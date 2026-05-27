@@ -36,15 +36,12 @@ const standalone = path.join(process.cwd(), ".next", "standalone");
 const nextServer = path.join(process.cwd(), ".next", "server");
 
 // ── Vercel lock-file guard ────────────────────────────────────────────────────
-// Next.js 16 creates .next/lock at build start via its native SWC Lockfile
-// API, then deletes it on process exit (lockfileUnlockSync). Vercel's
-// post-build packager runs AFTER "Build Completed" and calls
-//   lstat('/vercel/path0/.next/lock')
-// which fails with ENOENT because the file was already cleaned up. We
-// recreate it here (as an empty marker) so the packager finds it. This runs
-// before the standalone check so it fires on both Vercel and Netlify paths.
+// Next.js 16 lock-file recreation was a temporary workaround for a stale
+// Vercel project-level outputDirectory=".next" setting. Keep it opt-in only;
+// with native Vercel Next.js output detection, creating this marker can
+// interfere with the adapter's post-build output packaging.
 const nextDir = path.join(process.cwd(), ".next");
-if (fs.existsSync(nextDir)) {
+if (process.env.AOL_RECREATE_NEXT_LOCK === "1" && fs.existsSync(nextDir)) {
   const lockPath = path.join(nextDir, "lock");
   try {
     fs.closeSync(fs.openSync(lockPath, "a"));
