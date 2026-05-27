@@ -1372,11 +1372,11 @@
 #
 #  1. PROMOTE TO PRODUCTION: Vercel Dashboard → Project → Deployments →
 #     promote the current preview to "production". That activates the stable
-#     production alias below (without the per-deployment hash).
+#     public production alias below (without the per-deployment hash).
 #     Current preview URL (changes every push — do NOT use this in production):
 #       aol-check-visual-1o8z3qoil-abrahamoflondons-projects.vercel.app
-#     Stable production alias (active after promotion):
-#       aol-check-visual-abrahamoflondons-projects.vercel.app  ← used below
+#     Public stable production alias (active after promotion):
+#       aol-check-visual.vercel.app  ← used below
 #
 #  2. DISABLE DEPLOYMENT PROTECTION for production: Vercel → Project →
 #     Settings → Deployment Protection → set to "Only preview deployments"
@@ -1389,6 +1389,6 @@
 # served directly by Netlify CDN and never hit this proxy rule.
 [[redirects]]
   from = "/*"
-  to = "https://aol-check-visual-abrahamoflondons-projects.vercel.app/:splat"
+  to = "https://aol-check-visual.vercel.app/:splat"
   status = 200
   force = true
