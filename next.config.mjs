@@ -314,6 +314,7 @@ const nextConfig = {
    */
   async redirects() {
     return [
+      // ── Canonical redirects ────────────────────────────────────────────────
       {
         source: "/terms-of-service",
         destination: "/terms",
@@ -338,6 +339,42 @@ const nextConfig = {
         source: "/essays/:slug*",
         destination: "/blog/:slug*",
         permanent: true,
+      },
+
+      // ── Retired App Router routes (config-level, no Lambda created) ────────
+      // These routes were previously served by App Router page files that
+      // caused "Unable to find lambda" packaging failures on Vercel.
+      // Moved here so Next.js handles them at the router/middleware level
+      // before any server function is invoked — zero Lambda overhead.
+      {
+        source: "/dashboard/pdf-analytics",
+        destination: "/admin/reporting/lineage",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/purpose-alignment",
+        destination: "/purpose-alignment",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/live",
+        destination: "/admin",
+        permanent: false,
+      },
+      {
+        source: "/pdf-dashboard",
+        destination: "/admin/reporting/lineage",
+        permanent: false,
+      },
+      {
+        source: "/testing/lab",
+        destination: "/admin/intelligence-foundry",
+        permanent: false,
+      },
+      {
+        source: "/downloads/vault",
+        destination: "/downloads",
+        permanent: false,
       },
     ];
   },

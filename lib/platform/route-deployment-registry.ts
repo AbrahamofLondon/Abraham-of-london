@@ -10,9 +10,12 @@
  * Rules:
  *   - Every route in app/** that is NOT a simple redirect and NOT fully static
  *     MUST have an entry here.
- *   - LEGACY_DISABLED routes must NOT remain as dynamic lambdas — they should be
- *     simple redirect/notFound server components.
+ *   - LEGACY_DISABLED routes must NOT have physical app/[dir]/page.tsx files.
+ *     They must be handled by config-level redirects in next.config.mjs.
+ *   - REDIRECT_ONLY routes must NOT have physical app/[dir]/page.tsx files.
+ *     They must be handled by config-level redirects in next.config.mjs.
  *   - DEBUG_INTERNAL routes must NOT be reachable without authentication.
+ *   - physicalRouteAllowed: false means the route MUST NOT have an app/page.tsx.
  *   - deployable: false means the route must redirect/404 before reaching users.
  */
 
@@ -45,6 +48,24 @@ export interface RouteEntry {
   requiresDatabase: boolean;
   /** Where this route is deployed */
   platform: DeploymentPlatform;
+  /**
+   * Whether an app/[dir]/page.tsx is permitted for this route.
+   * false = must be handled by config-level redirects (next.config.mjs redirects()),
+   *         netlify.toml, or vercel.json rewrites — never by an App Router page file.
+   * true  = a physical app/[dir]/page.tsx is expected and required.
+   */
+  physicalRouteAllowed: boolean;
+  /**
+   * Whether a config-level redirect is configured for this route
+   * (in next.config.mjs redirects(), netlify.toml, or vercel.json).
+   * Required to be true when physicalRouteAllowed is false.
+   */
+  redirectConfigured: boolean;
+  /**
+   * Whether this route is expected to be reachable and functional in production.
+   * Retired routes that permanently 404 or permanently redirect should be false.
+   */
+  productionDeployable: boolean;
 }
 
 /**
@@ -56,6 +77,8 @@ export interface RouteEntry {
  */
 export const ROUTE_REGISTRY: RouteEntry[] = [
   // ─── REDIRECT_ONLY ────────────────────────────────────────────────────────
+  // These routes have NO physical app/[dir]/page.tsx files.
+  // They are handled entirely by config-level redirects in next.config.mjs.
   {
     path: "/dashboard/live",
     class: "REDIRECT_ONLY",
@@ -65,6 +88,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
   {
     path: "/dashboard/pdf-analytics",
@@ -75,16 +101,22 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
   {
     path: "/dashboard/purpose-alignment",
     class: "REDIRECT_ONLY",
     owner: "platform",
-    intent: "Permanent redirect to /diagnostics/purpose-alignment",
+    intent: "Permanent redirect to /purpose-alignment",
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
   {
     path: "/pdf-dashboard",
@@ -95,6 +127,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
   {
     path: "/testing/lab",
@@ -105,18 +140,26 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
 
   // ─── LEGACY_DISABLED ──────────────────────────────────────────────────────
+  // These routes have NO physical app/[dir]/page.tsx files.
+  // They are handled by config-level redirects or simply 404.
   {
     path: "/downloads/vault",
     class: "LEGACY_DISABLED",
     owner: "platform",
     intent: "Retired vault download listing; superseded by authenticated /portal",
-    deployable: true,  // returns 404/notFound
+    deployable: false,
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
 
   // ─── ADMIN_DYNAMIC ────────────────────────────────────────────────────────
@@ -129,6 +172,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/access",
@@ -139,6 +185,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/campaigns",
@@ -149,6 +198,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/campaigns/[id]",
@@ -159,6 +211,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/intelligence-foundry",
@@ -169,6 +224,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/organisations",
@@ -179,6 +237,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/organisations/[id]",
@@ -189,6 +250,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/admin/reporting/lineage",
@@ -199,6 +263,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/portfolio",
@@ -209,6 +276,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
 
   // ─── PUBLIC_DYNAMIC ───────────────────────────────────────────────────────
@@ -221,6 +291,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/registry/[...slug]",
@@ -231,6 +304,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/boardroom/dossier/[dossierId]",
@@ -241,6 +317,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/assessment/[token]",
@@ -251,6 +330,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/audit/[id]",
@@ -261,6 +343,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/portal",
@@ -271,9 +356,10 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
-
-  // ─── PUBLIC_DYNAMIC ───────────────────────────────────────────────────────
   {
     path: "/purpose-alignment",
     class: "PUBLIC_DYNAMIC",
@@ -283,6 +369,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: false,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
 
   // ─── CLIENT_DELIVERY ──────────────────────────────────────────────────────
@@ -295,6 +384,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/render/pdf/[id]",
@@ -305,6 +397,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/client",
@@ -315,6 +410,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: true,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
   {
     path: "/settings/integrations",
@@ -325,6 +423,9 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     requiresAuth: true,
     requiresDatabase: false,
     platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
 
   // ─── DEBUG_INTERNAL ───────────────────────────────────────────────────────
@@ -347,3 +448,8 @@ export const NON_LAMBDA_CLASSES = new Set<RouteClass>([
   "REDIRECT_ONLY",
   "LEGACY_DISABLED",
 ]);
+
+/** Routes that must NOT have a physical app/[dir]/page.tsx file. */
+export const NO_PHYSICAL_ROUTE_PATHS = ROUTE_REGISTRY
+  .filter((r) => !r.physicalRouteAllowed)
+  .map((r) => r.path);

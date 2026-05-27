@@ -4,6 +4,8 @@
  *
  * Post-build guard: verifies that every App Router route in the build manifest
  * has a coherent deployment state before Vercel packages the output.
+ * Also runs source-level checks to prevent retired routes from re-entering
+ * the App Router and causing "Unable to find lambda" packaging failures.
  *
  * Runs AFTER `next build --webpack` (called from clean-standalone.mjs).
  *
@@ -12,8 +14,13 @@
  *   2. Every route in the manifest has a corresponding .js file in .next/server/app/
  *   3. Dynamic routes (not prerendered) have an .nft.json trace file
  *   4. No orphaned route.js file exists without a manifest entry
- *   5. Client-only 'use client' pages have force-static OR force-dynamic declared
- *      (heuristic: pages must not be pure client components without an export)
+ *   5. pages-manifest.json (Pages Router) — all entries have JS files
+ *   6. middleware-manifest.json — all referenced files exist
+ *   7. No REDIRECT_ONLY or LEGACY_DISABLED route has a physical app/[dir]/page.tsx
+ *      (these must be handled by config-level redirects, never by App Router pages)
+ *   8. No route from previous missing-lambda failures has a physical page file
+ *   9. No route under app/dashboard/** has a physical page file
+ *      (dashboard routes are fully retired; redirects live in next.config.mjs)
  *
  * Exit codes:
  *   0  — all checks pass
@@ -188,101 +195,73 @@ if (middlewareManifest) {
   }
 }
 
-// ─── Check 7: app/dashboard/** source must not contain 'use client' ──────────
-// All dashboard/* routes must be pure server-side redirects (force-static).
-// A 'use client' component would create a Lambda without proper NFT traces,
-// triggering "Unable to find lambda for route: /dashboard/..." at deploy time.
+// ─── Check 7: REDIRECT_ONLY / LEGACY_DISABLED routes must NOT have page files ─
+// These routes are permanently retired. Their redirects live in next.config.mjs.
+// A physical app/[dir]/page.tsx would create a Lambda (or attempt to) during
+// `next build`, causing "Unable to find lambda" failures at Vercel packaging time.
+// The authoritative fix is no page file — not a force-static declaration.
 
-const dashboardAppDir = path.join(projectRoot, "app", "dashboard");
-if (fileExists(dashboardAppDir)) {
-  const dashboardPageFiles = collectSourcePageFiles(dashboardAppDir);
-  for (const pageFile of dashboardPageFiles) {
-    try {
-      const content = fs.readFileSync(pageFile, "utf8");
-      if (/^\s*['"]use client['"]/m.test(content)) {
-        fail(
-          `app/dashboard route contains 'use client': ${path.relative(projectRoot, pageFile)}` +
-            ` — dashboard routes must be server-only redirects with force-static`,
-        );
-      }
-    } catch {
-      // skip unreadable files
-    }
-  }
-}
-
-// ─── Check 8: REDIRECT_ONLY / LEGACY_DISABLED routes must declare force-static ─
-// These routes are permanently retired or redirect-only. They must declare
-// force-static so Next.js prerenders them as static responses — never Lambdas.
-// force-dynamic on a redirect/notFound page creates a Lambda that cannot be
-// cleanly packaged, causing sequential "Unable to find lambda" deploy failures.
-
-const FORCE_STATIC_RE = /export\s+const\s+dynamic\s*=\s*["']force-static["']/;
-const FORCE_DYNAMIC_RE = /export\s+const\s+dynamic\s*=\s*["']force-dynamic["']/;
-
-const MUST_BE_FORCE_STATIC = [
+const MUST_NOT_HAVE_PAGE_FILE = [
+  // REDIRECT_ONLY
   path.join("app", "dashboard", "live"),
   path.join("app", "dashboard", "pdf-analytics"),
   path.join("app", "dashboard", "purpose-alignment"),
   path.join("app", "pdf-dashboard"),
   path.join("app", "testing", "lab"),
+  // LEGACY_DISABLED
   path.join("app", "downloads", "vault"),
 ];
 
-for (const rel of MUST_BE_FORCE_STATIC) {
+for (const rel of MUST_NOT_HAVE_PAGE_FILE) {
   for (const ext of ["page.tsx", "page.ts", "page.jsx", "page.js"]) {
     const abs = path.join(projectRoot, rel, ext);
-    if (!fileExists(abs)) continue;
-    try {
-      const content = fs.readFileSync(abs, "utf8");
-      if (!FORCE_STATIC_RE.test(content)) {
-        fail(
-          `Quarantined route missing force-static: ${path.join(rel, ext)}` +
-            ` — retired/redirect routes must declare \`export const dynamic = "force-static"\``,
-        );
-      }
-      if (FORCE_DYNAMIC_RE.test(content)) {
-        fail(
-          `Quarantined route incorrectly uses force-dynamic: ${path.join(rel, ext)}` +
-            ` — use force-static to prerender as a static redirect, not a Lambda`,
-        );
-      }
-    } catch {
-      // skip unreadable files
+    if (fileExists(abs)) {
+      fail(
+        `Retired route has a physical page file: ${path.join(rel, ext)}` +
+          ` — delete this file; the redirect belongs in next.config.mjs redirects(), not App Router`,
+      );
     }
-    break; // found the page file for this directory
   }
 }
 
-// ─── Check 9: Production dynamic routes must declare force-dynamic explicitly ─
-// Routes that are not under app/admin/ (which inherits force-dynamic from its
-// layout) must explicitly declare force-dynamic to ensure Vercel creates a
-// Lambda with a complete NFT trace. Omitting the declaration causes Next.js to
-// attempt static prerender which fails when runtime data (params, DB) is needed.
+// ─── Check 8: No previously-failing lambda routes may have page files ─────────
+// These are the specific routes that triggered "Unable to find lambda" failures
+// on Vercel. If any re-appears as a physical page file, fail immediately so
+// the deployment does not silently regress.
 
-const MUST_BE_FORCE_DYNAMIC = [
-  path.join("app", "render", "pdf", "[id]"),
-  path.join("app", "settings", "integrations"),
-  path.join("app", "assessment", "[token]"),
-  path.join("app", "purpose-alignment"),
+const KNOWN_FAILED_LAMBDA_ROUTES = [
+  path.join("app", "dashboard", "pdf-analytics"),
+  path.join("app", "dashboard", "purpose-alignment"),
+  path.join("app", "dashboard", "live"),
+  path.join("app", "pdf-dashboard"),
+  path.join("app", "testing", "lab"),
+  path.join("app", "downloads", "vault"),
 ];
 
-for (const rel of MUST_BE_FORCE_DYNAMIC) {
+for (const rel of KNOWN_FAILED_LAMBDA_ROUTES) {
   for (const ext of ["page.tsx", "page.ts", "page.jsx", "page.js"]) {
     const abs = path.join(projectRoot, rel, ext);
-    if (!fileExists(abs)) continue;
-    try {
-      const content = fs.readFileSync(abs, "utf8");
-      if (!FORCE_DYNAMIC_RE.test(content)) {
-        fail(
-          `Production route missing force-dynamic: ${path.join(rel, ext)}` +
-            ` — non-admin dynamic routes must declare \`export const dynamic = "force-dynamic"\``,
-        );
-      }
-    } catch {
-      // skip unreadable files
+    if (fileExists(abs)) {
+      fail(
+        `Previously-failing lambda route re-introduced: ${path.join(rel, ext)}` +
+          ` — this route caused "Unable to find lambda" on Vercel; remove the page file`,
+      );
     }
-    break; // found the page file for this directory
+  }
+}
+
+// ─── Check 9: app/dashboard/** must have no page files at all ─────────────────
+// All dashboard sub-routes are retired. Redirects are in next.config.mjs.
+// Any page.tsx under app/dashboard/ is a regression waiting to fail.
+
+const dashboardAppDir = path.join(projectRoot, "app", "dashboard");
+if (fileExists(dashboardAppDir)) {
+  const dashboardPageFiles = collectSourcePageFiles(dashboardAppDir);
+  for (const pageFile of dashboardPageFiles) {
+    fail(
+      `app/dashboard contains a page file: ${path.relative(projectRoot, pageFile)}` +
+        ` — all dashboard routes are retired; remove the page file and configure the redirect in next.config.mjs`,
+    );
   }
 }
 
