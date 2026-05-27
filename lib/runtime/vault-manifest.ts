@@ -1,3 +1,5 @@
+import vaultIndexManifest from "../../vault-manifest.json";
+
 export type VaultManifestEntry = {
   key: string;
   title: string;
@@ -7,8 +9,16 @@ export type VaultManifestEntry = {
   isDownloadable: boolean;
 };
 
-// Explicit vault allowlist. Keep this small; large/private media belongs in
-// external storage, not in serverless function traces.
+export type VaultIndexEntry = {
+  title: string;
+  slug: string;
+  category: string;
+  type: string;
+};
+
+// Explicit private-file allowlist. Keep this scoped to files that actually live
+// under private/vault; editorial vault contents are indexed below from the
+// generated content manifest and should not be mirrored back into private files.
 export const VAULT_FILE_MANIFEST: readonly VaultManifestEntry[] = [
   {
     key: "frameworks/inner-circle/operating-cadence-pack.pptx",
@@ -19,6 +29,13 @@ export const VAULT_FILE_MANIFEST: readonly VaultManifestEntry[] = [
     isDownloadable: true,
   },
 ];
+
+export const VAULT_INDEX_MANIFEST: readonly VaultIndexEntry[] = (
+  vaultIndexManifest as VaultIndexEntry[]
+).filter((entry) => {
+  const slug = String(entry.slug || "").trim();
+  return slug.startsWith("/vault/") && !slug.includes("..") && !slug.includes("\0");
+});
 
 export function getVaultManifestEntry(key: string): VaultManifestEntry | null {
   const normalized = String(key || "")
