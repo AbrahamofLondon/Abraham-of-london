@@ -8,6 +8,10 @@ draft: false
 published: true
 ---
 
+/Human
+Future you
+Unlearn
+80/20
 	# ART, NARRATIVE, AND THE HISTORY OF TRUTH
 ## Agent Source Kit — Abraham of London Content Production
 **Classification:** Internal storytelling resource
