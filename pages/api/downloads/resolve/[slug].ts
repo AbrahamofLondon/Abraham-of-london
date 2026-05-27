@@ -11,6 +11,7 @@ import {
   normalizeUserTier,
   hasAccess,
   getTierLabel,
+  type AccessTier,
 } from "@/lib/access/tier-policy";
 
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
@@ -23,9 +24,10 @@ import {
   type LegacyDownloadResolveOk,
 } from "@/lib/downloads/legacy-resolver";
 import {
-  resolveDownloadAsset,
-  type DownloadAssetContentType,
-} from "@/lib/downloads/asset-registry";
+  getDownloadManifestEntry,
+  getDownloadRedirectUrl,
+  type DownloadManifestEntry,
+} from "@/lib/downloads/download-manifest";
 
 type InnerCircleAccess = {
   hasAccess: boolean;
@@ -34,6 +36,8 @@ type InnerCircleAccess = {
   sessionId?: string;
   tier?: string;
 };
+
+type DownloadAssetContentType = "books" | "canon" | "briefs" | "downloads";
 
 const LEGACY_SEARCH_ORDER: DownloadAssetContentType[] = [
   "downloads",
@@ -59,10 +63,23 @@ function normalizeLegacySlug(input: unknown): string {
 
 async function resolveLegacyAsset(slug: string) {
   for (const contentType of LEGACY_SEARCH_ORDER) {
-    const asset = await resolveDownloadAsset({ contentType, slug });
-    if (asset) return asset;
+    const asset = getDownloadManifestEntry(slug);
+    if (asset) return { asset, contentType };
   }
   return null;
+}
+
+function requiredTierFor(entry: DownloadManifestEntry): AccessTier {
+  if (entry.accessLevel === "inner_circle") return "inner_circle";
+  if (entry.accessLevel === "paid") return "client";
+  if (entry.accessLevel === "restricted") return "restricted";
+  return "public";
+}
+
+function appendToken(url: string, token: string | null | undefined): string {
+  if (!token) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
 }
 
 export default async function handler(
@@ -88,42 +105,25 @@ export default async function handler(
     });
   }
 
-  const asset = await resolveLegacyAsset(slug);
-  if (!asset) {
+  const resolved = await resolveLegacyAsset(slug);
+  if (!resolved) {
     return res.status(404).json({
       ok: false,
       reason: "NOT_FOUND",
     });
   }
 
-  const requiredTier = asset.requiredTier;
+  const { asset, contentType } = resolved;
+  const requiredTier = requiredTierFor(asset);
   const requiredTierLabel = getTierLabel(requiredTier);
+  const target = getDownloadRedirectUrl(asset);
+
+  if (!target || !asset.isDownloadable) {
+    return res.status(404).json({ ok: false, reason: "NOT_DOWNLOADABLE" });
+  }
 
   if (asset.isPublic) {
-    const issued = await createDownloadGrantToken({
-      slug: asset.slug,
-      contentType: asset.contentType,
-      requiredTier,
-      userTier: "public",
-      contentId: asset.premiumContentId || asset.id,
-      expiresInMs: 5 * 60 * 1000,
-      maxDownloads: asset.maxDownloads ?? 100,
-      userId: undefined,
-      sessionId: undefined,
-      metadata: {
-        public: true,
-        title: asset.title,
-        legacyEndpoint: "/api/downloads/resolve/[slug]",
-        watermarkRequired: asset.watermarkRequired,
-      },
-    }).catch((error) => {
-      console.error("[DOWNLOAD_RESOLVE_LEGACY_PUBLIC_TOKEN_ERROR]", error);
-      return null;
-    });
-
-    return res.status(200).json(
-      buildLegacyDownloadResolveOk({ asset, requiredTier, issued }),
-    );
+    return res.redirect(302, target);
   }
 
   const access = (await getInnerCircleAccess(req)) as InnerCircleAccess | null;
@@ -151,28 +151,36 @@ export default async function handler(
 
   const issued = await createDownloadGrantToken({
     slug: asset.slug,
-    contentType: asset.contentType,
+    contentType,
     requiredTier,
     userTier,
-    contentId: asset.premiumContentId || asset.id,
+    contentId: asset.entitlementSlug || asset.slug,
     expiresInMs: 24 * 60 * 60 * 1000,
-    maxDownloads: asset.maxDownloads ?? 3,
+    maxDownloads: 3,
     userId: access.id,
     sessionId: access.sessionId,
     metadata: {
       authorized: true,
       title: asset.title,
       legacyEndpoint: "/api/downloads/resolve/[slug]",
-      watermarkRequired: asset.watermarkRequired,
     },
   }).catch((error) => {
     console.error("[DOWNLOAD_RESOLVE_LEGACY_AUTH_TOKEN_ERROR]", error);
     return null;
   });
 
-  return res.status(200).json(
-    buildLegacyDownloadResolveOk({ asset, requiredTier, issued, userTier }),
-  );
+  if (req.query.format === "json") {
+    return res.status(200).json(
+      buildLegacyDownloadResolveOk({
+        asset: { ...asset, contentType },
+        requiredTier,
+        issued,
+        userTier,
+      }),
+    );
+  }
+
+  return res.redirect(302, appendToken(target, issued?.token));
 }
 
 export const config = {

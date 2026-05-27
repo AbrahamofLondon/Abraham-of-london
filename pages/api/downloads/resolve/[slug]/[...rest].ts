@@ -5,6 +5,7 @@ import {
   normalizeUserTier,
   hasAccess,
   getTierLabel,
+  type AccessTier,
 } from "@/lib/access/tier-policy";
 
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
@@ -17,9 +18,10 @@ import {
   type LegacyDownloadResolveOk,
 } from "@/lib/downloads/legacy-resolver";
 import {
-  resolveDownloadAsset,
-  normalizeAssetContentType,
-} from "@/lib/downloads/asset-registry";
+  getDownloadManifestEntry,
+  getDownloadRedirectUrl,
+  type DownloadManifestEntry,
+} from "@/lib/downloads/download-manifest";
 
 type InnerCircleAccess = {
   hasAccess: boolean;
@@ -29,11 +31,35 @@ type InnerCircleAccess = {
   tier?: string;
 };
 
+type DownloadAssetContentType = "books" | "canon" | "briefs" | "downloads";
+
+function normalizeAssetContentType(input: unknown): DownloadAssetContentType | null {
+  const value = String(input || "").trim().toLowerCase();
+  if (value === "books" || value === "book") return "books";
+  if (value === "canon" || value === "canons") return "canon";
+  if (value === "briefs" || value === "brief") return "briefs";
+  if (value === "downloads" || value === "download") return "downloads";
+  return null;
+}
+
 function joinSlugParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) {
     return value.map((v) => String(v || "").trim()).filter(Boolean).join("/");
   }
   return String(value || "").trim();
+}
+
+function requiredTierFor(entry: DownloadManifestEntry): AccessTier {
+  if (entry.accessLevel === "inner_circle") return "inner_circle";
+  if (entry.accessLevel === "paid") return "client";
+  if (entry.accessLevel === "restricted") return "restricted";
+  return "public";
+}
+
+function appendToken(url: string, token: string | null | undefined): string {
+  if (!token) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
 }
 
 export default async function handler(
@@ -58,35 +84,21 @@ export default async function handler(
     return res.status(400).json({ ok: false, reason: "BAD_TARGET" });
   }
 
-  const asset = await resolveDownloadAsset({ contentType, slug });
+  const asset = getDownloadManifestEntry(slug);
   if (!asset) {
     return res.status(404).json({ ok: false, reason: "NOT_FOUND" });
   }
 
-  const requiredTier = asset.requiredTier;
+  const requiredTier = requiredTierFor(asset);
   const requiredTierLabel = getTierLabel(requiredTier);
+  const target = getDownloadRedirectUrl(asset);
+
+  if (!target || !asset.isDownloadable) {
+    return res.status(404).json({ ok: false, reason: "NOT_DOWNLOADABLE" });
+  }
 
   if (asset.isPublic) {
-    const issued = await createDownloadGrantToken({
-      slug: asset.slug,
-      contentType: asset.contentType,
-      requiredTier,
-      userTier: "public",
-      contentId: asset.premiumContentId || asset.id,
-      expiresInMs: 5 * 60 * 1000,
-      maxDownloads: asset.maxDownloads ?? 100,
-      userId: undefined,
-      sessionId: undefined,
-      metadata: {
-        public: true,
-        title: asset.title,
-        watermarkRequired: asset.watermarkRequired,
-      },
-    }).catch(() => null);
-
-    return res.status(200).json(
-      buildLegacyDownloadResolveOk({ asset, requiredTier, issued }),
-    );
+    return res.redirect(302, target);
   }
 
   const access = (await getInnerCircleAccess(req)) as InnerCircleAccess | null;
@@ -114,27 +126,35 @@ export default async function handler(
 
   const issued = await createDownloadGrantToken({
     slug: asset.slug,
-    contentType: asset.contentType,
+    contentType,
     requiredTier,
     userTier,
-    contentId: asset.premiumContentId || asset.id,
+    contentId: asset.entitlementSlug || asset.slug,
     expiresInMs: 24 * 60 * 60 * 1000,
-    maxDownloads: asset.maxDownloads ?? 3,
+    maxDownloads: 3,
     userId: access.id,
     sessionId: access.sessionId,
     metadata: {
       authorized: true,
       title: asset.title,
-      watermarkRequired: asset.watermarkRequired,
     },
   }).catch((error) => {
     console.error("[DOWNLOAD_RESOLVE_TOKEN_CREATION_ERROR]", error);
     return null;
   });
 
-  return res.status(200).json(
-    buildLegacyDownloadResolveOk({ asset, requiredTier, issued, userTier }),
-  );
+  if (req.query.format === "json") {
+    return res.status(200).json(
+      buildLegacyDownloadResolveOk({
+        asset: { ...asset, contentType },
+        requiredTier,
+        issued,
+        userTier,
+      }),
+    );
+  }
+
+  return res.redirect(302, appendToken(target, issued?.token));
 }
 
 export const config = {

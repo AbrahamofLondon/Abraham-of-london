@@ -1,13 +1,14 @@
 import type { AccessTier } from "@/lib/access/tier-policy";
 import { getTierLabel } from "@/lib/access/tier-policy";
-import type { DownloadAssetRecord } from "@/lib/downloads/asset-registry";
+import type { DownloadManifestEntry } from "@/lib/downloads/download-manifest";
+import { getDownloadRedirectUrl } from "@/lib/downloads/download-manifest";
 import type { DownloadGrantToken } from "@/lib/downloads/security";
 import { getTokenForensics } from "@/lib/downloads/security";
 
-type LegacyDownloadAsset = Pick<
-  DownloadAssetRecord,
-  "slug" | "title" | "contentType" | "bodyCode"
->;
+type LegacyDownloadAsset = DownloadManifestEntry & {
+  contentType?: string;
+  bodyCode?: string;
+};
 
 export type LegacyDownloadResolveOk = {
   ok: true;
@@ -50,7 +51,7 @@ export function buildLegacyDownloadResolveOk(args: {
     ok: true,
     slug: asset.slug,
     title: asset.title,
-    contentType: asset.contentType,
+    contentType: asset.contentType || "downloads",
     requiredTier,
     requiredTierLabel: getTierLabel(requiredTier),
     userTier: userTier ? getTierLabel(userTier) : undefined,
@@ -59,6 +60,6 @@ export function buildLegacyDownloadResolveOk(args: {
     tokenId: issued?.tokenId ?? null,
     watermarkId: forensics.watermarkId,
     forensicFooter: forensics.expectedFooter,
-    downloadUrl: getCanonicalDownloadUrl(asset.slug),
+    downloadUrl: getDownloadRedirectUrl(asset) || getCanonicalDownloadUrl(asset.slug),
   };
 }

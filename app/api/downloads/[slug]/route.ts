@@ -1,187 +1,97 @@
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-import fs from "fs/promises";
-import path from "path";
-
 import { NextRequest, NextResponse } from "next/server";
 
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority";
 import {
-  getPdfAssetIdentityBySlug,
-  type PdfAssetIdentityResolved,
-} from "@/lib/assets/pdf-identity";
-import { resolvePdfDelivery } from "@/lib/assets/pdf-delivery";
-import type { UserContext } from "@/lib/assets/pdf-access";
+  getDownloadManifestEntry,
+  getDownloadRedirectUrl,
+  type DownloadManifestEntry,
+} from "@/lib/downloads/download-manifest";
+import { createDownloadGrantToken } from "@/lib/downloads/security";
+import type { AccessTier } from "@/lib/access/tier-policy";
 
 type RouteContext = {
   params: { slug: string } | Promise<{ slug: string }>;
 };
 
-async function getSlug(params: RouteContext["params"]): Promise<string> {
-  const resolved = await params;
-  return String(resolved.slug || "").replace(/\.pdf$/i, "");
+function requiredTierFor(entry: DownloadManifestEntry): AccessTier {
+  if (entry.accessLevel === "inner_circle") return "inner_circle";
+  if (entry.accessLevel === "paid") return "client";
+  if (entry.accessLevel === "restricted") return "restricted";
+  return "public";
 }
 
-async function buildUserContext(
-  req: NextRequest,
-  asset: PdfAssetIdentityResolved,
-): Promise<UserContext | null> {
+function appendToken(url: string, token: string | null | undefined): string {
+  if (!token) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
+}
+
+async function getSlug(params: RouteContext["params"]): Promise<string> {
+  const resolved = await params;
+  return String(resolved.slug || "").replace(/\.[a-z0-9]+$/i, "");
+}
+
+export async function GET(req: NextRequest, { params }: RouteContext) {
+  const entry = getDownloadManifestEntry(await getSlug(params));
+  if (!entry) {
+    return NextResponse.json({ ok: false, error: "Download asset not found" }, { status: 404 });
+  }
+
+  const target = getDownloadRedirectUrl(entry);
+  if (!target || !entry.isDownloadable) {
+    return NextResponse.json({ ok: false, error: "Download asset unavailable" }, { status: 404 });
+  }
+
+  const requiredTier = requiredTierFor(entry);
+  if (requiredTier === "public") {
+    return NextResponse.redirect(new URL(target, req.url), 302);
+  }
+
   const identity = await resolveIdentity(req);
-  if (!identity.authenticated || !identity.subjectId) return null;
+  if (!identity.authenticated || !identity.subjectId) {
+    return NextResponse.json(
+      { ok: false, error: "Authentication required", requiredTier },
+      { status: 401 },
+    );
+  }
 
   const entitlement = await resolveCanonicalEntitlement({
     userId: identity.subjectId,
     email: identity.email,
-    slug: asset.slug,
+    slug: entry.entitlementSlug || entry.slug,
     tier: identity.tier,
-    requiredTier: asset.access === "inner_circle" ? "inner_circle" : null,
+    requiredTier: entry.accessLevel === "inner_circle" ? "inner_circle" : requiredTier,
   });
 
-  return {
-    id: identity.subjectId,
-    authenticated: identity.authenticated,
-    tier: identity.tier,
-    flags: identity.flags,
-    entitlementSlugs: entitlement.granted ? [asset.slug] : [],
-  };
-}
-
-function resolvePrivatePdfPath(relativePath: string): { absolutePath: string; allowedRoot: string } {
-  const cwd = process.cwd();
-  const normalized = relativePath.replace(/^\/+/, "");
-
-  if (normalized.startsWith("assets/downloads/")) {
-    return {
-      absolutePath: path.resolve(cwd, "private_storage", "premium-content", normalized),
-      allowedRoot: path.resolve(cwd, "private_storage", "premium-content", "assets", "downloads"),
-    };
+  if (!entitlement.granted) {
+    return NextResponse.json(
+      { ok: false, error: "Insufficient entitlement", requiredTier },
+      { status: 403 },
+    );
   }
 
-  if (normalized.startsWith("_archive/")) {
-    return {
-      absolutePath: path.resolve(cwd, "private_storage", "premium-content", normalized),
-      allowedRoot: path.resolve(cwd, "private_storage", "premium-content", "_archive"),
-    };
-  }
-
-  return {
-    absolutePath: path.resolve(cwd, "private_storage", "premium-content", normalized),
-    allowedRoot: path.resolve(cwd, "private_storage", "premium-content"),
-  };
-}
-
-function jsonBlocked(
-  asset: PdfAssetIdentityResolved,
-  delivery: ReturnType<typeof resolvePdfDelivery>,
-  status: number,
-) {
-  return NextResponse.json(
-    {
-      ok: false,
-      slug: asset.slug,
-      mode: delivery.mode,
-      allowed: false,
-      price: delivery.price,
-      originalPrice: delivery.originalPrice,
-      discounted: delivery.discounted,
-      reason: delivery.reason,
-      nextAction: delivery.nextAction,
+  const issued = await createDownloadGrantToken({
+    slug: entry.slug,
+    contentType: "downloads",
+    requiredTier,
+    userTier: requiredTier,
+    contentId: entry.entitlementSlug || entry.slug,
+    userId: identity.subjectId,
+    expiresInMs: 24 * 60 * 60 * 1000,
+    maxDownloads: 3,
+    metadata: {
+      authorized: true,
+      title: entry.title,
+      appRouterEndpoint: "/api/downloads/[slug]",
     },
-    { status },
-  );
-}
+  }).catch((error) => {
+    console.error("[APP_DOWNLOAD_TOKEN_ERROR]", error);
+    return null;
+  });
 
-export async function GET(req: NextRequest, { params }: RouteContext) {
-  let asset: PdfAssetIdentityResolved;
-
-  try {
-    asset = getPdfAssetIdentityBySlug(await getSlug(params));
-  } catch {
-    return NextResponse.json(
-      { ok: false, error: "PDF asset not found" },
-      { status: 404 },
-    );
-  }
-
-  const user = await buildUserContext(req, asset);
-  const delivery = resolvePdfDelivery(user, asset);
-
-  if (!delivery.allowed) {
-    return jsonBlocked(asset, delivery, user ? 403 : 401);
-  }
-
-  const relativePath = asset.canonicalPath.replace(/^\/+/, "");
-  let absolutePath: string;
-  let allowedRoot: string;
-
-  if (asset.access === "paid") {
-    absolutePath = path.resolve(
-      process.cwd(),
-      "private",
-      "assets",
-      "paid-instruments",
-      `${asset.slug}.pdf`,
-    );
-    allowedRoot = path.resolve(process.cwd(), "private");
-  } else {
-    const resolved = resolvePrivatePdfPath(relativePath);
-    absolutePath = resolved.absolutePath;
-    allowedRoot = resolved.allowedRoot;
-  }
-
-  if (!absolutePath.startsWith(allowedRoot + path.sep)) {
-    return NextResponse.json(
-      { ok: false, error: "Invalid PDF asset path" },
-      { status: 500 },
-    );
-  }
-
-  try {
-    const [allowedRootRealPath, assetRealPath, assetStat] = await Promise.all([
-      fs.realpath(allowedRoot),
-      fs.realpath(absolutePath),
-      fs.lstat(absolutePath),
-    ]);
-
-    if (assetStat.isSymbolicLink()) {
-      return NextResponse.json(
-        { ok: false, error: "Symlinked PDF assets are not allowed" },
-        { status: 403 },
-      );
-    }
-
-    if (
-      assetRealPath !== allowedRootRealPath &&
-      !assetRealPath.startsWith(allowedRootRealPath + path.sep)
-    ) {
-      return NextResponse.json(
-        { ok: false, error: "Resolved PDF asset escaped allowed root" },
-        { status: 403 },
-      );
-    }
-
-    const file = await fs.readFile(assetRealPath);
-    return new NextResponse(new Uint8Array(file), {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${asset.slug}.pdf"`,
-        "Cache-Control": "private, no-store, max-age=0",
-        "X-PDF-Delivery": delivery.mode,
-        "X-PDF-Asset": asset.slug,
-      },
-    });
-  } catch {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "PDF unavailable",
-        state: "unavailable",
-        slug: asset.slug,
-        htmlFallback: `/downloads/${encodeURIComponent(asset.slug)}`,
-      },
-      { status: 404 },
-    );
-  }
+  return NextResponse.redirect(new URL(appendToken(target, issued?.token), req.url), 302);
 }
