@@ -9,20 +9,6 @@
     "NEXT_TELEMETRY_DISABLED": "1",
     "NEXT_SKIP_TYPE_CHECK": "1"
   },
-  "crons": [
-    {
-      "path": "/api/cleanup-download-tokens",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/escalation",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/decision-state",
-      "schedule": "0 4 * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
