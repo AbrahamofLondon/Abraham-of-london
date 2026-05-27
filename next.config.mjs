@@ -342,15 +342,8 @@ const nextConfig = {
       },
 
       // ── Retired App Router routes (config-level, no Lambda created) ────────
-      // These routes were previously served by App Router page files that
-      // caused "Unable to find lambda" packaging failures on Vercel.
-      // Moved here so Next.js handles them at the router/middleware level
-      // before any server function is invoked — zero Lambda overhead.
-      {
-        source: "/dashboard/pdf-analytics",
-        destination: "/admin/reporting/lineage",
-        permanent: false,
-      },
+      // Only truly retired routes that have no page file. Routes that have been
+      // rebuilt as server-wrapper + client-component pages are NOT listed here.
       {
         source: "/dashboard/purpose-alignment",
         destination: "/purpose-alignment",
@@ -362,18 +355,8 @@ const nextConfig = {
         permanent: false,
       },
       {
-        source: "/pdf-dashboard",
-        destination: "/admin/reporting/lineage",
-        permanent: false,
-      },
-      {
         source: "/testing/lab",
         destination: "/admin/intelligence-foundry",
-        permanent: false,
-      },
-      {
-        source: "/downloads/vault",
-        destination: "/downloads",
         permanent: false,
       },
     ];

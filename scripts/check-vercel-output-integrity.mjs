@@ -49,12 +49,16 @@ const LAMBDA_SIZE_LIMIT_BYTES = 50 * 1024 * 1024; // 50 MB
 // if any of these appear as compiled server files without a corresponding
 // Vercel function, it is an immediate failure.
 const KNOWN_FAILED_LAMBDA_ROUTES_APP_PATHS = [
-  "app/dashboard/pdf-analytics/page",
+  // These pages have been rebuilt as server-wrapper + client-component:
+  //   app/dashboard/pdf-analytics/page  → PdfAnalyticsClient.tsx
+  //   app/pdf-dashboard/page            → PdfDashboardClient.tsx
+  //   app/downloads/vault/page          → VaultBrowserClient.tsx
+  // They are expected to have .func directories and are NOT in this list.
+  //
+  // Permanently retired routes (no page file, redirect only):
   "app/dashboard/purpose-alignment/page",
   "app/dashboard/live/page",
-  "app/pdf-dashboard/page",
   "app/testing/lab/page",
-  "app/downloads/vault/page",
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
