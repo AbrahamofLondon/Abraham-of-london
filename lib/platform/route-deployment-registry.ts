@@ -13,7 +13,7 @@
  *      The build fails if a page file exists without a registry entry.
  *   2. REDIRECT_ONLY and LEGACY_DISABLED routes MUST NOT have physical page files.
  *      They are handled by config-level redirects in next.config.mjs.
- *   3. DEBUG_INTERNAL routes that are productionDeployable MUST require auth.
+ *   3. DEBUG_INTERNAL routes MUST NOT be productionDeployable.
  *   4. A redirectConfigured:true entry MUST have a matching source in next.config.mjs.
  *
  * Route path format:
@@ -149,17 +149,17 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
   },
   {
     path: "/testing/lab",
-    class: "DEBUG_INTERNAL",
+    class: "REDIRECT_ONLY",
     owner: "platform",
-    intent: "Internal strategic stress workbench restored behind app/testing admin layout",
+    intent: "Redirect to /admin/intelligence-foundry for retired testing route",
     deployable: true,
-    requiresAuth: true,
+    requiresAuth: false,
     requiresDatabase: false,
-    requiresRuntime: "nodejs",
+    requiresRuntime: "static",
     platform: "vercel",
-    physicalRouteAllowed: true,
-    redirectConfigured: false,
-    productionDeployable: true,
+    physicalRouteAllowed: false,
+    redirectConfigured: true,
+    productionDeployable: false,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

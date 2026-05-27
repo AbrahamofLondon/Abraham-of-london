@@ -354,6 +354,11 @@ const nextConfig = {
         destination: "/admin",
         permanent: false,
       },
+      {
+        source: "/testing/lab",
+        destination: "/admin/intelligence-foundry",
+        permanent: false,
+      },
     ];
   },
 

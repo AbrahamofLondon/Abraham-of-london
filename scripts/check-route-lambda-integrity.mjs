@@ -20,7 +20,7 @@
  *       Required pattern: page.tsx = server wrapper; client logic in sibling *Client.tsx
  *   8.  Every physical app/[dir]/page.tsx is in route-deployment-registry.ts
  *   9.  Every registry entry with redirectConfigured:true has a source in next.config.mjs
- *   10. DEBUG_INTERNAL routes that are productionDeployable:true must require auth
+ *   10. No DEBUG_INTERNAL route is productionDeployable:true
  *   11. No REDIRECT_ONLY or LEGACY_DISABLED route has a physical app/[dir]/page.tsx
  *   12. No route from previous missing-lambda failures has a physical page file
  *   13. No route under app/dashboard/** has a physical page file
@@ -336,15 +336,15 @@ for (const registryPath of REGISTRY_REDIRECT_PATHS) {
   }
 }
 
-// ─── Check 9: Production DEBUG_INTERNAL routes must require auth ──────────────
+// ─── Check 9: No DEBUG_INTERNAL route may be productionDeployable ─────────────
 
-const publicDebugRoutes = extractUnauthedProductionDebugRoutes(
+const debugRoutes = extractDebugInternalProductionDeployable(
   path.join(projectRoot, "lib", "platform", "route-deployment-registry.ts")
 );
-for (const p of publicDebugRoutes) {
+for (const p of debugRoutes) {
   fail(
-    `DEBUG_INTERNAL route "${p}" is productionDeployable:true without requiresAuth:true — ` +
-      `internal routes must be auth-gated in production`,
+    `DEBUG_INTERNAL route "${p}" is marked productionDeployable:true — ` +
+      `debug routes must never be reachable in production`,
   );
 }
 
@@ -358,7 +358,8 @@ const MUST_NOT_HAVE_PAGE_FILE = [
   // REDIRECT_ONLY — permanently retired, redirect only in next.config.mjs
   path.join("app", "dashboard", "live"),
   path.join("app", "dashboard", "purpose-alignment"),
-  // NOTE: pdf-analytics, pdf-dashboard, downloads/vault, and testing/lab have been REBUILT
+  path.join("app", "testing", "lab"),
+  // NOTE: pdf-analytics, pdf-dashboard, downloads/vault have been REBUILT
   // as server-wrapper + client-component pages (C: REBUILD from rollback audit).
   // They have legitimate page.tsx files and are NOT in this retired list.
 ];
@@ -385,9 +386,9 @@ const KNOWN_FAILED_LAMBDA_ROUTES = [
   // pdf-analytics, pdf-dashboard, and downloads/vault have been REBUILT with
   // the correct server-wrapper + client-component pattern and are no longer
   // in this list. Their Lambda failures were pattern errors, not route errors.
-  // testing/lab has also been restored as a server-wrapper page behind admin auth.
   path.join("app", "dashboard", "purpose-alignment"),
   path.join("app", "dashboard", "live"),
+  path.join("app", "testing", "lab"),
 ];
 
 for (const rel of KNOWN_FAILED_LAMBDA_ROUTES) {
@@ -543,12 +544,12 @@ function extractRegistryRedirectPaths(registryPath) {
 }
 
 /**
- * Extract DEBUG_INTERNAL entries that are productionDeployable:true without auth.
+ * Extract paths of DEBUG_INTERNAL entries that are productionDeployable:true.
  *
  * @param {string} registryPath
  * @returns {string[]}
  */
-function extractUnauthedProductionDebugRoutes(registryPath) {
+function extractDebugInternalProductionDeployable(registryPath) {
   try {
     const content = fs.readFileSync(registryPath, "utf8");
     const result = [];
@@ -557,8 +558,7 @@ function extractUnauthedProductionDebugRoutes(registryPath) {
     for (const block of blocks) {
       const isDebug = /class:\s*["']DEBUG_INTERNAL["']/.test(block);
       const isDeployable = /productionDeployable:\s*true/.test(block);
-      const requiresAuth = /requiresAuth:\s*true/.test(block);
-      if (isDebug && isDeployable && !requiresAuth) {
+      if (isDebug && isDeployable) {
         const pathMatch = block.match(/\bpath:\s*["']([^"']+)["']/);
         if (pathMatch) result.push(pathMatch[1]);
       }
