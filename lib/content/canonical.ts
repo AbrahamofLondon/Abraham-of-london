@@ -119,6 +119,7 @@ export function inferCollectionFromDoc(doc: any): string | null {
   if (kind === "strategy") return "strategy";
   if (kind === "lexicon") return "lexicon";
   if (kind === "vault") return "vault";
+  if (kind === "editorial") return "editorials";
 
   // Try path-based inference
   const path = doc?._raw?.flattenedPath || doc?.slug || "";
@@ -137,6 +138,7 @@ export function inferCollectionFromDoc(doc: any): string | null {
   if (normalized.startsWith("strategy/")) return "strategy";
   if (normalized.startsWith("lexicon/")) return "lexicon";
   if (normalized.startsWith("vault/")) return "vault";
+  if (normalized.startsWith("editorials/")) return "editorials";
 
   return null;
 }

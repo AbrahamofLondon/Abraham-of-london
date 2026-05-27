@@ -194,9 +194,13 @@ function looksLikeReadableText(value: string): boolean {
  * It does NOT import or use `useMDXComponent`, `next-contentlayer2/hooks`,
  * or `mdx-bundler/client`.
  *
- * Returns rendered HTML. For compiled MDX (which requires runtime eval),
- * returns an empty string — those pages should use the client-side renderer
- * or be converted to SSR.
+ * Design:
+ * - If body.code is compiled MDX (requires runtime eval), skip it and fall
+ *   through to body.raw / content for static rendering.
+ * - If body.code is leaked module code, skip it as suspicious.
+ * - If body.code is readable text, render it directly as markdown.
+ * - If body.raw is available and readable, transform MDX-like tags and render.
+ * - Never returns empty HTML when a viable raw text fallback exists.
  */
 export function renderDocBodyToStaticHtml(doc: any): StaticRenderResult {
   const bodyCode = typeof doc?.body?.code === "string" ? doc.body.code.trim() : "";
@@ -204,17 +208,14 @@ export function renderDocBodyToStaticHtml(doc: any): StaticRenderResult {
   const rawBody = typeof doc?.body?.raw === "string" ? doc.body.raw.trim() : "";
   const content = typeof doc?.content === "string" ? doc.content.trim() : "";
 
-  // 1. Try body.code — if it's compiled MDX, we CANNOT render it statically
+  // 1. Try body.code — if it's compiled MDX, skip to raw fallback
   if (bodyCode) {
     if (looksLikeCompiledMdx(bodyCode) && !looksLikeLeakedModuleCode(bodyCode)) {
-      // Compiled MDX requires runtime evaluation — skip for SSG
-      return { mode: "html", html: "" };
-    }
-    if (looksLikeLeakedModuleCode(bodyCode)) {
-      // Suspicious — skip
-      return { mode: "html", html: "" };
-    }
-    if (looksLikeReadableText(bodyCode)) {
+      // Compiled MDX requires runtime evaluation — fall through to raw body
+      // instead of returning empty.
+    } else if (looksLikeLeakedModuleCode(bodyCode)) {
+      // Suspicious — skip body.code, fall through to raw body
+    } else if (looksLikeReadableText(bodyCode)) {
       // Raw readable text — render as markdown
       return {
         mode: "markdown",
@@ -226,9 +227,8 @@ export function renderDocBodyToStaticHtml(doc: any): StaticRenderResult {
   // 2. Try legacy bodyCode
   if (legacyBodyCode) {
     if (looksLikeCompiledMdx(legacyBodyCode) && !looksLikeLeakedModuleCode(legacyBodyCode)) {
-      return { mode: "html", html: "" };
-    }
-    if (looksLikeReadableText(legacyBodyCode)) {
+      // Compiled MDX — fall through to raw body
+    } else if (looksLikeReadableText(legacyBodyCode)) {
       return {
         mode: "markdown",
         html: renderMarkdownToHtml(legacyBodyCode),
