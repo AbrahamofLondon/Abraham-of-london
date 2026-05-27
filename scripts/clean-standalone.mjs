@@ -58,6 +58,28 @@ if (process.env.AOL_RECREATE_NEXT_LOCK === "1" && fs.existsSync(nextDir)) {
   }
 }
 
+// ── Route / Lambda integrity gate ────────────────────────────────────────────
+// Runs on every build (Vercel and Netlify) before we touch the standalone.
+// Fails fast if any built route is missing its JS file, preventing a silent
+// "Unable to find lambda for route" error at the Vercel packaging stage.
+{
+  const integrityScript = path.join(
+    process.cwd(),
+    "scripts",
+    "check-route-lambda-integrity.mjs",
+  );
+  if (fs.existsSync(integrityScript)) {
+    const { execFileSync } = await import("node:child_process");
+    try {
+      execFileSync(process.execPath, [integrityScript], { stdio: "inherit" });
+    } catch {
+      // Non-zero exit from the integrity check — already printed the violation.
+      // Propagate the failure to fail the build.
+      process.exit(1);
+    }
+  }
+}
+
 if (!fs.existsSync(standalone)) {
   console.log("[clean-standalone] .next/standalone not found — skipping");
   process.exit(0);
