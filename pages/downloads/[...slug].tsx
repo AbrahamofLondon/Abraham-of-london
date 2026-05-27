@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, FileText, Lock, Shield } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   getDownloadManifestEntry,
   getDownloadRedirectUrl,
@@ -11,6 +12,7 @@ import {
   type DownloadManifestEntry,
 } from "@/lib/downloads/download-manifest";
 import { getProductByEntitlementSlug } from "@/lib/commercial/catalog";
+import { getDownloadBySlug } from "@/lib/server/downloads-data";
 
 const GOLD = "#C9A96E";
 
@@ -18,6 +20,10 @@ type Props = {
   entry: DownloadManifestEntry;
   redirectUrl: string | null;
   price: { display: string; justification: string } | null;
+  staticHtml: string;
+  description: string | null;
+  subtitle: string | null;
+  category: string | null;
 };
 
 const ACCESS_LABEL: Record<DownloadManifestEntry["accessLevel"], string> = {
@@ -27,14 +33,36 @@ const ACCESS_LABEL: Record<DownloadManifestEntry["accessLevel"], string> = {
   restricted: "Request access required",
 };
 
-const Page: NextPage<Props> = ({ entry, redirectUrl, price }) => {
+const VALUE_LINES: Record<string, string> = {
+  framework: "A working structure, not a template. Designed for decision environments where instinct alone is not enough.",
+  worksheet: "A structured tool for converting thinking into governed action.",
+  playbook: "Operational logic for situations that cannot afford improvisation.",
+  brief: "Compressed institutional intelligence. Read once, act on immediately.",
+  report: "Decision-grade analysis designed for boards, operators, and principals.",
+  toolkit: "A complete working set for structured assessment and correction.",
+};
+
+const Page: NextPage<Props> = ({
+  entry,
+  redirectUrl,
+  price,
+  staticHtml,
+  description,
+  subtitle,
+  category,
+}) => {
   const isPublic = entry.isPublic;
   const accessLabel = price ? `${price.display} - Unlock access` : ACCESS_LABEL[entry.accessLevel];
+  const categoryLabel = category || `${entry.fileType.toUpperCase()} Asset`;
+  const valueLine =
+    description ||
+    VALUE_LINES[categoryLabel.toLowerCase()] ||
+    "A governed Abraham of London decision asset designed for serious use.";
 
   return (
     <Layout
       title={`${entry.title} | Abraham of London`}
-      description={`${entry.title} is a governed Abraham of London decision asset.`}
+      description={valueLine}
       canonicalUrl={`/downloads/${entry.slug}`}
       fullWidth
       headerTransparent={false}
@@ -48,7 +76,7 @@ const Page: NextPage<Props> = ({ entry, redirectUrl, price }) => {
           <div className="mb-2 flex items-center gap-3">
             <span className="h-px w-8" style={{ backgroundColor: `${GOLD}50` }} />
             <span className="font-mono uppercase" style={{ fontSize: "8px", letterSpacing: "0.34em", color: `${GOLD}90` }}>
-              {entry.fileType.toUpperCase()} Asset
+              {categoryLabel}
             </span>
           </div>
 
@@ -56,8 +84,17 @@ const Page: NextPage<Props> = ({ entry, redirectUrl, price }) => {
             {entry.title}
           </h1>
 
+          {subtitle ? (
+            <p
+              className="mt-2 font-['Cormorant_Garamond',Georgia,serif] font-light italic"
+              style={{ fontSize: "1.05rem", lineHeight: 1.5, color: "var(--ds-text-muted)" }}
+            >
+              {subtitle}
+            </p>
+          ) : null}
+
           <p className="mt-4 max-w-[56ch]" style={{ fontSize: "14.5px", lineHeight: 1.7, color: "var(--ds-text-muted)" }}>
-            This asset is delivered through the static media layer. Dynamic runtime is used only for entitlement checks where required.
+            {valueLine}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border p-5" style={{ borderColor: `${GOLD}25`, backgroundColor: `${GOLD}08` }}>
@@ -130,6 +167,12 @@ const Page: NextPage<Props> = ({ entry, redirectUrl, price }) => {
               Protected delivery is handled by the entitlement resolver. Unknown assets are not resolvable.
             </p>
           )}
+
+          {staticHtml ? (
+            <section className="mt-12 border-t pt-10" style={{ borderColor: "var(--ds-border)" }}>
+              <StaticMDXRenderer html={staticHtml} />
+            </section>
+          ) : null}
         </div>
       </main>
     </Layout>
@@ -144,6 +187,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 
   if (!entry) return { notFound: true };
 
+  const doc = await getDownloadBySlug(entry.slug);
+  const staticHtml = doc && entry.isPublic ? renderDocBodyToStaticHtml(doc).html : "";
   const product = entry.entitlementSlug
     ? getProductByEntitlementSlug(entry.entitlementSlug)
     : getProductByEntitlementSlug(entry.slug);
@@ -152,6 +197,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
     props: {
       entry,
       redirectUrl: getDownloadRedirectUrl(entry),
+      staticHtml,
+      description:
+        doc?.description ||
+        doc?.excerpt ||
+        null,
+      subtitle:
+        typeof (doc as any)?.subtitle === "string"
+          ? (doc as any).subtitle
+          : null,
+      category:
+        doc?.category ||
+        null,
       price: product
         ? {
             display: product.displayPrice,
