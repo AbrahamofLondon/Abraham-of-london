@@ -16,12 +16,14 @@
  *   4.  No orphaned route.js file exists without a manifest entry
  *   5.  pages-manifest.json (Pages Router) — all entries have JS files
  *   6.  middleware-manifest.json — all referenced files exist
- *   7.  Every physical app/[dir]/page.tsx is in route-deployment-registry.ts
- *   8.  Every registry entry with redirectConfigured:true has a source in next.config.mjs
- *   9.  No DEBUG_INTERNAL route is productionDeployable:true
- *   10. No REDIRECT_ONLY or LEGACY_DISABLED route has a physical app/[dir]/page.tsx
- *   11. No route from previous missing-lambda failures has a physical page file
- *   12. No route under app/dashboard/** has a physical page file
+ *   7.  No app/[dir]/page.tsx is a direct "use client" component outside the migration allowlist
+ *       Required pattern: page.tsx = server wrapper; client logic in sibling *Client.tsx
+ *   8.  Every physical app/[dir]/page.tsx is in route-deployment-registry.ts
+ *   9.  Every registry entry with redirectConfigured:true has a source in next.config.mjs
+ *   10. No DEBUG_INTERNAL route is productionDeployable:true
+ *   11. No REDIRECT_ONLY or LEGACY_DISABLED route has a physical app/[dir]/page.tsx
+ *   12. No route from previous missing-lambda failures has a physical page file
+ *   13. No route under app/dashboard/** has a physical page file
  *
  * Exit codes:
  *   0  — all checks pass
@@ -196,11 +198,96 @@ if (middlewareManifest) {
   }
 }
 
-// ─── Check 7: Every physical App Router page must have a registry entry ──────
+// Shared across checks 7, 8, and 13
+const appSourceDir = path.join(projectRoot, "app");
+
+// ─── Check 7: No page.tsx may be a direct "use client" component ─────────────
+//
+// Required pattern:
+//   page.tsx       = server component (may export const dynamic = "force-dynamic")
+//   *Client.tsx    = sibling 'use client' component containing all interactive logic
+//
+// Why: A direct 'use client' page.tsx without a server-component wrapper gets added
+// to prerender-manifest.json by Next.js. @vercel/next then expects a Lambda for
+// that route, but Next.js prerendered it as static HTML →
+// "Unable to find lambda for route: /settings/integrations".
+//
+// Allowlist: existing violations that are currently safe (pending migration).
+//   - Admin routes inherit force-dynamic from app/admin/layout.tsx → ƒ Dynamic.
+//     They work now but must eventually follow the server-wrapper pattern.
+//   - assessment/[token] has force-dynamic + dynamic param → ƒ Dynamic. Works.
+//
+// To add a new exception: add an entry with a written justification.
+// NEVER add an exception without understanding WHY it is safe.
+
+/** @type {Record<string, string>} path (relative to project root) → justification */
+const DIRECT_CLIENT_PAGE_ALLOWLIST = {
+  // ── Admin routes ─────────────────────────────────────────────────────────
+  // app/admin/layout.tsx exports `const dynamic = "force-dynamic"`, which
+  // forces ALL child routes to be ƒ (Dynamic) regardless of 'use client'.
+  // These pages are safe now but MUST be migrated to the server-wrapper pattern.
+  // Migration pass: convert each to page.tsx (server) + *Client.tsx ('use client').
+  "app/admin/boardroom-delivery/page.tsx":                             "admin-layout-force-dynamic — pending migration",
+  "app/admin/commercial/page.tsx":                                     "admin-layout-force-dynamic — pending migration",
+  "app/admin/decision-intelligence/page.tsx":                         "admin-layout-force-dynamic — pending migration",
+  "app/admin/decision/contextual-efficacy/page.tsx":                  "admin-layout-force-dynamic — pending migration",
+  "app/admin/decision/contextual-ranking/page.tsx":                   "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/chaos/page.tsx":                    "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/data-poisoning/page.tsx":           "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/debug/page.tsx":                    "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/engines/page.tsx":                  "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/health/page.tsx":                   "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/performance/page.tsx":              "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/product-health/page.tsx":           "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/runs/page.tsx":                     "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/runs/[id]/page.tsx":                "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/boardroom-mode/page.tsx":                        "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/executive-report-boardroom-bridge/page.tsx":     "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/executive-reporting/page.tsx":                   "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/fast-diagnostic/page.tsx":                       "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/report-lineage/page.tsx":                        "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/strategy-room/page.tsx":                         "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/trash-day/page.tsx":                "admin-layout-force-dynamic — pending migration",
+  "app/admin/organisations/new/page.tsx":                             "admin-layout-force-dynamic — pending migration",
+  "app/admin/organisations/[id]/campaigns/new/page.tsx":              "admin-layout-force-dynamic — pending migration",
+
+  // ── Non-admin with force-dynamic + dynamic param ──────────────────────────
+  // assessment/[token] has `export const dynamic = "force-dynamic"` AND a
+  // dynamic [token] param, making it ƒ (Dynamic) by two independent mechanisms.
+  // Safe as-is; migrate in a future client-pattern cleanup pass.
+  "app/assessment/[token]/page.tsx": "force-dynamic + dynamic-param → ƒ Dynamic — pending migration",
+};
+
+if (fileExists(appSourceDir)) {
+  const pageFiles = collectSourcePageFiles(appSourceDir);
+
+  for (const pageFile of pageFiles) {
+    const content = fs.readFileSync(pageFile, "utf8");
+    if (!isDirectClientPage(content)) continue;
+
+    const relPath = path.relative(projectRoot, pageFile).replace(/\\/g, "/");
+
+    if (DIRECT_CLIENT_PAGE_ALLOWLIST[relPath]) {
+      warn(
+        `Direct 'use client' page (allowlisted — pending migration): ${relPath}` +
+          `\n            Reason: ${DIRECT_CLIENT_PAGE_ALLOWLIST[relPath]}` +
+          `\n            Action: convert to server-wrapper + sibling *Client.tsx`,
+      );
+    } else {
+      fail(
+        `Direct 'use client' page.tsx not in migration allowlist: ${relPath}` +
+          `\n  Required pattern: page.tsx = server component; client logic in sibling *Client.tsx` +
+          `\n  See scripts/check-route-lambda-integrity.mjs DIRECT_CLIENT_PAGE_ALLOWLIST` +
+          `\n  to add a justified exception, or fix the page now.`,
+      );
+    }
+  }
+}
+
+// ─── Check 8: Every physical App Router page must have a registry entry ──────
 // Prevents new routes from entering production without explicit classification.
 // Every app/[dir]/page.tsx MUST appear in lib/platform/route-deployment-registry.ts.
 
-const appSourceDir = path.join(projectRoot, "app");
 if (fileExists(appSourceDir)) {
   const physicalPages = collectSourcePageFiles(appSourceDir);
 
@@ -487,6 +574,48 @@ function extractNextConfigRedirectSources(configPath) {
   } catch {
     return new Set();
   }
+}
+
+/**
+ * Returns true if the file's first meaningful non-comment line is a
+ * "use client" or 'use client' directive.
+ *
+ * Skips: blank lines, // single-line comments, block comments (/* … *\/)
+ *
+ * A direct 'use client' page.tsx (without a server-component wrapper) gets
+ * added to prerender-manifest.json by Next.js → @vercel/next expects a Lambda
+ * → "Unable to find lambda for route: /…". The required pattern is:
+ *   page.tsx       = server component (no 'use client')
+ *   *Client.tsx    = sibling 'use client' component
+ *
+ * @param {string} content - raw UTF-8 content of the page.tsx file
+ * @returns {boolean}
+ */
+function isDirectClientPage(content) {
+  const lines = content.split("\n");
+  let inBlockComment = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Track block comments
+    if (inBlockComment) {
+      if (trimmed.includes("*/")) inBlockComment = false;
+      continue;
+    }
+    if (trimmed.startsWith("/*")) {
+      if (!trimmed.includes("*/")) inBlockComment = true;
+      continue;
+    }
+
+    // Skip blank lines and single-line comments
+    if (!trimmed || trimmed.startsWith("//")) continue;
+
+    // First non-comment, non-blank line — check for "use client" directive
+    return /^["']use client["'];?$/.test(trimmed);
+  }
+
+  return false;
 }
 
 /** Recursively collect page.js and route.js files under a directory. */
