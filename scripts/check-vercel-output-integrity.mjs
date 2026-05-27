@@ -94,6 +94,30 @@ function fileExists(filePath) {
   }
 }
 
+/**
+ * Convert a Next App Router manifest key to the public URL path Vercel uses
+ * when naming output functions.
+ *
+ * Examples:
+ *   /api/search/route                  -> /api/search
+ *   /settings/integrations/page        -> /settings/integrations
+ *   /(dashboard)/portfolio/page        -> /portfolio
+ */
+function appManifestKeyToUrlPath(routePath) {
+  const withoutLeaf = routePath.replace(/\/(?:page|route)$/, "") || "/";
+  const segments = withoutLeaf
+    .split("/")
+    .filter(Boolean)
+    .filter((segment) => !/^\(.+\)$/.test(segment))
+    .filter((segment) => !segment.startsWith("@"));
+
+  return segments.length ? `/${segments.join("/")}` : "/";
+}
+
+function urlPathToFuncName(urlPath) {
+  return urlPath === "/" ? "index" : urlPath.replace(/^\//, "");
+}
+
 /** Recursively sum directory size in bytes. */
 function dirSize(dir) {
   let total = 0;
@@ -221,17 +245,14 @@ if (appPathsManifest && fileExists(vercelFunctions)) {
       continue;
     }
 
-    // Derive the expected Vercel function name from the route path.
+    // Derive the expected Vercel function name from the public URL path.
     // Vercel names functions after the URL path segments, replacing
     // [param] with [param] and [...slug] with [...slug].
-    // The .func directory mirrors the URL structure.
-    const funcName = routePath === "/" ? "index" : routePath.replace(/^\//, "");
+    // App Router manifest keys include implementation leaves (`/page`, `/route`)
+    // and route groups (`/(group)`), but those are not part of the URL.
+    const urlPath = appManifestKeyToUrlPath(routePath);
+    const funcName = urlPathToFuncName(urlPath);
     const expectedFuncDir = path.join(vercelFunctions, `${funcName}.func`);
-
-    // Also check for RSC variant
-    if (routePath.endsWith("/page")) {
-      // Already a page route — check normally
-    }
 
     // Static routes won't have a .func dir — they live in .vercel/output/static
     // We can't distinguish static vs dynamic here without the prerender manifest,
@@ -241,11 +262,11 @@ if (appPathsManifest && fileExists(vercelFunctions)) {
       const staticEquiv = path.join(
         vercelOutput,
         "static",
-        routePath === "/" ? "index.html" : `${routePath}.html`,
+        urlPath === "/" ? "index.html" : `${urlPath}.html`,
       );
       if (!fileExists(staticEquiv)) {
         warn(
-          `Route ${routePath} has a compiled JS file but no .func or static output found` +
+          `Route ${routePath} (${urlPath}) has a compiled JS file but no .func or static output found` +
             ` — may cause "Unable to find lambda" at deploy time`,
         );
         missingFunctions.push(routePath);
@@ -274,11 +295,10 @@ const unexpectedDynamicRoutes = [];
 
 if (appPathsManifest && fileExists(vercelFunctions)) {
   for (const [routePath] of Object.entries(appPathsManifest)) {
-    // Strip /page suffix to get URL — app-paths-manifest uses /route/page as key
-    const urlPath = routePath.replace(/\/page$/, "") || "/";
+    const urlPath = appManifestKeyToUrlPath(routePath);
 
     const isPrerendered = prerenderRoutes.has(urlPath);
-    const funcName = urlPath === "/" ? "index" : urlPath.replace(/^\//, "");
+    const funcName = urlPathToFuncName(urlPath);
     const hasFuncDir = fileExists(path.join(vercelFunctions, `${funcName}.func`));
 
     if (!isPrerendered && !hasFuncDir) {
@@ -296,7 +316,7 @@ if (appPathsManifest && fileExists(vercelFunctions)) {
 if (fileExists(vercelFunctions)) {
   for (const route of prerenderRoutes) {
     if (!appPathsManifest) break;
-    const funcName = route === "/" ? "index" : route.replace(/^\//, "");
+    const funcName = urlPathToFuncName(route);
     const hasFuncDir = fileExists(path.join(vercelFunctions, `${funcName}.func`));
     if (hasFuncDir) {
       // Having both static prerender + func dir is fine (ISR needs a Lambda for revalidation)
