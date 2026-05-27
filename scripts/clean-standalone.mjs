@@ -45,8 +45,20 @@ const nextServer = path.join(process.cwd(), ".next", "server");
 // before the standalone check so it fires on both Vercel and Netlify paths.
 const nextDir = path.join(process.cwd(), ".next");
 if (fs.existsSync(nextDir)) {
-  fs.writeFileSync(path.join(nextDir, "lock"), "");
-  console.log("[clean-standalone] recreated .next/lock for Vercel packager");
+  const lockPath = path.join(nextDir, "lock");
+  try {
+    fs.closeSync(fs.openSync(lockPath, "a"));
+    console.log("[clean-standalone] recreated .next/lock for Vercel packager");
+  } catch (error) {
+    if (
+      ["EBUSY", "EPERM", "EACCES"].includes(error?.code) &&
+      fs.existsSync(lockPath)
+    ) {
+      console.warn("[clean-standalone] .next/lock already exists but is locked; continuing");
+    } else {
+      throw error;
+    }
+  }
 }
 
 if (!fs.existsSync(standalone)) {
