@@ -260,28 +260,113 @@ if (appPathsManifest && fileExists(vercelFunctions)) {
   }
 }
 
-// ─── Result summary ───────────────────────────────────────────────────────────
+// ─── Missing lambda risk analysis ────────────────────────────────────────────
+// A route is a "missing lambda risk" if it has a compiled .js in .next/server/app
+// but is NOT in prerender-manifest (so it should be a Lambda) AND has no .func dir.
+// These are the routes most likely to cause "Unable to find lambda" on Vercel.
 
-console.log("\n[vercel-output] ── Build Output Summary ──────────────────────────");
-console.log(`[vercel-output]   Total functions:    ${funcDirs.length}`);
-console.log(`[vercel-output]   Dynamic routes:     ${dynamicRouteCount}`);
-console.log(`[vercel-output]   Static routes:      ${staticRouteCount}`);
-console.log(`[vercel-output]   Missing output:     ${missingFunctions.length}`);
+const prerenderManifest = readJson(path.join(projectRoot, ".next", "prerender-manifest.json")) ?? {};
+const prerenderRoutes = new Set(Object.keys(prerenderManifest.routes ?? {}));
 
-if (funcSizes.length > 0) {
-  const top = funcSizes.slice(0, 20);
-  console.log(`\n[vercel-output] ── Largest ${top.length} function(s) ─────────────────────`);
-  for (const { name, size } of top) {
-    const mb = (size / 1024 / 1024).toFixed(1);
-    const bar = size > LAMBDA_SIZE_LIMIT_BYTES ? " ✗ OVER LIMIT" : "";
-    console.log(`[vercel-output]   ${mb.padStart(6)} MB  ${name}${bar}`);
+const missingLambdaRisks = [];
+const unexpectedStaticRoutes = [];
+const unexpectedDynamicRoutes = [];
+
+if (appPathsManifest && fileExists(vercelFunctions)) {
+  for (const [routePath] of Object.entries(appPathsManifest)) {
+    // Strip /page suffix to get URL — app-paths-manifest uses /route/page as key
+    const urlPath = routePath.replace(/\/page$/, "") || "/";
+
+    const isPrerendered = prerenderRoutes.has(urlPath);
+    const funcName = urlPath === "/" ? "index" : urlPath.replace(/^\//, "");
+    const hasFuncDir = fileExists(path.join(vercelFunctions, `${funcName}.func`));
+
+    if (!isPrerendered && !hasFuncDir) {
+      missingLambdaRisks.push({ routePath, urlPath });
+    }
   }
 }
 
+// ─── Unexpected static/dynamic mismatch analysis ─────────────────────────────
+// Routes in prerender-manifest are served statically by Vercel's CDN.
+// Routes NOT in prerender-manifest but IN app-paths-manifest need a Lambda.
+// Report any route that appears to be miscategorised.
+
+// Static routes that have a .func dir (unexpected: costs Lambda when not needed)
+if (fileExists(vercelFunctions)) {
+  for (const route of prerenderRoutes) {
+    if (!appPathsManifest) break;
+    const funcName = route === "/" ? "index" : route.replace(/^\//, "");
+    const hasFuncDir = fileExists(path.join(vercelFunctions, `${funcName}.func`));
+    if (hasFuncDir) {
+      // Having both static prerender + func dir is fine (ISR needs a Lambda for revalidation)
+      // Only report if it looks unexpected (initialRevalidateSeconds is false = permanent static)
+      const routeEntry = (prerenderManifest.routes ?? {})[route];
+      if (routeEntry && routeEntry.initialRevalidateSeconds === false) {
+        unexpectedDynamicRoutes.push(route);
+      }
+    }
+  }
+}
+
+// ─── Result summary ───────────────────────────────────────────────────────────
+
+console.log("\n[vercel-output] ════════════════════════════════════════════════════");
+console.log("[vercel-output]   VERCEL OUTPUT INTEGRITY REPORT");
+console.log("[vercel-output] ════════════════════════════════════════════════════");
+console.log(`[vercel-output]   Total .func directories:     ${funcDirs.length}`);
+console.log(`[vercel-output]   Prerendered static routes:   ${prerenderRoutes.size}`);
+console.log(`[vercel-output]   App Router manifest entries: ${appPathsManifest ? Object.keys(appPathsManifest).length : 0}`);
+console.log(`[vercel-output]   Missing lambda risks:        ${missingLambdaRisks.length}`);
+console.log(`[vercel-output]   Oversized functions (>50MB): ${funcSizes.filter(f => f.size > LAMBDA_SIZE_LIMIT_BYTES).length}`);
+
+// Every generated function with size
+if (funcSizes.length > 0) {
+  console.log(`\n[vercel-output] ── All generated functions (${funcSizes.length} total) ──────────────`);
+  for (const { name, size } of funcSizes) {
+    const mb = (size / 1024 / 1024).toFixed(2);
+    const flag = size > LAMBDA_SIZE_LIMIT_BYTES ? "  ✗ OVER 50MB LIMIT" : "";
+    console.log(`[vercel-output]   ${mb.padStart(7)} MB  ${name}${flag}`);
+  }
+}
+
+// Largest 20 (redundant display when all are shown, but explicit per brief)
+if (funcSizes.length > 20) {
+  const top20 = funcSizes.slice(0, 20);
+  console.log(`\n[vercel-output] ── Top 20 largest functions ─────────────────────────────`);
+  for (const { name, size } of top20) {
+    const mb = (size / 1024 / 1024).toFixed(2);
+    const flag = size > LAMBDA_SIZE_LIMIT_BYTES ? "  ✗ OVER LIMIT" : "";
+    console.log(`[vercel-output]   ${mb.padStart(7)} MB  ${name}${flag}`);
+  }
+}
+
+// Routes without output mapping
 if (missingFunctions.length > 0) {
-  console.log(`\n[vercel-output] ── Routes without output entries ────────────────`);
+  console.log(`\n[vercel-output] ── Routes without output entries (${missingFunctions.length}) ───────────`);
   for (const r of missingFunctions) {
-    console.log(`[vercel-output]   ${r}`);
+    console.log(`[vercel-output]   ⚠  ${r}`);
+  }
+}
+
+// Missing lambda risks
+if (missingLambdaRisks.length > 0) {
+  console.log(`\n[vercel-output] ── Missing lambda risks (${missingLambdaRisks.length}) ──────────────────────`);
+  console.log("[vercel-output]   These routes are NOT prerendered and have NO .func dir.");
+  console.log("[vercel-output]   They will trigger 'Unable to find lambda' on Vercel.");
+  for (const { routePath, urlPath } of missingLambdaRisks) {
+    console.log(`[vercel-output]   ✗  ${urlPath}  (manifest key: ${routePath})`);
+    fail(`Missing lambda: route "${urlPath}" has compiled JS but no .func and is not prerendered`);
+  }
+}
+
+// Unexpected static/dynamic mismatches
+if (unexpectedDynamicRoutes.length > 0) {
+  console.log(`\n[vercel-output] ── Unexpected .func for permanently-static routes (${unexpectedDynamicRoutes.length}) ──`);
+  console.log("[vercel-output]   These routes are permanently static but have a .func directory.");
+  console.log("[vercel-output]   This is usually harmless (cached Lambda) but worth reviewing.");
+  for (const r of unexpectedDynamicRoutes) {
+    console.log(`[vercel-output]   ℹ  ${r}`);
   }
 }
 
@@ -297,9 +382,9 @@ if (violations > 0) {
     process.exit(0);
   }
   console.error(
-    `[vercel-output] Output gate failed: ${violations} violation(s). Fix before deploying.`,
+    `[vercel-output] Output gate FAILED: ${violations} violation(s). Fix before deploying.`,
   );
   process.exit(1);
 }
 
-console.log("[vercel-output] ✓ Vercel output integrity checks passed.");
+console.log("[vercel-output] ✓ All Vercel output integrity checks passed.");

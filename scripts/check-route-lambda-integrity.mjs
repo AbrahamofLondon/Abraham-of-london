@@ -10,17 +10,18 @@
  * Runs AFTER `next build --webpack` (called from clean-standalone.mjs).
  *
  * Checks:
- *   1. app-paths-manifest.json is present and parseable
- *   2. Every route in the manifest has a corresponding .js file in .next/server/app/
- *   3. Dynamic routes (not prerendered) have an .nft.json trace file
- *   4. No orphaned route.js file exists without a manifest entry
- *   5. pages-manifest.json (Pages Router) — all entries have JS files
- *   6. middleware-manifest.json — all referenced files exist
- *   7. No REDIRECT_ONLY or LEGACY_DISABLED route has a physical app/[dir]/page.tsx
- *      (these must be handled by config-level redirects, never by App Router pages)
- *   8. No route from previous missing-lambda failures has a physical page file
- *   9. No route under app/dashboard/** has a physical page file
- *      (dashboard routes are fully retired; redirects live in next.config.mjs)
+ *   1.  app-paths-manifest.json is present and parseable
+ *   2.  Every route in the manifest has a corresponding .js file in .next/server/app/
+ *   3.  Dynamic routes (not prerendered) have an .nft.json trace file
+ *   4.  No orphaned route.js file exists without a manifest entry
+ *   5.  pages-manifest.json (Pages Router) — all entries have JS files
+ *   6.  middleware-manifest.json — all referenced files exist
+ *   7.  Every physical app/[dir]/page.tsx is in route-deployment-registry.ts
+ *   8.  Every registry entry with redirectConfigured:true has a source in next.config.mjs
+ *   9.  No DEBUG_INTERNAL route is productionDeployable:true
+ *   10. No REDIRECT_ONLY or LEGACY_DISABLED route has a physical app/[dir]/page.tsx
+ *   11. No route from previous missing-lambda failures has a physical page file
+ *   12. No route under app/dashboard/** has a physical page file
  *
  * Exit codes:
  *   0  — all checks pass
@@ -195,7 +196,72 @@ if (middlewareManifest) {
   }
 }
 
-// ─── Check 7: REDIRECT_ONLY / LEGACY_DISABLED routes must NOT have page files ─
+// ─── Check 7: Every physical App Router page must have a registry entry ──────
+// Prevents new routes from entering production without explicit classification.
+// Every app/[dir]/page.tsx MUST appear in lib/platform/route-deployment-registry.ts.
+
+const appSourceDir = path.join(projectRoot, "app");
+if (fileExists(appSourceDir)) {
+  const physicalPages = collectSourcePageFiles(appSourceDir);
+
+  // Build set of registered paths (exact match)
+  const registeredPaths = new Set([
+    // Load from the compiled registry — use require on the TS-compiled output
+    // OR parse the source file for path values. We parse the source to avoid
+    // needing a compiled .js output. Look for: path: "..." entries.
+    ...extractRegistryPaths(path.join(projectRoot, "lib", "platform", "route-deployment-registry.ts")),
+  ]);
+
+  for (const pageFile of physicalPages) {
+    const urlPath = pageFileToUrlPath(appSourceDir, pageFile);
+    if (urlPath === null) continue; // skip files we can't parse
+
+    if (!registeredPaths.has(urlPath)) {
+      fail(
+        `Physical App Router page not in route registry: app${pageFile.slice(appSourceDir.length)}` +
+          ` → URL "${urlPath}" — add an entry to lib/platform/route-deployment-registry.ts`,
+      );
+    } else {
+      ok(`Registered: ${urlPath}`);
+    }
+  }
+}
+
+// ─── Check 8: Redirect-declared registry entries must exist in next.config.mjs ─
+// If a route entry has redirectConfigured:true and physicalRouteAllowed:false,
+// a matching source must appear in next.config.mjs async redirects().
+
+const nextConfigPath = path.join(projectRoot, "next.config.mjs");
+const configRedirectSources = extractNextConfigRedirectSources(nextConfigPath);
+
+const REGISTRY_REDIRECT_PATHS = extractRegistryRedirectPaths(
+  path.join(projectRoot, "lib", "platform", "route-deployment-registry.ts")
+);
+
+for (const registryPath of REGISTRY_REDIRECT_PATHS) {
+  if (!configRedirectSources.has(registryPath)) {
+    fail(
+      `Registry declares redirectConfigured:true for "${registryPath}" but no matching` +
+        ` source found in next.config.mjs redirects() — add the redirect or fix the registry`,
+    );
+  } else {
+    ok(`Redirect source "${registryPath}" confirmed in next.config.mjs`);
+  }
+}
+
+// ─── Check 9: No DEBUG_INTERNAL route may be productionDeployable ─────────────
+
+const debugRoutes = extractDebugInternalProductionDeployable(
+  path.join(projectRoot, "lib", "platform", "route-deployment-registry.ts")
+);
+for (const p of debugRoutes) {
+  fail(
+    `DEBUG_INTERNAL route "${p}" is marked productionDeployable:true — ` +
+      `debug routes must never be reachable in production`,
+  );
+}
+
+// ─── Check 11: REDIRECT_ONLY / LEGACY_DISABLED routes must NOT have page files ─
 // These routes are permanently retired. Their redirects live in next.config.mjs.
 // A physical app/[dir]/page.tsx would create a Lambda (or attempt to) during
 // `next build`, causing "Unable to find lambda" failures at Vercel packaging time.
@@ -224,10 +290,9 @@ for (const rel of MUST_NOT_HAVE_PAGE_FILE) {
   }
 }
 
-// ─── Check 8: No previously-failing lambda routes may have page files ─────────
+// ─── Check 12: No previously-failing lambda routes may have page files ────────
 // These are the specific routes that triggered "Unable to find lambda" failures
-// on Vercel. If any re-appears as a physical page file, fail immediately so
-// the deployment does not silently regress.
+// on Vercel. If any re-appears as a physical page file, fail immediately.
 
 const KNOWN_FAILED_LAMBDA_ROUTES = [
   path.join("app", "dashboard", "pdf-analytics"),
@@ -250,9 +315,8 @@ for (const rel of KNOWN_FAILED_LAMBDA_ROUTES) {
   }
 }
 
-// ─── Check 9: app/dashboard/** must have no page files at all ─────────────────
+// ─── Check 13: app/dashboard/** must have no page files at all ────────────────
 // All dashboard sub-routes are retired. Redirects are in next.config.mjs.
-// Any page.tsx under app/dashboard/ is a regression waiting to fail.
 
 const dashboardAppDir = path.join(projectRoot, "app", "dashboard");
 if (fileExists(dashboardAppDir)) {
@@ -260,7 +324,7 @@ if (fileExists(dashboardAppDir)) {
   for (const pageFile of dashboardPageFiles) {
     fail(
       `app/dashboard contains a page file: ${path.relative(projectRoot, pageFile)}` +
-        ` — all dashboard routes are retired; remove the page file and configure the redirect in next.config.mjs`,
+        ` — all dashboard routes are retired; remove it and configure the redirect in next.config.mjs`,
     );
   }
 }
@@ -308,6 +372,121 @@ function collectSourcePageFiles(dir) {
     // skip unreadable dirs
   }
   return results;
+}
+
+/**
+ * Convert a physical page.tsx path to its URL path.
+ * Handles route groups: (dashboard)/portfolio → /portfolio
+ * Handles catch-all and dynamic segments unchanged.
+ *
+ * @param {string} appDir - absolute path to the app/ directory
+ * @param {string} pageFile - absolute path to the page.tsx file
+ * @returns {string|null} URL path like "/admin/campaigns/[id]" or null if unparseable
+ */
+function pageFileToUrlPath(appDir, pageFile) {
+  // Get relative from app/: "admin/campaigns/[id]/page.tsx"
+  let rel = path.relative(appDir, pageFile);
+  // Normalize slashes
+  rel = rel.replace(/\\/g, "/");
+  // Strip page.tsx suffix
+  rel = rel.replace(/\/page\.(tsx|ts|jsx|js)$/, "");
+  // Remove route group segments: (anything)/
+  rel = rel.replace(/\([^)]+\)\//g, "");
+  // If nothing left (i.e. page was at app/page.tsx), it's "/"
+  if (!rel) return "/";
+  return "/" + rel;
+}
+
+/**
+ * Extract all path: "..." values from the route registry TypeScript source.
+ * Uses regex to avoid requiring a compiled output.
+ *
+ * @param {string} registryPath - path to route-deployment-registry.ts
+ * @returns {Set<string>}
+ */
+function extractRegistryPaths(registryPath) {
+  try {
+    const content = fs.readFileSync(registryPath, "utf8");
+    // Match: path: "/some/path" or path: '/some/path'
+    const matches = [...content.matchAll(/\bpath:\s*["']([^"']+)["']/g)];
+    return new Set(matches.map((m) => m[1]));
+  } catch {
+    return new Set();
+  }
+}
+
+/**
+ * Extract paths that have redirectConfigured:true and physicalRouteAllowed:false.
+ * Uses a heuristic: find entries where both flags appear together.
+ * Regex is not perfect for nested objects; relies on the consistent formatting
+ * used in the registry file.
+ *
+ * @param {string} registryPath
+ * @returns {string[]}
+ */
+function extractRegistryRedirectPaths(registryPath) {
+  try {
+    const content = fs.readFileSync(registryPath, "utf8");
+    const result = [];
+    // Split on top-level object boundaries — find each { ... } block that has
+    // both redirectConfigured: true and physicalRouteAllowed: false
+    const blockRegex = /\{[^{}]+\}/gs;
+    const blocks = content.match(blockRegex) || [];
+    for (const block of blocks) {
+      const hasRedirectTrue = /redirectConfigured:\s*true/.test(block);
+      const hasPhysicalFalse = /physicalRouteAllowed:\s*false/.test(block);
+      if (hasRedirectTrue && hasPhysicalFalse) {
+        const pathMatch = block.match(/\bpath:\s*["']([^"']+)["']/);
+        if (pathMatch) result.push(pathMatch[1]);
+      }
+    }
+    return result;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Extract paths of DEBUG_INTERNAL entries that are productionDeployable:true.
+ *
+ * @param {string} registryPath
+ * @returns {string[]}
+ */
+function extractDebugInternalProductionDeployable(registryPath) {
+  try {
+    const content = fs.readFileSync(registryPath, "utf8");
+    const result = [];
+    const blockRegex = /\{[^{}]+\}/gs;
+    const blocks = content.match(blockRegex) || [];
+    for (const block of blocks) {
+      const isDebug = /class:\s*["']DEBUG_INTERNAL["']/.test(block);
+      const isDeployable = /productionDeployable:\s*true/.test(block);
+      if (isDebug && isDeployable) {
+        const pathMatch = block.match(/\bpath:\s*["']([^"']+)["']/);
+        if (pathMatch) result.push(pathMatch[1]);
+      }
+    }
+    return result;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Extract redirect source strings from next.config.mjs using regex.
+ * Finds all: source: "..." or source: '...' patterns in the file.
+ *
+ * @param {string} configPath - path to next.config.mjs
+ * @returns {Set<string>}
+ */
+function extractNextConfigRedirectSources(configPath) {
+  try {
+    const content = fs.readFileSync(configPath, "utf8");
+    const matches = [...content.matchAll(/\bsource:\s*["']([^"']+)["']/g)];
+    return new Set(matches.map((m) => m[1]));
+  } catch {
+    return new Set();
+  }
 }
 
 /** Recursively collect page.js and route.js files under a directory. */

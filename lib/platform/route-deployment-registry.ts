@@ -1,63 +1,74 @@
 /**
  * lib/platform/route-deployment-registry.ts
  *
- * Canonical registry of every non-trivial dynamic route in the application.
+ * Canonical registry of every non-trivial App Router route in the application.
  *
  * Purpose:
- *   Provides a machine-readable source of truth for the build integrity guard
- *   (scripts/check-route-lambda-integrity.mjs) and for future tooling.
+ *   Machine-readable source of truth consumed by the build integrity guard
+ *   (scripts/check-route-lambda-integrity.mjs) and the Vercel output gate
+ *   (scripts/check-vercel-output-integrity.mjs).
  *
- * Rules:
- *   - Every route in app/** that is NOT a simple redirect and NOT fully static
- *     MUST have an entry here.
- *   - LEGACY_DISABLED routes must NOT have physical app/[dir]/page.tsx files.
- *     They must be handled by config-level redirects in next.config.mjs.
- *   - REDIRECT_ONLY routes must NOT have physical app/[dir]/page.tsx files.
- *     They must be handled by config-level redirects in next.config.mjs.
- *   - DEBUG_INTERNAL routes must NOT be reachable without authentication.
- *   - physicalRouteAllowed: false means the route MUST NOT have an app/page.tsx.
- *   - deployable: false means the route must redirect/404 before reaching users.
+ * Enforcement rules:
+ *   1. Every physical app/[dir]/page.tsx MUST have an entry here.
+ *      The build fails if a page file exists without a registry entry.
+ *   2. REDIRECT_ONLY and LEGACY_DISABLED routes MUST NOT have physical page files.
+ *      They are handled by config-level redirects in next.config.mjs.
+ *   3. DEBUG_INTERNAL routes MUST NOT be productionDeployable.
+ *   4. A redirectConfigured:true entry MUST have a matching source in next.config.mjs.
+ *
+ * Route path format:
+ *   - Exact URL path as it appears in the browser (no trailing slash).
+ *   - Use [param] for dynamic segments, [...slug] for catch-all.
+ *   - Route group directories like (dashboard) are stripped: /(dashboard)/portfolio → /portfolio.
+ *   - The __pdf and api prefix paths are kept as-is.
  */
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type RouteClass =
   | "PUBLIC_STATIC"      // Pre-rendered at build; no runtime data
   | "PUBLIC_DYNAMIC"     // Server-rendered per request; public access
   | "ADMIN_DYNAMIC"      // Server-rendered; requires admin auth
   | "API_DYNAMIC"        // App Router API route (route.ts)
-  | "CLIENT_DELIVERY"    // Client component shell; auth enforced client-side
-  | "DEBUG_INTERNAL"     // Internal tooling; must not be publicly accessible
+  | "CLIENT_DELIVERY"    // Client component shell; auth enforced client-side or by layout
+  | "DEBUG_INTERNAL"     // Internal tooling; must not be publicly accessible in production
   | "LEGACY_DISABLED"    // Route exists in code but is permanently retired
-  | "REDIRECT_ONLY";     // Route exists solely to redirect to canonical URL
+  | "REDIRECT_ONLY";     // Route exists solely to redirect to a canonical URL
 
 export type DeploymentPlatform = "vercel" | "netlify" | "static" | "disabled";
 
+export type RouteRuntime =
+  | "nodejs"    // Node.js Lambda (most dynamic routes)
+  | "edge"      // Vercel Edge Function
+  | "static";   // No runtime — served as prerendered HTML/asset
+
 export interface RouteEntry {
-  /** URL path as it appears in the browser (no trailing slash, use [param] for params) */
+  /** URL path as it appears in the browser. Use [param] for dynamic segments. */
   path: string;
   /** Classification controlling deployment behaviour */
   class: RouteClass;
   /** Team or domain that owns this route */
-  owner: string;
+  owner: "ops" | "product" | "intelligence" | "platform";
   /** What runtime intent this route serves */
   intent: string;
   /** Whether the route should produce a working lambda/page in production */
   deployable: boolean;
   /** True if the route should redirect non-authenticated requests */
   requiresAuth: boolean;
-  /** True if the route executes Prisma queries at request time */
+  /** True if the route executes Prisma/DB queries at request time */
   requiresDatabase: boolean;
+  /** Expected Vercel runtime for this route */
+  requiresRuntime: RouteRuntime;
   /** Where this route is deployed */
   platform: DeploymentPlatform;
   /**
-   * Whether an app/[dir]/page.tsx is permitted for this route.
-   * false = must be handled by config-level redirects (next.config.mjs redirects()),
-   *         netlify.toml, or vercel.json rewrites — never by an App Router page file.
-   * true  = a physical app/[dir]/page.tsx is expected and required.
+   * Whether a physical app/[dir]/page.tsx is permitted for this route.
+   * false → must be handled by config-level redirect; no App Router page file allowed.
+   * true  → a physical page.tsx is expected and required.
    */
   physicalRouteAllowed: boolean;
   /**
-   * Whether a config-level redirect is configured for this route
-   * (in next.config.mjs redirects(), netlify.toml, or vercel.json).
+   * Whether a config-level redirect is configured (in next.config.mjs redirects()).
    * Required to be true when physicalRouteAllowed is false.
    */
   redirectConfigured: boolean;
@@ -68,17 +79,18 @@ export interface RouteEntry {
   productionDeployable: boolean;
 }
 
-/**
- * Route registry. Alphabetically ordered within each class group.
- *
- * IMPORTANT: When you add a new App Router page that is NOT purely static and
- * NOT a simple redirect, add it here. The build guard will warn if a dynamic
- * route appears in the manifest without a registry entry.
- */
+// ─── Registry ─────────────────────────────────────────────────────────────────
+// Alphabetical within each class group.
+// Every physical app/page.tsx file MUST have a corresponding entry here.
+
 export const ROUTE_REGISTRY: RouteEntry[] = [
-  // ─── REDIRECT_ONLY ────────────────────────────────────────────────────────
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // REDIRECT_ONLY
   // These routes have NO physical app/[dir]/page.tsx files.
   // They are handled entirely by config-level redirects in next.config.mjs.
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     path: "/dashboard/live",
     class: "REDIRECT_ONLY",
@@ -87,6 +99,7 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "static",
     platform: "vercel",
     physicalRouteAllowed: false,
     redirectConfigured: true,
@@ -96,10 +109,11 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/dashboard/pdf-analytics",
     class: "REDIRECT_ONLY",
     owner: "platform",
-    intent: "Permanent redirect to /admin/reporting/lineage for retired OGR-IV terminal",
+    intent: "Redirect to /admin/reporting/lineage for retired OGR-IV terminal",
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "static",
     platform: "vercel",
     physicalRouteAllowed: false,
     redirectConfigured: true,
@@ -109,10 +123,11 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/dashboard/purpose-alignment",
     class: "REDIRECT_ONLY",
     owner: "platform",
-    intent: "Permanent redirect to /purpose-alignment",
+    intent: "Redirect to /purpose-alignment for retired dashboard variant",
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "static",
     platform: "vercel",
     physicalRouteAllowed: false,
     redirectConfigured: true,
@@ -122,10 +137,11 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/pdf-dashboard",
     class: "REDIRECT_ONLY",
     owner: "platform",
-    intent: "Permanent redirect to /admin/reporting/lineage for retired PDF telemetry dashboard",
+    intent: "Redirect to /admin/reporting/lineage for retired PDF telemetry dashboard",
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "static",
     platform: "vercel",
     physicalRouteAllowed: false,
     redirectConfigured: true,
@@ -135,19 +151,23 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/testing/lab",
     class: "REDIRECT_ONLY",
     owner: "platform",
-    intent: "Permanent redirect to /admin/intelligence-foundry for retired testing route",
+    intent: "Redirect to /admin/intelligence-foundry for retired testing route",
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "static",
     platform: "vercel",
     physicalRouteAllowed: false,
     redirectConfigured: true,
     productionDeployable: false,
   },
 
-  // ─── LEGACY_DISABLED ──────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEGACY_DISABLED
   // These routes have NO physical app/[dir]/page.tsx files.
-  // They are handled by config-level redirects or simply 404.
+  // Handled by config-level redirects or simply 404.
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     path: "/downloads/vault",
     class: "LEGACY_DISABLED",
@@ -156,23 +176,31 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: false,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "static",
     platform: "vercel",
     physicalRouteAllowed: false,
     redirectConfigured: true,
     productionDeployable: false,
   },
 
-  // ─── ADMIN_DYNAMIC ────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ADMIN_DYNAMIC
+  // All admin routes inherit force-dynamic from app/admin/layout.tsx.
+  // All require admin auth enforced by requireAdminServer() in the layout.
+  // Physical files live in app/admin/.
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     path: "/admin",
     class: "ADMIN_DYNAMIC",
     owner: "ops",
-    intent: "Admin command centre — requires admin session",
+    intent: "Admin root (handled by Pages Router pages/admin/index.tsx)",
     deployable: true,
     requiresAuth: true,
-    requiresDatabase: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
-    physicalRouteAllowed: true,
+    physicalRouteAllowed: false,
     redirectConfigured: false,
     productionDeployable: true,
   },
@@ -180,10 +208,53 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/admin/access",
     class: "ADMIN_DYNAMIC",
     owner: "ops",
-    intent: "Access tier management",
+    intent: "Access tier management — App Router",
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/audit",
+    class: "ADMIN_DYNAMIC",
+    owner: "ops",
+    intent: "Audit log viewer — admin panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/boardroom-delivery",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Boardroom delivery queue and management",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/campaign",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Single campaign view (singular path variant)",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -197,6 +268,7 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -210,6 +282,217 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/campaigns/[id]/enterprise-report",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Enterprise report viewer for a campaign",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/campaigns/[id]/report",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Campaign report detail view",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/campaigns/new",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Campaign creation form",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/command",
+    class: "ADMIN_DYNAMIC",
+    owner: "ops",
+    intent: "Admin command panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/commercial",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Commercial metrics and pipeline view",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/content",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Content management panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/content-vault",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Content vault admin view",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision-intelligence",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Decision intelligence overview panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision/contextual-efficacy",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Contextual efficacy decision panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision/contextual-ranking",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Contextual ranking decision panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision/efficacy",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Decision efficacy metrics panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision/governance",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Decision governance audit panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision/metadata-audit",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Decision metadata audit panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/decision/performance",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Decision performance metrics panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/enterprise",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Enterprise accounts panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -223,6 +506,343 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/chaos",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Chaos engine control panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/content",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Content generation foundry panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/data-poisoning",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Data poisoning test control panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/debug",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Foundry debug tooling panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/engines",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Engine registry and status panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/health",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Foundry health and diagnostics panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/market",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Market intelligence panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/outbound",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Outbound intelligence dispatch panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/performance",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Foundry performance benchmarks panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/product-health",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Product health monitoring panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/red-team/content",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Red team content adversarial testing panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/red-team/security",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Red team security testing panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/reference",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Foundry reference documentation panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/runs",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Foundry run history list",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/runs/[id]",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Single foundry run detail view",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/scenario",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Scenario definition and management panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/boardroom-mode",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Boardroom mode simulation runner",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/constitutional-diagnostic",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Constitutional diagnostic simulation runner",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/executive-report-boardroom-bridge",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Executive report to boardroom bridge simulation",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/executive-reporting",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Executive reporting simulation runner",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/fast-diagnostic",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Fast diagnostic simulation runner",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/report-lineage",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Report lineage simulation runner",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/simulation/strategy-room",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Strategy room simulation runner",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/intelligence-foundry/trash-day",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Foundry garbage collection and cleanup panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -236,6 +856,7 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -245,10 +866,109 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/admin/organisations/[id]",
     class: "ADMIN_DYNAMIC",
     owner: "product",
-    intent: "Single organisation detail",
+    intent: "Single organisation detail view",
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/organisations/[id]/campaigns/new",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Create new campaign for a specific organisation",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/organisations/[id]/dashboard",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Organisation-specific dashboard",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/organisations/[id]/report",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Organisation-specific report view",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/organisations/new",
+    class: "ADMIN_DYNAMIC",
+    owner: "product",
+    intent: "Create new organisation form",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/reporting/executive",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Executive reporting admin dashboard",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/reporting/executive/[...slug]",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Executive report catch-all viewer (slug-based routing)",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/reporting/executive/[id]",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Single executive report viewer",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -262,60 +982,116 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
     productionDeployable: true,
   },
   {
-    path: "/portfolio",
+    path: "/admin/reports",
     class: "ADMIN_DYNAMIC",
-    owner: "ops",
-    intent: "Institutional master portfolio view (route group /(dashboard))",
+    owner: "intelligence",
+    intent: "Reports management panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/research",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Research management panel",
     deployable: true,
     requiresAuth: true,
     requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/snapshot",
+    class: "ADMIN_DYNAMIC",
+    owner: "ops",
+    intent: "System snapshot and diagnostic view",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/strategy-room",
+    class: "ADMIN_DYNAMIC",
+    owner: "intelligence",
+    intent: "Strategy room admin configuration panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/admin/users",
+    class: "ADMIN_DYNAMIC",
+    owner: "ops",
+    intent: "User management panel",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
     productionDeployable: true,
   },
 
-  // ─── PUBLIC_DYNAMIC ───────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ADMIN_DYNAMIC — route group (dashboard)/portfolio
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
-    path: "/strategy-room",
+    path: "/portfolio",
+    class: "ADMIN_DYNAMIC",
+    owner: "ops",
+    intent: "Institutional master portfolio view (route group (dashboard))",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PUBLIC_DYNAMIC
+  // Server-rendered routes accessible without admin auth (may require user auth).
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    path: "/api/audit/[id]/success",
     class: "PUBLIC_DYNAMIC",
     owner: "product",
-    intent: "Strategy room diagnostic entry point",
+    intent: "Audit submission success page (UI at /api/audit/[id]/success path)",
     deployable: true,
     requiresAuth: false,
-    requiresDatabase: true,
-    platform: "vercel",
-    physicalRouteAllowed: true,
-    redirectConfigured: false,
-    productionDeployable: true,
-  },
-  {
-    path: "/registry/[...slug]",
-    class: "PUBLIC_DYNAMIC",
-    owner: "platform",
-    intent: "Vault content registry gated by VaultGuard",
-    deployable: true,
-    requiresAuth: true,
-    requiresDatabase: true,
-    platform: "vercel",
-    physicalRouteAllowed: true,
-    redirectConfigured: false,
-    productionDeployable: true,
-  },
-  {
-    path: "/boardroom/dossier/[dossierId]",
-    class: "PUBLIC_DYNAMIC",
-    owner: "product",
-    intent: "Boardroom delivery dossier viewer",
-    deployable: true,
-    requiresAuth: true,
-    requiresDatabase: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -329,6 +1105,21 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: false,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/assessment/success",
+    class: "PUBLIC_DYNAMIC",
+    owner: "product",
+    intent: "Assessment submission success page",
+    deployable: true,
+    requiresAuth: false,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -338,10 +1129,39 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/audit/[id]",
     class: "PUBLIC_DYNAMIC",
     owner: "product",
-    intent: "Constitutional audit detail view",
+    intent: "Constitutional audit detail view (Sovereign Telemetry Node)",
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/audit/[id]/success",
+    class: "PUBLIC_DYNAMIC",
+    owner: "product",
+    intent: "Audit completion success confirmation page",
+    deployable: true,
+    requiresAuth: false,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/boardroom/dossier/[dossierId]",
+    class: "PUBLIC_DYNAMIC",
+    owner: "product",
+    intent: "Boardroom delivery dossier viewer",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -355,6 +1175,7 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -364,17 +1185,65 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/purpose-alignment",
     class: "PUBLIC_DYNAMIC",
     owner: "product",
-    intent: "Purpose alignment diagnostic tool (parallel support surface)",
+    intent: "Purpose alignment diagnostic tool",
     deployable: true,
     requiresAuth: false,
     requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/registry/[...slug]",
+    class: "PUBLIC_DYNAMIC",
+    owner: "platform",
+    intent: "Vault content registry gated by VaultGuard",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/strategy-room",
+    class: "PUBLIC_DYNAMIC",
+    owner: "product",
+    intent: "Strategy room diagnostic entry point",
+    deployable: true,
+    requiresAuth: false,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/strategy-room/success",
+    class: "PUBLIC_DYNAMIC",
+    owner: "product",
+    intent: "Strategy room session completion page",
+    deployable: true,
+    requiresAuth: false,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
     productionDeployable: true,
   },
 
-  // ─── CLIENT_DELIVERY ──────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CLIENT_DELIVERY
+  // Client component shells. Auth may be enforced client-side or by layout.
+  // The page.tsx is a server component wrapper; the UI is in a *Client.tsx.
+  // ═══════════════════════════════════════════════════════════════════════════
+
   {
     path: "/__pdf/[slug]",
     class: "CLIENT_DELIVERY",
@@ -383,6 +1252,91 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: false,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/client",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "Client portal landing — server wrapper around ClientPortalClient",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/client/actions",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "Client actions list — server wrapper around ClientActionsClient",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/client/dossiers",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "Client dossier list — server wrapper around ClientDossiersClient",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/client/reports",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "Client reports list — server wrapper around ClientReportsClient",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/client/reports/[reportId]",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "Single client report viewer",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/enterprise/alignment/campaigns/[campaignId]",
+    class: "CLIENT_DELIVERY",
+    owner: "product",
+    intent: "Enterprise alignment campaign viewer",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -396,19 +1350,21 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     deployable: true,
     requiresAuth: true,
     requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
     productionDeployable: true,
   },
   {
-    path: "/client",
+    path: "/restricted",
     class: "CLIENT_DELIVERY",
     owner: "product",
-    intent: "Client portal landing",
+    intent: "Restricted access gate — server wrapper around RestrictedClient",
     deployable: true,
     requiresAuth: true,
-    requiresDatabase: true,
+    requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
@@ -418,19 +1374,24 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
     path: "/settings/integrations",
     class: "CLIENT_DELIVERY",
     owner: "product",
-    intent: "OAuth integration management (Google Calendar, Slack)",
+    intent: "OAuth integration management (Google Calendar, Slack). Server wrapper (force-dynamic) + IntegrationsClient.tsx — same pattern as /portal, /client, /restricted.",
     deployable: true,
     requiresAuth: true,
     requiresDatabase: false,
+    requiresRuntime: "nodejs",
     platform: "vercel",
     physicalRouteAllowed: true,
     redirectConfigured: false,
     productionDeployable: true,
   },
 
-  // ─── DEBUG_INTERNAL ───────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DEBUG_INTERNAL
   // (none active — all retired to REDIRECT_ONLY or LEGACY_DISABLED)
+  // ═══════════════════════════════════════════════════════════════════════════
 ];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Quick lookup: is this path in the registry? */
 export function isRegisteredRoute(path: string): boolean {
@@ -452,4 +1413,19 @@ export const NON_LAMBDA_CLASSES = new Set<RouteClass>([
 /** Routes that must NOT have a physical app/[dir]/page.tsx file. */
 export const NO_PHYSICAL_ROUTE_PATHS = ROUTE_REGISTRY
   .filter((r) => !r.physicalRouteAllowed)
+  .map((r) => r.path);
+
+/** All paths registered as having a physical page file. */
+export const PHYSICAL_ROUTE_PATHS = new Set(
+  ROUTE_REGISTRY
+    .filter((r) => r.physicalRouteAllowed)
+    .map((r) => r.path)
+);
+
+/**
+ * Paths declared as redirectConfigured but physicalRouteAllowed:false.
+ * The build check verifies these exist in next.config.mjs redirects().
+ */
+export const REDIRECT_DECLARED_PATHS = ROUTE_REGISTRY
+  .filter((r) => r.redirectConfigured && !r.physicalRouteAllowed)
   .map((r) => r.path);
