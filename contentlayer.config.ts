@@ -805,6 +805,8 @@ const XOutbound = defineDocumentType(() => ({
     thread: { type: "boolean", required: false },
     xCharCount: { type: "number", required: false },
     characterCount: { type: "number", required: false },
+    // Design brief for quote card assets
+    designBrief: { type: "string", required: false },
   },
   computedFields: {
     slug: {
