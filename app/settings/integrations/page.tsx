@@ -1,6 +1,10 @@
 "use client";
 
-export const dynamic = "force-dynamic";
+// No export const dynamic here — this page is a pure client-side shell.
+// useEffect fetches /api/integrations/status at runtime; the HTML shell is
+// identical on every request so static prerendering (○) is correct.
+// Adding force-dynamic to a 'use client' page causes Vercel's packager to
+// expect a Lambda that doesn't exist (the page is prerendered as static).
 
 /**
  * app/settings/integrations/page.tsx
