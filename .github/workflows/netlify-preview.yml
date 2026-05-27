@@ -24,6 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Prime Corepack for pnpm cache
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
