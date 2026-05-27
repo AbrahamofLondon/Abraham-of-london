@@ -355,14 +355,13 @@ for (const p of debugRoutes) {
 // The authoritative fix is no page file — not a force-static declaration.
 
 const MUST_NOT_HAVE_PAGE_FILE = [
-  // REDIRECT_ONLY
+  // REDIRECT_ONLY — permanently retired, redirect only in next.config.mjs
   path.join("app", "dashboard", "live"),
-  path.join("app", "dashboard", "pdf-analytics"),
   path.join("app", "dashboard", "purpose-alignment"),
-  path.join("app", "pdf-dashboard"),
   path.join("app", "testing", "lab"),
-  // LEGACY_DISABLED
-  path.join("app", "downloads", "vault"),
+  // NOTE: pdf-analytics, pdf-dashboard, downloads/vault have been REBUILT
+  // as server-wrapper + client-component pages (C: REBUILD from rollback audit).
+  // They have legitimate page.tsx files and are NOT in this retired list.
 ];
 
 for (const rel of MUST_NOT_HAVE_PAGE_FILE) {
@@ -382,12 +381,14 @@ for (const rel of MUST_NOT_HAVE_PAGE_FILE) {
 // on Vercel. If any re-appears as a physical page file, fail immediately.
 
 const KNOWN_FAILED_LAMBDA_ROUTES = [
-  path.join("app", "dashboard", "pdf-analytics"),
+  // Routes that caused "Unable to find lambda" when they used 'use client'
+  // directly in page.tsx (without a server wrapper).
+  // pdf-analytics, pdf-dashboard, and downloads/vault have been REBUILT with
+  // the correct server-wrapper + client-component pattern and are no longer
+  // in this list. Their Lambda failures were pattern errors, not route errors.
   path.join("app", "dashboard", "purpose-alignment"),
   path.join("app", "dashboard", "live"),
-  path.join("app", "pdf-dashboard"),
   path.join("app", "testing", "lab"),
-  path.join("app", "downloads", "vault"),
 ];
 
 for (const rel of KNOWN_FAILED_LAMBDA_ROUTES) {
@@ -402,16 +403,25 @@ for (const rel of KNOWN_FAILED_LAMBDA_ROUTES) {
   }
 }
 
-// ─── Check 13: app/dashboard/** must have no page files at all ────────────────
-// All dashboard sub-routes are retired. Redirects are in next.config.mjs.
+// ─── Check 13: app/dashboard/** retired routes must have no page files ─────────
+// Most dashboard sub-routes are retired. Exceptions: routes that have been
+// rebuilt as server-wrapper + client-component pages (see rollback audit C:REBUILD).
+
+const DASHBOARD_REBUILT_ROUTES = new Set([
+  path.join(projectRoot, "app", "dashboard", "pdf-analytics", "page.tsx"),
+  path.join(projectRoot, "app", "dashboard", "pdf-analytics", "page.ts"),
+  path.join(projectRoot, "app", "dashboard", "pdf-analytics", "page.jsx"),
+  path.join(projectRoot, "app", "dashboard", "pdf-analytics", "page.js"),
+]);
 
 const dashboardAppDir = path.join(projectRoot, "app", "dashboard");
 if (fileExists(dashboardAppDir)) {
   const dashboardPageFiles = collectSourcePageFiles(dashboardAppDir);
   for (const pageFile of dashboardPageFiles) {
+    if (DASHBOARD_REBUILT_ROUTES.has(pageFile)) continue; // legitimately rebuilt
     fail(
-      `app/dashboard contains a page file: ${path.relative(projectRoot, pageFile)}` +
-        ` — all dashboard routes are retired; remove it and configure the redirect in next.config.mjs`,
+      `app/dashboard contains a retired page file: ${path.relative(projectRoot, pageFile)}` +
+        ` — retired dashboard routes must use next.config.mjs redirects(), not App Router page files`,
     );
   }
 }
