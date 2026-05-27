@@ -1,10 +1,13 @@
 "use client";
 
-// No export const dynamic here — this page is a pure client-side shell.
-// useEffect fetches /api/integrations/status at runtime; the HTML shell is
-// identical on every request so static prerendering (○) is correct.
-// Adding force-dynamic to a 'use client' page causes Vercel's packager to
-// expect a Lambda that doesn't exist (the page is prerendered as static).
+// No export const dynamic, no searchParams prop — this page is a pure client-side shell.
+// useSearchParams() reads URL params on the client; the HTML shell is identical on every
+// request so static prerendering (○) is correct and no Lambda is needed.
+//
+// IMPORTANT: The searchParams prop (Promise<...>) must NOT be used here. Even on a
+// 'use client' page, the searchParams prop causes Next.js to add the route to
+// prerender-manifest.json. @vercel/next then expects a Lambda for ISR revalidation
+// and fails with "Unable to find lambda for route". useSearchParams() avoids this entirely.
 
 /**
  * app/settings/integrations/page.tsx
@@ -25,10 +28,6 @@ interface IntegrationStatus {
   status: string;
   scopes: string;
   lastSyncAt: string | null;
-}
-
-interface PageProps {
-  searchParams: Promise<{ success?: string; error?: string }>;
 }
 
 // ─── Provider Display Config ──────────────────────────────────────────────────
@@ -52,36 +51,37 @@ const PROVIDER_CONFIG: Record<ProviderType, { label: string; description: string
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function IntegrationsSettingsPage({ searchParams }: PageProps) {
+export default function IntegrationsSettingsPage() {
   const [integrations, setIntegrations] = React.useState<IntegrationStatus[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Handle URL query params for OAuth callback results
+  // Handle URL query params for OAuth callback results.
+  // Read directly from window.location.search — no Next.js searchParams prop or useSearchParams()
+  // hook, so the prerender-manifest never gets an entry for this route.
   React.useEffect(() => {
-    async function handleParams() {
-      const params = await searchParams;
-      if (params.success === "google_calendar") {
-        setMessage({ type: "success", text: "Google Calendar connected successfully." });
-      } else if (params.success === "slack") {
-        setMessage({ type: "success", text: "Slack connected successfully." });
-      } else if (params.error) {
-        const errorMessages: Record<string, string> = {
-          access_denied: "You denied the authorization request.",
-          csrf_mismatch: "Security verification failed. Please try again.",
-          not_authenticated: "You must be signed in to connect integrations.",
-          token_exchange_failed: "Failed to exchange authorization code. Please try again.",
-          missing_authorization_code: "No authorization code received from provider.",
-          no_user_identifier: "Could not identify your user account.",
-        };
-        setMessage({
-          type: "error",
-          text: errorMessages[params.error] || `Connection failed: ${params.error}`,
-        });
-      }
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const error = params.get("error");
+    if (success === "google_calendar") {
+      setMessage({ type: "success", text: "Google Calendar connected successfully." });
+    } else if (success === "slack") {
+      setMessage({ type: "success", text: "Slack connected successfully." });
+    } else if (error) {
+      const errorMessages: Record<string, string> = {
+        access_denied: "You denied the authorization request.",
+        csrf_mismatch: "Security verification failed. Please try again.",
+        not_authenticated: "You must be signed in to connect integrations.",
+        token_exchange_failed: "Failed to exchange authorization code. Please try again.",
+        missing_authorization_code: "No authorization code received from provider.",
+        no_user_identifier: "Could not identify your user account.",
+      };
+      setMessage({
+        type: "error",
+        text: errorMessages[error] || `Connection failed: ${error}`,
+      });
     }
-    handleParams();
-  }, [searchParams]);
+  }, []);
 
   // Fetch current integration statuses
   React.useEffect(() => {
