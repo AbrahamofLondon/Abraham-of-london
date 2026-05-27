@@ -1,0 +1,111 @@
+name: Vercel Output Gate
+
+# ─── Purpose ─────────────────────────────────────────────────────────────────
+# Production-parity build gate running on ubuntu-latest (Linux).
+#
+# Why this exists:
+#   `npx vercel build` on Windows fails with EPERM when @vercel/next creates
+#   symlinks to deduplicate Lambda bundles.  Windows Developer Mode / Admin is
+#   required for local use.  This CI job provides the authoritative Linux gate:
+#   it runs the full Vercel adapter pipeline and then runs the output-integrity
+#   script to verify functions, sizes, and missing-lambda risks.
+#
+# Acceptance criteria:
+#   1. `npx vercel build` exits 0
+#   2. .vercel/output/config.json exists
+#   3. .vercel/output/functions/ exists and is non-empty
+#   4. `node scripts/check-vercel-output-integrity.mjs` exits 0
+#      — no oversized Lambda (>50 MB)
+#      — no missing-lambda risk routes
+#      — no known-failed routes re-introduced
+#
+# Required GitHub Actions secret:
+#   VERCEL_TOKEN  — Vercel personal access token
+#                   Settings → Secrets → Actions → New repository secret
+#                   Value: your token from vercel.com/account/tokens
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Non-sensitive — sourced from .vercel/project.json
+  VERCEL_ORG_ID: team_ASzB8I7KjfEnRBPXrtVnmRgn
+  VERCEL_PROJECT_ID: prj_ePGpB4iKgQguGSqHetUuJIX8yN16
+  # Increase Node heap to match production build command
+  NODE_OPTIONS: "--max-old-space-size=6144"
+
+jobs:
+  vercel-build-gate:
+    name: Vercel Build Gate (Linux)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      # Pull Vercel project env vars (.env.production.local) + output config.
+      # This provides all NEXT_PUBLIC_* and server-side env vars the build needs.
+      - name: Pull Vercel project settings
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Full Vercel adapter build: runs the project's buildCommand, then packages
+      # output into .vercel/output/{config.json,functions/,static/}.
+      # On Linux this succeeds where Windows fails (no EPERM on symlinks).
+      - name: Build — npx vercel build
+        run: npx vercel build --yes --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      # Hard gate: verify .vercel/output was actually written before running
+      # the integrity script. Fails fast with a clear message if the adapter
+      # produced no output (avoids misleading "all checks passed" on empty dir).
+      - name: Assert .vercel/output exists
+        run: |
+          if [ ! -d .vercel/output ]; then
+            echo "FATAL: .vercel/output directory missing after vercel build" >&2
+            exit 1
+          fi
+          if [ ! -f .vercel/output/config.json ]; then
+            echo "FATAL: .vercel/output/config.json missing — adapter did not complete" >&2
+            exit 1
+          fi
+          FUNC_COUNT=$(find .vercel/output/functions -name "*.func" -type d 2>/dev/null | wc -l)
+          echo ".vercel/output present — ${FUNC_COUNT} .func directories"
+          if [ "$FUNC_COUNT" -eq 0 ]; then
+            echo "FATAL: no .func directories found — no Lambdas were packaged" >&2
+            exit 1
+          fi
+
+      # Full output integrity gate: function sizes, missing-lambda detection,
+      # static/dynamic classification, known-failed route re-introduction check.
+      - name: Vercel output integrity gate
+        run: node scripts/check-vercel-output-integrity.mjs
