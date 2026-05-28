@@ -8,6 +8,13 @@ type ServiceStatus = {
   status: HealthStatus;
   latency?: number;
   message?: string;
+  /**
+   * true when the degradation is the result of a deliberate operator decision
+   * (e.g. REDIS_DISABLED=true, known runtime manifest gap) rather than an
+   * unexpected failure. Intentional degradation does not affect the HTTP status
+   * code — the endpoint still returns 200 so uptime monitors do not false-alarm.
+   */
+  intentional?: boolean;
 };
 
 type HealthResponse = {
@@ -97,17 +104,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const serviceStatuses = [apiStatus, dbStatus, redisStatus, contentlayerStatus];
 
-    const isDegraded = serviceStatuses.some(
-      s => s.status === 'fulfilled' && s.value.status === 'degraded'
-    );
+    // Policy:
+    //   required dependency down        → unhealthy → 503
+    //   optional dependency unexpectedly failing → degraded → 206
+    //   optional dependency intentionally disabled → still "degraded" in body, but
+    //     intentional: true means it does NOT count toward the HTTP status code.
+    //     The endpoint returns 200 so uptime monitors that expect 200 do not
+    //     false-alarm on known-disabled infrastructure.
     const isUnhealthy = serviceStatuses.some(
       s => s.status === 'rejected' || (s.status === 'fulfilled' && s.value.status === 'unhealthy')
     );
+    const isDegraded = serviceStatuses.some(
+      s =>
+        s.status === 'fulfilled' &&
+        s.value.status === 'degraded' &&
+        !s.value.intentional  // intentional degradations are visible in the body but invisible to HTTP status
+    );
 
-    const overallStatus: HealthStatus = isUnhealthy 
-      ? 'unhealthy' 
-      : isDegraded 
-        ? 'degraded' 
+    const overallStatus: HealthStatus = isUnhealthy
+      ? 'unhealthy'
+      : isDegraded
+        ? 'degraded'
         : 'healthy';
 
     const healthResponse: HealthResponse = {
@@ -216,6 +233,7 @@ async function checkRedisConnection(): Promise<ServiceStatus> {
       status: "degraded",
       message: "Redis intentionally disabled (REDIS_DISABLED=true)",
       latency: 0,
+      intentional: true,
     };
   }
 
@@ -244,8 +262,14 @@ async function checkContentlayerStatus(): Promise<ServiceStatus> {
     if (!allDocuments || allDocuments.length === 0) {
       return {
         status: 'degraded',
-        message: 'Contentlayer: No documents found in manifest',
+        // The .contentlayer/generated/ manifest is built at compile time and is
+        // NOT traced into Vercel serverless function bundles. All public content
+        // is pre-rendered as static HTML and served from the CDN — this check is
+        // a known runtime limitation, not an operational failure. Mark intentional
+        // so it does not drive the HTTP status to 206.
+        message: 'Contentlayer: manifest unavailable at serverless runtime (pre-rendered content unaffected)',
         latency: Date.now() - start,
+        intentional: true,
       };
     }
 
