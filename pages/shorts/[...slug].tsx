@@ -722,10 +722,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
       return { params: { slug: parts } };
     })
-    .filter(Boolean) as Array<{ params: { slug: string[] } }>)
-    // Cap prebuild to the 5 most recent shorts. Runtime slug resolution
-    // still works for older shorts via `fallback: "blocking"` below.
-    .slice(0, 5);
+    .filter(Boolean) as Array<{ params: { slug: string[] } }>);
+  // All published shorts are pre-built at build time. The .contentlayer/generated/
+  // JSON manifest is available during the Next.js build but is NOT traced into
+  // Vercel serverless function bundles at runtime. Omitting the slice cap means
+  // every valid short slug is pre-rendered to static HTML and served directly from
+  // the CDN — the fallback path is never triggered for known slugs. Unknown slugs
+  // still fall through to "blocking" and resolve to notFound: true.
 
   return {
     paths,

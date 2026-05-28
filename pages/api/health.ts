@@ -206,6 +206,19 @@ async function checkDatabaseConnection(): Promise<ServiceStatus> {
 
 async function checkRedisConnection(): Promise<ServiceStatus> {
   const start = Date.now();
+
+  // REDIS_DISABLED=true means Redis is intentionally not provisioned on this
+  // deployment. Report as "degraded" (known/expected state) rather than
+  // "unhealthy" (broken), so the overall health endpoint returns 206 instead
+  // of 503 and monitoring systems do not false-alarm.
+  if (process.env.REDIS_DISABLED === "true") {
+    return {
+      status: "degraded",
+      message: "Redis intentionally disabled (REDIS_DISABLED=true)",
+      latency: 0,
+    };
+  }
+
   try {
     const redis = await getRedis();
     if (!redis) return { status: 'degraded', message: 'Redis not configured', latency: Date.now() - start };
