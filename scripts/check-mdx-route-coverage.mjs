@@ -144,7 +144,21 @@ function checkCoverage() {
     });
   }
 
-  // ── Check 2: Draft documents should not appear in public routes ────────
+  // ── Check 2: Future-dated documents should not appear in public routes ──
+  for (const doc of docs) {
+    if (doc.isFutureDated && doc.expectedPublicRoute) {
+      failures.push({
+        type: "FUTURE_DATED_IN_PUBLIC_ROUTE",
+        routePath: doc.routePath,
+        slug: doc.slug,
+        collection: doc.collection,
+        title: doc.title,
+        detail: `Future-dated document (${doc.date}) is marked as expected public route — set draft: true or update date`,
+      });
+    }
+  }
+
+  // ── Check 3: Draft documents should not appear in public routes ────────
   for (const doc of docs) {
     if (doc.draft && doc.expectedPublicRoute) {
       failures.push({

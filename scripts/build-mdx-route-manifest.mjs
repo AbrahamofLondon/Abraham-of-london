@@ -88,12 +88,34 @@ function getAccessTier(doc) {
   return "restricted";
 }
 
+const TODAY = new Date("2026-05-28T23:59:59Z");
+
+function isFutureDated(doc) {
+  // Check date field — if it's in the future, content is scheduled, not public now
+  const dateStr = safeStr(doc.date || doc.eventDate || doc.startDate || doc.scheduledDate || doc.releaseDate);
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  return Number.isFinite(d.getTime()) && d > TODAY;
+}
+
 function isPublished(doc) {
   // Use publishedSafe if available (contentlayer computed), else manual check
-  if (doc.publishedSafe !== undefined) return doc.publishedSafe === true;
+  if (doc.publishedSafe !== undefined) {
+    // Even if publishedSafe is true, check if future-dated
+    if (doc.publishedSafe === true && isFutureDated(doc)) return false;
+    return doc.publishedSafe === true;
+  }
   const published = safeBool(doc.published, true);
   const draft = safeBool(doc.draft, false);
-  return published && !draft;
+  const result = published && !draft;
+  // Even if draft/published look good, check future date
+  if (result && isFutureDated(doc)) return false;
+  return result;
+}
+
+function isPublicNow(doc) {
+  // PUBLIC_NOW: not draft, published, not future-dated, public tier
+  return isPublished(doc) && getAccessTier(doc) === "public";
 }
 
 function getFlattenedPath(doc) {
@@ -202,13 +224,16 @@ function buildManifest() {
       }
 
       // Determine if this should be a public route
+      // PUBLIC_NOW: not draft, published, not future-dated, public tier
       let expectedPublicRoute = false;
       if (!isInternal && collection && isPub && tier === "public") {
         expectedPublicRoute = true;
       }
       if (!reasonIfNotPublic && !expectedPublicRoute) {
-        if (!isPub) reasonIfNotPublic = "Not published (draft or unpublished)";
-        else if (tier !== "public") reasonIfNotPublic = `Tier: ${tier}`;
+        if (!isPub) {
+          if (isFutureDated(doc)) reasonIfNotPublic = "Future-dated (scheduled, not public yet)";
+          else reasonIfNotPublic = "Not published (draft or unpublished)";
+        } else if (tier !== "public") reasonIfNotPublic = `Tier: ${tier}`;
         else if (!collection) reasonIfNotPublic = "No collection mapping";
       }
 
@@ -232,6 +257,8 @@ function buildManifest() {
         bodyCodeLength: getBodyCodeLength(doc),
         expectedPublicRoute,
         reasonIfNotPublic,
+        isFutureDated: isFutureDated(doc),
+        date: safeStr(doc.date || doc.eventDate || doc.startDate || ""),
         isInternal,
       };
 
