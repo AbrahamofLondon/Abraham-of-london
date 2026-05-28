@@ -71,19 +71,28 @@ function classifyDoc(doc) {
   if (!doc) return "UNKNOWN";
   const type = safeStr(doc.type || doc.docKind || "");
   if (["LinkedInOutbound", "FacebookOutbound", "XOutbound", "Dispatch"].includes(type)) return "INTERNAL";
+  // Check future date FIRST — future-dated content is SCHEDULED even if draft:true
+  if (isFutureDated(doc)) {
+    const routePath = safeStr(doc.routePath || doc.hrefSafe || doc.href || "");
+    if (AUTHORISED_OVERRIDES.has(routePath)) return "PUBLIC_READABLE_NOW";
+    return "SCHEDULED";
+  }
   if (safeBool(doc.draft, false)) return "DRAFT";
   if (safeBool(doc.published, true) === false) return "DRAFT";
   const status = safeStr(doc.status || doc.publicationStatus).toLowerCase();
   if (status === "draft") return "DRAFT";
   const tier = safeStr(doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || "public").toLowerCase();
   if (!["public", "open", "free", "unclassified"].includes(tier)) return "RESTRICTED";
-  if (isFutureDated(doc)) {
-    const routePath = safeStr(doc.routePath || doc.hrefSafe || doc.href || "");
-    if (AUTHORISED_OVERRIDES.has(routePath)) return "PUBLIC_NOW";
-    return "SCHEDULED";
-  }
   if (status === "scheduled" || status === "limited") return "SCHEDULED";
-  return "PUBLIC_NOW";
+  return "PUBLIC_READABLE_NOW";
+}
+
+function hasPreviewPermission(parts) {
+  for (const p of parts) {
+    const sv = safeStr(p.seriesVisibility || p.publicPreview || p.teaser || "").toLowerCase();
+    if (sv === "scheduled" || sv === "visible" || sv === "true" || sv === "teaser") return true;
+  }
+  return false;
 }
 
 function computeSeriesState(parts) {
@@ -91,17 +100,21 @@ function computeSeriesState(parts) {
   let firstPublic = null, nextScheduled = null;
   for (const p of parts) {
     const cls = classifyDoc(p);
-    if (cls === "PUBLIC_NOW") { publicNow++; const d = safeStr(p.date); if (d && (!firstPublic || d < firstPublic)) firstPublic = d; }
+    if (cls === "PUBLIC_READABLE_NOW") { publicNow++; const d = safeStr(p.date); if (d && (!firstPublic || d < firstPublic)) firstPublic = d; }
     else if (cls === "SCHEDULED") { scheduled++; const d = safeStr(p.date); if (d && (!nextScheduled || d < nextScheduled)) nextScheduled = d; }
     else if (cls === "DRAFT") draft++;
     else if (cls === "RESTRICTED") restricted++;
   }
+  const preview = hasPreviewPermission(parts);
   let visibility, label;
   if (publicNow === parts.length) { visibility = "COMPLETE"; label = "Complete"; }
   else if (publicNow > 0) { visibility = "IN_PROGRESS"; label = "In progress"; }
-  else if (scheduled > 0 && scheduled + restricted === parts.length) { visibility = "SCHEDULED"; label = "Scheduled"; }
-  else if (draft === parts.length) { visibility = "DRAFT"; label = "Draft"; }
-  else { visibility = "HIDDEN"; label = "Hidden"; }
+  else if (scheduled > 0 && scheduled + restricted === parts.length) {
+    if (preview) { visibility = "SCHEDULED_VISIBLE"; label = "Scheduled"; }
+    else { visibility = "SCHEDULED_HIDDEN"; label = "Scheduled (hidden)"; }
+  }
+  else if (draft === parts.length) { visibility = "DRAFT_INTERNAL"; label = "Draft"; }
+  else { visibility = "MIXED_REVIEW"; label = "Review needed"; }
   return { totalParts: parts.length, publicNow, scheduled, draft, restricted, firstPublic, nextScheduled, visibility, label };
 }
 
@@ -154,25 +167,41 @@ function checkPublicationEligibility() {
     espBySeries[slug].push(doc);
   }
 
-  console.log("\n--- EDITORIAL SERIES ---");
-  for (const [slug, parts] of Object.entries(espBySeries)) {
+  function displaySeries(parts, slug) {
     parts.sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
     const state = computeSeriesState(parts);
     const title = parts[0].seriesTitle || parts[0].series || slug;
-    const isPublic = state.publicNow > 0;
-    console.log(`  ${isPublic ? "✅" : "⏳"} ${title} (${slug})`);
+    const isPublic = state.visibility === "COMPLETE" || state.visibility === "IN_PROGRESS" || state.visibility === "SCHEDULED_VISIBLE";
+    const icon = state.visibility === "COMPLETE" ? "✅" :
+                 state.visibility === "IN_PROGRESS" ? "📝" :
+                 state.visibility === "SCHEDULED_VISIBLE" ? "📅" : "⏳";
+    console.log(`  ${icon} ${title} (${slug})`);
     console.log(`     Parts: ${state.totalParts} | Public: ${state.publicNow} | Scheduled: ${state.scheduled} | Draft: ${state.draft}`);
-    console.log(`     Status: ${state.label} | Publicly visible: ${isPublic ? "YES" : "NO"}`);
+    console.log(`     Status: ${state.label} (${state.visibility}) | Publicly visible: ${isPublic ? "YES" : "NO"}`);
+    if (state.nextScheduled) console.log(`     Next: ${state.nextScheduled}`);
 
-    // Fail if series has 0 public parts but appears as public
-    if (state.publicNow === 0 && isPublic) {
+    // Fail if series has 0 public parts but is SCHEDULED_HIDDEN and visible
+    if (state.publicNow === 0 && state.visibility === "SCHEDULED_HIDDEN" && isPublic) {
       failures.push({
         type: "SERIES_ZERO_PUBLIC_PARTS_VISIBLE",
-        series: slug,
-        title,
-        detail: `Series "${title}" has 0 public parts but is publicly visible`,
+        series: slug, title,
+        detail: `Series "${title}" has 0 public parts but is publicly visible without preview permission`,
       });
     }
+    // Fail if scheduled-visible series is labelled COMPLETE
+    if (state.visibility === "SCHEDULED_VISIBLE" && state.label === "Complete") {
+      failures.push({
+        type: "SCHEDULED_SERIES_LABELLED_COMPLETE",
+        series: slug, title,
+        detail: `Series "${title}" is scheduled-visible but labelled Complete`,
+      });
+    }
+    return state;
+  }
+
+  console.log("\n--- EDITORIAL SERIES ---");
+  for (const [slug, parts] of Object.entries(espBySeries)) {
+    displaySeries(parts, slug);
   }
 
   // Audit blog series
@@ -187,22 +216,7 @@ function checkPublicationEligibility() {
 
   console.log("\n--- BLOG SERIES ---");
   for (const [slug, parts] of Object.entries(blogBySeries)) {
-    parts.sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
-    const state = computeSeriesState(parts);
-    const title = parts[0].seriesTitle || parts[0].series || slug;
-    const isPublic = state.publicNow > 0;
-    console.log(`  ${isPublic ? "✅" : "⏳"} ${title} (${slug})`);
-    console.log(`     Parts: ${state.totalParts} | Public: ${state.publicNow} | Scheduled: ${state.scheduled} | Draft: ${state.draft}`);
-    console.log(`     Status: ${state.label} | Publicly visible: ${isPublic ? "YES" : "NO"}`);
-
-    if (state.publicNow === 0 && isPublic) {
-      failures.push({
-        type: "SERIES_ZERO_PUBLIC_PARTS_VISIBLE",
-        series: slug,
-        title,
-        detail: `Series "${title}" has 0 public parts but is publicly visible`,
-      });
-    }
+    displaySeries(parts, slug);
   }
 
   // ── Report ─────────────────────────────────────────────────────────────

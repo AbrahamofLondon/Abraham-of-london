@@ -4,14 +4,12 @@
  * Shared publication classifier for all MDX content.
  *
  * Single source of truth for determining whether a document or series
- * is PUBLIC_NOW, SCHEDULED, DRAFT, RESTRICTED, or INTERNAL.
+ * is PUBLIC_READABLE_NOW, SCHEDULED_VISIBLE, SCHEDULED_HIDDEN, DRAFT, etc.
  *
- * All MDX route/audit scripts and series resolvers must use this classifier
- * or mirror it through a testable shared implementation.
+ * All MDX route/audit scripts and series resolvers must use this classifier.
  */
 
 // ─── Today's date for publication eligibility ────────────────────────────────
-// Use system date in production; override for testing.
 export function getToday(): Date {
   if (process.env.MDX_PUBLICATION_TODAY) {
     const override = new Date(process.env.MDX_PUBLICATION_TODAY);
@@ -22,21 +20,23 @@ export function getToday(): Date {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/** Classification for a single document */
 export type PublicationClass =
-  | "PUBLIC_NOW"    // Published, not draft, not future-dated, public tier
-  | "SCHEDULED"     // Future-dated or publicationStatus=scheduled
-  | "DRAFT"         // draft=true or status=draft
-  | "RESTRICTED"    // Non-public tier (member, verified, restricted)
-  | "INTERNAL"      // Internal document type (outbound, dispatch)
-  | "UNKNOWN";      // Cannot determine
+  | "PUBLIC_READABLE_NOW"  // Published, not draft, not future-dated, public tier
+  | "SCHEDULED"            // Future-dated or publicationStatus=scheduled
+  | "DRAFT"                // draft=true or status=draft
+  | "RESTRICTED"           // Non-public tier (member, verified, restricted)
+  | "INTERNAL"             // Internal document type (outbound, dispatch)
+  | "UNKNOWN";             // Cannot determine
 
+/** Classification for a series */
 export type SeriesPublicationState =
-  | "HIDDEN"        // Zero PUBLIC_NOW parts, no approved teaser
-  | "SCHEDULED"     // All parts future-dated/scheduled
-  | "IN_PROGRESS"   // Some PUBLIC_NOW parts, some not public yet
-  | "COMPLETE"      // All intended parts PUBLIC_NOW
-  | "DRAFT"         // All parts draft
-  | "MIXED_REVIEW"; // Inconsistent metadata requiring manual review
+  | "COMPLETE"             // All intended parts are PUBLIC_READABLE_NOW
+  | "IN_PROGRESS"          // Some parts PUBLIC_READABLE_NOW, some not
+  | "SCHEDULED_VISIBLE"    // Zero readable parts, future parts exist, explicit preview permission
+  | "SCHEDULED_HIDDEN"     // Zero readable parts, future parts exist, no preview permission
+  | "DRAFT_INTERNAL"       // All draft/internal
+  | "MIXED_REVIEW";        // Contradictory metadata
 
 export interface SeriesPublicationInfo {
   totalParts: number;
@@ -51,7 +51,6 @@ export interface SeriesPublicationInfo {
 }
 
 // ─── Authorised overrides ────────────────────────────────────────────────────
-// Documents that are intentionally public despite future dates
 const AUTHORISED_OVERRIDES = new Set<string>([]);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -77,13 +76,19 @@ function parseDate(value: unknown): Date | null {
   return Number.isFinite(d.getTime()) ? d : null;
 }
 
+/**
+ * Check if a document has explicit public preview/scheduled-visible permission.
+ * Uses frontmatter field: seriesVisibility, publicPreview, or teaser.
+ */
+function hasPublicPreviewPermission(doc: any): boolean {
+  const sv = safeStr(doc.seriesVisibility || doc.publicPreview || doc.teaser || "").toLowerCase();
+  return sv === "scheduled" || sv === "visible" || sv === "true" || sv === "teaser";
+}
+
 // ─── Main classifier ─────────────────────────────────────────────────────────
 
 /**
  * Classify a single document's publication state.
- *
- * Inputs: draft, status, publicationStatus, published, date, accessLevel, tier
- * Returns one of: PUBLIC_NOW, SCHEDULED, DRAFT, RESTRICTED, INTERNAL, UNKNOWN
  */
 export function classifyPublication(
   doc: any,
@@ -97,12 +102,25 @@ export function classifyPublication(
     return "INTERNAL";
   }
 
+  // Check future date FIRST — future-dated content is SCHEDULED even if draft:true
+  // (draft:true on future content is a safety mechanism, not the primary classification)
+  const dateStr = safeStr(doc.date || doc.eventDate || doc.startDate || doc.scheduledDate || doc.releaseDate);
+  if (dateStr) {
+    const d = parseDate(dateStr);
+    if (d && d > now) {
+      const routePath = safeStr(doc.routePath || doc.hrefSafe || doc.href || "");
+      if (AUTHORISED_OVERRIDES.has(routePath)) {
+        return "PUBLIC_READABLE_NOW";
+      }
+      return "SCHEDULED";
+    }
+  }
+
   // Check explicit draft/published fields
   const draft = safeBool(doc.draft, false);
   const published = safeBool(doc.published, true);
   const status = (safeStr(doc.status || doc.publicationStatus)).toLowerCase();
 
-  // Explicit draft markers
   if (draft) return "DRAFT";
   if (published === false) return "DRAFT";
   if (status === "draft") return "DRAFT";
@@ -113,37 +131,15 @@ export function classifyPublication(
     return "RESTRICTED";
   }
 
-  // Check future date
-  const dateStr = safeStr(doc.date || doc.eventDate || doc.startDate || doc.scheduledDate || doc.releaseDate);
-  if (dateStr) {
-    const d = parseDate(dateStr);
-    if (d && d > now) {
-      // Check for authorised override
-      const routePath = safeStr(doc.routePath || doc.hrefSafe || doc.href || "");
-      if (AUTHORISED_OVERRIDES.has(routePath)) {
-        return "PUBLIC_NOW";
-      }
-      return "SCHEDULED";
-    }
-  }
-
-  // Check status field for scheduled
   if (status === "scheduled" || status === "limited") return "SCHEDULED";
 
-  // Default: public now
-  return "PUBLIC_NOW";
+  return "PUBLIC_READABLE_NOW";
 }
 
-/**
- * Check if a document is public now (convenience wrapper).
- */
 export function isPublicNow(doc: any, now: Date = getToday()): boolean {
-  return classifyPublication(doc, now) === "PUBLIC_NOW";
+  return classifyPublication(doc, now) === "PUBLIC_READABLE_NOW";
 }
 
-/**
- * Check if a document is scheduled (future-dated but not draft).
- */
 export function isScheduled(doc: any, now: Date = getToday()): boolean {
   return classifyPublication(doc, now) === "SCHEDULED";
 }
@@ -153,9 +149,13 @@ export function isScheduled(doc: any, now: Date = getToday()): boolean {
 /**
  * Compute series publication state from its parts.
  *
- * @param parts - Array of document objects that belong to the series
- * @param now - Reference date (defaults to today)
- * @returns SeriesPublicationInfo with computed state and labels
+ * Rules:
+ *   COMPLETE:          all intended parts are PUBLIC_READABLE_NOW
+ *   IN_PROGRESS:       some parts PUBLIC_READABLE_NOW, some not
+ *   SCHEDULED_VISIBLE: zero readable parts, future parts exist, explicit preview permission
+ *   SCHEDULED_HIDDEN:  zero readable parts, future parts exist, no preview permission
+ *   DRAFT_INTERNAL:    all draft
+ *   MIXED_REVIEW:      contradictory metadata
  */
 export function computeSeriesPublicationState(
   parts: any[],
@@ -163,29 +163,20 @@ export function computeSeriesPublicationState(
 ): SeriesPublicationInfo {
   if (!parts || parts.length === 0) {
     return {
-      totalParts: 0,
-      publicNowParts: 0,
-      scheduledParts: 0,
-      draftParts: 0,
-      restrictedParts: 0,
-      firstPublicDate: null,
-      nextScheduledDate: null,
-      seriesVisibility: "HIDDEN",
-      seriesStatusLabel: "Hidden",
+      totalParts: 0, publicNowParts: 0, scheduledParts: 0, draftParts: 0, restrictedParts: 0,
+      firstPublicDate: null, nextScheduledDate: null,
+      seriesVisibility: "DRAFT_INTERNAL", seriesStatusLabel: "Draft",
     };
   }
 
-  let publicNowCount = 0;
-  let scheduledCount = 0;
-  let draftCount = 0;
-  let restrictedCount = 0;
-  let firstPublicDate: string | null = null;
-  let nextScheduledDate: string | null = null;
+  let publicNowCount = 0, scheduledCount = 0, draftCount = 0, restrictedCount = 0;
+  let firstPublicDate: string | null = null, nextScheduledDate: string | null = null;
+  let hasPreviewPermission = false;
 
   for (const part of parts) {
     const classification = classifyPublication(part, now);
     switch (classification) {
-      case "PUBLIC_NOW":
+      case "PUBLIC_READABLE_NOW":
         publicNowCount++;
         const pd = safeStr(part.date || part.eventDate || part.startDate);
         if (pd && (!firstPublicDate || pd < firstPublicDate)) firstPublicDate = pd;
@@ -202,9 +193,14 @@ export function computeSeriesPublicationState(
         restrictedCount++;
         break;
     }
+    // Check if any part has preview permission
+    if (hasPublicPreviewPermission(part)) hasPreviewPermission = true;
   }
 
-  // Compute series visibility
+  // Also check the first part for series-level visibility field
+  const firstDoc = parts[0];
+  if (firstDoc && hasPublicPreviewPermission(firstDoc)) hasPreviewPermission = true;
+
   let seriesVisibility: SeriesPublicationState;
   let seriesStatusLabel: string;
 
@@ -215,14 +211,16 @@ export function computeSeriesPublicationState(
     seriesVisibility = "IN_PROGRESS";
     seriesStatusLabel = "In progress";
   } else if (scheduledCount > 0 && scheduledCount + restrictedCount === parts.length) {
-    seriesVisibility = "SCHEDULED";
-    seriesStatusLabel = "Scheduled";
+    if (hasPreviewPermission) {
+      seriesVisibility = "SCHEDULED_VISIBLE";
+      seriesStatusLabel = "Scheduled";
+    } else {
+      seriesVisibility = "SCHEDULED_HIDDEN";
+      seriesStatusLabel = "Scheduled";
+    }
   } else if (draftCount === parts.length) {
-    seriesVisibility = "DRAFT";
+    seriesVisibility = "DRAFT_INTERNAL";
     seriesStatusLabel = "Draft";
-  } else if (publicNowCount === 0 && scheduledCount === 0 && draftCount === 0 && restrictedCount === 0) {
-    seriesVisibility = "HIDDEN";
-    seriesStatusLabel = "Hidden";
   } else {
     seriesVisibility = "MIXED_REVIEW";
     seriesStatusLabel = "Review needed";
@@ -243,9 +241,17 @@ export function computeSeriesPublicationState(
 
 /**
  * Check if a series should be publicly visible.
- * A series is public only if at least one part is PUBLIC_NOW,
- * unless it has an explicitly approved public teaser/index mode.
+ * Visible if: COMPLETE, IN_PROGRESS, or SCHEDULED_VISIBLE.
  */
 export function isSeriesPublic(seriesInfo: SeriesPublicationInfo): boolean {
+  return seriesInfo.seriesVisibility === "COMPLETE" ||
+         seriesInfo.seriesVisibility === "IN_PROGRESS" ||
+         seriesInfo.seriesVisibility === "SCHEDULED_VISIBLE";
+}
+
+/**
+ * Check if a series part should be publicly readable.
+ */
+export function isSeriesPartReadable(seriesInfo: SeriesPublicationInfo): boolean {
   return seriesInfo.publicNowParts > 0;
 }

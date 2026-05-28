@@ -89,7 +89,7 @@ function docToSeriesPart(doc: any, now: Date = getToday()): SeriesPart {
     title: doc.title ?? doc.titleSafe ?? "Untitled",
     excerpt: doc.excerpt ?? doc.excerptSafe ?? doc.description ?? "",
     readTime: doc.readTime ?? doc.readTimeSafe ?? "",
-    status: classification === "PUBLIC_NOW" ? "PUBLISHED" : "DRAFT",
+    status: classification === "PUBLIC_READABLE_NOW" ? "PUBLISHED" : "DRAFT",
     mdxSlug: doc.slug ?? doc.slugSafe ?? undefined,
   };
 }
@@ -170,8 +170,16 @@ export function resolveAllSeries(
 
     const publishedPartCount = publishedParts.length;
 
-    // If no published parts, skip public exposure (unless approved teaser)
-    if (publishedPartCount === 0) continue;
+    // Visibility rules:
+    // - Skip if DRAFT_INTERNAL (all draft, no preview permission)
+    // - Skip if SCHEDULED_HIDDEN (future-dated, no preview permission)
+    // - Skip if MIXED_REVIEW (inconsistent)
+    // - Allow if COMPLETE, IN_PROGRESS, or SCHEDULED_VISIBLE
+    if (seriesPubState.seriesVisibility === "DRAFT_INTERNAL" ||
+        seriesPubState.seriesVisibility === "SCHEDULED_HIDDEN" ||
+        seriesPubState.seriesVisibility === "MIXED_REVIEW") {
+      continue;
+    }
 
     // Map computed state to resolver status
     let seriesStatus: SeriesPartStatus;
@@ -182,9 +190,9 @@ export function resolveAllSeries(
       case "IN_PROGRESS":
         seriesStatus = "DRAFT";
         break;
-      case "SCHEDULED":
-      case "DRAFT":
-      case "HIDDEN":
+      case "SCHEDULED_VISIBLE":
+        seriesStatus = "DRAFT"; // Not published yet, but visible as scheduled
+        break;
       default:
         seriesStatus = "DRAFT";
         break;
