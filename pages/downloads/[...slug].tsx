@@ -12,7 +12,7 @@ import {
   type DownloadManifestEntry,
 } from "@/lib/downloads/download-manifest";
 import { getProductByEntitlementSlug } from "@/lib/commercial/catalog";
-import { getDownloadBySlug } from "@/lib/server/downloads-data";
+import { getDownloadBySlug } from "@/lib/content/server";
 
 const GOLD = "#C9A96E";
 
