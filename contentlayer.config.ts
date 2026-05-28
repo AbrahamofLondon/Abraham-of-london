@@ -414,6 +414,7 @@ const Post = defineDocumentType(() => ({
     seriesOrder: { type: "number", required: false },
     seriesTitle: { type: "string", required: false },
     seriesDescription: { type: "string", required: false },
+    seriesVisibility: { type: "string", required: false },
   },
   computedFields: createComputedFields("blog/", "blog"),
 }));
