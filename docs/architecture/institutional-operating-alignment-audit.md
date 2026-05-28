@@ -14,7 +14,7 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - Total product surfaces audited: 236
 - Total Foundry engines/adapters audited: 116
 - Total outbound flows audited: 100
-- Total governance events referenced: 16
+- Total governance events referenced: 78
 - Registry route references scanned: 141
 
 ## RED findings
@@ -93,13 +93,13 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [RED] FOUNDRY_PAGE_NO_ENGINE: /admin/intelligence-foundry/outbound exists but no engine/adapter linkage is visible (/admin/intelligence-foundry/outbound) - app/admin/intelligence-foundry/outbound/page.tsx
 - [RED] FOUNDRY_PAGE_NO_ENGINE: /admin/intelligence-foundry/red-team/security exists but no engine/adapter linkage is visible (/admin/intelligence-foundry/red-team/security) - app/admin/intelligence-foundry/red-team/security/page.tsx
 - [RED] FOUNDRY_PAGE_NO_ENGINE: /admin/intelligence-foundry/reference exists but no engine/adapter linkage is visible (/admin/intelligence-foundry/reference) - app/admin/intelligence-foundry/reference/page.tsx
-- [RED] EVENT_EMITTED_NOT_REGISTERED: TRANSACTIONAL is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: ENTERPRISE is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: SYSTEM is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: ARTIFACT is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: EXECUTIVE_REPORT is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: DIAGNOSTIC_RUN is emitted/referenced but not registered in governance event types
-- ... 37 additional finding(s) in JSON reports.
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/boardroom-delivery/page.tsx links to missing route /boardroom/dossier/${d.id}?email=${d.clientEmail ??  (/boardroom/dossier/${d.id}?email=${d.clientEmail ?? ) - app/admin/boardroom-delivery/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/[id]/report/page.tsx links to missing route /admin/campaigns/${id} (/admin/campaigns/${id}) - app/admin/campaigns/[id]/report/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/[id]/enterprise-report/page.tsx links to missing route /admin/campaigns/${metadata.campaignId} (/admin/campaigns/${metadata.campaignId}) - app/admin/campaigns/[id]/enterprise-report/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/page.tsx links to missing route /admin/organisations/${campaign.organisationId} (/admin/organisations/${campaign.organisationId}) - app/admin/campaigns/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/reports/page.tsx links to missing route /admin/campaigns/${campaign.id}/report (/admin/campaigns/${campaign.id}/report) - app/admin/reports/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/[id]/page.tsx links to missing route /admin/campaigns/${campaign.id}/enterprise-report (/admin/campaigns/${campaign.id}/enterprise-report) - app/admin/campaigns/[id]/page.tsx
+- ... 21 additional finding(s) in JSON reports.
 
 ## AMBER findings
 

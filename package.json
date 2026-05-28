@@ -147,6 +147,7 @@
     "check:system": "tsx scripts/system/check-system.ts",
     "check:security": "pnpm exec audit-ci --config .auditci.json",
     "check:content-boundary": "node scripts/check-content-boundary.mjs",
+    "check:governance-events": "node scripts/check-governance-event-durability.mjs",
     "check:deps": "npm-check --skip-unused",
     "security:audit": "pnpm audit --prod",
     "security:grep": "node scripts/security/audit-public-ip-exposure.mjs",

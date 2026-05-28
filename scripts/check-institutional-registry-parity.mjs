@@ -216,9 +216,13 @@ function inferRecord(file, route, source) {
 
 function extractGovernanceEvents(source) {
   const events = new Set();
+  // Only match governance-bus-specific eventType fields and explicit governance calls.
+  // The broad `type:` pattern was removed — it matched TypeScript discriminated union
+  // members (e.g. type: "TRANSACTIONAL", type: "EXECUTIVE_REPORT") that are not
+  // governance events, generating 16 false-positive RED findings.
   const patterns = [
-    /governanceEvent(?:Type)?:\s*["'`]([A-Z0-9_:-]+)["'`]/g,
-    /type:\s*["'`]([A-Z][A-Z0-9_:-]{3,})["'`]/g,
+    /eventType:\s*["'`]([A-Z0-9_:-]+)["'`]/g,
+    /governanceEventType:\s*["'`]([A-Z0-9_:-]+)["'`]/g,
     /recordGovernanceEvent\s*\([^)]*["'`]([A-Z0-9_:-]+)["'`]/g,
     /emit(?:Governance)?Event\s*\([^)]*["'`]([A-Z0-9_:-]+)["'`]/g,
   ];
@@ -422,7 +426,25 @@ function auditGovernance(inventory, registries) {
   const findings = [];
   const allSource = inventory.map((s) => read(s.file)).join("\n");
   const emitted = new Set();
-  for (const s of inventory) extractGovernanceEvents(read(s.file)).forEach((e) => emitted.add(e));
+
+  // Only extract governance events from files that actually call the governance bus
+  // (routeGovernanceEvent / emitGovernanceEvent). Files that use eventType: for
+  // domain-specific logging (outbound audit helpers, boardroom delivery logs) are
+  // not governance bus callers and must not contribute to the emitted set.
+  const GOVERNANCE_BUS_CALLERS = /routeGovernanceEvent|emitGovernanceEvent|governance-event-bus/;
+  const GOVERNANCE_INFRA = new Set([
+    "lib/platform/governance-event-types.ts",
+    "lib/platform/governance-event-bus.ts",
+    "lib/platform/product-event-contract.ts",
+    "lib/research/lineage/lineage-chain-definitions.ts",
+  ]);
+  for (const s of inventory) {
+    if (GOVERNANCE_INFRA.has(s.file)) continue;
+    const src = read(s.file);
+    if (!GOVERNANCE_BUS_CALLERS.test(src)) continue;
+    extractGovernanceEvents(src).forEach((e) => emitted.add(e));
+  }
+
   for (const event of emitted) {
     if (!registries.eventTypes.includes(event)) addFinding(findings, "RED", "EVENT_EMITTED_NOT_REGISTERED", `${event} is emitted/referenced but not registered in governance event types`, { event });
   }
@@ -559,7 +581,11 @@ function auditStatusTruth(inventory) {
     // "INTERNAL_PREVIEW" as a delivery method — neither is an outbound publication claim
     const isAdminWorkflowPage = /oversight-review|editorials\/index|sample-export|internal\/oversight/.test(s.file);
     const isTestFile = /\.test\.|\.spec\.|__tests__|\/tests\//.test(s.file);
-    const isInfraFile = isOutboundInfra || isFoundryInfra || isBoardroomOrPortal || isAdminWorkflowPage || isTestFile;
+    // Platform registry/type files legitimately contain event names (e.g. OUTBOUND_POST_PUBLISHED,
+    // BOARDROOM_DOSSIER_DELIVERED) alongside simulation-classification type values — they are
+    // vocabulary definitions, not product surfaces claiming a publication state.
+    const isPlatformRegistry = /lib\/platform\/governance-event-types|lib\/platform\/governance-event-bus|lib\/platform\/product-event-contract/.test(s.file);
+    const isInfraFile = isOutboundInfra || isFoundryInfra || isBoardroomOrPortal || isAdminWorkflowPage || isTestFile || isPlatformRegistry;
 
     const simulation = /simulation|fixture|mock|dry.?run|sample|preview/i.test(src);
     const proof = /evidence|audit|governance|provider|credential|webhook|route-integrity|verified|durable|record/i.test(src);
