@@ -1,0 +1,622 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Abraham of London//Content Release Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Content Release Schedule
+X-WR-TIMEZONE:UTC
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260529
+DTEND;VALUE=DATE:20260530
+SUMMARY:📝 Release: When the Burden Changes Address (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-burden-changes-address.mdx
+RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20260529
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260531
+DTEND;VALUE=DATE:20260601
+SUMMARY:📝 Release: The Child Before the Story (Science of Inherited Selves Pt 2)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/the-child-before-the-story.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260601
+DTEND;VALUE=DATE:20260602
+SUMMARY:📝 Release: Leadership Begins at Home (blog)
+DESCRIPTION:Set draft: false on content/blog/leadership-begins-at-home.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260601
+DTEND;VALUE=DATE:20260602
+SUMMARY:📝 Release: When the Archive Keeps Talking (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-archive-keeps-talking.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260603
+DTEND;VALUE=DATE:20260604
+SUMMARY:📝 Release: Love, Loss, and the Familiar Wound (Science of Inherited Selves Pt 3)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/love-loss-and-the-familiar-wound.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260604
+DTEND;VALUE=DATE:20260605
+SUMMARY:📝 Release: When Old Records Still Rule You (short)
+DESCRIPTION:Set draft: false on content/shorts/when-old-records-still-rule-you.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260606
+DTEND;VALUE=DATE:20260607
+SUMMARY:📝 Release: Choose the Ancestral Landscape (Science of Inherited Selves Pt 4)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260607
+DTEND;VALUE=DATE:20260608
+SUMMARY:📝 Release: The House That Teaches the Nervous System (Science of Inherited Selves Pt 5)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/the-house-that-teaches-the-nervous-system.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260607
+DTEND;VALUE=DATE:20260608
+SUMMARY:📝 Release: When the Past Becomes Management (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-past-becomes-management.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260610
+DTEND;VALUE=DATE:20260611
+SUMMARY:📝 Release: When the Record Is Not the Truth (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-record-is-not-the-truth.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260613
+DTEND;VALUE=DATE:20260614
+SUMMARY:📝 Release: When Data Needs Judgement (short)
+DESCRIPTION:Set draft: false on content/shorts/when-data-needs-judgement.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260614
+DTEND;VALUE=DATE:20260615
+SUMMARY:📝 Release: What Silence Gives to the Next Generation (Science of Inherited Selves Pt 6)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/what-silence-gives-to-the-next-generation.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260616
+DTEND;VALUE=DATE:20260617
+SUMMARY:📝 Release: When the Dashboard Lies Politely (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-dashboard-lies-politely.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260619
+DTEND;VALUE=DATE:20260620
+SUMMARY:📝 Release: When Custody Becomes Power (short)
+DESCRIPTION:Set draft: false on content/shorts/when-custody-becomes-power.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260621
+DTEND;VALUE=DATE:20260622
+SUMMARY:📝 Release: When Biology Becomes Biography (Science of Inherited Selves Pt 7)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/when-biology-becomes-biography.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260622
+DTEND;VALUE=DATE:20260623
+SUMMARY:📝 Release: When Classification Decides Reality (short)
+DESCRIPTION:Set draft: false on content/shorts/when-classification-decides-reality.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260625
+DTEND;VALUE=DATE:20260626
+SUMMARY:📝 Release: When It Holds the System but Not the Responsibility (short)
+DESCRIPTION:Set draft: false on content/shorts/when-it-holds-the-system-but-not-the-responsibility.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260628
+DTEND;VALUE=DATE:20260629
+SUMMARY:📝 Release: The Generation That Refuses to Pass It On (Science of Inherited Selves Pt 8)
+DESCRIPTION:Set draft: false on content/blog/series/the-science-of-inherited-selves/the-generation-that-refuses-to-pass-it-on.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release blog post tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260628
+DTEND;VALUE=DATE:20260629
+SUMMARY:📝 Release: When Speed Starts Thinking for You (short)
+DESCRIPTION:Set draft: false on content/shorts/when-speed-starts-thinking-for-you.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260701
+DTEND;VALUE=DATE:20260702
+SUMMARY:📝 Release: When a Decision Needs Friction (short)
+DESCRIPTION:Set draft: false on content/shorts/when-a-decision-needs-friction.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260704
+DTEND;VALUE=DATE:20260705
+SUMMARY:📝 Release: When Slow Thought Saves You (short)
+DESCRIPTION:Set draft: false on content/shorts/when-slow-thought-saves-you.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260707
+DTEND;VALUE=DATE:20260708
+SUMMARY:📝 RELEASE: The Truth in the Frame — Part 1: Before the Word
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/before-the-word-what-the-cave-walls-remember.mdx\n\nFirst release of The Truth in the Frame series!
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 1 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260707
+DTEND;VALUE=DATE:20260708
+SUMMARY:📝 Release: When AI Writes and Nobody Owns It (short)
+DESCRIPTION:Set draft: false on content/shorts/when-ai-writes-and-nobody-owns-it.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260710
+DTEND;VALUE=DATE:20260711
+SUMMARY:📝 Release: When Prompting Is Not Authorship (short)
+DESCRIPTION:Set draft: false on content/shorts/when-prompting-is-not-authorship.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260713
+DTEND;VALUE=DATE:20260714
+SUMMARY:📝 Release: When the Author Leaves the Room (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-author-leaves-the-room.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260714
+DTEND;VALUE=DATE:20260715
+SUMMARY:📝 Release: The Truth in the Frame — Part 2: The King's Shadow
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-kings-shadow.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 2 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260716
+DTEND;VALUE=DATE:20260717
+SUMMARY:📝 Release: When the Archive Needs a Living Mind (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-archive-needs-a-living-mind.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260719
+DTEND;VALUE=DATE:20260720
+SUMMARY:📝 Release: When Memory Outlives Meaning (short)
+DESCRIPTION:Set draft: false on content/shorts/when-memory-outlives-meaning.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260721
+DTEND;VALUE=DATE:20260722
+SUMMARY:📝 Release: The Truth in the Frame — Part 3: The Emperor's Canvas
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-emperors-canvas.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 3 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260722
+DTEND;VALUE=DATE:20260723
+SUMMARY:📝 Release: When the Burden Never Disappears (short)
+DESCRIPTION:Set draft: false on content/shorts/when-the-burden-never-disappears.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release short tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260728
+DTEND;VALUE=DATE:20260729
+SUMMARY:📝 Release: The Truth in the Frame — Part 4: The Empire in the Frame
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-empire-in-the-frame.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 4 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260804
+DTEND;VALUE=DATE:20260805
+SUMMARY:📝 Release: The Truth in the Frame — Part 5: The Grain Is Abundant
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-grain-is-abundant.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 5 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260811
+DTEND;VALUE=DATE:20260812
+SUMMARY:📝 Release: The Truth in the Frame — Part 6: The Camera Never Lies
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-camera-never-lies.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 6 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260818
+DTEND;VALUE=DATE:20260819
+SUMMARY:📝 Release: The Truth in the Frame — Part 7: The Algorithm's Gallery
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-algorithms-gallery.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 7 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260825
+DTEND;VALUE=DATE:20260826
+SUMMARY:📝 Release: The Truth in the Frame — Part 8: The Synthetic Truth
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/the-synthetic-truth.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame Part 8 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260901
+DTEND;VALUE=DATE:20260902
+SUMMARY:📝 Release: The Truth in the Frame — Part 9: What Deserves to Survive (FINAL)
+DESCRIPTION:Set draft: false on content/blog/series/the-truth-in-the-frame/what-deserves-to-survive.mdx\n\nFinal part! Series becomes COMPLETE.
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Truth in the Frame FINAL PART tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260912
+DTEND;VALUE=DATE:20260913
+SUMMARY:📝 Release: Leadership Workshop (event)
+DESCRIPTION:Set draft: false on content/events/leadership-workshop.mdx (or when event is confirmed)
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release event tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261103
+DTEND;VALUE=DATE:20261104
+SUMMARY:📝 RELEASE: What Survived — Part 1: The Paintings That Waited
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/the-paintings-that-waited.mdx\n\nFirst release of What Survived series!
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived Part 1 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261110
+DTEND;VALUE=DATE:20261111
+SUMMARY:📝 Release: What Survived — Part 2: The Living Archive
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/the-living-archive.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived Part 2 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261117
+DTEND;VALUE=DATE:20261118
+SUMMARY:📝 Release: What Survived — Part 3: Four Hundred Years Without Paper
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/four-hundred-years-without-paper.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived Part 3 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261124
+DTEND;VALUE=DATE:20261125
+SUMMARY:📝 Release: What Survived — Part 4: The Man Who Was Not There
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/the-man-who-was-not-there.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived Part 4 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261201
+DTEND;VALUE=DATE:20261202
+SUMMARY:📝 Release: What Survived — Part 5: The Library That Cannot Tell Us
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/the-library-that-cannot-tell-us.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived Part 5 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261208
+DTEND;VALUE=DATE:20261209
+SUMMARY:📝 Release: What Survived — Part 6: The Tapestry the Winners Made
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/the-tapestry-the-winners-made.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived Part 6 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261215
+DTEND;VALUE=DATE:20261216
+SUMMARY:📝 Release: What Survived — Part 7: What We Are Losing Right Now (FINAL)
+DESCRIPTION:Set draft: false on content/blog/series/what-survived/what-we-are-losing-right-now.mdx\n\nFinal part! Series becomes COMPLETE.
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release What Survived FINAL PART tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270302
+DTEND;VALUE=DATE:20270303
+SUMMARY:📝 RELEASE: The Mind's Clay — Series 2 — Part 1: The Attention Landscape
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-attention-landscape.mdx\n\nFirst release of The Mind's Clay — Series 2!
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 Part 1 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270309
+DTEND;VALUE=DATE:20270310
+SUMMARY:📝 Release: The Mind's Clay — Series 2 — Part 2: The Feed and the Truth
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-feed-and-the-truth.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 Part 2 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270316
+DTEND;VALUE=DATE:20270317
+SUMMARY:📝 Release: The Mind's Clay — Series 2 — Part 3: The Interface and the Question
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-interface-and-the-question.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 Part 3 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270323
+DTEND;VALUE=DATE:20270324
+SUMMARY:📝 Release: The Mind's Clay — Series 2 — Part 4: The Sentence That Writes Itself
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-sentence-that-writes-itself.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 Part 4 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:📝 Release: The Mind's Clay — Series 2 — Part 5: The Memory That Does Not Need to Remember
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-memory-that-does-not-need-to-remember.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 Part 5 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270406
+DTEND;VALUE=DATE:20270407
+SUMMARY:📝 Release: The Mind's Clay — Series 2 — Part 6: The Judgment That Is Not Yours
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-judgment-that-is-not-yours.mdx
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 Part 6 tomorrow
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20270413
+DTEND;VALUE=DATE:20270414
+SUMMARY:📝 Release: The Mind's Clay — Series 2 — Part 7: The Kind of Mind (FINAL)
+DESCRIPTION:Set draft: false on content/editorial-series/the-minds-clay-2/the-kind-of-mind.mdx\n\nFinal part! Series becomes COMPLETE.
+BEGIN:VALARM
+TRIGGER:-PT12H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Release Mind's Clay Series 2 FINAL PART tomorrow
+END:VALARM
+END:VEVENT
+
+END:VCALENDAR

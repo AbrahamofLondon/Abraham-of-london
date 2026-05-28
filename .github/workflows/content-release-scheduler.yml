@@ -1,0 +1,125 @@
+name: Content Release Scheduler
+
+on:
+  schedule:
+    # Runs daily at 08:00 UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Release date to check (YYYY-MM-DD, defaults to today)'
+        required: false
+        type: string
+
+jobs:
+  check-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.0
+
+      - name: Check for pending releases
+        id: check
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            export RELEASE_DATE="${{ inputs.date }}"
+          fi
+          node scripts/check-and-stage-releases.mjs
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Create approval issue
+        if: steps.check.outputs.exit_code == '10'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('reports/pending-releases.json', 'utf8'));
+
+            let body = `## 📝 Content Release Request — ${report.date}\n\n`;
+
+            if (report.dueToday.length > 0) {
+              body += `### Due Today\n\n`;
+              for (const item of report.dueToday) {
+                body += `- **${item.title}** (${item.series})\n`;
+                body += `  \`${item.file}\`\n`;
+              }
+              body += `\n`;
+            }
+
+            if (report.overdue.length > 0) {
+              body += `### ⚠️ Overdue\n\n`;
+              for (const item of report.overdue) {
+                body += `- **${item.title}** (was due ${item.dueDate})\n`;
+                body += `  \`${item.file}\`\n`;
+              }
+              body += `\n`;
+            }
+
+            body += `---\n`;
+            body += `To approve, comment: \`/approve-release\`\n`;
+            body += `To approve specific files only, comment: \`/approve-release content/path/to/file.mdx\`\n`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Content Release — ${report.date}`,
+              body: body,
+              labels: ['content-release', 'auto-generated'],
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+
+  execute-release:
+    if: github.event.issue && contains(github.event.comment.body, '/approve-release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.0
+
+      - name: Execute release
+        id: release
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          if echo "$COMMENT" | grep -q "/approve-release "; then
+            # Extract file paths from comment
+            FILES=$(echo "$COMMENT" | grep -oP '(?<=/approve-release ).*')
+            node scripts/execute-release.mjs $FILES
+          else
+            node scripts/execute-release.mjs --all-pending
+          fi
+
+      - name: Commit and push
+        run: |
+          git config user.name "Content Release Bot"
+          git config user.email "bot@abrahamoflondon.org"
+          git add -A
+          git diff --staged --quiet || git commit -m "Release scheduled content [skip vercel]"
+          git push
+
+      - name: Close approval issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ Content released. Closing issue.',
+            });
+            github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed',
+            });
