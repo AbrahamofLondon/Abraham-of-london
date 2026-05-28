@@ -97,7 +97,7 @@ jobs:
     if: |
       github.event_name == 'issue_comment' &&
       github.event.issue.state == 'open' &&
-      contains(github.event.comment.body, '/approve-release') &&
+      startsWith(github.event.comment.body, '/approve-release') &&
       contains(github.event.issue.labels.*.name, 'content-release')
     runs-on: ubuntu-latest
     # SECURITY: Only repo admins and maintainers can approve releases
@@ -141,6 +141,14 @@ jobs:
 
             console.log(`✅ Authorized: ${context.payload.comment.user.login} (${permission.permission})`);
             core.setOutput('approver', context.payload.comment.user.login);
+
+            // Post audit trail comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ Approval accepted from @${context.payload.comment.user.login} with **${permission.permission}** permission.\n\nRelease in progress — creating branch, running checks, and opening PR.`,
+            });
 
       # ── B. Create release branch ─────────────────────────────────────────
       - uses: actions/checkout@v4
