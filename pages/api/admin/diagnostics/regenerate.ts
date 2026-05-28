@@ -1,11 +1,17 @@
 // pages/api/admin/diagnostics/regenerate.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import { writeDiagnosticAudit } from "@/lib/server/diagnostics/audit";
 import { enqueue } from "@/lib/jobs/queue";
 import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
+
+  const session = await requireAdminServer(req, res, {
+    routeKey: "admin-diagnostics-regenerate",
+  });
+  if (!session) return;
 
   const { diagnosticRef, artifactId } = req.body || {};
   if (!diagnosticRef) return res.status(400).json({ ok: false, reason: "REF_REQUIRED" });

@@ -29,14 +29,38 @@ export type GovernanceEventDurability =
   | "durable_confirmed"   // durable write confirmed by governance bus response
   | "external_confirmed"; // durable write confirmed by external platform response
 
+/**
+ * Event maturity model — replaces binary reserved/active classification.
+ *
+ * The Foundry is the institutional R&D and controlled experimentation engine.
+ * Events mature through this pipeline:
+ *
+ *   RESERVED_CONCEPT
+ *     → SIMULATION_ONLY
+ *     → PILOT_READY
+ *     → LIVE_GOVERNED
+ *     → RETIRED
+ *
+ * Only LIVE_GOVERNED counts as GREEN for Product Health.
+ * RESERVED_CONCEPT, SIMULATION_ONLY, and PILOT_READY must never make
+ * dashboards green — they are governance vocabulary waiting for proof.
+ * RETIRED should be rare and requires justification.
+ */
+export type EventMaturity =
+  | "RESERVED_CONCEPT"   // Future product pathway; vocabulary reserved for strategic continuity
+  | "SIMULATION_ONLY"    // Exists inside Foundry, scenario testing, red-team, mock runs, preview
+  | "PILOT_READY"        // Controlled real-world use under constraint; manual approval required
+  | "LIVE_GOVERNED"      // Real production workflow: real trigger, real emitter, durable record, auth guard, audit trail
+  | "RETIRED";           // Genuinely obsolete, duplicated, superseded, or strategically abandoned
+
 /** Whether the event represents a real production occurrence or a test/sim path. */
 export type GovernanceEventReality =
-  | "real"        // live production event
-  | "simulation"  // dry-run / simulation path only
-  | "dry_run"     // explicit dry-run (gate validation, no side effects)
-  | "preview"     // admin preview; no client-facing artefact
-  | "test"        // test/canary path
-  | "reserved";   // registered but no emitter wired yet
+  | "real"         // LIVE_GOVERNED — live production event
+  | "simulation"   // SIMULATION_ONLY — Foundry/scenario/test path
+  | "dry_run"      // PILOT_READY — explicit dry-run (gate validation, no side effects)
+  | "preview"      // PILOT_READY — admin preview; no client-facing artefact
+  | "test"         // SIMULATION_ONLY — test/canary path
+  | "reserved";    // RESERVED_CONCEPT — registered but no emitter wired yet
 
 /** High-level domain that owns the event. */
 export type GovernanceEventDomain =
@@ -83,13 +107,43 @@ export type EventTypeEntry = {
   writesLineage: boolean;
   canCreateResearchRun: boolean;
   adminDomain: AdminDomain;
+
   /**
    * reserved: true — registered event with no governance-bus emitter yet.
-   * Must include reservedReason. The audit script treats reserved events as
-   * GREEN (documented) rather than AMBER (missing emitter).
+   * Product Health must treat reserved events as AMBER intent, not GREEN proof.
    */
   reserved?: true;
   reservedReason?: string;
+
+  // ── Maturity model (progressive migration from binary reserved/active) ──
+  maturity?: EventMaturity;
+
+  /** Current reality classification — what the event actually is today. */
+  currentReality?: GovernanceEventReality;
+
+  /** Target maturity this event should eventually reach. */
+  targetMaturity?: EventMaturity;
+
+  /** Conditions that must be met before promoting to the next maturity stage. */
+  promotionCriteria?: string[];
+
+  /** What is blocking promotion to the next stage. */
+  blockingGaps?: string[];
+
+  /** Product domain this event belongs to. */
+  productDomain?: string;
+
+  /** How the Foundry relates to this event (if applicable). */
+  foundryRelationship?: "generates" | "consumes" | "simulates" | "validates" | "none";
+
+  /** Whether this event should affect Product Health dashboard. */
+  affectsProductHealth?: boolean;
+
+  /** Whether this event should appear in dashboards at all. */
+  appearsInDashboards?: boolean;
+
+  /** Required only when maturity === RETIRED — explains why retired. */
+  retiredReason?: string;
 };
 
 export const GOVERNANCE_EVENT_TYPES: EventTypeEntry[] = [

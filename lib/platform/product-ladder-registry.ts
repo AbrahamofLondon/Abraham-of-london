@@ -319,7 +319,30 @@ export const PRODUCT_LADDER: ProductLadderEntry[] = [
     publicStatus: "GATED",
   },
 
-  // ── 8. Outbound Publishing ──────────────────────────────────────────────
+  // ── 8. Decision Centre ─────────────────────────────────────────────────
+  {
+    id: "decision-centre",
+    label: "Decision Centre",
+    route: "/decision-centre",
+    surfaceType: "room",
+    canonicalRecord: "StrategyRoomCase",
+    entitlementRequired: "professional",
+    adminOwnerSurface: "/admin/decision-intelligence",
+    foundryModuleId: undefined,
+    engineId: undefined,
+    adapterId: undefined,
+    lineageEvents: [
+      "ACTION_LOG_CREATED",
+      "FINDING_CREATED",
+    ],
+    auditEvents: [
+      "ACTION_LOG_CREATED",
+    ],
+    outboundEligible: false,
+    publicStatus: "GATED",
+  },
+
+  // ── 9. Outbound Publishing ──────────────────────────────────────────────
   {
     id: "outbound-linkedin",
     label: "LinkedIn Publishing",
