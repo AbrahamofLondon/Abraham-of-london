@@ -45,7 +45,7 @@ export type SchedulerItemResult = {
   provider: ProviderId;
   slug: string;
   title: string;
-  status: "published" | "skipped" | "failed" | "blocked";
+  status: "published" | "dry_run" | "skipped" | "failed" | "blocked";
   reason?: string;
   errorCode?: string;
   postUrl?: string;
@@ -292,7 +292,7 @@ export async function runOutboundScheduler(
           provider,
           slug: item.slug,
           title: item.sourceSeries ?? item.slug,
-          status: "published", // dry-run "success"
+          status: "dry_run",
           reason: "Dry-run — gate passed, no post published.",
         });
         continue;
@@ -402,6 +402,7 @@ export async function runOutboundScheduler(
     }
 
     // ── Compile summary ────────────────────────────────────────────────────
+    const dryRunEligible = results.filter((r) => r.status === "dry_run").length;
     const published = results.filter((r) => r.status === "published").length;
     const skipped = results.filter((r) => r.status === "skipped").length;
     const failed = results.filter((r) => r.status === "failed").length;
@@ -418,7 +419,7 @@ export async function runOutboundScheduler(
       failed,
       results,
       message: input.dryRun
-        ? `Dry-run complete. Scanned ${scanned}, ${results.length} eligible, ${published} would publish.`
+        ? `Dry-run complete. Scanned ${scanned}, ${results.length} eligible, ${dryRunEligible} would publish.`
         : `Scheduler run complete. Published ${published}, skipped ${skipped}, failed ${failed}.`,
     };
 

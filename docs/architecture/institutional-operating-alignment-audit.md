@@ -14,7 +14,7 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - Total product surfaces audited: 236
 - Total Foundry engines/adapters audited: 116
 - Total outbound flows audited: 100
-- Total governance events referenced: 16
+- Total governance events referenced: 78
 - Registry route references scanned: 141
 
 ## RED findings
@@ -93,13 +93,13 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [RED] FOUNDRY_PAGE_NO_ENGINE: /admin/intelligence-foundry/outbound exists but no engine/adapter linkage is visible (/admin/intelligence-foundry/outbound) - app/admin/intelligence-foundry/outbound/page.tsx
 - [RED] FOUNDRY_PAGE_NO_ENGINE: /admin/intelligence-foundry/red-team/security exists but no engine/adapter linkage is visible (/admin/intelligence-foundry/red-team/security) - app/admin/intelligence-foundry/red-team/security/page.tsx
 - [RED] FOUNDRY_PAGE_NO_ENGINE: /admin/intelligence-foundry/reference exists but no engine/adapter linkage is visible (/admin/intelligence-foundry/reference) - app/admin/intelligence-foundry/reference/page.tsx
-- [RED] EVENT_EMITTED_NOT_REGISTERED: TRANSACTIONAL is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: ENTERPRISE is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: SYSTEM is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: ARTIFACT is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: EXECUTIVE_REPORT is emitted/referenced but not registered in governance event types
-- [RED] EVENT_EMITTED_NOT_REGISTERED: DIAGNOSTIC_RUN is emitted/referenced but not registered in governance event types
-- ... 128 additional finding(s) in JSON reports.
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/boardroom-delivery/page.tsx links to missing route /boardroom/dossier/${d.id}?email=${d.clientEmail ??  (/boardroom/dossier/${d.id}?email=${d.clientEmail ?? ) - app/admin/boardroom-delivery/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/[id]/report/page.tsx links to missing route /admin/campaigns/${id} (/admin/campaigns/${id}) - app/admin/campaigns/[id]/report/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/[id]/enterprise-report/page.tsx links to missing route /admin/campaigns/${metadata.campaignId} (/admin/campaigns/${metadata.campaignId}) - app/admin/campaigns/[id]/enterprise-report/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/page.tsx links to missing route /admin/organisations/${campaign.organisationId} (/admin/organisations/${campaign.organisationId}) - app/admin/campaigns/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/reports/page.tsx links to missing route /admin/campaigns/${campaign.id}/report (/admin/campaigns/${campaign.id}/report) - app/admin/reports/page.tsx
+- [RED] ADMIN_NAV_TARGET_MISSING: app/admin/campaigns/[id]/page.tsx links to missing route /admin/campaigns/${campaign.id}/enterprise-report (/admin/campaigns/${campaign.id}/enterprise-report) - app/admin/campaigns/[id]/page.tsx
+- ... 21 additional finding(s) in JSON reports.
 
 ## AMBER findings
 
@@ -317,66 +317,15 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 
 ## False-green surfaces
 
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/boardroom-delivery/page.tsx uses DELIVERED, APPROVED near simulation/dry-run language (/admin/boardroom-delivery) - app/admin/boardroom-delivery/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/performance/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/performance) - app/admin/intelligence-foundry/performance/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/simulation/fast-diagnostic/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/simulation/fast-diagnostic) - app/admin/intelligence-foundry/simulation/fast-diagnostic/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/simulation/report-lineage/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/simulation/report-lineage) - app/admin/intelligence-foundry/simulation/report-lineage/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/simulation/strategy-room/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/simulation/strategy-room) - app/admin/intelligence-foundry/simulation/strategy-room/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/api/client-portal/deliverables/route.ts uses DELIVERED near simulation/dry-run language (/api/client-portal/deliverables) - app/api/client-portal/deliverables/route.ts
-- [RED] SIMULATION_LABELLED_LIVE: app/api/client-portal/dossier-redirect/route.ts uses DELIVERED near simulation/dry-run language (/api/client-portal/dossier-redirect) - app/api/client-portal/dossier-redirect/route.ts
 - [AMBER] STATUS_LABEL_WITHOUT_PROOF: app/dashboard/pdf-analytics/PdfAnalyticsClient.tsx uses LIVE without obvious proof chain - app/dashboard/pdf-analytics/PdfAnalyticsClient.tsx
 - [AMBER] STATUS_LABEL_WITHOUT_PROOF: components/admin/AdminStatusBadge.test.ts uses LIVE without obvious proof chain - components/admin/AdminStatusBadge.test.ts
-- [RED] SIMULATION_LABELLED_LIVE: components/admin/outbound/OutboundLedgerTable.tsx uses PUBLISHED near simulation/dry-run language - components/admin/outbound/OutboundLedgerTable.tsx
-- [RED] SIMULATION_LABELLED_LIVE: lib/boardroom/boardroom-delivery-pipeline.ts uses DELIVERED, APPROVED near simulation/dry-run language - lib/boardroom/boardroom-delivery-pipeline.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/boardroom/boardroom-dossier-service.ts uses DELIVERED, APPROVED near simulation/dry-run language - lib/boardroom/boardroom-dossier-service.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/core/outbound-publish-ledger.test.ts uses PUBLISHED near simulation/dry-run language - lib/outbound/core/outbound-publish-ledger.test.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/core/outbound-publish-ledger.ts uses PUBLISHED near simulation/dry-run language - lib/outbound/core/outbound-publish-ledger.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/core/outbound-scheduler-runner.ts uses READY, PUBLISHED near simulation/dry-run language - lib/outbound/core/outbound-scheduler-runner.ts
 - [AMBER] STATUS_LABEL_WITHOUT_PROOF: lib/outbound/facebook-types.ts uses READY without obvious proof chain - lib/outbound/facebook-types.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/linkedin-publishing-client.test.ts uses PUBLISHED near simulation/dry-run language - lib/outbound/linkedin-publishing-client.test.ts
 - [AMBER] STATUS_LABEL_WITHOUT_PROOF: lib/outbound/x-publish-gate.test.ts uses READY without obvious proof chain - lib/outbound/x-publish-gate.test.ts
 - [AMBER] STATUS_LABEL_WITHOUT_PROOF: lib/outbound/x-types.ts uses READY without obvious proof chain - lib/outbound/x-types.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/engines/enforcement-gates-adapter.ts uses GREEN, COMPLETE near simulation/dry-run language - lib/research/engines/enforcement-gates-adapter.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/engines/report-lineage-adapter.ts uses COMPLETE near simulation/dry-run language - lib/research/engines/report-lineage-adapter.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/foundry-contract.ts uses COMPLETE near simulation/dry-run language - lib/research/foundry-contract.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/lineage/lineage-simulation-contract.ts uses COMPLETE near simulation/dry-run language - lib/research/lineage/lineage-simulation-contract.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/lineage/report-lineage-simulation.ts uses COMPLETE, APPROVED near simulation/dry-run language - lib/research/lineage/report-lineage-simulation.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/product-health/product-health-rules.ts uses GREEN, COMPLETE near simulation/dry-run language - lib/research/product-health/product-health-rules.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/product-health/product-health-service.ts uses GREEN near simulation/dry-run language - lib/research/product-health/product-health-service.ts
-- [RED] SIMULATION_LABELLED_LIVE: pages/admin/oversight-review.tsx uses DELIVERED, COMPLETE near simulation/dry-run language (/admin/oversight-review) - pages/admin/oversight-review.tsx
-- [RED] SIMULATION_LABELLED_LIVE: pages/api/admin/outbound/linkedin/publish.ts uses PUBLISHED near simulation/dry-run language (/api/admin/outbound/linkedin/publish) - pages/api/admin/outbound/linkedin/publish.ts
-- [RED] SIMULATION_LABELLED_LIVE: pages/api/internal/oversight/delivery-action.ts uses DELIVERED near simulation/dry-run language (/api/internal/oversight/delivery-action) - pages/api/internal/oversight/delivery-action.ts
-- [RED] SIMULATION_LABELLED_LIVE: pages/editorials/index.tsx uses PUBLISHED near simulation/dry-run language (/editorials) - pages/editorials/index.tsx
-- [RED] SIMULATION_LABELLED_LIVE: pages/provenance/sample-export.tsx uses LIVE near simulation/dry-run language (/provenance/sample-export) - pages/provenance/sample-export.tsx
 
 ## Simulated-but-labelled-live surfaces
 
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/boardroom-delivery/page.tsx uses DELIVERED, APPROVED near simulation/dry-run language (/admin/boardroom-delivery) - app/admin/boardroom-delivery/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/performance/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/performance) - app/admin/intelligence-foundry/performance/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/simulation/fast-diagnostic/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/simulation/fast-diagnostic) - app/admin/intelligence-foundry/simulation/fast-diagnostic/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/simulation/report-lineage/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/simulation/report-lineage) - app/admin/intelligence-foundry/simulation/report-lineage/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/admin/intelligence-foundry/simulation/strategy-room/page.tsx uses COMPLETE near simulation/dry-run language (/admin/intelligence-foundry/simulation/strategy-room) - app/admin/intelligence-foundry/simulation/strategy-room/page.tsx
-- [RED] SIMULATION_LABELLED_LIVE: app/api/client-portal/deliverables/route.ts uses DELIVERED near simulation/dry-run language (/api/client-portal/deliverables) - app/api/client-portal/deliverables/route.ts
-- [RED] SIMULATION_LABELLED_LIVE: app/api/client-portal/dossier-redirect/route.ts uses DELIVERED near simulation/dry-run language (/api/client-portal/dossier-redirect) - app/api/client-portal/dossier-redirect/route.ts
-- [RED] SIMULATION_LABELLED_LIVE: components/admin/outbound/OutboundLedgerTable.tsx uses PUBLISHED near simulation/dry-run language - components/admin/outbound/OutboundLedgerTable.tsx
-- [RED] SIMULATION_LABELLED_LIVE: lib/boardroom/boardroom-delivery-pipeline.ts uses DELIVERED, APPROVED near simulation/dry-run language - lib/boardroom/boardroom-delivery-pipeline.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/boardroom/boardroom-dossier-service.ts uses DELIVERED, APPROVED near simulation/dry-run language - lib/boardroom/boardroom-dossier-service.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/core/outbound-publish-ledger.test.ts uses PUBLISHED near simulation/dry-run language - lib/outbound/core/outbound-publish-ledger.test.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/core/outbound-publish-ledger.ts uses PUBLISHED near simulation/dry-run language - lib/outbound/core/outbound-publish-ledger.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/core/outbound-scheduler-runner.ts uses READY, PUBLISHED near simulation/dry-run language - lib/outbound/core/outbound-scheduler-runner.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/outbound/linkedin-publishing-client.test.ts uses PUBLISHED near simulation/dry-run language - lib/outbound/linkedin-publishing-client.test.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/engines/enforcement-gates-adapter.ts uses GREEN, COMPLETE near simulation/dry-run language - lib/research/engines/enforcement-gates-adapter.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/engines/report-lineage-adapter.ts uses COMPLETE near simulation/dry-run language - lib/research/engines/report-lineage-adapter.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/foundry-contract.ts uses COMPLETE near simulation/dry-run language - lib/research/foundry-contract.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/lineage/lineage-simulation-contract.ts uses COMPLETE near simulation/dry-run language - lib/research/lineage/lineage-simulation-contract.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/lineage/report-lineage-simulation.ts uses COMPLETE, APPROVED near simulation/dry-run language - lib/research/lineage/report-lineage-simulation.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/product-health/product-health-rules.ts uses GREEN, COMPLETE near simulation/dry-run language - lib/research/product-health/product-health-rules.ts
-- [RED] SIMULATION_LABELLED_LIVE: lib/research/product-health/product-health-service.ts uses GREEN near simulation/dry-run language - lib/research/product-health/product-health-service.ts
-- [RED] SIMULATION_LABELLED_LIVE: pages/admin/oversight-review.tsx uses DELIVERED, COMPLETE near simulation/dry-run language (/admin/oversight-review) - pages/admin/oversight-review.tsx
-- [RED] SIMULATION_LABELLED_LIVE: pages/api/admin/outbound/linkedin/publish.ts uses PUBLISHED near simulation/dry-run language (/api/admin/outbound/linkedin/publish) - pages/api/admin/outbound/linkedin/publish.ts
-- [RED] SIMULATION_LABELLED_LIVE: pages/api/internal/oversight/delivery-action.ts uses DELIVERED near simulation/dry-run language (/api/internal/oversight/delivery-action) - pages/api/internal/oversight/delivery-action.ts
-- [RED] SIMULATION_LABELLED_LIVE: pages/editorials/index.tsx uses PUBLISHED near simulation/dry-run language (/editorials) - pages/editorials/index.tsx
-- [RED] SIMULATION_LABELLED_LIVE: pages/provenance/sample-export.tsx uses LIVE near simulation/dry-run language (/provenance/sample-export) - pages/provenance/sample-export.tsx
+- None detected by this static pass.
 
 ## Auth/access mismatches
 

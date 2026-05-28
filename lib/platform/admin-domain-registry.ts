@@ -160,6 +160,7 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/events", domain: "audit", requiredRole: "ADMIN", canonicalRecord: "AuditEvent", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/provenance-chain", domain: "audit", requiredRole: "OWNER", canonicalRecord: "LineageEvent", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/access-diagnostics", domain: "access", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/security-assurance-requests", domain: "audit", requiredRole: "ADMIN", canonicalRecord: "AuditEvent", riskLevel: "HIGH", emitsAudit: true },
 ];
 
 export function getAdminRoute(route: string): AdminRouteEntry | undefined {
