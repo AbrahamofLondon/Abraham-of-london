@@ -2,24 +2,30 @@ name: Content Release Scheduler
 
 on:
   schedule:
-    # Runs daily at 08:00 UTC
+    # Daily at 08:00 UTC
     - cron: '0 8 * * *'
   workflow_dispatch:
     inputs:
       date:
-        description: 'Release date to check (YYYY-MM-DD, defaults to today)'
+        description: 'Release date to check (YYYY-MM-DD)'
         required: false
         type: string
+  issue_comment:
+    types: [created]
+
+# Only allow one release workflow at a time
+concurrency:
+  group: content-release
+  cancel-in-progress: false
 
 jobs:
+  # ─── Step 1: Daily check for due content ─────────────────────────────────
   check-releases:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.20.0
 
@@ -33,7 +39,7 @@ jobs:
           echo "exit_code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: Create approval issue
+      - name: Create approval issue with release preview
         if: steps.check.outputs.exit_code == '10'
         uses: actions/github-script@v7
         with:
@@ -41,29 +47,40 @@ jobs:
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('reports/pending-releases.json', 'utf8'));
 
-            let body = `## 📝 Content Release Request — ${report.date}\n\n`;
+            let body = `## 📋 Content Release Request — ${report.date}\n\n`;
 
-            if (report.dueToday.length > 0) {
-              body += `### Due Today\n\n`;
-              for (const item of report.dueToday) {
-                body += `- **${item.title}** (${item.series})\n`;
-                body += `  \`${item.file}\`\n`;
-              }
-              body += `\n`;
+            body += `### Summary\n\n`;
+            body += `| Metric | Value |\n`;
+            body += `|---|---|\n`;
+            body += `| Total candidates | ${report.summary.total} |\n`;
+            body += `| Due today | ${report.summary.dueToday} |\n`;
+            body += `| Overdue | ${report.summary.overdue} |\n`;
+            body += `| Series affected | ${report.summary.series.join(", ")} |\n`;
+            body += `\n`;
+
+            body += `### Release Candidates\n\n`;
+            body += `| # | Title | Series | File | Current | New | URL | Outbound |\n`;
+            body += `|---|---|---|---|---|---|---|---|\n`;
+
+            let i = 1;
+            for (const c of report.candidates) {
+              const icon = c.status === "overdue" ? "⚠️" : "";
+              body += `| ${i} | ${icon} ${c.title} | ${c.series} | \`${c.file}\` | ${c.currentState} | \`draft: false\` | ${c.publicUrl} | ${c.outboundEligible ? "⚠️" : "❌"} |\n`;
+              i++;
             }
 
-            if (report.overdue.length > 0) {
-              body += `### ⚠️ Overdue\n\n`;
-              for (const item of report.overdue) {
-                body += `- **${item.title}** (was due ${item.dueDate})\n`;
-                body += `  \`${item.file}\`\n`;
-              }
-              body += `\n`;
-            }
-
-            body += `---\n`;
-            body += `To approve, comment: \`/approve-release\`\n`;
-            body += `To approve specific files only, comment: \`/approve-release content/path/to/file.mdx\`\n`;
+            body += `\n---\n`;
+            body += `### ⚠️ Outbound status\n\n`;
+            body += `Content release does NOT trigger outbound publishing. Outbound requires separate approval.\n\n`;
+            body += `### How to approve\n\n`;
+            body += `Comment \`/approve-release\` to:\n`;
+            body += `1. Create release branch \`release/content-${report.date}\`\n`;
+            body += `2. Flip \`draft: true → draft: false\` on scheduled files\n`;
+            body += `3. Run content checks (contentlayer build, MDX audit, publication eligibility)\n`;
+            body += `4. Open PR for review\n`;
+            body += `5. Auto-merge after checks pass\n\n`;
+            body += `To approve specific files only:\n`;
+            body += `\`/approve-release content/path/to/file.mdx [another/file.mdx]\``;
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
@@ -75,51 +92,210 @@ jobs:
 
             console.log(`Created issue #${issue.data.number}`);
 
+  # ─── Step 2: Execute release on /approve-release ────────────────────────
   execute-release:
-    if: github.event.issue && contains(github.event.comment.body, '/approve-release')
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.state == 'open' &&
+      contains(github.event.comment.body, '/approve-release') &&
+      contains(github.event.issue.labels.*.name, 'content-release')
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    # SECURITY: Only repo admins and maintainers can approve releases
+    # Uses GitHub's built-in permission check
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+    steps:
+      # ── A. Verify approver identity ──────────────────────────────────────
+      - name: Verify approver authorization
+        id: auth
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: commenter } = await github.rest.users.getByUsername({
+              username: context.payload.comment.user.login,
+            });
+
+            const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.comment.user.login,
+            });
+
+            const isAdmin = permission.permission === 'admin';
+            const isMaintainer = permission.permission === 'maintain';
+            const isApprovedUser = ['AbrahamofLondon'].includes(context.payload.comment.user.login);
+
+            if (!isAdmin && !isMaintainer && !isApprovedUser) {
+              console.log(`❌ User ${context.payload.comment.user.login} is not authorized (permission: ${permission.permission})`);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `❌ @${context.payload.comment.user.login} is not authorized to approve content releases. Only repository admins and maintainers can approve.`,
+              });
+              process.exit(1);
+            }
+
+            console.log(`✅ Authorized: ${context.payload.comment.user.login} (${permission.permission})`);
+            core.setOutput('approver', context.payload.comment.user.login);
+
+      # ── B. Create release branch ─────────────────────────────────────────
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.20.0
 
+      - name: Create release branch
+        id: branch
+        run: |
+          BRANCH_NAME="release/content-$(date +%Y-%m-%d)"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      # ── C. Execute release (flip draft: true → draft: false) ────────────
       - name: Execute release
         id: release
         run: |
           COMMENT="${{ github.event.comment.body }}"
           if echo "$COMMENT" | grep -q "/approve-release "; then
-            # Extract file paths from comment
-            FILES=$(echo "$COMMENT" | grep -oP '(?<=/approve-release ).*')
+            FILES=$(echo "$COMMENT" | sed 's/\/approve-release //')
             node scripts/execute-release.mjs $FILES
           else
             node scripts/execute-release.mjs --all-pending
           fi
 
-      - name: Commit and push
+      # ── D. Run content checks ────────────────────────────────────────────
+      - name: Contentlayer build
+        run: pnpm contentlayer2 build
+
+      - name: MDX route manifest
+        run: node scripts/build-mdx-route-manifest.mjs
+
+      - name: Route coverage
+        run: node scripts/check-mdx-route-coverage.mjs
+
+      - name: Body rendering
+        run: node scripts/check-mdx-body-rendering.mjs
+
+      - name: Route conventions
+        run: node scripts/check-mdx-route-conventions.mjs
+
+      - name: Template rendering
+        run: node scripts/check-mdx-template-rendering.mjs
+
+      - name: Public routes
+        run: node scripts/check-mdx-public-routes.mjs
+
+      - name: Publication eligibility
+        run: node scripts/check-mdx-publication-eligibility.mjs
+
+      - name: Runtime imports
+        run: node scripts/check-contentlayer-runtime-imports.mjs
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # ── E. Commit and push release branch ───────────────────────────────
+      - name: Commit changes
         run: |
           git config user.name "Content Release Bot"
           git config user.email "bot@abrahamoflondon.org"
           git add -A
-          git diff --staged --quiet || git commit -m "Release scheduled content [skip vercel]"
-          git push
+          git diff --staged --quiet || git commit -m "Release scheduled content — $(date +%Y-%m-%d)"
 
+      - name: Push release branch
+        run: git push origin ${{ steps.branch.outputs.branch_name }}
+
+      # ── F. Open PR ──────────────────────────────────────────────────────
+      - name: Open release PR
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const changes = fs.existsSync('reports/release-changes.json')
+              ? JSON.parse(fs.readFileSync('reports/release-changes.json', 'utf8'))
+              : { released: [], skipped: [], errors: [] };
+
+            let body = `## 📋 Content Release\n\n`;
+            body += `**Date:** ${new Date().toISOString().split('T')[0]}\n\n`;
+
+            if (changes.released.length > 0) {
+              body += `### ✅ Released\n\n`;
+              for (const item of changes.released) {
+                body += `- **${item.title}** (${item.date})\n`;
+                body += `  \`${item.file}\`\n`;
+              }
+              body += `\n`;
+            }
+
+            if (changes.skipped.length > 0) {
+              body += `### ⏭️ Skipped (already released)\n\n`;
+              for (const item of changes.skipped) {
+                body += `- ${item.file}\n`;
+              }
+              body += `\n`;
+            }
+
+            body += `### Checks\n\n`;
+            body += `- [x] Contentlayer build\n`;
+            body += `- [x] MDX route coverage\n`;
+            body += `- [x] Body rendering\n`;
+            body += `- [x] Route conventions\n`;
+            body += `- [x] Template rendering\n`;
+            body += `- [x] Public routes\n`;
+            body += `- [x] Publication eligibility\n`;
+            body += `- [x] Runtime imports\n`;
+            body += `- [x] TypeScript typecheck\n\n`;
+
+            body += `### Outbound\n\n`;
+            body += `Content release only. Outbound publishing requires separate approval.\n`;
+
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Content Release — ${new Date().toISOString().split('T')[0]}`,
+              head: '${{ steps.branch.outputs.branch_name }}',
+              base: 'main',
+              body: body,
+              draft: false,
+            });
+
+            console.log(`Created PR #${pr.data.number}`);
+            core.setOutput('pr_number', pr.data.number.toString());
+
+            // Update the approval issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ Release branch created. PR #${pr.data.number} is open with all checks passing.\n\nAuto-merge will complete when you approve the PR.`,
+            });
+
+      # ── G. Auto-merge PR ────────────────────────────────────────────────
+      - name: Enable auto-merge
+        if: steps.pr.outputs.pr_number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge ${{ steps.pr.outputs.pr_number }} --auto --squash
+
+      # ── H. Close the approval issue ─────────────────────────────────────
       - name: Close approval issue
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '✅ Content released. Closing issue.',
-            });
-            github.rest.issues.update({
+            await github.rest.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
               state: 'closed',
+              state_reason: 'completed',
             });
