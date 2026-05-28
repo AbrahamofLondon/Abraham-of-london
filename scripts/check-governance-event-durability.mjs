@@ -191,7 +191,9 @@ function buildRegistryInventory(registryEntries, emittedSet) {
   return registryEntries.map((entry) => {
     const emittedCount = emittedSet.get(entry.eventType) ?? 0;
     const hasEmitter = emittedCount > 0;
-    const missingEmitterRisk = !hasEmitter && !entry.reserved ? "AMBER" : "GREEN";
+    // Reserved events are intentionally unwired — distinct from GREEN (live + durable).
+    // RESERVED = vocabulary documented, bus wiring pending. Reserved ≠ live.
+    const missingEmitterRisk = !hasEmitter ? (entry.reserved ? "RESERVED" : "AMBER") : "GREEN";
 
     return {
       eventType: entry.eventType,
@@ -289,6 +291,8 @@ export async function runGovernanceEventAudit({ fail = true } = {}) {
   const reservedCount = registryEntries.filter((e) => e.reserved).length;
   const activeCount = registryEntries.filter((e) => !e.reserved && emittedSet.has(e.eventType)).length;
 
+  // reserved ≠ live. Reserved events are documented vocabulary with bus wiring
+  // pending. They must not inflate the live/integrated count. green = active only.
   const summary = {
     registeredEvents: registryEntries.length,
     activeEmitters: uniqueEmitted.size,
@@ -296,7 +300,7 @@ export async function runGovernanceEventAudit({ fail = true } = {}) {
     activeRegisteredEvents: activeCount,
     red,
     amber,
-    green: activeCount + reservedCount,
+    green: activeCount,
   };
 
   fs.writeFileSync(
@@ -314,7 +318,8 @@ export async function runGovernanceEventAudit({ fail = true } = {}) {
 
   console.log(`[governance-events] RED: ${red}`);
   console.log(`[governance-events] AMBER: ${amber}`);
-  console.log(`[governance-events] GREEN: ${summary.green} (active: ${activeCount}, reserved: ${reservedCount})`);
+  console.log(`[governance-events] LIVE: ${activeCount} (active, governance bus wired)`);
+  console.log(`[governance-events] RESERVED: ${reservedCount} (vocabulary registered, bus wiring pending — reserved ≠ live)`);
 
   if (fail && red > 0) process.exitCode = 1;
   return { findings, summary };

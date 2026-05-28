@@ -190,6 +190,15 @@ export function checkLineageCoverage(surface: ProductLadderEntry): RuleResult {
 }
 
 // ─── Rule 6: Governance event vocabulary coverage ────────────────────────────
+//
+// GREEN requires all declared events to be:
+//   (a) registered in GOVERNANCE_EVENT_TYPES, AND
+//   (b) not marked reserved — i.e. wired to the governance bus in live code.
+//
+// Reserved events are registered vocabulary but have no live governance bus
+// emitter yet. Reserved ≠ live. Reserved ≠ integrated. Reserved ≠ durable.
+// A surface that declares only reserved events has documented intent, not
+// working coverage — it must not receive a GREEN from this rule.
 
 export function checkGovernanceEvents(surface: ProductLadderEntry): RuleResult {
   if (surface.lineageEvents.length === 0 && surface.auditEvents.length === 0) {
@@ -198,14 +207,30 @@ export function checkGovernanceEvents(surface: ProductLadderEntry): RuleResult {
 
   const allEvents = [...new Set([...surface.lineageEvents, ...surface.auditEvents])];
   const missing = allEvents.filter((e) => !getEventType(e));
+  const reservedEvents = allEvents.filter((e) => getEventType(e)?.reserved === true);
 
   if (missing.length === allEvents.length) {
     return { status: "RED", explanation: `None of ${allEvents.length} declared events found in governance-event-types.` };
   }
   if (missing.length > 0) {
-    return { status: "AMBER", explanation: `${missing.length}/${allEvents.length} declared events not in governance-event-types: ${missing.join(", ")}.` };
+    return {
+      status: "AMBER",
+      explanation: `${missing.length}/${allEvents.length} declared events not in governance-event-types: ${missing.join(", ")}.`,
+    };
   }
-  return { status: "GREEN", explanation: `All ${allEvents.length} declared events registered in governance-event-types.` };
+  if (reservedEvents.length > 0) {
+    return {
+      status: "AMBER",
+      explanation:
+        `${reservedEvents.length}/${allEvents.length} declared event(s) are reserved — ` +
+        `registered in vocabulary but governance bus wiring is pending: ${reservedEvents.join(", ")}. ` +
+        `Reserved ≠ integrated.`,
+    };
+  }
+  return {
+    status: "GREEN",
+    explanation: `All ${allEvents.length} declared events are registered and have live governance bus wiring.`,
+  };
 }
 
 // ─── Rule 7: Entitlement declared for gated products ─────────────────────────
