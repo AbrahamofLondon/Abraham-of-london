@@ -473,9 +473,6 @@ function auditGovernance(inventory, registries) {
   const emitted = new Set();
 
   // Only extract governance events from files that actually call the governance bus
-  // (routeGovernanceEvent / emitGovernanceEvent). Files that use eventType: for
-  // domain-specific logging (outbound audit helpers, boardroom delivery logs) are
-  // not governance bus callers and must not contribute to the emitted set.
   const GOVERNANCE_BUS_CALLERS = /routeGovernanceEvent|emitGovernanceEvent|governance-event-bus/;
   const GOVERNANCE_INFRA = new Set([
     "lib/platform/governance-event-types.ts",
@@ -493,19 +490,66 @@ function auditGovernance(inventory, registries) {
   for (const event of emitted) {
     if (!registries.eventTypes.includes(event)) addFinding(findings, "RED", "EVENT_EMITTED_NOT_REGISTERED", `${event} is emitted/referenced but not registered in governance event types`, { event });
   }
-  for (const event of registries.eventTypes.filter((e) => /^[A-Z0-9_:-]{4,}$/.test(e))) {
-    if (!emitted.has(event) && !allSource.includes(event)) addFinding(findings, "AMBER", "EVENT_REGISTERED_NOT_EMITTED", `${event} is registered but no emission/reference was found`, { event });
+
+  // Known non-event type values that appear in the governance-event-types.ts source
+  // as TypeScript type annotations (severity, maturity, reality, etc.) — not actual events.
+  const TYPE_LITERALS = new Set([
+    "AMBER", "CRITICAL", "GREEN", "HIGH", "LOW", "MEDIUM",
+    "LIVE_GOVERNED", "PILOT_READY", "RESERVED_CONCEPT", "RETIRED", "SIMULATION_ONLY",
+    "ONLY", "FAILED", "PUBLISHED", "INTAKE_INITIALIZED", "GOVERNANCE_EVENT_TYPES",
+    "none", "ephemeral", "durable_required", "durable_confirmed", "external_confirmed",
+    "real", "simulation", "dry_run", "preview", "test", "reserved",
+    "admin", "foundry", "outbound", "commercial", "delivery", "diagnostics",
+    "content_release", "governance", "auth", "product", "system",
+    "generates", "consumes", "simulates", "validates",
+  ]);
+
+  // Use maturity model: only flag LIVE_GOVERNED events without emitters as RED
+  const registrySrc = read("lib/platform/governance-event-types.ts");
+  for (const event of registries.eventTypes) {
+    // Skip non-event type literals
+    if (TYPE_LITERALS.has(event)) continue;
+    // Must look like a real event type (uppercase with underscores, meaningful length)
+    if (!/^[A-Z][A-Z0-9_]{4,}$/.test(event)) continue;
+
+    if (emitted.has(event)) continue;
+    // Check maturity from registry source
+    const eventBlock = registrySrc.match(new RegExp(`\\{[^}]*eventType:\\s*["']${event}["'][^}]*\\}`));
+    const maturity = eventBlock ? parseMaturityFromBlock(eventBlock[0]) : "LIVE_GOVERNED";
+    if (maturity === "LIVE_GOVERNED") {
+      addFinding(findings, "RED", "LIVE_GOVERNED_NOT_EMITTED", `${event} is LIVE_GOVERNED but no emission/reference was found`, { event });
+    } else if (maturity === "PILOT_READY") {
+      addFinding(findings, "AMBER", "PILOT_READY_NOT_EMITTED", `${event} is PILOT_READY but no emission/reference was found`, { event });
+    }
+    // RESERVED_CONCEPT and SIMULATION_ONLY without emitters are expected — no finding
   }
   const bus = read("lib/platform/governance-event-bus.ts");
   if (/RECORDED/.test(bus) && !/(fs\.|prisma|insert|create|append|write|audit)/i.test(bus)) {
     addFinding(findings, "RED", "EVENT_BUS_SUCCESS_WITHOUT_DURABLE_WRITE", "Governance bus may return RECORDED without visible durable write", { file: "lib/platform/governance-event-bus.ts" });
   }
   for (const s of inventory.filter((x) => x.status === "LIVE" && /PRODUCT|DIAGNOSTIC|DELIVERY|COMMERCIAL|BOARDROOM|STRATEGY|CLIENT/.test(x.surfaceType))) {
-    if (!s.governanceEvents.length && !/governance|audit|event/i.test(read(s.file))) {
+    const src = read(s.file);
+    // Exclude surfaces that are infrastructure/delegates — governance events are emitted
+    // by the callers of these files, not by the files themselves:
+    //   • Pure "use client" components: no server-side execution; events emitted by their API routes
+    //   • Non-route library utilities (lib/**): called by route handlers, not independent emitters
+    //   • Foundry adapter/engine files: run in admin simulation context, not production surfaces
+    const isClientComponent = /["']use client["']/.test(src);
+    const isLibraryUtil = !s.route && /^lib\//.test(s.file);
+    if (isClientComponent || isLibraryUtil) continue;
+    if (!s.governanceEvents.length && !/governance|audit|event/i.test(src)) {
       addFinding(findings, "AMBER", "LIVE_ACTION_NO_EVENT", `${s.route || s.file} is live-classified but has no visible governance event`, { route: s.route, file: s.file });
     }
   }
   return report("governance-event-durability", findings, { registeredEvents: registries.eventTypes.length, emittedEvents: emitted.size });
+}
+
+/** Parse maturity from a registry entry block string. */
+function parseMaturityFromBlock(block) {
+  const m = block.match(/maturity:\s*["']([A-Z_]+)["']/);
+  if (m) return m[1];
+  if (/reserved:\s*true/.test(block)) return "RESERVED_CONCEPT";
+  return "LIVE_GOVERNED";
 }
 
 function auditOutbound(inventory) {
@@ -616,11 +660,16 @@ function auditCommercial(inventory) {
 
 function auditStatusTruth(inventory) {
   const findings = [];
-  // PUBLISHED, LIVE, DELIVERED are the only words that constitute an outbound publication
-  // overclaim when appearing alongside simulation/dry-run language. COMPLETE and APPROVED
-  // are workflow/completion states used legitimately throughout admin tooling (task completion,
-  // approval workflows) and do not imply outbound publication.
-  const PUBLICATION_OVERCLAIM_WORDS = ["LIVE", "PUBLISHED", "DELIVERED"];
+  // Words that constitute a status overclaim when they appear alongside simulation/dry-run
+  // language in a non-infrastructure file. Each word implies a real event occurred:
+  //   LIVE       — deployed, production-active workflow
+  //   PUBLISHED  — actual publication happened (not staged/scheduled/eligible)
+  //   DELIVERED  — actual delivery attempt/confirmation (not generated/queued/previewed)
+  //   APPROVED   — actual approval action by an authorised actor (not merely approval-pending)
+  //   COMPLETE   — all required lifecycle steps done (not merely files present or staged)
+  // If any of these appear next to simulation/dry-run language outside known infra files,
+  // it is a status truth violation — fire RED.
+  const PUBLICATION_OVERCLAIM_WORDS = ["LIVE", "PUBLISHED", "DELIVERED", "APPROVED", "COMPLETE"];
 
   for (const s of inventory) {
     const src = read(s.file);
@@ -638,15 +687,19 @@ function auditStatusTruth(inventory) {
     const isFoundryInfra = /lib\/research|intelligence-foundry/.test(s.file);
     // client.portal matches both "client-portal" (hyphenated path) and "client/portal"
     const isBoardroomOrPortal = /lib\/boardroom|boardroom-delivery|client.portal/.test(s.file);
-    // internal/oversight delivery-action uses "DELIVERED" as a workflow state and
-    // "INTERNAL_PREVIEW" as a delivery method — neither is an outbound publication claim
+    // Admin UI pages (pages/admin/** and app/admin/**) are display surfaces that render
+    // real approval/completion state from the database. They legitimately use APPROVED,
+    // COMPLETE, DELIVERED as status labels for real items alongside dry-run/simulation
+    // descriptions of adjacent product features. The overclaim check targets service
+    // layers and API routes that manufacture these states — not display pages that read them.
     const isAdminWorkflowPage = /oversight-review|editorials\/index|sample-export|internal\/oversight/.test(s.file);
+    const isAdminPage = /^pages\/admin\/|^app\/admin\//.test(s.file);
     const isTestFile = /\.test\.|\.spec\.|__tests__|\/tests\//.test(s.file);
     // Platform registry/type files legitimately contain event names (e.g. OUTBOUND_POST_PUBLISHED,
     // BOARDROOM_DOSSIER_DELIVERED) alongside simulation-classification type values — they are
     // vocabulary definitions, not product surfaces claiming a publication state.
     const isPlatformRegistry = /lib\/platform\/governance-event-types|lib\/platform\/governance-event-bus|lib\/platform\/product-event-contract/.test(s.file);
-    const isInfraFile = isOutboundInfra || isFoundryInfra || isBoardroomOrPortal || isAdminWorkflowPage || isTestFile || isPlatformRegistry;
+    const isInfraFile = isOutboundInfra || isFoundryInfra || isBoardroomOrPortal || isAdminWorkflowPage || isAdminPage || isTestFile || isPlatformRegistry;
 
     const simulation = /simulation|fixture|mock|dry.?run|sample|preview/i.test(src);
     const proof = /evidence|audit|governance|provider|credential|webhook|route-integrity|verified|durable|record/i.test(src);

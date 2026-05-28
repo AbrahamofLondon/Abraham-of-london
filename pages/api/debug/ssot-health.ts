@@ -1,4 +1,9 @@
 // pages/api/debug/ssot-health.ts
+//
+// Dev-only SSOT health diagnostic. Enumerates all content collection counts
+// and samples. Exposes internal corpus structure — must not be reachable in
+// production. Dynamic import keeps @/lib/content/server out of the production
+// module graph even if the NODE_ENV guard were to fail at trace time.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -11,6 +16,10 @@ function sample(list: any[], n = 3) {
 }
 
 export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
+  if (process.env.NODE_ENV !== "development") {
+    return res.status(404).json({ error: "Not found" });
+  }
+
   try {
     const {
       getAllContentlayerDocs,
