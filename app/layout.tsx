@@ -4,9 +4,10 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 import AppShell from "@/components/AppShell";
 
-const BASE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org"
-).replace(/\/+$/, "");
+const RAW_URL = (process.env.NEXT_PUBLIC_SITE_URL || "")
+  .replace(/^["']|["']$/g, "")  // Strip accidental quotes from Vercel env values
+  .trim();
+const BASE_URL = (RAW_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
