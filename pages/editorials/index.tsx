@@ -172,7 +172,7 @@ function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
         </span>
         <span style={{ color: "var(--ds-border)" }}>·</span>
         <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-          {item.status === "PUBLISHED" ? "Complete" : "In progress"}
+          {item.status === "PUBLISHED" ? "Complete" : item.partCount > 0 && item.parts.length === 0 ? "Scheduled" : "In progress"}
         </span>
       </div>
       <h2

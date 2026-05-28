@@ -19,6 +19,7 @@ import OperatorPilotBlock from "@/components/homepage/OperatorPilotBlock";
 import VenturesSection from "@/components/homepage/VenturesSection";
 import EditorialIntelligenceBand from "@/components/homepage/EditorialIntelligenceBand";
 import HomepageFinalCTA from "@/components/homepage/HomepageFinalCTA";
+import type { HomepageEditorialViewModel } from "@/lib/content/homepage-editorial-series";
 
 // Repeated CTA configurations — restrained, never duplicating the primary in
 // the same visual cluster. First strip sits at the entry/product-ladder
@@ -35,7 +36,11 @@ const MID_CTAS = [
   { label: "Explore Library", href: "/library" },
 ];
 
-export default function CategoryFrontDoor() {
+type Props = {
+  editorialViewModel: HomepageEditorialViewModel;
+};
+
+export default function CategoryFrontDoor({ editorialViewModel }: Props) {
   return (
     <>
       <HomepageHero />
@@ -57,7 +62,7 @@ export default function CategoryFrontDoor() {
       <MemoryContinuityPreview />
       <DecisionDelayExposureCTASection />
       <OperatorPilotBlock />
-      <EditorialIntelligenceBand />
+      <EditorialIntelligenceBand editorialViewModel={editorialViewModel} />
       <section
         aria-label="Venture ecosystem"
         className="border-y border-white/[0.05] bg-black px-6 py-20 lg:px-12 lg:py-24"

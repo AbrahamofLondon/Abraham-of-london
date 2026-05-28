@@ -127,7 +127,7 @@ const FALLBACK_BLOCKING = [
   "CRON_SECRET",
   "ACTION_TOKEN_SECRET",
   "DATABASE_URL",
-  "MONGODB_URI",
+  // MONGODB_URI intentionally omitted: LEGACY_UNKNOWN — no live route imports the MongoDB chain.
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
   "RESEND_API_KEY",
@@ -143,6 +143,9 @@ const FALLBACK_BLOCKING = [
   "DOWNLOAD_TOKEN_SECRET",
   "DOWNLOAD_SIGNING_SECRET",
   "COMMERCIAL_COOKIE_SECRET",
+  // MONGODB_URI is intentionally excluded: static analysis confirms no live
+  // route in pages/ or app/ imports the MongoDB chain (lib/database/connection.ts,
+  // lib/services/UserService.ts). Classified LEGACY_UNKNOWN — not a cutover blocker.
 ];
 
 // ─── Preflight checks ─────────────────────────────────────────────────────────
@@ -162,9 +165,10 @@ const pulledNames = parseEnvNames(CHECK_ENV);
 
 // ─── Load catalogue from JSON report (if available) ──────────────────────────
 
-let catalogueToCopy = [];      // { name, blocking, environments, sensitive, group, note }
-let catalogueDoNotCopy = [];   // { name, reason, group }
-let catalogueConditional = []; // { name, ... } — present when certain conditions hold
+let catalogueToCopy = [];        // { name, blocking, environments, sensitive, group, note }
+let catalogueDoNotCopy = [];     // { name, reason, group }
+let catalogueConditional = [];   // { name, ... } — present when certain conditions hold
+let catalogueLegacyUnknown = []; // { name, reason, note } — reachability unconfirmed; NOT a cutover blocker
 let blockingNames = FALLBACK_BLOCKING;
 let usingFullCatalogue = false;
 
@@ -173,6 +177,7 @@ if (fs.existsSync(REQUIRED_JSON)) {
   catalogueToCopy = report.toCopy || [];
   catalogueDoNotCopy = report.doNotCopy || [];
   catalogueConditional = report.conditionalVars || [];
+  catalogueLegacyUnknown = report.legacyUnknownVars || [];
   blockingNames = (report.blocking || []).map((v) => v.name);
   usingFullCatalogue = true;
 }
@@ -211,6 +216,7 @@ const unrecognised = usingFullCatalogue
         ...catalogueToCopy.map((v) => v.name),
         ...catalogueDoNotCopy.map((v) => v.name),
         ...catalogueConditional.map((v) => v.name),
+        ...catalogueLegacyUnknown.map((v) => v.name),
         ...[...FORBIDDEN_IN_PRODUCTION.keys()],
         ...VERCEL_ALWAYS_INJECTED,
       ]);

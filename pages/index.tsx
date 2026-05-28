@@ -1,10 +1,16 @@
-import type { NextPage } from "next";
+import type { NextPage, GetStaticProps } from "next";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
 import CategoryFrontDoor from "@/components/homepage/CategoryFrontDoor";
+import type { HomepageEditorialViewModel } from "@/lib/content/homepage-editorial-series";
+import { getHomepageEditorialSeries } from "@/lib/content/homepage-editorial-series";
 
-const HomePage: NextPage = () => {
+type Props = {
+  editorialViewModel: HomepageEditorialViewModel;
+};
+
+const HomePage: NextPage<Props> = ({ editorialViewModel }) => {
   return (
     <Layout
       title="Abraham of London"
@@ -18,9 +24,14 @@ const HomePage: NextPage = () => {
         <meta property="og:image" content="/assets/images/social/og-image.jpg" />
       </Head>
 
-      <CategoryFrontDoor />
+      <CategoryFrontDoor editorialViewModel={editorialViewModel} />
     </Layout>
   );
+};
+
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const editorialViewModel = getHomepageEditorialSeries();
+  return { props: { editorialViewModel } };
 };
 
 export default HomePage;

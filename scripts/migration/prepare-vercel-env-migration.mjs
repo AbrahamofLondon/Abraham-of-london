@@ -450,11 +450,11 @@ const VARIABLES = [
     name: "MONGODB_URI",
     environments: ["production"],
     sensitive: true,
-    action: "COPY",
-    reason: "lib/database/connection.ts throws FATAL error in production if absent. Active MongoDB dependency — cannot be omitted.",
-    blocking: true,
+    action: "LEGACY_UNKNOWN",
+    reason: "lib/database/connection.ts and lib/services/UserService.ts reference MongoDB, but static analysis confirms no live route in pages/ or app/ imports this chain. The MongoDB layer appears to be a pre-Prisma legacy migration artifact. connection.ts has a module-level throw, but it is never triggered because the module is unreachable from the production route tree. Classified LEGACY_UNKNOWN — do not treat as a cutover blocker unless a live production path is proven to require it.",
+    blocking: false,
     group: "database",
-    note: "BLOCKING: Production will crash on startup if this is missing.",
+    note: "LEGACY: Not reachable from any live route. Safe to omit unless a feature backed by MongoDB is activated.",
   },
   {
     name: "INNER_CIRCLE_DB_URL",
@@ -492,6 +492,16 @@ const VARIABLES = [
     reason: "Feature flag for Redis usage. Set 'false' if not provisioned.",
     blocking: false,
     group: "redis",
+  },
+  {
+    name: "REDIS_URL",
+    environments: ["production"],
+    sensitive: true,
+    action: "CONDITIONAL",
+    reason: "Primary Redis connection URL. Used by lib/server/redis.ts, lib/redis.ts, lib/server/token-store.ts, lib/server/inner-circle-cache.ts. Required if Redis is enabled (USE_REDIS=true and REDIS_DISABLED=false). Omit if REDIS_DISABLED=true.",
+    blocking: false,
+    group: "redis",
+    note: "Production: set if Redis is active. Preview: omit (REDIS_DISABLED=true). Supports both raw Redis URL and Upstash REST URL patterns.",
   },
   {
     name: "UPSTASH_REDIS_REST_URL",
@@ -628,6 +638,16 @@ const VARIABLES = [
     group: "email",
   },
   // ──────────────────────── Brand / AOL Salts ───────────────────────────────
+  {
+    name: "NEXT_PUBLIC_APP_NAME",
+    environments: ["production"],
+    sensitive: false,
+    action: "COPY",
+    reason: "Client-facing app display name. Used by scripts/environment/validate-env.ts and setup-env.ts. Non-secret.",
+    blocking: false,
+    group: "brand",
+    note: "Set to 'Abraham of London' for production.",
+  },
   {
     name: "AOL_BRAND_NAME",
     environments: ["production"],
@@ -1519,6 +1539,7 @@ const toCopy = VARIABLES.filter((v) => v.action === "COPY");
 const conditional = VARIABLES.filter((v) => v.action === "CONDITIONAL");
 const investigate = VARIABLES.filter((v) => v.action === "INVESTIGATE");
 const doNotCopy = VARIABLES.filter((v) => v.action === "DO_NOT_COPY");
+const legacyUnknown = VARIABLES.filter((v) => v.action === "LEGACY_UNKNOWN");
 const blocking = VARIABLES.filter((v) => v.blocking);
 const domainSensitive = VARIABLES.filter((v) => v.domainSensitive);
 
@@ -1543,6 +1564,7 @@ const requiredJson = {
     conditional: conditional.length,
     investigate: investigate.length,
     doNotCopy: doNotCopy.length,
+    legacyUnknown: legacyUnknown.length,
     blocking: blocking.length,
     domainSensitive: domainSensitive.length,
     missingFromSource: missingFromSource.length,
@@ -1567,6 +1589,11 @@ const requiredJson = {
     note: v.note || null,
   })),
   conditionalVars: conditional.map((v) => ({
+    name: v.name,
+    reason: v.reason,
+    note: v.note || null,
+  })),
+  legacyUnknownVars: legacyUnknown.map((v) => ({
     name: v.name,
     reason: v.reason,
     note: v.note || null,

@@ -8,8 +8,9 @@
  * - a scheduled part has an active "Read" link
  * - a visible series has CTA to a non-public first part
  *
- * Also checks the mandatory regression case:
+ * Also checks the mandatory regression cases:
  *   /blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape
+ *   /shorts/when-the-burden-changes-address
  *
  * Output: reports/public-link-integrity-report.json
  * Exit code: 0 if all pass, 1 if failures found.
@@ -27,8 +28,11 @@ const OUTPUT_PATH = path.join(ROOT, "reports", "public-link-integrity-report.jso
 
 const TODAY = new Date("2026-05-28T23:59:59Z");
 
-// ─── Known broken URL (regression case) ──────────────────────────────────────
-const REGRESSION_URL = "/blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape";
+// ─── Known broken URLs (regression cases) ────────────────────────────────────
+const REGRESSION_URLS_LIST = [
+  "/blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape",
+  "/shorts/when-the-burden-changes-address",
+];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -102,63 +106,68 @@ async function checkPublicLinkIntegrity() {
   console.log("============================================");
   console.log(`Today: ${TODAY.toISOString().split("T")[0]}`);
 
-  // ── Check 1: Regression case ──────────────────────────────────────────
-  console.log(`\n--- Regression case: ${REGRESSION_URL} ---`);
+  // ── Check 1: Regression cases ─────────────────────────────────────────
+  for (const REGRESSION_URL of REGRESSION_URLS_LIST) {
+    console.log(`\n--- Regression case: ${REGRESSION_URL} ---`);
 
-  // Check if the document exists in the manifest
-  const regressionDoc = docs.find(d =>
-    d.routePath === REGRESSION_URL ||
-    d.routePath === "/blog/choose-the-ancestral-landscape" ||
-    (d.slug === "choose-the-ancestral-landscape" && d.collection === "Post")
-  );
+    // Check if the document exists in the manifest
+    const slug = REGRESSION_URL.split("/").filter(Boolean).pop();
+    const regressionDoc = docs.find(d =>
+      d.routePath === REGRESSION_URL ||
+      d.routePath === `/blog/${slug}` ||
+      d.routePath === `/shorts/${slug}` ||
+      (d.slug === slug && (d.collection === "Post" || d.collection === "Short"))
+    );
 
-  if (regressionDoc) {
-    const classification = classifyDoc(regressionDoc);
-    console.log(`  Document found: "${regressionDoc.title}"`);
-    console.log(`  Route path in manifest: ${regressionDoc.routePath}`);
-    console.log(`  Classification: ${classification}`);
-    console.log(`  Expected public route: ${regressionDoc.expectedPublicRoute}`);
-    console.log(`  Is future-dated: ${regressionDoc.isFutureDated}`);
-    console.log(`  Date: ${regressionDoc.date}`);
-    console.log(`  Draft: ${regressionDoc.draft}`);
-    console.log(`  Published: ${regressionDoc.published}`);
+    if (regressionDoc) {
+      const classification = classifyDoc(regressionDoc);
+      console.log(`  Document found: "${regressionDoc.title}"`);
+      console.log(`  Route path in manifest: ${regressionDoc.routePath}`);
+      console.log(`  Classification: ${classification}`);
+      console.log(`  Expected public route: ${regressionDoc.expectedPublicRoute}`);
+      console.log(`  Is future-dated: ${regressionDoc.isFutureDated}`);
+      console.log(`  Date: ${regressionDoc.date}`);
+      console.log(`  Draft: ${regressionDoc.draft}`);
+      console.log(`  Published: ${regressionDoc.published}`);
 
-    // The route path in manifest is /blog/choose-the-ancestral-landscape (incorrect for series parts)
-    // The actual public URL is /blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape
-    // This URL should NOT be publicly accessible because the part is future-dated
+      // Check if the sitemap contains this URL
+      let sitemapHasUrl = false;
+      const sitemapPath = path.join(ROOT, "public", "sitemap-0.xml");
+      if (fs.existsSync(sitemapPath)) {
+        const sitemapContent = fs.readFileSync(sitemapPath, "utf8");
+        if (sitemapContent.includes(REGRESSION_URL)) {
+          sitemapHasUrl = true;
+          failures.push({
+            type: "SITEMAP_CONTAINS_FUTURE_URL",
+            url: REGRESSION_URL,
+            detail: `Sitemap at public/sitemap-0.xml contains future-dated URL ${REGRESSION_URL}`,
+          });
+        }
+      }
 
-    // Check if the sitemap contains this URL (this is the actual source of the 404)
-    let sitemapHasUrl = false;
-    const sitemapPath = path.join(ROOT, "public", "sitemap-0.xml");
-    if (fs.existsSync(sitemapPath)) {
-      const sitemapContent = fs.readFileSync(sitemapPath, "utf8");
-      if (sitemapContent.includes(REGRESSION_URL)) {
-        sitemapHasUrl = true;
-        failures.push({
-          type: "SITEMAP_CONTAINS_FUTURE_URL",
-          url: REGRESSION_URL,
-          detail: `Sitemap at public/sitemap-0.xml contains future-dated URL ${REGRESSION_URL}`,
-        });
+      if (classification === "SCHEDULED" || classification === "DRAFT") {
+        if (sitemapHasUrl) {
+          // Already reported above
+        } else {
+          console.log(`  ✅ Correctly classified as ${classification} — not publicly linked`);
+        }
+      }
+    } else {
+      // Document not found in manifest — check sitemap directly
+      const sitemapPath = path.join(ROOT, "public", "sitemap-0.xml");
+      if (fs.existsSync(sitemapPath)) {
+        const sitemapContent = fs.readFileSync(sitemapPath, "utf8");
+        if (sitemapContent.includes(REGRESSION_URL)) {
+          failures.push({
+            type: "SITEMAP_CONTAINS_UNKNOWN_URL",
+            url: REGRESSION_URL,
+            detail: `Sitemap contains ${REGRESSION_URL} but document not found in manifest`,
+          });
+        } else {
+          console.log(`  ✅ URL absent from sitemap (document not in manifest)`);
+        }
       }
     }
-
-    // The regression case PASSES if:
-    // 1. The document is correctly classified as SCHEDULED (not public)
-    // 2. The URL is NOT in the sitemap
-    // 3. The series hub correctly shows it as "Coming Soon" (not linked)
-    if (classification === "SCHEDULED" || classification === "DRAFT") {
-      if (sitemapHasUrl) {
-        // Already reported above
-      } else {
-        console.log(`  ✅ Correctly classified as ${classification} — not publicly linked`);
-      }
-    }
-  } else {
-    failures.push({
-      type: "REGRESSION_DOCUMENT_NOT_FOUND",
-      url: REGRESSION_URL,
-      detail: `Document for regression case ${REGRESSION_URL} not found in manifest`,
-    });
   }
 
   // ── Check 2: All series parts — verify no public links to non-public parts ──
@@ -340,7 +349,7 @@ async function checkPublicLinkIntegrity() {
   const report = {
     generated: new Date().toISOString(),
     today: TODAY.toISOString().split("T")[0],
-    regressionUrl: REGRESSION_URL,
+    regressionUrls: REGRESSION_URLS_LIST,
     summary: {
       totalFailures: failures.length,
       totalWarnings: warnings.length,

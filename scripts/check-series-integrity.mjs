@@ -115,8 +115,14 @@ for (const [slug, data] of seriesMap.entries()) {
   }
 
   // Check for zero published parts
+  // Exempt: SCHEDULED_VISIBLE series (seriesVisibility: scheduled/visible/teaser)
+  // are intentionally shown with zero published parts as public previews.
   const publishedCount = docs.filter((d) => !d.isDraft).length;
-  if (publishedCount === 0) {
+  const hasScheduledVisibility = docs.some((d) => {
+    const content = readFileSync(join(ROOT, d.file), "utf-8");
+    return /^seriesVisibility:\s*["']?(scheduled|visible|teaser)["']?\s*$/m.test(content);
+  });
+  if (publishedCount === 0 && !hasScheduledVisibility) {
     violations.push(`"${slug}": zero published parts — series will not be exposed publicly`);
   }
 }
