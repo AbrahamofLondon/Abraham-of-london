@@ -111,7 +111,9 @@ export async function POST(req: NextRequest) {
   };
 
   const pricing = resolveAssetPricing(user, asset);
-  const paymentSucceeded = payload.simulateSuccess === true;
+  // Simulation is only valid in development; the 308 above blocks production, but
+  // we also guard here so NODE_ENV === "development" is the single source of truth.
+  const paymentSucceeded = process.env.NODE_ENV === "development" && payload.simulateSuccess === true;
 
   if (!paymentSucceeded) {
     return noStoreJson(
