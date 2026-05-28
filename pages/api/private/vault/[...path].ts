@@ -7,6 +7,7 @@ import fs from "fs";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import tiers, { requiredTierFromVaultPath } from "@/lib/access/tiers";
 import { vaultRuntimeConfig } from "@/lib/runtime/vault-config";
+import { getVaultManifestEntry } from "@/lib/runtime/vault-manifest";
 
 const VAULT_ROOT = path.join(
   /* turbopackIgnore: true */ process.cwd(),
@@ -43,7 +44,7 @@ function contentTypeFor(filePath: string): string {
   }
 }
 
-function safeResolveVaultPath(parts: string[]): string | null {
+function normalizeVaultKey(parts: string[]): string | null {
   const clean = parts
     .map((p) => String(p || "").trim())
     .filter(Boolean)
@@ -65,7 +66,17 @@ function safeResolveVaultPath(parts: string[]): string | null {
     }
   }
 
-  const joined = path.join(VAULT_ROOT, ...clean);
+  return clean.join("/").replace(/\/{2,}/g, "/");
+}
+
+function safeResolveVaultPath(parts: string[]): string | null {
+  const key = normalizeVaultKey(parts);
+  if (!key) return null;
+
+  const entry = getVaultManifestEntry(key);
+  if (!entry) return null;
+
+  const joined = path.join(VAULT_ROOT, ...entry.key.split("/"));
   const normalizedRoot = path.resolve(VAULT_ROOT);
   const normalizedJoined = path.resolve(joined);
 
