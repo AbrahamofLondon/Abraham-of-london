@@ -48,6 +48,18 @@ jobs:
       - name: Contentlayer build
         run: pnpm contentlayer2 build
 
+      - name: MDX route manifest
+        run: node scripts/build-mdx-route-manifest.mjs
+
+      - name: MDX route coverage
+        run: node scripts/check-mdx-route-coverage.mjs
+
+      - name: MDX body rendering
+        run: node scripts/check-mdx-body-rendering.mjs
+
+      - name: MDX public smoke list
+        run: node scripts/check-mdx-public-routes.mjs
+
       - name: Typecheck
         run: pnpm typecheck
 

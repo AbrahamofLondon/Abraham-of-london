@@ -1000,7 +1000,7 @@ const Playbook = defineDocumentType(() => ({
     continuationPath: { type: "json", required: false },
   },
   computedFields: {
-    ...createComputedFields("playbooks/", "playbook"),
+    ...createComputedFields("playbooks/", "playbooks"),
     playbookSlug: {
       type: "string",
       resolve: (doc) => stripPrefix(doc?._raw?.flattenedPath || "", "playbooks/"),

@@ -64,6 +64,18 @@ jobs:
       - name: Build Contentlayer
         run: pnpm run content:build
 
+      - name: MDX route manifest
+        run: node scripts/build-mdx-route-manifest.mjs
+
+      - name: MDX route coverage
+        run: node scripts/check-mdx-route-coverage.mjs
+
+      - name: MDX body rendering
+        run: node scripts/check-mdx-body-rendering.mjs
+
+      - name: MDX public smoke list
+        run: node scripts/check-mdx-public-routes.mjs
+
       - name: Build (Netlify-safe)
         # TODO: replace with strict command once build is stable
         # Currently non-blocking to allow merge during recovery.

@@ -15,7 +15,8 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import type { Playbook } from "contentlayer/generated";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Playbook = any;
 import {
   ArrowLeft,
   ArrowRight,
