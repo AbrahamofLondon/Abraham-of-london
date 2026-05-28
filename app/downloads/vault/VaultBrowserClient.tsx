@@ -4,48 +4,56 @@
 import * as React from "react";
 import {
   FileText,
-  Workflow,
-  Scale,
-  ShieldCheck,
   Download,
   Search,
   LayoutGrid,
-  List
+  List,
+  Lock,
+  BookOpen,
 } from "lucide-react";
 import { InterfaceCard, MetadataTag } from "@/components/ui/BrandAssets";
 
-const vaultItems = [
-  {
-    id: "AOL-ARTEFACT-001",
-    category: "Governance",
-    title: "Decision Rights Matrix",
-    description: "The definitive framework for assigning institutional accountability and decision-making authority.",
-    type: "PDF + XLSX",
-    icon: <Scale className="h-5 w-5" />
-  },
-  {
-    id: "AOL-ARTEFACT-002",
-    category: "Operations",
-    title: "Weekly Operating Cadence",
-    description: "Meeting architectures and reporting loops for high-velocity executive teams.",
-    type: "NOTION PACK",
-    icon: <Workflow className="h-5 w-5" />
-  },
-  {
-    id: "AOL-ARTEFACT-003",
-    category: "Strategy",
-    title: "Cross-Examination Toolkit",
-    description: "A series of 12 stress-tests designed to expose hidden vulnerabilities in corporate strategy.",
-    type: "DOCX",
-    icon: <ShieldCheck className="h-5 w-5" />
-  },
-];
+export type VaultBrowserItem = {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  type: string;
+  href: string;
+  access: string;
+  isDownloadable: boolean;
+};
 
-export default function VaultBrowserClient() {
+type VaultBrowserClientProps = {
+  items: VaultBrowserItem[];
+};
+
+function itemMatches(item: VaultBrowserItem, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return [
+    item.id,
+    item.category,
+    item.title,
+    item.description,
+    item.type,
+    item.access,
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes(q);
+}
+
+export default function VaultBrowserClient({ items }: VaultBrowserClientProps) {
+  const [query, setQuery] = React.useState("");
+  const visibleItems = React.useMemo(
+    () => items.filter((item) => itemMatches(item, query)),
+    [items, query],
+  );
+
   return (
     <main className="min-h-screen bg-[#060609] pt-32 pb-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b border-white/5 pb-12">
           <div className="max-w-2xl">
             <MetadataTag>Authorized Repository</MetadataTag>
@@ -62,21 +70,27 @@ export default function VaultBrowserClient() {
             <input
               type="text"
               placeholder="Filter by ID or Category..."
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-all"
             />
           </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {vaultItems.map((item) => (
+          {visibleItems.map((item) => (
             <InterfaceCard key={item.id} className="p-8 group/item">
               <div className="flex justify-between items-start mb-12">
                 <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 group-hover/item:bg-amber-500/20 transition-all">
-                  {item.icon}
+                  {item.isDownloadable ? (
+                    <Download className="h-5 w-5" />
+                  ) : (
+                    <BookOpen className="h-5 w-5" />
+                  )}
                 </div>
                 <div className="text-right">
-                  <div className="text-[9px] font-mono text-white/20 uppercase tracking-tighter">
-                    {item.id}
+                  <div className="max-w-[12rem] truncate text-[9px] font-mono text-white/20 uppercase tracking-tighter">
+                    {item.id.replace(/^\/vault\//, "")}
                   </div>
                   <div className="mt-1 text-[10px] font-black text-amber-500/60 uppercase">
                     {item.category}
@@ -94,13 +108,20 @@ export default function VaultBrowserClient() {
               <div className="flex items-center justify-between pt-6 border-t border-white/5">
                 <span className="flex items-center gap-2 text-[10px] font-mono text-white/20">
                   <FileText className="h-3 w-3" />
-                  {item.type}
+                  {item.type.toUpperCase()}
                 </span>
 
-                <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-white transition-colors">
-                  <Download className="h-3.5 w-3.5" />
-                  Download
-                </button>
+                <a
+                  href={item.href}
+                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-white transition-colors"
+                >
+                  {item.isDownloadable ? (
+                    <Download className="h-3.5 w-3.5" />
+                  ) : (
+                    <Lock className="h-3.5 w-3.5" />
+                  )}
+                  {item.isDownloadable ? "Download" : "Open"}
+                </a>
               </div>
 
               <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none opacity-0 group-hover/item:opacity-100 transition-opacity">

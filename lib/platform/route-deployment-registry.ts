@@ -13,7 +13,7 @@
  *      The build fails if a page file exists without a registry entry.
  *   2. REDIRECT_ONLY and LEGACY_DISABLED routes MUST NOT have physical page files.
  *      They are handled by config-level redirects in next.config.mjs.
- *   3. DEBUG_INTERNAL routes MUST NOT be productionDeployable.
+ *   3. DEBUG_INTERNAL routes that are productionDeployable MUST require auth.
  *   4. A redirectConfigured:true entry MUST have a matching source in next.config.mjs.
  *
  * Route path format:
@@ -107,11 +107,11 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
   },
   {
     path: "/dashboard/pdf-analytics",
-    class: "PUBLIC_DYNAMIC",
+    class: "ADMIN_DYNAMIC",
     owner: "platform",
     intent: "PDF Analytics Engine — OGR-IV telemetry terminal; server-wrapper + PdfAnalyticsClient",
     deployable: true,
-    requiresAuth: false,
+    requiresAuth: true,
     requiresDatabase: false,
     requiresRuntime: "nodejs",
     platform: "vercel",
@@ -135,11 +135,11 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
   },
   {
     path: "/pdf-dashboard",
-    class: "PUBLIC_DYNAMIC",
+    class: "ADMIN_DYNAMIC",
     owner: "platform",
     intent: "Sovereign telemetry dashboard — print/export; server-wrapper + PdfDashboardClient",
     deployable: true,
-    requiresAuth: false,
+    requiresAuth: true,
     requiresDatabase: false,
     requiresRuntime: "nodejs",
     platform: "vercel",
@@ -149,17 +149,17 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
   },
   {
     path: "/testing/lab",
-    class: "REDIRECT_ONLY",
+    class: "DEBUG_INTERNAL",
     owner: "platform",
-    intent: "Redirect to /admin/intelligence-foundry for retired testing route",
+    intent: "Internal strategic stress workbench restored behind app/testing admin layout",
     deployable: true,
-    requiresAuth: false,
+    requiresAuth: true,
     requiresDatabase: false,
-    requiresRuntime: "static",
+    requiresRuntime: "nodejs",
     platform: "vercel",
-    physicalRouteAllowed: false,
-    redirectConfigured: true,
-    productionDeployable: false,
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
