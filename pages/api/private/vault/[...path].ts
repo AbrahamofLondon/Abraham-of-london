@@ -7,12 +7,18 @@ import fs from "fs";
 import { getInnerCircleAccess } from "@/lib/inner-circle/access.server";
 import tiers, { requiredTierFromVaultPath } from "@/lib/access/tiers";
 import { vaultRuntimeConfig } from "@/lib/runtime/vault-config";
-import { getVaultManifestEntry } from "@/lib/runtime/vault-manifest";
+import { getVaultManifestEntry } from "@/lib/runtime/vault-file-manifest";
 
-const VAULT_ROOT = path.join(
-  /* turbopackIgnore: true */ process.cwd(),
-  ...vaultRuntimeConfig.vaultRootSegments,
-);
+const VAULT_ROOT = path.resolve("private", "vault");
+const VAULT_FILE_PATHS: Readonly<Record<string, string>> = {
+  "frameworks/inner-circle/operating-cadence-pack.pptx": path.resolve(
+    "private",
+    "vault",
+    "frameworks",
+    "inner-circle",
+    "operating-cadence-pack.pptx",
+  ),
+};
 
 function contentTypeFor(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
@@ -76,7 +82,9 @@ function safeResolveVaultPath(parts: string[]): string | null {
   const entry = getVaultManifestEntry(key);
   if (!entry) return null;
 
-  const joined = path.join(VAULT_ROOT, ...entry.key.split("/"));
+  const joined = VAULT_FILE_PATHS[entry.key];
+  if (!joined) return null;
+
   const normalizedRoot = path.resolve(VAULT_ROOT);
   const normalizedJoined = path.resolve(joined);
 
