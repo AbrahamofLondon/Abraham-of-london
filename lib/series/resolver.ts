@@ -53,6 +53,7 @@ export type ResolvedSeries = {
 // ---------------------------------------------------------------------------
 
 import { getDocumentsForKind } from "./data";
+import { classifyPublication, computeSeriesPublicationState, isPublicNow, getToday } from "@/lib/content/publication-eligibility";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -80,15 +81,15 @@ function normaliseSeriesSlug(raw: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function docToSeriesPart(doc: any): SeriesPart {
+function docToSeriesPart(doc: any, now: Date = getToday()): SeriesPart {
+  const classification = classifyPublication(doc, now);
   return {
     order: doc.seriesOrder ?? 0,
     slug: doc.slug ?? doc.slugSafe ?? "",
     title: doc.title ?? doc.titleSafe ?? "Untitled",
     excerpt: doc.excerpt ?? doc.excerptSafe ?? doc.description ?? "",
     readTime: doc.readTime ?? doc.readTimeSafe ?? "",
-    status:
-      doc.draft === true || doc.published === false ? "DRAFT" : "PUBLISHED",
+    status: classification === "PUBLIC_NOW" ? "PUBLISHED" : "DRAFT",
     mdxSlug: doc.slug ?? doc.slugSafe ?? undefined,
   };
 }
@@ -142,15 +143,20 @@ export function resolveAllSeries(
 
   const seriesList: ResolvedSeries[] = [];
 
+  const now = getToday();
+
   for (const [slug, { docs, rawSlug }] of groups.entries()) {
     // Sort parts by seriesOrder ascending
     const sortedParts = [...docs].sort(
       (a, b) => (a.seriesOrder ?? 0) - (b.seriesOrder ?? 0),
     );
 
-    const allParts: SeriesPart[] = sortedParts.map((doc) => docToSeriesPart(doc));
+    const allParts: SeriesPart[] = sortedParts.map((doc) => docToSeriesPart(doc, now));
     const publishedParts = allParts.filter((p) => p.status === "PUBLISHED");
     const firstDoc = sortedParts[0];
+
+    // Use shared publication classifier for series-level state
+    const seriesPubState = computeSeriesPublicationState(sortedParts, now);
 
     // Derive series-level metadata from frontmatter or first document
     const seriesTitle =
@@ -164,8 +170,25 @@ export function resolveAllSeries(
 
     const publishedPartCount = publishedParts.length;
 
-    // If no published parts, skip public exposure
+    // If no published parts, skip public exposure (unless approved teaser)
     if (publishedPartCount === 0) continue;
+
+    // Map computed state to resolver status
+    let seriesStatus: SeriesPartStatus;
+    switch (seriesPubState.seriesVisibility) {
+      case "COMPLETE":
+        seriesStatus = "PUBLISHED";
+        break;
+      case "IN_PROGRESS":
+        seriesStatus = "DRAFT";
+        break;
+      case "SCHEDULED":
+      case "DRAFT":
+      case "HIDDEN":
+      default:
+        seriesStatus = "DRAFT";
+        break;
+    }
 
     seriesList.push({
       slug,
@@ -174,9 +197,9 @@ export function resolveAllSeries(
       excerpt: firstDoc.excerpt ?? firstDoc.description ?? "",
       category: firstDoc.category ?? "Essays",
       tags: Array.isArray(firstDoc.tags) ? firstDoc.tags : [],
-      partCount: publishedPartCount,
+      partCount: seriesPubState.totalParts,
       publishedPartCount,
-      status: publishedPartCount === allParts.length ? "PUBLISHED" : "DRAFT",
+      status: seriesStatus,
       parts: publishedParts,
     });
   }
