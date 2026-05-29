@@ -119,10 +119,19 @@ function StatusChip({ status }: { status: string }) {
 
 function apiEndpointFor(engineId: string): string | null {
   const map: Record<string, string> = {
-    "fast-diagnostic":      "/api/admin/intelligence-foundry/simulation/fast-diagnostic",
-    "market-response":      "/api/admin/intelligence-foundry/market/analyze",
-    "content-red-team":     "/api/admin/intelligence-foundry/red-team/content/run",
-    "security-red-team":    "/api/admin/intelligence-foundry/red-team/security/run",
+    // Core engines with dedicated run routes
+    "fast-diagnostic":                    "/api/admin/intelligence-foundry/engines/fast-diagnostic/run",
+    "strategy-room":                      "/api/admin/intelligence-foundry/engines/strategy-room/run",
+    "boardroom-dossier":                  "/api/admin/intelligence-foundry/engines/boardroom-mode/run",
+    "executive-reporting":                "/api/admin/intelligence-foundry/engines/executive-reporting/run",
+    "executive-report-boardroom-bridge":  "/api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run",
+    // Specialist lab endpoints
+    "market-response":                    "/api/admin/intelligence-foundry/market/analyze",
+    "editorial-style-checker":            "/api/admin/intelligence-foundry/content/analyze",
+    "outbound-policy-gate":               "/api/admin/intelligence-foundry/outbound/analyze",
+    // Red-team endpoints
+    "content-red-team":                   "/api/admin/intelligence-foundry/red-team/content/run",
+    "security-red-team":                  "/api/admin/intelligence-foundry/red-team/security/run",
   };
   return map[engineId] ?? null;
 }

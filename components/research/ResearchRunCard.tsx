@@ -21,6 +21,24 @@ export function ResearchRunCard({ run }: { run: ResearchRun }) {
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <SeverityBadge severity={run.severity} />
             <RunStatusBadge status={run.status} />
+            {run.maturityStage && (
+              <span className={`rounded px-1.5 py-0.5 text-[9px] font-mono uppercase ${
+                run.maturityStage === "LIVE_GOVERNED"  ? "bg-emerald-500/10 text-emerald-400/70 border border-emerald-500/15" :
+                run.maturityStage === "PILOT_READY"    ? "bg-violet-500/10 text-violet-400/70 border border-violet-500/15" :
+                run.maturityStage === "SIMULATION_ONLY"? "bg-purple-500/10 text-purple-400/60 border border-purple-500/12" :
+                "bg-white/5 text-white/30 border border-white/8"
+              }`}>
+                {run.maturityStage === "LIVE_GOVERNED" ? "Live" :
+                 run.maturityStage === "PILOT_READY"   ? "Pilot" :
+                 run.maturityStage === "SIMULATION_ONLY" ? "Sim" :
+                 run.maturityStage === "RESERVED_CONCEPT" ? "Reserved" : run.maturityStage}
+              </span>
+            )}
+            {run.promotionDecision && (
+              <span className="rounded bg-amber-500/8 px-1.5 py-0.5 text-[9px] font-mono text-amber-400/60 border border-amber-500/12">
+                {run.promotionDecision}
+              </span>
+            )}
             {run.isDemo && (
               <span className="rounded bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-mono text-purple-400">
                 DEMO

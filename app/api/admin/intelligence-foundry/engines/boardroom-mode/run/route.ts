@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
-import { boardroomModeAdapter, BOARDROOM_ENGINE_ID, BOARDROOM_VERSION } from "@/lib/research/engines/boardroom-mode-adapter";
+import { boardroomDossierAdapter as boardroomModeAdapter, BOARDROOM_ENGINE_ID, BOARDROOM_VERSION } from "@/lib/research/engines/boardroom-dossier-adapter";
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdminAppRoute();
