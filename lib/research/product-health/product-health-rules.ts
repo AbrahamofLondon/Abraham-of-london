@@ -24,7 +24,7 @@ import "server-only";
 import { getProductLadderEntry, type ProductLadderEntry } from "@/lib/platform/product-ladder-registry";
 import { getCanonicalRecord } from "@/lib/platform/canonical-record-registry";
 import { getAdminRoute } from "@/lib/platform/admin-domain-registry";
-import { getEventType } from "@/lib/platform/governance-event-types";
+import { getEventType, getEffectiveMaturity, affectsProductHealth } from "@/lib/platform/governance-event-types";
 import { getEngine } from "@/lib/research/engine-registry";
 import { getModule } from "@/lib/research/module-registry";
 import { getAdapter } from "@/lib/research/adapter-registry";
@@ -193,12 +193,13 @@ export function checkLineageCoverage(surface: ProductLadderEntry): RuleResult {
 //
 // GREEN requires all declared events to be:
 //   (a) registered in GOVERNANCE_EVENT_TYPES, AND
-//   (b) not marked reserved — i.e. wired to the governance bus in live code.
+//   (b) at LIVE_GOVERNED maturity — i.e. wired to the governance bus in live code.
 //
-// Reserved events are registered vocabulary but have no live governance bus
-// emitter yet. Reserved ≠ live. Reserved ≠ integrated. Reserved ≠ durable.
-// A surface that declares only reserved events has documented intent, not
-// working coverage — it must not receive a GREEN from this rule.
+// Events at RESERVED_CONCEPT, SIMULATION_ONLY, or PILOT_READY maturity have
+// documented intent but no live governance bus wiring yet. They must not
+// receive a GREEN from this rule.
+//
+// Only LIVE_GOVERNED counts as GREEN for Product Health.
 
 export function checkGovernanceEvents(surface: ProductLadderEntry): RuleResult {
   if (surface.lineageEvents.length === 0 && surface.auditEvents.length === 0) {
@@ -207,7 +208,11 @@ export function checkGovernanceEvents(surface: ProductLadderEntry): RuleResult {
 
   const allEvents = [...new Set([...surface.lineageEvents, ...surface.auditEvents])];
   const missing = allEvents.filter((e) => !getEventType(e));
-  const reservedEvents = allEvents.filter((e) => getEventType(e)?.reserved === true);
+  const notLiveGoverned = allEvents.filter((e) => {
+    const entry = getEventType(e);
+    if (!entry) return false;
+    return !affectsProductHealth(entry);
+  });
 
   if (missing.length === allEvents.length) {
     return { status: "RED", explanation: `None of ${allEvents.length} declared events found in governance-event-types.` };
@@ -218,18 +223,22 @@ export function checkGovernanceEvents(surface: ProductLadderEntry): RuleResult {
       explanation: `${missing.length}/${allEvents.length} declared events not in governance-event-types: ${missing.join(", ")}.`,
     };
   }
-  if (reservedEvents.length > 0) {
+  if (notLiveGoverned.length > 0) {
+    const details = notLiveGoverned.map((e) => {
+      const entry = getEventType(e);
+      return `${e} (${getEffectiveMaturity(entry!)})`;
+    });
     return {
       status: "AMBER",
       explanation:
-        `${reservedEvents.length}/${allEvents.length} declared event(s) are reserved — ` +
-        `registered in vocabulary but governance bus wiring is pending: ${reservedEvents.join(", ")}. ` +
-        `Reserved ≠ integrated.`,
+        `${notLiveGoverned.length}/${allEvents.length} declared event(s) are not LIVE_GOVERNED — ` +
+        `registered in vocabulary but governance bus wiring is pending: ${details.join(", ")}. ` +
+        `Only LIVE_GOVERNED counts as GREEN.`,
     };
   }
   return {
     status: "GREEN",
-    explanation: `All ${allEvents.length} declared events are registered and have live governance bus wiring.`,
+    explanation: `All ${allEvents.length} declared events are LIVE_GOVERNED with governance bus wiring.`,
   };
 }
 

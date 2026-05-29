@@ -3,21 +3,32 @@
  *
  * Governance Event Durability Audit
  *
+ * Uses the 5-stage event maturity model:
+ *   RESERVED_CONCEPT → SIMULATION_ONLY → PILOT_READY → LIVE_GOVERNED → RETIRED
+ *
  * Checks:
  *   1. Emitted event not registered — RED
  *      Any eventType emitted via routeGovernanceEvent/emitGovernanceEvent that
  *      is not in GOVERNANCE_EVENT_TYPES.
- *   2. Registered event never emitted (unless reserved: true) — AMBER
- *      Events in the registry with no governance-bus emitter, not marked reserved.
- *   3. Reserved events correctly documented — GREEN
- *      Events marked reserved: true with a reservedReason are acceptable.
+ *   2. Registered event never emitted (unless RESERVED_CONCEPT or SIMULATION_ONLY) — AMBER
+ *      Events in the registry with no governance-bus emitter, not in pipeline stages
+ *      where that's expected.
+ *   3. LIVE_GOVERNED event without emitter — RED
+ *      Events claiming LIVE_GOVERNED maturity must have a governance-bus emitter.
  *   4. Simulation event labeled real — RED
  *      eventType emission inside a dryRun conditional that uses a real (non-simulation)
- *      event name. After Phase 2 fixes the scheduler uses status:"dry_run" so this
- *      catches regressions.
+ *      event name.
  *   5. Competing governance event registries — RED
  *      More than one file exports GOVERNANCE_EVENT_TYPES or similar canonical
  *      event registry.
+ *   6. RETIRED events still emitting — AMBER
+ *      Events marked RETIRED should not have active emitters.
+ *
+ * Rules:
+ *   - Only LIVE_GOVERNED counts as GREEN for Product Health.
+ *   - RESERVED_CONCEPT, SIMULATION_ONLY, and PILOT_READY must never make
+ *     dashboards green — they are governance vocabulary waiting for proof.
+ *   - RETIRED should be rare and requires justification.
  *
  * Durability note:
  *   All events emitted through routeGovernanceEvent → emitGovernanceEvent go through
@@ -62,13 +73,57 @@ function allFiles() {
   return Array.from(new Set(SURFACE_ROOTS.flatMap(walk))).sort();
 }
 
+// ─── Maturity helpers ─────────────────────────────────────────────────────────
+
+const MATURITY_ORDER = {
+  RESERVED_CONCEPT: 0,
+  SIMULATION_ONLY: 1,
+  PILOT_READY: 2,
+  LIVE_GOVERNED: 3,
+  RETIRED: 4,
+};
+
+/**
+ * Parse maturity from a registry entry block.
+ * Falls back to RESERVED_CONCEPT if reserved: true is set (backward compat).
+ */
+function parseMaturity(block) {
+  const m = block.match(/maturity:\s*["']([A-Z_]+)["']/);
+  if (m) return m[1];
+  if (/reserved:\s*true/.test(block)) return "RESERVED_CONCEPT";
+  return "LIVE_GOVERNED"; // default for legacy entries without maturity
+}
+
+function parseCurrentReality(block) {
+  const r = block.match(/currentReality:\s*["']([a-z_]+)["']/);
+  if (r) return r[1];
+  const maturity = parseMaturity(block);
+  if (maturity === "LIVE_GOVERNED") return "real";
+  if (maturity === "SIMULATION_ONLY") return "simulation";
+  if (maturity === "PILOT_READY") return "dry_run";
+  return "reserved";
+}
+
+function parseAffectsProductHealth(block) {
+  const m = block.match(/affectsProductHealth:\s*(true|false)/);
+  if (m) return m[1] === "true";
+  return parseMaturity(block) === "LIVE_GOVERNED";
+}
+
+function parseAppearsInDashboards(block) {
+  const m = block.match(/appearsInDashboards:\s*(true|false)/);
+  if (m) return m[1] === "true";
+  const maturity = parseMaturity(block);
+  return maturity !== "RESERVED_CONCEPT" && maturity !== "RETIRED";
+}
+
 // ─── Registry loader ──────────────────────────────────────────────────────────
 
 const REGISTRY_FILE = "lib/platform/governance-event-types.ts";
 
 /**
  * Parse the GOVERNANCE_EVENT_TYPES array from source.
- * Each entry is: { eventType, reserved?, reservedReason?, writesAudit, writesLineage }
+ * Each entry now includes maturity, currentReality, affectsProductHealth, etc.
  */
 function loadRegistry() {
   const src = read(REGISTRY_FILE);
@@ -78,12 +133,38 @@ function loadRegistry() {
     const block = match[0];
     const eventType = block.match(/eventType:\s*["']([A-Z_]+)["']/)?.[1];
     if (!eventType) continue;
+
+    const maturity = parseMaturity(block);
+    const currentReality = parseCurrentReality(block);
+    const affectsProductHealth = parseAffectsProductHealth(block);
+    const appearsInDashboards = parseAppearsInDashboards(block);
     const reserved = /reserved:\s*true/.test(block);
     const reservedReason = block.match(/reservedReason:\s*["']([^"']+)["']/)?.[1] ?? null;
     const writesAudit = /writesAudit:\s*true/.test(block);
     const writesLineage = /writesLineage:\s*true/.test(block);
     const adminDomain = block.match(/adminDomain:\s*["']([^"']+)["']/)?.[1] ?? "unknown";
-    entries.push({ eventType, reserved, reservedReason, writesAudit, writesLineage, adminDomain });
+    const targetMaturity = block.match(/targetMaturity:\s*["']([A-Z_]+)["']/)?.[1] ?? null;
+    // Extract promotionCriteria and blockingGaps arrays
+    const pcMatch = block.match(/promotionCriteria:\s*\[([^\]]*)\]/);
+    const promotionCriteria = pcMatch ? [...pcMatch[1].matchAll(/["']([^"']+)["']/g)].map((m) => m[1]) : [];
+    const bgMatch = block.match(/blockingGaps:\s*\[([^\]]*)\]/);
+    const blockingGaps = bgMatch ? [...bgMatch[1].matchAll(/["']([^"']+)["']/g)].map((m) => m[1]) : [];
+
+    entries.push({
+      eventType,
+      maturity,
+      currentReality,
+      affectsProductHealth,
+      appearsInDashboards,
+      reserved,
+      reservedReason,
+      writesAudit,
+      writesLineage,
+      adminDomain,
+      targetMaturity,
+      promotionCriteria,
+      blockingGaps,
+    });
   }
 
   return entries;
@@ -91,9 +172,6 @@ function loadRegistry() {
 
 // ─── Infrastructure files excluded from "emitter" scan ───────────────────────
 
-// These files define eventType fields for purposes other than live governance bus emission:
-// the registry itself, the bus (exports functions, not emitters), the product contract
-// (type definitions), and the lineage chain definitions (simulation reference data).
 const INFRASTRUCTURE_FILES = new Set([
   "lib/platform/governance-event-types.ts",
   "lib/platform/governance-event-bus.ts",
@@ -103,11 +181,6 @@ const INFRASTRUCTURE_FILES = new Set([
 
 // ─── Emitter scanner ──────────────────────────────────────────────────────────
 
-/**
- * Find all governance event emissions across the codebase.
- * Only files that import routeGovernanceEvent or emitGovernanceEvent are
- * considered emitters. The eventType: field is the standard governance bus param.
- */
 function findEmissions(files) {
   const emissions = [];
 
@@ -117,20 +190,14 @@ function findEmissions(files) {
 
     const src = read(file);
 
-    // Only process files that actually call the governance bus
     if (!/routeGovernanceEvent|emitGovernanceEvent/.test(src)) continue;
 
     for (const match of src.matchAll(/eventType:\s*["']([A-Z_]+)["']/g)) {
       const eventType = match[1];
       const idx = match.index;
-
-      // Check if this emission is inside a dryRun conditional block.
       const before = src.slice(Math.max(0, idx - 400), idx);
       const inDryRunContext = /if\s*\([^)]*dryRun/.test(before);
-
-      // Check if the event name itself signals simulation
       const isSimulationEvent = /SIMULATED|DRY_RUN|PREVIEW|SAMPLE|FIXTURE|TEST/.test(eventType);
-
       emissions.push({ file, eventType, inDryRunContext, isSimulationEvent });
     }
   }
@@ -144,7 +211,6 @@ function findCompetingRegistries(files) {
   const competing = [];
   for (const file of files) {
     if (file === REGISTRY_FILE) continue;
-    // Exclude audit/check scripts — they reference the registry name in comments/strings
     if (/scripts\/check-/.test(file)) continue;
     const src = read(file);
     if (/export\s+const\s+GOVERNANCE_EVENT_TYPES|export.*GovernanceEventRegistry|export.*EVENT_REGISTRY/.test(src)) {
@@ -160,6 +226,7 @@ function buildEmitterInventory(emissions, registryMap) {
   return emissions.map((e) => {
     const reg = registryMap.get(e.eventType);
     const registered = Boolean(reg);
+    const maturity = reg?.maturity ?? "unknown";
     const isReserved = reg?.reserved ?? false;
 
     let risk = "GREEN";
@@ -171,13 +238,19 @@ function buildEmitterInventory(emissions, registryMap) {
     } else if (e.inDryRunContext && !e.isSimulationEvent) {
       risk = "RED";
       recommendedFix = `Event "${e.eventType}" is emitted inside a dryRun block but is not a simulation event. Use a simulation-namespaced event or add !dryRun guard.`;
+    } else if (reg && maturity === "RETIRED") {
+      risk = "AMBER";
+      recommendedFix = `Event "${e.eventType}" is RETIRED but still has active emitters. Remove emitter or update maturity.`;
     }
 
     return {
       file: e.file,
       eventType: e.eventType,
       registered,
+      maturity,
       reserved: isReserved,
+      affectsProductHealth: reg?.affectsProductHealth ?? false,
+      appearsInDashboards: reg?.appearsInDashboards ?? true,
       durableWriteDetected: registered ? (reg.writesAudit || reg.writesLineage ? "confirmed_via_bus" : "none") : "unknown",
       simulationContext: e.inDryRunContext,
       simulationEvent: e.isSimulationEvent,
@@ -191,19 +264,39 @@ function buildRegistryInventory(registryEntries, emittedSet) {
   return registryEntries.map((entry) => {
     const emittedCount = emittedSet.get(entry.eventType) ?? 0;
     const hasEmitter = emittedCount > 0;
-    // Reserved events are intentionally unwired — distinct from GREEN (live + durable).
-    // RESERVED = vocabulary documented, bus wiring pending. Reserved ≠ live.
-    const missingEmitterRisk = !hasEmitter ? (entry.reserved ? "RESERVED" : "AMBER") : "GREEN";
+
+    // Determine risk based on maturity model
+    let missingEmitterRisk;
+    if (hasEmitter) {
+      missingEmitterRisk = "GREEN";
+    } else if (entry.maturity === "RESERVED_CONCEPT" || entry.maturity === "SIMULATION_ONLY") {
+      // Expected: these stages don't require live emitters
+      missingEmitterRisk = "RESERVED";
+    } else if (entry.maturity === "LIVE_GOVERNED") {
+      // RED: LIVE_GOVERNED must have an emitter
+      missingEmitterRisk = "RED";
+    } else if (entry.maturity === "RETIRED") {
+      // RETIRED without emitter is fine
+      missingEmitterRisk = "RETIRED";
+    } else {
+      // PILOT_READY without emitter is AMBER (should be working toward it)
+      missingEmitterRisk = "AMBER";
+    }
 
     return {
       eventType: entry.eventType,
       adminDomain: entry.adminDomain,
+      maturity: entry.maturity,
+      currentReality: entry.currentReality,
+      targetMaturity: entry.targetMaturity,
+      affectsProductHealth: entry.affectsProductHealth,
+      appearsInDashboards: entry.appearsInDashboards,
+      promotionCriteria: entry.promotionCriteria,
+      blockingGaps: entry.blockingGaps,
       reserved: entry.reserved,
-      reservedReason: entry.reservedReason,
       emittedCount,
       hasLiveEmitter: hasEmitter,
       durabilityExpectation: entry.writesAudit || entry.writesLineage ? "durable_required" : "none",
-      realityClassification: entry.reserved ? "reserved" : "real",
       missingEmitterRisk,
     };
   });
@@ -257,21 +350,51 @@ export async function runGovernanceEventAudit({ fail = true } = {}) {
     }
   }
 
-  // ── 3: Registered not emitted (unless reserved) ────────────────────────
+  // ── 3: LIVE_GOVERNED without emitter ───────────────────────────────────
   for (const entry of registryEntries) {
-    if (!emittedSet.has(entry.eventType) && !entry.reserved) {
+    if (entry.maturity === "LIVE_GOVERNED" && !emittedSet.has(entry.eventType)) {
       findings.push({
-        severity: "AMBER",
-        code: "REGISTERED_EVENT_NOT_EMITTED",
-        message: `"${entry.eventType}" is registered but has no governance-bus emitter and is not marked reserved`,
+        severity: "RED",
+        code: "LIVE_GOVERNED_NO_EMITTER",
+        message: `"${entry.eventType}" is LIVE_GOVERNED but has no governance-bus emitter`,
         eventType: entry.eventType,
         adminDomain: entry.adminDomain,
-        recommendedFix: `Either add a routeGovernanceEvent emitter, or mark as reserved: true with reservedReason in ${REGISTRY_FILE}`,
+        recommendedFix: `Add a routeGovernanceEvent emitter for "${entry.eventType}" or downgrade maturity to PILOT_READY/RESERVED_CONCEPT`,
       });
     }
   }
 
-  // ── 4: Competing registries ────────────────────────────────────────────
+  // ── 4: PILOT_READY without emitter ─────────────────────────────────────
+  for (const entry of registryEntries) {
+    if (entry.maturity === "PILOT_READY" && !emittedSet.has(entry.eventType)) {
+      findings.push({
+        severity: "AMBER",
+        code: "PILOT_READY_NO_EMITTER",
+        message: `"${entry.eventType}" is PILOT_READY but has no governance-bus emitter yet`,
+        eventType: entry.eventType,
+        adminDomain: entry.adminDomain,
+        promotionCriteria: entry.promotionCriteria,
+        blockingGaps: entry.blockingGaps,
+        recommendedFix: `Add a routeGovernanceEvent emitter or downgrade maturity to RESERVED_CONCEPT`,
+      });
+    }
+  }
+
+  // ── 5: RETIRED events still emitting ───────────────────────────────────
+  for (const entry of registryEntries) {
+    if (entry.maturity === "RETIRED" && emittedSet.has(entry.eventType)) {
+      findings.push({
+        severity: "AMBER",
+        code: "RETIRED_STILL_EMITTING",
+        message: `"${entry.eventType}" is RETIRED but still has active emitters`,
+        eventType: entry.eventType,
+        adminDomain: entry.adminDomain,
+        recommendedFix: `Remove emitters for "${entry.eventType}" or update maturity if still needed`,
+      });
+    }
+  }
+
+  // ── 6: Competing registries ────────────────────────────────────────────
   for (const file of competingRegistries) {
     findings.push({
       severity: "RED",
@@ -288,19 +411,30 @@ export async function runGovernanceEventAudit({ fail = true } = {}) {
 
   const red = findings.filter((f) => f.severity === "RED").length;
   const amber = findings.filter((f) => f.severity === "AMBER").length;
-  const reservedCount = registryEntries.filter((e) => e.reserved).length;
-  const activeCount = registryEntries.filter((e) => !e.reserved && emittedSet.has(e.eventType)).length;
 
-  // reserved ≠ live. Reserved events are documented vocabulary with bus wiring
-  // pending. They must not inflate the live/integrated count. green = active only.
+  // Count by maturity stage
+  const reservedConceptCount = registryEntries.filter((e) => e.maturity === "RESERVED_CONCEPT").length;
+  const simulationOnlyCount = registryEntries.filter((e) => e.maturity === "SIMULATION_ONLY").length;
+  const pilotReadyCount = registryEntries.filter((e) => e.maturity === "PILOT_READY").length;
+  const liveGovernedCount = registryEntries.filter((e) => e.maturity === "LIVE_GOVERNED").length;
+  const retiredCount = registryEntries.filter((e) => e.maturity === "RETIRED").length;
+
+  // Only LIVE_GOVERNED counts as GREEN
+  const greenCount = liveGovernedCount;
+
   const summary = {
     registeredEvents: registryEntries.length,
     activeEmitters: uniqueEmitted.size,
-    reservedEvents: reservedCount,
-    activeRegisteredEvents: activeCount,
+    maturityBreakdown: {
+      RESERVED_CONCEPT: reservedConceptCount,
+      SIMULATION_ONLY: simulationOnlyCount,
+      PILOT_READY: pilotReadyCount,
+      LIVE_GOVERNED: liveGovernedCount,
+      RETIRED: retiredCount,
+    },
     red,
     amber,
-    green: activeCount,
+    green: greenCount,
   };
 
   fs.writeFileSync(
@@ -318,8 +452,8 @@ export async function runGovernanceEventAudit({ fail = true } = {}) {
 
   console.log(`[governance-events] RED: ${red}`);
   console.log(`[governance-events] AMBER: ${amber}`);
-  console.log(`[governance-events] LIVE: ${activeCount} (active, governance bus wired)`);
-  console.log(`[governance-events] RESERVED: ${reservedCount} (vocabulary registered, bus wiring pending — reserved ≠ live)`);
+  console.log(`[governance-events] GREEN (LIVE_GOVERNED): ${liveGovernedCount}`);
+  console.log(`[governance-events] Pipeline: RESERVED_CONCEPT=${reservedConceptCount} SIMULATION_ONLY=${simulationOnlyCount} PILOT_READY=${pilotReadyCount} RETIRED=${retiredCount}`);
 
   if (fail && red > 0) process.exitCode = 1;
   return { findings, summary };

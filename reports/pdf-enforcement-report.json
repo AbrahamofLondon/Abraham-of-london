@@ -1,10 +1,30 @@
 {
-  "generatedAt": "2026-05-26T09:13:02.640Z",
+  "generatedAt": "2026-05-28T17:50:41.737Z",
   "totals": {
-    "failures": 0,
+    "failures": 4,
     "warnings": 1
   },
   "findings": [
+    {
+      "rule": "download_route_resolves_identity",
+      "severity": "fail",
+      "message": "app/api/downloads/[slug]/route.ts must include getPdfAssetIdentityBySlug."
+    },
+    {
+      "rule": "download_route_resolves_delivery",
+      "severity": "fail",
+      "message": "app/api/downloads/[slug]/route.ts must include resolvePdfDelivery."
+    },
+    {
+      "rule": "download_route_enforces_delivery",
+      "severity": "fail",
+      "message": "app/api/downloads/[slug]/route.ts must include delivery.allowed."
+    },
+    {
+      "rule": "no_direct_pdf_asset_links",
+      "severity": "fail",
+      "message": "lib/downloads/download-manifest.ts contains a direct /assets/downloads/*.pdf link; use /api/downloads/{slug}."
+    },
     {
       "rule": "generated_pdf_inventory_outside_canonical_path",
       "severity": "warn",
