@@ -88,12 +88,22 @@ export async function POST(request: NextRequest) {
 
     if (!result.ok) {
       const status =
-        result.error.type === "INVALID_TRANSITION"    ? 422 :
-        result.error.type === "RUN_NOT_FOUND"         ? 404 :
-        result.error.type === "RUN_ARCHIVED"          ? 409 :
-        result.error.type === "DUPLICATE_PENDING"     ? 409 : 500;
+        result.error.type === "INVALID_TRANSITION"        ? 422 :
+        result.error.type === "EVIDENCE_RUN_REQUIRED"     ? 422 :
+        result.error.type === "RUN_HAS_CRITICAL_FINDINGS" ? 422 :
+        result.error.type === "RUN_NOT_FOUND"             ? 404 :
+        result.error.type === "RUN_ARCHIVED"              ? 409 :
+        result.error.type === "DUPLICATE_PENDING"         ? 409 : 500;
 
-      return NextResponse.json({ ok: false, error: result.error }, { status });
+      // Surface human-readable message for gate failures
+      const errorMsg =
+        result.error.type === "EVIDENCE_RUN_REQUIRED"
+          ? `Promotion to ${(result.error as { toStage: string }).toStage} requires a linked ResearchRun as evidence.`
+          : result.error.type === "RUN_HAS_CRITICAL_FINDINGS"
+          ? `Promotion to LIVE_GOVERNED is blocked: linked run has unresolved CRITICAL findings.`
+          : result.error;
+
+      return NextResponse.json({ ok: false, error: errorMsg }, { status });
     }
 
     return NextResponse.json({ ok: true, promotion: result.promotion }, { status: 201 });

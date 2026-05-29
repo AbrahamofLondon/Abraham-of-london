@@ -65,6 +65,8 @@ export type PromotionServiceError =
   | { type: "INVALID_TRANSITION"; from: string; to: string }
   | { type: "RUN_NOT_FOUND"; runId: string }
   | { type: "RUN_ARCHIVED"; runId: string }
+  | { type: "RUN_HAS_CRITICAL_FINDINGS"; runId: string }
+  | { type: "EVIDENCE_RUN_REQUIRED"; toStage: string }
   | { type: "DUPLICATE_PENDING"; eventType: string; toStage: string }
   | { type: "DB_ERROR"; message: string };
 
@@ -132,11 +134,19 @@ export async function createPromotion(
     };
   }
 
+  // ── Gate: LIVE_GOVERNED requires evidence run ──────────────────────────────
+  if (input.toStage === "LIVE_GOVERNED" && !input.researchRunId) {
+    return {
+      ok: false,
+      error: { type: "EVIDENCE_RUN_REQUIRED", toStage: input.toStage },
+    };
+  }
+
   // ── Validate evidence run (if provided) ────────────────────────────────────
   if (input.researchRunId) {
     const run = await prisma.researchRun.findUnique({
       where: { id: input.researchRunId },
-      select: { id: true, status: true },
+      select: { id: true, status: true, findingsJson: true },
     });
 
     if (!run) {
@@ -144,6 +154,22 @@ export async function createPromotion(
     }
     if (run.status === "ARCHIVED") {
       return { ok: false, error: { type: "RUN_ARCHIVED", runId: input.researchRunId } };
+    }
+
+    // Gate: LIVE_GOVERNED requires no unresolved CRITICAL findings
+    if (input.toStage === "LIVE_GOVERNED" && run.findingsJson) {
+      try {
+        const findings = JSON.parse(run.findingsJson) as Array<{ severity?: string }>;
+        const hasCritical = findings.some((f) => f.severity === "CRITICAL");
+        if (hasCritical) {
+          return {
+            ok: false,
+            error: { type: "RUN_HAS_CRITICAL_FINDINGS", runId: input.researchRunId },
+          };
+        }
+      } catch {
+        // findingsJson parse failure is non-fatal; proceed with promotion
+      }
     }
   }
 
