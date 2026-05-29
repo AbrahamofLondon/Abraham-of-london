@@ -153,8 +153,8 @@ export default function Layout({
             // Use CSS variable for background — consistent with globals.css
             headerTransparent ? "pt-0" : "pt-[84px]",
             fullWidth
-              ? "min-h-[calc(100vh-84px)]"
-              : "mx-auto min-h-[calc(100vh-84px)] max-w-7xl px-6 py-12 lg:px-12 lg:py-20",
+              ? "min-h-[calc(100vh-84px)] pb-24 lg:pb-32"
+              : "mx-auto min-h-[calc(100vh-84px)] max-w-7xl px-6 py-12 pb-24 lg:px-12 lg:py-20 lg:pb-32",
             className,
           )}
           style={{ backgroundColor: "rgb(var(--aol-bg))" }}
