@@ -230,7 +230,9 @@ export function resolveAllSeries(
       excerpt: firstDoc.excerpt ?? firstDoc.description ?? "",
       category: firstDoc.category ?? "Essays",
       tags: Array.isArray(firstDoc.tags) ? firstDoc.tags : [],
-      partCount: seriesPubState.totalParts,
+      // partCount reflects published parts only — drafts are not exposed in the
+      // public-facing ResolvedSeries. Use previewParts for scheduled previews.
+      partCount: publishedParts.length,
       publishedPartCount,
       status: seriesStatus,
       parts: publishedParts,

@@ -136,7 +136,7 @@ describe("Series Resolver", () => {
           seriesTitle: "Newer Series",
           seriesOrder: 1,
           slug: "newer-part-1",
-          date: "2026-06-01",
+          date: "2026-05-01", // Past date — 2026-06-01 is future, gets SCHEDULED_HIDDEN
         }),
       ]);
 

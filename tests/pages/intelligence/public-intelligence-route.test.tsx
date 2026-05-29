@@ -1,9 +1,10 @@
+import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getAllIntelligence: vi.fn(),
-  sanitizeData: vi.fn((value) => value),
+  sanitizeData: vi.fn((value: unknown) => value),
 }));
 
 vi.mock("@/lib/content/server", () => ({
@@ -15,12 +16,15 @@ vi.mock("@/components/Layout", () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock("@/components/mdx/SafeMDXRenderer", () => ({
-  default: ({ code }: { code: string }) => <div data-testid="body">{code}</div>,
-}));
-
-vi.mock("@/lib/content/render-body", () => ({
-  getRenderableBody: (doc: any) => ({ code: doc?.bodyCode || "" }),
+// Pages use renderDocBodyToStaticHtml + StaticMDXRenderer from static-mdx-runtime.
+// Mock them so the body content flows through without the real content classifier.
+vi.mock("@/lib/mdx/static-mdx-runtime", () => ({
+  renderDocBodyToStaticHtml: (doc: any) => ({
+    html: doc?.bodyCode ?? doc?.body?.code ?? "",
+    mode: "raw-mdx" as const,
+  }),
+  StaticMDXRenderer: ({ html }: { html?: string; doc?: any; className?: string }) =>
+    html ? React.createElement("div", { "data-testid": "mdx-body", dangerouslySetInnerHTML: { __html: html } }) : null,
 }));
 
 import PublicIntelligencePage, { getStaticProps } from "@/pages/intelligence/[slug]";
