@@ -48,6 +48,7 @@ type Props = {
   recommendations: BriefRecommendation[];
   requiredTier: AccessTier;
   bareSlug: string;
+  bodyEmpty?: boolean;
 };
 
 const DEFAULT_COVER = "/assets/images/canon/canon-resources.jpg";
@@ -246,6 +247,7 @@ const BriefPage: NextPage<Props> = ({
   recommendations,
   requiredTier,
   bareSlug,
+  bodyEmpty,
 }) => {
   const { data: session, status } = useSession();
 
@@ -320,6 +322,35 @@ const BriefPage: NextPage<Props> = ({
         <div className="flex min-h-screen items-center justify-center bg-black">
           <div className="animate-pulse font-mono text-xs text-amber-500">
             Verifying clearance...
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (bodyEmpty && !needsAuth) {
+    return (
+      <Layout title={title} description="This record is under institutional review.">
+        <div className="flex min-h-screen items-center justify-center bg-black px-6">
+          <div className="max-w-md text-center">
+            <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-amber-500/60">
+              Abraham of London · Vault
+            </p>
+            <h1 className="mt-4 font-serif text-3xl italic text-white/80">{title}</h1>
+            <p className="mt-6 font-mono text-[9px] uppercase tracking-[0.25em] text-white/30">
+              Under Institutional Review
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-white/20">
+              This record exists in the governed estate but its body has not been
+              cleared for public rendering. Contact the administration if you believe
+              this is in error.
+            </p>
+            <Link
+              href="/vault/briefs"
+              className="mt-8 inline-block font-mono text-[9px] uppercase tracking-[0.3em] text-amber-500/50 transition-colors hover:text-amber-500"
+            >
+              ← Return to Index
+            </Link>
           </div>
         </div>
       </Layout>
@@ -557,6 +588,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const renderBody = getRenderableBody(rawDoc);
   const bodyCode = locked ? "" : pickRenderableBriefCode(rawDoc, renderBody);
+  const bodyEmpty = !locked && (renderBody.mode === "empty" || renderBody.mode === "suspicious" || !bodyCode.trim());
 
   const recommendations: BriefRecommendation[] = docs
     .filter((doc: any) => {
@@ -569,8 +601,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       title: safeString(doc?.title) || "Untitled Brief",
     }));
 
+  // Strip body (raw MDX source + compiled code) before serialising into page
+  // props. Locked briefs set bodyCode="" above; rawDoc.body would still leak
+  // body.raw and body.code into __NEXT_DATA__ if spread unchecked.
+  const { body: _body, ...safeRawDoc } = rawDoc as any;
+
   const brief = {
-    ...rawDoc,
+    ...safeRawDoc,
     slug: bare,
     bodyCode,
     coverImage: resolveDocCoverImage(rawDoc),
@@ -582,6 +619,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       recommendations,
       requiredTier,
       bareSlug: bare,
+      bodyEmpty,
     }),
     revalidate: 1800,
   };

@@ -170,11 +170,16 @@ export const getStaticProps: GetStaticProps<PlaybookPageProps> = async ({ params
 
   const tier = requiredTierFromDoc(playbook as any);
   const isPublic = tier === "public";
+  const renderCode = isPublic ? renderDocBodyToStaticHtml(playbook).html : null;
+
+  // Strip body before passing to props — body.raw/code must not ride in
+  // __NEXT_DATA__ for locked playbooks (renderCode=null keeps render correct).
+  const { body: _body, ...safePlaybook } = playbook as any;
 
   return {
     props: {
-      playbook,
-      renderCode: isPublic ? renderDocBodyToStaticHtml(playbook).html : null,
+      playbook: safePlaybook,
+      renderCode,
       requiredTier: tier,
       adjacent: {
         prev: prevItem

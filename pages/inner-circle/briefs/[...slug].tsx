@@ -157,9 +157,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   const renderBody = getRenderableBody(brief);
 
+  // Strip body before passing props — bodyCode below carries the render
+  // content; body.raw/code in the brief object would be redundant payload.
+  const { body: _body, ...safeBrief } = brief as any;
+
   return {
     props: {
-      brief: JSON.parse(JSON.stringify(brief)),
+      brief: JSON.parse(JSON.stringify(safeBrief)),
       bodyCode: renderBody.code,
       accessTier: safeString(ctx.tier) || "inner-circle",
     },

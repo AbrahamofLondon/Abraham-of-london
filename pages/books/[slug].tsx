@@ -4,6 +4,7 @@
 import * as React from "react";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
@@ -27,6 +28,7 @@ type Props = {
   doc: any;
   requiredTier: AccessTier;
   bareSlug: string;
+  bodyEmpty?: boolean;
 };
 
 const DEFAULT_COVER = "/assets/images/books/the-architecture-of-human-purpose.jpg";
@@ -111,7 +113,7 @@ function normalizeCoverPosition(
     : null;
 }
 
-const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
+const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty }) => {
   const { data: session, status } = useSession();
 
   const title = doc?.title || "Untitled Book";
@@ -169,6 +171,32 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug }) => {
         <div className="flex min-h-screen items-center justify-center bg-black">
           <div className="animate-pulse font-mono text-xs text-amber-500">
             Verifying clearance…
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (bodyEmpty && !needsAuth) {
+    return (
+      <Layout title={title} description="This volume is under institutional review.">
+        <div className="flex min-h-screen items-center justify-center bg-black px-6">
+          <div className="max-w-md text-center">
+            <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-amber-500/60">
+              Abraham of London · Books
+            </p>
+            <h1 className="mt-4 font-serif text-3xl italic text-white/80">{title}</h1>
+            <p className="mt-6 font-mono text-[9px] uppercase tracking-[0.25em] text-white/30">
+              Under Institutional Review
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-white/20">
+              This volume is part of the governed estate but its content has not been
+              cleared for public rendering. Contact the administration if you believe
+              this is in error.
+            </p>
+            <Link href="/books" className="mt-8 inline-block font-mono text-[9px] uppercase tracking-[0.3em] text-amber-500/50 transition-colors hover:text-amber-500">
+              ← Return to Books
+            </Link>
           </div>
         </div>
       </Layout>
@@ -279,11 +307,18 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
     const locked = requiredTier !== "public";
     const renderBody = getRenderableBody(rawDoc);
+    const bodyCode = locked ? "" : renderBody.code;
+    const bodyEmpty = !locked && (renderBody.mode === "empty" || renderBody.mode === "suspicious" || !bodyCode.trim());
+
+    // Strip body (raw MDX source + compiled code) before serialising into page
+    // props — locked books set bodyCode="" but rawDoc.body would still leak
+    // body.raw and body.code into __NEXT_DATA__ if spread unchecked.
+    const { body: _body, ...safeRawDoc } = rawDoc as any;
 
     const doc = {
-      ...rawDoc,
+      ...safeRawDoc,
       slug: bare,
-      bodyCode: locked ? "" : renderBody.code,
+      bodyCode,
       bodyMode: renderBody.mode,
       coverImage: resolveDocCoverImage(rawDoc) || rawDoc?.coverImage || DEFAULT_COVER,
     };
@@ -293,6 +328,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         doc,
         requiredTier,
         bareSlug: bare,
+        bodyEmpty,
       }),
       revalidate: 1800,
     };

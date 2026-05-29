@@ -232,8 +232,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const isPublic = requiredTier === "public";
   const staticHtml = isPublic ? renderDocBodyToStaticHtml(doc).html : "";
 
+  // Strip body before spreading — doc.body.raw/code must not ride in
+  // __NEXT_DATA__ for locked strategies (staticHtml="" keeps the render correct).
+  const { body: _body, ...safeDoc } = doc as any;
+
   return {
-    props: jsonSafe({ item: { ...doc, slug, staticHtml }, requiredTier }),
+    props: jsonSafe({ item: { ...safeDoc, slug, staticHtml }, requiredTier }),
     revalidate: 1800,
   };
 

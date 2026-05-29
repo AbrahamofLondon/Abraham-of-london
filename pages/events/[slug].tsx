@@ -58,8 +58,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const renderBody = getRenderableBody(eventData);
     const initialBodyCode = isPublic ? renderBody.code : null;
 
+    // Strip body before spreading — body.raw/code must not ride in __NEXT_DATA__
+    // for locked events (initialBodyCode=null keeps render correct).
+    const { body: _body, ...safeEventData } = eventData as any;
+
     const event = {
-      ...eventData,
+      ...safeEventData,
       title: eventData.titleSafe,
       slug: eventData.slugSafe,
       accessLevel: requiredTier,

@@ -3,10 +3,16 @@ import type { ContentDoc } from "@/lib/contentlayer-helper";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
+function isPublicDoc(doc: ContentDoc): boolean {
+  const level = String(doc?.tier || doc?.accessLevel || "public").toLowerCase().trim();
+  return level === "public" || level === "open";
+}
+
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const { getPublishedVault } = await import("@/lib/content/server");
-  // getPublishedVault() applies isLiveDoc — excludes future-dated, draft, and unpublished vault content
-  const docs = getPublishedVault();
+  // Only include vault docs with explicit public access — restricted vault
+  // paths must not appear in the public sitemap.
+  const docs = getPublishedVault().filter(isPublicDoc);
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

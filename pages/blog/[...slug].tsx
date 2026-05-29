@@ -279,8 +279,12 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
     const renderBody = getRenderableBody(rawDoc);
     const code = requiredTier === "public" ? renderBody.code : "";
 
+    // Strip body before spreading — rawDoc.body.raw/code must not ride in
+    // __NEXT_DATA__ for locked posts (code="" above keeps the render correct).
+    const { body: _body, ...safeRawDoc } = rawDoc as any;
+
     const doc = {
-      ...rawDoc,
+      ...safeRawDoc,
       slug: bare,
       bodyMode: renderBody.mode,
     };
