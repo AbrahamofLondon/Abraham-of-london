@@ -82,6 +82,16 @@ function analyzeDecision(text: string): TestResult {
   return { score, label, summary, findings, consequence, nextAction };
 }
 
+function track(event: string, data?: Record<string, unknown>) {
+  try {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", event, data);
+    }
+  } catch {
+    // Analytics unavailable — non-blocking
+  }
+}
+
 export default function DecisionTestPage() {
   const [text, setText] = React.useState("");
   const [result, setResult] = React.useState<TestResult | null>(null);
@@ -91,12 +101,14 @@ export default function DecisionTestPage() {
 
   function handleSubmit() {
     if (!text.trim()) return;
+    track("foundry_test_run", { test: "decision", charCount: text.length });
     setResult(analyzeDecision(text));
   }
 
   function handleSample() {
     setText(SAMPLE);
     setShowSample(true);
+    track("foundry_test_sample", { test: "decision" });
   }
 
   return (
@@ -141,6 +153,7 @@ export default function DecisionTestPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!text.trim()}
+                data-analytics="foundry-decision-submit"
                 className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors disabled:opacity-30"
                 style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
               >
@@ -148,6 +161,7 @@ export default function DecisionTestPage() {
               </button>
               <button
                 onClick={handleSample}
+                data-analytics="foundry-decision-sample"
                 className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
               >
                 Use Sample
@@ -231,6 +245,8 @@ export default function DecisionTestPage() {
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Link
                     href="/foundry/start"
+                    data-analytics="foundry-conversion-full-review"
+                    onClick={() => track("foundry_conversion_click", { target: "full-review", source: "decision-test" })}
                     className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
                     style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
                   >
@@ -238,6 +254,8 @@ export default function DecisionTestPage() {
                   </Link>
                   <Link
                     href="/foundry/value"
+                    data-analytics="foundry-conversion-value"
+                    onClick={() => track("foundry_conversion_click", { target: "value-case", source: "decision-test" })}
                     className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
                   >
                     See what a full review includes

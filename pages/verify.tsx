@@ -92,6 +92,24 @@ export default function VerifyPage() {
               and has not been tampered with since issuance.
             </p>
           </div>
+
+          {/* ── Conversion CTA ────────────────────────────────────────────── */}
+          <div className="mt-12 border border-white/8 bg-white/2 p-6 text-center">
+            <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 mb-3">
+              Don't have a token yet?
+            </p>
+            <Link
+              href="/foundry"
+              data-analytics="verify-to-foundry"
+              className="inline-block border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
+              style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
+            >
+              Run a public test →
+            </Link>
+            <p className="mt-3 font-mono text-[7px] uppercase tracking-[0.25em] text-white/20">
+              Public tests include a demo reference. Full reviews issue verifiable tokens.
+            </p>
+          </div>
         </div>
       </main>
     </Layout>

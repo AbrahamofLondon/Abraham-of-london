@@ -60,7 +60,7 @@ export default function FoundryIndexPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 
           {/* ── Hero ── */}
-          <header className="pt-28 pb-20">
+          <header className="pt-20 pb-16 sm:pt-28 sm:pb-20">
             <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase", color: `${GOLD}99` }}>
               Abraham of London · Decision Foundry
             </p>
@@ -72,10 +72,24 @@ export default function FoundryIndexPage() {
             <p className="mt-6 max-w-2xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
               Every decision leaves a trace. The Foundry makes those traces visible — before you commit.
               Three controlled public tests for decisions, market claims, and release commitments.
-              Each result includes a verification token. No sign-up required.
+              No sign-up required.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
+            {/* Primary CTA — above the fold */}
+            <div className="mt-8">
+              <Link
+                href="/foundry/decision-test"
+                className="inline-flex items-center gap-3 px-6 py-3 text-xs uppercase tracking-widest transition-all"
+                style={{ ...mono, color: `#0a0a0a`, backgroundColor: GOLD, border: `1px solid ${GOLD}` }}
+              >
+                Start with a decision test →
+              </Link>
+              <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.2)" }}>
+                Takes 30 seconds · No data persisted
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-4">
               <Link
                 href="/verify"
                 className="inline-flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-widest transition-colors"

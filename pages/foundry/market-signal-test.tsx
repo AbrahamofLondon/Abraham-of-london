@@ -98,6 +98,14 @@ function analyzeMarketSignal(text: string): TestResult {
   return { score, label, summary, findings, consequence, nextAction };
 }
 
+function track(event: string, data?: Record<string, unknown>) {
+  try {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", event, data);
+    }
+  } catch {}
+}
+
 export default function MarketSignalTestPage() {
   const [text, setText] = React.useState("");
   const [result, setResult] = React.useState<TestResult | null>(null);
@@ -106,6 +114,7 @@ export default function MarketSignalTestPage() {
 
   function handleSubmit() {
     if (!text.trim()) return;
+    track("foundry_test_run", { test: "market-signal", charCount: text.length });
     setResult(analyzeMarketSignal(text));
   }
 
@@ -149,13 +158,15 @@ export default function MarketSignalTestPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!text.trim()}
+                data-analytics="foundry-market-submit"
                 className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors disabled:opacity-30"
                 style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
               >
                 Assess Signal
               </button>
               <button
-                onClick={() => { setText(SAMPLE); }}
+                onClick={() => { setText(SAMPLE); track("foundry_test_sample", { test: "market-signal" }); }}
+                data-analytics="foundry-market-sample"
                 className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
               >
                 Use Sample
@@ -238,6 +249,8 @@ export default function MarketSignalTestPage() {
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Link
                     href="/foundry/start"
+                    data-analytics="foundry-conversion-full-review"
+                    onClick={() => track("foundry_conversion_click", { target: "full-review", source: "market-signal-test" })}
                     className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
                     style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
                   >
@@ -245,6 +258,8 @@ export default function MarketSignalTestPage() {
                   </Link>
                   <Link
                     href="/foundry/value"
+                    data-analytics="foundry-conversion-value"
+                    onClick={() => track("foundry_conversion_click", { target: "value-case", source: "market-signal-test" })}
                     className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
                   >
                     See what a full review includes

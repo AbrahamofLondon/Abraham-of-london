@@ -90,20 +90,33 @@ export default function ContinuityPage() {
             </ul>
           </div>
 
-          <div className="mt-12 flex gap-4">
-            <Link
-              href="/foundry/decision-test"
-              className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
-              style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
-            >
-              Test a Decision
-            </Link>
-            <Link
-              href="/foundry"
-              className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
-            >
-              Foundry Home
-            </Link>
+          <div className="mt-12 border-t border-white/10 pt-10">
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/foundry/decision-test"
+                data-analytics="continuity-to-test"
+                className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
+                style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
+              >
+                Test a Decision →
+              </Link>
+              <Link
+                href="/foundry/start"
+                data-analytics="continuity-to-start"
+                className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
+              >
+                Start a full review →
+              </Link>
+              <Link
+                href="/foundry"
+                className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+              >
+                ← Foundry Home
+              </Link>
+            </div>
+            <p className="mt-6 font-mono text-[7px] uppercase tracking-[0.25em] text-white/15 text-center">
+              Continuity is the institutional product. Public tests demonstrate the category.
+            </p>
           </div>
         </div>
       </main>
