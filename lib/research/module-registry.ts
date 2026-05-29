@@ -264,6 +264,23 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
     capabilities: [],
     limitationNote: "DEMO only. Reference models are not production decision engines.",
   },
+  // ─── Governance workflow ─────────────────────────────────────────────────
+  {
+    id: "promotion-workflow",
+    name: "Promotion Workflow",
+    status: "WIRED",
+    description: "Record evidenced maturity stage promotions. Append-only ledger. One step at a time: RESERVED_CONCEPT → SIMULATION_ONLY → PILOT_READY → LIVE_GOVERNED.",
+    route: "/admin/intelligence-foundry/promotion",
+    runType: "MANUAL",
+    capabilities: [
+      "maturity-promotion",
+      "evidence-linkage",
+      "criteria-capture",
+      "blocker-record",
+      "append-only-ledger",
+      "rollback-record",
+    ],
+  },
   // ─── Delivery and governance dashboards ───────────────────────────────────
   {
     id: "boardroom-delivery",

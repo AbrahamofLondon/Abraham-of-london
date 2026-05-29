@@ -27,7 +27,8 @@ const HUB_MODULES = [
   { id: "product-health",          label: "Product Health Dashboard", href: "/admin/intelligence-foundry/product-health",     desc: "Live integration status for the product ladder, admin ownership, canonical records, lineage, governance events, Foundry coverage, and release blockers." },
   { id: "foundry-health",          label: "Foundry Health",           href: "/admin/intelligence-foundry/health",            desc: "Real run metrics: velocity, action conversion, dormant modules." },
   { id: "trash-day",               label: "Trash Day",                href: "/admin/intelligence-foundry/trash-day",         desc: "Stale ACTION_REQUIRED and CRITICAL unresolved findings." },
-  { id: "reference-models",        label: "Reference Models",         href: "/admin/intelligence-foundry/reference",         desc: "DEMO — Illustrative reference model comparisons only." },
+  { id: "reference-models",        label: "Reference Models",         href: "/admin/intelligence-foundry/reference",         desc: "DOCUMENTATION_ONLY — Illustrative reference model comparisons. Not a production decision engine." },
+  { id: "promotion-workflow",      label: "Promotion Workflow",        href: "/admin/intelligence-foundry/promotion",         desc: "Record evidenced maturity stage promotions. Append-only ledger. One step at a time: RESERVED_CONCEPT → SIMULATION_ONLY → PILOT_READY → LIVE_GOVERNED." },
 ];
 
 export default function IntelligenceFoundryHub() {
