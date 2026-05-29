@@ -143,7 +143,7 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/retainers/enforcement-cycles has no explicit owner in scanned registries (/api/retainers/enforcement-cycles) - app/api/retainers/enforcement-cycles/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/retainers/surface has no explicit owner in scanned registries (/api/retainers/surface) - app/api/retainers/surface/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/sovereign/auth has no explicit owner in scanned registries (/api/sovereign/auth) - app/api/sovereign/auth/route.ts
-- ... 419 additional finding(s) in JSON reports.
+- ... 418 additional finding(s) in JSON reports.
 
 ## GREEN confirmations
 
