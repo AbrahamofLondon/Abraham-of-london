@@ -43,7 +43,7 @@ export default function VerifyPage() {
     >
       <Head><title>Verify | Abraham of London</title></Head>
 
-      <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)", paddingBottom: "8rem" }}>
+      <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-2xl px-6 py-24 lg:px-10">
           <h1 className="font-serif text-4xl font-light italic leading-tight text-white/90 md:text-5xl">
             Verify

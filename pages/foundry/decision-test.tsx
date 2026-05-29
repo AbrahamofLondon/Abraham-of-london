@@ -119,7 +119,7 @@ export default function DecisionTestPage() {
     >
       <Head><title>Test a Decision | Foundry | Abraham of London</title></Head>
 
-      <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)", paddingBottom: "8rem" }}>
+      <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-4xl px-6 py-24 lg:px-10">
           {/* Breadcrumb */}
           <div className="mb-10 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">
