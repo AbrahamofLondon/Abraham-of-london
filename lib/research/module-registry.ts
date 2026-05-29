@@ -123,6 +123,7 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
     description: "Deterministic copy analysis: CTA verb check, headline noun check, generic SaaS language detection, forbidden phrases, audience clarity, platform length, and claim validation. No invented scores.",
     route: "/admin/intelligence-foundry/market",
     runType: "MARKET",
+    engineId: "market-response",
     capabilities: [
       "cta-verb-check",
       "headline-concrete-noun",

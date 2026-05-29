@@ -195,6 +195,16 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
     limitationReason:
       "Pattern-based heuristic detection. Does not evaluate factual accuracy of specific claims. Semantic claim severity scoring not yet implemented.",
   },
+  {
+    id: "market-response",
+    name: "Market Response",
+    status: "PRODUCTION_CALLABLE",
+    description:
+      "Deterministic copy analysis for outbound marketing and positioning text. CTA verb check, headline noun check, generic SaaS language detection, forbidden phrases, audience clarity, platform length, and unsupported comparative claim detection. No invented scores.",
+    version: "1.0.0",
+    limitationReason:
+      "Pattern-based detection. Does not evaluate factual accuracy, tone, or sentiment. Platform length checks are based on declared platform type — no live platform API validation.",
+  },
 ];
 
 export function getEngine(id: string): EngineRegistryEntry | undefined {
