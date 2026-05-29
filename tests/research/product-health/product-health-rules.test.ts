@@ -98,10 +98,15 @@ describe("checkLineageCoverage", () => {
 // ─── 6. Governance events ────────────────────────────────────────────────────
 
 describe("checkGovernanceEvents", () => {
-  it("surface with registered events returns GREEN", () => {
+  it("surface with mixed-maturity events returns AMBER (not all LIVE_GOVERNED)", () => {
+    // executive-reporting has 3 events at RESERVED_CONCEPT maturity:
+    //   EXECUTIVE_REPORT_STARTED, EXECUTIVE_REPORT_REVIEWED, EXECUTIVE_REPORT_EXPORTED
+    // Governance bus wiring is pending for these. Only LIVE_GOVERNED counts as GREEN.
+    // Mixed maturity → AMBER is the correct and expected result.
     const surface = getProductLadderEntry("executive-reporting")!;
     const result = checkGovernanceEvents(surface);
-    expect(result.status).toBe("GREEN");
+    expect(result.status).toBe("AMBER");
+    expect(result.explanation).toMatch(/not LIVE_GOVERNED/i);
   });
 });
 

@@ -195,7 +195,7 @@ export default async function PromotionDashboardPage() {
             const count   = dash.byStage[stage] ?? 0;
             const maxCount = Math.max(...Object.values(dash.byStage), 1);
             const pct     = (count / maxCount) * 100;
-            const s       = STAGE_STYLES[stage];
+            const s       = STAGE_STYLES[stage] ?? { label: stage, color: "text-white/30", bg: "bg-white/5", border: "border-white/8" };
             return (
               <div key={stage} className="flex items-center gap-3">
                 <div className="w-32 shrink-0">
@@ -205,7 +205,7 @@ export default async function PromotionDashboardPage() {
                 </div>
                 <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${s.bg.replace("bg-", "bg-")}`}
+                    className={`h-full rounded-full ${s.bg}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
