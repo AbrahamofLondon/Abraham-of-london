@@ -176,6 +176,17 @@ export default function EditorialIntelligenceBand({
 }: Props) {
   const { editorialSeries, appliedSeries } = editorialViewModel;
 
+  // Guard: warn loudly in non-production builds if editorial series resolves empty.
+  // Applied Essay Series rendering while editorialSeries is empty indicates a
+  // resolver or data-pipeline regression — fail fast so it is caught before deploy.
+  if (process.env.NODE_ENV !== "production" && editorialSeries.length === 0) {
+    console.error(
+      "[EditorialIntelligenceBand] editorialSeries is empty. " +
+        "The homepage will render Applied Essay Series without any Editorial Series cards. " +
+        "Check: contentlayer build, getHomepageEditorialSeries(), and getStaticProps in pages/index.tsx."
+    );
+  }
+
   return (
     <section
       aria-label="Editorial Intelligence"

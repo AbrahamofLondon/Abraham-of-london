@@ -413,6 +413,33 @@ if (allDocs.length > 0 && catalogue.length === 0) {
   });
 }
 
+// Guard: homepage editorialSeries must not be empty when catalogue has eligible series
+// This is the exact defect observed: Applied Essay Series renders while editorial is empty.
+if (catalogue.length > 0 && homepage.editorialSeries.length === 0) {
+  failures.push({
+    type: "EMPTY_EDITORIAL_SERIES_ON_HOMEPAGE",
+    detail:
+      `Homepage editorialSeries is empty but catalogue has ${catalogue.length} eligible series — ` +
+      "EditorialIntelligenceBand will render Applied Essay Series with no Editorial Series cards. " +
+      "Check getStaticProps in pages/index.tsx and the prop passed to EditorialIntelligenceBand.",
+  });
+}
+
+// Guard: Applied Essay Series must not be the only thing rendering
+// (i.e. editorialSeries empty while appliedSeries non-empty = observed regression)
+if (
+  homepage.appliedSeries.length > 0 &&
+  homepage.editorialSeries.length === 0 &&
+  catalogue.length > 0
+) {
+  failures.push({
+    type: "APPLIED_WITHOUT_EDITORIAL",
+    detail:
+      "Applied Essay Series will render but Editorial Series will not — " +
+      "this is the observed live regression. editorialSeries resolves empty despite catalogue having eligible entries.",
+  });
+}
+
 // ─── 2. Build lookup maps ────────────────────────────────────────────────────
 const catalogueMap = new Map(catalogue.map((s) => [s.slug, s]));
 const homepageMap = new Map(homepage.editorialSeries.map((s) => [s.slug, s]));
@@ -499,6 +526,30 @@ for (const [slug, hpSeries] of homepageMap) {
       slug,
       title: hpSeries.title,
       detail: `"${hpSeries.title}" exists in homepage model but not in /editorials catalogue`,
+    });
+  }
+}
+
+// ─── 4b. Required editorial series must be present ──────────────────────────
+// These series are known to exist in the repo. If they are absent from both
+// catalogue AND homepage it indicates a resolver regression or a global filter.
+// Update this list when series are intentionally retired.
+const REQUIRED_EDITORIAL_SLUGS = [
+  "the-minds-clay", // Complete series — must always be catalogued and on homepage
+];
+for (const slug of REQUIRED_EDITORIAL_SLUGS) {
+  if (!catalogueMap.has(slug)) {
+    failures.push({
+      type: "REQUIRED_SERIES_MISSING_FROM_CATALOGUE",
+      slug,
+      detail: `Required series "${slug}" is absent from /editorials catalogue — resolver may be filtering it incorrectly`,
+    });
+  }
+  if (!homepageMap.has(slug)) {
+    failures.push({
+      type: "REQUIRED_SERIES_MISSING_FROM_HOMEPAGE",
+      slug,
+      detail: `Required series "${slug}" is absent from homepage editorial model`,
     });
   }
 }
