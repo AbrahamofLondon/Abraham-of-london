@@ -50,7 +50,7 @@ export default function ContinuityPage() {
           <h1 className="font-serif text-4xl font-light italic leading-tight text-white/90 md:text-5xl">
             Continuity
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-white/50">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-white/65">
             Decisions outlive the people who make them. The Foundry ensures that every governed
             decision remains traceable, verifiable, and actionable across team changes, reorganisation,
             and evolving evidence.
@@ -63,14 +63,14 @@ export default function ContinuityPage() {
                   <span className="font-mono text-[8px] text-white/20">{String(i + 1).padStart(2, "0")}</span>
                   <h2 className="font-serif text-xl font-light italic text-white/80">{p.title}</h2>
                 </div>
-                <p className="text-sm leading-7 text-white/50 max-w-2xl">{p.body}</p>
+                <p className="text-sm leading-7 text-white/65 max-w-2xl">{p.body}</p>
               </div>
             ))}
           </div>
 
           <div className="mt-16 border-t border-white/10 pt-10">
             <h2 className="font-serif text-2xl font-light italic text-white/80">Why continuity matters</h2>
-            <p className="mt-4 text-sm leading-7 text-white/50 max-w-2xl">
+            <p className="mt-4 text-sm leading-7 text-white/65 max-w-2xl">
               When a key decision-maker leaves, the institutional memory of <em>why</em> a decision was
               made often leaves with them. The Foundry preserves not just the decision outcome, but the
               evidence, authority, and reasoning chain that produced it. This means:
@@ -82,7 +82,7 @@ export default function ContinuityPage() {
                 "Auditors can verify that governance was followed",
                 "Escalations carry their full context, not just a summary",
               ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-white/50">
+                <li key={i} className="flex items-start gap-3 text-sm text-white/65">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: GOLD }} />
                   {item}
                 </li>
@@ -103,13 +103,13 @@ export default function ContinuityPage() {
               <Link
                 href="/foundry/start"
                 data-analytics="continuity-to-start"
-                className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
+                className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
               >
                 Start a full review →
               </Link>
               <Link
                 href="/foundry"
-                className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
               >
                 ← Foundry Home
               </Link>

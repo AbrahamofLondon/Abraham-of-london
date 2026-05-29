@@ -137,7 +137,7 @@ export default function MarketSignalTestPage() {
           <h1 className="font-serif text-4xl font-light italic leading-tight text-white/90 md:text-5xl">
             Check a Market Signal
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-white/50">
+          <p className="mt-4 max-w-2xl text-base leading-7 text-white/65">
             Submit a claim, offer, or positioning statement. The Foundry will assess overclaim risk,
             clarity, and buyer friction.
           </p>
@@ -167,7 +167,7 @@ export default function MarketSignalTestPage() {
               <button
                 onClick={() => { setText(SAMPLE); track("foundry_test_sample", { test: "market-signal" }); }}
                 data-analytics="foundry-market-sample"
-                className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
+                className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
               >
                 Use Sample
               </button>
@@ -188,7 +188,7 @@ export default function MarketSignalTestPage() {
                     "bg-amber-500/10 text-amber-400"
                   }`}>{result.label}</span>
                 </div>
-                <p className="mt-4 text-sm text-white/60">{result.summary}</p>
+                <p className="mt-4 text-sm text-white/70">{result.summary}</p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3 pt-3 border-t border-white/5">
                   <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
@@ -221,7 +221,7 @@ export default function MarketSignalTestPage() {
                         }`}>{f.severity}</span>
                         <span className="text-sm font-medium text-white/70">{f.label}</span>
                       </div>
-                      <p className="text-xs text-white/45">{f.detail}</p>
+                      <p className="text-xs text-white/55">{f.detail}</p>
                     </div>
                   ))}
                 </div>
@@ -229,7 +229,7 @@ export default function MarketSignalTestPage() {
 
               <div className="border border-white/8 bg-white/2 p-5">
                 <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Consequence</p>
-                <p className="text-sm text-white/60">{result.consequence}</p>
+                <p className="text-sm text-white/70">{result.consequence}</p>
                 <div className="mt-4 h-px bg-white/5" />
                 <p className="mt-4 font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Recommended Next Action</p>
                 <p className="text-sm text-[#C9A96E]/80">{result.nextAction}</p>
@@ -260,7 +260,7 @@ export default function MarketSignalTestPage() {
                     href="/foundry/value"
                     data-analytics="foundry-conversion-value"
                     onClick={() => track("foundry_conversion_click", { target: "value-case", source: "market-signal-test" })}
-                    className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
+                    className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
                   >
                     See what a full review includes
                   </Link>
@@ -271,21 +271,21 @@ export default function MarketSignalTestPage() {
               <div className="flex flex-wrap items-center justify-center gap-5 pt-2">
                 <Link
                   href="/foundry"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
                 >
                   ← Back to Foundry
                 </Link>
                 <span className="text-white/10">·</span>
                 <Link
                   href="/foundry/decision-test"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
                 >
                   Try Decision Test →
                 </Link>
                 <span className="text-white/10">·</span>
                 <Link
                   href="/foundry/release-risk-test"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
                 >
                   Try Release Risk Test →
                 </Link>

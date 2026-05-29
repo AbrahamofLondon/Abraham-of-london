@@ -4,6 +4,9 @@
  * Explains the category in under 10 seconds.
  * Offers three controlled public tests and points to verification.
  * No internal vocabulary: no ResearchRun, LIVE_GOVERNED, adapter, registry.
+ *
+ * Legibility: body text at rgba(...,0.6), metadata at rgba(...,0.35),
+ * headings at rgba(...,0.88). Quiet authority, not dim austerity.
  */
 
 import * as React from "react";
@@ -15,6 +18,13 @@ const GOLD = "#C9A96E";
 const BASE = "rgb(3,3,5)";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
+
+// Legibility constants — one step brighter than previous
+const BODY = "rgba(255,255,255,0.6)";       // was 0.45/0.4 — now clearly readable
+const META = "rgba(255,255,255,0.35)";      // was 0.22/0.25 — now legible metadata
+const SUBTLE = "rgba(255,255,255,0.2)";     // decorative only
+const HEADING = "rgba(255,255,255,0.88)";   // unchanged — good
+const CTA_SECONDARY = "rgba(255,255,255,0.45)"; // was 0.35 — action text must read
 
 const TESTS = [
   {
@@ -65,11 +75,11 @@ export default function FoundryIndexPage() {
               Abraham of London · Decision Foundry
             </p>
 
-            <h1 className="mt-5 max-w-3xl" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.25rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.92)" }}>
+            <h1 className="mt-5 max-w-3xl" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.25rem)", lineHeight: 1.15, color: HEADING }}>
               Test the quality of a decision before it becomes an expensive mistake.
             </h1>
 
-            <p className="mt-6 max-w-2xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="mt-6 max-w-2xl text-sm leading-relaxed" style={{ color: BODY }}>
               Every decision leaves a trace. The Foundry makes those traces visible — before you commit.
               Three controlled public tests for decisions, market claims, and release commitments.
               No sign-up required.
@@ -84,7 +94,7 @@ export default function FoundryIndexPage() {
               >
                 Start with a decision test →
               </Link>
-              <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.2)" }}>
+              <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.25em]" style={{ color: SUBTLE }}>
                 Takes 30 seconds · No data persisted
               </p>
             </div>
@@ -100,7 +110,7 @@ export default function FoundryIndexPage() {
               <Link
                 href="/continuity"
                 className="inline-flex items-center gap-2 px-4 py-2 text-[10px] uppercase tracking-widest transition-colors"
-                style={{ ...mono, color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ ...mono, color: CTA_SECONDARY, border: "1px solid rgba(255,255,255,0.12)" }}
               >
                 How Continuity Works →
               </Link>
@@ -108,11 +118,11 @@ export default function FoundryIndexPage() {
           </header>
 
           {/* ── Divider ── */}
-          <div style={{ height: "1px", backgroundColor: "rgba(255,255,255,0.06)", marginBottom: "3rem" }} />
+          <div style={{ height: "1px", backgroundColor: "rgba(255,255,255,0.08)", marginBottom: "3rem" }} />
 
           {/* ── Test cards ── */}
           <section aria-label="Public controlled tests">
-            <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "1.5rem" }}>
+            <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", color: META, marginBottom: "1.5rem" }}>
               Three controlled tests
             </p>
 
@@ -123,27 +133,27 @@ export default function FoundryIndexPage() {
                   href={t.href}
                   className="group block p-6 transition-all"
                   style={{
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    backgroundColor: "rgba(255,255,255,0.012)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: "rgba(255,255,255,0.015)",
                     textDecoration: "none",
                   }}
                 >
-                  {/* Accent top bar */}
-                  <div style={{ height: "2px", width: "2rem", backgroundColor: t.accent, opacity: 0.6, marginBottom: "1.25rem" }} />
+                  {/* Accent top bar — thicker for mobile visibility */}
+                  <div style={{ height: "3px", width: "2.5rem", backgroundColor: t.accent, opacity: 0.7, marginBottom: "1.25rem" }} />
 
-                  <h2 className="text-base font-medium" style={{ color: "rgba(255,255,255,0.88)" }}>
+                  <h2 className="text-base font-medium" style={{ color: HEADING }}>
                     {t.label}
                   </h2>
 
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: BODY }}>
                     {t.body}
                   </p>
 
-                  <p className="mt-4 text-[9px] leading-relaxed" style={{ ...mono, color: "rgba(255,255,255,0.22)" }}>
+                  <p className="mt-4 text-[10px] leading-relaxed sm:text-[9px]" style={{ ...mono, color: META }}>
                     {t.detail}
                   </p>
 
-                  <p className="mt-5 text-[10px] uppercase tracking-widest" style={{ ...mono, color: `${t.accent}` }}>
+                  <p className="mt-5 text-[10px] uppercase tracking-widest font-medium" style={{ ...mono, color: `${t.accent}` }}>
                     Run test →
                   </p>
                 </Link>
@@ -160,15 +170,15 @@ export default function FoundryIndexPage() {
               <p style={{ ...serif, fontSize: "1.35rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>
                 You do not pay for access. You pay for continuity.
               </p>
-              <p className="mt-4 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="mt-4 text-sm leading-relaxed" style={{ color: BODY }}>
                 A governed case is a decision record that can be returned to, compared, verified,
                 and developed over time. The public tests demonstrate the category.
                 Continuity is the institutional product.
               </p>
               <Link
                 href="/continuity"
-                className="mt-5 inline-block text-[10px] uppercase tracking-widest transition-colors"
-                style={{ ...mono, color: `${GOLD}88` }}
+                className="mt-5 inline-block text-[10px] uppercase tracking-widest transition-colors font-medium"
+                style={{ ...mono, color: `${GOLD}BB` }}
               >
                 About Continuity →
               </Link>
@@ -189,9 +199,9 @@ export default function FoundryIndexPage() {
               <div
                 key={claim}
                 className="p-4"
-                style={{ border: "1px solid rgba(255,255,255,0.05)" }}
+                style={{ border: "1px solid rgba(255,255,255,0.06)" }}
               >
-                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+                <p className="text-xs leading-relaxed" style={{ color: BODY }}>
                   {claim}
                 </p>
               </div>
