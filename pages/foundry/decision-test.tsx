@@ -171,6 +171,19 @@ export default function DecisionTestPage() {
                   }`}>{result.label}</span>
                 </div>
                 <p className="mt-4 text-sm text-white/60">{result.summary}</p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3 pt-3 border-t border-white/5">
+                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
+                    Demo ref: {Date.now().toString(36).slice(-6).toUpperCase()}
+                  </span>
+                  <span className="text-white/5">·</span>
+                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
+                    {new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  <span className="rounded border border-amber-500/10 bg-amber-500/5 px-1.5 py-0.5 font-mono text-[6px] uppercase tracking-[0.2em] text-amber-400/40">
+                    Demo — not verifiable
+                  </span>
+                </div>
               </div>
 
               {result.findings.length > 0 && (
@@ -231,6 +244,30 @@ export default function DecisionTestPage() {
                     See what a full review includes
                   </Link>
                 </div>
+              </div>
+
+              {/* ── Navigation links ──────────────────────────────────────── */}
+              <div className="flex flex-wrap items-center justify-center gap-5 pt-2">
+                <Link
+                  href="/foundry"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                >
+                  ← Back to Foundry
+                </Link>
+                <span className="text-white/10">·</span>
+                <Link
+                  href="/foundry/market-signal-test"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                >
+                  Try Market Signal Test →
+                </Link>
+                <span className="text-white/10">·</span>
+                <Link
+                  href="/foundry/release-risk-test"
+                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/50 transition-colors"
+                >
+                  Try Release Risk Test →
+                </Link>
               </div>
             </div>
           )}

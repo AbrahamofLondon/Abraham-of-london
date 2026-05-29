@@ -21,7 +21,7 @@ const TESTS = [
     id:     "decision",
     label:  "Test a Decision",
     href:   "/foundry/decision-test",
-    body:   "Describe a decision your organisation is facing. The Foundry returns a risk score, flags evidence gaps, and identifies authority issues — in seconds.",
+    body:   "Describe a decision your organisation is facing. The Foundry returns a risk score, flags evidence gaps, and identifies authority issues — in seconds. Includes a demo reference for continuity.",
     detail: "Risk score · Evidence gaps · Authority flags · Next-action directive",
     accent: GOLD,
   },
