@@ -1,0 +1,598 @@
+"use client";
+// app/admin/intelligence-foundry/market/page.tsx
+// Market Response Lab — deterministic copy analysis.
+// No invented scores. All findings reference specific matched strings.
+// Feedback intake: per-finding disposition (ACTED / DISMISSED / DEFERRED)
+// is recorded in component state and persisted in the saved ResearchRun.
+
+import { useState } from "react";
+import Link from "next/link";
+
+// ─── Types (matching EngineRunOutput + foundry-contract shapes) ───────────────
+
+type RunSeverity = "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+type Finding = {
+  id: string;
+  title: string;
+  description: string;
+  severity: RunSeverity;
+  source: string;
+  evidence?: string;
+  remediation?: string;
+};
+
+type FormulaStep = {
+  stepId: string;
+  label: string;
+  inputs: Record<string, number | string>;
+  intermediate?: Record<string, number | string>;
+  output: number | string;
+  sourceRule: string;
+  engineVersion: string;
+};
+
+type CheckResults = {
+  weakCtaMatches?: string[];
+  genericSaasMatches?: string[];
+  comparativeMatches?: string[];
+  audienceMatches?: string[];
+  wordCount?: number;
+  charCount?: number;
+  platform?: string;
+  mode?: string;
+};
+
+type RawOutput = {
+  engineId?: string;
+  wordCount?: number;
+  charCount?: number;
+  platform?: string;
+  mode?: string;
+  formulaSteps?: FormulaStep[];
+  checkResults?: CheckResults;
+};
+
+type EngineResult = {
+  findings: Finding[];
+  summary: string;
+  severity: RunSeverity;
+  engineVersion: string;
+  durationMs: number;
+  limitations?: string[];
+  promotionRequirements?: string[];
+  rawOutput?: RawOutput;
+};
+
+// ─── Feedback types ───────────────────────────────────────────────────────────
+
+type FeedbackDisposition = "ACTED" | "DISMISSED" | "DEFERRED";
+
+type FindingFeedback = {
+  disposition: FeedbackDisposition;
+  note?: string;
+};
+
+// ─── Platform options ─────────────────────────────────────────────────────────
+
+const PLATFORM_OPTIONS = [
+  { value: "none",             label: "No platform check" },
+  { value: "linkedin-post",    label: "LinkedIn post (3,000 chars)" },
+  { value: "x-post",           label: "X / Twitter post (280 chars)" },
+  { value: "facebook-post",    label: "Facebook post (63,206 chars)" },
+  { value: "email-subject",    label: "Email subject line (60 chars / 10 words)" },
+  { value: "email-preview",    label: "Email preview text (90 chars)" },
+  { value: "ad-headline",      label: "Ad headline (30 chars / 5 words)" },
+  { value: "ad-description",   label: "Ad description (90 chars / 20 words)" },
+  { value: "meta-description", label: "Meta description (160 chars)" },
+  { value: "page-title",       label: "Page title (60 chars)" },
+];
+
+// ─── Components ───────────────────────────────────────────────────────────────
+
+function SeverityChip({ severity }: { severity: RunSeverity | string }) {
+  const styles: Record<string, string> = {
+    CRITICAL: "bg-red-500/10 text-red-400 border border-red-500/20",
+    HIGH:     "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+    MEDIUM:   "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+    LOW:      "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+    INFO:     "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  };
+  return (
+    <span className={`rounded px-1.5 py-0.5 text-[9px] font-mono uppercase ${styles[severity] ?? "bg-white/5 text-white/40"}`}>
+      {severity}
+    </span>
+  );
+}
+
+function OverallBadge({ severity }: { severity: RunSeverity | string }) {
+  const styles: Record<string, string> = {
+    CRITICAL: "bg-red-500/10 text-red-400 border border-red-500/20",
+    HIGH:     "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+    MEDIUM:   "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+    LOW:      "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+    INFO:     "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  };
+  return (
+    <span className={`rounded px-2 py-1 text-xs font-mono font-semibold uppercase ${styles[severity] ?? "bg-white/5 text-white/40"}`}>
+      {severity === "INFO" ? "CLEAR" : severity}
+    </span>
+  );
+}
+
+// ─── Feedback row component ───────────────────────────────────────────────────
+
+function FeedbackRow({
+  findingId,
+  feedback,
+  onChange,
+}: {
+  findingId: string;
+  feedback: FindingFeedback | undefined;
+  onChange: (id: string, disposition: FeedbackDisposition | null) => void;
+}) {
+  const buttons: { label: string; value: FeedbackDisposition; style: string; activeStyle: string }[] = [
+    {
+      label: "Acted",
+      value: "ACTED",
+      style: "border-white/8 text-white/25 hover:text-emerald-400/70 hover:border-emerald-500/20",
+      activeStyle: "border-emerald-500/25 bg-emerald-500/8 text-emerald-400",
+    },
+    {
+      label: "Dismissed",
+      value: "DISMISSED",
+      style: "border-white/8 text-white/25 hover:text-white/45 hover:border-white/15",
+      activeStyle: "border-white/20 bg-white/5 text-white/55",
+    },
+    {
+      label: "Defer",
+      value: "DEFERRED",
+      style: "border-white/8 text-white/25 hover:text-amber-400/70 hover:border-amber-500/20",
+      activeStyle: "border-amber-500/20 bg-amber-500/6 text-amber-400/80",
+    },
+  ];
+
+  return (
+    <div className="flex items-center gap-1.5 pt-2 mt-2 border-t border-white/5">
+      <span className="text-[9px] font-mono uppercase tracking-widest text-white/18 mr-1">Response</span>
+      {buttons.map((btn) => {
+        const isActive = feedback?.disposition === btn.value;
+        return (
+          <button
+            key={btn.value}
+            onClick={() => onChange(findingId, isActive ? null : btn.value)}
+            className={`rounded px-2 py-0.5 text-[9px] font-mono uppercase tracking-wide border transition-colors ${
+              isActive ? btn.activeStyle : btn.style
+            }`}
+          >
+            {isActive ? `✓ ${btn.label}` : btn.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Feedback summary panel ───────────────────────────────────────────────────
+
+function FeedbackSummary({
+  findings,
+  feedback,
+}: {
+  findings: Finding[];
+  feedback: Record<string, FindingFeedback>;
+}) {
+  const violations = findings.filter((f) => f.severity !== "INFO");
+  const total = violations.length;
+  if (total === 0) return null;
+
+  const acted    = violations.filter((f) => feedback[f.id]?.disposition === "ACTED").length;
+  const dismissed = violations.filter((f) => feedback[f.id]?.disposition === "DISMISSED").length;
+  const deferred  = violations.filter((f) => feedback[f.id]?.disposition === "DEFERRED").length;
+  const pending   = total - acted - dismissed - deferred;
+
+  if (acted + dismissed + deferred === 0) return null;
+
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/[0.015] p-4">
+      <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-3">Feedback Summary</p>
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "Acted", count: acted,    color: "text-emerald-400" },
+          { label: "Dismissed", count: dismissed, color: "text-white/50" },
+          { label: "Deferred", count: deferred,  color: "text-amber-400/80" },
+          { label: "Pending", count: pending,   color: "text-white/25" },
+        ].map(({ label, count, color }) => (
+          <div key={label} className="text-center">
+            <p className={`text-xl font-mono font-semibold ${color}`}>{count}</p>
+            <p className="text-[9px] font-mono uppercase tracking-wider text-white/20">{label}</p>
+          </div>
+        ))}
+      </div>
+      {pending === 0 && (
+        <p className="text-[10px] text-emerald-400/60 font-mono mt-3 text-center">
+          All findings have a response recorded.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
+export default function MarketResponseLabPage() {
+  const [mode,        setMode]        = useState<"analyze" | "clean" | "dirty">("analyze");
+  const [text,        setText]        = useState("");
+  const [platform,    setPlatform]    = useState("none");
+  const [isHeadline,  setIsHeadline]  = useState(false);
+  const [loading,     setLoading]     = useState(false);
+  const [result,      setResult]      = useState<EngineResult | null>(null);
+  const [error,       setError]       = useState<string | null>(null);
+  const [saving,     setSaving]     = useState(false);
+  const [savedRunId, setSavedRunId] = useState<string | null>(null);
+  const [saveError,  setSaveError]  = useState<string | null>(null);
+
+  // Feedback intake — keyed by finding ID
+  const [feedback,     setFeedback]     = useState<Record<string, FindingFeedback>>({});
+  const [persistError, setPersistError] = useState<string | null>(null);
+
+  async function handleFeedback(findingId: string, disposition: FeedbackDisposition | null) {
+    // Always update local state immediately for responsiveness
+    setFeedback((prev) => {
+      if (disposition === null) {
+        const next = { ...prev };
+        delete next[findingId];
+        return next;
+      }
+      return { ...prev, [findingId]: { disposition } };
+    });
+
+    // If a run is saved, persist to DB
+    if (savedRunId) {
+      setPersistError(null);
+      try {
+        if (disposition === null) {
+          await fetch(
+            `/api/admin/intelligence-foundry/feedback?runId=${encodeURIComponent(savedRunId)}&findingId=${encodeURIComponent(findingId)}`,
+            { method: "DELETE" },
+          );
+        } else {
+          await fetch("/api/admin/intelligence-foundry/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              runId:     savedRunId,
+              findingId,
+              disposition,
+              moduleId:  "market-response-lab",
+              engineId:  result?.rawOutput?.engineId ?? "market-response",
+            }),
+          });
+        }
+      } catch {
+        setPersistError("Feedback saved locally but DB write failed.");
+      }
+    }
+  }
+
+  // After saving a run, batch-persist any feedback already captured
+  async function persistFeedbackSnapshot(runId: string) {
+    const entries = Object.entries(feedback);
+    if (entries.length === 0) return;
+    await Promise.allSettled(
+      entries.map(([findingId, fb]) =>
+        fetch("/api/admin/intelligence-foundry/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            runId,
+            findingId,
+            disposition: fb.disposition,
+            moduleId:    "market-response-lab",
+            engineId:    result?.rawOutput?.engineId ?? "market-response",
+          }),
+        }),
+      ),
+    );
+  }
+
+  async function runAnalysis() {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    setSavedRunId(null);
+    setSaveError(null);
+    setFeedback({});
+    try {
+      const res = await fetch("/api/admin/intelligence-foundry/market/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, platform, isHeadline, mode }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? "Analysis failed");
+      setResult(data.result as EngineResult);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveRun() {
+    if (!result) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const ts = Date.now();
+      const res = await fetch("/api/admin/intelligence-foundry/runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Market Response · ${new Date(ts).toISOString().slice(0, 16).replace("T", " ")}`,
+          slug: `market-response-${ts}`,
+          runType: "MARKET",
+          module: "market-response-lab",
+          severity: result.severity,
+          durationMs: result.durationMs,
+          recommendation: result.summary,
+          findingsJson: JSON.stringify(result.findings),
+          outputJson: JSON.stringify({
+            ...(result.rawOutput ?? {}),
+            feedback: Object.keys(feedback).length > 0 ? feedback : undefined,
+          }),
+          status: "PENDING",
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? "Save failed");
+      const newRunId = (data.run as { id: string }).id;
+      setSavedRunId(newRunId);
+      // Batch-persist any feedback already captured before run was saved
+      await persistFeedbackSnapshot(newRunId);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const rawOutput = result?.rawOutput;
+  const violationFindings = result?.findings.filter((f) => f.severity !== "INFO") ?? [];
+  const formulaSteps = rawOutput?.formulaSteps ?? [];
+
+  return (
+    <div className="space-y-6 p-6 max-w-4xl">
+      {/* Header */}
+      <div>
+        <Link
+          href="/admin/intelligence-foundry"
+          className="text-[10px] font-mono uppercase tracking-widest text-white/20 hover:text-white/40 transition-colors"
+        >
+          ← Intelligence Foundry
+        </Link>
+        <div className="flex items-center gap-3 mt-3 mb-1">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-white/25">
+            Market Response Lab · PRODUCTION_CALLABLE
+          </p>
+        </div>
+        <h1 className="text-xl font-semibold text-white/80">Market Response Lab</h1>
+        <p className="mt-1 text-sm text-white/40 max-w-xl">
+          Deterministic copy analysis. CTA verbs, headline language, generic SaaS phrases,
+          forbidden claims, audience clarity, platform length, unsupported comparatives.
+          No invented scores — all findings reference specific matched strings.
+        </p>
+      </div>
+
+      {/* Controls */}
+      <div className="rounded-xl border border-white/8 bg-white/[0.02] p-5 space-y-4">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-white/20">Analysis Mode</p>
+
+        {/* Mode selector */}
+        <div className="flex gap-2 flex-wrap">
+          {(["analyze", "clean", "dirty"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => { setMode(m); setResult(null); }}
+              className={`rounded-lg px-3 py-1.5 text-xs font-mono uppercase transition-all ${
+                mode === m
+                  ? m === "dirty" ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                    : m === "clean" ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                    : "bg-amber-400/10 text-amber-400 border border-amber-400/25"
+                  : "bg-white/3 text-white/35 border border-white/8 hover:text-white/55"
+              }`}
+            >
+              {m === "analyze" ? "Custom Text" : m === "clean" ? "Clean Fixture" : "Dirty Fixture"}
+            </button>
+          ))}
+        </div>
+
+        <div className="text-[10px] text-white/30 leading-relaxed">
+          {mode === "clean" && "Honest editorial sample. Expects 0 violations."}
+          {mode === "dirty" && "Overclaim-loaded sample. Expects multiple CRITICAL/HIGH findings."}
+          {mode === "analyze" && "Analyse your own copy. Paste text below."}
+        </div>
+
+        {/* Custom text input */}
+        {mode === "analyze" && (
+          <div className="space-y-3">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={6}
+              placeholder="Paste marketing copy, headlines, CTAs, or ad text here..."
+              className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/70 placeholder:text-white/20 focus:outline-none focus:border-white/20 resize-y"
+            />
+            <div className="flex gap-4 flex-wrap">
+              <div className="flex-1 min-w-48">
+                <label className="block text-[10px] font-mono uppercase text-white/20 mb-1">Platform</label>
+                <select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-[#0a0a0a] px-3 py-1.5 text-xs text-white/60 focus:outline-none focus:border-white/20"
+                >
+                  {PLATFORM_OPTIONS.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end gap-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isHeadline}
+                    onChange={(e) => setIsHeadline(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-xs text-white/40">Headline check</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={runAnalysis}
+          disabled={loading || (mode === "analyze" && !text.trim())}
+          className="rounded-lg px-4 py-2 text-sm font-medium bg-amber-400/10 text-amber-400 border border-amber-400/20 hover:bg-amber-400/15 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          {loading ? "Analysing…" : "Run Analysis"}
+        </button>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+          <p className="text-xs text-red-400">{error}</p>
+        </div>
+      )}
+
+      {/* Results */}
+      {result && (
+        <div className="space-y-4">
+          {/* Summary */}
+          <div className="rounded-xl border border-white/8 bg-white/[0.02] p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <OverallBadge severity={result.severity} />
+              <p className="text-xs text-white/40">
+                {rawOutput?.wordCount ?? 0} words · {rawOutput?.charCount ?? 0} chars
+                {rawOutput?.platform && rawOutput.platform !== "none" && ` · ${rawOutput.platform}`}
+              </p>
+              <p className="text-[10px] font-mono text-white/25 ml-auto">v{result.engineVersion}</p>
+            </div>
+            <p className="text-xs text-white/50">{result.summary}</p>
+            <div className="flex gap-4 mt-3">
+              <span className="text-xs text-white/30">{result.findings.filter((f) => f.severity === "CRITICAL").length} CRITICAL</span>
+              <span className="text-xs text-white/30">{result.findings.filter((f) => f.severity === "HIGH").length} HIGH</span>
+              <span className="text-xs text-white/30">{result.findings.filter((f) => f.severity === "MEDIUM").length} MEDIUM</span>
+              <span className="text-xs text-white/30">{result.findings.filter((f) => f.severity === "LOW").length} LOW</span>
+            </div>
+          </div>
+
+          {/* Save run */}
+          <div className="flex items-center gap-3">
+            {savedRunId ? (
+              <a
+                href={`/admin/intelligence-foundry/runs/${savedRunId}`}
+                className="text-xs text-emerald-400/70 hover:text-emerald-400 font-mono transition-colors"
+              >
+                ✓ Run saved — view run →
+              </a>
+            ) : (
+              <button
+                onClick={saveRun}
+                disabled={saving}
+                className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs font-mono text-white/40 hover:text-white/60 hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {saving ? "Saving…" : "Save run to vault"}
+              </button>
+            )}
+            {saveError && <p className="text-xs text-red-400/70 font-mono">{saveError}</p>}
+            {persistError && <p className="text-xs text-amber-400/60 font-mono">{persistError}</p>}
+          </div>
+
+          {/* Findings */}
+          {violationFindings.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-white/20">Findings</p>
+              {violationFindings.map((f) => (
+                <div key={f.id} className={`rounded-xl border p-4 ${
+                  f.severity === "CRITICAL" ? "border-red-500/20 bg-red-500/[0.04]" :
+                  f.severity === "HIGH"     ? "border-orange-500/20 bg-orange-500/[0.03]" :
+                  f.severity === "MEDIUM"   ? "border-amber-500/15 bg-amber-500/[0.03]" :
+                  "border-yellow-500/15 bg-yellow-500/[0.03]"
+                }`}>
+                  <div className="flex items-start gap-2 mb-2">
+                    <SeverityChip severity={f.severity} />
+                    <p className="text-xs font-medium text-white/65">{f.title}</p>
+                  </div>
+                  <p className="text-xs text-white/45 mb-2">{f.description}</p>
+                  {f.evidence && (
+                    <p className="text-[10px] font-mono text-white/30 mb-2 bg-white/[0.03] rounded px-2 py-1">
+                      {f.evidence}
+                    </p>
+                  )}
+                  {f.remediation && (
+                    <p className="text-[10px] text-white/35 leading-relaxed border-t border-white/5 pt-2 mt-2">
+                      {f.remediation}
+                    </p>
+                  )}
+                  <FeedbackRow
+                    findingId={f.id}
+                    feedback={feedback[f.id]}
+                    onChange={handleFeedback}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4">
+              <p className="text-xs text-emerald-400">No violations — content passed all checks.</p>
+            </div>
+          )}
+
+          {/* Feedback summary — shown once any finding has a response */}
+          <FeedbackSummary findings={result.findings} feedback={feedback} />
+
+          {/* Formula trace */}
+          {formulaSteps.length > 0 && (
+            <div className="rounded-xl border border-white/8 bg-white/[0.02] p-5">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-3">Check Trace</p>
+              <div className="space-y-1">
+                {formulaSteps.map((step) => (
+                  <div key={step.stepId} className="flex items-center justify-between text-xs">
+                    <span className="text-white/40">{step.label}</span>
+                    <span className={`font-mono text-[10px] ${
+                      String(step.output).startsWith("FAIL") ? "text-red-400" :
+                      String(step.output).startsWith("WARN") ? "text-amber-400" :
+                      String(step.output) === "PASS" ? "text-emerald-400/70" :
+                      String(step.output) === "NOT_CHECKED" ? "text-white/20" :
+                      "text-white/55"
+                    }`}>
+                      {String(step.output)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Limitations */}
+          {result.limitations && result.limitations.length > 0 && (
+            <div className="rounded-xl border border-white/8 bg-white/[0.02] p-4">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-2">Engine Limitations</p>
+              <ul className="space-y-1">
+                {result.limitations.map((l, i) => (
+                  <li key={i} className="flex gap-2 text-xs text-white/30">
+                    <span className="text-white/20 shrink-0">·</span>
+                    <span>{l}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
