@@ -24,12 +24,19 @@ export type EditorialSeries = {
   descriptor: string;
   partCount: number;
   status: EditorialSeriesStatus;
+  /** Published parts only — safe for routing, navigation CTAs, neighbour links */
   parts: EditorialSeriesPart[];
+  /** Published + scheduled parts — use for hub-page display (scheduled = Coming Soon) */
+  previewParts: EditorialSeriesPart[];
 };
 
 // ─── Mapping — convert ResolvedSeries to EditorialSeries ────────────────────
 
 function toEditorialSeries(resolved: ResolvedSeries): EditorialSeries {
+  const mapPart = (p: typeof resolved.parts[number]) => ({
+    ...p,
+    mdxSlug: p.mdxSlug ?? p.slug,
+  });
   return {
     id: `editorial-series-${resolved.slug}`,
     slug: resolved.slug,
@@ -37,10 +44,8 @@ function toEditorialSeries(resolved: ResolvedSeries): EditorialSeries {
     descriptor: resolved.description,
     partCount: resolved.partCount,
     status: resolved.status as EditorialSeriesStatus,
-    parts: resolved.parts.map((p) => ({
-      ...p,
-      mdxSlug: p.mdxSlug ?? p.slug,
-    })),
+    parts: resolved.parts.map(mapPart),
+    previewParts: resolved.previewParts.map(mapPart),
   };
 }
 

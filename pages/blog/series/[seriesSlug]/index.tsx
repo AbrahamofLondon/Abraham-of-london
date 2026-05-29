@@ -133,8 +133,14 @@ function PartRow({
 }
 
 const BlogSeriesHub: NextPage<Props> = ({ series, totalMinutes }) => {
+  // publishedCount: for the "X of Y published" display strip — published only.
   const publishedCount = series.parts.filter((p) => p.status === "PUBLISHED").length;
   const isComplete = publishedCount === series.partCount;
+  // displayParts: published + scheduled, sorted. Scheduled parts render as Coming Soon
+  // via the existing isDraft (status !== "PUBLISHED") check in PartRow.
+  const displayParts = (series.previewParts ?? series.parts)
+    .slice()
+    .sort((a, b) => a.order - b.order);
 
   return (
     <Layout
@@ -254,16 +260,14 @@ const BlogSeriesHub: NextPage<Props> = ({ series, totalMinutes }) => {
         <section className="py-8 lg:py-10">
           <div className="mx-auto max-w-4xl px-6 lg:px-10">
             <div style={{ borderTop: "1px solid var(--ds-border)" }}>
-              {series.parts
-                .sort((a, b) => a.order - b.order)
-                .map((part) => (
-                  <PartRow
-                    key={part.slug}
-                    part={part}
-                    seriesSlug={series.slug}
-                    isFirst={part.order === 1}
-                  />
-                ))}
+              {displayParts.map((part) => (
+                <PartRow
+                  key={part.slug}
+                  part={part}
+                  seriesSlug={series.slug}
+                  isFirst={part.order === 1}
+                />
+              ))}
             </div>
           </div>
         </section>

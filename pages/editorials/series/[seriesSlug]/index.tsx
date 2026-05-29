@@ -39,6 +39,110 @@ function PartRow({
   isFirst: boolean;
 }) {
   const partLabel = `Part ${formatEditorialSeriesPartNumber(part.order)}`;
+  // Scheduled parts (publicationState === "SCHEDULED") have status === "DRAFT"
+  // in the two-value enum. Use this to decide between active link and Coming Soon.
+  const isScheduled = part.status !== "PUBLISHED";
+
+  const inner = (
+    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
+      <div className="flex-1 min-w-0">
+        {/* Part number + entry marker / Coming soon badge */}
+        <div className="flex items-center gap-3 mb-2">
+          <span
+            className="font-mono uppercase tracking-[0.32em]"
+            style={{
+              fontSize: "7px",
+              color: isFirst && !isScheduled ? "var(--ds-accent)" : "var(--ds-text-subtle)",
+            }}
+          >
+            {partLabel}
+          </span>
+          {isFirst && !isScheduled && (
+            <span
+              className="font-mono uppercase tracking-[0.28em]"
+              style={{
+                fontSize: "6.5px",
+                color: "var(--ds-accent)",
+                border: "1px solid var(--ds-accent-soft)",
+                padding: "1px 6px",
+              }}
+            >
+              Begin here
+            </span>
+          )}
+          {isScheduled && (
+            <span
+              className="font-mono uppercase tracking-[0.2em] px-1.5 py-0.5 rounded-sm"
+              style={{
+                fontSize: "6.5px",
+                color: "var(--ds-text-subtle)",
+                background: "var(--ds-background-muted)",
+                border: "1px solid var(--ds-border)",
+              }}
+            >
+              Coming soon
+            </span>
+          )}
+        </div>
+
+        {/* Title */}
+        <h3
+          className={`font-serif italic mb-2${!isScheduled ? " transition-colors duration-200 group-hover:text-white" : ""}`}
+          style={{
+            fontWeight: 300,
+            fontSize: isFirst ? "1.35rem" : "1.15rem",
+            lineHeight: 1.1,
+            color: isScheduled ? "var(--ds-text-subtle)" : "var(--ds-text)",
+          }}
+        >
+          {part.title}
+        </h3>
+
+        {/* Excerpt */}
+        <p
+          className="text-[13px] leading-[1.55rem]"
+          style={{ color: "var(--ds-text-muted)", maxWidth: "60ch" }}
+        >
+          {part.excerpt}
+        </p>
+      </div>
+
+      {/* Right meta */}
+      <div className="flex items-center gap-6 md:flex-col md:items-end md:gap-2 md:pt-1 flex-shrink-0">
+        <span
+          className="font-mono uppercase tracking-[0.26em]"
+          style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+        >
+          {part.readTime}
+        </span>
+        {!isScheduled && (
+          <span
+            className="font-mono uppercase tracking-[0.26em] transition-colors duration-200 group-hover:text-[#C9963A]"
+            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+          >
+            {isFirst ? "Begin reading →" : "Read →"}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
+  if (isScheduled) {
+    // Scheduled parts: no active link, visually dimmed
+    return (
+      <div
+        className="block border-b py-6"
+        style={{
+          borderBottomColor: "var(--ds-border)",
+          backgroundColor: "transparent",
+          opacity: 0.45,
+          cursor: "default",
+        }}
+      >
+        {inner}
+      </div>
+    );
+  }
 
   return (
     <Link
@@ -49,79 +153,21 @@ function PartRow({
         backgroundColor: isFirst ? "rgba(201,150,58,0.03)" : "transparent",
       }}
     >
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-8">
-        <div className="flex-1 min-w-0">
-          {/* Part number + entry marker */}
-          <div className="flex items-center gap-3 mb-2">
-            <span
-              className="font-mono uppercase tracking-[0.32em]"
-              style={{
-                fontSize: "7px",
-                color: isFirst ? "var(--ds-accent)" : "var(--ds-text-subtle)",
-              }}
-            >
-              {partLabel}
-            </span>
-            {isFirst && (
-              <span
-                className="font-mono uppercase tracking-[0.28em]"
-                style={{
-                  fontSize: "6.5px",
-                  color: "var(--ds-accent)",
-                  border: "1px solid var(--ds-accent-soft)",
-                  padding: "1px 6px",
-                }}
-              >
-                Begin here
-              </span>
-            )}
-          </div>
-
-          {/* Title */}
-          <h3
-            className="font-serif italic mb-2 transition-colors duration-200 group-hover:text-white"
-            style={{
-              fontWeight: 300,
-              fontSize: isFirst ? "1.35rem" : "1.15rem",
-              lineHeight: 1.1,
-              color: "var(--ds-text)",
-            }}
-          >
-            {part.title}
-          </h3>
-
-          {/* Excerpt */}
-          <p
-            className="text-[13px] leading-[1.55rem]"
-            style={{ color: "var(--ds-text-muted)", maxWidth: "60ch" }}
-          >
-            {part.excerpt}
-          </p>
-        </div>
-
-        {/* Right meta */}
-        <div className="flex items-center gap-6 md:flex-col md:items-end md:gap-2 md:pt-1 flex-shrink-0">
-          <span
-            className="font-mono uppercase tracking-[0.26em]"
-            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
-          >
-            {part.readTime}
-          </span>
-          <span
-            className="font-mono uppercase tracking-[0.26em] transition-colors duration-200 group-hover:text-[#C9963A]"
-            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
-          >
-            {isFirst ? "Begin reading →" : "Read →"}
-          </span>
-        </div>
-      </div>
+      {inner}
     </Link>
   );
 }
 
 const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
+  // publishedParts: for CTA "Begin with Part One" and the "X of Y published" counter.
+  // Must remain published-only — no active link to a scheduled part.
   const publishedParts = series.parts
     .filter((p) => p.status === "PUBLISHED")
+    .sort((a, b) => a.order - b.order);
+
+  // displayParts: published + scheduled, sorted. Scheduled parts render as Coming Soon.
+  const displayParts = (series.previewParts ?? series.parts)
+    .slice()
     .sort((a, b) => a.order - b.order);
 
   const firstPart = publishedParts[0];
@@ -237,7 +283,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
             </div>
 
             <div style={{ borderTop: "1px solid var(--ds-border)" }}>
-              {publishedParts.map((part) => (
+              {displayParts.map((part) => (
                 <PartRow
                   key={part.slug}
                   part={part}

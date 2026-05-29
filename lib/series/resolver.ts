@@ -33,6 +33,12 @@ export type SeriesPart = {
   status: SeriesPartStatus;
   /** Used by editorial series pages — maps to the MDX slug for content lookup */
   mdxSlug?: string;
+  /**
+   * Raw publication classification from publication-eligibility.
+   * Preserved so callers can distinguish SCHEDULED from DRAFT without
+   * re-running the classifier. Used internally to build previewParts.
+   */
+  publicationState: PublicationClass;
 };
 
 export type ResolvedSeries = {
@@ -45,7 +51,18 @@ export type ResolvedSeries = {
   partCount: number;
   publishedPartCount: number;
   status: SeriesPartStatus;
+  /**
+   * Published parts only.
+   * Safe for: sitemap generation, getStaticPaths, navigation CTAs, neighbour links.
+   * Never contains scheduled or draft parts.
+   */
   parts: SeriesPart[];
+  /**
+   * Published + scheduled parts (no draft/internal).
+   * Use for hub-page display so future parts appear as "Coming soon" previews.
+   * Never used for routing — scheduled parts must not generate active links.
+   */
+  previewParts: SeriesPart[];
 };
 
 // ---------------------------------------------------------------------------
@@ -53,7 +70,7 @@ export type ResolvedSeries = {
 // ---------------------------------------------------------------------------
 
 import { getDocumentsForKind } from "./data";
-import { classifyPublication, computeSeriesPublicationState, isPublicNow, getToday } from "@/lib/content/publication-eligibility";
+import { classifyPublication, computeSeriesPublicationState, isPublicNow, getToday, type PublicationClass } from "@/lib/content/publication-eligibility";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -89,8 +106,11 @@ function docToSeriesPart(doc: any, now: Date = getToday()): SeriesPart {
     title: doc.title ?? doc.titleSafe ?? "Untitled",
     excerpt: doc.excerpt ?? doc.excerptSafe ?? doc.description ?? "",
     readTime: doc.readTime ?? doc.readTimeSafe ?? "",
+    // SCHEDULED collapses to "DRAFT" in the two-value status enum —
+    // callers that need the fine-grained distinction use publicationState instead.
     status: classification === "PUBLIC_READABLE_NOW" ? "PUBLISHED" : "DRAFT",
     mdxSlug: doc.slug ?? doc.slugSafe ?? undefined,
+    publicationState: classification,
   };
 }
 
@@ -153,6 +173,11 @@ export function resolveAllSeries(
 
     const allParts: SeriesPart[] = sortedParts.map((doc) => docToSeriesPart(doc, now));
     const publishedParts = allParts.filter((p) => p.status === "PUBLISHED");
+    // previewParts: published + scheduled only. Draft/internal parts are never surfaced.
+    // Used by hub pages to render "Coming soon" previews for future parts.
+    const previewParts = allParts.filter(
+      (p) => p.publicationState === "PUBLIC_READABLE_NOW" || p.publicationState === "SCHEDULED",
+    );
     const firstDoc = sortedParts[0];
 
     // Use shared publication classifier for series-level state
@@ -209,6 +234,7 @@ export function resolveAllSeries(
       publishedPartCount,
       status: seriesStatus,
       parts: publishedParts,
+      previewParts,
     });
   }
 
