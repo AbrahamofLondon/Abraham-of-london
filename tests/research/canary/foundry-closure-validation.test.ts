@@ -209,10 +209,11 @@ describe("Closure 5 — Foundry governance events in registry", () => {
     expect(entry, "FOUNDRY_RUN_STATUS_CHANGED not found in governance event types").toBeDefined();
   });
 
-  it("FOUNDRY_PROMOTION_CREATED has SIMULATION_ONLY maturity", async () => {
+  it("FOUNDRY_PROMOTION_CREATED is PILOT_READY (writes real DB records)", async () => {
     const { GOVERNANCE_EVENT_TYPES } = await import("@/lib/platform/governance-event-types");
     const entry = GOVERNANCE_EVENT_TYPES.find((e) => e.eventType === "FOUNDRY_PROMOTION_CREATED");
-    expect(entry!.maturity).toBe("SIMULATION_ONLY");
+    // Previously SIMULATION_ONLY — corrected because it writes FoundryPromotion + FoundryAuditEvent rows
+    expect(entry!.maturity).toBe("PILOT_READY");
   });
 
   it("FOUNDRY_RUN_STATUS_CHANGED is emitted on ResearchRun promotion", async () => {
