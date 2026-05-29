@@ -114,21 +114,65 @@ export default function RunDetailPage() {
         onArchive={handleArchive}
       />
 
-      {/* Promote this run */}
-      <div className="rounded-xl border border-white/6 bg-white/[0.015] p-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-0.5">Maturity Promotion</p>
-          <p className="text-xs text-white/35">
-            Capture a formal promotion decision for this run in the promotion ledger.
-          </p>
-        </div>
-        <Link
-          href={`/admin/intelligence-foundry/promotion?runId=${id}`}
-          className="shrink-0 rounded-lg border border-amber-400/20 bg-amber-400/8 px-3 py-1.5 text-xs font-mono text-amber-400/70 hover:border-amber-400/35 hover:text-amber-400/90 transition-all"
-        >
-          Promote this run →
-        </Link>
-      </div>
+      {/* Promote this run — evidence summary + blocker gate */}
+      {(() => {
+        const findings: Array<{ severity: string; title: string }> = (() => {
+          try { return JSON.parse(run.findingsJson ?? "[]"); } catch { return []; }
+        })();
+        const criticals = findings.filter((f) => f.severity === "CRITICAL");
+        const highs     = findings.filter((f) => f.severity === "HIGH");
+        const hasCriticalBlocker = criticals.length > 0;
+
+        return (
+          <div className={`rounded-xl border p-4 space-y-3 ${hasCriticalBlocker ? "border-red-500/20 bg-red-500/[0.04]" : "border-white/6 bg-white/[0.015]"}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-0.5">Maturity Promotion</p>
+                <p className="text-xs text-white/35">
+                  {run.maturityStage
+                    ? `Current stage: ${run.maturityStage.replace(/_/g, " ")}`
+                    : "No maturity stage recorded."}
+                  {" "}Capture a formal promotion decision in the promotion ledger.
+                </p>
+              </div>
+              {hasCriticalBlocker ? (
+                <span className="shrink-0 rounded border border-red-500/25 bg-red-500/10 px-2 py-1 text-[10px] font-mono text-red-400/80">
+                  BLOCKED
+                </span>
+              ) : (
+                <Link
+                  href={`/admin/intelligence-foundry/promotion?runId=${id}`}
+                  className="shrink-0 rounded-lg border border-amber-400/20 bg-amber-400/8 px-3 py-1.5 text-xs font-mono text-amber-400/70 hover:border-amber-400/35 hover:text-amber-400/90 transition-all"
+                >
+                  Promote this run →
+                </Link>
+              )}
+            </div>
+
+            {/* Evidence summary */}
+            {findings.length > 0 && (
+              <div className="border-t border-white/5 pt-3 space-y-1.5">
+                <p className="text-[9px] font-mono uppercase tracking-widest text-white/18">Evidence Summary</p>
+                <div className="flex gap-4 flex-wrap text-[10px] font-mono">
+                  {criticals.length > 0 && (
+                    <span className="text-red-400/70">{criticals.length} CRITICAL{criticals.length !== 1 ? "s" : ""}</span>
+                  )}
+                  {highs.length > 0 && (
+                    <span className="text-orange-400/70">{highs.length} HIGH{highs.length !== 1 ? "s" : ""}</span>
+                  )}
+                  <span className="text-white/25">{findings.length} finding{findings.length !== 1 ? "s" : ""} total</span>
+                  {run.severity && <span className="text-white/25">overall: {run.severity}</span>}
+                </div>
+                {hasCriticalBlocker && (
+                  <p className="text-xs text-red-400/60">
+                    Promotion to LIVE_GOVERNED blocked: {criticals.length} unresolved CRITICAL finding{criticals.length !== 1 ? "s" : ""}. Resolve or defer before promoting.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Feedback history — only shown when durable feedback exists */}
       {feedback.length > 0 && (
