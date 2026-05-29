@@ -61,6 +61,116 @@ const STATUS_LABEL: Record<HealthStatus, string> = {
   GREY: "N/A",
 };
 
+// ─── AMBER classification ─────────────────────────────────────────────────────
+//
+// Five operational priority buckets for AMBER surfaces.
+// Each check maps to the bucket that best describes the risk to the operator.
+
+type AmberPriority = "Release-blocking" | "Buyer-visible" | "Security/access" | "Internal hygiene" | "Deferred";
+
+const AMBER_PRIORITY_STYLE: Record<AmberPriority, string> = {
+  "Release-blocking": "text-red-300 border-red-500/25 bg-red-500/8",
+  "Buyer-visible":    "text-orange-300 border-orange-500/25 bg-orange-500/8",
+  "Security/access":  "text-violet-300 border-violet-500/25 bg-violet-500/8",
+  "Internal hygiene": "text-amber-300/70 border-amber-500/20 bg-amber-500/5",
+  "Deferred":         "text-white/35 border-white/12 bg-white/[0.02]",
+};
+
+type AmberCheckResult = {
+  checkLabel: string;
+  priority: AmberPriority;
+  why: string;
+};
+
+function classifyAmberChecks(surface: SurfaceHealth): AmberCheckResult[] {
+  const results: AmberCheckResult[] = [];
+
+  // Release blockers always go first
+  if (surface.releaseBlockers.length > 0 || surface.criticalFindings > 0) {
+    results.push({
+      checkLabel: "Open blockers",
+      priority: "Release-blocking",
+      why: surface.releaseBlockers.length > 0
+        ? `${surface.releaseBlockers.length} release blocker(s) recorded: ${surface.releaseBlockers.slice(0, 2).join("; ")}.`
+        : `${surface.criticalFindings} critical finding(s) unresolved — deployment is at risk.`,
+    });
+  }
+
+  // Governance events — blocked promotion or missing live-wiring
+  if (surface.governanceEventStatus === "AMBER") {
+    results.push({
+      checkLabel: "Governance events",
+      priority: "Release-blocking",
+      why: "One or more governance events are at SIMULATION_ONLY or RESERVED_CONCEPT. Promotion to LIVE_GOVERNED is blocked until these are resolved.",
+    });
+  }
+
+  // Product route — a public route that is partial
+  if (surface.productRouteStatus === "AMBER") {
+    results.push({
+      checkLabel: "Product route",
+      priority: "Buyer-visible",
+      why: "The product route exists but returns inconsistent or partial responses. Buyers may experience degraded behaviour.",
+    });
+  }
+
+  // Entitlement — access control partially configured
+  if (surface.entitlementStatus === "AMBER") {
+    results.push({
+      checkLabel: "Entitlement",
+      priority: "Security/access",
+      why: "Entitlement configuration is partial. Some access paths may be ungated or mis-scoped. Resolve before expanding access.",
+    });
+  }
+
+  // Admin owner — no assigned responsible operator
+  if (surface.adminOwnerStatus === "AMBER") {
+    results.push({
+      checkLabel: "Admin ownership",
+      priority: "Internal hygiene",
+      why: "No admin owner assigned to this surface. Governance findings have no escalation path.",
+    });
+  }
+
+  // Foundry coverage — partially covered by a ResearchRun
+  if (surface.foundryCoverageStatus === "AMBER") {
+    results.push({
+      checkLabel: "Foundry coverage",
+      priority: "Internal hygiene",
+      why: "Foundry coverage is partial. Not all governance checks have been run against this surface.",
+    });
+  }
+
+  // Canonical record — content exists but is not fully canonical
+  if (surface.canonicalRecordStatus === "AMBER") {
+    results.push({
+      checkLabel: "Canonical record",
+      priority: "Internal hygiene",
+      why: "The canonical record for this surface is present but incomplete. Documentation or evidence is missing.",
+    });
+  }
+
+  // Lineage — partial report lineage
+  if (surface.lineageCoverageStatus === "AMBER") {
+    results.push({
+      checkLabel: "Report lineage",
+      priority: "Internal hygiene",
+      why: "Report lineage is partial. Some outputs from this surface cannot be traced to their source.",
+    });
+  }
+
+  // Outbound — partial outbound delivery
+  if (surface.outboundStatus === "AMBER") {
+    results.push({
+      checkLabel: "Outbound delivery",
+      priority: "Deferred",
+      why: "Outbound delivery is partially configured. This is low urgency unless this surface has active distribution.",
+    });
+  }
+
+  return results;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ProductHealthPage() {
@@ -257,6 +367,32 @@ export default function ProductHealthPage() {
           </div>
 
           <p className="text-xs text-white/40">{selectedSurface.explanation}</p>
+
+          {/* AMBER operational priority classification */}
+          {selectedSurface.overallStatus === "AMBER" && (() => {
+            const amberChecks = classifyAmberChecks(selectedSurface);
+            if (amberChecks.length === 0) return null;
+            return (
+              <div className="rounded-lg border border-amber-400/20 bg-amber-400/4 p-3 space-y-2">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-amber-400/50 mb-3">
+                  AMBER — classified by operational priority
+                </p>
+                <div className="space-y-2">
+                  {amberChecks.map((check) => (
+                    <div key={check.checkLabel} className="flex items-start gap-2">
+                      <span className={`shrink-0 mt-0.5 rounded border px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider ${AMBER_PRIORITY_STYLE[check.priority]}`}>
+                        {check.priority}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="font-mono text-[10px] text-white/50 mr-1.5">{check.checkLabel}:</span>
+                        <span className="text-[11px] text-white/35 leading-5">{check.why}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
