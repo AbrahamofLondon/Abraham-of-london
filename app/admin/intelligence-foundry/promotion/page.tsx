@@ -24,6 +24,7 @@ type PromotionRecord = {
   researchRunId: string | null;
   rollbackAt: string | null;
   rollbackReason: string | null;
+  rollbackBy: string | null;
   createdAt: string;
 };
 
@@ -90,12 +91,13 @@ function RollbackPanel({ promotion, onDone }: { promotion: PromotionRecord; onDo
 
   if (promotion.rollbackAt) {
     return (
-      <div className="mt-3 rounded-lg border border-red-400/10 bg-red-400/[0.04] px-3 py-2">
-        <p className="text-[9px] font-mono uppercase text-red-400/40 mb-0.5">Rolled Back</p>
+      <div className="mt-3 rounded-lg border border-red-400/10 bg-red-400/[0.04] px-3 py-2 space-y-0.5">
+        <p className="text-[9px] font-mono uppercase text-red-400/40">Rolled Back</p>
         <p className="text-[10px] text-red-400/50">{promotion.rollbackReason}</p>
-        <p className="text-[9px] text-white/15 mt-0.5">
-          {new Date(promotion.rollbackAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-        </p>
+        <div className="flex items-center gap-3 text-[9px] text-white/15 font-mono mt-0.5">
+          <span>{new Date(promotion.rollbackAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+          {promotion.rollbackBy && <span>by {promotion.rollbackBy}</span>}
+        </div>
       </div>
     );
   }

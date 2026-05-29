@@ -46,6 +46,7 @@ export type PromotionRecord = {
   researchRunId: string | null;
   rollbackAt: Date | null;
   rollbackReason: string | null;
+  rollbackBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -244,6 +245,7 @@ export async function createPromotion(
 export async function rollbackPromotion(
   promotionId: string,
   rollbackReason: string,
+  rollbackBy?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
     await prisma.foundryPromotion.update({
@@ -251,6 +253,7 @@ export async function rollbackPromotion(
       data: {
         rollbackAt:     new Date(),
         rollbackReason: rollbackReason,
+        rollbackBy:     rollbackBy ?? null,
       },
     });
     return { ok: true };

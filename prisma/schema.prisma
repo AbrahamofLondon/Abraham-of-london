@@ -3794,6 +3794,7 @@ model FoundryPromotion {
   run             ResearchRun? @relation(fields: [researchRunId], references: [id])
   rollbackAt      DateTime?   // Set if the promotion was subsequently rolled back
   rollbackReason  String?
+  rollbackBy      String?     // Actor email who recorded the rollback
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 

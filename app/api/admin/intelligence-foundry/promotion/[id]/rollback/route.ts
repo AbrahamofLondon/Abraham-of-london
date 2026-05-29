@@ -31,7 +31,7 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Request body required" }, { status: 400 });
     }
 
-    const { rollbackReason } = body as { rollbackReason?: string };
+    const { rollbackReason, rollbackBy: rollbackByBody } = body as { rollbackReason?: string; rollbackBy?: string };
     if (!rollbackReason || typeof rollbackReason !== "string" || !rollbackReason.trim()) {
       return NextResponse.json({ ok: false, error: "rollbackReason is required" }, { status: 400 });
     }
@@ -48,14 +48,13 @@ export async function POST(
       );
     }
 
-    // Execute rollback (append-only record)
-    const result = await rollbackPromotion(promotionId, rollbackReason.trim());
+    const actorEmail = auth.email ?? (typeof rollbackByBody === "string" ? rollbackByBody : null) ?? "unknown";
+
+    // Execute rollback (append-only record) — persist actor for accountability
+    const result = await rollbackPromotion(promotionId, rollbackReason.trim(), actorEmail);
     if (!result.ok) {
       return NextResponse.json({ ok: false, error: result.error }, { status: 500 });
     }
-
-    // Emit audit event
-    const actorEmail = auth.email ?? (body as { actorEmail?: string }).actorEmail ?? "unknown";
     if (existing.researchRunId) {
       await prisma.foundryAuditEvent.create({
         data: {
