@@ -173,7 +173,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
                 style={{ fontSize: "7px", color: "var(--ds-accent)" }}
               >
                 {series.partCount}-Part Editorial Series
-                {series.status === "PUBLISHED" ? " · Complete" : " · In Progress"}
+                {series.status === "PUBLISHED" ? " · Complete" : publishedParts.length === 0 ? " · Scheduled" : " · In Progress"}
                 {totalMinutes > 0 ? ` · ${formatTotalTime(totalMinutes)} total` : ""}
               </span>
             </div>

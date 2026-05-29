@@ -55,22 +55,9 @@ export const getServerSideProps: GetServerSideProps = async ({
   const rawTypeKey = typeMatch?.[1];
   const typeKey = String(rawTypeKey || "blog").toLowerCase();
 
-  // Get SSOT data
-  const { getAllCombinedDocs } = await import("@/lib/content/server");
-  const allDocuments = getAllCombinedDocs();
-
-  const filteredDocs = allDocuments.filter((d: any) => {
-    // Map various Contentlayer field variations to the requested typeKey
-    const type = String(d.type || "").toLowerCase();
-    const docKind = String(d.docKind || "").toLowerCase();
-    const kind = String(d.kind || "").toLowerCase();
-
-    return (
-      (type === typeKey || docKind === typeKey || kind === typeKey) &&
-      d.draft !== true &&
-      d.published !== false
-    );
-  });
+  // Get SSOT data — getPublishedDocumentsByType applies isLiveDoc, excluding future-dated, draft, and unpublished content
+  const { getPublishedDocumentsByType } = await import("@/lib/content/server");
+  const filteredDocs = getPublishedDocumentsByType(typeKey);
 
   // If no documents found, we still return an empty sitemap rather than a 404
   const sitemap = generateSiteMap(filteredDocs, typeKey);

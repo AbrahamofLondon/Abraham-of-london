@@ -194,10 +194,22 @@ function buildManifest() {
           } else {
             routePath = `/${collection.routeBase}/${slug}`;
           }
+          pageFileExpected = collection.pageFile;
+        }
+        // Special handling for Blog (Post) series parts: route is /blog/series/[seriesSlug]/[partSlug]
+        else if (typeDir === "Post" && doc.series && doc.seriesOrder != null) {
+          const seriesSlug = safeStr(String(doc.series).toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, ""));
+          if (seriesSlug) {
+            routePath = `/blog/series/${seriesSlug}/${slug}`;
+            pageFileExpected = "pages/blog/series/[seriesSlug]/[partSlug].tsx";
+          } else {
+            routePath = `/${collection.routeBase}/${slug}`;
+            pageFileExpected = collection.pageFile;
+          }
         } else {
           routePath = `/${collection.routeBase}/${slug}`;
+          pageFileExpected = collection.pageFile;
         }
-        pageFileExpected = collection.pageFile;
       } else if (collection && !slug) {
         routePath = `/${collection.routeBase}/[no-slug]`;
         reasonIfNotPublic = "Missing slug";

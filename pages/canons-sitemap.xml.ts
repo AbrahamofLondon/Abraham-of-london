@@ -4,9 +4,9 @@ import type { ContentDoc } from "@/lib/contentlayer-helper";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const { getAllCombinedDocs } = await import("@/lib/content/server");
-  // Filter for specific content types (e.g., 'Canon')
-  const docs = getAllCombinedDocs().filter((d: ContentDoc) => d.type === "Canon" || String(d.slug ?? "").includes("canon"));
+  const { getPublishedCanons } = await import("@/lib/content/server");
+  // getPublishedCanons() applies isLiveDoc — excludes future-dated, draft, and unpublished canons
+  const docs = getPublishedCanons();
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

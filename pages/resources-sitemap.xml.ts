@@ -4,8 +4,9 @@ import type { ContentDoc } from "@/lib/contentlayer-helper";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const { getAllCombinedDocs } = await import("@/lib/content/server");
-  const docs = getAllCombinedDocs().filter((d: ContentDoc) =>
+  const { getPublishedDocuments } = await import("@/lib/content/server");
+  // getPublishedDocuments() applies isLiveDoc — preserve the same path scope, now date-filtered
+  const docs = getPublishedDocuments().filter((d: ContentDoc) =>
     d._raw?.sourceFilePath?.startsWith("resources/") ||
     d._raw?.sourceFilePath?.startsWith("strategic-frameworks/") ||
     d._raw?.sourceFilePath?.startsWith("downloads/")

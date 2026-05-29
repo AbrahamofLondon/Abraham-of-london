@@ -90,6 +90,15 @@ function isLiveDoc(doc: any): boolean {
   if (!doc) return false;
   if (doc.draft === true) return false;
   if (doc.published === false) return false;
+  // Future-dated content is not live yet
+  if (doc.date) {
+    try {
+      const d = new Date(doc.date);
+      if (Number.isFinite(d.getTime()) && d > new Date()) return false;
+    } catch {
+      // Ignore parse errors
+    }
+  }
   return true;
 }
 

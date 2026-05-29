@@ -5,12 +5,9 @@ import { resolveDocCoverImage } from "@/lib/content/shared";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const { getAllCombinedDocs } = await import("@/lib/content/server");
-  // Filter for both prints and general downloads
-  const downloads = getAllCombinedDocs().filter((doc: ContentDoc) =>
-    doc._raw?.sourceFilePath?.startsWith("prints/") ||
-    doc._raw?.sourceFilePath?.startsWith("downloads/")
-  );
+  const { getPublishedPrints, getPublishedDownloads } = await import("@/lib/content/server");
+  // Both getters apply isLiveDoc — excludes future-dated, draft, and unpublished content
+  const downloads = [...getPublishedPrints(), ...getPublishedDownloads()];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"

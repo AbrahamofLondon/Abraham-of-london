@@ -1,10 +1,12 @@
 import { GetServerSideProps } from "next";
+import type { ContentDoc } from "@/lib/contentlayer-helper";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.abrahamoflondon.org";
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const { allDocuments } = await import("@/lib/contentlayer");
-  const docs = allDocuments.filter((d) => d._raw.sourceFilePath.startsWith("inner-circle/"));
+  const { getPublishedDocuments } = await import("@/lib/content/server");
+  // getPublishedDocuments() applies isLiveDoc — excludes future-dated, draft, and unpublished content
+  const docs = getPublishedDocuments().filter((d: ContentDoc) => d._raw?.sourceFilePath?.startsWith("inner-circle/"));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
