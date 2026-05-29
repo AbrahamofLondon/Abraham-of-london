@@ -1,4 +1,5 @@
 // app/admin/intelligence-foundry/runs/[id]/page.tsx
+// Shows run detail with feedback history panel for runs that have durable feedback records.
 "use client";
 
 import * as React from "react";
@@ -7,25 +8,44 @@ import { ResearchRunDetail } from "@/components/research/ResearchRunDetail";
 import Link from "next/link";
 import type { ResearchRun, ActionBrief } from "@/lib/research/foundry-contract";
 
+type FeedbackRecord = {
+  id:          string;
+  findingId:   string;
+  disposition: "ACTED" | "DISMISSED" | "DEFERRED";
+  note:        string | null;
+  updatedBy:   string | null;
+  updatedAt:   string;
+};
+
+const DISPOSITION_STYLES: Record<string, string> = {
+  ACTED:     "bg-emerald-500/8 text-emerald-400/80 border-emerald-500/20",
+  DISMISSED: "bg-white/5 text-white/45 border-white/10",
+  DEFERRED:  "bg-amber-500/6 text-amber-400/70 border-amber-500/15",
+};
+
 export default function RunDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
   const router = useRouter();
 
-  const [run, setRun] = React.useState<ResearchRun | null>(null);
-  const [brief, setBrief] = React.useState<ActionBrief | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [run,      setRun]      = React.useState<ResearchRun | null>(null);
+  const [brief,    setBrief]    = React.useState<ActionBrief | null>(null);
+  const [feedback, setFeedback] = React.useState<FeedbackRecord[]>([]);
+  const [loading,  setLoading]  = React.useState(true);
+  const [error,    setError]    = React.useState<string | null>(null);
   const [actionMsg, setActionMsg] = React.useState<string | null>(null);
 
   const loadRun = React.useCallback(() => {
     if (!id) return;
     setLoading(true);
-    fetch(`/api/admin/intelligence-foundry/runs/${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.ok) setRun(data.run);
-        else setError(data.error ?? "Run not found");
+    Promise.all([
+      fetch(`/api/admin/intelligence-foundry/runs/${id}`).then((r) => r.json()),
+      fetch(`/api/admin/intelligence-foundry/feedback?runId=${id}`).then((r) => r.json()).catch(() => ({ ok: false })),
+    ])
+      .then(([runData, fbData]) => {
+        if (runData.ok) setRun(runData.run);
+        else setError(runData.error ?? "Run not found");
+        if (fbData.ok) setFeedback(fbData.feedback ?? []);
       })
       .catch(() => setError("Network error"))
       .finally(() => setLoading(false));
@@ -109,6 +129,40 @@ export default function RunDetailPage() {
           Promote this run →
         </Link>
       </div>
+
+      {/* Feedback history — only shown when durable feedback exists */}
+      {feedback.length > 0 && (
+        <div className="rounded-xl border border-white/8 bg-white/[0.015] p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-white/20">
+              Finding Feedback History
+            </p>
+            <span className="text-[10px] font-mono text-white/20">{feedback.length} record{feedback.length !== 1 ? "s" : ""}</span>
+          </div>
+          <div className="space-y-2">
+            {feedback.map((fb) => (
+              <div key={fb.id} className="flex items-start gap-3 text-xs">
+                <span
+                  className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-mono uppercase border ${
+                    DISPOSITION_STYLES[fb.disposition] ?? "bg-white/5 text-white/30 border-white/8"
+                  }`}
+                >
+                  {fb.disposition}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/40 font-mono text-[10px] truncate">
+                    finding: {fb.findingId}
+                  </p>
+                  {fb.note && <p className="text-white/30 mt-0.5">{fb.note}</p>}
+                </div>
+                <p className="shrink-0 text-[10px] text-white/20 font-mono">
+                  {new Date(fb.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

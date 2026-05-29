@@ -233,9 +233,11 @@ export default function MarketResponseLabPage() {
   const [saveError,  setSaveError]  = useState<string | null>(null);
 
   // Feedback intake — keyed by finding ID
-  const [feedback, setFeedback] = useState<Record<string, FindingFeedback>>({});
+  const [feedback,     setFeedback]     = useState<Record<string, FindingFeedback>>({});
+  const [persistError, setPersistError] = useState<string | null>(null);
 
-  function handleFeedback(findingId: string, disposition: FeedbackDisposition | null) {
+  async function handleFeedback(findingId: string, disposition: FeedbackDisposition | null) {
+    // Always update local state immediately for responsiveness
     setFeedback((prev) => {
       if (disposition === null) {
         const next = { ...prev };
@@ -244,6 +246,54 @@ export default function MarketResponseLabPage() {
       }
       return { ...prev, [findingId]: { disposition } };
     });
+
+    // If a run is saved, persist to DB
+    if (savedRunId) {
+      setPersistError(null);
+      try {
+        if (disposition === null) {
+          await fetch(
+            `/api/admin/intelligence-foundry/feedback?runId=${encodeURIComponent(savedRunId)}&findingId=${encodeURIComponent(findingId)}`,
+            { method: "DELETE" },
+          );
+        } else {
+          await fetch("/api/admin/intelligence-foundry/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              runId:     savedRunId,
+              findingId,
+              disposition,
+              moduleId:  "market-response-lab",
+              engineId:  result?.rawOutput?.engineId ?? "market-response",
+            }),
+          });
+        }
+      } catch {
+        setPersistError("Feedback saved locally but DB write failed.");
+      }
+    }
+  }
+
+  // After saving a run, batch-persist any feedback already captured
+  async function persistFeedbackSnapshot(runId: string) {
+    const entries = Object.entries(feedback);
+    if (entries.length === 0) return;
+    await Promise.allSettled(
+      entries.map(([findingId, fb]) =>
+        fetch("/api/admin/intelligence-foundry/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            runId,
+            findingId,
+            disposition: fb.disposition,
+            moduleId:    "market-response-lab",
+            engineId:    result?.rawOutput?.engineId ?? "market-response",
+          }),
+        }),
+      ),
+    );
   }
 
   async function runAnalysis() {
@@ -296,7 +346,10 @@ export default function MarketResponseLabPage() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error ?? "Save failed");
-      setSavedRunId((data.run as { id: string }).id);
+      const newRunId = (data.run as { id: string }).id;
+      setSavedRunId(newRunId);
+      // Batch-persist any feedback already captured before run was saved
+      await persistFeedbackSnapshot(newRunId);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -455,6 +508,7 @@ export default function MarketResponseLabPage() {
               </button>
             )}
             {saveError && <p className="text-xs text-red-400/70 font-mono">{saveError}</p>}
+            {persistError && <p className="text-xs text-amber-400/60 font-mono">{persistError}</p>}
           </div>
 
           {/* Findings */}

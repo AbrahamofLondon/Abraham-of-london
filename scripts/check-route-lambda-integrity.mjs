@@ -247,7 +247,16 @@ const DIRECT_CLIENT_PAGE_ALLOWLIST = {
   "app/admin/intelligence-foundry/simulation/fast-diagnostic/page.tsx":                       "admin-layout-force-dynamic — pending migration",
   "app/admin/intelligence-foundry/simulation/report-lineage/page.tsx":                        "admin-layout-force-dynamic — pending migration",
   "app/admin/intelligence-foundry/simulation/strategy-room/page.tsx":                         "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/page.tsx":             "admin-layout-force-dynamic — pending migration",
   "app/admin/intelligence-foundry/trash-day/page.tsx":                "admin-layout-force-dynamic — pending migration",
+  // ── Foundry surfaces wired in session 1R (content, market, outbound, promo, red-team, scenario)
+  "app/admin/intelligence-foundry/content/page.tsx":                  "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/market/page.tsx":                   "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/outbound/page.tsx":                 "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/promotion/page.tsx":                "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/red-team/content/page.tsx":         "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/red-team/security/page.tsx":        "admin-layout-force-dynamic — pending migration",
+  "app/admin/intelligence-foundry/scenario/page.tsx":                 "admin-layout-force-dynamic — pending migration",
   "app/admin/organisations/new/page.tsx":                             "admin-layout-force-dynamic — pending migration",
   "app/admin/organisations/[id]/campaigns/new/page.tsx":              "admin-layout-force-dynamic — pending migration",
 

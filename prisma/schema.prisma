@@ -3658,10 +3658,11 @@ model ResearchRun {
   updatedAt      DateTime  @updatedAt
 
   // Relations
-  findings    FoundryFinding[]
-  auditEvents FoundryAuditEvent[]
-  briefs      ActionBrief[]
-  promotions  FoundryPromotion[]
+  findings         FoundryFinding[]
+  auditEvents      FoundryAuditEvent[]
+  briefs           ActionBrief[]
+  promotions       FoundryPromotion[]
+  findingFeedback  FindingFeedback[]
 
   @@index([module])
   @@index([status])
@@ -3801,6 +3802,33 @@ model FoundryPromotion {
   @@index([researchRunId])
   @@index([approvedAt])
   @@map("foundry_promotions")
+}
+
+// ─── Intelligence Foundry — Feedback & Baselines ─────────────────────────────
+
+/// Durable per-finding disposition from a human reviewer.
+/// Authority over outputJson snapshot. Upserted per (runId, findingId) pair.
+model FindingFeedback {
+  id          String      @id @default(cuid())
+  runId       String
+  run         ResearchRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  findingId   String      // ID of the finding in findingsJson array
+  engineId    String?     // Engine that emitted the finding
+  moduleId    String?     // Foundry module (e.g. "market-response-lab")
+  disposition String      // ACTED | DISMISSED | DEFERRED
+  note        String?     // Optional freetext from reviewer
+  updatedBy   String?     // Actor email
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([runId, findingId])
+  @@index([runId])
+  @@index([disposition])
+  @@index([moduleId])
+  @@index([engineId])
+  @@map("finding_feedback")
 }
 
 // ─── Privacy Architecture — Data Separation Layer ────────────────────────────
