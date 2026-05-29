@@ -7,6 +7,7 @@ import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 import { ResearchRunRepository } from "@/lib/research/research-run-repository";
 import { CreateResearchRunSchema, ResearchRunFiltersSchema } from "@/lib/research/research-run-validation";
 import { ZodError } from "zod";
+import { notifyCriticalFindingCreated } from "@/lib/foundry/webhook-notifier";
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdminAppRoute();
@@ -50,6 +51,18 @@ export async function POST(request: NextRequest) {
     if (!input.actorEmail) input.actorEmail = auth.email ?? undefined;
 
     const run = await ResearchRunRepository.create(input);
+
+    // Fire-and-forget webhook for CRITICAL findings — never blocks the response
+    if (run.severity === "CRITICAL" && !run.isDemo) {
+      void notifyCriticalFindingCreated({
+        findingId: run.id,
+        label: run.title,
+        detail: run.recommendation ?? "",
+        engineId: run.module,
+        runId: run.id,
+      });
+    }
+
     return NextResponse.json({ ok: true, run }, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {

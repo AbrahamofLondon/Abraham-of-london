@@ -15,6 +15,7 @@ import {
   MATURITY_ORDER,
   isValidPromotion,
 } from "@/lib/research/promotion/promotion-service";
+import { notifyPromotionApproved } from "@/lib/foundry/webhook-notifier";
 
 // ─── GET ─────────────────────────────────────────────────────────────────────
 
@@ -105,6 +106,15 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ ok: false, error: errorMsg }, { status });
     }
+
+    // Fire-and-forget webhook notification — never blocks the response
+    void notifyPromotionApproved({
+      eventType,
+      fromStage,
+      toStage,
+      approvedBy: result.promotion.approvedBy,
+      researchRunId: result.promotion.researchRunId,
+    });
 
     return NextResponse.json({ ok: true, promotion: result.promotion }, { status: 201 });
   } catch (err) {

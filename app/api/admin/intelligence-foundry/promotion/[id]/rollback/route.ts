@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
 import { rollbackPromotion, getPromotion } from "@/lib/research/promotion/promotion-service";
 import { prisma } from "@/lib/prisma";
+import { notifyPromotionRolledBack } from "@/lib/foundry/webhook-notifier";
 
 export async function POST(
   request: NextRequest,
@@ -68,6 +69,15 @@ export async function POST(
         // Audit event emission is best-effort; rollback already succeeded
       });
     }
+
+    // Fire-and-forget webhook notification — never blocks the response
+    void notifyPromotionRolledBack({
+      eventType: existing.eventType,
+      fromStage: existing.fromStage,
+      toStage: existing.toStage,
+      rolledBackBy: actorEmail,
+      rollbackReason: rollbackReason.trim(),
+    });
 
     // Return the updated promotion record
     const updated = await getPromotion(promotionId);
