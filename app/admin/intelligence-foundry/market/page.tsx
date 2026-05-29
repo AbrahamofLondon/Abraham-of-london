@@ -2,6 +2,8 @@
 // app/admin/intelligence-foundry/market/page.tsx
 // Market Response Lab — deterministic copy analysis.
 // No invented scores. All findings reference specific matched strings.
+// Feedback intake: per-finding disposition (ACTED / DISMISSED / DEFERRED)
+// is recorded in component state and persisted in the saved ResearchRun.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -62,6 +64,15 @@ type EngineResult = {
   rawOutput?: RawOutput;
 };
 
+// ─── Feedback types ───────────────────────────────────────────────────────────
+
+type FeedbackDisposition = "ACTED" | "DISMISSED" | "DEFERRED";
+
+type FindingFeedback = {
+  disposition: FeedbackDisposition;
+  note?: string;
+};
+
 // ─── Platform options ─────────────────────────────────────────────────────────
 
 const PLATFORM_OPTIONS = [
@@ -109,6 +120,104 @@ function OverallBadge({ severity }: { severity: RunSeverity | string }) {
   );
 }
 
+// ─── Feedback row component ───────────────────────────────────────────────────
+
+function FeedbackRow({
+  findingId,
+  feedback,
+  onChange,
+}: {
+  findingId: string;
+  feedback: FindingFeedback | undefined;
+  onChange: (id: string, disposition: FeedbackDisposition | null) => void;
+}) {
+  const buttons: { label: string; value: FeedbackDisposition; style: string; activeStyle: string }[] = [
+    {
+      label: "Acted",
+      value: "ACTED",
+      style: "border-white/8 text-white/25 hover:text-emerald-400/70 hover:border-emerald-500/20",
+      activeStyle: "border-emerald-500/25 bg-emerald-500/8 text-emerald-400",
+    },
+    {
+      label: "Dismissed",
+      value: "DISMISSED",
+      style: "border-white/8 text-white/25 hover:text-white/45 hover:border-white/15",
+      activeStyle: "border-white/20 bg-white/5 text-white/55",
+    },
+    {
+      label: "Defer",
+      value: "DEFERRED",
+      style: "border-white/8 text-white/25 hover:text-amber-400/70 hover:border-amber-500/20",
+      activeStyle: "border-amber-500/20 bg-amber-500/6 text-amber-400/80",
+    },
+  ];
+
+  return (
+    <div className="flex items-center gap-1.5 pt-2 mt-2 border-t border-white/5">
+      <span className="text-[9px] font-mono uppercase tracking-widest text-white/18 mr-1">Response</span>
+      {buttons.map((btn) => {
+        const isActive = feedback?.disposition === btn.value;
+        return (
+          <button
+            key={btn.value}
+            onClick={() => onChange(findingId, isActive ? null : btn.value)}
+            className={`rounded px-2 py-0.5 text-[9px] font-mono uppercase tracking-wide border transition-colors ${
+              isActive ? btn.activeStyle : btn.style
+            }`}
+          >
+            {isActive ? `✓ ${btn.label}` : btn.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Feedback summary panel ───────────────────────────────────────────────────
+
+function FeedbackSummary({
+  findings,
+  feedback,
+}: {
+  findings: Finding[];
+  feedback: Record<string, FindingFeedback>;
+}) {
+  const violations = findings.filter((f) => f.severity !== "INFO");
+  const total = violations.length;
+  if (total === 0) return null;
+
+  const acted    = violations.filter((f) => feedback[f.id]?.disposition === "ACTED").length;
+  const dismissed = violations.filter((f) => feedback[f.id]?.disposition === "DISMISSED").length;
+  const deferred  = violations.filter((f) => feedback[f.id]?.disposition === "DEFERRED").length;
+  const pending   = total - acted - dismissed - deferred;
+
+  if (acted + dismissed + deferred === 0) return null;
+
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/[0.015] p-4">
+      <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-3">Feedback Summary</p>
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: "Acted", count: acted,    color: "text-emerald-400" },
+          { label: "Dismissed", count: dismissed, color: "text-white/50" },
+          { label: "Deferred", count: deferred,  color: "text-amber-400/80" },
+          { label: "Pending", count: pending,   color: "text-white/25" },
+        ].map(({ label, count, color }) => (
+          <div key={label} className="text-center">
+            <p className={`text-xl font-mono font-semibold ${color}`}>{count}</p>
+            <p className="text-[9px] font-mono uppercase tracking-wider text-white/20">{label}</p>
+          </div>
+        ))}
+      </div>
+      {pending === 0 && (
+        <p className="text-[10px] text-emerald-400/60 font-mono mt-3 text-center">
+          All findings have a response recorded.
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MarketResponseLabPage() {
@@ -123,12 +232,27 @@ export default function MarketResponseLabPage() {
   const [savedRunId, setSavedRunId] = useState<string | null>(null);
   const [saveError,  setSaveError]  = useState<string | null>(null);
 
+  // Feedback intake — keyed by finding ID
+  const [feedback, setFeedback] = useState<Record<string, FindingFeedback>>({});
+
+  function handleFeedback(findingId: string, disposition: FeedbackDisposition | null) {
+    setFeedback((prev) => {
+      if (disposition === null) {
+        const next = { ...prev };
+        delete next[findingId];
+        return next;
+      }
+      return { ...prev, [findingId]: { disposition } };
+    });
+  }
+
   async function runAnalysis() {
     setLoading(true);
     setError(null);
     setResult(null);
     setSavedRunId(null);
     setSaveError(null);
+    setFeedback({});
     try {
       const res = await fetch("/api/admin/intelligence-foundry/market/analyze", {
         method: "POST",
@@ -163,7 +287,10 @@ export default function MarketResponseLabPage() {
           durationMs: result.durationMs,
           recommendation: result.summary,
           findingsJson: JSON.stringify(result.findings),
-          outputJson: JSON.stringify(result.rawOutput ?? {}),
+          outputJson: JSON.stringify({
+            ...(result.rawOutput ?? {}),
+            feedback: Object.keys(feedback).length > 0 ? feedback : undefined,
+          }),
           status: "PENDING",
         }),
       });
@@ -356,6 +483,11 @@ export default function MarketResponseLabPage() {
                       {f.remediation}
                     </p>
                   )}
+                  <FeedbackRow
+                    findingId={f.id}
+                    feedback={feedback[f.id]}
+                    onChange={handleFeedback}
+                  />
                 </div>
               ))}
             </div>
@@ -364,6 +496,9 @@ export default function MarketResponseLabPage() {
               <p className="text-xs text-emerald-400">No violations — content passed all checks.</p>
             </div>
           )}
+
+          {/* Feedback summary — shown once any finding has a response */}
+          <FeedbackSummary findings={result.findings} feedback={feedback} />
 
           {/* Formula trace */}
           {formulaSteps.length > 0 && (
