@@ -7,7 +7,9 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 type PromotionRecord = {
   id: string;
@@ -171,18 +173,21 @@ function RollbackPanel({ promotion, onDone }: { promotion: PromotionRecord; onDo
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function PromotionWorkflowPage() {
+function PromotionWorkflowInner() {
+  const searchParams = useSearchParams();
+  const prefillRunId = searchParams?.get("runId") ?? "";
+
   const [promotions, setPromotions] = React.useState<PromotionRecord[]>([]);
   const [loading,    setLoading]    = React.useState(true);
   const [error,      setError]      = React.useState<string | null>(null);
 
-  // New promotion form
-  const [showForm,         setShowForm]         = React.useState(false);
+  // New promotion form — prefill researchRunId from ?runId= query param
+  const [showForm,         setShowForm]         = React.useState(!!prefillRunId);
   const [eventType,        setEventType]        = React.useState("");
   const [fromStage,        setFromStage]        = React.useState<typeof MATURITY_ORDER[number]>("RESERVED_CONCEPT");
   const [approvedBy,       setApprovedBy]       = React.useState("");
   const [promotionReason,  setPromotionReason]  = React.useState("");
-  const [researchRunId,    setResearchRunId]     = React.useState("");
+  const [researchRunId,    setResearchRunId]     = React.useState(prefillRunId);
   const [submitting,       setSubmitting]        = React.useState(false);
   const [formError,        setFormError]         = React.useState<string | null>(null);
   const [formSuccess,      setFormSuccess]       = React.useState<string | null>(null);
@@ -528,5 +533,14 @@ export default function PromotionWorkflowPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function PromotionWorkflowPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-xs text-white/30 animate-pulse">Loading…</div>}>
+      <PromotionWorkflowInner />
+    </Suspense>
   );
 }

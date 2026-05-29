@@ -93,6 +93,22 @@ export default function RunDetailPage() {
         onDefer={handleDefer}
         onArchive={handleArchive}
       />
+
+      {/* Promote this run */}
+      <div className="rounded-xl border border-white/6 bg-white/[0.015] p-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-0.5">Maturity Promotion</p>
+          <p className="text-xs text-white/35">
+            Capture a formal promotion decision for this run in the promotion ledger.
+          </p>
+        </div>
+        <Link
+          href={`/admin/intelligence-foundry/promotion?runId=${id}`}
+          className="shrink-0 rounded-lg border border-amber-400/20 bg-amber-400/8 px-3 py-1.5 text-xs font-mono text-amber-400/70 hover:border-amber-400/35 hover:text-amber-400/90 transition-all"
+        >
+          Promote this run →
+        </Link>
+      </div>
     </div>
   );
 }
