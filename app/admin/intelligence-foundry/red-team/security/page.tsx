@@ -47,14 +47,19 @@ type Mode = "clean" | "vulnerable";
 export default function SecurityRedTeamPage() {
   const [scope, setScope] = React.useState("all");
   const [mode, setMode] = React.useState<Mode>("clean");
-  const [running, setRunning] = React.useState(false);
-  const [result, setResult] = React.useState<RunResult | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
+  const [running,    setRunning]    = React.useState(false);
+  const [result,     setResult]     = React.useState<RunResult | null>(null);
+  const [error,      setError]      = React.useState<string | null>(null);
+  const [saving,     setSaving]     = React.useState(false);
+  const [savedRunId, setSavedRunId] = React.useState<string | null>(null);
+  const [saveError,  setSaveError]  = React.useState<string | null>(null);
 
   const handleRun = async () => {
     setRunning(true);
     setError(null);
     setResult(null);
+    setSavedRunId(null);
+    setSaveError(null);
 
     const payload: Record<string, unknown> = { scope };
     if (mode === "vulnerable") payload.useVulnerableFixture = true;
@@ -76,6 +81,38 @@ export default function SecurityRedTeamPage() {
       setError("Network error — is the dev server running?");
     } finally {
       setRunning(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const ts = Date.now();
+      const res = await fetch("/api/admin/intelligence-foundry/runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Security Red-Team · ${new Date(ts).toISOString().slice(0, 16).replace("T", " ")}`,
+          slug: `security-red-team-${ts}`,
+          runType: "SECURITY",
+          module: "security-red-team",
+          severity: result.severity,
+          durationMs: result.durationMs,
+          recommendation: result.summary,
+          findingsJson: JSON.stringify(result.findings),
+          outputJson: JSON.stringify(result.rawOutput ?? {}),
+          status: "PENDING",
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? "Save failed");
+      setSavedRunId((data.run as { id: string }).id);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -191,6 +228,27 @@ export default function SecurityRedTeamPage() {
               </div>
             </div>
             <p className="text-sm text-white/50">{result.summary}</p>
+          </div>
+
+          {/* Save run */}
+          <div className="flex items-center gap-3">
+            {savedRunId ? (
+              <a
+                href={`/admin/intelligence-foundry/runs/${savedRunId}`}
+                className="text-xs text-emerald-400/70 hover:text-emerald-400 font-mono transition-colors"
+              >
+                ✓ Run saved — view run →
+              </a>
+            ) : (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs font-mono text-white/40 hover:text-white/60 hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {saving ? "Saving…" : "Save run to vault"}
+              </button>
+            )}
+            {saveError && <p className="text-xs text-red-400/70 font-mono">{saveError}</p>}
           </div>
 
           {/* Findings */}

@@ -94,14 +94,19 @@ export default function OutboundNarrativeRangePage() {
   const [title,    setTitle]    = useState("");
   const [link,     setLink]     = useState("");
   const [provider, setProvider] = useState("linkedin");
-  const [loading,  setLoading]  = useState(false);
-  const [result,   setResult]   = useState<EngineResult | null>(null);
-  const [error,    setError]    = useState<string | null>(null);
+  const [loading,    setLoading]    = useState(false);
+  const [result,     setResult]     = useState<EngineResult | null>(null);
+  const [error,      setError]      = useState<string | null>(null);
+  const [saving,     setSaving]     = useState(false);
+  const [savedRunId, setSavedRunId] = useState<string | null>(null);
+  const [saveError,  setSaveError]  = useState<string | null>(null);
 
   async function runGate() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setSavedRunId(null);
+    setSaveError(null);
     try {
       const payload =
         mode === "safe"    ? { useSafeFixture: true } :
@@ -120,6 +125,38 @@ export default function OutboundNarrativeRangePage() {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function saveRun() {
+    if (!result) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const ts = Date.now();
+      const res = await fetch("/api/admin/intelligence-foundry/runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Outbound Policy Gate · ${new Date(ts).toISOString().slice(0, 16).replace("T", " ")}`,
+          slug: `outbound-policy-gate-${ts}`,
+          runType: "OUTBOUND",
+          module: "outbound-narrative-range",
+          severity: result.severity,
+          durationMs: result.durationMs,
+          recommendation: result.summary,
+          findingsJson: JSON.stringify(result.findings),
+          outputJson: JSON.stringify(result.rawOutput ?? {}),
+          status: "PENDING",
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? "Save failed");
+      setSavedRunId((data.run as { id: string }).id);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -288,6 +325,27 @@ export default function OutboundNarrativeRangePage() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Save run */}
+          <div className="flex items-center gap-3">
+            {savedRunId ? (
+              <a
+                href={`/admin/intelligence-foundry/runs/${savedRunId}`}
+                className="text-xs text-emerald-400/70 hover:text-emerald-400 font-mono transition-colors"
+              >
+                ✓ Run saved — view run →
+              </a>
+            ) : (
+              <button
+                onClick={saveRun}
+                disabled={saving}
+                className="rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs font-mono text-white/40 hover:text-white/60 hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {saving ? "Saving…" : "Save run to vault"}
+              </button>
+            )}
+            {saveError && <p className="text-xs text-red-400/70 font-mono">{saveError}</p>}
           </div>
 
           {/* Findings */}
