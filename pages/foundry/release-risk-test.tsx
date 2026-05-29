@@ -218,8 +218,7 @@ export default function ReleaseRiskTestPage() {
 
               <div className="border border-white/5 bg-white/1 p-4">
                 <p className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/20 text-center">
-                  This is a public preview. Results are illustrative and based on pattern analysis only.
-                  They do not constitute a governed assessment.
+                  This is a public preview. It identifies visible patterns and risks, but it is not a full governed assessment.
                 </p>
               </div>
 
