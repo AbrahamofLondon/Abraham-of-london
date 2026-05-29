@@ -236,6 +236,63 @@ function checkCoverage() {
     }
   }
 
+  // ── Check 6: Duplicate public index route variants ──────────────────────
+  // Forbids alternate index files (e.g. index.migrated.tsx, index.backup.tsx)
+  // from existing beside a canonical index.tsx in public route directories.
+  // This prevents the /shorts empty-page defect from recurring.
+  const pagesDir = path.join(ROOT, "pages");
+  const FORBIDDEN_INDEX_SUFFIXES = [
+    ".migrated",
+    ".backup",
+    ".old",
+    ".copy",
+    ".v2",
+    ".v3",
+    ".new",
+    ".orig",
+    ".bak",
+    ".previous",
+  ];
+
+  function scanForDuplicateIndexVariants(dir) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name.startsWith("_")) continue;
+        if (entry.name === "api") continue;
+        if (entry.name.startsWith(".")) continue;
+        scanForDuplicateIndexVariants(fullPath);
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name);
+        if (![".tsx", ".ts", ".jsx", ".js"].includes(ext)) continue;
+        const base = entry.name.slice(0, -ext.length);
+
+        for (const suffix of FORBIDDEN_INDEX_SUFFIXES) {
+          if (base === "index" + suffix) {
+            const canonicalPath = path.join(dir, "index" + ext);
+            if (fs.existsSync(canonicalPath)) {
+              const relativePath = path.relative(pagesDir, fullPath).replace(/\\/g, "/");
+              failures.push({
+                type: "DUPLICATE_INDEX_VARIANT",
+                routePath: "pages/" + relativePath,
+                detail: "Forbidden duplicate index variant \"" + entry.name + "\" exists beside canonical \"index" + ext + "\" in pages/" + path.dirname(relativePath).replace(/\\/g, "/") + ". Remove the variant or add to FORBIDDEN_INDEX_SUFFIXES allowlist.",
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  scanForDuplicateIndexVariants(pagesDir);
+
   // ── Report ─────────────────────────────────────────────────────────────
   const report = {
     generated: new Date().toISOString(),
