@@ -33,28 +33,27 @@ export default function HomepageHero() {
             letterSpacing: "-0.02em",
           }}
         >
-          Governed decision infrastructure for leaders carrying decisions that cannot drift.
+          Test a decision before it becomes an expensive mistake.
         </h1>
 
         <p
           className="mx-auto mt-6 max-w-[58ch] text-[16px] leading-[1.85]"
           style={{ color: "rgba(255,255,255,0.58)" }}
         >
-          Start with one real decision. If the evidence holds, the system can
-          progress it into executive reporting, intervention, retained oversight,
-          and chain-anchored provenance.
+          Describe a real decision. The Foundry returns a risk score, flags evidence gaps,
+          and identifies authority issues — in seconds. No sign-up required.
         </p>
 
         <p
           className="mx-auto mt-5 max-w-[48ch] text-[13px] leading-[1.75]"
           style={{ color: "rgba(255,255,255,0.36)" }}
         >
-          No guaranteed outcomes. No hidden certainty. Evidence first.
+          Public preview. Results are illustrative. Full governed reviews issue verifiable records.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
-            href="/diagnostics/fast"
+            href="/foundry/decision-test"
             className="group inline-flex min-h-[52px] items-center gap-3 border px-8 py-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderColor: `${HOMEPAGE_GOLD}60`,
@@ -66,11 +65,11 @@ export default function HomepageHero() {
               textTransform: "uppercase",
             }}
           >
-            Run the Fast Diagnostic
+            Test a Decision
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
-            href="/tools/decision-delay-exposure"
+            href="/foundry/market-signal-test"
             className="inline-flex min-h-[44px] items-center"
             style={{
               ...mono,
@@ -80,13 +79,13 @@ export default function HomepageHero() {
               color: "rgba(255,255,255,0.36)",
             }}
           >
-            Estimate decision delay exposure
+            Check a Market Signal
           </Link>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           <Link
-            href="/provenance/sample-export"
+            href="/diagnostics/fast"
             style={{
               ...mono,
               fontSize: "10px",
@@ -95,7 +94,19 @@ export default function HomepageHero() {
               color: `${HOMEPAGE_GOLD}55`,
             }}
           >
-            View provenance sample →
+            Or run the Fast Diagnostic →
+          </Link>
+          <Link
+            href="/foundry"
+            style={{
+              ...mono,
+              fontSize: "10px",
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.30)",
+            }}
+          >
+            About the Foundry →
           </Link>
         </div>
 
@@ -105,10 +116,10 @@ export default function HomepageHero() {
         >
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             {[
-              "Evidence tested",
-              "Authority checked",
-              "Escalation may be refused",
-              "Checkpoint retained",
+              "Risk scored",
+              "Evidence checked",
+              "Authority flagged",
+              "Demo reference issued",
             ].map((label) => (
               <div key={label} className="flex items-center gap-2">
                 <span
