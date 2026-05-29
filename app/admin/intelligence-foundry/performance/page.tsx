@@ -27,6 +27,54 @@ type PerformanceResult = {
   runId?: string;
 };
 
+type PerformanceBaseline = {
+  engineId: string;
+  engineName: string;
+  iterations: number;
+  minMs: number;
+  avgMs: number;
+  p95Ms: number;
+  maxMs: number;
+  capturedAt: string;
+  researchRunId?: string;
+};
+
+const BASELINE_STORAGE_KEY = "foundry-perf-baselines";
+
+function loadBaselines(): Record<string, PerformanceBaseline> {
+  try {
+    const raw = localStorage.getItem(BASELINE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveBaseline(baseline: PerformanceBaseline): void {
+  try {
+    const existing = loadBaselines();
+    existing[baseline.engineId] = baseline;
+    localStorage.setItem(BASELINE_STORAGE_KEY, JSON.stringify(existing));
+  } catch {
+    // localStorage unavailable — no-op
+  }
+}
+
+function clearBaseline(engineId: string): void {
+  try {
+    const existing = loadBaselines();
+    delete existing[engineId];
+    localStorage.setItem(BASELINE_STORAGE_KEY, JSON.stringify(existing));
+  } catch {}
+}
+
+function fmtDelta(current: number, baseline: number): { text: string; positive: boolean; neutral: boolean } {
+  const diff = current - baseline;
+  const pct = baseline > 0 ? ((diff / baseline) * 100).toFixed(1) : "0.0";
+  const text = diff > 0 ? `+${diff.toFixed(1)}ms (+${pct}%)` : `${diff.toFixed(1)}ms (${pct}%)`;
+  return { text, positive: diff < 0, neutral: Math.abs(diff) < 1 };
+}
+
 export default function PerformanceRangePage() {
   const [engines, setEngines] = React.useState<EngineOption[]>([]);
   const [selectedEngine, setSelectedEngine] = React.useState<string>("");
@@ -35,6 +83,15 @@ export default function PerformanceRangePage() {
   const [running, setRunning] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saveMsg, setSaveMsg] = React.useState<string | null>(null);
+
+  // Baseline state
+  const [baselines, setBaselines] = React.useState<Record<string, PerformanceBaseline>>({});
+  const [baselineMsg, setBaselineMsg] = React.useState<string | null>(null);
+
+  // Load baselines from localStorage on mount
+  React.useEffect(() => {
+    setBaselines(loadBaselines());
+  }, []);
 
   React.useEffect(() => {
     fetch("/api/admin/intelligence-foundry/engines")
@@ -51,12 +108,15 @@ export default function PerformanceRangePage() {
       .catch(() => {});
   }, []);
 
+  const currentBaseline = selectedEngine ? baselines[selectedEngine] ?? null : null;
+
   const handleRun = async () => {
     if (!selectedEngine) return;
     setRunning(true);
     setError(null);
     setResults(null);
     setSaveMsg(null);
+    setBaselineMsg(null);
 
     try {
       const res = await fetch("/api/admin/intelligence-foundry/performance/run", {
@@ -99,7 +159,12 @@ export default function PerformanceRangePage() {
           inputJson: JSON.stringify({ engineId: selectedEngine, iterations }),
           outputJson: JSON.stringify(results),
           findingsJson: JSON.stringify(results.findings),
-          severity: results.findings.some((f) => f.severity === "HIGH") ? "HIGH" : results.findings.some((f) => f.severity === "MEDIUM") ? "MEDIUM" : "INFO",
+          severity:
+            results.findings.some((f) => f.severity === "HIGH")
+              ? "HIGH"
+              : results.findings.some((f) => f.severity === "MEDIUM")
+              ? "MEDIUM"
+              : "INFO",
           status: "COMPLETE",
           durationMs: results.totalMs,
         }),
@@ -114,6 +179,34 @@ export default function PerformanceRangePage() {
     } catch (err) {
       setSaveMsg(`Save error: ${err instanceof Error ? err.message : "unknown"}`);
     }
+  };
+
+  const handleSetBaseline = () => {
+    if (!results) return;
+    const baseline: PerformanceBaseline = {
+      engineId: results.engineId,
+      engineName: results.engineName,
+      iterations: results.iterations,
+      minMs: results.minMs,
+      avgMs: results.avgMs,
+      p95Ms: results.p95Ms,
+      maxMs: results.maxMs,
+      capturedAt: new Date().toISOString(),
+    };
+    saveBaseline(baseline);
+    setBaselines((prev) => ({ ...prev, [results.engineId]: baseline }));
+    setBaselineMsg(`Baseline set for ${results.engineName} at ${new Date().toLocaleTimeString()}.`);
+  };
+
+  const handleClearBaseline = () => {
+    if (!selectedEngine) return;
+    clearBaseline(selectedEngine);
+    setBaselines((prev) => {
+      const next = { ...prev };
+      delete next[selectedEngine];
+      return next;
+    });
+    setBaselineMsg("Baseline cleared.");
   };
 
   return (
@@ -132,6 +225,30 @@ export default function PerformanceRangePage() {
         </p>
       </div>
 
+      {/* Baseline banner for selected engine */}
+      {currentBaseline && (
+        <div className="rounded-lg border border-violet-500/15 bg-violet-500/5 p-3 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-violet-400/60 mb-0.5">Active Baseline</p>
+            <p className="text-xs text-white/50">
+              {currentBaseline.engineName} · captured {new Date(currentBaseline.capturedAt).toLocaleString()}
+            </p>
+            <p className="text-[11px] font-mono text-white/35 mt-1">
+              avg {currentBaseline.avgMs.toFixed(1)}ms &nbsp;·&nbsp;
+              p95 {currentBaseline.p95Ms.toFixed(1)}ms &nbsp;·&nbsp;
+              max {currentBaseline.maxMs.toFixed(1)}ms &nbsp;·&nbsp;
+              {currentBaseline.iterations} iter
+            </p>
+          </div>
+          <button
+            onClick={handleClearBaseline}
+            className="shrink-0 rounded border border-white/8 bg-white/3 px-2 py-1 text-[10px] font-mono text-white/30 hover:text-white/50 hover:border-white/15 transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       <SimulationShell
         title="Engine Performance Benchmark"
         moduleId="performance-range"
@@ -145,7 +262,12 @@ export default function PerformanceRangePage() {
               <p className="text-[10px] font-mono uppercase tracking-wider text-white/20">Engine</p>
               <select
                 value={selectedEngine}
-                onChange={(e) => setSelectedEngine(e.target.value)}
+                onChange={(e) => {
+                  setSelectedEngine(e.target.value);
+                  setResults(null);
+                  setSaveMsg(null);
+                  setBaselineMsg(null);
+                }}
                 className="w-full rounded border border-white/15 bg-[#0d0d0d] px-3 py-2 text-xs text-white/70 focus:outline-none focus:border-white/30"
               >
                 {engines.map((e) => (
@@ -173,6 +295,7 @@ export default function PerformanceRangePage() {
         outputsSlot={
           results ? (
             <div className="space-y-4">
+              {/* Primary metrics grid */}
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "Engine", value: results.engineName },
@@ -200,12 +323,65 @@ export default function PerformanceRangePage() {
                 ))}
               </div>
 
+              {/* Baseline comparison — only when baseline exists for this engine */}
+              {currentBaseline && (
+                <div className="rounded border border-violet-500/12 bg-violet-500/4 p-3 space-y-2">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-violet-400/50">
+                    Delta vs Baseline
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        { label: "Min", current: results.minMs, base: currentBaseline.minMs },
+                        { label: "Avg", current: results.avgMs, base: currentBaseline.avgMs },
+                        { label: "P95", current: results.p95Ms, base: currentBaseline.p95Ms },
+                        { label: "Max", current: results.maxMs, base: currentBaseline.maxMs },
+                      ] as const
+                    ).map(({ label, current, base }) => {
+                      const delta = fmtDelta(current, base);
+                      return (
+                        <div key={label} className="rounded border border-white/6 bg-white/2 p-2">
+                          <p className="text-[10px] font-mono uppercase tracking-wider text-white/20">{label}</p>
+                          <p
+                            className={`text-sm font-mono font-semibold ${
+                              delta.neutral
+                                ? "text-white/40"
+                                : delta.positive
+                                ? "text-emerald-400/80"
+                                : "text-red-400/80"
+                            }`}
+                          >
+                            {delta.text}
+                          </p>
+                          <p className="text-[10px] text-white/25">
+                            {current.toFixed(1)}ms vs {base.toFixed(1)}ms
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {results.findings.length > 0 && (
                 <div>
                   <p className="text-[10px] font-mono uppercase tracking-wider text-white/20 mb-2">Findings</p>
                   <FindingsList findings={results.findings} />
                 </div>
               )}
+
+              {/* Set baseline CTA */}
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  onClick={handleSetBaseline}
+                  className="rounded border border-violet-500/20 bg-violet-500/8 px-3 py-1.5 text-[11px] font-mono text-violet-300/70 hover:text-violet-200/90 hover:border-violet-500/35 transition-colors"
+                >
+                  {currentBaseline ? "Update Baseline" : "Set as Baseline"}
+                </button>
+                {baselineMsg && (
+                  <p className="text-[11px] text-white/35 font-mono">{baselineMsg}</p>
+                )}
+              </div>
             </div>
           ) : (
             <p className="text-xs text-white/25 italic">Run a benchmark to see results.</p>
@@ -230,6 +406,14 @@ export default function PerformanceRangePage() {
                 {engines.length > 0 ? "✓" : "✗"}
               </span>
               <span className="text-white/50">{engines.length} callable engines</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={currentBaseline ? "text-violet-400" : "text-white/20"}>
+                {currentBaseline ? "✓" : "○"}
+              </span>
+              <span className="text-white/50">
+                {currentBaseline ? `Baseline: ${currentBaseline.engineName}` : "No baseline set"}
+              </span>
             </div>
           </div>
         }
