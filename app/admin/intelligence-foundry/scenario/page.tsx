@@ -129,6 +129,8 @@ function apiEndpointFor(engineId: string): string | null {
     "market-response":                    "/api/admin/intelligence-foundry/market/analyze",
     "editorial-style-checker":            "/api/admin/intelligence-foundry/content/analyze",
     "outbound-policy-gate":               "/api/admin/intelligence-foundry/outbound/analyze",
+    // Constitutional diagnostic
+    "constitutional-diagnostic":          "/api/admin/intelligence-foundry/engines/constitutional-diagnostic/run",
     // Red-team endpoints
     "content-red-team":                   "/api/admin/intelligence-foundry/red-team/content/run",
     "security-red-team":                  "/api/admin/intelligence-foundry/red-team/security/run",

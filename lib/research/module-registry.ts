@@ -219,6 +219,16 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
     engineId: "report-lineage",
     capabilities: ["chain-validation", "event-registry-check", "lineage-proof"],
   },
+  {
+    id: "constitutional-diagnostic-sim",
+    name: "Constitutional Diagnostic Simulator",
+    status: "WIRED",
+    description: "Interactive 10-question diagnostic using real domain scoring. Returns constitutional route (REJECT/DIAGNOSTIC/STRATEGY/INFORMATION), authority score, coherence score, and failure mode count.",
+    route: "/admin/intelligence-foundry/simulation/constitutional-diagnostic",
+    runType: "SCENARIO",
+    engineId: "constitutional-diagnostic",
+    capabilities: ["domain-scoring", "constitutional-routing", "authority-score", "coherence-score", "failure-mode-count", "guided-input", "run-capture"],
+  },
   // ─── Adversarial / resilience labs ───────────────────────────────────────
   {
     id: "chaos-range",

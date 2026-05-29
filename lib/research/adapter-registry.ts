@@ -29,7 +29,9 @@ export const ADAPTER_REGISTRY: AdapterRegistryEntry[] = [
   { id: "enforcement-gates", engineId: "enforcement-gates", selfTest: "registered" },
   { id: "outbound-policy-gate", engineId: "outbound-policy-gate", selfTest: "registered" },
   { id: "report-lineage", engineId: "report-lineage", selfTest: "registered" },
-  { id: "market-response", engineId: "market-response", selfTest: "registered" },
+  { id: "market-response",    engineId: "market-response",    selfTest: "registered" },
+  { id: "content-red-team",  engineId: "content-red-team",  selfTest: "registered" },
+  { id: "security-red-team", engineId: "security-red-team", selfTest: "registered" },
 ];
 
 export const REGISTERED_ADAPTER_IDS = new Set(ADAPTER_REGISTRY.map((adapter) => adapter.id));
