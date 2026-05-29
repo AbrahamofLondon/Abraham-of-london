@@ -3642,6 +3642,14 @@ model ResearchRun {
   resurrectionCount Int     @default(0)
   resurrectedFromId String?
 
+  // Maturity linkage — Phase 3
+  // Mirrors EventMaturity from lib/platform/governance-event-types.ts.
+  // Only LIVE_GOVERNED runs contribute to product-health GREEN status.
+  // SIMULATION_RECORDED runs must have maturityStage = SIMULATION_ONLY.
+  maturityStage       String? // RESERVED_CONCEPT | SIMULATION_ONLY | PILOT_READY | LIVE_GOVERNED | RETIRED
+  promotionDecision   String? // JSON: { approved, actor, reason, timestamp, criteria[] }
+  promotionBlockersJson String? // JSON: string[] — remaining promotion blockers
+
   // Timestamps
   reviewedAt     DateTime?
   implementedAt  DateTime?
@@ -3653,6 +3661,7 @@ model ResearchRun {
   findings    FoundryFinding[]
   auditEvents FoundryAuditEvent[]
   briefs      ActionBrief[]
+  promotions  FoundryPromotion[]
 
   @@index([module])
   @@index([status])
@@ -3660,6 +3669,7 @@ model ResearchRun {
   @@index([actorId])
   @@index([createdAt])
   @@index([archivedAt])
+  @@index([maturityStage])
   @@map("research_runs")
 }
 
@@ -3764,6 +3774,33 @@ model FoundryPattern {
   @@index([status])
   @@index([lastSeenAt])
   @@map("foundry_patterns")
+}
+
+/// Records a promotion decision between two EventMaturity stages for a product
+/// surface or governance event. Created by the promotion workflow after evidence
+/// review. Linked to the ResearchRun(s) that served as primary evidence.
+model FoundryPromotion {
+  id              String      @id @default(cuid())
+  eventType       String      // Governance event type or product surface key
+  fromStage       String      // RESERVED_CONCEPT | SIMULATION_ONLY | PILOT_READY | LIVE_GOVERNED
+  toStage         String      // Target EventMaturity stage
+  approvedBy      String      // Actor email who approved the promotion
+  approvedAt      DateTime
+  promotionReason String
+  criteriaMetJson String?     // JSON: string[] — criteria confirmed as met
+  blockersJson    String?     // JSON: string[] — remaining blockers at promotion time
+  researchRunId   String?     // Primary evidence ResearchRun (optional additional runs via FoundryPattern)
+  run             ResearchRun? @relation(fields: [researchRunId], references: [id])
+  rollbackAt      DateTime?   // Set if the promotion was subsequently rolled back
+  rollbackReason  String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([eventType])
+  @@index([fromStage, toStage])
+  @@index([researchRunId])
+  @@index([approvedAt])
+  @@map("foundry_promotions")
 }
 
 // ─── Privacy Architecture — Data Separation Layer ────────────────────────────

@@ -699,7 +699,16 @@ function auditStatusTruth(inventory) {
     // BOARDROOM_DOSSIER_DELIVERED) alongside simulation-classification type values — they are
     // vocabulary definitions, not product surfaces claiming a publication state.
     const isPlatformRegistry = /lib\/platform\/governance-event-types|lib\/platform\/governance-event-bus|lib\/platform\/product-event-contract/.test(s.file);
-    const isInfraFile = isOutboundInfra || isFoundryInfra || isBoardroomOrPortal || isAdminWorkflowPage || isAdminPage || isTestFile || isPlatformRegistry;
+    // Content series hub pages (blog/series, editorials/series) use "PUBLISHED" as a data
+    // field status enum (SeriesPartStatus) to determine whether a part is readable or scheduled.
+    // They also use "previewParts" (a naming convention for published+scheduled display arrays)
+    // which the "preview" keyword in the simulation detector matches. These pages are display
+    // surfaces rendering real content state — they are not simulating publication.
+    const isSeriesDisplayPage = /pages\/(blog|editorials)\/series/.test(s.file);
+    // Resolver and series lib files use "PUBLISHED" / "SCHEDULED" / "DRAFT" as data-model
+    // classification values and "previewParts" as a naming convention — not as status claims.
+    const isSeriesResolverLib = /lib\/(series|editorial|blog)\//.test(s.file);
+    const isInfraFile = isOutboundInfra || isFoundryInfra || isBoardroomOrPortal || isAdminWorkflowPage || isAdminPage || isTestFile || isPlatformRegistry || isSeriesDisplayPage || isSeriesResolverLib;
 
     const simulation = /simulation|fixture|mock|dry.?run|sample|preview/i.test(src);
     const proof = /evidence|audit|governance|provider|credential|webhook|route-integrity|verified|durable|record/i.test(src);

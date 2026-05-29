@@ -175,6 +175,26 @@ export const ENGINE_REGISTRY: EngineRegistryEntry[] = [
     limitationReason:
       "Reference model only. Not used in production decisions. Illustrative output only.",
   },
+  {
+    id: "security-red-team",
+    name: "Security Red-Team",
+    status: "PRODUCTION_CALLABLE",
+    description:
+      "Adversarial security analysis: admin route auth guard coverage, IDOR risk, sensitive field exposure, rate limiting gaps. Static analysis — no live HTTP probing.",
+    version: "1.0.0",
+    limitationReason:
+      "Static analysis against a route manifest declaration. Does not perform live HTTP scanning. Ownership check detection is declaration-based; logic-level IDOR requires manual review. AST-level route discovery not yet wired.",
+  },
+  {
+    id: "content-red-team",
+    name: "Content Red-Team",
+    status: "PRODUCTION_CALLABLE",
+    description:
+      "Adversarial content pressure-testing: fabricated credentials, regulatory misrepresentation, market dominance overclaim, AI capability overclaim, urgency tactics, unattributed social proof, claim density.",
+    version: "1.0.0",
+    limitationReason:
+      "Pattern-based heuristic detection. Does not evaluate factual accuracy of specific claims. Semantic claim severity scoring not yet implemented.",
+  },
 ];
 
 export function getEngine(id: string): EngineRegistryEntry | undefined {

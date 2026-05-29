@@ -92,25 +92,25 @@ describe("resolveAllSeries — previewParts / parts split", () => {
     const sch = scheduledDoc({ seriesOrder: 2, slug: "part-two" });
     mockGetDocs.mockReturnValue([pub, sch]);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
     expect(series).toBeDefined();
-    expect(series.parts).toHaveLength(1);
-    expect(series.parts[0].slug).toBe("part-one");
+    expect(series!.parts).toHaveLength(1);
+    expect(series!.parts[0]!.slug).toBe("part-one");
 
-    expect(series.previewParts).toHaveLength(2);
-    expect(series.previewParts.map((p) => p.slug)).toContain("part-one");
-    expect(series.previewParts.map((p) => p.slug)).toContain("part-two");
+    expect(series!.previewParts).toHaveLength(2);
+    expect(series!.previewParts.map((p) => p.slug)).toContain("part-one");
+    expect(series!.previewParts.map((p) => p.slug)).toContain("part-two");
   });
 
   it("2. Scheduled part in previewParts has status 'DRAFT' (two-value enum compat)", () => {
     const sch = scheduledDoc({ seriesOrder: 1, slug: "part-one" });
     mockGetDocs.mockReturnValue([sch]);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
     expect(series).toBeDefined();
-    const scheduledInPreview = series.previewParts.find((p) => p.slug === "part-one");
+    const scheduledInPreview = series!.previewParts.find((p) => p.slug === "part-one");
     expect(scheduledInPreview).toBeDefined();
     expect(scheduledInPreview!.status).toBe("DRAFT");
   });
@@ -119,9 +119,9 @@ describe("resolveAllSeries — previewParts / parts split", () => {
     const sch = scheduledDoc({ seriesOrder: 1, slug: "part-one" });
     mockGetDocs.mockReturnValue([sch]);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
-    const scheduledInPreview = series.previewParts.find((p) => p.slug === "part-one");
+    const scheduledInPreview = series!.previewParts.find((p) => p.slug === "part-one");
     expect(scheduledInPreview!.publicationState).toBe("SCHEDULED");
   });
 
@@ -131,10 +131,10 @@ describe("resolveAllSeries — previewParts / parts split", () => {
     const dft = draftDoc({ seriesOrder: 3, slug: "part-draft" });
     mockGetDocs.mockReturnValue([pub, sch, dft]);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
-    const draftInParts = series.parts.find((p) => p.slug === "part-draft");
-    const draftInPreview = series.previewParts.find((p) => p.slug === "part-draft");
+    const draftInParts = series!.parts.find((p) => p.slug === "part-draft");
+    const draftInPreview = series!.previewParts.find((p) => p.slug === "part-draft");
 
     expect(draftInParts).toBeUndefined();
     expect(draftInPreview).toBeUndefined();
@@ -147,11 +147,11 @@ describe("resolveAllSeries — previewParts / parts split", () => {
     );
     mockGetDocs.mockReturnValue(docs);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
     expect(series).toBeDefined();
-    expect(series.parts).toHaveLength(0);          // No published parts
-    expect(series.previewParts).toHaveLength(6);   // All 6 scheduled → Coming Soon
+    expect(series!.parts).toHaveLength(0);          // No published parts
+    expect(series!.previewParts).toHaveLength(6);   // All 6 scheduled → Coming Soon
   });
 
   it("6. Mixed series: correct published / scheduled split in both arrays", () => {
@@ -162,13 +162,13 @@ describe("resolveAllSeries — previewParts / parts split", () => {
     );
     mockGetDocs.mockReturnValue([pub, ...scheduled]);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
-    expect(series.parts).toHaveLength(1);
-    expect(series.parts[0].status).toBe("PUBLISHED");
+    expect(series!.parts).toHaveLength(1);
+    expect(series!.parts[0]!.status).toBe("PUBLISHED");
 
-    expect(series.previewParts).toHaveLength(8);
-    const statuses = series.previewParts.map((p) => p.status);
+    expect(series!.previewParts).toHaveLength(8);
+    const statuses = series!.previewParts.map((p) => p.status);
     expect(statuses.filter((s) => s === "PUBLISHED")).toHaveLength(1);
     expect(statuses.filter((s) => s === "DRAFT")).toHaveLength(7);
   });
@@ -197,9 +197,9 @@ describe("resolveAllSeries — previewParts / parts split", () => {
     );
     mockGetDocs.mockReturnValue(docs);
 
-    const [series] = resolveAllSeries("editorial");
+    const series = resolveAllSeries("editorial")[0];
 
-    const orders = series.previewParts.map((p) => p.order);
+    const orders = series!.previewParts.map((p) => p.order);
     expect(orders).toEqual([1, 2, 3]);
   });
 

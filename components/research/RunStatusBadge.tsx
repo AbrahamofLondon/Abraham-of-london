@@ -15,6 +15,11 @@ const STATUS_STYLES: Record<RunStatus, { label: string; className: string }> = {
   DEFERRED:                 { label: "Deferred",           className: "bg-purple-500/10 text-purple-400 border border-purple-500/20" },
   FAILED:                   { label: "Failed",             className: "bg-red-500/10 text-red-400 border border-red-500/20" },
   ARCHIVED:                 { label: "Archived",           className: "bg-white/5 text-white/20 border border-white/5" },
+  // Maturity-aware statuses (Phase 3)
+  SIMULATION_RECORDED:      { label: "Simulation",         className: "bg-purple-500/10 text-purple-400/80 border border-purple-500/20" },
+  PILOT_RECORDED:           { label: "Pilot",              className: "bg-violet-500/10 text-violet-400/80 border border-violet-500/20" },
+  PARTIAL:                  { label: "Partial",            className: "bg-amber-500/10 text-amber-400/70 border border-amber-500/15" },
+  SKIPPED:                  { label: "Skipped",            className: "bg-white/5 text-white/30 border border-white/8" },
 };
 
 export function RunStatusBadge({ status }: { status: RunStatus }) {

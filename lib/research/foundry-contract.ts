@@ -22,7 +22,16 @@ export type RunStatus =
   | "IMPLEMENTED"
   | "DEFERRED"
   | "FAILED"
-  | "ARCHIVED";
+  | "ARCHIVED"
+  // ── Maturity-aware statuses (Phase 3 additions) ───────────────────────────
+  /** Run completed inside a simulation context. Creates evidence; never claims live delivery. */
+  | "SIMULATION_RECORDED"
+  /** Run completed inside a pilot context under manual constraint. */
+  | "PILOT_RECORDED"
+  /** Run has partial results — not all stages completed; output is incomplete. */
+  | "PARTIAL"
+  /** Run was intentionally skipped (engine not callable, prerequisites unmet). */
+  | "SKIPPED";
 
 export type RunType =
   | "RED_TEAM"
@@ -141,6 +150,24 @@ export type ResearchRun = {
   linkedRouteExists?: boolean | null;
   linkedProductId?: string | null;
   linkedFileHash?: string | null;
+
+  // Maturity linkage (Phase 3 — mirrors EventMaturity from governance-event-types)
+  /**
+   * The maturity stage of the product surface or governance event this run targets.
+   * Determines what evidence standard applies and what promotion criteria must be met.
+   * Must not be LIVE_GOVERNED for a SIMULATION_RECORDED run.
+   */
+  maturityStage?: string | null; // EventMaturity: RESERVED_CONCEPT | SIMULATION_ONLY | PILOT_READY | LIVE_GOVERNED | RETIRED
+  /**
+   * JSON: { approved: boolean, actor: string, reason: string, timestamp: string, criteria: string[] }
+   * Populated by the promotion workflow when a run contributes to a maturity promotion decision.
+   */
+  promotionDecision?: string | null;
+  /**
+   * JSON: string[] — criteria that must be met before this surface/event can promote.
+   * Populated from the governance event's promotionCriteria field.
+   */
+  promotionBlockersJson?: string | null;
 
   // Operations
   runCostEstimate?: number | null;
