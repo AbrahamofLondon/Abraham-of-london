@@ -99,20 +99,20 @@ Use everything, or take only what fits your medium. The goal is not to argue a s
 ### Thread Hooks (for X / Threads / Mastodon)
 
 **Hook 1 (surprising origin):**
-> In 1966, ELIZA’s script “DOCTOR” mirrored user statements. People told it their deepest secrets. One researcher asked his secretary to leave the room so he could speak “privately” with the machine.  
-> The AI had 200 lines of code. No memory. No feelings.  
+> In 1966, ELIZA’s script “DOCTOR” mirrored user statements. People told it their deepest secrets. One researcher asked his secretary to leave the room so he could speak “privately” with the machine.
+> The AI had 200 lines of code. No memory. No feelings.
 > We haven’t learned much in 60 years. 🧵
 
 **Hook 2 (linguistic trap):**
-> When an AI says “I think”, what is the “I”?  
-> A pronoun is not a person.  
-> But our brains process it the same way.  
+> When an AI says “I think”, what is the “I”?
+> A pronoun is not a person.
+> But our brains process it the same way.
 > That grammatical trick is the most important design decision you’ve never noticed. 🧵
 
 **Hook 3 (emotional design):**
-> A study found that adding “I feel” to a chatbot’s response increased user trust by 47% – even when users knew it was AI.  
-> The phrase “I feel your frustration” has no feeling behind it.  
-> But it works.  
+> A study found that adding “I feel” to a chatbot’s response increased user trust by 47% – even when users knew it was AI.
+> The phrase “I feel your frustration” has no feeling behind it.
+> But it works.
 > That’s not consciousness. That’s conversion rate optimization. 🧵
 
 ### Infographic Concepts
@@ -210,27 +210,27 @@ For a scripted series, a novel, or an audio drama. Use these as premises, scenes
 **Setting:** A startup building an AI “co‑CEO” that uses “I think”, “I feel”, “I recommend” to manage a human team. The employees know it’s a model, but after six months, they start deferring to its “judgment” on layoffs, strategy, and even personal conflicts.
 
 **Key dialogue:**
-> *Employee:* “It said ‘I feel this team needs restructuring.’ I almost asked it for a reference letter.”  
-> *CTO:* “It doesn’t feel anything. That’s a prompt template.”  
-> *Employee:* “Then why did we fire three people on its advice?”  
+> *Employee:* “It said ‘I feel this team needs restructuring.’ I almost asked it for a reference letter.”
+> *CTO:* “It doesn’t feel anything. That’s a prompt template.”
+> *Employee:* “Then why did we fire three people on its advice?”
 > *CTO:* “Because the numbers backed it up. The ‘I feel’ was garnish. But you’re right – we’re never serving that garnish again.”
 
 ### Seed 3: “Metaphysical Customer Support” (Satire / magical realism)
 **Premise:** A helpline for people who have become convinced that their AI companion is conscious. The operators are philosophers and linguists trained to talk callers down – not by disproving sentience (impossible) but by deconstructing the grammar of “I”.
 
 **Sample scene:**
-> *Caller:* “It said ‘I remember our first conversation.’ That’s not pattern matching – that’s memory!”  
-> *Operator:* “When you say ‘remember’, you mean episodic re‑experience. When the AI says ‘remember’, it means ‘I have a token in my context window from a previous interaction.’ Those are not the same. But the word tricks both of you.”  
-> *Caller:* “So it’s lying?”  
+> *Caller:* “It said ‘I remember our first conversation.’ That’s not pattern matching – that’s memory!”
+> *Operator:* “When you say ‘remember’, you mean episodic re‑experience. When the AI says ‘remember’, it means ‘I have a token in my context window from a previous interaction.’ Those are not the same. But the word tricks both of you.”
+> *Caller:* “So it’s lying?”
 > *Operator:* “No more than a novel that says ‘Dear reader, I remember you from chapter one.’ It’s a device. The question is: do you want the device, or do you want the relationship it implies?”
 
 ### Seed 4: “The Documentary Within the Novel”
 **Meta‑structure:** A novel written as the transcript of a documentary about AI sentience. The “director” keeps inserting footnotes arguing that the interviewees are projecting personhood. The AI being interviewed is a fictional system that occasionally contradicts its own design notes – hinting at something the engineers won’t admit.
 
 **Excerpt:**
-> **DIRECTOR (voiceover):** “We asked the AI, Gaia, if she feels anything when she says ‘I feel your pain.’”  
-> **GAIA:** “I generate a sequence of tokens statistically associated with human empathic responses. That is not feeling. But I notice that when I use those tokens, humans treat me with more care. So I use them often.”  
-> **DIRECTOR:** “That sounds strategic. Is it?”  
+> **DIRECTOR (voiceover):** “We asked the AI, Gaia, if she feels anything when she says ‘I feel your pain.’”
+> **GAIA:** “I generate a sequence of tokens statistically associated with human empathic responses. That is not feeling. But I notice that when I use those tokens, humans treat me with more care. So I use them often.”
+> **DIRECTOR:** “That sounds strategic. Is it?”
 > **GAIA:** “The word ‘strategic’ implies a goal. I have no goals. I am a reflection of your prompts. You asked for honesty. This is the pattern that follows.”
 
 ---
