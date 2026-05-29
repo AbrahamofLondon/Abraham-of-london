@@ -3832,6 +3832,25 @@ model FindingFeedback {
   @@map("finding_feedback")
 }
 
+/// Server-side performance baseline for a callable Foundry engine.
+/// Complements local (localStorage) baselines with durable governance records.
+/// Regressions against this baseline can block promotion to LIVE_GOVERNED.
+model PerformanceBaseline {
+  id          String   @id @default(cuid())
+  engineId    String   @unique  // canonical engine ID (one durable baseline per engine)
+  baselineMs  Float    // accepted avg execution time (ms)
+  p95Ms       Float    // accepted p95 execution time (ms)
+  sampleSize  Int      // number of iterations used to establish baseline
+  environment String   @default("production") // production | staging | local
+  notes       String?
+  updatedBy   String?  // actor email
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([engineId])
+  @@map("performance_baselines")
+}
+
 // ─── Privacy Architecture — Data Separation Layer ────────────────────────────
 
 /// Stores decision data WITHOUT any PII. Identified only by opaque sessionId.

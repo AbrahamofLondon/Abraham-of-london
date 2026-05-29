@@ -8,14 +8,14 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 
 ## Counts
 
-- Total surfaces audited: 1426
-- Total routes audited: 919
-- Total admin surfaces audited: 163
-- Total product surfaces audited: 236
-- Total Foundry engines/adapters audited: 125
-- Total outbound flows audited: 100
+- Total surfaces audited: 1436
+- Total routes audited: 926
+- Total admin surfaces audited: 167
+- Total product surfaces audited: 237
+- Total Foundry engines/adapters audited: 135
+- Total outbound flows audited: 101
 - Total governance events referenced: 78
-- Registry route references scanned: 153
+- Registry route references scanned: 154
 
 ## RED findings
 
@@ -56,21 +56,27 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/executive-report-delivery/revoke-link has no explicit owner in scanned registries (/api/admin/executive-report-delivery/revoke-link) - app/api/admin/executive-report-delivery/revoke-link/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/chaos/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/chaos/run) - app/api/admin/intelligence-foundry/chaos/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/ci-gate has no explicit owner in scanned registries (/api/admin/intelligence-foundry/ci-gate) - app/api/admin/intelligence-foundry/ci-gate/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/content/analyze has no explicit owner in scanned registries (/api/admin/intelligence-foundry/content/analyze) - app/api/admin/intelligence-foundry/content/analyze/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/data-poisoning/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/data-poisoning/run) - app/api/admin/intelligence-foundry/data-poisoning/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/debug has no explicit owner in scanned registries (/api/admin/intelligence-foundry/debug) - app/api/admin/intelligence-foundry/debug/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/boardroom-mode/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/boardroom-mode/run) - app/api/admin/intelligence-foundry/engines/boardroom-mode/run/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/constitutional-diagnostic/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/constitutional-diagnostic/run) - app/api/admin/intelligence-foundry/engines/constitutional-diagnostic/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run) - app/api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/executive-reporting/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/executive-reporting/run) - app/api/admin/intelligence-foundry/engines/executive-reporting/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/fast-diagnostic/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/fast-diagnostic/run) - app/api/admin/intelligence-foundry/engines/fast-diagnostic/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/request-adapter has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/request-adapter) - app/api/admin/intelligence-foundry/engines/request-adapter/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines) - app/api/admin/intelligence-foundry/engines/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/strategy-room/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/strategy-room/run) - app/api/admin/intelligence-foundry/engines/strategy-room/run/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/feedback has no explicit owner in scanned registries (/api/admin/intelligence-foundry/feedback) - app/api/admin/intelligence-foundry/feedback/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/health has no explicit owner in scanned registries (/api/admin/intelligence-foundry/health) - app/api/admin/intelligence-foundry/health/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/lineage/simulate has no explicit owner in scanned registries (/api/admin/intelligence-foundry/lineage/simulate) - app/api/admin/intelligence-foundry/lineage/simulate/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/market/analyze has no explicit owner in scanned registries (/api/admin/intelligence-foundry/market/analyze) - app/api/admin/intelligence-foundry/market/analyze/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/modules has no explicit owner in scanned registries (/api/admin/intelligence-foundry/modules) - app/api/admin/intelligence-foundry/modules/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/outbound/analyze has no explicit owner in scanned registries (/api/admin/intelligence-foundry/outbound/analyze) - app/api/admin/intelligence-foundry/outbound/analyze/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/performance/baseline has no explicit owner in scanned registries (/api/admin/intelligence-foundry/performance/baseline) - app/api/admin/intelligence-foundry/performance/baseline/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/performance/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/performance/run) - app/api/admin/intelligence-foundry/performance/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/product-health has no explicit owner in scanned registries (/api/admin/intelligence-foundry/product-health) - app/api/admin/intelligence-foundry/product-health/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/promotion/[id]/rollback has no explicit owner in scanned registries (/api/admin/intelligence-foundry/promotion/[id]/rollback) - app/api/admin/intelligence-foundry/promotion/[id]/rollback/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/promotion has no explicit owner in scanned registries (/api/admin/intelligence-foundry/promotion) - app/api/admin/intelligence-foundry/promotion/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/red-team/content/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/red-team/content/run) - app/api/admin/intelligence-foundry/red-team/content/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/red-team/security/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/red-team/security/run) - app/api/admin/intelligence-foundry/red-team/security/run/route.ts
@@ -137,13 +143,7 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/library/download has no explicit owner in scanned registries (/api/library/download) - app/api/library/download/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/predictive/insights/[campaignId] has no explicit owner in scanned registries (/api/predictive/insights/[campaignId]) - app/api/predictive/insights/[campaignId]/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/premium/forensics/attribution has no explicit owner in scanned registries (/api/premium/forensics/attribution) - app/api/premium/forensics/attribution/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/pulse/submit has no explicit owner in scanned registries (/api/pulse/submit) - app/api/pulse/submit/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/retainers/contracts has no explicit owner in scanned registries (/api/retainers/contracts) - app/api/retainers/contracts/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/retainers/decisions has no explicit owner in scanned registries (/api/retainers/decisions) - app/api/retainers/decisions/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/retainers/enforcement-cycles has no explicit owner in scanned registries (/api/retainers/enforcement-cycles) - app/api/retainers/enforcement-cycles/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/retainers/surface has no explicit owner in scanned registries (/api/retainers/surface) - app/api/retainers/surface/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/sovereign/auth has no explicit owner in scanned registries (/api/sovereign/auth) - app/api/sovereign/auth/route.ts
-- ... 418 additional finding(s) in JSON reports.
+- ... 423 additional finding(s) in JSON reports.
 
 ## GREEN confirmations
 
@@ -186,21 +186,27 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/executive-report-delivery/revoke-link has no explicit owner in scanned registries (/api/admin/executive-report-delivery/revoke-link) - app/api/admin/executive-report-delivery/revoke-link/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/chaos/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/chaos/run) - app/api/admin/intelligence-foundry/chaos/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/ci-gate has no explicit owner in scanned registries (/api/admin/intelligence-foundry/ci-gate) - app/api/admin/intelligence-foundry/ci-gate/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/content/analyze has no explicit owner in scanned registries (/api/admin/intelligence-foundry/content/analyze) - app/api/admin/intelligence-foundry/content/analyze/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/data-poisoning/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/data-poisoning/run) - app/api/admin/intelligence-foundry/data-poisoning/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/debug has no explicit owner in scanned registries (/api/admin/intelligence-foundry/debug) - app/api/admin/intelligence-foundry/debug/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/boardroom-mode/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/boardroom-mode/run) - app/api/admin/intelligence-foundry/engines/boardroom-mode/run/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/constitutional-diagnostic/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/constitutional-diagnostic/run) - app/api/admin/intelligence-foundry/engines/constitutional-diagnostic/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run) - app/api/admin/intelligence-foundry/engines/executive-report-boardroom-bridge/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/executive-reporting/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/executive-reporting/run) - app/api/admin/intelligence-foundry/engines/executive-reporting/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/fast-diagnostic/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/fast-diagnostic/run) - app/api/admin/intelligence-foundry/engines/fast-diagnostic/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/request-adapter has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/request-adapter) - app/api/admin/intelligence-foundry/engines/request-adapter/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines) - app/api/admin/intelligence-foundry/engines/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/engines/strategy-room/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/engines/strategy-room/run) - app/api/admin/intelligence-foundry/engines/strategy-room/run/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/feedback has no explicit owner in scanned registries (/api/admin/intelligence-foundry/feedback) - app/api/admin/intelligence-foundry/feedback/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/health has no explicit owner in scanned registries (/api/admin/intelligence-foundry/health) - app/api/admin/intelligence-foundry/health/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/lineage/simulate has no explicit owner in scanned registries (/api/admin/intelligence-foundry/lineage/simulate) - app/api/admin/intelligence-foundry/lineage/simulate/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/market/analyze has no explicit owner in scanned registries (/api/admin/intelligence-foundry/market/analyze) - app/api/admin/intelligence-foundry/market/analyze/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/modules has no explicit owner in scanned registries (/api/admin/intelligence-foundry/modules) - app/api/admin/intelligence-foundry/modules/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/outbound/analyze has no explicit owner in scanned registries (/api/admin/intelligence-foundry/outbound/analyze) - app/api/admin/intelligence-foundry/outbound/analyze/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/performance/baseline has no explicit owner in scanned registries (/api/admin/intelligence-foundry/performance/baseline) - app/api/admin/intelligence-foundry/performance/baseline/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/performance/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/performance/run) - app/api/admin/intelligence-foundry/performance/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/product-health has no explicit owner in scanned registries (/api/admin/intelligence-foundry/product-health) - app/api/admin/intelligence-foundry/product-health/route.ts
+- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/promotion/[id]/rollback has no explicit owner in scanned registries (/api/admin/intelligence-foundry/promotion/[id]/rollback) - app/api/admin/intelligence-foundry/promotion/[id]/rollback/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/promotion has no explicit owner in scanned registries (/api/admin/intelligence-foundry/promotion) - app/api/admin/intelligence-foundry/promotion/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/red-team/content/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/red-team/content/run) - app/api/admin/intelligence-foundry/red-team/content/run/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/admin/intelligence-foundry/red-team/security/run has no explicit owner in scanned registries (/api/admin/intelligence-foundry/red-team/security/run) - app/api/admin/intelligence-foundry/red-team/security/run/route.ts
@@ -227,13 +233,7 @@ Registry presence alone was not counted as integration. Surfaces are treated as 
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/campaigns/[id]/invite has no explicit owner in scanned registries (/api/campaigns/[id]/invite) - app/api/campaigns/[id]/invite/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/campaigns/[id]/nudge has no explicit owner in scanned registries (/api/campaigns/[id]/nudge) - app/api/campaigns/[id]/nudge/route.ts
 - [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/campaigns/[id]/report/json has no explicit owner in scanned registries (/api/campaigns/[id]/report/json) - app/api/campaigns/[id]/report/json/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/campaigns/[id]/report/pdf-file has no explicit owner in scanned registries (/api/campaigns/[id]/report/pdf-file) - app/api/campaigns/[id]/report/pdf-file/route.tsx
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/campaigns/[id]/report/pdf has no explicit owner in scanned registries (/api/campaigns/[id]/report/pdf) - app/api/campaigns/[id]/report/pdf/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/campaigns/[id]/report has no explicit owner in scanned registries (/api/campaigns/[id]/report) - app/api/campaigns/[id]/report/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/client-portal/actions has no explicit owner in scanned registries (/api/client-portal/actions) - app/api/client-portal/actions/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/client-portal/deliverables has no explicit owner in scanned registries (/api/client-portal/deliverables) - app/api/client-portal/deliverables/route.ts
-- [AMBER] ROUTE_WITHOUT_REGISTRY_OWNER: /api/client-portal/dossier-redirect has no explicit owner in scanned registries (/api/client-portal/dossier-redirect) - app/api/client-portal/dossier-redirect/route.ts
-- ... 381 additional finding(s) in JSON reports.
+- ... 387 additional finding(s) in JSON reports.
 
 ## False-green surfaces
 

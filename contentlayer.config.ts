@@ -430,6 +430,8 @@ const EditorialSeriesPart = defineDocumentType(() => ({
     seriesTitle: { type: "string", required: false },
     seriesDescription: { type: "string", required: false },
     seriesVisibility: { type: "string", required: false },
+    /** Distinguishes editorial series from special-edition series. Values: "special-edition" */
+    seriesKind: { type: "string", required: false },
   },
   computedFields: createComputedFields("editorial-series/", "editorials/series"),
 }));
