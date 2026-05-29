@@ -38,6 +38,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const WARN_ONLY = process.argv.includes("--warn-only");
+const STRICT_ADMIN = process.env.ROUTE_INTEGRITY_STRICT_ADMIN === "true";
 const projectRoot = process.cwd();
 const nextServer = path.join(projectRoot, ".next", "server");
 
@@ -277,11 +278,21 @@ if (fileExists(appSourceDir)) {
     const relPath = path.relative(projectRoot, pageFile).replace(/\\/g, "/");
 
     if (DIRECT_CLIENT_PAGE_ALLOWLIST[relPath]) {
-      warn(
-        `Direct 'use client' page (allowlisted — pending migration): ${relPath}` +
-          `\n            Reason: ${DIRECT_CLIENT_PAGE_ALLOWLIST[relPath]}` +
-          `\n            Action: convert to server-wrapper + sibling *Client.tsx`,
-      );
+      const isAdminPage = relPath.startsWith("app/admin/");
+      if (STRICT_ADMIN && isAdminPage) {
+        fail(
+          `Direct 'use client' admin page (STRICT ADMIN mode): ${relPath}` +
+            `\n            Reason: ${DIRECT_CLIENT_PAGE_ALLOWLIST[relPath]}` +
+            `\n            Action: convert to server-wrapper + sibling *Client.tsx` +
+            `\n            Set ROUTE_INTEGRITY_STRICT_ADMIN=false to downgrade to warning.`,
+        );
+      } else {
+        warn(
+          `Direct 'use client' page (allowlisted — pending migration): ${relPath}` +
+            `\n            Reason: ${DIRECT_CLIENT_PAGE_ALLOWLIST[relPath]}` +
+            `\n            Action: convert to server-wrapper + sibling *Client.tsx`,
+        );
+      }
     } else {
       fail(
         `Direct 'use client' page.tsx not in migration allowlist: ${relPath}` +
