@@ -1,12 +1,15 @@
 // POST /api/admin/intelligence-foundry/ci-gate
 // CI systems send POST (not GET) to trigger a gate check.
 // If FOUNDRY_CI_API_KEY is configured, bearer must match exactly — no fallthrough.
-// Returns block: true with blocking run stubs when unresolved CRITICAL runs exist.
+// Returns block: true when either:
+//   (a) unresolved CRITICAL/HIGH ResearchRun findings exist, OR
+//   (b) any product surface is RED in product health overview.
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { ResearchRunRepository } from "@/lib/research/research-run-repository";
 import { requireAdminAppRoute } from "@/lib/access/require-admin-app";
+import { getProductHealthOverview } from "@/lib/research/product-health/product-health-service";
 
 const FOUNDRY_CI_API_KEY = process.env.FOUNDRY_CI_API_KEY ?? process.env.FOUNDRY_API_KEY;
 
@@ -38,17 +41,23 @@ export async function POST(request: NextRequest) {
   if (!auth.ok) return auth.response;
 
   try {
-    const metrics = await ResearchRunRepository.getHealthMetrics();
+    const [metrics, overview] = await Promise.all([
+      ResearchRunRepository.getHealthMetrics(),
+      Promise.resolve(getProductHealthOverview()),
+    ]);
+
     const criticalUnresolved = metrics.criticalUnresolved;
-    const block = criticalUnresolved > 0;
+    const { red, amber, green, grey, releaseBlockers } = overview.summary;
+    const block = criticalUnresolved > 0 || red > 0;
 
     return NextResponse.json({
       ok: true,
       block,
       criticalUnresolved,
+      productHealth: { red, amber, green, grey, releaseBlockers },
       message: block
-        ? `CI gate blocked: ${criticalUnresolved} unresolved CRITICAL/HIGH run(s) require a decision.`
-        : "CI gate clear. No blocking runs.",
+        ? `CI gate blocked: ${criticalUnresolved} unresolved CRITICAL/HIGH run(s), ${red} RED product surface(s).`
+        : "CI gate clear. No blocking runs or RED product surfaces.",
     });
   } catch (error) {
     console.error("[FOUNDRY_CI_GATE]", error);
