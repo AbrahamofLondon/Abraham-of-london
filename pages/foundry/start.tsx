@@ -275,10 +275,10 @@ export default function FoundryStartPage() {
         <section id="contact" className="border-t border-white/8 px-6 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <p className="font-mono text-[10px] uppercase tracking-widest text-white/25 mb-3">Operator Access</p>
-            <h2 className="text-2xl font-semibold text-white/80 mb-4">Request a governed run</h2>
+            <h2 className="text-2xl font-semibold text-white/80 mb-4">Request a full review</h2>
             <p className="text-sm text-white/40 mb-8 leading-7">
               Operator access gives you full Foundry capability: authority validation, evidence adequacy
-              scoring, ResearchRun persistence, CI gate integration, and signed governance records.
+              scoring, persistent signed records, deployment gate checks, and verifiable decision certificates.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link

@@ -205,8 +205,31 @@ export default function ReleaseRiskTestPage() {
 
               <div className="border border-white/5 bg-white/1 p-4">
                 <p className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/20 text-center">
-                  This is a public test. Results are illustrative and based on pattern analysis only.
+                  This is a public preview. Results are illustrative and based on pattern analysis only.
+                  They do not constitute a governed assessment.
                 </p>
+              </div>
+
+              {/* ── Conversion path ───────────────────────────────────────── */}
+              <div className="border border-white/8 bg-white/2 p-5 text-center">
+                <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 mb-3">
+                  Need a verifiable record?
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    href="/foundry/start"
+                    className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
+                    style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
+                  >
+                    Run a full review →
+                  </Link>
+                  <Link
+                    href="/foundry/value"
+                    className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/40 hover:text-white/60 transition-colors"
+                  >
+                    See what a full review includes
+                  </Link>
+                </div>
               </div>
             </div>
           )}

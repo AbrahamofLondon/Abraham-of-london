@@ -1,7 +1,7 @@
 /* pages/foundry/demo.tsx — PUBLIC FOUNDRY DEMO PLAYGROUND
  *
  * Safe, limited demo of Foundry-style pressure testing.
- * No admin data. No real ResearchRun persistence. No governed engine calls.
+ * No admin data. No real record persistence. No governed engine calls.
  * All analysis runs client-side with deterministic pattern matching.
  * Output is clearly labelled DEMO throughout.
  */
@@ -102,7 +102,7 @@ function analyseContradiction(input: string): DemoResult {
         "Evidence adequacy assessment",
         "Cross-decision contradiction detection (not just within one statement)",
         "Governance event durability check",
-        "ResearchRun with audit trail",
+        "Signed record with audit trail",
       ],
     };
   }
@@ -118,13 +118,13 @@ function analyseContradiction(input: string): DemoResult {
     summary: `${matched.length} structural issue${matched.length !== 1 ? "s" : ""} detected in your statement.`,
     findings: matched,
     consequence,
-    nextAction: "Resolve contradictions before proceeding. Each finding maps to a governance event that a full Foundry run would require evidence for.",
+    nextAction: "Resolve contradictions before proceeding. Each finding maps to a risk that a full review would require evidence for.",
     fullRunAdds: [
       "Cross-run contradiction detection (finds contradictions with prior decisions)",
       "Authority chain validation against institutional registry",
       "Evidence adequacy scoring for each claim",
-      "Governance event emission with audit trail",
-      "ResearchRun persisted for future reference",
+      "Signed decision record with audit trail",
+      "Persistent record for future reference and verification",
     ],
   };
 }
@@ -215,7 +215,7 @@ function analyseRelease(input: string): DemoResult {
       summary: "No surface-level release blockers detected.",
       findings: [{ label: "No blockers found on this scan", detail: "Surface-level indicators are clear. This does not mean the release is safe — only that the statement doesn't contain common governance red flags.", severity: "LOW" }],
       consequence: "A clean surface scan is not a release gate. A full governed run checks evidence, authority, test coverage, and downstream dependency chains.",
-      nextAction: "Request a full governed release review from the Foundry to generate a ResearchRun with a signed-off release record.",
+      nextAction: "Request a full release review from the Foundry to generate a signed record with evidence chain and authority verification.",
       fullRunAdds: [
         "Evidence adequacy check for each release claim",
         "Authority chain validation",
@@ -233,16 +233,16 @@ function analyseRelease(input: string): DemoResult {
       ? "Multiple hard blockers indicate a release that is not ready for production governance sign-off. Proceeding risks reversal, customer impact, and governance debt."
       : highCount === 1
       ? "One hard blocker must be resolved and documented before a governed release can be signed off."
-      : "Medium and low signals indicate governance gaps that may not stop the release but will create unresolved debt. Each must be documented.",
+      : "Medium and low signals indicate process gaps that may not stop the release but will create unresolved risk. Each must be documented with a named owner.",
     nextAction: highCount > 0
-      ? "Resolve hard blockers first. Each resolution should generate a governance event with evidence. Then request a full Foundry governed release review."
-      : "Document each medium/low signal as a known risk with a named owner. Run a full governed review to generate the release record.",
+      ? "Resolve hard blockers first. Each resolution should be documented with evidence. Then request a full Foundry release review."
+      : "Document each medium/low signal as a known risk with a named owner. Run a full review to generate the signed record.",
     fullRunAdds: [
-      "Evidence-gated sign-off with named authority",
+      "Evidence-based sign-off with named authority",
       "Dependency resolution with evidence chain",
       "Rollback plan validation",
-      "CI gate check (blocks deployment if governance is incomplete)",
-      "Persistent ResearchRun with full audit trail",
+      "Deployment gate check (blocks release if requirements are incomplete)",
+      "Persistent signed record with full audit trail",
     ],
   };
 }
@@ -290,7 +290,7 @@ function classifyMarketSignal(input: string): DemoResult {
         "Pattern frequency analysis across multiple signals",
         "Signal source credibility weighting",
         "Cross-signal correlation against product positioning",
-        "ResearchRun with sourced evidence chain",
+        "Signed record with sourced evidence chain",
       ],
     };
   }
@@ -309,23 +309,23 @@ function classifyMarketSignal(input: string): DemoResult {
       severity: (signal === "THREAT" || signal === "REGULATOR_SIGNAL" ? "HIGH" : signal === "OPPORTUNITY" ? "MEDIUM" : "LOW") as "HIGH" | "MEDIUM" | "LOW",
     })),
     consequence: primary.signal === "THREAT"
-      ? "Unaddressed threats compound. A competitive or customer threat that does not receive a governed response within 30 days becomes an accepted position loss."
+      ? "Unaddressed threats compound. A competitive or customer threat that does not receive a structured response within 30 days becomes an accepted position loss."
       : primary.signal === "REGULATOR_SIGNAL"
       ? "Regulatory signals cannot be treated as operational tasks. They require a governance-level decision with a named authority and documented response."
       : primary.signal === "OPPORTUNITY"
       ? "Unactioned opportunity signals decay. Market windows are time-limited. This signal needs a qualifying decision within the window."
       : "Validation signals should be codified as evidence for product and strategy decisions — not just noted.",
     nextAction: primary.signal === "THREAT"
-      ? "Escalate to named authority within 24–48 hours. Prepare a governed response brief with evidence and proposed action."
+      ? "Escalate to named authority within 24–48 hours. Prepare a response brief with evidence and proposed action."
       : primary.signal === "REGULATOR_SIGNAL"
       ? "Route immediately to legal/compliance authority. Do not treat as an operational matter."
       : "Qualify the signal against product strategy. Assign a named owner and a response deadline.",
     fullRunAdds: [
       "Cross-signal pattern analysis (not single-observation)",
       "Source credibility and context assessment",
-      "Connection to product strategy and governance events",
+      "Connection to product strategy and decision history",
       "Named authority assignment and deadline governance",
-      "ResearchRun with full evidence chain and audit trail",
+      "Signed record with full evidence chain and audit trail",
     ],
   };
 }
@@ -436,7 +436,7 @@ export default function FoundryDemoPage() {
             </p>
             <p className="mt-4 font-mono text-[10px] text-white/20 uppercase tracking-wider">
               All analysis below is a limited demo. Output is clearly labelled DEMO.
-              A full governed run includes audit trails, ResearchRun persistence, and authority validation.
+              A full review adds signed records, evidence verification, and authority validation.
             </p>
           </div>
         </section>
@@ -612,7 +612,7 @@ export default function FoundryDemoPage() {
                 "Evidence chain validation",
                 "Cross-decision consistency check",
                 "Route-specific template and delivery format",
-                "ResearchRun with signed governance record",
+                "Signed record with verifiable decision certificate",
               ]} />
             </div>
           )}
@@ -670,18 +670,18 @@ export default function FoundryDemoPage() {
               What you saw was a limited demo
             </p>
             <h2 className="text-2xl font-semibold text-white/80 mb-3">
-              Ready for a governed review?
+              Ready for a full review?
             </h2>
             <p className="text-sm text-white/40 mb-8 leading-7">
-              A full governed run adds authority validation, evidence adequacy scoring,
-              ResearchRun persistence with audit trail, CI gate integration, and a signed governance record.
+              A full review adds authority validation, evidence adequacy scoring,
+              signed records with audit trail, and a verifiable decision certificate.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/foundry/start"
                 className="rounded-lg border border-white/25 bg-white/5 px-8 py-3 text-sm font-mono text-white/75 transition-all hover:border-white/40 hover:text-white"
               >
-                Run a governed review →
+                Run a full review →
               </Link>
               <Link
                 href="/foundry/value"
@@ -707,7 +707,7 @@ function FullRunPanel({ adds }: { adds: string[] }) {
       style={{ borderColor: `${GOLD}25`, backgroundColor: `${GOLD}06` }}
     >
       <p className="font-mono text-[10px] uppercase tracking-widest mb-3" style={{ color: `${GOLD}80` }}>
-        What a full governed run adds
+        What a full review adds
       </p>
       <ul className="space-y-1.5">
         {adds.map((item, i) => (
