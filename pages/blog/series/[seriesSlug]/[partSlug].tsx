@@ -517,7 +517,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       previous,
       next,
     },
-    revalidate: 1800,
+    // No revalidate — pages are built at deploy time and served as static HTML.
+    // Runtime re-generation fails because .contentlayer data is not in the
+    // serverless function bundle. New content requires a new deploy.
   };
 };
 

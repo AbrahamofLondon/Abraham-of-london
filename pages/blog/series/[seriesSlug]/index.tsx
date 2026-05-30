@@ -281,7 +281,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const catalogue = getBlogSeriesCatalogue();
   return {
     paths: catalogue.map((s) => ({ params: { seriesSlug: s.slug } })),
-    fallback: false,
+    fallback: "blocking",
   };
 };
 
@@ -297,7 +297,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   return {
     props: { series, totalMinutes },
-    revalidate: 1800,
+    // No revalidate — pages are built at deploy time and served as static HTML.
+    // Runtime re-generation fails because .contentlayer data is not in the
+    // serverless function bundle. New series require a new deploy.
   };
 };
 

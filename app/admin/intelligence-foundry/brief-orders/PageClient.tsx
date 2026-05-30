@@ -210,7 +210,16 @@ export default function BriefOrdersPageClient() {
         {loading ? (
           <p className="text-xs text-white/30 font-mono">Loading...</p>
         ) : filteredOrders.length === 0 ? (
-          <p className="text-xs text-white/30 font-mono">No orders found.</p>
+          <div className="border border-dashed border-white/10 p-8 text-center">
+            <p className="text-sm text-white/50 mb-2">No Decision Failure Brief orders yet</p>
+            <p className="text-xs text-white/30 leading-relaxed max-w-lg mx-auto">
+              Once checkout is completed, paid orders will appear here for founder review,
+              draft generation, and delivery tracking.
+            </p>
+            <p className="mt-4 text-[10px] font-mono text-amber-500/50">
+              Run a checkout smoke test after production deployment.
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs font-mono">

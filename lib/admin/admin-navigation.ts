@@ -161,6 +161,8 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
       { id: "foundry-outbound", label: "Outbound Narrative Range",  href: "/admin/intelligence-foundry/outbound",                 router: "app", visibility: "admin", status: "active", description: "Outbound post validation: Facebook, X, LinkedIn — claims, style, approval readiness" },
       { id: "foundry-engines",  label: "Engine Testing Range",      href: "/admin/intelligence-foundry/engines",                  router: "app", visibility: "admin", status: "active", description: "Test callable engines, capture versions, request adapters for non-callable" },
       { id: "foundry-debug",    label: "Foundry Debug",             href: "/admin/intelligence-foundry/debug",                    router: "app", visibility: "internal", status: "active", description: "Dev-only: registry state, validation paths, execution context" },
+      { id: "brief-orders",     label: "Brief Orders",              href: "/admin/intelligence-foundry/brief-orders",             router: "app", visibility: "admin", status: "active", description: "Paid Decision Failure Brief fulfilment queue" },
+      { id: "qa-bench",         label: "QA Bench",                  href: "/admin/intelligence-foundry/qa-bench",                 router: "app", visibility: "admin", status: "active", description: "Adversarial product QA bench for stress-testing the product ladder" },
     ],
   },
   {
