@@ -391,7 +391,93 @@ if (unexpectedUncovered.length === 0) {
   exitCode = 1;
 }
 
-// 9. Summary
+// 9. Check for public nav label leakage in admin pages
+console.log("\n─── 9. No public nav labels in admin rendered output ───");
+
+// Public nav labels that must NOT appear in admin rendered pages
+// EXCEPTION: command-wall.tsx has its own internal "Dossier Library" tab
+// as part of the Directorate OS interface — this is intentional, not a leak.
+const PUBLIC_NAV_LABELS = [
+  "TEST A DECISION",
+  "INNER CIRCLE",
+  "EDITORIALS",
+  "LIBRARY",        // Public nav has "Library" — command wall has "Dossier Library" (allowlisted)
+];
+
+// Files where certain labels are intentionally used (own nav, not public nav leak)
+const ALLOWLISTED_LABELS = {
+  "pages/admin/command-wall.tsx": ["LIBRARY"], // Directorate OS "Dossier Library" tab
+};
+
+// Check that AppShell suppresses Header/Footer on admin routes
+const appShellPath = path.join(ROOT, "components/AppShell.tsx");
+if (fs.existsSync(appShellPath)) {
+  const appShellContent = fs.readFileSync(appShellPath, "utf-8");
+  const hasAdminGuard = appShellContent.includes("isAdminRoute") && 
+                        appShellContent.includes("!isAdminRoute");
+  if (hasAdminGuard) {
+    console.log("  ✓ AppShell suppresses Header/Footer on admin routes");
+    results.push({ check: "AppShell: admin route guard", status: "PASS" });
+  } else {
+    console.log("  ✗ AppShell missing admin route guard — public nav will render on admin pages");
+    results.push({ check: "AppShell: admin route guard", status: "FAIL" });
+    exitCode = 1;
+  }
+}
+
+// Scan all admin page files for public nav labels in rendered context
+const allAdminPageFiles = [];
+for (const dir of adminDirs) {
+  const fullDir = path.join(ROOT, dir);
+  if (fs.existsSync(fullDir)) allAdminPageFiles.push(...walkDir(fullDir));
+}
+
+let navLabelLeaks = 0;
+for (const file of allAdminPageFiles) {
+  const content = fs.readFileSync(file, "utf-8");
+  const relPath = path.relative(ROOT, file);
+  
+  // Only check page files (not utility files)
+  if (!relPath.endsWith("page.tsx") && !relPath.endsWith("PageClient.tsx") && 
+      !relPath.endsWith("layout.tsx") && !relPath.endsWith(".tsx")) continue;
+
+  for (const label of PUBLIC_NAV_LABELS) {
+    // Check if this file is allowlisted for this label
+    const normalizedRel = relPath.replace(/\\/g, "/");
+    const allowlisted = ALLOWLISTED_LABELS[normalizedRel] || [];
+    if (allowlisted.includes(label)) continue;
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      // Skip imports, comments, type definitions
+      if (trimmed.startsWith("import ") || trimmed.startsWith("//") || 
+          trimmed.startsWith("/*") || trimmed.startsWith("*")) continue;
+      if (trimmed.startsWith("type ") || trimmed.startsWith("interface ") || 
+          trimmed.startsWith("export type")) continue;
+      
+      if (trimmed.includes(label)) {
+        // Check if it's in a string that would be rendered (not a type or variable name)
+        if ((trimmed.includes('"') || trimmed.includes("'") || trimmed.includes("`")) &&
+            !trimmed.includes("from ") && !trimmed.includes("require(")) {
+          console.log(`  ⚠ ${relPath}:${i + 1} — contains "${label}" which may be rendered public nav`);
+          navLabelLeaks++;
+        }
+      }
+    }
+  }
+}
+
+if (navLabelLeaks === 0) {
+  console.log("  ✓ No public nav labels detected in admin page files");
+  results.push({ check: "Admin: no public nav label leaks", status: "PASS" });
+} else {
+  console.log(`  ⚠ ${navLabelLeaks} potential public nav label leak(s) found — review each`);
+  results.push({ check: "Admin: no public nav label leaks", status: "WARN" });
+}
+
+// 10. Summary
 console.log("\n─── SUMMARY ───");
 const passes = results.filter(r => r.status === "PASS").length;
 const warnings = results.filter(r => r.status === "WARN").length;
