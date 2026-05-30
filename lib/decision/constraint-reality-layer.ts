@@ -132,19 +132,23 @@ function classifyDecisionType(lower: string): DecisionDomain {
   ) return "compliance_statutory";
 
   // 2. Legal / regulatory (non-tax) — includes disputes and general legal issues
+  // Exclude negated patterns like "no legal obligation" which indicate absence of legal duty
   if (
-    /\b(lawsuit|litigation|court|tribunal|gdpr|data protection|regulatory approval|fca|ico|ofcom|planning permission|contract dispute|breach of contract|legal obligation|terms of service|intellectual property|patent|trademark|employment law|unfair dismissal|redundancy|legal dispute|legal issue|legal problem|legal matter|legal claim|legal action|legal proceeding|dispute resolution|arbitration)\b/.test(lower) ||
-    (/\b(legal|law|lawyer|solicitor|barrister|attorney)\b/.test(lower) && /\b(dispute|issue|problem|matter|advice|help|question)\b/.test(lower))
+    (/\b(lawsuit|litigation|court|tribunal|gdpr|data protection|regulatory approval|fca|ico|ofcom|planning permission|contract dispute|breach of contract|legal obligation|terms of service|intellectual property|patent|trademark|employment law|unfair dismissal|redundancy|legal dispute|legal issue|legal problem|legal matter|legal claim|legal action|legal proceeding|dispute resolution|arbitration)\b/.test(lower) ||
+    (/\b(legal|law|lawyer|solicitor|barrister|attorney)\b/.test(lower) && /\b(dispute|issue|problem|matter|advice|help|question)\b/.test(lower))) &&
+    !/\bno (legal|statutory|regulatory) (obligation|duty|requirement|need)\b/.test(lower)
   ) return "legal_regulatory";
 
   // 3. Family / personal legal
+  // Note: "will" is excluded as a standalone word because it's too common ("no one will be harmed").
+  // Use "last will" or "will and testament" for estate-specific detection.
   if (
-    /\b(divorce|custody|probate|estate|will|inheritance|family court|child support|alimony|separation agreement|power of attorney|guardianship|adoption)\b/.test(lower)
+    /\b(divorce|custody|probate|estate|inheritance|family court|child support|alimony|separation agreement|power of attorney|guardianship|adoption|last will|will and testament)\b/.test(lower)
   ) return "family_legal_admin";
 
   // 4. Board / executive authority decisions
   if (
-    /\b(board (approval|decision|meeting|sign.?off|vote)|shareholder (approval|vote|meeting)|executive (approval|committee)|c.?suite|board of directors|trustee (approval|decision)|committee approval)\b/.test(lower)
+    /\b(board (approval|decision|meeting|sign.?off|vote|needs|wants|members|directors|level|room)|shareholder (approval|vote|meeting)|executive (approval|committee|team)|c.?suite|board of directors|trustee (approval|decision)|committee approval|the board (is|has|will|must|needs|wants|expects|pressures|pushes|considers|discusses|debates|deliberates))\b/.test(lower)
   ) return "board_sensitive";
 
   // 5. Product / release
@@ -171,14 +175,18 @@ function classifyDecisionType(lower: string): DecisionDomain {
   ) return "operational_dependency";
 
   // 9. Has a deadline but domain is unclear
+  // Exclude negated patterns like "no deadline"
   if (
-    /\b(deadline|by \w+ \d{4}|due date|expir|time limit|must decide|must act|by end of)\b/.test(lower)
+    /\b(deadline|by \w+ \d{4}|due date|expir|time limit|must decide|must act|by end of)\b/.test(lower) &&
+    !/\bno (deadline|due date|time limit|hurry|rush|urgency)\b/.test(lower)
   ) return "deadline_bound";
 
   // 10. Personal / low stakes — preference or administrative decisions with no consequence signals
+  // Exclude negated patterns: "no legal obligation" should not block low-stakes classification
   if (
     /\b(prefer|favourite|which one|should (i|we) (choose|pick|go with|move|change|switch|reschedule|rename)|best option|what do you think|opinion|recommendation for me|which (day|time|date|option|approach))\b/.test(lower) &&
-    !/\b(penalty|deadline|obligation|compliance|statutory|legal|court|fine|risk|exposure|liability)\b/.test(lower)
+    !/\b(penalty|deadline|compliance|statutory|court|fine|risk|exposure|liability)\b/.test(lower) &&
+    !(/\b(obligation|legal)\b/.test(lower) && !/\bno (legal |statutory |regulatory )?obligation\b/.test(lower))
   ) return "personal_low_stakes";
 
   return "unclear";
@@ -362,12 +370,17 @@ function computeDirective(
     return { directive: "MODERATE", score: 55 };
   }
 
-  // LOW: genuinely low stakes
+  // LOW: genuinely low stakes or unclear domain with no concerning signals
   if (
-    domain === "personal_low_stakes" &&
+    (domain === "personal_low_stakes" || domain === "unclear") &&
     !constraints.has("deadline_external") &&
     !constraints.has("penalty_exposure") &&
-    !constraints.has("irreversible_window")
+    !constraints.has("irreversible_window") &&
+    !constraints.has("cash_constraint") &&
+    !constraints.has("capability_gap") &&
+    !constraints.has("authority_unclear") &&
+    !constraints.has("records_incomplete") &&
+    !constraints.has("delay_compounds_harm")
   ) {
     return { directive: "LOW", score: 85 };
   }
@@ -565,15 +578,43 @@ function primaryTension(
     if (constraints.has("cash_constraint"))
       return "Legal exposure vs resource constraint — the cost of inaction is likely higher than the cost of a minimum viable legal consultation.";
   }
-  if (domain === "board_sensitive" && constraints.has("authority_unclear")) {
-    return "Decision urgency vs authority gap — proceeding without confirmed mandate creates the risk of reversal.";
+  if (domain === "board_sensitive") {
+    if (constraints.has("authority_unclear"))
+      return "Decision urgency vs authority gap — proceeding without confirmed mandate creates the risk of reversal.";
+    if (constraints.has("deadline_external"))
+      return "External deadline vs incomplete evidence — the timeline is fixed but the information needed for a sound decision is not yet available.";
+    return "Political pressure vs governance discipline — the desire for a specific outcome is competing with the duty to make a defensible decision.";
   }
   if (domain === "product_release") {
     if (constraints.has("deadline_external") && constraints.has("records_incomplete"))
       return "Revenue pressure vs release readiness — shipping without evidence of testing creates incident risk that costs more than the delay.";
+    if (constraints.has("deadline_external"))
+      return "Revenue urgency vs release safety — the cost of delay is known but the cost of failure may be higher.";
+    return "Feature completion vs operational risk — the release is feature-complete but the governance and testing evidence is not.";
+  }
+  if (domain === "market_claim") {
+    return "Claim strength vs proof weakness — the statement is compelling but lacks the evidence required to defend it under scrutiny.";
+  }
+  if (domain === "family_legal_admin") {
+    if (constraints.has("cash_constraint"))
+      return "Legal/admin obligation vs resource constraint — the required action cannot be deferred but the means to address it professionally are limited.";
+    if (constraints.has("delay_compounds_harm"))
+      return "Delay compounds harm vs capacity to act — every day of inaction worsens the situation but the path forward is unclear.";
+    return "Personal consequence vs institutional process — the decision affects someone's welfare but must navigate formal legal or administrative channels.";
   }
   if (constraints.has("deadline_external") && constraints.has("cash_constraint")) {
     return "Time pressure vs resource constraint — the deadline is fixed but the budget to respond adequately is limited.";
+  }
+  if (constraints.has("irreversible_window")) {
+    return "Irreversible consequence vs incomplete information — once taken, this decision cannot be undone, but not all necessary facts are known.";
+  }
+  if (domain === "financial_exposure") {
+    if (constraints.has("irreversible_window"))
+      return "Irreversible financial commitment vs incomplete information — the decision must be made but the full picture is not yet available.";
+    return "Financial exposure vs constrained options — the downside of each available path is material, but inaction also carries a cost.";
+  }
+  if (domain === "personal_low_stakes") {
+    return null; // No tension — genuinely low-stakes preference decision
   }
   return null;
 }

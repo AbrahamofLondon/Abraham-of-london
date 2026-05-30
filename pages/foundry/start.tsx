@@ -8,6 +8,7 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import { InterestForm } from "@/components/foundry/InterestForm";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ const PATHWAYS: Pathway[] = [
     route: [
       { step: "1", label: "Decision Contradiction Demo",    href: "/foundry/demo#contradiction", type: "demo",    desc: "Run a free, instant contradiction scan on your decision statement." },
       { step: "2", label: "Constitutional Diagnostic",      href: "/foundry/demo#diagnostic",    type: "demo",    desc: "Get a constitutional route and authority score in 60 seconds." },
-      { step: "3", label: "Fast Diagnostic (governed run)", href: "/foundry/start#contact",       type: "contact", desc: "Full governed diagnostic with ResearchRun, evidence chain, and authority validation." },
+      { step: "3", label: "Fast Diagnostic (governed run)", href: "/foundry/start#contact",       type: "contact", desc: "Full governed diagnostic with signed record, evidence chain, and authority validation." },
       { step: "4", label: "Executive Reporting",            href: "/foundry/start#contact",       type: "pilot",   desc: "For strategic decisions: full executive brief with delivery and sign-off tracking." },
     ],
   },
@@ -57,7 +58,7 @@ const PATHWAYS: Pathway[] = [
     route: [
       { step: "1", label: "Market Response Classifier Demo", href: "/foundry/demo#market",   type: "demo",    desc: "Classify your claim as validated signal, threat, or noise." },
       { step: "2", label: "Content Red Team",                href: "/foundry/start#contact", type: "contact", desc: "Overclaim detection, guarantee language analysis, evidence posture review." },
-      { step: "3", label: "Market Response Lab (governed)",   href: "/foundry/start#contact", type: "pilot",   desc: "Full governed copy check with per-claim feedback and ResearchRun audit." },
+      { step: "3", label: "Market Response Lab (governed)",   href: "/foundry/start#contact", type: "pilot",   desc: "Full governed copy check with per-claim feedback and governed audit trail." },
     ],
   },
   {
@@ -67,7 +68,7 @@ const PATHWAYS: Pathway[] = [
     example: "\"We're shipping in two weeks. What is the governance risk?\"",
     route: [
       { step: "1", label: "Release Risk Scanner Demo",   href: "/foundry/demo#release",   type: "demo",    desc: "Instant surface-level governance check for your release readiness." },
-      { step: "2", label: "CI Gate Check",               href: "/foundry/start#contact",  type: "contact", desc: "Wire the Foundry CI gate into your deployment pipeline. Blocks releases with unresolved critical findings." },
+      { step: "2", label: "Release Gate Check",               href: "/foundry/start#contact",  type: "contact", desc: "Wire the Foundry release gate into your deployment pipeline. Blocks releases with unresolved critical findings." },
       { step: "3", label: "Security Red Team",           href: "/foundry/start#contact",  type: "pilot",   desc: "Route exposure, auth checks, rate-limit presence, manual checklist." },
       { step: "4", label: "Full Governed Release Review", href: "/foundry/start#contact", type: "pilot",   desc: "Evidence-gated release sign-off with named authority and audit trail." },
     ],
@@ -271,29 +272,17 @@ export default function FoundryStartPage() {
           </section>
         )}
 
-        {/* ── Contact anchor ──────────────────────────────────────────────────── */}
+        {/* ── Contact anchor — interest capture form ─────────────────────────── */}
         <section id="contact" className="border-t border-white/8 px-6 py-16">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-white/25 mb-3">Operator Access</p>
-            <h2 className="text-2xl font-semibold text-white/80 mb-4">Request a full review</h2>
-            <p className="text-sm text-white/40 mb-8 leading-7">
-              Operator access gives you full Foundry capability: authority validation, evidence adequacy
-              scoring, persistent signed records, deployment gate checks, and verifiable decision certificates.
+          <div className="mx-auto max-w-2xl">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-white/25 mb-3 text-center">Operator Access</p>
+            <h2 className="text-2xl font-semibold text-white/80 mb-4 text-center">Request a full review</h2>
+            <p className="text-sm text-white/40 mb-8 leading-7 text-center max-w-lg mx-auto">
+              Public tests identify visible risk patterns. A full review creates a structured record,
+              checks evidence and authority, and gives the decision a continuity path.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/foundry/value"
-                className="rounded-lg border border-white/20 bg-white/5 px-6 py-2.5 font-mono text-sm text-white/65 hover:border-white/35 hover:text-white/85 transition-all"
-              >
-                See the value case →
-              </Link>
-              <Link
-                href="/foundry/demo"
-                className="font-mono text-sm text-white/30 hover:text-white/55 transition-colors"
-              >
-                Back to demo
-              </Link>
-            </div>
+
+            <InterestForm />
           </div>
         </section>
 

@@ -8,6 +8,7 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { track } from "@/lib/foundry/track";
 import ExecutiveReportingSection from "@/components/homepage/ExecutiveReportingSection";
 import StrategyRoomSection from "@/components/homepage/StrategyRoomSection";
 import ProvenanceThesisSection from "@/components/homepage/ProvenanceThesisSection";
@@ -79,14 +80,14 @@ const PANELS: ValuePanel[] = [
     id: "governance-gaps-closed",
     headline: "Governance Gaps Closed",
     subhead: "A finding without a resolution is just documentation.",
-    body: "The Foundry does not produce reports. It produces governed runs — each finding carries an owner, a severity, and a fix path. When a finding is resolved, the ResearchRun audit trail records who closed it, when, and under what authority. Operators can prove governance closure to auditors, regulators, and boards without assembling evidence manually.",
+    body: "The Foundry does not produce reports. It produces governed runs — each finding carries an owner, a severity, and a fix path. When a finding is resolved, the governed audit trail records who closed it, when, and under what authority. Operators can prove governance closure to auditors, regulators, and boards without assembling evidence manually.",
     stat: {
       label: "Governance findings with named owner and fix path",
       value: "100%",
-      context: "in a governed ResearchRun",
+      context: "in a governed run",
     },
     proof: "Every finding produced by the Foundry carries a severity classification, a recommended resolution, and is linked to the evidence run that detected it.",
-    signal: "Foundry produces: named authority, evidence adequacy score, per-finding fix path, ResearchRun audit trail",
+    signal: "Foundry produces: named authority, evidence adequacy score, per-finding fix path, governed audit trail",
   },
   {
     id: "execution-risk-reduced",
@@ -124,7 +125,7 @@ const COMPARISON_ROWS = [
   },
   {
     without: "Board reporting requires manual evidence gathering across teams",
-    with: "ResearchRun audit trail is already complete — governance closure is provable",
+    with: "Governed audit trail is already complete — governance closure is provable",
   },
 ];
 
@@ -383,6 +384,8 @@ export default function FoundryValuePage() {
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/foundry/demo"
+                data-analytics="value-to-demo"
+                onClick={() => track("foundry_conversion_click", { target: "demo", source: "value-page" })}
                 className="rounded-lg border px-7 py-3 font-mono text-sm transition-all hover:opacity-90"
                 style={{ borderColor: `${GOLD}35`, backgroundColor: `${GOLD}10`, color: `${GOLD}` }}
               >
@@ -390,6 +393,8 @@ export default function FoundryValuePage() {
               </Link>
               <Link
                 href="/foundry/start#contact"
+                data-analytics="value-to-interest"
+                onClick={() => track("foundry_conversion_click", { target: "interest-form", source: "value-page" })}
                 className="rounded-lg border border-white/20 bg-white/5 px-7 py-3 font-mono text-sm text-white/60 transition-all hover:border-white/35 hover:text-white/80"
               >
                 Request operator access

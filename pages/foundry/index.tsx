@@ -3,7 +3,7 @@
  * Category entry point. No auth. No admin data. No internal mechanics.
  * Explains the category in under 10 seconds.
  * Offers three controlled public tests and points to verification.
- * No internal vocabulary: no ResearchRun, LIVE_GOVERNED, adapter, registry.
+ * No internal vocabulary in rendered output.
  *
  * Legibility: body text at rgba(...,0.6), metadata at rgba(...,0.35),
  * headings at rgba(...,0.88). Quiet authority, not dim austerity.

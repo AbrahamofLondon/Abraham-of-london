@@ -101,7 +101,7 @@ function analyseContradiction(input: string): DemoResult {
         "Deep authority chain analysis",
         "Evidence adequacy assessment",
         "Cross-decision contradiction detection (not just within one statement)",
-        "Governance event durability check",
+        "Decision durability check across governance cycles",
         "Signed record with audit trail",
       ],
     };
@@ -121,7 +121,7 @@ function analyseContradiction(input: string): DemoResult {
     nextAction: "Resolve contradictions before proceeding. Each finding maps to a risk that a full review would require evidence for.",
     fullRunAdds: [
       "Cross-run contradiction detection (finds contradictions with prior decisions)",
-      "Authority chain validation against institutional registry",
+      "Authority chain validation against institutional records",
       "Evidence adequacy scoring for each claim",
       "Signed decision record with audit trail",
       "Persistent record for future reference and verification",
@@ -608,7 +608,7 @@ export default function FoundryDemoPage() {
               </div>
 
               <FullRunPanel adds={[
-                "10-question authority scoring against institutional registry",
+                "10-question authority scoring against institutional records",
                 "Evidence chain validation",
                 "Cross-decision consistency check",
                 "Route-specific template and delivery format",

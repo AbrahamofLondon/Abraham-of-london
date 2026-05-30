@@ -4477,3 +4477,39 @@ model FoundryInterest {
   @@index([professionalHelpStatus])
   @@map("foundry_interest")
 }
+
+// ─── Paid Decision Failure Brief orders ───────────────────────────────────────
+
+model DecisionBriefOrder {
+  id                    String   @id @default(cuid())
+  name                  String
+  email                 String
+  tier                  String   // basic | full | urgent
+  price                 Int      // Price in pence (GBP)
+  status                String   @default("pending") // pending | in_review | delivered | cancelled | refunded
+
+  // Decision context (stored only with consent)
+  decisionSummary       String?  // Brief summary of the decision (not full free-text unless consented)
+  decisionType          String?  // From DFM: compliance_statutory | product_release | etc.
+  primaryFailurePoint   String?  // From DFM: OBLIGATION_FAILURE | etc.
+  directive             String?  // From DFM: ESCALATE | CONSTRAINED_RESCUE | etc.
+  sourceTest            String?  // "decision" | "market-signal" | "release-risk" | "general"
+
+  // Stripe
+  stripeCheckoutSessionId  String?  @unique
+  stripePaymentIntentId    String?  @unique
+
+  // Verification
+  verificationToken     String?  @unique // FDY- format token for full/urgent tiers
+
+  // Timestamps
+  createdAt             DateTime @default(now())
+  paidAt                DateTime?
+  deliveredAt           DateTime?
+
+  @@index([email])
+  @@index([status])
+  @@index([tier])
+  @@index([createdAt])
+  @@map("decision_brief_orders")
+}

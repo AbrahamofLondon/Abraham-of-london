@@ -181,12 +181,20 @@ if (startPath) {
     console.log('  ✓ /foundry/start contains "Request a full review"');
   }
 
-  if (!startContent.includes("Submit review interest")) {
+  // The form component may be inline or imported from components/foundry/InterestForm.tsx
+  const interestFormPath = path.join(ROOT, "components", "foundry", "InterestForm.tsx");
+  let interestFormContent = "";
+  if (fs.existsSync(interestFormPath)) {
+    interestFormContent = fs.readFileSync(interestFormPath, "utf-8");
+  }
+  const combinedFormContent = startContent + "\n" + interestFormContent;
+  const hasSubmitButton = /submit\s+review\s+interest/i.test(combinedFormContent);
+  if (!hasSubmitButton) {
     console.log('  ✗ /foundry/start missing interest capture form submit button');
     results.push({ route: "/foundry/start", issue: "missing interest capture form submit button", severity: "FAIL" });
     exitCode = 1;
   } else {
-    console.log('  ✓ /foundry/start has interest capture form with "Submit review interest"');
+    console.log('  ✓ /foundry/start has interest capture form with "Submit Review Interest"');
   }
 }
 
