@@ -304,33 +304,91 @@ if (secretLeaksFound === 0) {
 console.log("\n─── 8. Admin shell usage ───");
 // Check that pages router admin pages use AdminLayout
 const pagesAdminFiles = walkDir(path.join(ROOT, "pages/admin"));
+
+// Known intentional exclusions from AdminLayout
+// These are documented and justified:
+const INTENTIONAL_EXCLUSIONS = [
+  {
+    file: "pages/admin/access-revoke.tsx",
+    reason: "LEGACY REDIRECT — permanently redirects to /admin/access-keys. No shell needed.",
+    route: "/admin/access-revoke",
+  },
+  {
+    file: "pages/admin/command-wall.tsx",
+    reason: "STANDALONE SURFACE — 'Directorate OS' full-screen control surface with its own navigation, header, and footer. Intentionally separate from standard admin shell.",
+    route: "/admin/command-wall",
+  },
+  {
+    file: "pages/admin/inner-circle/index.tsx",
+    reason: "CUSTOM SECURITY SHELL — Inner Circle key management has its own security-isolated shell with session timeout, admin key auth, and SSR-safe rendering. Cannot use standard AdminLayout due to pre-auth rendering requirements.",
+    route: "/admin/inner-circle",
+  },
+  {
+    file: "pages/admin/login.tsx",
+    reason: "PRE-AUTH PAGE — Login page renders before authentication. AdminLayout requires an active session, so it cannot be used here.",
+    route: "/admin/login",
+  },
+];
+
+function isPageEntry(relPath) {
+  const parts = relPath.replace(/\\/g, "/").split("/");
+  const bn = parts[parts.length - 1];
+  const dn = parts[parts.length - 2];
+  const pd = parts.length >= 4 ? parts[parts.length - 3] : "";
+  
+  // Top-level .tsx files in pages/admin/
+  if (parts.length === 3 && bn.endsWith(".tsx")) return true;
+  // index.tsx in subdirectories
+  if (parts.length === 4 && bn === "index.tsx") return true;
+  // Outbound pages: pages/admin/outbound/*.tsx
+  if (parts.length === 4 && dn === "outbound" && bn.endsWith(".tsx")) return true;
+  // Intelligence pages: pages/admin/intelligence/*.tsx
+  if (parts.length === 4 && dn === "intelligence" && bn.endsWith(".tsx")) return true;
+  
+  return false;
+}
+
 let pagesUsingAdminLayout = 0;
 let pagesTotal = 0;
+const unexpectedUncovered = [];
 
 for (const file of pagesAdminFiles) {
   const content = fs.readFileSync(file, "utf-8");
   const relPath = path.relative(ROOT, file);
-  // Skip non-page files
-  if (!relPath.endsWith(".tsx") && !relPath.endsWith(".ts")) continue;
-  // Skip files in subdirectories that aren't pages
-  if (relPath.includes("/outbound/linkedin/")) continue;
+  if (!isPageEntry(relPath)) continue;
 
   pagesTotal++;
   if (content.includes("AdminLayout")) {
     pagesUsingAdminLayout++;
+  } else {
+    // Check if it's an intentional exclusion (handle Windows backslashes)
+    const normalizedRel = relPath.replace(/\\/g, "/");
+    const isExcluded = INTENTIONAL_EXCLUSIONS.some(e => e.file.replace(/\\/g, "/") === normalizedRel);
+    if (!isExcluded) {
+      unexpectedUncovered.push(relPath);
+    }
   }
 }
 
-if (pagesTotal > 0) {
-  const coverage = Math.round((pagesUsingAdminLayout / pagesTotal) * 100);
-  console.log(`  ${pagesUsingAdminLayout}/${pagesTotal} pages router admin pages use AdminLayout (${coverage}%)`);
-  if (coverage >= 90) {
-    console.log("  ✓ High admin shell coverage");
-    results.push({ check: "Admin shell coverage", status: "PASS" });
-  } else {
-    console.log(`  ⚠ Admin shell coverage is ${coverage}% — some pages may not use AdminLayout`);
-    results.push({ check: "Admin shell coverage", status: "WARN" });
+const intentionalCount = INTENTIONAL_EXCLUSIONS.length;
+const effectiveCoverage = Math.round(((pagesUsingAdminLayout) / (pagesTotal - intentionalCount)) * 100);
+
+console.log(`  ${pagesUsingAdminLayout}/${pagesTotal} pages router admin pages use AdminLayout`);
+console.log(`  ${intentionalCount} intentional exclusion(s) documented:`);
+for (const ex of INTENTIONAL_EXCLUSIONS) {
+  console.log(`    - ${ex.file}: ${ex.reason}`);
+}
+
+if (unexpectedUncovered.length === 0) {
+  console.log(`  ✓ 100% effective admin shell coverage (${effectiveCoverage}% of applicable pages)`);
+  results.push({ check: "Admin shell coverage", status: "PASS" });
+} else {
+  console.log(`  ✗ ${unexpectedUncovered.length} unexpected uncovered page(s):`);
+  for (const u of unexpectedUncovered) {
+    console.log(`    - ${u}`);
   }
+  results.push({ check: "Admin shell coverage", status: "FAIL" });
+  exitCode = 1;
 }
 
 // 9. Summary
