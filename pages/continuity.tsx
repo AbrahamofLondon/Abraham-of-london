@@ -7,6 +7,8 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import RetainedOversightSection from "@/components/homepage/RetainedOversightSection";
+import MemoryContinuityPreview from "@/components/homepage/MemoryContinuityPreview";
 import Layout from "@/components/Layout";
 
 const GOLD = "#C9A96E";
@@ -89,6 +91,12 @@ export default function ContinuityPage() {
               ))}
             </ul>
           </div>
+
+          {/* ── Retained Oversight ──────────────────────────────────────────── */}
+          <RetainedOversightSection />
+
+          {/* ── Memory Continuity ──────────────────────────────────────────── */}
+          <MemoryContinuityPreview />
 
           <div className="mt-12 border-t border-white/10 pt-10">
             <div className="flex flex-wrap gap-4">

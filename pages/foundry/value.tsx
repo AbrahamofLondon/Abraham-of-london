@@ -8,6 +8,9 @@
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import ExecutiveReportingSection from "@/components/homepage/ExecutiveReportingSection";
+import StrategyRoomSection from "@/components/homepage/StrategyRoomSection";
+import ProvenanceThesisSection from "@/components/homepage/ProvenanceThesisSection";
 import Layout from "@/components/Layout";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -357,6 +360,15 @@ export default function FoundryValuePage() {
             </div>
           </div>
         </section>
+
+        {/* ── Executive Reporting ──────────────────────────────────────────── */}
+        <ExecutiveReportingSection />
+
+        {/* ── Strategy Room ──────────────────────────────────────────────── */}
+        <StrategyRoomSection />
+
+        {/* ── Provenance Thesis ──────────────────────────────────────────── */}
+        <ProvenanceThesisSection />
 
         {/* ── CTA ───────────────────────────────────────────────────────────── */}
         <section className="border-t border-white/8 px-6 py-16">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { NextPage } from "next";
 
 import Layout from "@/components/Layout";
+import OperatorPilotBlock from "@/components/homepage/OperatorPilotBlock";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -99,6 +100,8 @@ const EngagementsPage: NextPage = () => {
             />
           </section>
         </div>
+
+        <OperatorPilotBlock />
       </main>
     </Layout>
   );
