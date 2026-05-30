@@ -5,7 +5,12 @@
  *
  * Not a newsletter form. Not a sales form. A review-intent signal.
  * Free-text content is never passed to analytics.
+ *
+ * "use client" is required: this component uses React hooks and may be
+ * rendered from App Router server components. Pages Router ignores it.
  */
+
+"use client";
 
 import * as React from "react";
 import { track } from "@/lib/foundry/track";

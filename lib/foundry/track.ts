@@ -1,5 +1,9 @@
 /* lib/foundry/track.ts — Browser-safe analytics helper for Foundry pages.
  *
+ * Safe to import in both Pages Router pages and App Router client components.
+ * Do NOT import from App Router server components — the window guard makes it
+ * safe at runtime but the intent is client-only.
+ *
  * IMPORTANT: Never pass free-text decision/claim/release content to analytics.
  * Only metadata: test type, char count, score bucket, source page.
  */
