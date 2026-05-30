@@ -252,6 +252,28 @@ const CommandWallPage: NextPage = () => {
             <Loader2 className="animate-spin" size={20} />
             Initialising Strategic Interface...
           </div>
+        ) : !error && efficacyRows.length === 0 && logs.length === 0 ? (
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="mx-auto max-w-2xl py-20 text-center">
+              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
+                <Activity className="h-8 w-8 text-white/20" />
+              </div>
+              <h2 className="mb-3 font-serif text-2xl text-white/60">
+                Command Wall
+              </h2>
+              <p className="mx-auto max-w-lg text-sm leading-relaxed text-white/40">
+                No command wall intelligence has been recorded yet. The wall will populate
+                after governed decisions, brief orders, or continuity records begin generating
+                operational signals.
+              </p>
+              <div className="mt-8 flex items-center justify-center gap-2">
+                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500/50" />
+                <span className="font-mono text-[9px] uppercase tracking-widest text-white/20">
+                  Awaiting operational signals
+                </span>
+              </div>
+            </div>
+          </section>
         ) : (
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-4">

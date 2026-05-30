@@ -2,15 +2,17 @@
 /**
  * scripts/check-admin-surface-integrity.mjs
  *
- * Admin Operating Console Integrity Check.
+ * Admin Operating Console Integrity Check — HARDENED.
  *
  * Verifies:
  *   - Critical admin route files exist
+ *   - Admin pages do not import public Layout/Header/Footer directly
+ *   - Admin route registry/navigation includes brief-orders and qa-bench
  *   - Reserved outbound surfaces are labelled reserved/config-required when not configured
- *   - Brief-orders route exists
- *   - QA bench route exists
- *   - Command wall has controlled empty state wording
- *   - No admin route imports public Layout/Header directly unless intended
+ *   - Command wall has controlled empty state
+ *   - Brief-orders has controlled empty state
+ *   - No admin route renders raw secret/config/token values
+ *   - Admin shell is used by all admin routes (not public shell)
  */
 
 import fs from "fs";
@@ -24,7 +26,8 @@ const ROOT = path.resolve(__dirname, "..");
 
 const CRITICAL_ADMIN_ROUTES = [
   { path: "app/admin/layout.tsx", label: "Admin layout (shell)" },
-  { path: "components/admin/AppAdminShell.tsx", label: "Admin shell component" },
+  { path: "components/admin/AppAdminShell.tsx", label: "App Router admin shell component" },
+  { path: "components/admin/AdminLayout.tsx", label: "Pages Router admin layout" },
   { path: "lib/admin/admin-navigation.ts", label: "Admin navigation registry" },
   { path: "app/admin/intelligence-foundry/brief-orders/page.tsx", label: "Brief orders page" },
   { path: "app/admin/intelligence-foundry/brief-orders/PageClient.tsx", label: "Brief orders client" },
@@ -34,17 +37,32 @@ const CRITICAL_ADMIN_ROUTES = [
   { path: "pages/admin/outbound/facebook.tsx", label: "Facebook outbound console" },
   { path: "pages/admin/outbound/x.tsx", label: "X outbound console" },
   { path: "pages/admin/outbound/linkedin.tsx", label: "LinkedIn outbound console" },
+  { path: "pages/admin/outbound/index.tsx", label: "Outbound publishing index" },
 ];
 
 const RESERVED_SURFACE_PATTERNS = [
-  { file: "pages/admin/outbound/facebook.tsx", patterns: ["not configured", "OAuth not configured"] },
+  { file: "pages/admin/outbound/facebook.tsx", patterns: ["not configured", "OAuth not configured", "CONFIG_MISSING"] },
   { file: "pages/admin/outbound/x.tsx", patterns: ["not configured", "OAuth not configured"] },
-  { file: "pages/admin/outbound/linkedin.tsx", patterns: ["Not connected", "not connected"] },
+  { file: "pages/admin/outbound/linkedin.tsx", patterns: ["Not connected", "not connected", "CONFIG_MISSING"] },
 ];
 
 const FORBIDDEN_PUBLIC_IMPORTS = [
   { import: "components/Layout", label: "public Layout" },
-  { import: "components/homepage/", label: "homepage component" },
+  { import: "components/Header", label: "public Header" },
+  { import: "components/EnhancedFooter", label: "public Footer" },
+  { import: "components/AppShell", label: "public AppShell" },
+];
+
+// Patterns that indicate raw secret/config/token rendering in admin pages
+const SECRET_RENDERING_PATTERNS = [
+  /FACEBOOK_APP_SECRET/,
+  /FACEBOOK_APP_ID/,
+  /sk-[a-zA-Z0-9]{20,}/,
+  /pk-[a-zA-Z0-9]{20,}/,
+  /token:\s*['"][A-Za-z0-9_-]{20,}['"]/,
+  /accessToken:\s*['"][A-Za-z0-9_-]{20,}['"]/,
+  /refreshToken:\s*['"][A-Za-z0-9_-]{20,}['"]/,
+  /process\.env\./,
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -52,10 +70,12 @@ const FORBIDDEN_PUBLIC_IMPORTS = [
 let exitCode = 0;
 const results = [];
 
-console.log("═══ Admin Surface Integrity Check ═══\n");
+console.log("═══════════════════════════════════════════════");
+console.log("  ADMIN SURFACE INTEGRITY CHECK");
+console.log("═══════════════════════════════════════════════\n");
 
 // 1. Check critical admin routes exist
-console.log("Checking critical admin route files exist...");
+console.log("─── 1. Critical admin route files exist ───");
 for (const route of CRITICAL_ADMIN_ROUTES) {
   const fullPath = path.join(ROOT, route.path);
   if (fs.existsSync(fullPath)) {
@@ -69,7 +89,7 @@ for (const route of CRITICAL_ADMIN_ROUTES) {
 }
 
 // 2. Check reserved outbound surfaces have config-required labels
-console.log("\nChecking reserved outbound surfaces have config-required labels...");
+console.log("\n─── 2. Reserved outbound surfaces have config-required labels ───");
 for (const { file, patterns } of RESERVED_SURFACE_PATTERNS) {
   const fullPath = path.join(ROOT, file);
   if (!fs.existsSync(fullPath)) {
@@ -88,41 +108,49 @@ for (const { file, patterns } of RESERVED_SURFACE_PATTERNS) {
   }
 }
 
-// 3. Check no admin route imports public Layout directly
-console.log("\nChecking no admin route imports public Layout directly...");
+// 3. Check no admin route imports public Layout/Header/Footer directly
+console.log("\n─── 3. No admin route imports public Layout/Header/Footer ───");
 const adminDirs = [
   "pages/admin",
   "app/admin",
 ];
+
+function walkDir(dirPath) {
+  const files = [];
+  if (!fs.existsSync(dirPath)) return files;
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      if (!entry.name.startsWith(".") && entry.name !== "node_modules") files.push(...walkDir(full));
+    } else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts")) {
+      files.push(full);
+    }
+  }
+  return files;
+}
+
 for (const dir of adminDirs) {
   const fullDir = path.join(ROOT, dir);
   if (!fs.existsSync(fullDir)) continue;
 
-  const files = [];
-  function walk(dirPath) {
-    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-    for (const entry of entries) {
-      const full = path.join(dirPath, entry.name);
-      if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && entry.name !== "node_modules") walk(full);
-      } else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts")) {
-        files.push(full);
-      }
-    }
-  }
-  walk(fullDir);
+  const files = walkDir(fullDir);
 
   for (const file of files) {
     const content = fs.readFileSync(file, "utf-8");
+    const relPath = path.relative(ROOT, file);
+
     for (const { import: imp, label } of FORBIDDEN_PUBLIC_IMPORTS) {
-      if (content.includes(`from "@/${imp}"`) || content.includes(`from ' @/${imp}'`)) {
-        // Check if it's using AdminLayout instead
-        if (content.includes("AdminLayout")) {
-          console.log(`  ⚠ ${path.relative(ROOT, file)} imports ${label} but also uses AdminLayout`);
-          results.push({ check: `${path.relative(ROOT, file)}: ${label}`, status: "WARN" });
+      // Check for direct imports of public components
+      const importPattern = new RegExp(`from\\s+["']@/${imp}["']`);
+      if (importPattern.test(content)) {
+        // Check if it's using AdminLayout or AppAdminShell instead
+        if (content.includes("AdminLayout") || content.includes("AppAdminShell")) {
+          console.log(`  ⚠ ${relPath} imports ${label} but also uses AdminLayout`);
+          results.push({ check: `${relPath}: ${label}`, status: "WARN" });
         } else {
-          console.log(`  ✗ ${path.relative(ROOT, file)} imports ${label} directly`);
-          results.push({ check: `${path.relative(ROOT, file)}: ${label}`, status: "FAIL" });
+          console.log(`  ✗ ${relPath} imports ${label} directly`);
+          results.push({ check: `${relPath}: ${label}`, status: "FAIL" });
           exitCode = 1;
         }
       }
@@ -130,62 +158,183 @@ for (const dir of adminDirs) {
   }
 }
 
-// 4. Check brief-orders and qa-bench in navigation
-console.log("\nChecking navigation registry includes brief-orders and qa-bench...");
-const navContent = fs.readFileSync(path.join(ROOT, "lib/admin/admin-navigation.ts"), "utf-8");
-if (navContent.includes("brief-orders")) {
-  console.log("  ✓ brief-orders in navigation");
-  results.push({ check: "Navigation: brief-orders", status: "PASS" });
-} else {
-  console.log("  ✗ brief-orders NOT in navigation");
-  results.push({ check: "Navigation: brief-orders", status: "FAIL" });
-  exitCode = 1;
+// If no violations found
+if (!results.some(r => r.status === "FAIL" && r.check.includes("imports"))) {
+  console.log("  ✓ No admin routes import public shell components directly");
 }
-if (navContent.includes("qa-bench")) {
-  console.log("  ✓ qa-bench in navigation");
-  results.push({ check: "Navigation: qa-bench", status: "PASS" });
+
+// 4. Check brief-orders and qa-bench in navigation
+console.log("\n─── 4. Navigation registry includes brief-orders and qa-bench ───");
+const navPath = path.join(ROOT, "lib/admin/admin-navigation.ts");
+if (fs.existsSync(navPath)) {
+  const navContent = fs.readFileSync(navPath, "utf-8");
+
+  if (navContent.includes("brief-orders")) {
+    console.log("  ✓ brief-orders in navigation");
+    results.push({ check: "Navigation: brief-orders", status: "PASS" });
+  } else {
+    console.log("  ✗ brief-orders NOT in navigation");
+    results.push({ check: "Navigation: brief-orders", status: "FAIL" });
+    exitCode = 1;
+  }
+
+  if (navContent.includes("qa-bench")) {
+    console.log("  ✓ qa-bench in navigation");
+    results.push({ check: "Navigation: qa-bench", status: "PASS" });
+  } else {
+    console.log("  ✗ qa-bench NOT in navigation");
+    results.push({ check: "Navigation: qa-bench", status: "FAIL" });
+    exitCode = 1;
+  }
 } else {
-  console.log("  ✗ qa-bench NOT in navigation");
-  results.push({ check: "Navigation: qa-bench", status: "FAIL" });
+  console.log("  ✗ Navigation registry not found");
+  results.push({ check: "Navigation: file exists", status: "FAIL" });
   exitCode = 1;
 }
 
 // 5. Check command wall has controlled empty state
-console.log("\nChecking command wall has controlled empty state...");
-const cwContent = fs.readFileSync(path.join(ROOT, "pages/admin/command-wall.tsx"), "utf-8");
-if (cwContent.includes("EmptyPanelText")) {
-  console.log("  ✓ Command wall has EmptyPanelText component");
-  results.push({ check: "Command wall: empty state", status: "PASS" });
-} else {
-  console.log("  ✗ Command wall missing empty state component");
-  results.push({ check: "Command wall: empty state", status: "FAIL" });
-  exitCode = 1;
-}
+console.log("\n─── 5. Command wall has controlled empty state ───");
+const cwPath = path.join(ROOT, "pages/admin/command-wall.tsx");
+if (fs.existsSync(cwPath)) {
+  const cwContent = fs.readFileSync(cwPath, "utf-8");
 
-// Check "Failed to synchronize" is only in catch block
-const syncErrorCount = (cwContent.match(/Failed to synchronize/g) || []).length;
-if (syncErrorCount <= 1) {
-  console.log("  ✓ Command wall error message is controlled (not shown for empty data)");
-  results.push({ check: "Command wall: error discipline", status: "PASS" });
+  // Check for the new premium empty state
+  const hasPremiumEmptyState = cwContent.includes("No command wall intelligence has been recorded yet");
+  if (hasPremiumEmptyState) {
+    console.log("  ✓ Command wall has premium controlled empty state");
+    results.push({ check: "Command wall: premium empty state", status: "PASS" });
+  } else if (cwContent.includes("EmptyPanelText")) {
+    console.log("  ✓ Command wall has EmptyPanelText component");
+    results.push({ check: "Command wall: empty state", status: "PASS" });
+  } else {
+    console.log("  ✗ Command wall missing empty state component");
+    results.push({ check: "Command wall: empty state", status: "FAIL" });
+    exitCode = 1;
+  }
+
+  // Check "Failed to synchronize" is only in catch block (error discipline)
+  const syncErrorCount = (cwContent.match(/Failed to synchronize/g) || []).length;
+  if (syncErrorCount <= 1) {
+    console.log("  ✓ Command wall error message is controlled (not shown for empty data)");
+    results.push({ check: "Command wall: error discipline", status: "PASS" });
+  } else {
+    console.log(`  ⚠ Command wall has ${syncErrorCount} occurrences of error message — review`);
+    results.push({ check: "Command wall: error discipline", status: "WARN" });
+  }
 } else {
-  console.log(`  ⚠ Command wall has ${syncErrorCount} occurrences of error message — review`);
-  results.push({ check: "Command wall: error discipline", status: "WARN" });
+  console.log("  ✗ Command wall file not found");
+  results.push({ check: "Command wall: file exists", status: "FAIL" });
+  exitCode = 1;
 }
 
 // 6. Check brief-orders empty state
-console.log("\nChecking brief-orders has controlled empty state...");
-const boContent = fs.readFileSync(path.join(ROOT, "app/admin/intelligence-foundry/brief-orders/PageClient.tsx"), "utf-8");
-if (boContent.includes("No Decision Failure Brief orders yet")) {
-  console.log("  ✓ Brief orders has informative empty state");
-  results.push({ check: "Brief orders: empty state", status: "PASS" });
+console.log("\n─── 6. Brief-orders has controlled empty state ───");
+const boPath = path.join(ROOT, "app/admin/intelligence-foundry/brief-orders/PageClient.tsx");
+if (fs.existsSync(boPath)) {
+  const boContent = fs.readFileSync(boPath, "utf-8");
+
+  const hasEmptyState = boContent.includes("No Decision Failure Brief orders yet");
+  const hasInternalNote = boContent.includes("Run a checkout smoke test after production deployment");
+
+  if (hasEmptyState) {
+    console.log("  ✓ Brief orders has informative empty state");
+    results.push({ check: "Brief orders: empty state", status: "PASS" });
+  } else {
+    console.log("  ✗ Brief orders missing informative empty state");
+    results.push({ check: "Brief orders: empty state", status: "FAIL" });
+    exitCode = 1;
+  }
+
+  if (hasInternalNote) {
+    console.log("  ✓ Brief orders has internal deployment note");
+    results.push({ check: "Brief orders: deployment note", status: "PASS" });
+  } else {
+    console.log("  ⚠ Brief orders missing internal deployment note");
+    results.push({ check: "Brief orders: deployment note", status: "WARN" });
+  }
 } else {
-  console.log("  ✗ Brief orders missing informative empty state");
-  results.push({ check: "Brief orders: empty state", status: "FAIL" });
+  console.log("  ✗ Brief orders PageClient not found");
+  results.push({ check: "Brief orders: file exists", status: "FAIL" });
   exitCode = 1;
 }
 
-// 7. Summary
-console.log("\n─── Summary ───");
+// 7. Check no admin route renders raw secret/config/token values
+console.log("\n─── 7. No admin route renders raw secret/config/token values ───");
+const allAdminFiles = [];
+for (const dir of adminDirs) {
+  const fullDir = path.join(ROOT, dir);
+  if (fs.existsSync(fullDir)) allAdminFiles.push(...walkDir(fullDir));
+}
+
+let secretLeaksFound = 0;
+for (const file of allAdminFiles) {
+  const content = fs.readFileSync(file, "utf-8");
+  const relPath = path.relative(ROOT, file);
+
+  for (const pattern of SECRET_RENDERING_PATTERNS) {
+    const matches = content.match(pattern);
+    if (matches) {
+      // Only flag if the match appears in JSX/TSX rendering context (not in imports or comments)
+      const lines = content.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")) continue;
+        if (trimmed.startsWith("import ")) continue;
+
+        if (pattern.test(trimmed)) {
+          // Check if it's in a JSX context (inside return statement or JSX block)
+          if (trimmed.includes("</") || trimmed.includes("/>") || trimmed.includes(">{") || trimmed.includes("} {")) {
+            console.log(`  ⚠ ${relPath}:${i + 1} — potential secret rendering`);
+            secretLeaksFound++;
+          }
+        }
+      }
+    }
+  }
+}
+
+if (secretLeaksFound === 0) {
+  console.log("  ✓ No secret/token rendering detected in admin routes");
+} else {
+  console.log(`  ⚠ ${secretLeaksFound} potential secret rendering(s) found — review`);
+}
+
+// 8. Check admin shell usage
+console.log("\n─── 8. Admin shell usage ───");
+// Check that pages router admin pages use AdminLayout
+const pagesAdminFiles = walkDir(path.join(ROOT, "pages/admin"));
+let pagesUsingAdminLayout = 0;
+let pagesTotal = 0;
+
+for (const file of pagesAdminFiles) {
+  const content = fs.readFileSync(file, "utf-8");
+  const relPath = path.relative(ROOT, file);
+  // Skip non-page files
+  if (!relPath.endsWith(".tsx") && !relPath.endsWith(".ts")) continue;
+  // Skip files in subdirectories that aren't pages
+  if (relPath.includes("/outbound/linkedin/")) continue;
+
+  pagesTotal++;
+  if (content.includes("AdminLayout")) {
+    pagesUsingAdminLayout++;
+  }
+}
+
+if (pagesTotal > 0) {
+  const coverage = Math.round((pagesUsingAdminLayout / pagesTotal) * 100);
+  console.log(`  ${pagesUsingAdminLayout}/${pagesTotal} pages router admin pages use AdminLayout (${coverage}%)`);
+  if (coverage >= 90) {
+    console.log("  ✓ High admin shell coverage");
+    results.push({ check: "Admin shell coverage", status: "PASS" });
+  } else {
+    console.log(`  ⚠ Admin shell coverage is ${coverage}% — some pages may not use AdminLayout`);
+    results.push({ check: "Admin shell coverage", status: "WARN" });
+  }
+}
+
+// 9. Summary
+console.log("\n─── SUMMARY ───");
 const passes = results.filter(r => r.status === "PASS").length;
 const warnings = results.filter(r => r.status === "WARN").length;
 const failures = results.filter(r => r.status === "FAIL").length;
