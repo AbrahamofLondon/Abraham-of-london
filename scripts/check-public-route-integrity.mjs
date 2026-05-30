@@ -478,6 +478,65 @@ async function checkPublicRouteIntegrity() {
     console.log("  ⚠ Brief success page not found");
   }
 
+  // ── Check 6: Public CTA coherence — "Test a Decision" must point to Foundry ──
+  console.log("\n─── 6. Public CTA coherence — 'Test a Decision' must point to Foundry ───");
+
+  const CTA_CHECK_FILES = [
+    "components/Header.tsx",
+    "components/EnhancedFooter.tsx",
+    "components/Navbar.tsx",
+    "components/homepage/CategoryFrontDoor.tsx",
+    "components/homepage/FoundryEntrySection.tsx",
+    "components/homepage/HomepageHero.tsx",
+    "components/homepage/HomepageFinalCTA.tsx",
+    "components/homepage/EarnedProgressionBlock.tsx",
+    "components/homepage/WhatYouCanUseTodaySection.tsx",
+    "components/homepage/OperatorPilotBlock.tsx",
+  ];
+
+  let ctaIssues = 0;
+
+  for (const ctaFile of CTA_CHECK_FILES) {
+    const fullPath = path.join(ROOT, ctaFile);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, "utf-8");
+    const lines = content.split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // Check for "Test a Decision" label pointing to /diagnostics/fast
+      if (trimmed.includes("Test a Decision") && trimmed.includes("/diagnostics/fast")) {
+        failures.push({
+          type: "CTA_POINTS_TO_LEGACY_DIAGNOSTIC",
+          file: ctaFile,
+          line: i + 1,
+          detail: `Line ${i + 1} in ${ctaFile}: "Test a Decision" CTA points to /diagnostics/fast instead of /foundry/decision-test`,
+        });
+        ctaIssues++;
+      }
+
+      // Check for "Test a Decision" label pointing to /diagnostics (without /fast)
+      if (trimmed.includes("Test a Decision") && (trimmed.includes('href="/diagnostics"') || trimmed.includes("href='/diagnostics'"))) {
+        failures.push({
+          type: "CTA_POINTS_TO_LEGACY_DIAGNOSTIC",
+          file: ctaFile,
+          line: i + 1,
+          detail: `Line ${i + 1} in ${ctaFile}: "Test a Decision" CTA points to /diagnostics instead of /foundry/decision-test`,
+        });
+        ctaIssues++;
+      }
+    }
+  }
+
+  if (ctaIssues === 0) {
+    console.log("  ✓ All 'Test a Decision' CTAs point to /foundry/decision-test");
+  } else {
+    console.log(`  ✗ ${ctaIssues} CTA issue(s) found — see failures above`);
+  }
+
   // ── Summary ────────────────────────────────────────────────────────────
   console.log("\n─── SUMMARY ───");
   console.log(`  Failures: ${failures.length}`);

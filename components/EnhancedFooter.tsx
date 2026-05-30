@@ -388,7 +388,7 @@ export default function EnhancedFooter(): React.ReactElement {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
               <Link
-                href="/diagnostics/fast"
+                href="/foundry/decision-test"
                 className="group inline-flex items-center justify-center gap-3 border border-[#C9A96E]/35 bg-[#C9A96E]/[0.08] px-6 py-[14px] font-mono text-[9px] uppercase tracking-[0.24em] text-[#D7B77E] transition-colors duration-300 hover:border-[#C9A96E]/55 hover:bg-[#C9A96E]/[0.13] hover:text-[#E8C991]"
               >
                 Test a Decision
@@ -437,7 +437,7 @@ export default function EnhancedFooter(): React.ReactElement {
               </Link>
 
               <Link
-                href="/diagnostics/fast"
+                href="/foundry/decision-test"
                 className="group inline-flex items-center justify-center gap-3 border border-[#C9A96E]/35 bg-[#C9A96E]/[0.08] px-6 py-[14px] font-mono text-[9px] uppercase tracking-[0.28em] text-[#D7B77E] transition-colors duration-300 hover:border-[#C9A96E]/55 hover:bg-[#C9A96E]/[0.13] hover:text-[#E8C991]"
               >
                 <Crown className="h-3.5 w-3.5" />

@@ -249,7 +249,7 @@ export default function Header({
             {/* Member slot — auth-aware. Hidden when collapsed. */}
             {!minimal && !deepScroll && (
               <Link
-                href="/diagnostics/fast"
+                href="/foundry/decision-test"
                 className="hidden items-center gap-2 border px-3 py-2 font-['JetBrains_Mono',ui-monospace,monospace] text-[7.5px] uppercase tracking-[0.28em] transition-all duration-300 lg:inline-flex"
                 style={{
                   borderColor: `${GOLD}38`,
