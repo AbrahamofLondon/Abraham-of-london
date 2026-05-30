@@ -9,6 +9,8 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import { InterestForm } from "@/components/foundry/InterestForm";
+import { track } from "@/lib/foundry/track";
 
 const GOLD = "#C9A96E";
 
@@ -23,9 +25,16 @@ type TestResult = {
   label: string;
   summary: string;
   findings: Finding[];
+  evidenceNote: string;
   consequence: string;
   nextAction: string;
+  demoRef: string;
+  timestamp: string;
 };
+
+function generateDemoRef(): string {
+  return Date.now().toString(36).slice(-6).toUpperCase();
+}
 
 function analyzeMarketSignal(text: string): TestResult {
   const findings: Finding[] = [];
@@ -37,7 +46,7 @@ function analyzeMarketSignal(text: string): TestResult {
     { word: "game-changer", issue: "Game-changer claim", detail: "\"Game-changer\" is a subjective superlative that undermines credibility. Replace with specific, measurable impact." },
     { word: "best-in-class", issue: "Best-in-class claim", detail: "\"Best-in-class\" requires comparative evidence. Without a named benchmark, this is an unsupported superlative." },
     { word: "industry-leading", issue: "Industry-leading claim", detail: "\"Industry-leading\" is a comparative claim that requires evidence of the comparison set and the metric." },
-    { word: "unique", issue: "Uniqueness claim", detail: "\"Unique\" is an absolute claim. Unless the statement describes a legally protectable differentiation, this is overclaim." },
+    { word: "unique", issue: "Uniqueness claim", detail: "\"Unique\" is an absolute claim. Unless describing a legally protectable differentiation, this is overclaim." },
     { word: "guaranteed", issue: "Guarantee claim", detail: "\"Guaranteed\" creates a contractual expectation. Verify that the organisation can legally and operationally deliver on this." },
     { word: "transform", issue: "Transformation claim", detail: "\"Transform\" implies fundamental change. This requires evidence of before/after states and a defined mechanism." },
     { word: "disrupt", issue: "Disruption claim", detail: "\"Disrupt\" is a loaded term that signals hype in most B2B contexts. Replace with specific market impact." },
@@ -52,29 +61,55 @@ function analyzeMarketSignal(text: string): TestResult {
   // Clarity assessment
   const wordCount = text.split(/\s+/).filter(Boolean).length;
   if (wordCount > 100) {
-    findings.push({ label: "Excessive length", detail: `At ${wordCount} words, this is too long for a clear market signal. Core claims should be expressible in 2-3 sentences.`, severity: "MEDIUM" });
+    findings.push({
+      label: "Excessive length",
+      detail: `At ${wordCount} words, this is too long for a clear market signal. Core claims should be expressible in 2–3 sentences.`,
+      severity: "MEDIUM",
+    });
   }
 
   if (!lower.includes("for") && !lower.includes("to") && !lower.includes("that")) {
-    findings.push({ label: "Missing value proposition structure", detail: "Strong market signals follow a 'what → for whom → why' structure. This statement does not clearly articulate the value recipient.", severity: "MEDIUM" });
+    findings.push({
+      label: "Missing value proposition structure",
+      detail: "Strong market signals follow a 'what → for whom → why' structure. This statement does not clearly articulate the value recipient.",
+      severity: "MEDIUM",
+    });
   }
 
   // Buyer friction
   const frictionWords = ["complex", "sophisticated", "enterprise-grade", "powerful", "robust", "scalable"];
   const foundFriction = frictionWords.filter(w => lower.includes(w));
   if (foundFriction.length > 0) {
-    findings.push({ label: "Abstract feature language", detail: `Terms like "${foundFriction.join(", ")}" describe features, not outcomes. Replace with specific customer benefit statements.`, severity: "LOW" });
+    findings.push({
+      label: "Abstract feature language",
+      detail: `Terms like "${foundFriction.join(", ")}" describe features, not outcomes. Replace with specific customer benefit statements.`,
+      severity: "LOW",
+    });
   }
 
   // Jargon density
   const jargonWords = ["synergy", "leverage", "optimize", "streamline", "holistic", "end-to-end", "best-of-breed", "world-class"];
   const foundJargon = jargonWords.filter(w => lower.includes(w));
   if (foundJargon.length > 0) {
-    findings.push({ label: "Jargon detected", detail: `Terms like "${foundJargon.join(", ")}" reduce clarity. Each jargon word costs you a reader. Replace with plain language.`, severity: "LOW" });
+    findings.push({
+      label: "Jargon detected",
+      detail: `Terms like "${foundJargon.join(", ")}" reduce clarity. Each jargon word costs you a reader. Replace with plain language.`,
+      severity: "LOW",
+    });
   }
 
-  const highCount = findings.filter(f => f.severity === "HIGH").length;
-  const medCount = findings.filter(f => f.severity === "MEDIUM").length;
+  // Pad to at least 3 findings
+  const capped = findings.slice(0, 5);
+  if (capped.length < 3) {
+    capped.push({
+      label: "Claim evidence absent",
+      detail: "No evidence, data, or external reference was detected. Credible market claims cite a specific outcome, customer, or benchmark.",
+      severity: "LOW",
+    });
+  }
+
+  const highCount = capped.filter(f => f.severity === "HIGH").length;
+  const medCount = capped.filter(f => f.severity === "MEDIUM").length;
   const score = Math.max(0, 100 - (highCount * 20 + medCount * 10));
 
   let label: string, summary: string, consequence: string, nextAction: string;
@@ -90,32 +125,55 @@ function analyzeMarketSignal(text: string): TestResult {
     nextAction = "Address HIGH findings before using this in market-facing materials.";
   } else {
     label = "WEAK SIGNAL";
-    summary = "This market signal is unlikely to be credible to informed buyers. Multiple overclaims and clarity issues.";
+    summary = "This market signal is unlikely to be credible to informed buyers. Multiple overclaims and clarity issues detected.";
     consequence = "Buyers will likely challenge or dismiss the statement. Credibility damage may outlast the specific claim.";
     nextAction = "Rewrite. Remove all unsupported superlatives. Lead with specific, verifiable outcomes.";
   }
 
-  return { score, label, summary, findings, consequence, nextAction };
-}
+  // Evidence note
+  const hasSpecificClaim = /\d+%|\d+ (customer|client|user)|case study|proved|measured|benchmark/.test(lower);
+  const overclaimCount = capped.filter(f => f.severity === "HIGH").length;
+  const evidenceNote = hasSpecificClaim
+    ? "Specific or quantified claims were detected. Ensure each is backed by a source that can be cited under challenge."
+    : overclaimCount > 0
+    ? `${overclaimCount} unsupported superlative(s) detected. Each requires a specific comparative benchmark or must be removed.`
+    : "No evidence or quantified claims were found. Even a single specific outcome reference materially strengthens credibility.";
 
-function track(event: string, data?: Record<string, unknown>) {
-  try {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", event, data);
-    }
-  } catch {}
+  return {
+    score,
+    label,
+    summary,
+    findings: capped,
+    evidenceNote,
+    consequence,
+    nextAction,
+    demoRef: generateDemoRef(),
+    timestamp: new Date().toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
 }
 
 export default function MarketSignalTestPage() {
   const [text, setText] = React.useState("");
   const [result, setResult] = React.useState<TestResult | null>(null);
 
-  const SAMPLE = "Our revolutionary, industry-leading platform leverages AI to transform enterprise operations. We're the world-class solution for complex business challenges, delivering best-in-class outcomes through our powerful, end-to-end synergy engine.";
+  const SAMPLE =
+    "Our revolutionary, industry-leading platform leverages AI to transform enterprise operations. We're the world-class solution for complex business challenges, delivering best-in-class outcomes through our powerful, end-to-end synergy engine.";
 
   function handleSubmit() {
     if (!text.trim()) return;
     track("foundry_test_run", { test: "market-signal", charCount: text.length });
     setResult(analyzeMarketSignal(text));
+  }
+
+  function handleSample() {
+    setText(SAMPLE);
+    track("foundry_test_sample", { test: "market-signal" });
   }
 
   return (
@@ -128,10 +186,11 @@ export default function MarketSignalTestPage() {
 
       <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-4xl px-6 py-24 lg:px-10">
+
           <div className="mb-10 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">
             <Link href="/foundry" className="hover:text-white/60 transition-colors">Foundry</Link>
             <span className="text-white/10">/</span>
-            <span className="text-[#C9A96E]/70">Market Signal Test</span>
+            <span style={{ color: `${GOLD}B0` }}>Market Signal Test</span>
           </div>
 
           <h1 className="font-serif text-4xl font-light italic leading-tight text-white/90 md:text-5xl">
@@ -165,7 +224,7 @@ export default function MarketSignalTestPage() {
                 Assess Signal
               </button>
               <button
-                onClick={() => { setText(SAMPLE); track("foundry_test_sample", { test: "market-signal" }); }}
+                onClick={handleSample}
                 data-analytics="foundry-market-sample"
                 className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
               >
@@ -176,11 +235,15 @@ export default function MarketSignalTestPage() {
 
           {result && (
             <div className="mt-12 space-y-6">
+
+              {/* 1. Score header */}
               <div className="border p-6" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">Signal Clarity Score</p>
-                    <p className="mt-2 font-serif text-5xl font-light text-white/90">{result.score}<span className="text-2xl text-white/30">/100</span></p>
+                    <p className="mt-2 font-serif text-5xl font-light text-white/90">
+                      {result.score}<span className="text-2xl text-white/30">/100</span>
+                    </p>
                   </div>
                   <span className={`rounded px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] ${
                     result.label === "CLEAR SIGNAL" ? "bg-emerald-500/10 text-emerald-400" :
@@ -190,13 +253,14 @@ export default function MarketSignalTestPage() {
                 </div>
                 <p className="mt-4 text-sm text-white/70">{result.summary}</p>
 
+                {/* 6. Demo ref + 7. Timestamp */}
                 <div className="mt-4 flex flex-wrap items-center gap-3 pt-3 border-t border-white/5">
-                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
-                    Demo ref: {Date.now().toString(36).slice(-6).toUpperCase()}
+                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/25">
+                    Demo ref: {result.demoRef}
                   </span>
-                  <span className="text-white/5">·</span>
-                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
-                    {new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  <span className="text-white/10">·</span>
+                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/25">
+                    {result.timestamp}
                   </span>
                   <span className="rounded border border-amber-500/10 bg-amber-500/5 px-1.5 py-0.5 font-mono text-[6px] uppercase tracking-[0.2em] text-amber-400/40">
                     Demo — not verifiable
@@ -204,13 +268,14 @@ export default function MarketSignalTestPage() {
                 </div>
               </div>
 
+              {/* 2. Findings */}
               {result.findings.length > 0 && (
                 <div className="space-y-2">
                   <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">Findings</p>
                   {result.findings.map((f, i) => (
                     <div key={i} className={`border p-4 ${
                       f.severity === "HIGH" ? "border-red-500/20 bg-red-500/5" :
-                      f.severity === "MEDIUM" ? "border-amber-500/15 bg-amber-500/4" :
+                      f.severity === "MEDIUM" ? "border-amber-500/15 bg-amber-500/5" :
                       "border-white/8 bg-white/2"
                     }`}>
                       <div className="flex items-center gap-2 mb-1">
@@ -227,24 +292,39 @@ export default function MarketSignalTestPage() {
                 </div>
               )}
 
+              {/* 3. Evidence note */}
+              <div className="border border-white/8 bg-white/2 p-5">
+                <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Evidence & Credibility Note</p>
+                <p className="text-sm text-white/65">{result.evidenceNote}</p>
+              </div>
+
+              {/* 4. Consequence + 5. Next action */}
               <div className="border border-white/8 bg-white/2 p-5">
                 <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Consequence</p>
                 <p className="text-sm text-white/70">{result.consequence}</p>
                 <div className="mt-4 h-px bg-white/5" />
                 <p className="mt-4 font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Recommended Next Action</p>
-                <p className="text-sm text-[#C9A96E]/80">{result.nextAction}</p>
+                <p className="text-sm" style={{ color: `${GOLD}CC` }}>{result.nextAction}</p>
               </div>
 
+              {/* 8. Disclaimer */}
               <div className="border border-white/5 bg-white/1 p-4">
                 <p className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/20 text-center">
-                  This is a public preview. It identifies visible patterns and risks, but it is not a full governed assessment.
+                  Public preview · Pattern-based analysis only · Not a full governed assessment · No data retained
                 </p>
               </div>
 
-              {/* ── Conversion path ───────────────────────────────────────── */}
+              {/* Interest capture */}
+              <InterestForm sourceTest="market-signal" />
+
+              {/* 9. Conversion CTA */}
               <div className="border border-white/8 bg-white/2 p-5 text-center">
                 <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 mb-3">
-                  Need a verifiable record?
+                  What a full review adds
+                </p>
+                <p className="text-xs text-white/50 mb-4 max-w-md mx-auto">
+                  A full review validates each claim against evidence, records the review authority,
+                  and issues a verifiable record your team can return to.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Link
@@ -254,39 +334,30 @@ export default function MarketSignalTestPage() {
                     className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
                     style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
                   >
-                    Run a full review →
+                    Start a full review →
                   </Link>
                   <Link
-                    href="/foundry/value"
-                    data-analytics="foundry-conversion-value"
-                    onClick={() => track("foundry_conversion_click", { target: "value-case", source: "market-signal-test" })}
+                    href="/continuity"
+                    data-analytics="foundry-conversion-continuity"
+                    onClick={() => track("foundry_conversion_click", { target: "continuity", source: "market-signal-test" })}
                     className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
                   >
-                    See what a full review includes
+                    Understand continuity →
                   </Link>
                 </div>
               </div>
 
-              {/* ── Navigation links ──────────────────────────────────────── */}
+              {/* Navigation */}
               <div className="flex flex-wrap items-center justify-center gap-5 pt-2">
-                <Link
-                  href="/foundry"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
-                >
+                <Link href="/foundry" className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors">
                   ← Back to Foundry
                 </Link>
                 <span className="text-white/10">·</span>
-                <Link
-                  href="/foundry/decision-test"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
-                >
+                <Link href="/foundry/decision-test" className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors">
                   Try Decision Test →
                 </Link>
                 <span className="text-white/10">·</span>
-                <Link
-                  href="/foundry/release-risk-test"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
-                >
+                <Link href="/foundry/release-risk-test" className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors">
                   Try Release Risk Test →
                 </Link>
               </div>

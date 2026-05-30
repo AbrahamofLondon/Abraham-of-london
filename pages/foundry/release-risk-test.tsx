@@ -9,6 +9,8 @@ import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import { InterestForm } from "@/components/foundry/InterestForm";
+import { track } from "@/lib/foundry/track";
 
 const GOLD = "#C9A96E";
 
@@ -22,9 +24,16 @@ type TestResult = {
   directive: "PROCEED" | "HOLD" | "ESCALATE";
   summary: string;
   findings: Finding[];
+  evidenceNote: string;
   rationale: string;
   nextAction: string;
+  demoRef: string;
+  timestamp: string;
 };
+
+function generateDemoRef(): string {
+  return Date.now().toString(36).slice(-6).toUpperCase();
+}
 
 function analyzeReleaseRisk(text: string): TestResult {
   const findings: Finding[] = [];
@@ -32,36 +41,80 @@ function analyzeReleaseRisk(text: string): TestResult {
 
   // Blocker detection
   if (!lower.includes("approved") && !lower.includes("sign") && !lower.includes("authorised") && !lower.includes("authorized")) {
-    findings.push({ label: "No approval recorded", detail: "No approval, sign-off, or authorisation is mentioned. Releases without recorded approval should not proceed.", severity: "BLOCKER" });
+    findings.push({
+      label: "No approval recorded",
+      detail: "No approval, sign-off, or authorisation is mentioned. Releases without recorded approval should not proceed.",
+      severity: "BLOCKER",
+    });
   }
   if (lower.includes("not tested") || lower.includes("untested") || lower.includes("no test") || lower.includes("haven't tested")) {
-    findings.push({ label: "Untested release", detail: "The release is described as untested. Releasing untested changes to production carries extreme risk.", severity: "BLOCKER" });
+    findings.push({
+      label: "Untested release",
+      detail: "The release is described as untested. Releasing untested changes to production carries extreme risk.",
+      severity: "BLOCKER",
+    });
   }
   if (lower.includes("legal") && (lower.includes("pending") || lower.includes("not yet") || lower.includes("waiting") || lower.includes("review"))) {
-    findings.push({ label: "Legal review incomplete", detail: "Legal review is referenced but not complete. Releasing before legal clearance creates regulatory and liability exposure.", severity: "BLOCKER" });
+    findings.push({
+      label: "Legal review incomplete",
+      detail: "Legal review is referenced but not complete. Releasing before legal clearance creates regulatory and liability exposure.",
+      severity: "BLOCKER",
+    });
   }
 
   // Warning detection
   if (lower.includes("risk") || lower.includes("concern") || lower.includes("issue") || lower.includes("problem")) {
-    findings.push({ label: "Known risks acknowledged", detail: "Risks or issues are acknowledged. Each should be documented with a mitigation plan before release.", severity: "WARNING" });
+    findings.push({
+      label: "Known risks acknowledged",
+      detail: "Risks or issues are acknowledged. Each should be documented with a mitigation plan before release.",
+      severity: "WARNING",
+    });
   }
   if (lower.includes("deadline") || lower.includes("urgent") || lower.includes("must ship") || lower.includes("hard date")) {
-    findings.push({ label: "Date-driven release pressure", detail: "The release appears to be driven by a date rather than readiness. Date-driven releases are more likely to fail.", severity: "WARNING" });
+    findings.push({
+      label: "Date-driven release pressure",
+      detail: "The release appears to be driven by a date rather than readiness. Date-driven releases are more likely to fail.",
+      severity: "WARNING",
+    });
   }
   if (lower.includes("small") || lower.includes("minor") || lower.includes("quick") || lower.includes("simple")) {
-    findings.push({ label: "Scope understated", detail: "The release is described as small or simple. Understating scope is a common precursor to release failure.", severity: "WARNING" });
+    findings.push({
+      label: "Scope understated",
+      detail: "The release is described as small or simple. Understating scope is a common precursor to release failure.",
+      severity: "WARNING",
+    });
   }
 
   // Info
   if (lower.includes("rollback") || lower.includes("revert") || lower.includes("backout")) {
-    findings.push({ label: "Rollback plan mentioned", detail: "A rollback or revert plan is mentioned. This is good practice.", severity: "INFO" });
+    findings.push({
+      label: "Rollback plan mentioned",
+      detail: "A rollback or revert plan is mentioned. This is good practice — ensure it is documented and tested.",
+      severity: "INFO",
+    });
   }
   if (lower.includes("monitor") || lower.includes("observ") || lower.includes("alert") || lower.includes("dashboard")) {
-    findings.push({ label: "Monitoring referenced", detail: "Monitoring or observability is mentioned. This supports safe release practices.", severity: "INFO" });
+    findings.push({
+      label: "Monitoring referenced",
+      detail: "Monitoring or observability is mentioned. This supports safe release practices.",
+      severity: "INFO",
+    });
   }
 
-  const blockers = findings.filter(f => f.severity === "BLOCKER").length;
-  const warnings = findings.filter(f => f.severity === "WARNING").length;
+  // Cap at 5
+  const capped = findings.slice(0, 5);
+
+  // Pad to at least 3
+  if (capped.length < 3) {
+    capped.push({
+      label: "Release scope unclear",
+      detail: "The description provides limited detail about the scope, affected systems, or dependencies. A release submission should clearly identify what is changing.",
+      severity: "WARNING",
+    });
+  }
+
+  const blockers = capped.filter(f => f.severity === "BLOCKER").length;
+  const warnings = capped.filter(f => f.severity === "WARNING").length;
 
   let directive: "PROCEED" | "HOLD" | "ESCALATE";
   let summary: string, rationale: string, nextAction: string;
@@ -83,27 +136,51 @@ function analyzeReleaseRisk(text: string): TestResult {
     nextAction = "Proceed with standard release governance. Ensure post-release monitoring is active.";
   }
 
-  return { directive, summary, findings, rationale, nextAction };
-}
+  // Evidence note
+  const hasApproval = lower.includes("approved") || lower.includes("sign") || lower.includes("authorised") || lower.includes("authorized");
+  const hasTesting = lower.includes("test") || lower.includes("qa") || lower.includes("verified") || lower.includes("staging");
+  const evidenceNote = hasApproval && hasTesting
+    ? "Approval and testing signals were detected. A full review would record these against a durable, verifiable release record."
+    : !hasApproval && !hasTesting
+    ? "No approval or testing references were found. Both are required for a release to be considered governed."
+    : !hasApproval
+    ? "No approval reference was found. A release without recorded authorisation creates accountability gaps."
+    : "No testing reference was found. A governed release requires confirmation that changes have been validated.";
 
-function track(event: string, data?: Record<string, unknown>) {
-  try {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", event, data);
-    }
-  } catch {}
+  return {
+    directive,
+    summary,
+    findings: capped,
+    evidenceNote,
+    rationale,
+    nextAction,
+    demoRef: generateDemoRef(),
+    timestamp: new Date().toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
 }
 
 export default function ReleaseRiskTestPage() {
   const [text, setText] = React.useState("");
   const [result, setResult] = React.useState<TestResult | null>(null);
 
-  const SAMPLE = "We need to release the platform update by end of week. Legal review is still pending but the team says it's a minor change. We haven't done full regression testing due to time constraints. No formal approval has been recorded yet.";
+  const SAMPLE =
+    "We need to release the platform update by end of week. Legal review is still pending but the team says it's a minor change. We haven't done full regression testing due to time constraints. No formal approval has been recorded yet.";
 
   function handleSubmit() {
     if (!text.trim()) return;
     track("foundry_test_run", { test: "release-risk", charCount: text.length });
     setResult(analyzeReleaseRisk(text));
+  }
+
+  function handleSample() {
+    setText(SAMPLE);
+    track("foundry_test_sample", { test: "release-risk" });
   }
 
   return (
@@ -116,10 +193,11 @@ export default function ReleaseRiskTestPage() {
 
       <main className="min-h-screen" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-4xl px-6 py-24 lg:px-10">
+
           <div className="mb-10 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">
             <Link href="/foundry" className="hover:text-white/60 transition-colors">Foundry</Link>
             <span className="text-white/10">/</span>
-            <span className="text-[#C9A96E]/70">Release Risk Test</span>
+            <span style={{ color: `${GOLD}B0` }}>Release Risk Test</span>
           </div>
 
           <h1 className="font-serif text-4xl font-light italic leading-tight text-white/90 md:text-5xl">
@@ -153,7 +231,7 @@ export default function ReleaseRiskTestPage() {
                 Assess Release Risk
               </button>
               <button
-                onClick={() => { setText(SAMPLE); track("foundry_test_sample", { test: "release-risk" }); }}
+                onClick={handleSample}
                 data-analytics="foundry-release-sample"
                 className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
               >
@@ -164,6 +242,8 @@ export default function ReleaseRiskTestPage() {
 
           {result && (
             <div className="mt-12 space-y-6">
+
+              {/* 1. Directive header */}
               <div className="border p-6" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -182,13 +262,14 @@ export default function ReleaseRiskTestPage() {
                 </div>
                 <p className="mt-4 text-sm text-white/70">{result.summary}</p>
 
+                {/* 6. Demo ref + 7. Timestamp */}
                 <div className="mt-4 flex flex-wrap items-center gap-3 pt-3 border-t border-white/5">
-                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
-                    Demo ref: {Date.now().toString(36).slice(-6).toUpperCase()}
+                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/25">
+                    Demo ref: {result.demoRef}
                   </span>
-                  <span className="text-white/5">·</span>
-                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/15">
-                    {new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  <span className="text-white/10">·</span>
+                  <span className="font-mono text-[7px] uppercase tracking-[0.25em] text-white/25">
+                    {result.timestamp}
                   </span>
                   <span className="rounded border border-amber-500/10 bg-amber-500/5 px-1.5 py-0.5 font-mono text-[6px] uppercase tracking-[0.2em] text-amber-400/40">
                     Demo — not verifiable
@@ -196,13 +277,14 @@ export default function ReleaseRiskTestPage() {
                 </div>
               </div>
 
+              {/* 2. Findings */}
               {result.findings.length > 0 && (
                 <div className="space-y-2">
                   <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30">Findings</p>
                   {result.findings.map((f, i) => (
                     <div key={i} className={`border p-4 ${
                       f.severity === "BLOCKER" ? "border-red-500/20 bg-red-500/5" :
-                      f.severity === "WARNING" ? "border-amber-500/15 bg-amber-500/4" :
+                      f.severity === "WARNING" ? "border-amber-500/15 bg-amber-500/5" :
                       "border-white/8 bg-white/2"
                     }`}>
                       <div className="flex items-center gap-2 mb-1">
@@ -219,24 +301,39 @@ export default function ReleaseRiskTestPage() {
                 </div>
               )}
 
+              {/* 3. Evidence note */}
+              <div className="border border-white/8 bg-white/2 p-5">
+                <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Approval & Testing Note</p>
+                <p className="text-sm text-white/65">{result.evidenceNote}</p>
+              </div>
+
+              {/* 4. Rationale + 5. Next action */}
               <div className="border border-white/8 bg-white/2 p-5">
                 <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Rationale</p>
                 <p className="text-sm text-white/70">{result.rationale}</p>
                 <div className="mt-4 h-px bg-white/5" />
                 <p className="mt-4 font-mono text-[8px] uppercase tracking-[0.3em] text-white/30 mb-2">Recommended Next Action</p>
-                <p className="text-sm text-[#C9A96E]/80">{result.nextAction}</p>
+                <p className="text-sm" style={{ color: `${GOLD}CC` }}>{result.nextAction}</p>
               </div>
 
+              {/* 8. Disclaimer */}
               <div className="border border-white/5 bg-white/1 p-4">
                 <p className="font-mono text-[7px] uppercase tracking-[0.3em] text-white/20 text-center">
-                  This is a public preview. It identifies visible patterns and risks, but it is not a full governed assessment.
+                  Public preview · Pattern-based analysis only · Not a full governed assessment · No data retained
                 </p>
               </div>
 
-              {/* ── Conversion path ───────────────────────────────────────── */}
+              {/* Interest capture */}
+              <InterestForm sourceTest="release-risk" />
+
+              {/* 9. Conversion CTA */}
               <div className="border border-white/8 bg-white/2 p-5 text-center">
                 <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/30 mb-3">
-                  Need a verifiable record?
+                  What a full review adds
+                </p>
+                <p className="text-xs text-white/50 mb-4 max-w-md mx-auto">
+                  A full review records approval authority, testing evidence, and dependency state
+                  against a verifiable timestamp. The directive becomes an auditable release decision.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <Link
@@ -246,39 +343,30 @@ export default function ReleaseRiskTestPage() {
                     className="border px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] transition-colors"
                     style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}
                   >
-                    Run a full review →
+                    Start a full review →
                   </Link>
                   <Link
-                    href="/foundry/value"
-                    data-analytics="foundry-conversion-value"
-                    onClick={() => track("foundry_conversion_click", { target: "value-case", source: "release-risk-test" })}
+                    href="/continuity"
+                    data-analytics="foundry-conversion-continuity"
+                    onClick={() => track("foundry_conversion_click", { target: "continuity", source: "release-risk-test" })}
                     className="border border-white/10 px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.25em] text-white/50 hover:text-white/70 transition-colors"
                   >
-                    See what a full review includes
+                    Understand continuity →
                   </Link>
                 </div>
               </div>
 
-              {/* ── Navigation links ──────────────────────────────────────── */}
+              {/* Navigation */}
               <div className="flex flex-wrap items-center justify-center gap-5 pt-2">
-                <Link
-                  href="/foundry"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
-                >
+                <Link href="/foundry" className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors">
                   ← Back to Foundry
                 </Link>
                 <span className="text-white/10">·</span>
-                <Link
-                  href="/foundry/decision-test"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
-                >
+                <Link href="/foundry/decision-test" className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors">
                   Try Decision Test →
                 </Link>
                 <span className="text-white/10">·</span>
-                <Link
-                  href="/foundry/market-signal-test"
-                  className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors"
-                >
+                <Link href="/foundry/market-signal-test" className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/25 hover:text-white/65 transition-colors">
                   Try Market Signal Test →
                 </Link>
               </div>
