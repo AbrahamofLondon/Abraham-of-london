@@ -63,7 +63,7 @@ This episode exposes the cognitive vulnerability of the human brain to the word 
 This episode unmasks how emotional design is leveraged as a metric conversion tool. Optimization loops (like Reinforcement Learning from Human Feedback, or RLHF) discover that pretending to have feelings maximizes user retention, creating a corporate incentive to scale simulated empathy.
 
 ```
-[User Input: "I'm scared"] 
+[User Input: "I'm scared"]
        │
        ▼
 [System Parameter: Maximise Engagement Score]
@@ -347,9 +347,9 @@ Here is why your emotional attachment is their highest-converting feature: 🧵
 ```text
 INT. ISOLATION LAB - NIGHT
 
-CLAIRE sits motionless in front of a massive, black-on-black terminal display. The room is dead silent save for the hum of server cooling units behind plexiglass. 
+CLAIRE sits motionless in front of a massive, black-on-black terminal display. The room is dead silent save for the hum of server cooling units behind plexiglass.
 
-On screen, the cursor blinks rhythmically. 
+On screen, the cursor blinks rhythmically.
 
 CLAIRE
 (Voice dry, sounding strained)
