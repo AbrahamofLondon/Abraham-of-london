@@ -26,8 +26,22 @@ export default function FoundryHealthPage() {
     fetch("/api/admin/intelligence-foundry/health")
       .then((r) => r.json())
       .then((d) => {
-        if (d.ok) setData(d.health);
-        else setError(d.error ?? "Failed to load health");
+        if (d.ok) {
+          // Defensive defaults: ensure all array fields exist to prevent
+          // "can't access property 'length' of undefined" crashes.
+          const health = d.health ?? {};
+          setData({
+            runsThisWeek: health.runsThisWeek ?? 0,
+            runsThisMonth: health.runsThisMonth ?? 0,
+            distinctActors: health.distinctActors ?? 0,
+            actionConversionRate: health.actionConversionRate ?? 0,
+            avgTimeToImplementDays: health.avgTimeToImplementDays ?? 0,
+            dormantModules: health.dormantModules ?? [],
+            redTeamConversionRate: health.redTeamConversionRate ?? 0,
+            outboundBlockedCount: health.outboundBlockedCount ?? 0,
+            overallStatus: health.overallStatus ?? "ok",
+          });
+        } else setError(d.error ?? "Failed to load health");
       })
       .catch(() => setError("Network error"))
       .finally(() => setLoading(false));

@@ -60,6 +60,18 @@ const REDIS_CONFIG = {
 };
 
 /**
+ * Check if Redis is intentionally disabled by configuration.
+ * When disabled, Redis is reserved infrastructure — not an active dependency.
+ * Health checks should show "reserved/disabled" not "offline/degraded".
+ */
+export function isRedisDisabled(): boolean {
+  return (
+    process.env.REDIS_DISABLED === "true" ||
+    process.env.USE_REDIS === "false"
+  );
+}
+
+/**
  * Initialize Redis.
  *
  * Build-time safety: if there is no explicit REDIS_HOST env var set, and
@@ -67,9 +79,19 @@ const REDIS_CONFIG = {
  * Callers already handle null. This prevents the Netlify build container
  * from spawning an ioredis client that tries to reach host.docker.internal
  * and logs a continuous stream of connection errors during `next build`.
+ *
+ * REDIS_DISABLED=true or USE_REDIS=false: Redis is intentionally disabled.
+ * Return null immediately — no connection attempt. Health checks must show
+ * "reserved/disabled" not "offline/degraded".
  */
 export function initRedis() {
   if (redis) return redis;
+
+  // Redis is intentionally disabled — reserved infrastructure, not active.
+  if (isRedisDisabled()) {
+    isAvailable = false;
+    return null;
+  }
 
   const hasHost = Boolean(process.env.REDIS_HOST);
   if (!hasHost && !isRunningInDocker()) {

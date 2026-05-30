@@ -11,10 +11,26 @@ export async function GET() {
   if (!auth.authorized) return auth.response;
 
   try {
-    const [health, registrySanity] = await Promise.all([
+    const [rawHealth, registrySanity] = await Promise.all([
       ResearchRunRepository.getDetailedHealth(),
       Promise.resolve(checkRegistrySanity()),
     ]);
+
+    // Normalise response: map dormantModuleIds → dormantModules,
+    // ensure all array fields have defaults to prevent client crashes.
+    const health = {
+      runsThisWeek: rawHealth.runsThisWeek ?? 0,
+      runsThisMonth: rawHealth.runsThisMonth ?? 0,
+      distinctActors: rawHealth.distinctActors ?? 0,
+      actionConversionRate: rawHealth.actionConversionRate ?? 0,
+      avgTimeToImplementDays: rawHealth.avgTimeToImplementDays ?? 0,
+      criticalUnresolved: rawHealth.criticalUnresolved ?? 0,
+      dormantModules: rawHealth.dormantModuleIds ?? [],
+      redTeamConversionRate: rawHealth.redTeamConversionRate ?? 0,
+      outboundBlockedCount: rawHealth.outboundBlockedCount ?? 0,
+      overallStatus: rawHealth.overallStatus ?? "ok",
+    };
+
     return NextResponse.json({ ok: true, health, registrySanity });
   } catch (error) {
     console.error("[FOUNDRY_HEALTH]", error);

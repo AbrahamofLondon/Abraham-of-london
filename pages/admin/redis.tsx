@@ -52,6 +52,9 @@ const RedisDiagnostic: NextPage = () => {
     );
   }
 
+  const isReserved = status.status === "reserved";
+  const isDisabled = status.redis?.disabled === true;
+
   return (
     <AdminLayout title="Redis Diagnostics">
     <div className="bg-[#050505] p-8 font-mono">
@@ -64,43 +67,61 @@ const RedisDiagnostic: NextPage = () => {
         </div>
         
         <div className="space-y-4">
+          {/* Connection Status — handles reserved/disabled state */}
           <div className="border border-white/10 bg-black/60 backdrop-blur-sm p-6 rounded-2xl">
             <h2 className="text-[10px] uppercase tracking-[0.2em] text-amber-700/60 mb-4">
               Connection Status
             </h2>
-            <div className={`${status.redis?.connected ? 'text-emerald-500' : 'text-red-500'} font-mono text-sm`}>
-              {status.redis?.connected ? '✓ ACTIVE' : '✗ OFFLINE'}
-            </div>
-            {status.redis?.error && (
-              <div className="text-red-500/70 text-xs mt-3 font-mono">
-                {status.redis.error}
+            {isReserved || isDisabled ? (
+              <div>
+                <div className="text-amber-500 font-mono text-sm">
+                  ⊘ RESERVED — NOT ACTIVE
+                </div>
+                <div className="text-amber-600/50 text-xs mt-3 font-mono leading-relaxed">
+                  Redis reserved — intentionally disabled. No active production dependency.
+                  No action required unless enabling cache-backed workflows.
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className={`${status.redis?.connected ? 'text-emerald-500' : 'text-red-500'} font-mono text-sm`}>
+                  {status.redis?.connected ? '✓ ACTIVE' : '✗ OFFLINE'}
+                </div>
+                {status.redis?.error && (
+                  <div className="text-red-500/70 text-xs mt-3 font-mono">
+                    {status.redis.error}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          <div className="border border-white/10 bg-black/60 backdrop-blur-sm p-6 rounded-2xl">
-            <h2 className="text-[10px] uppercase tracking-[0.2em] text-amber-700/60 mb-4">
-              Metrics
-            </h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between border-b border-white/5 py-2">
-                <span className="text-zinc-500">PING</span>
-                <span className={status.redis?.ping ? 'text-emerald-500' : 'text-red-500'}>
-                  {status.redis?.ping ? '✓' : '✗'}
-                </span>
-              </div>
-              <div className="flex justify-between border-b border-white/5 py-2">
-                <span className="text-zinc-500">KEYS</span>
-                <span className="text-amber-600/80">
-                  {typeof status.redis?.keys === "number" ? status.redis.keys : "Unavailable"}
-                </span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span className="text-zinc-500">MEMORY</span>
-                <span className="text-amber-600/80">{status.redis?.memory ?? 'Unavailable'}</span>
+          {/* Metrics — only show if Redis is active */}
+          {!isReserved && !isDisabled && (
+            <div className="border border-white/10 bg-black/60 backdrop-blur-sm p-6 rounded-2xl">
+              <h2 className="text-[10px] uppercase tracking-[0.2em] text-amber-700/60 mb-4">
+                Metrics
+              </h2>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between border-b border-white/5 py-2">
+                  <span className="text-zinc-500">PING</span>
+                  <span className={status.redis?.ping ? 'text-emerald-500' : 'text-red-500'}>
+                    {status.redis?.ping ? '✓' : '✗'}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b border-white/5 py-2">
+                  <span className="text-zinc-500">KEYS</span>
+                  <span className="text-amber-600/80">
+                    {typeof status.redis?.keys === "number" ? status.redis.keys : "Unavailable"}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-zinc-500">MEMORY</span>
+                  <span className="text-amber-600/80">{status.redis?.memory ?? 'Unavailable'}</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="border border-white/10 bg-black/60 backdrop-blur-sm p-6 rounded-2xl">
             <h2 className="text-[10px] uppercase tracking-[0.2em] text-amber-700/60 mb-4">
@@ -116,13 +137,13 @@ const RedisDiagnostic: NextPage = () => {
               <div className="flex justify-between border-b border-white/5 py-2">
                 <span className="text-zinc-500">REDIS CACHE</span>
                 <span className="text-amber-600/80">
-                  {typeof status.redis?.keys === "number" ? status.redis.keys : "Unavailable"}
+                  {isReserved || isDisabled ? "Disabled" : (typeof status.redis?.keys === "number" ? status.redis.keys : "Unavailable")}
                 </span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-zinc-500">SYNC STATE</span>
-                <span className={status.redis?.keys === status.disk?.assets ? 'text-emerald-500' : 'text-amber-500'}>
-                  {status.redis?.keys === status.disk?.assets ? 'SYNCHRONIZED' : 'PARTIAL'}
+                <span className={isReserved || isDisabled ? 'text-amber-500' : (status.redis?.keys === status.disk?.assets ? 'text-emerald-500' : 'text-amber-500')}>
+                  {isReserved || isDisabled ? 'RESERVED' : (status.redis?.keys === status.disk?.assets ? 'SYNCHRONIZED' : 'PARTIAL')}
                 </span>
               </div>
             </div>
@@ -135,8 +156,8 @@ const RedisDiagnostic: NextPage = () => {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between border-b border-white/5 py-2">
                 <span className="text-zinc-500">STATUS</span>
-                <span className={status.status === 'healthy' ? 'text-emerald-500' : 'text-amber-500'}>
-                  {status.status?.toUpperCase() ?? "Unavailable"}
+                <span className={isReserved ? 'text-amber-500' : (status.status === 'healthy' ? 'text-emerald-500' : 'text-amber-500')}>
+                  {isReserved ? 'RESERVED' : (status.status?.toUpperCase() ?? "Unavailable")}
                 </span>
               </div>
               <div className="flex justify-between border-b border-white/5 py-2">
@@ -156,7 +177,7 @@ const RedisDiagnostic: NextPage = () => {
         <div className="mt-8 text-center">
           <div className="inline-block px-4 py-2 border border-amber-900/30 bg-amber-950/20 rounded-full">
             <p className="font-mono text-[8px] text-amber-700/60 tracking-[0.2em]">
-              VAULT: {status.redis?.connected ? 'OPERATIONAL' : 'DEGRADED (CACHE ONLY)'}
+              {isReserved ? 'VAULT: RESERVED (INTENTIONALLY DISABLED)' : (status.redis?.connected ? 'VAULT: OPERATIONAL' : 'VAULT: DEGRADED (CACHE ONLY)')}
             </p>
           </div>
         </div>
