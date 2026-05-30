@@ -53,13 +53,13 @@ const PANELS: ValuePanel[] = [
     id: "release-risk-avoided",
     headline: "Release Risk Avoided",
     subhead: "Governance gaps don't wait until after you ship to become problems.",
-    body: "Missing auth checks, unvalidated deployment assumptions, no rollback path, rate-limit absent — these are not engineering oversights. They are governance gaps. The Foundry CI gate runs before merge, catches high-severity findings, and blocks the release until they are resolved. You learn about the gap on Tuesday, not from a post-incident review on Friday.",
+    body: "Missing auth checks, unvalidated deployment assumptions, no rollback path, rate-limit absent — these are not engineering oversights. They are governance gaps. The Foundry deployment gate runs before merge, catches high-severity findings, and blocks the release until they are resolved. You learn about the gap on Tuesday, not from a post-incident review on Friday.",
     stat: {
       label: "Release-blocking findings caught before deployment",
       value: "1 in 3",
       context: "governance reviews surface at least one blocker",
     },
-    proof: "Operators with CI gate integration report fewer post-release governance incidents in the first 60 days.",
+    proof: "Operators with deployment gate integration report fewer post-release governance incidents in the first 60 days.",
     signal: "Foundry detects: route exposure gaps, missing authority sign-off, unresolved critical findings, absent evidence chain",
   },
   {
@@ -99,7 +99,7 @@ const PANELS: ValuePanel[] = [
       context: "after first governed run",
     },
     proof: "Once operators see the structural gap between what they believed was decided and what the Foundry can confirm as decided, they immediately identify three or four more decisions in the same state.",
-    signal: "Foundry produces: authority validation, evidence adequacy score, 8-component intake gate, governance directive",
+    signal: "Foundry produces: authority validation, evidence adequacy score, structured intake review, governance directive",
   },
 ];
 
@@ -112,7 +112,7 @@ const COMPARISON_ROWS = [
   },
   {
     without: "Post-release incidents discovered after customer impact",
-    with: "CI gate blocks the release when governance gaps are detected pre-merge",
+    with: "Deployment gate blocks the release when governance gaps are detected pre-merge",
   },
   {
     without: "Contradiction discovered in a retrospective, after the sprint",
@@ -295,23 +295,23 @@ export default function FoundryValuePage() {
               {[
                 {
                   step: "01",
-                  label: "Intake",
-                  desc: "Decision, claim, or release description submitted via the Foundry intake gate. Eight components checked: scope, authority, evidence, urgency, contradictions, stakeholders, timeline, rollback.",
+                  label: "Submit",
+                  desc: "A decision, claim, or release description is submitted through the Foundry. The system checks scope, authority, evidence, urgency, contradictions, stakeholders, timeline, and rollback readiness.",
                 },
                 {
                   step: "02",
-                  label: "Governed Run",
-                  desc: "The Foundry runs a ResearchRun against the intake. Every finding is classified by severity, assigned a named owner, and linked to its evidence source.",
+                  label: "Analysis",
+                  desc: "The Foundry runs a structured review against the submission. Every finding is classified by severity, assigned a named owner, and linked to its evidence source.",
                 },
                 {
                   step: "03",
                   label: "Directive",
-                  desc: "A governance directive is produced: the decision is approved, blocked, or returned with a specific remediation path. No ambiguous recommendations.",
+                  desc: "A clear directive is produced: the decision is approved, blocked, or returned with a specific remediation path. No ambiguous recommendations.",
                 },
                 {
                   step: "04",
-                  label: "Audit Trail",
-                  desc: "The full run — intake, findings, directive, resolution — is persisted to the ResearchRun record. Authority validation and sign-off are captured. The record is complete and provable.",
+                  label: "Record",
+                  desc: "The full review — submission, findings, directive, resolution — is persisted as a signed record. Authority validation and sign-off are captured. The record is complete and provable.",
                 },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4 rounded-xl border border-white/6 bg-white/[0.015] px-5 py-4">
