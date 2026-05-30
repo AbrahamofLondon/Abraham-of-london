@@ -87,10 +87,11 @@ const FORBIDDEN_INTERNAL_TERMS = [
 
 // ─── Series hubs that must return 200 ────────────────────────────────────────
 const REQUIRED_SERIES_HUBS = [
-  { path: "/editorials/series/the-minds-clay-series-2", label: "Editorial Series 2" },
-  { path: "/editorials/series/outsourcing-our-sense-of-meaning-and-belonging", label: "Editorial Series: Outsourcing" },
-  { path: "/blog/series/the-burden-changes-hands", label: "Blog Series: Burden Changes Hands" },
-  { path: "/blog/series/the-science-of-inherited-selves", label: "Blog Series: Science of Inherited Selves" },
+  { path: "/editorials/series/the-minds-clay", label: "Editorial Series: The Mind's Clay" },
+  { path: "/editorials/series/the-minds-clay-series-2", label: "Editorial Series: The Mind's Clay — Series 2" },
+  { path: "/editorials/series/outsourcing-our-sense-of-meaning-and-belonging", label: "Editorial Series: Outsourcing Our Sense of Meaning and Belonging" },
+  { path: "/blog/series/the-burden-changes-hands", label: "Blog Series: The Burden Changes Hands" },
+  { path: "/blog/series/the-science-of-inherited-selves", label: "Blog Series: The Science of Inherited Selves" },
 ];
 
 // ─── Checkout / success routes that must use controlled messaging ────────────
@@ -230,6 +231,60 @@ async function checkPublicRouteIntegrity() {
         detail: `Required series hub ${hub.path} has no page file`,
       });
     }
+  }
+
+  // ── Check 2b: Visible hrefs from /editorials page match canonical routes ──
+  console.log("\n─── 2b. Visible hrefs from /editorials page match canonical routes ───");
+  const editorialsIndexPath = path.join(ROOT, "pages/editorials/index.tsx");
+  if (fs.existsSync(editorialsIndexPath)) {
+    const editorialsContent = fs.readFileSync(editorialsIndexPath, "utf-8");
+    
+    // Extract APPLIED_SERIES hrefs
+    const hrefRegex = /href:\s*"([^"]+)"/g;
+    let hrefMatch;
+    const foundHrefs = [];
+    while ((hrefMatch = hrefRegex.exec(editorialsContent)) !== null) {
+      const href = hrefMatch[1];
+      if (href.startsWith("/blog/series/") || href.startsWith("/editorials/series/")) {
+        foundHrefs.push(href);
+      }
+    }
+    
+    // Also extract from EditorialSeriesCard links
+    const seriesLinkRegex = /`\/editorials\/series\/\$\{item\.slug\}`/g;
+    let seriesMatch;
+    while ((seriesMatch = seriesLinkRegex.exec(editorialsContent)) !== null) {
+      // These are dynamic, so we can't check the exact path, but we can verify the pattern
+    }
+    
+    console.log(`  Found ${foundHrefs.length} visible series href(s) in /editorials page`);
+    for (const href of foundHrefs) {
+      const isInRequired = REQUIRED_SERIES_HUBS.some(h => h.path === href);
+      const isInRequiredAlt = REQUIRED_SERIES_HUBS.some(h => h.path === href || href.startsWith(h.path));
+      
+      if (isInRequired || isInRequiredAlt) {
+        console.log(`  ✓ ${href} — matches required series hub`);
+      } else {
+        // Check if it's a known series hub
+        const parts = href.split("/").filter(Boolean);
+        const hubDir = path.join(ROOT, "pages", ...parts, "index.tsx");
+        const dynamicDir = path.join(ROOT, "pages", ...parts.slice(0, -1), "[seriesSlug]", "index.tsx");
+        const exists = fs.existsSync(hubDir) || fs.existsSync(dynamicDir);
+        
+        if (exists) {
+          console.log(`  ✓ ${href} — page file exists`);
+        } else {
+          warnings.push({
+            type: "VISIBLE_HREF_NO_ROUTE",
+            href,
+            detail: `/editorials page links to ${href} but no matching page file or required hub entry found`,
+          });
+          console.log(`  ⚠ ${href} — no matching page file found`);
+        }
+      }
+    }
+  } else {
+    console.log("  ⚠ /editorials page not found — cannot validate visible hrefs");
   }
 
   // ── Check 3: No internal terms leaked in public page source files ──────

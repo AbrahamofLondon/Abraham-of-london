@@ -315,12 +315,16 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const series = getEditorialSeriesCatalogue();
+  const catalogue = getEditorialSeriesCatalogue();
   return {
-    paths: series.map((s) => ({
+    paths: catalogue.map((s) => ({
       params: { seriesSlug: s.slug },
     })),
-    fallback: "blocking",
+    // fallback: false ensures all paths are pre-rendered at build time.
+    // Contentlayer data is generated during the build and embedded in the
+    // static page props — no runtime filesystem access required.
+    // If a series is not in the catalogue, it returns 404 immediately.
+    fallback: false,
   };
 };
 
