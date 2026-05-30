@@ -4450,20 +4450,30 @@ model XPublishAttempt {
 // ─── Foundry public proof layer ───────────────────────────────────────────────
 
 model FoundryInterest {
-  id           String   @id @default(cuid())
-  name         String
-  email        String
-  organisation String?
-  role         String?
-  context      String?  // "What decision/release/claim is this connected to?"
-  urgency      String   @default("Medium") // Low | Medium | High | Board-sensitive
-  sourceTest   String?  // "decision" | "market-signal" | "release-risk" | "general"
-  ipHash       String?  // SHA-256 of IP — never raw IP
-  consentGiven Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  id                    String   @id @default(cuid())
+  name                  String
+  email                 String
+  organisation          String?
+  role                  String?
+  // Structured triage fields (added in CRL upgrade)
+  decisionType          String?  // CRL domain: compliance_statutory | product_release | etc.
+  deadline              String?  // Free text: "30 June 2026", "no hard deadline", etc.
+  professionalHelpStatus String? // can_access | seeking | cannot_afford | not_applicable
+  hasFinancialConstraint Boolean @default(false)
+  alreadyTried          String?  // What the user has already attempted
+  minimumOutcome        String?  // Minimum viable outcome they need
+  // Legacy / generic
+  context               String?  // Free text context (kept for backward compat)
+  urgency               String   @default("Medium") // Low | Medium | High | Board-sensitive
+  sourceTest            String?  // "decision" | "market-signal" | "release-risk" | "general"
+  ipHash                String?  // SHA-256 prefix of IP — never raw IP
+  consentGiven          Boolean  @default(false)
+  createdAt             DateTime @default(now())
 
   @@index([email])
   @@index([createdAt])
   @@index([sourceTest])
+  @@index([decisionType])
+  @@index([professionalHelpStatus])
   @@map("foundry_interest")
 }
