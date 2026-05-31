@@ -1,0 +1,148 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243846017-ky8far",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Cash-Constrained Survival",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": true,
+    "forbiddenActionsCount": 2,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 6,
+    "authorityCount": 0,
+    "obligationCount": 0,
+    "constraintCount": 1,
+    "adversarialCount": 2,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:46.019Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Cash-Constrained Survival",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:46.019Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:46.019Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "FINANCIAL_AND_CAPITAL",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "OPERATIONAL_AND_EXECUTION",
+          "confidence": "LOW",
+          "reason": "Timing pressure suggests operational execution dimension"
+        }
+      ],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a financial or capital decision where cash, funding, or balance sheet capacity constrains the feasible set. Dimensions surfaced: constraint.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "1 constraint mapped (1 critical/high)",
+    "evidenceSummary": "6 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "runway-vs-funding-delay",
+        "contradiction": "Cash runway is critically short but required funding has not been secured or is delayed",
+        "severity": "CRITICAL"
+      },
+      {
+        "id": "investor-claim-vs-evidence",
+        "contradiction": "1 claim(s) in the investor narrative would not survive due diligence: Customer or user base (customer)",
+        "severity": "HIGH"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Cash position constrains available options",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": true,
+      "type": "investment-advice",
+      "professionalBrief": {
+        "suggestedProfession": "a regulated financial adviser",
+        "whatToBring": [
+          "This Living Decision Case reference and output",
+          "Evidence of constraints (financial statements, timelines, capacity data)",
+          "Any documentation referenced in the evidence graph"
+        ],
+        "questionsToAsk": [
+          "What are the regulatory requirements for any financial promotion or investment solicitation?"
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "RESOLVE_PRIMARY_ADVERSARIAL_RISK",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "CLARIFY_AUTHORITY",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Make commitments — payroll guarantees, supplier agreements, or operational promises — that assume funding or payment that has not been confirmed in writing",
+        "severity": "HIGH"
+      },
+      {
+        "action": "Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Address the primary identified risk: Cash runway is critically short but required funding has not been secured or is delayed. This is the failure point most likely to undermine the decision.",
+      "Identify and confirm who holds formal decision mandate.",
+      "Verify: Cash position constrains available options"
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

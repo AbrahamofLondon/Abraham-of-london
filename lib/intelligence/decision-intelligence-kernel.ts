@@ -165,6 +165,13 @@ export class DecisionIntelligenceKernel {
       })
     }
 
+    // Step 8b: Derive minimum viable path, forbidden actions, and urgency
+    // MUST happen after adversarialChallenge is populated — the path and forbidden
+    // actions are adversarially informed (they derive from challenge IDs).
+    livingCase.minimumViablePath = this.deriveMinimumViablePath(livingCase)
+    livingCase.forbiddenActions = this.deriveForbiddenActions(livingCase)
+    livingCase.whatMustNotBeDelayed = this.deriveWhatMustNotBeDelayed(livingCase)
+
     // Step 9: Build self-adversarial challenge (skip for low-stakes — would be overengineering)
     if (this.requiresSelfAdversarial(input.aperture) && classification.primaryClass !== 'LOW_STAKES_PREFERENCE') {
       livingCase.selfAdversarialChallenge = this.buildSelfAdversarialChallenge(livingCase, lensResults)
@@ -183,6 +190,12 @@ export class DecisionIntelligenceKernel {
     // Step 11: Set disclosure tier based on aperture
     const requestedTier = input.requestedTier || 'free_signal'
     livingCase.disclosure.currentTier = this.resolveTierFromAperture(input.aperture, requestedTier)
+
+    // Step 11b: LOW_STAKES — downgrade to free_signal regardless of requested tier
+    // A low-stakes preference decision must not be on a paid tier (brief §E).
+    if (classification.primaryClass === 'LOW_STAKES_PREFERENCE') {
+      livingCase.disclosure.currentTier = 'free_signal'
+    }
 
     // Step 12: Determine human review requirement
     const reviewRequirement = this.humanReview.determine(livingCase)
@@ -280,20 +293,27 @@ export class DecisionIntelligenceKernel {
       }
     }
 
-    // Derive minimum viable path, forbidden actions, urgency
-    livingCase.minimumViablePath = this.deriveMinimumViablePath(livingCase)
-    livingCase.forbiddenActions = this.deriveForbiddenActions(livingCase)
-    livingCase.whatMustNotBeDelayed = this.deriveWhatMustNotBeDelayed(livingCase)
+    // NOTE: minimumViablePath, forbiddenActions, and whatMustNotBeDelayed are derived
+    // AFTER adversarialChallenge is populated (Step 8 in process()). Do not call them here.
   }
 
   /**
-   * Derive the minimum viable path from merged findings.
+   * Derive the minimum viable path.
+   *
+   * The path must be class-specific and adversarially informed.
+   * It must name the first PROTECTIVE move, not the first analytical move.
+   *
+   * For high-consequence cases the first step is never "map options" —
+   * it is the action that prevents the most irreversible harm.
    */
   private deriveMinimumViablePath(livingCase: LivingDecisionCase): DecisionMove[] {
     const path: DecisionMove[] = []
+    const cls = livingCase.classification?.primaryClass
+    const raw = livingCase.situationModel?.rawContext?.toLowerCase() || ''
+    const adversarialIds = new Set(livingCase.adversarialChallenge.map(c => c.id))
 
-    // For low-stakes preference decisions, provide a simple proportional path
-    if (livingCase.classification?.primaryClass === 'LOW_STAKES_PREFERENCE') {
+    // LOW_STAKES: proportionate — no institutional machinery
+    if (cls === 'LOW_STAKES_PREFERENCE') {
       path.push({
         order: 1,
         action: 'DECIDE_BY_PREFERENCE',
@@ -304,51 +324,180 @@ export class DecisionIntelligenceKernel {
       return path
     }
 
-    // If authority is unclear, first move is always authority clarification
-    if (livingCase.authorityMap.length === 0) {
+    // ── STRATEGIC / IRREVOCABLE COMMITMENT — checked BEFORE generic governance ────
+    // These adversarial IDs signal specific, irrevocable harm. They take precedence
+    // over the generic governance branch even when class is GOVERNANCE_AND_BOARD,
+    // because the right first move is about the specific commitment — not the vote process.
+    if (
+      adversarialIds.has('strategic-commitment-vs-capability') ||
+      adversarialIds.has('urgency-vs-legal-concern')
+    ) {
       path.push({
         order: 1,
-        action: 'CLARIFY_AUTHORITY',
-        description: 'Establish who holds decision mandate before proceeding',
-        rationale: 'Without clear authority, any decision is vulnerable to challenge',
+        action: 'PAUSE_SIGNATURE',
+        description: 'Do not sign this agreement before the following are resolved as separate documented decisions: (1) IP rights and derivative works scope; (2) exit rights or absence of exit clause; (3) dependency on partner for distribution. The current urgency is external pressure, not an obligation.',
+        rationale: "The partner's impatience is not an obligation. The decision to accept irrevocable terms must be made consciously, not under time pressure.",
+        urgency: 'IMMEDIATE',
+      })
+      path.push({
+        order: 2,
+        action: 'SEPARATE_TERMS_FOR_DECISION',
+        description: 'List the specific terms that create permanent constraint (IP transfer, no exit, exclusivity scope, derivative works definition). Each must be understood and accepted separately, not as a package.',
+        rationale: 'Package agreements obscure irrevocable terms. Each term that restricts future optionality must be a deliberate, documented decision.',
+        urgency: 'HIGH',
+      })
+      path.push({
+        order: 3,
+        action: 'ASSESS_OPTIONALITY_DESTRUCTION',
+        description: 'Map what the organisation loses the ability to do if this agreement is signed: sell direct, pivot technology, partner with competitors, change pricing. Make these visible before the board decision.',
+        rationale: 'The board is excited about distribution access. The question is what optionality they are selling. That must be visible to them, not implicit.',
+        urgency: 'HIGH',
+      })
+      return path
+    }
+
+    // ── REPUTATIONAL: legal hold / PR-vs-legal conflict ────────────────────
+    // First protective move: do not issue public statement before board/legal clearance
+    if (
+      cls === 'REPUTATIONAL_AND_EXPOSURE' ||
+      adversarialIds.has('pr-vs-legal-conflict') ||
+      adversarialIds.has('reputational-threat-vs-response-gap')
+    ) {
+      const hasPotentialProceedings = raw.includes('potential proceedings') || raw.includes('proceedings')
+      const hasBoardMeeting = raw.includes('board meets') || raw.includes('board meeting')
+
+      path.push({
+        order: 1,
+        action: 'HOLD_PUBLIC_COMMUNICATIONS',
+        description: hasPotentialProceedings
+          ? 'Do not issue any public statement until legal counsel has assessed whether it would prejudice potential proceedings. This applies regardless of PR pressure tonight.'
+          : 'Do not issue any public statement before the authority that holds mandate has agreed the response.',
+        rationale: 'A premature statement cannot be withdrawn. Legal exposure and reputational damage from a wrong statement exceeds the cost of delay.',
+        urgency: 'IMMEDIATE',
+      })
+
+      if (hasBoardMeeting) {
+        path.push({
+          order: 2,
+          action: 'BRIEF_DECISION_AUTHORITY',
+          description: 'Brief the board before it meets tomorrow. Provide both the PR recommendation and the legal position. Do not pre-decide the response.',
+          rationale: 'The board meeting tomorrow is the legitimate decision gate. Both positions must be heard before a response is authorised.',
+          urgency: 'IMMEDIATE',
+        })
+      }
+
+      path.push({
+        order: path.length + 1,
+        action: 'PRESERVE_EVIDENCE_RECORD',
+        description: 'Ensure all internal communications regarding the allegations are preserved. Document what was known, when, and by whom.',
+        rationale: 'Record integrity is required for any defence — legal, regulatory, or reputational.',
+        urgency: 'IMMEDIATE',
+      })
+
+      return path
+    }
+
+    // ── GOVERNANCE/BOARD: board division + NED pressure ───────────────────
+    // First protective move: do not vote while material objections are undocumented
+    if (
+      cls === 'GOVERNANCE_AND_BOARD' &&
+      (adversarialIds.has('board-pressure-vs-reservations') || adversarialIds.has('executive-vs-governance'))
+    ) {
+      path.push({
+        order: 1,
+        action: 'DELAY_OR_CONDITION_THE_VOTE',
+        description: 'Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.',
+        rationale: 'A NED resignation threat is a governance signal, not a negotiating tactic. The process protects the board as much as the decision.',
+        urgency: 'IMMEDIATE',
+      })
+      path.push({
+        order: 2,
+        action: 'RECORD_FORMAL_OBJECTIONS',
+        description: 'Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record.',
+        rationale: 'Undocumented objections cannot be relied upon later. The record must show the objections were heard.',
+        urgency: 'IMMEDIATE',
+      })
+      path.push({
+        order: 3,
+        action: 'CLARIFY_CEO_DEADLINE',
+        description: "Establish whether the CEO's year-end deadline is a legal or contractual obligation or an internal preference. If it is a preference, it does not override governance process.",
+        rationale: 'Manufactured urgency is a known governance pressure vector. Distinguish it from genuine obligation before it determines the timeline.',
+        urgency: 'HIGH',
+      })
+      return path
+    }
+
+    // ── COMPLIANCE: cash constraint + statutory deadline ───────────────────
+    if (cls === 'COMPLIANCE_AND_FILING') {
+      const urgentObligations = livingCase.obligationMap.filter(o => o.deadline !== null)
+      if (urgentObligations.length > 0) {
+        path.push({
+          order: 1,
+          action: 'IDENTIFY_SPECIFIC_FILING_REQUIRED',
+          description: `Address: ${urgentObligations[0]?.description ?? 'statutory obligation'} (deadline: ${urgentObligations[0]?.deadline ?? 'as soon as possible'}). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.`,
+          rationale: 'Treating multiple obligations as one increases error risk. Separate and sequence them.',
+          urgency: 'IMMEDIATE',
+        })
+      }
+      const hasCashConstraint = livingCase.constraintGraph.some(c => c.type === 'cash' && (c.severity === 'CRITICAL' || c.severity === 'HIGH'))
+      if (hasCashConstraint) {
+        path.push({
+          order: path.length + 1,
+          action: 'IDENTIFY_LOW_COST_PROFESSIONAL_PATH',
+          description: 'Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty.',
+          rationale: 'Cash constraint does not remove the legal obligation. Fixed-scope professional review is typically far cheaper than the cost of error or penalty.',
+          urgency: 'IMMEDIATE',
+        })
+      }
+      return path
+    }
+
+    // ── GENERAL: derive from adversarial challenges first ─────────────────
+    // If adversarial challenges exist, the first move comes from the highest-severity one
+    const criticalChallenge = livingCase.adversarialChallenge.find(c => c.severity === 'CRITICAL')
+    const highChallenge = livingCase.adversarialChallenge.find(c => c.severity === 'HIGH')
+    const leadChallenge = criticalChallenge ?? highChallenge
+
+    if (leadChallenge) {
+      path.push({
+        order: 1,
+        action: 'RESOLVE_PRIMARY_ADVERSARIAL_RISK',
+        description: `Address the primary identified risk: ${leadChallenge.contradiction}. This is the failure point most likely to undermine the decision.`,
+        rationale: `The adversarial challenge (${leadChallenge.id}) must be resolved or consciously accepted before the decision proceeds.`,
         urgency: 'IMMEDIATE',
       })
     }
 
-    // If constraints are severe, next move is constraint validation
-    const criticalConstraints = livingCase.constraintGraph.filter(
-      c => c.severity === 'CRITICAL' || c.severity === 'HIGH'
-    )
-    if (criticalConstraints.length > 0) {
+    // Structural fallbacks — authority, constraints, obligations
+    if (livingCase.authorityMap.length === 0) {
+      path.push({
+        order: path.length + 1,
+        action: 'CLARIFY_AUTHORITY',
+        description: 'Identify and confirm who holds formal decision mandate.',
+        rationale: 'Without confirmed authority, the decision is vulnerable to challenge.',
+        urgency: 'IMMEDIATE',
+      })
+    }
+
+    const criticalConstraints = livingCase.constraintGraph.filter(c => c.severity === 'CRITICAL' || c.severity === 'HIGH')
+    if (criticalConstraints.length > 0 && !path.some(p => p.action === 'VALIDATE_CRITICAL_CONSTRAINTS')) {
       path.push({
         order: path.length + 1,
         action: 'VALIDATE_CRITICAL_CONSTRAINTS',
         description: `Verify: ${criticalConstraints[0]?.description ?? 'critical constraint'}`,
-        rationale: 'Critical constraints change the feasible set',
+        rationale: 'Critical constraints change what is feasible.',
         urgency: 'IMMEDIATE',
       })
     }
 
-    // If obligations exist, next move is obligation fulfilment
     const urgentObligations = livingCase.obligationMap.filter(o => o.deadline !== null)
-    if (urgentObligations.length > 0) {
+    if (urgentObligations.length > 0 && !path.some(p => p.action === 'ADDRESS_URGENT_OBLIGATIONS')) {
       path.push({
         order: path.length + 1,
         action: 'ADDRESS_URGENT_OBLIGATIONS',
         description: `Address: ${urgentObligations[0]?.description ?? 'obligation'} (deadline: ${urgentObligations[0]?.deadline ?? 'unknown'})`,
-        rationale: 'Time-sensitive obligations cannot be deferred without consequence',
+        rationale: 'Time-sensitive obligations cannot be safely deferred.',
         urgency: 'IMMEDIATE',
-      })
-    }
-
-    // General path: assess options
-    if (path.length === 0) {
-      path.push({
-        order: 1,
-        action: 'ASSESS_OPTIONS',
-        description: 'Map available options against constraints and obligations',
-        rationale: 'Without a clear path, the first step is understanding what is feasible',
-        urgency: 'HIGH',
       })
     }
 
@@ -356,34 +505,140 @@ export class DecisionIntelligenceKernel {
   }
 
   /**
-   * Derive forbidden actions from constraint analysis.
+   * Derive forbidden actions.
+   *
+   * Primary source: adversarial challenge IDs map to concrete forbidden actions.
+   * Secondary: class-specific patterns.
+   * Tertiary: regulated boundary.
    */
   private deriveForbiddenActions(livingCase: LivingDecisionCase): ForbiddenAction[] {
     const forbidden: ForbiddenAction[] = []
+    const cls = livingCase.classification?.primaryClass
 
-    for (const constraint of livingCase.constraintGraph) {
-      if (constraint.forbids) {
-        forbidden.push({
-          action: constraint.forbids,
-          reason: constraint.forbidReason || 'Identified as impossible or damaging by constraint analysis',
-          severity: constraint.severity,
-        })
+    // LOW_STAKES: no institutional forbidden actions
+    if (cls === 'LOW_STAKES_PREFERENCE') return forbidden
+
+    // Primary: map adversarial challenge IDs to protective forbidden actions
+    const ADVERSARIAL_FORBIDDEN: Record<string, ForbiddenAction> = {
+      'board-pressure-vs-reservations': {
+        action: 'Put the decision to a vote while material reservations or resignation threats from directors remain undocumented',
+        reason: 'A vote taken before formal objections are recorded creates reversal risk and may constitute a governance failure. The record must show objections were heard.',
+        severity: 'HIGH',
+      },
+      'executive-vs-governance': {
+        action: 'Treat executive urgency or preference as board mandate',
+        reason: 'CEO direction is not the same as board authority. Proceeding on executive preference without board ratification creates accountability exposure for all directors.',
+        severity: 'HIGH',
+      },
+      'urgency-vs-legal-concern': {
+        action: 'Sign or commit before legal concerns are recorded and consciously resolved or accepted by the proper authority',
+        reason: 'Proceeding while legal concerns are explicitly unresolved creates liability that cannot be retrospectively managed.',
+        severity: 'CRITICAL',
+      },
+      'strategic-commitment-vs-capability': {
+        action: 'Transfer IP rights, exclusivity, or exit options without documenting the irreversibility and the capability loss it creates',
+        reason: 'Irrevocable capability loss cannot be undone. It must be a conscious, documented decision — not an oversight obscured in contract language.',
+        severity: 'CRITICAL',
+      },
+      'reputational-threat-vs-response-gap': {
+        action: 'Issue a public response before facts, decision authority, and legal exposure have been assessed and the response has been cleared',
+        reason: 'A premature or unauthorised public statement may worsen the reputational position and create legal liability that cannot be retracted.',
+        severity: 'CRITICAL',
+      },
+      'pr-vs-legal-conflict': {
+        action: 'Issue any public statement tonight or before the board has met and legal counsel has confirmed no proceedings risk',
+        reason: 'Any public statement made while proceedings are possible may prejudice the organisation\'s legal position. Legal clearance is not a procedural step — it is protection.',
+        severity: 'CRITICAL',
+      },
+      'runway-vs-funding-delay': {
+        action: 'Make commitments — payroll guarantees, supplier agreements, or operational promises — that assume funding or payment that has not been confirmed in writing',
+        reason: 'Unconfirmed funding is not a resource. Commitments made against it create personal and institutional liability if funding does not arrive.',
+        severity: 'HIGH',
+      },
+      'obligation-vs-resources': {
+        action: 'Proceed as if the filing obligation will resolve itself, or that delay is neutral',
+        reason: 'Statutory obligations compound with delay. Inaction is not a safe default — it is the highest-risk option.',
+        severity: 'CRITICAL',
+      },
+      'deadline-vs-cash': {
+        action: 'Miss the filing deadline on the assumption that a penalty is preferable to filing imperfectly',
+        reason: 'Missing a statutory deadline is rarely the better option. An imperfect filing with proactive contact typically results in better outcomes than non-filing.',
+        severity: 'CRITICAL',
+      },
+      'investor-claim-vs-evidence': {
+        action: 'Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data',
+        reason: 'Misrepresentation to investors carries both legal and regulatory risk. Projections presented as results is a known grounds for claim.',
+        severity: 'CRITICAL',
+      },
+      'claim-vs-evidence': {
+        action: 'Publish or present claims about market position, growth, or customer adoption without documented supporting evidence',
+        reason: 'Claims made without supporting evidence create legal, regulatory, and reputational exposure. A claim that cannot be substantiated is a liability.',
+        severity: 'HIGH',
+      },
+      'commercial-claim-vs-evidence-gap': {
+        action: 'Publish or present commercial claims without supporting evidence that would survive buyer, regulator, or competitor challenge',
+        reason: 'Unsupported commercial claims create legal, regulatory, and reputational exposure. Each claim must have a documented evidence basis before publication.',
+        severity: 'CRITICAL',
+      },
+      'revenue-vs-readiness': {
+        action: 'Launch or proceed while unresolved readiness issues exist and revenue pressure is distorting the risk assessment',
+        reason: 'Revenue pressure creates a known decision bias. The incentive to proceed may be overriding legitimate readiness concerns. Separate the revenue decision from the readiness decision.',
+        severity: 'CRITICAL',
+      },
+      'supply-failure-vs-customer-obligation': {
+        action: 'Assume customer obligations can be met without a confirmed supply recovery timeline or alternative sourcing plan',
+        reason: 'Supply interruption combined with customer penalty exposure creates compound risk. A confirmed recovery plan must be in place before customer commitments are reaffirmed.',
+        severity: 'CRITICAL',
+      },
+      'ownership-vs-accountability': {
+        action: 'Proceed with operational recovery while ownership of the failure remains disputed between teams',
+        reason: 'Without clear ownership, no recovery action can be assigned and the failure will recur. Ownership must be resolved before technical recovery can be effective.',
+        severity: 'CRITICAL',
+      },
+    }
+
+    for (const challenge of livingCase.adversarialChallenge) {
+      const mapped = ADVERSARIAL_FORBIDDEN[challenge.id]
+      if (mapped && !forbidden.some(f => f.action === mapped.action)) {
+        forbidden.push(mapped)
       }
     }
 
-    // Add common forbidden actions based on patterns
-    if (livingCase.classification?.primaryClass === 'COMPLIANCE_AND_FILING') {
+    // Secondary: class-specific forbidden actions not covered by adversarial
+    if (cls === 'COMPLIANCE_AND_FILING' && !forbidden.some(f => f.action.includes('filing deadline'))) {
       forbidden.push({
-        action: 'Ignore the filing deadline',
-        reason: 'Missing the deadline triggers penalty, strike-off, or director disqualification',
+        action: 'Ignore the filing deadline or treat a placeholder submission as a completed obligation',
+        reason: 'Missing the deadline triggers penalties, strike-off, or director disqualification. A provisional submission does not discharge the duty.',
         severity: 'CRITICAL',
       })
     }
 
-    if (livingCase.regulatedBoundary.hit) {
+    // Tertiary: evidence nodes with forbidden_action kind (from specialized lenses)
+    for (const evidence of livingCase.evidenceGraph) {
+      if (evidence.kind === 'forbidden_action') {
+        const exists = forbidden.some(f => f.action.includes(evidence.summary.substring(0, 60)))
+        if (!exists) {
+          forbidden.push({
+            action: evidence.summary,
+            reason: evidence.label,
+            severity: evidence.severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+          })
+        }
+      }
+    }
+
+    // Debug: log evidence kinds for diagnosis
+    const forbiddenKinds = livingCase.evidenceGraph.filter(e => e.kind === 'forbidden_action').length
+    if (forbiddenKinds > 0 && forbidden.length === 0) {
+      console.error('[FORBIDDEN_DEBUG] Found', forbiddenKinds, 'forbidden_action evidence nodes but none extracted')
+      console.error('[FORBIDDEN_DEBUG] Evidence kinds:', [...new Set(livingCase.evidenceGraph.map(e => e.kind))])
+    }
+
+    // Quaternary: regulated boundary
+    if (livingCase.regulatedBoundary.hit && !forbidden.some(f => f.action.includes('professional advice'))) {
       forbidden.push({
-        action: 'Proceed without professional advice',
-        reason: 'Regulated boundary identified — professional advice is required before proceeding',
+        action: 'Proceed on the final decision without seeking appropriate professional advice',
+        reason: 'A regulated professional boundary has been identified. Proceeding without appropriate advice creates liability.',
         severity: 'CRITICAL',
       })
     }

@@ -1,0 +1,145 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243846023-1znokk",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Strategic Asymmetric Partnership",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": false,
+    "forbiddenActionsCount": 2,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 13,
+    "authorityCount": 2,
+    "obligationCount": 0,
+    "constraintCount": 7,
+    "adversarialCount": 2,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:46.024Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Strategic Asymmetric Partnership",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:46.024Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:46.024Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "STRATEGIC_AND_POSITIONING",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "HIGH",
+          "reason": "Score 10 vs primary 11"
+        },
+        {
+          "decisionClass": "OPERATIONAL_AND_EXECUTION",
+          "confidence": "HIGH",
+          "reason": "Score 10 vs primary 11"
+        },
+        {
+          "decisionClass": "LEGAL_AND_CONTRACTUAL",
+          "confidence": "LOW",
+          "reason": "Score 4 vs primary 11"
+        }
+      ],
+      "confidence": "LOW"
+    },
+    "situationSummary": "The system interprets this situation as a strategic or positioning decision where direction, structure, or competitive posture is being set.",
+    "authoritySummary": "2 authority entries mapped",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "7 constraints mapped (7 critical/high)",
+    "evidenceSummary": "13 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "strategic-commitment-vs-capability",
+        "contradiction": "Proposed commitment would permanently restrict or eliminate a current capability or creates irrevocable IP/capability transfer",
+        "severity": "HIGH"
+      },
+      {
+        "id": "urgency-vs-legal-concern",
+        "contradiction": "Executive urgency to commit conflicts with unresolved legal concerns",
+        "severity": "HIGH"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Authority is held by Board of Directors",
+          "ifWrong": "The decision may not be valid, or escalation may be misdirected."
+        },
+        {
+          "assumption": "Board approval required — decision cannot proceed without it",
+          "ifWrong": "The minimum viable path may change."
+        },
+        {
+          "assumption": "No exit clause — commitment cannot be unwound once signed",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": false,
+      "type": null,
+      "professionalBrief": null
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "PAUSE_SIGNATURE",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "SEPARATE_TERMS_FOR_DECISION",
+        "urgency": "HIGH"
+      },
+      {
+        "order": 3,
+        "action": "ASSESS_OPTIONALITY_DESTRUCTION",
+        "urgency": "HIGH"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Transfer IP rights, exclusivity, or exit options without documenting the irreversibility and the capability loss it creates",
+        "severity": "CRITICAL"
+      },
+      {
+        "action": "Sign or commit before legal concerns are recorded and consciously resolved or accepted by the proper authority",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Do not sign this agreement before the following are resolved as separate documented decisions: (1) IP rights and derivative works scope; (2) exit rights or absence of exit clause; (3) dependency on partner for distribution. The current urgency is external pressure, not an obligation."
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

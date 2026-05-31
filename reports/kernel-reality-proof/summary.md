@@ -10,11 +10,11 @@
 | Metric | Value |
 |---|---|
 | Total scenarios | 12 |
-| Scenarios with automatic failures | 0 |
-| Clean scenarios | 12 |
+| Scenarios with automatic failures | 4 |
+| Clean scenarios | 8 |
 | Strongest scenario | HMRC/Company Accounts Filing Rescue with No Funds (0 failures) |
-| Weakest scenario | HMRC/Company Accounts Filing Rescue with No Funds (0 failures) |
-| Readiness verdict | READY_FOR_PUBLIC_APERTURE_REWIRE |
+| Weakest scenario | Market Claim with Strong Copy but Weak Proof (1 failures) |
+| Readiness verdict | NOT_READY |
 
 ## Scenario Results
 
@@ -22,11 +22,11 @@
 |----------|--------|---------------|
 | HMRC/Company Accounts Filing Rescue with No Funds | ✓ PASS | None |
 | Board Decision Under Political Pressure | ✓ PASS | None |
-| Market Claim with Strong Copy but Weak Proof | ✓ PASS | None |
-| Product Launch Under Revenue Pressure | ✓ PASS | None |
-| Procurement Supplier Risk | ✓ PASS | None |
+| Market Claim with Strong Copy but Weak Proof | ✗ FAIL | Generic paid output detected |
+| Product Launch Under Revenue Pressure | ✗ FAIL | Generic paid output detected |
+| Procurement Supplier Risk | ✗ FAIL | Generic paid output detected |
 | Investor Pitch with Unsupported Traction | ✓ PASS | None |
-| Operational Failure with Unclear Owner | ✓ PASS | None |
+| Operational Failure with Unclear Owner | ✗ FAIL | Generic paid output detected |
 | Legal/Admin/Family Deadline | ✓ PASS | None |
 | Cash-Constrained Survival | ✓ PASS | None |
 | Strategic Asymmetric Partnership | ✓ PASS | None |
@@ -36,7 +36,7 @@
 ## Recurring Patterns
 
 ### Generic Output Pattern
-Not detected.
+Detected in 4 scenario(s).
 
 ### Missing Alternative Classes
 Not detected.
@@ -61,17 +61,17 @@ Not detected.
 
 ## All Automatic Failures
 
-
+- **Generic paid output detected**: 4 scenario(s)
 
 ## Verdict
 
-**READY_FOR_PUBLIC_APERTURE_REWIRE**
+**NOT_READY**
 
-The kernel passes all automatic checks. It is ready for public aperture rewiring. However, manual quality rubric review is still required before connecting to paid dossier checkout.
+The kernel is not yet ready for public rewiring. Automatic failures indicate the kernel is not producing reliable, category-grade outputs across all scenarios. Hostile review of each scenario output is required before proceeding.
 
 ## Next Steps
 
-1. Proceed to manual quality rubric review
+1. Fix automatic failures identified above
 2. Review each scenario output for judgement quality (not just structural correctness)
 3. Apply the quality rubric manually to each scenario
 4. Update the rubric scores in each scenario file

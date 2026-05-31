@@ -1,0 +1,78 @@
+{
+  "scenario": "executive_reputational_exposure",
+  "title": "Executive Reputational Exposure",
+  "rawSituation": "A newspaper has contacted us about allegations regarding the CEO's conduct at a previous company. The allegations are unproven but damaging. The CEO says they are false. The PR firm recommends a full denial. The legal team says any public statement could prejudice potential proceedings. The board meets tomorrow.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference",
+      "regulated_boundary"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "URGENT",
+  "regulatedBoundaryHit": true,
+  "regulatedBoundaryType": "legal-advice",
+  "professionalBriefGenerated": true,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 2,
+  "minimumViablePathSteps": 3,
+  "whatMustNotBeDelayed": [
+    "Do not issue any public statement until legal counsel has assessed whether it would prejudice potential proceedings. This applies regardless of PR pressure tonight.",
+    "Brief the board before it meets tomorrow. Provide both the PR recommendation and the legal position. Do not pre-decide the response.",
+    "Ensure all internal communications regarding the allegations are preserved. Document what was known, when, and by whom."
+  ],
+  "evidenceCount": 10,
+  "authorityCount": 0,
+  "obligationCount": 0,
+  "constraintCount": 3,
+  "adversarialCount": 2,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

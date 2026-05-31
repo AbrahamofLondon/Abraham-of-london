@@ -1,0 +1,136 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243845990-oy7lrt",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Legal/Admin/Family Deadline",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": true,
+    "forbiddenActionsCount": 1,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 6,
+    "authorityCount": 1,
+    "obligationCount": 1,
+    "constraintCount": 1,
+    "adversarialCount": 1,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:45.992Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Legal/Admin/Family Deadline",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:45.992Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:45.992Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "LEGAL_AND_CONTRACTUAL",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "COMPLIANCE_AND_FILING",
+          "confidence": "LOW",
+          "reason": "Obligation ambiguity may include filing requirements"
+        }
+      ],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a legal or contractual decision where rights, obligations, or liabilities are being determined or disputed. Resource constraint meets external deadline. The system maps the minimum viable path rather than the ideal path.",
+    "authoritySummary": "1 authority entry mapped",
+    "obligationSummary": "1 obligation identified",
+    "constraintSummary": "1 constraint mapped (1 critical/high)",
+    "evidenceSummary": "6 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "obligation-vs-resources",
+        "contradiction": "Obligation to meet deadline exists but resources to meet it do not",
+        "severity": "CRITICAL"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Authority is held by Solicitor / Legal Counsel",
+          "ifWrong": "The decision may not be valid, or escalation may be misdirected."
+        },
+        {
+          "assumption": "Fixed deadline constrains response time",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": []
+    },
+    "regulatedBoundary": {
+      "hit": true,
+      "type": "legal-advice",
+      "professionalBrief": {
+        "suggestedProfession": "a qualified solicitor",
+        "whatToBring": [
+          "This Living Decision Case reference and output",
+          "Authority documentation and delegation records",
+          "Relevant contracts, filings, or regulatory correspondence",
+          "Evidence of constraints (financial statements, timelines, capacity data)",
+          "Any documentation referenced in the evidence graph"
+        ],
+        "questionsToAsk": [
+          "What is the strength of the legal position and what are the limitation periods?"
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "RESOLVE_PRIMARY_ADVERSARIAL_RISK",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "ADDRESS_URGENT_OBLIGATIONS",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Proceed as if the filing obligation will resolve itself, or that delay is neutral",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision.",
+      "Verify: Fixed deadline constrains response time",
+      "Address: Time-sensitive obligation with defined deadline (deadline: Unknown)"
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

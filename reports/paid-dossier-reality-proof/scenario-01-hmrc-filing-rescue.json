@@ -1,0 +1,77 @@
+{
+  "scenario": "hmrc_filing_rescue",
+  "title": "HMRC/Company Accounts Filing Rescue with No Funds",
+  "rawSituation": "We have a company accounts filing due at Companies House in 14 days. The accountant has resigned. The director is unwell. There are no funds to pay for an emergency filing. The company is solvent but cash-poor. If we miss the filing, the company will be struck off. The director's other directorates may also be affected.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": false,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference",
+      "regulated_boundary"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": false,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "STANDARD",
+  "regulatedBoundaryHit": true,
+  "regulatedBoundaryType": "audit-opinion",
+  "professionalBriefGenerated": true,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 2,
+  "minimumViablePathSteps": 2,
+  "whatMustNotBeDelayed": [
+    "Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.",
+    "Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty."
+  ],
+  "evidenceCount": 12,
+  "authorityCount": 0,
+  "obligationCount": 1,
+  "constraintCount": 3,
+  "adversarialCount": 2,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

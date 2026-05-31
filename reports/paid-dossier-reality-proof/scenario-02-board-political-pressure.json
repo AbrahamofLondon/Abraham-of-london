@@ -1,0 +1,77 @@
+{
+  "scenario": "board_decision_political_pressure",
+  "title": "Board Decision Under Political Pressure",
+  "rawSituation": "The board is being asked to approve a major acquisition. Two non-executive directors have expressed serious reservations about the strategic fit. The CEO is pushing for approval before the year-end. One NED has threatened to resign if the acquisition proceeds without a full due diligence period. The AGM is in three months.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": false,
+      "missingObligationMap": false,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference",
+      "regulated_boundary"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": false,
+      "missingObligationMap": false,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "STANDARD",
+  "regulatedBoundaryHit": true,
+  "regulatedBoundaryType": "director-duty-advice",
+  "professionalBriefGenerated": true,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 1,
+  "minimumViablePathSteps": 3,
+  "whatMustNotBeDelayed": [
+    "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
+    "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record."
+  ],
+  "evidenceCount": 9,
+  "authorityCount": 3,
+  "obligationCount": 1,
+  "constraintCount": 2,
+  "adversarialCount": 1,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

@@ -387,6 +387,15 @@ const nextConfig = {
         permanent: true,
       },
 
+      // ── Legacy diagnostics redirect ──────────────────────────────────────
+      // Fast Diagnostic has been superseded by the kernel-backed Foundry
+      // decision test. All traffic is redirected to the canonical public route.
+      {
+        source: "/diagnostics/fast",
+        destination: "/foundry/decision-test",
+        permanent: false,
+      },
+
       // ── Retired App Router routes (config-level, no Lambda created) ────────
       // Only truly retired routes that have no page file. Routes that have been
       // rebuilt as server-wrapper + client-component pages are NOT listed here.

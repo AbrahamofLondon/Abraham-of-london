@@ -1,213 +1,102 @@
-#!/usr/bin/env node
 /**
  * scripts/check-decision-brief-commerce.mjs
  *
- * Commerce readiness check for the Decision Failure Brief transaction spine.
- *
- * Verifies:
- *   - Database table readiness (if DATABASE_URL present)
- *   - Checkout API exists
- *   - Confirmation API exists
- *   - Success page exists
- *   - Admin order page exists
- *   - Admin list/update APIs exist
- *   - Generate-draft endpoint exists
- *   - Required Stripe env vars exist
- *   - No duplicate Stripe env names
- *   - No tracked live secrets
+ * Verifies that the checkout entitlement flow is correctly structured.
+ * No public leakage. No auto-delivery. No bypass of human review.
  */
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, "..");
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const root = path.resolve(__dirname, '..')
 
-// ─── Configuration ────────────────────────────────────────────────────────────
+const violations = []
 
-const REQUIRED_FILES = [
-  { path: "pages/api/checkout/decision-failure-brief.ts",              label: "Checkout API" },
-  { path: "pages/api/checkout/decision-failure-brief-confirm.ts",      label: "Confirmation API" },
-  { path: "pages/foundry/brief/success.tsx",                           label: "Success page" },
-  { path: "app/admin/intelligence-foundry/brief-orders/page.tsx",      label: "Admin page (server)" },
-  { path: "app/admin/intelligence-foundry/brief-orders/PageClient.tsx",label: "Admin page (client)" },
-  { path: "app/api/admin/intelligence-foundry/brief-orders/route.ts",  label: "Admin list API" },
-  { path: "app/api/admin/intelligence-foundry/brief-orders/[id]/route.ts",         label: "Admin update API" },
-  { path: "app/api/admin/intelligence-foundry/brief-orders/[id]/generate-draft/route.ts", label: "Generate draft API" },
-  { path: "prisma/schema.prisma",                                      label: "Prisma schema" },
-];
-
-const REQUIRED_ENV_VARS = [
-  "STRIPE_SECRET_KEY",
-  "STRIPE_WEBHOOK_SECRET",
-  "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
-];
-
-const STRIPE_ENV_NAMES = [
-  "STRIPE_SECRET_KEY",
-  "STRIPE_WEBHOOK_SECRET",
-  "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
-  "NEXT_PUBLIC_AOL_STRIPE_PUBLISHABLE_KEY",
-  "AOL_STRIPE_SECRET_KEY",
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function loadEnvFile(filePath) {
-  try {
-    const content = fs.readFileSync(filePath, "utf-8");
-    const vars = {};
-    for (const line of content.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-      const eqIdx = trimmed.indexOf("=");
-      if (eqIdx === -1) continue;
-      const key = trimmed.slice(0, eqIdx).trim();
-      const value = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
-      vars[key] = value;
-    }
-    return vars;
-  } catch {
-    return {};
-  }
-}
-
-// ─── Main ──────────────────────────────────────────────────────────────────────
-
-let exitCode = 0;
-const results = [];
-
-console.log("═══ Decision Brief Commerce Readiness Check ═══\n");
-
-// 1. Check required files exist
-console.log("Checking required files exist...");
-for (const file of REQUIRED_FILES) {
-  const fullPath = path.join(ROOT, file.path);
-  if (fs.existsSync(fullPath)) {
-    console.log(`  ✓ ${file.label} → ${file.path}`);
-    results.push({ check: file.label, status: "PASS" });
-  } else {
-    console.log(`  ✗ ${file.label} → MISSING (${file.path})`);
-    results.push({ check: file.label, status: "FAIL" });
-    exitCode = 1;
-  }
-}
-
-// 2. Check Prisma model exists in schema
-console.log("\nChecking Prisma model...");
-const schemaPath = path.join(ROOT, "prisma", "schema.prisma");
-if (fs.existsSync(schemaPath)) {
-  const schema = fs.readFileSync(schemaPath, "utf-8");
-  if (schema.includes("model DecisionBriefOrder")) {
-    console.log("  ✓ DecisionBriefOrder model found in schema");
-    results.push({ check: "Prisma model", status: "PASS" });
-  } else {
-    console.log("  ✗ DecisionBriefOrder model NOT found in schema");
-    results.push({ check: "Prisma model", status: "FAIL" });
-    exitCode = 1;
-  }
-}
-
-// 3. Check Stripe env vars
-console.log("\nChecking Stripe environment variables...");
-
-// Check .env
-const envVars = loadEnvFile(path.join(ROOT, ".env"));
-const envLocalVars = loadEnvFile(path.join(ROOT, ".env.local"));
-
-for (const varName of REQUIRED_ENV_VARS) {
-  const inEnv = !!envVars[varName];
-  const inLocal = !!envLocalVars[varName];
-  if (inEnv || inLocal) {
-    console.log(`  ✓ ${varName} is set`);
-    results.push({ check: `ENV: ${varName}`, status: "PASS" });
-  } else {
-    console.log(`  ✗ ${varName} is NOT set in .env or .env.local`);
-    results.push({ check: `ENV: ${varName}`, status: "FAIL" });
-    exitCode = 1;
-  }
-}
-
-// 4. Check for duplicate Stripe env names
-console.log("\nChecking for duplicate Stripe env names...");
-const allEnvContent = (() => {
-  try { return fs.readFileSync(path.join(ROOT, ".env"), "utf-8"); } catch { return ""; }
-})() + "\n" + (() => {
-  try { return fs.readFileSync(path.join(ROOT, ".env.local"), "utf-8"); } catch { return ""; }
-})();
-
-const envLines = allEnvContent.split("\n");
-const seenKeys = {};
-let duplicates = false;
-
-for (const line of envLines) {
-  const trimmed = line.trim();
-  if (!trimmed || trimmed.startsWith("#")) continue;
-  const eqIdx = trimmed.indexOf("=");
-  if (eqIdx === -1) continue;
-  const key = trimmed.slice(0, eqIdx).trim();
-
-  if (STRIPE_ENV_NAMES.includes(key)) {
-    const value = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
-    // Only flag duplicates where both values are non-empty (ignore empty placeholders)
-    if (value && value.length > 0) {
-      if (seenKeys[key]) {
-        console.log(`  ✗ Duplicate Stripe env name: ${key}`);
-        results.push({ check: `Duplicate: ${key}`, status: "FAIL" });
-        duplicates = true;
-        exitCode = 1;
-      } else {
-        seenKeys[key] = true;
-      }
-    }
-  }
-}
-
-if (!duplicates) {
-  console.log("  ✓ No duplicate Stripe env names");
-  results.push({ check: "No duplicate Stripe env names", status: "PASS" });
-}
-
-// 5. Check for tracked live secrets
-console.log("\nChecking for tracked live Stripe secrets...");
-try {
-  const { execSync } = await import("child_process");
-  const grepResult = execSync(
-    'git grep -n "sk_live_\\|whsec_" 2>&1 | findstr /v ".env"',
-    { cwd: ROOT, encoding: "utf-8", shell: true }
-  );
-  // Filter out documentation placeholders
-  const lines = grepResult.split("\n").filter(l => l.trim() && !l.includes("...") && !l.includes("*") && !l.includes("secret-scan"));
-  if (lines.length > 0) {
-    console.log(`  ⚠ Found ${lines.length} potential live secret reference(s) in tracked files:`);
-    for (const line of lines.slice(0, 5)) {
-      console.log(`     ${line.trim()}`);
-    }
-    results.push({ check: "Tracked live secrets", status: "WARN" });
-  } else {
-    console.log("  ✓ No live Stripe secrets in tracked files");
-    results.push({ check: "Tracked live secrets", status: "PASS" });
-  }
-} catch {
-  console.log("  ✓ No live Stripe secrets in tracked files");
-  results.push({ check: "Tracked live secrets", status: "PASS" });
-}
-
-// 6. Summary
-console.log("\n─── Summary ───");
-const passes = results.filter(r => r.status === "PASS").length;
-const warnings = results.filter(r => r.status === "WARN").length;
-const failures = results.filter(r => r.status === "FAIL").length;
-
-console.log(`  Passed: ${passes}`);
-console.log(`  Warnings: ${warnings}`);
-console.log(`  Failed: ${failures}`);
-
-if (exitCode === 0) {
-  console.log("\n  ✓ All commerce readiness checks passed.");
+// Check 1: Checkout entitlement module exists
+const entitlementPath = path.join(root, 'lib', 'commercial', 'checkout-entitlement.ts')
+if (!fs.existsSync(entitlementPath)) {
+  violations.push('MISSING_ENTITLEMENT_MODULE: lib/commercial/checkout-entitlement.ts does not exist')
 } else {
-  console.log(`\n  ✗ ${failures} failure(s) found.`);
+  const content = fs.readFileSync(entitlementPath, 'utf-8')
+  const requiredExports = ['buildStripeMetadata', 'validateCheckoutRequest', 'createEntitlement', 'createFulfilmentItem', 'getFulfilmentQueue']
+  for (const exp of requiredExports) {
+    if (!content.includes(`export function ${exp}`) && !content.includes(`export const ${exp}`)) {
+      violations.push(`MISSING_EXPORT: checkout-entitlement.ts does not export ${exp}`)
+    }
+  }
 }
 
-process.exit(exitCode);
+// Check 2: Checkout API route exists
+const checkoutRoute = path.join(root, 'app', 'api', 'checkout', 'living-case', 'route.ts')
+if (!fs.existsSync(checkoutRoute)) {
+  violations.push('MISSING_CHECKOUT_ROUTE: app/api/checkout/living-case/route.ts does not exist')
+} else {
+  const content = fs.readFileSync(checkoutRoute, 'utf-8')
+  if (!content.includes('caseId')) {
+    violations.push('CHECKOUT_MISSING_CASE_ID: checkout route does not reference caseId')
+  }
+  if (!content.includes('tier')) {
+    violations.push('CHECKOUT_MISSING_TIER: checkout route does not reference tier')
+  }
+}
+
+// Check 3: Checkout confirm route exists
+const confirmRoute = path.join(root, 'app', 'api', 'checkout', 'living-case-confirm', 'route.ts')
+if (!fs.existsSync(confirmRoute)) {
+  violations.push('MISSING_CONFIRM_ROUTE: app/api/checkout/living-case-confirm/route.ts does not exist')
+} else {
+  const content = fs.readFileSync(confirmRoute, 'utf-8')
+  if (!content.includes('createEntitlement')) {
+    violations.push('CONFIRM_MISSING_ENTITLEMENT: confirm route does not create entitlement')
+  }
+  if (!content.includes('createFulfilmentItem')) {
+    violations.push('CONFIRM_MISSING_FULFILMENT: confirm route does not create fulfilment item')
+  }
+}
+
+// Check 4: Success page exists
+const successPage = path.join(root, 'app', 'foundry', 'case', 'success', 'page.tsx')
+if (!fs.existsSync(successPage)) {
+  violations.push('MISSING_SUCCESS_PAGE: app/foundry/case/success/page.tsx does not exist')
+} else {
+  const content = fs.readFileSync(successPage, 'utf-8')
+  if (!content.includes('received for review')) {
+    violations.push('SUCCESS_MISSING_REVIEW_MESSAGE: success page does not mention review')
+  }
+  if (content.includes('dossier') && content.includes('download') || content.includes('here is your')) {
+    violations.push('SUCCESS_AUTO_DELIVERY: success page appears to auto-deliver dossier')
+  }
+}
+
+// Check 5: No raw scenario text in Stripe metadata
+const metadataContent = fs.readFileSync(entitlementPath, 'utf-8')
+if (metadataContent.includes('rawScenario') || metadataContent.includes('rawContext')) {
+  violations.push('METADATA_LEAKS_RAW_INPUT: Stripe metadata contains raw scenario text')
+}
+
+// Check 6: Checkout tests exist
+const testPath = path.join(root, 'tests', 'product', 'checkout-entitlement.spec.ts')
+if (!fs.existsSync(testPath)) {
+  violations.push('MISSING_CHECKOUT_TESTS: tests/product/checkout-entitlement.spec.ts does not exist')
+}
+
+// Report
+console.log('\n=== DECISION BRIEF COMMERCE CHECK ===\n')
+
+if (violations.length > 0) {
+  console.error('VIOLATIONS DETECTED:')
+  violations.forEach(v => console.error(`  ✗ ${v}`))
+  console.error(`\nTotal: ${violations.length} violation(s)`)
+  process.exit(1)
+} else {
+  console.log('✓ All commerce checks passed')
+  console.log('✓ Checkout entitlement module exists with all required exports')
+  console.log('✓ Checkout API route exists with caseId and tier')
+  console.log('✓ Confirm route creates entitlement and fulfilment item')
+  console.log('✓ Success page mentions review (no auto-delivery)')
+  console.log('✓ No raw scenario text in Stripe metadata')
+  console.log('✓ Checkout tests exist')
+  process.exit(0)
+}

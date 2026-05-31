@@ -1,0 +1,139 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243845924-s7fyag",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Investor Pitch with Unsupported Traction",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": true,
+    "forbiddenActionsCount": 1,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 9,
+    "authorityCount": 0,
+    "obligationCount": 0,
+    "constraintCount": 1,
+    "adversarialCount": 1,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:45.973Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Investor Pitch with Unsupported Traction",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:45.973Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:45.973Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "COMMERCIAL_AND_MARKET",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "FINANCIAL_AND_CAPITAL",
+          "confidence": "LOW",
+          "reason": "Constraint ambiguity suggests financial feasibility question"
+        }
+      ],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a commercial or market decision where positioning, pricing, or partnership terms are at stake.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "1 constraint mapped (1 critical/high)",
+    "evidenceSummary": "9 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "investor-claim-vs-evidence",
+        "contradiction": "2 claim(s) in the investor narrative would not survive due diligence: Growth rate or trajectory (growth), Customer or user base (customer)",
+        "severity": "CRITICAL"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Board approval required — decision cannot proceed without it",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": true,
+      "type": "investment-promotion",
+      "professionalBrief": {
+        "suggestedProfession": "a regulated financial adviser",
+        "whatToBring": [
+          "This Living Decision Case reference and output",
+          "Evidence of constraints (financial statements, timelines, capacity data)",
+          "Any documentation referenced in the evidence graph"
+        ],
+        "questionsToAsk": [
+          "What are the key legal, regulatory, or professional obligations in this situation?"
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "RESOLVE_PRIMARY_ADVERSARIAL_RISK",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "CLARIFY_AUTHORITY",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Address the primary identified risk: 2 claim(s) in the investor narrative would not survive due diligence: Growth rate or trajectory (growth), Customer or user base (customer). This is the failure point most likely to undermine the decision.",
+      "Identify and confirm who holds formal decision mandate.",
+      "Verify: Board approval required — decision cannot proceed without it"
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

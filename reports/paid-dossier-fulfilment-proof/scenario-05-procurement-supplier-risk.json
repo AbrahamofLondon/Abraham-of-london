@@ -1,0 +1,137 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243845871-7uau6c",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Procurement Supplier Risk",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": false,
+    "forbiddenActionsCount": 2,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 5,
+    "authorityCount": 0,
+    "obligationCount": 0,
+    "constraintCount": 3,
+    "adversarialCount": 1,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:45.915Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Procurement Supplier Risk",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:45.915Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:45.915Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "TECHNOLOGY_AND_DEPENDENCY",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "OPERATIONAL_AND_EXECUTION",
+          "confidence": "LOW",
+          "reason": "Timing pressure suggests operational execution dimension"
+        }
+      ],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a technology or dependency decision where system reliability, migration, or technical debt is the binding constraint. Dimensions surfaced: consequence.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "3 constraints mapped (3 critical/high)",
+    "evidenceSummary": "5 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "supply-failure-vs-customer-obligation",
+        "contradiction": "Supply interruption creates inability to meet customer obligations, with penalty exposure",
+        "severity": "CRITICAL"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Sole supplier dependency — no alternative source for critical component or service",
+          "ifWrong": "The minimum viable path may change."
+        },
+        {
+          "assumption": "Supplier has issued force majeure or cannot guarantee delivery — supply is interrupted",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": false,
+      "type": null,
+      "professionalBrief": null
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "RESOLVE_PRIMARY_ADVERSARIAL_RISK",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "CLARIFY_AUTHORITY",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Assume customer obligations can be met without a confirmed supply recovery timeline or alternative sourcing plan",
+        "severity": "CRITICAL"
+      },
+      {
+        "action": "Do not assume the supplier will resume delivery without a confirmed written commitment and recovery timeline.",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Address the primary identified risk: Supply interruption creates inability to meet customer obligations, with penalty exposure. This is the failure point most likely to undermine the decision.",
+      "Identify and confirm who holds formal decision mandate.",
+      "Verify: Sole supplier dependency — no alternative source for critical component or service"
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

@@ -11,20 +11,16 @@
     "primaryClass": "GOVERNANCE_AND_BOARD",
     "alternativeClasses": [
       {
-        "decisionClass": "COMPLIANCE_AND_FILING",
-        "confidence": "LOW",
-        "reason": "Obligation ambiguity may include filing requirements"
-      },
-      {
-        "decisionClass": "FINANCIAL_AND_CAPITAL",
-        "confidence": "LOW",
-        "reason": "Constraint ambiguity suggests financial feasibility question"
+        "decisionClass": "STRATEGIC_AND_POSITIONING",
+        "confidence": "MEDIUM",
+        "reason": "Score 5 vs primary 10"
       }
     ],
     "surfacedDimensions": [
       "authority"
     ],
     "preservedAmbiguities": [
+      "decision_class_uncertain",
       "authority_structure",
       "obligation_landscape",
       "constraint_landscape",
@@ -81,7 +77,20 @@
         "confidence": "MEDIUM"
       }
     ],
-    "constraintGraph": [],
+    "constraintGraph": [
+      {
+        "type": "authority",
+        "description": "Board approval required — decision cannot proceed without it",
+        "severity": "HIGH",
+        "isBinding": false
+      },
+      {
+        "type": "authority",
+        "description": "External approval required before proceeding",
+        "severity": "HIGH",
+        "isBinding": false
+      }
+    ],
     "evidenceState": [
       {
         "kind": "authority",
@@ -145,6 +154,24 @@
         "confidence": 0.7,
         "sourceStage": "kernel",
         "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "constraint",
+        "label": "Constraint: Board approval required — decision cannot proceed without it",
+        "summary": "Board approval required — decision cannot proceed without it",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "constraint-reality"
+      },
+      {
+        "kind": "constraint",
+        "label": "Constraint: External approval required before proceeding",
+        "summary": "External approval required before proceeding",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "constraint-reality"
       }
     ],
     "adversarialChallenges": [
@@ -167,21 +194,27 @@
           "evidenceBasis": "User-reported",
           "ifWrong": "The decision may not be valid, or escalation may be misdirected.",
           "verificationPath": "Verify authority documentation or delegation record."
+        },
+        {
+          "assumption": "Board approval required — decision cannot proceed without it",
+          "evidenceBasis": "System-inferred from context",
+          "ifWrong": "The minimum viable path may change.",
+          "verificationPath": "Verify constraint with primary source."
+        },
+        {
+          "assumption": "External approval required before proceeding",
+          "evidenceBasis": "System-inferred from context",
+          "ifWrong": "The minimum viable path may change.",
+          "verificationPath": "Verify constraint with primary source."
         }
       ],
       "classificationConfidence": {
         "primaryClass": "GOVERNANCE_AND_BOARD",
         "confidence": "LOW",
-        "alternativeClass": "COMPLIANCE_AND_FILING",
+        "alternativeClass": "STRATEGIC_AND_POSITIONING",
         "implication": "If classification is wrong, the entire lens selection and output structure changes."
       },
-      "informationGaps": [
-        {
-          "gap": "Constraint landscape is unmapped",
-          "impact": "Minimum viable path may be invalid",
-          "acquisitionPath": "Ask: What makes the ideal path impossible? Cash, time, authority, or capacity?"
-        }
-      ],
+      "informationGaps": [],
       "kernelLimitations": [
         "This analysis is based on the information provided and available evidence.",
         "The system cannot verify independently reported facts.",
@@ -213,6 +246,7 @@
             "This Living Decision Case reference and output",
             "Authority documentation and delegation records",
             "Relevant contracts, filings, or regulatory correspondence",
+            "Evidence of constraints (financial statements, timelines, capacity data)",
             "Any documentation referenced in the evidence graph"
           ],
           "questionsToAsk": [
@@ -231,14 +265,37 @@
     "minimumViablePath": [
       {
         "order": 1,
-        "action": "ASSESS_OPTIONS",
-        "description": "Map available options against constraints and obligations",
-        "rationale": "Without a clear path, the first step is understanding what is feasible",
+        "action": "DELAY_OR_CONDITION_THE_VOTE",
+        "description": "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
+        "rationale": "A NED resignation threat is a governance signal, not a negotiating tactic. The process protects the board as much as the decision.",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "RECORD_FORMAL_OBJECTIONS",
+        "description": "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record.",
+        "rationale": "Undocumented objections cannot be relied upon later. The record must show the objections were heard.",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "CLARIFY_CEO_DEADLINE",
+        "description": "Establish whether the CEO's year-end deadline is a legal or contractual obligation or an internal preference. If it is a preference, it does not override governance process.",
+        "rationale": "Manufactured urgency is a known governance pressure vector. Distinguish it from genuine obligation before it determines the timeline.",
         "urgency": "HIGH"
       }
     ],
-    "forbiddenActions": [],
-    "whatMustNotBeDelayed": [],
+    "forbiddenActions": [
+      {
+        "action": "Put the decision to a vote while material reservations or resignation threats from directors remain undocumented",
+        "reason": "A vote taken before formal objections are recorded creates reversal risk and may constitute a governance failure. The record must show objections were heard.",
+        "severity": "HIGH"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
+      "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record."
+    ],
     "freeSignalOutput": {
       "tier": "free_signal",
       "sections": [
@@ -278,6 +335,7 @@
           "content": [
             "Authority structure",
             "Obligation landscape",
+            "Constraint graph",
             "Evidence graph",
             "Adversarial challenge"
           ],
@@ -286,13 +344,368 @@
         {
           "id": "direction_of_minimum_viable_move",
           "label": "Direction of Minimum Viable Move",
-          "content": "Map available options against constraints and obligations",
+          "content": "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
           "type": "prose"
         }
-      ]
+      ],
+      "quality": {
+        "genericOutputDetected": false,
+        "missingAuthorityMap": false,
+        "missingObligationMap": false,
+        "missingEvidenceGraph": false,
+        "missingAdversarialChallenge": false,
+        "missingMinimumViablePath": false,
+        "selfAdversarialPresent": false,
+        "humanReviewAssessed": true,
+        "regulatedBoundaryRespected": true
+      }
     },
     "basicBriefOutput": null,
-    "fullDossierOutput": null,
+    "fullDossierOutput": {
+      "tier": "full_dossier",
+      "sections": [
+        {
+          "id": "authority_map",
+          "label": "Authority Map",
+          "content": [
+            {
+              "holder": "Board of Directors",
+              "scope": "Strategic and governance decisions",
+              "limitation": null,
+              "evidenceBasis": "User-reported",
+              "confidence": "MEDIUM",
+              "source": "user_reported"
+            },
+            {
+              "holder": "Chief Executive Officer",
+              "scope": "Executive operational decisions",
+              "limitation": "May require board ratification for major decisions",
+              "evidenceBasis": "User-reported",
+              "confidence": "MEDIUM",
+              "source": "user_reported"
+            },
+            {
+              "holder": "Board of Directors",
+              "scope": "Fiduciary and governance decisions",
+              "limitation": "Subject to shareholder oversight",
+              "evidenceBasis": "User-reported",
+              "confidence": "MEDIUM",
+              "source": "user_reported"
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "obligation_map",
+          "label": "Obligation Map",
+          "content": [
+            {
+              "description": "Fiduciary duty to board and shareholders",
+              "type": "fiduciary",
+              "deadline": null,
+              "consequence": "Director liability",
+              "evidenceBasis": "User-reported",
+              "confidence": "MEDIUM"
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "constraint_graph",
+          "label": "Constraint Graph",
+          "content": [
+            {
+              "type": "authority",
+              "description": "Board approval required — decision cannot proceed without it",
+              "severity": "HIGH",
+              "isBinding": false
+            },
+            {
+              "type": "authority",
+              "description": "External approval required before proceeding",
+              "severity": "HIGH",
+              "isBinding": false
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "evidence_graph",
+          "label": "Evidence Graph",
+          "content": [
+            {
+              "kind": "authority",
+              "label": "Authority: Board of Directors",
+              "summary": "Board of Directors holds authority over Strategic and governance decisions",
+              "severity": "MEDIUM",
+              "confidence": 0.6,
+              "sourceStage": "kernel",
+              "sourceLens": "authority"
+            },
+            {
+              "kind": "authority",
+              "label": "Authority: Chief Executive Officer",
+              "summary": "Chief Executive Officer holds authority over Executive operational decisions",
+              "severity": "MEDIUM",
+              "confidence": 0.6,
+              "sourceStage": "kernel",
+              "sourceLens": "authority"
+            },
+            {
+              "kind": "authority",
+              "label": "Authority: Board of Directors",
+              "summary": "Board of Directors holds authority over Fiduciary and governance decisions",
+              "severity": "MEDIUM",
+              "confidence": 0.6,
+              "sourceStage": "kernel",
+              "sourceLens": "authority"
+            },
+            {
+              "kind": "obligation",
+              "label": "Obligation: Fiduciary duty to board and shareholders",
+              "summary": "Fiduciary duty to board and shareholders",
+              "severity": "MEDIUM",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "obligation"
+            },
+            {
+              "kind": "evidence_gap",
+              "label": "Evidence Gap: Low documentation",
+              "summary": "Situation relies primarily on user-reported information without independent documentation",
+              "severity": "HIGH",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "evidence"
+            },
+            {
+              "kind": "contradiction",
+              "label": "Contradiction: Board action is proposed but internal reservations or disagr",
+              "summary": "Board action is proposed but internal reservations or disagreement have not been resolved",
+              "severity": "HIGH",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "adversarial"
+            },
+            {
+              "kind": "failure_mode",
+              "label": "Failure Mode: Governance pressure — board-level decision with fiduciary implications",
+              "summary": "Governance pressure — board-level decision with fiduciary implications",
+              "severity": "HIGH",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "failure-mode"
+            },
+            {
+              "kind": "constraint",
+              "label": "Constraint: Board approval required — decision cannot proceed without it",
+              "summary": "Board approval required — decision cannot proceed without it",
+              "severity": "HIGH",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "constraint-reality"
+            },
+            {
+              "kind": "constraint",
+              "label": "Constraint: External approval required before proceeding",
+              "summary": "External approval required before proceeding",
+              "severity": "HIGH",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "constraint-reality"
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "adversarial_challenge",
+          "label": "Adversarial Challenge",
+          "content": [
+            {
+              "id": "board-pressure-vs-reservations",
+              "between": [
+                "authority-lens",
+                "evidence-lens"
+              ],
+              "contradiction": "Board action is proposed but internal reservations or disagreement have not been resolved",
+              "severity": "HIGH",
+              "resolutionRule": "ADVERSARIAL_CHALLENGE_PRESERVED",
+              "outputEffect": "Output confidence downgraded. Human review recommended."
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "self_adversarial_challenge",
+          "label": "Self-Adversarial Challenge",
+          "content": {
+            "loadBearingAssumptions": [
+              {
+                "assumption": "Authority is held by Board of Directors",
+                "evidenceBasis": "User-reported",
+                "ifWrong": "The decision may not be valid, or escalation may be misdirected.",
+                "verificationPath": "Verify authority documentation or delegation record."
+              },
+              {
+                "assumption": "Board approval required — decision cannot proceed without it",
+                "evidenceBasis": "System-inferred from context",
+                "ifWrong": "The minimum viable path may change.",
+                "verificationPath": "Verify constraint with primary source."
+              },
+              {
+                "assumption": "External approval required before proceeding",
+                "evidenceBasis": "System-inferred from context",
+                "ifWrong": "The minimum viable path may change.",
+                "verificationPath": "Verify constraint with primary source."
+              }
+            ],
+            "classificationConfidence": {
+              "primaryClass": "GOVERNANCE_AND_BOARD",
+              "confidence": "LOW",
+              "alternativeClass": "STRATEGIC_AND_POSITIONING",
+              "implication": "If classification is wrong, the entire lens selection and output structure changes."
+            },
+            "informationGaps": [],
+            "kernelLimitations": [
+              "This analysis is based on the information provided and available evidence.",
+              "The system cannot verify independently reported facts.",
+              "Human review is recommended for high-consequence decisions.",
+              "This does not constitute legal, tax, or regulated professional advice."
+            ]
+          },
+          "type": "structured"
+        },
+        {
+          "id": "minimum_viable_path",
+          "label": "Minimum Viable Path",
+          "content": [
+            {
+              "order": 1,
+              "action": "DELAY_OR_CONDITION_THE_VOTE",
+              "description": "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
+              "rationale": "A NED resignation threat is a governance signal, not a negotiating tactic. The process protects the board as much as the decision.",
+              "urgency": "IMMEDIATE"
+            },
+            {
+              "order": 2,
+              "action": "RECORD_FORMAL_OBJECTIONS",
+              "description": "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record.",
+              "rationale": "Undocumented objections cannot be relied upon later. The record must show the objections were heard.",
+              "urgency": "IMMEDIATE"
+            },
+            {
+              "order": 3,
+              "action": "CLARIFY_CEO_DEADLINE",
+              "description": "Establish whether the CEO's year-end deadline is a legal or contractual obligation or an internal preference. If it is a preference, it does not override governance process.",
+              "rationale": "Manufactured urgency is a known governance pressure vector. Distinguish it from genuine obligation before it determines the timeline.",
+              "urgency": "HIGH"
+            }
+          ],
+          "type": "ordered_actions"
+        },
+        {
+          "id": "forbidden_actions",
+          "label": "Forbidden Actions",
+          "content": [
+            {
+              "action": "Put the decision to a vote while material reservations or resignation threats from directors remain undocumented",
+              "reason": "A vote taken before formal objections are recorded creates reversal risk and may constitute a governance failure. The record must show objections were heard.",
+              "severity": "HIGH"
+            }
+          ],
+          "type": "list"
+        },
+        {
+          "id": "fallback_path",
+          "label": "Fallback Path",
+          "content": [
+            {
+              "order": 2,
+              "action": "RECORD_FORMAL_OBJECTIONS",
+              "description": "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record.",
+              "rationale": "Undocumented objections cannot be relied upon later. The record must show the objections were heard.",
+              "urgency": "IMMEDIATE"
+            },
+            {
+              "order": 3,
+              "action": "CLARIFY_CEO_DEADLINE",
+              "description": "Establish whether the CEO's year-end deadline is a legal or contractual obligation or an internal preference. If it is a preference, it does not override governance process.",
+              "rationale": "Manufactured urgency is a known governance pressure vector. Distinguish it from genuine obligation before it determines the timeline.",
+              "urgency": "HIGH"
+            }
+          ],
+          "type": "ordered_actions"
+        },
+        {
+          "id": "what_must_not_be_delayed",
+          "label": "What Must Not Be Delayed",
+          "content": [
+            "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
+            "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record."
+          ],
+          "type": "list"
+        },
+        {
+          "id": "record_reference",
+          "label": "Record Reference",
+          "content": {
+            "caseReference": "PROOF-BOARD_DECISION_POLITICAL_PRESSURE-DOSSIER",
+            "kernelVersion": "1.0.0",
+            "ontologyVersion": "1.0.0",
+            "generatedAt": "2026-05-31T16:10:45.740Z"
+          },
+          "type": "metadata"
+        },
+        {
+          "id": "regulated_boundary",
+          "label": "Regulated Boundary",
+          "content": {
+            "regulatedBoundaryIdentified": true,
+            "whatThisMeans": "The system has identified that this situation touches on regulated professional advice boundaries. The system cannot provide regulated professional advice, but it can help you prepare to engage the right professional.",
+            "whatWeCanStillMap": [
+              "Authority structure and decision mandate",
+              "Obligation landscape and constraints",
+              "Evidence quality and gaps",
+              "Consequence exposure and timing",
+              "Adversarial challenge and minimum viable path"
+            ],
+            "professionalBrief": {
+              "purpose": "This brief is designed to help you approach a regulated professional with structure.",
+              "suggestedProfession": "a qualified solicitor",
+              "whatToBring": [
+                "This Living Decision Case reference and output",
+                "Authority documentation and delegation records",
+                "Relevant contracts, filings, or regulatory correspondence",
+                "Evidence of constraints (financial statements, timelines, capacity data)",
+                "Any documentation referenced in the evidence graph"
+              ],
+              "questionsToAsk": [
+                "What is the strength of the legal position and what are the limitation periods?",
+                "What are the director duties and potential liabilities in this situation?"
+              ]
+            },
+            "whatToDoNext": [
+              "Review the mapped elements above.",
+              "Prepare the documentation listed in the professional brief.",
+              "Engage a qualified professional for the regulated element.",
+              "Return to the system with the professional's input to update the case."
+            ]
+          },
+          "type": "structured"
+        }
+      ],
+      "quality": {
+        "genericOutputDetected": false,
+        "missingAuthorityMap": false,
+        "missingObligationMap": false,
+        "missingEvidenceGraph": false,
+        "missingAdversarialChallenge": false,
+        "missingMinimumViablePath": false,
+        "selfAdversarialPresent": true,
+        "humanReviewAssessed": true,
+        "regulatedBoundaryRespected": true
+      }
+    },
     "humanReviewTrigger": {
       "state": "pending",
       "tier": "STANDARD",
@@ -315,9 +728,7 @@
         }
       ]
     },
-    "qualityFailures": [
-      "MISSING_CONSTRAINT_GRAPH: Constraint landscape is required for paid tiers"
-    ]
+    "qualityFailures": []
   },
   "qualityRubric": {
     "situationSeenAccurately": "REVIEW",

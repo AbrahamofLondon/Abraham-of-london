@@ -1,0 +1,226 @@
+// prisma/schema/living-case.prisma — Living Decision Case Data Model
+//
+// This schema defines the persistence layer for the Decision Intelligence Kernel.
+// It uses typed relational index fields + versioned serialized state.
+// The append-only event ledger ensures no silent overwrite.
+
+model LivingCase {
+  id                String   @id @default(cuid())
+  caseReference     String   @unique
+  contractVersion   String
+  kernelVersion     String
+  ontologyVersion   String
+
+  // Source
+  sourceAperture    String   // "web", "api", "admin", "strategy-room", "paid_*"
+  createdById       String?
+  organisationId    String?
+  consentState      String   @default("granted") // "granted", "pending", "withdrawn"
+
+  // Classification
+  primaryClass      String   // DecisionClass enum value
+  alternativeClasses Json?   // DecisionClassCandidate[]
+  classificationConfidence String // "HIGH" | "MEDIUM" | "LOW"
+
+  // State
+  translationState  String   @default("pending") // "pending", "completed", "clarification_required"
+  caseStatus        String   @default("open") // "open", "active", "under_review", "resolved", "closed"
+  currentTier       String   @default("free_signal") // DisclosureTier
+
+  // Regulated boundary
+  regulatedBoundaryHit Boolean @default(false)
+  regulatedBoundaryType String?
+
+  // Human review
+  requiresHumanReview Boolean @default(false)
+  humanReviewTier     String? // "standard", "urgent", "executive", "founder"
+  humanReviewState    String  @default("not_required") // "not_required", "pending", "in_review", "amended", "completed"
+
+  // Quality
+  qualityStandardPassed Boolean?
+  qualityStandardFailure String?
+
+  // Versioned serialized state
+  serializedCase   Json
+
+  // Timestamps
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  completedAt      DateTime?
+  closedAt         DateTime?
+
+  // Relations
+  events           LivingCaseEvent[]
+  outputs          LivingCaseOutput[]
+  evidence         LivingCaseEvidence[]
+  entitlements     LivingCaseEntitlement[]
+  reviews          LivingCaseReview[]
+  outcomes         LivingCaseOutcome[]
+  qualityChecks    LivingCaseQualityCheck[]
+  similarityLinks  LivingCaseSimilarityLink[]
+  calibrationNotes LivingCaseCalibrationNote[]
+
+  @@index([createdById])
+  @@index([organisationId])
+  @@index([primaryClass])
+  @@index([caseStatus])
+  @@index([currentTier])
+  @@map("living_cases")
+}
+
+model LivingCaseEvent {
+  id              String   @id @default(cuid())
+  caseId          String
+  eventType       String   // From append-only event types list
+  eventVersion    String   @default("1.0.0")
+  actorId         String?
+  actorType       String?  // "system", "buyer", "admin", "reviewer"
+  payload         Json?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, createdAt])
+  @@index([eventType])
+  @@map("living_case_events")
+}
+
+model LivingCaseOutput {
+  id              String   @id @default(cuid())
+  caseId          String
+  tier            String   // "free_signal", "basic_brief", etc.
+  outputType      String   // "web", "pdf", "email"
+  outputVersion   String   @default("1.0.0")
+  contentHash     String
+  deliveryState   String   @default("generated") // "generated", "delivered", "failed"
+  deliveredAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, tier])
+  @@map("living_case_outputs")
+}
+
+model LivingCaseEvidence {
+  id              String   @id @default(cuid())
+  caseId          String
+  evidenceKey     String
+  evidenceType    String   // "user_reported", "system_inferred", "aggregated", "outcome_verified"
+  label           String
+  summary         String
+  severity        String   // "low", "medium", "high", "critical"
+  confidence      Float
+  sourceLens      String?
+  sourceStage     String?
+  provenance      Json?
+  createdAt       DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, evidenceKey])
+  @@map("living_case_evidence")
+}
+
+model LivingCaseEntitlement {
+  id              String   @id @default(cuid())
+  caseId          String
+  tier            String
+  grantedById     String?
+  grantType       String   // "purchase", "admin_grant", "earned", "retainer"
+  stripeSessionId String?
+  stripePriceId   String?
+  amount          Int?
+  currency        String   @default("gbp")
+  active          Boolean  @default(true)
+  expiresAt       DateTime?
+  grantedAt       DateTime @default(now())
+  revokedAt       DateTime?
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, active])
+  @@map("living_case_entitlements")
+}
+
+model LivingCaseReview {
+  id              String   @id @default(cuid())
+  caseId          String
+  reviewTier      String
+  reviewerId      String
+  reviewerType    String   // "human", "system"
+  reviewState     String   @default("pending") // "pending", "in_progress", "amended", "completed"
+  checklist       Json?
+  amendments      Json?    // Append-only amendment ledger
+  decision        String?  // "approved", "amended", "rejected", "escalated"
+  notes           String?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, reviewTier])
+  @@map("living_case_reviews")
+}
+
+model LivingCaseOutcome {
+  id              String   @id @default(cuid())
+  caseId          String
+  outcomeType     String   // "resolved", "escalated", "abandoned", "pending", "persistent"
+  outcomeSummary  String
+  outcomeDetail   Json?
+  recordedById    String?
+  recordedAt      DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@map("living_case_outcomes")
+}
+
+model LivingCaseQualityCheck {
+  id              String   @id @default(cuid())
+  caseId          String
+  checkType       String   // "generic_output", "missing_authority", "missing_obligation", etc.
+  passed          Boolean
+  detail          String?
+  createdAt       DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, checkType])
+  @@map("living_case_quality_checks")
+}
+
+model LivingCaseSimilarityLink {
+  id              String   @id @default(cuid())
+  sourceCaseId    String
+  targetCaseId    String
+  similarityScore Float
+  sharedClass     String?
+  linkedBy        String   @default("system") // "system", "admin"
+  createdAt       DateTime @default(now())
+
+  sourceCase      LivingCase @relation("SourceCase", fields: [sourceCaseId], references: [id], onDelete: Cascade)
+  targetCase      LivingCase @relation("TargetCase", fields: [targetCaseId], references: [id], onDelete: Cascade)
+
+  @@index([sourceCaseId])
+  @@index([targetCaseId])
+  @@map("living_case_similarity_links")
+}
+
+model LivingCaseCalibrationNote {
+  id              String   @id @default(cuid())
+  caseId          String
+  kernelVersion   String
+  calibrationType String   // "assumption_drift", "failure_pattern", "classification_error"
+  observation     String
+  action          String?
+  createdAt       DateTime @default(now())
+
+  case            LivingCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, calibrationType])
+  @@map("living_case_calibration_notes")
+}

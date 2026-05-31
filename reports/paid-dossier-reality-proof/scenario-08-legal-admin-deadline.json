@@ -1,0 +1,78 @@
+{
+  "scenario": "legal_admin_family_deadline",
+  "title": "Legal/Admin/Family Deadline",
+  "rawSituation": "I need to respond to a letter before claim from a former business partner. The deadline is 21 days. I cannot afford a solicitor. The claim is about an oral agreement from 2019. I do not have any documentation. The other party has a solicitor. I am considering representing myself.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": false,
+      "missingObligationMap": false,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference",
+      "regulated_boundary"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": false,
+      "missingObligationMap": false,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "STANDARD",
+  "regulatedBoundaryHit": true,
+  "regulatedBoundaryType": "legal-advice",
+  "professionalBriefGenerated": true,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 1,
+  "minimumViablePathSteps": 3,
+  "whatMustNotBeDelayed": [
+    "Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision.",
+    "Verify: Fixed deadline constrains response time",
+    "Address: Time-sensitive obligation with defined deadline (deadline: Unknown)"
+  ],
+  "evidenceCount": 6,
+  "authorityCount": 1,
+  "obligationCount": 1,
+  "constraintCount": 1,
+  "adversarialCount": 1,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

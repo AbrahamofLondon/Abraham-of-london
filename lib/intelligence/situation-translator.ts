@@ -52,7 +52,7 @@ export class SituationTranslator {
 
     const vocabularyState = this.detectVocabularyState(lower)
     const detectedSignals = this.detectStructuredSignals(lower, decisionClass)
-    const surfacedDimensions = this.buildDisplayDimensions(detectedSignals)
+    const surfacedDimensions = this.buildDisplayDimensions(detectedSignals, decisionClass)
     const initialActors = this.extractActors(lower)
     const preservedAmbiguities = this.detectAmbiguities(lower, decisionClass, classConfidence)
     const hiddenStakesDetected = this.detectHiddenStakes(lower, decisionClass)
@@ -218,9 +218,10 @@ export class SituationTranslator {
     if (/\bfile\b/.test(lower) && /\btax\b/.test(lower)) boost('COMPLIANCE_AND_FILING', 6)
     if (this.matchesAny(lower, ['statutory', 'statutory obligation', 'statutory deadline', 'must file', 'legally required', 'compliance implications', 'compliance requirement', 'compliance obligation'])) boost('COMPLIANCE_AND_FILING', 5)
 
-    // GOVERNANCE_AND_BOARD
-    if (this.matchesAny(lower, ['board', 'board of directors', 'board approval', 'board decision', 'board meeting', 'governance', 'director duty', 'fiduciary', 'non-executive', 'nxd', 'chairman', 'board pack', 'agm', 'egm'])) boost('GOVERNANCE_AND_BOARD', 10)
-    if (this.matchesAny(lower, ['signs off', 'sign-off', 'ratification', 'board vote', 'board resolution', 'board needs to'])) boost('GOVERNANCE_AND_BOARD', 5)
+    // GOVERNANCE_AND_BOARD — must not match 'onboarding', 'dashboard', 'keyboard', 'skateboard' etc.
+    // Using specific phrases rather than bare 'board' to avoid false positives
+    if (this.matchesAny(lower, ['board of directors', 'board approval', 'board decision', 'board meeting', 'board pack', 'board resolution', 'board vote', 'board needs to', 'board is', 'board has', 'board will', 'board member', 'board level', 'board paper', 'board room', 'board agenda', 'board minute', 'governance', 'director duty', 'fiduciary', 'non-executive', 'nxd', 'chairman', 'agm', 'egm'])) boost('GOVERNANCE_AND_BOARD', 10)
+    if (this.matchesAny(lower, ['signs off', 'sign-off', 'ratification'])) boost('GOVERNANCE_AND_BOARD', 5)
 
     // COMMERCIAL_AND_MARKET
     if (this.matchesAny(lower, ['market claim', 'positioning', 'pricing strategy', 'go-to-market', 'distribution deal', 'exclusive deal', 'competitive positioning', 'customer acquisition', 'sales strategy', 'contract negotiation', 'partnership terms', 'investor pitch', 'pitching to investors', 'pitch deck', 'investor presentation'])) boost('COMMERCIAL_AND_MARKET', 10)
@@ -232,7 +233,9 @@ export class SituationTranslator {
 
     // STRATEGIC_AND_POSITIONING
     if (this.matchesAny(lower, ['strategy', 'strategic direction', 'market entry', 'pivot', 'repositioning', 'competitive advantage', 'long-term direction', 'strategic bet', 'exclusive distribution', 'lose ability to sell direct'])) boost('STRATEGIC_AND_POSITIONING', 8)
-    if (this.matchesAny(lower, ['direction', 'vision', 'transformation', 'restructure', 'reorganisation', 'expansion'])) boost('STRATEGIC_AND_POSITIONING', 4)
+    if (this.matchesAny(lower, ['strategic', 'direction', 'vision', 'transformation', 'restructure', 'reorganisation', 'expansion', 'positioning'])) boost('STRATEGIC_AND_POSITIONING', 5)
+    // Asymmetric partnerships where one party has disproportionate power
+    if (this.matchesAny(lower, ['much larger company', 'asymmetric', 'power imbalance', 'dominant partner'])) boost('STRATEGIC_AND_POSITIONING', 6)
 
     // REPUTATIONAL_AND_EXPOSURE
     if (this.matchesAny(lower, ['reputation', 'reputational', 'crisis', 'brand damage', 'public statement', 'press release', 'media coverage', 'scandal', 'allegation', 'pr crisis', 'public perception'])) boost('REPUTATIONAL_AND_EXPOSURE', 10)
@@ -321,8 +324,12 @@ export class SituationTranslator {
   private detectStructuredSignals(lower: string, cls: DecisionClass): string[] {
     const signals: string[] = []
 
-    // Cash constraint
-    if (this.matchesAny(lower, ['no funds', 'no money', 'cannot afford', "can't afford", 'no budget', 'limited budget', 'do not have funds', 'runway', 'not sure i can afford', 'may not be able to afford'])) {
+    // Cash constraint — must not match negated patterns like "no budget constraint" (meaning budget is NOT a constraint)
+    const cashConstraintSignals = ['no funds', 'no money', 'cannot afford', "can't afford", 'limited budget', 'do not have funds', 'runway', 'not sure i can afford', 'may not be able to afford']
+    const hasCashConstraint = cashConstraintSignals.some(s => lower.includes(s))
+    // Also check for "no budget" but only if it's not followed by "constraint" or "issue" (which would negate it)
+    const hasNoBudget = lower.includes('no budget') && !lower.includes('no budget constraint') && !lower.includes('no budget issue')
+    if (hasCashConstraint || hasNoBudget) {
       signals.push('constraint:cash')
     }
 
@@ -404,8 +411,10 @@ export class SituationTranslator {
    * Converts structured signals to short display labels.
    * "constraint:cash" → "financial", "obligation:deadline" → "timing", etc.
    */
-  private buildDisplayDimensions(signals: string[]): string[] {
+  private buildDisplayDimensions(signals: string[], cls: DecisionClass): string[] {
     const dims = new Set<string>()
+    // Low-stakes decisions should not surface institutional dimensions
+    if (cls === 'LOW_STAKES_PREFERENCE') return []
     const map: Record<string, string> = {
       'constraint:cash': 'financial',
       'constraint:capability': 'capability',
@@ -480,6 +489,7 @@ export class SituationTranslator {
     const authorityConfirmed = this.matchesAny(lower, [
       'approved by', 'authorised by', 'authority confirmed', 'board has decided', 'signed off by',
       'approved the', 'team lead approved', 'manager approved', 'everyone agrees', 'agreed by',
+      'board has authority', 'authority is clear', 'authority is established',
     ])
     if (!authorityConfirmed) {
       ambiguities.push('authority_structure')
@@ -527,7 +537,14 @@ export class SituationTranslator {
     if (cls !== 'REPUTATIONAL_AND_EXPOSURE' && ['reputation', 'brand damage', 'crisis', 'scandal', 'allegation'].some(s => lower.includes(s))) return true
 
     // Pattern 4: Low-stakes classification but high-stakes language present
-    if (cls === 'LOW_STAKES_PREFERENCE' && ['deadline', 'penalty', 'legal', 'regulatory', 'board', 'director', 'compliance', 'filing'].some(s => lower.includes(s))) return true
+    // Must not match negated patterns like 'no deadline' (which means deadline is NOT present)
+    if (cls === 'LOW_STAKES_PREFERENCE') {
+      const highStakesTerms = ['penalty', 'legal', 'regulatory', 'board', 'director', 'compliance', 'filing']
+      const hasHighStakes = highStakesTerms.some(s => lower.includes(s))
+      // For 'deadline', check it's not negated
+      const hasDeadline = lower.includes('deadline') && !lower.includes('no deadline')
+      if (hasHighStakes || hasDeadline) return true
+    }
 
     return false
   }
@@ -611,6 +628,11 @@ export class SituationTranslator {
       LOW_STAKES_PREFERENCE: 'a low-stakes preference decision',
     }
     const classLabel = classLabels[cls] ?? 'a decision requiring structured analysis'
+    // For low-stakes decisions, do not add constraint/deadline notes even if signals are present
+    // (signals may be false positives from negated language like 'no deadline')
+    if (cls === 'LOW_STAKES_PREFERENCE') {
+      return `This is ${classLabel}.`
+    }
     const constraintNote = signals.includes('constraint:cash') ? ' Financial constraint present.' : ''
     const deadlineNote = signals.includes('obligation:deadline') ? ' A deadline is referenced.' : ''
     return `This is ${classLabel}.${constraintNote}${deadlineNote}`
@@ -652,6 +674,10 @@ export class SituationTranslator {
       return `${base} Resource constraint meets external deadline. The system maps the minimum viable path rather than the ideal path.`
     }
 
+    // For low-stakes decisions, do not add dimension text (avoids overengineering)
+    if (cls === 'LOW_STAKES_PREFERENCE') {
+      return `${base} No binding constraints, obligations, or consequences are at stake.`
+    }
     const dimensionText = signals.length > 0 ? ` Dimensions surfaced: ${[...new Set(signals.map(s => s.split(':')[0]))].join(', ')}.` : ''
     return `${base}${dimensionText}`
   }

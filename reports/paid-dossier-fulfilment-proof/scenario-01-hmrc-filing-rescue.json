@@ -1,0 +1,143 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243845675-vpp476",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "HMRC/Company Accounts Filing Rescue with No Funds",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": true,
+    "forbiddenActionsCount": 2,
+    "minimumViablePathSteps": 2,
+    "evidenceCount": 12,
+    "authorityCount": 0,
+    "obligationCount": 1,
+    "constraintCount": 3,
+    "adversarialCount": 2,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:45.698Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: HMRC/Company Accounts Filing Rescue with No Funds",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:45.698Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:45.698Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "COMPLIANCE_AND_FILING",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "OPERATIONAL_AND_EXECUTION",
+          "confidence": "LOW",
+          "reason": "Timing pressure suggests operational execution dimension"
+        }
+      ],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a compliance or filing obligation with a defined deadline and consequence for missing it. The primary institutional question is not whether to comply — the obligation is legal. The question is what is the minimum viable rescue path given the resource constraint.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "1 obligation identified",
+    "constraintSummary": "3 constraints mapped (3 critical/high)",
+    "evidenceSummary": "12 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "obligation-vs-resources",
+        "contradiction": "Obligation to meet deadline exists but resources to meet it do not",
+        "severity": "CRITICAL"
+      },
+      {
+        "id": "existential-threat-vs-resources",
+        "contradiction": "Existential threat detected but resources to address it are constrained",
+        "severity": "CRITICAL"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Insufficient funds to execute the required action",
+          "ifWrong": "The minimum viable path may change."
+        },
+        {
+          "assumption": "Cash position constrains available options",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": true,
+      "type": "audit-opinion",
+      "professionalBrief": {
+        "suggestedProfession": "a qualified auditor",
+        "whatToBring": [
+          "This Living Decision Case reference and output",
+          "Relevant contracts, filings, or regulatory correspondence",
+          "Evidence of constraints (financial statements, timelines, capacity data)",
+          "Any documentation referenced in the evidence graph"
+        ],
+        "questionsToAsk": [
+          "What are the key legal, regulatory, or professional obligations in this situation?"
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "IDENTIFY_SPECIFIC_FILING_REQUIRED",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "IDENTIFY_LOW_COST_PROFESSIONAL_PATH",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Proceed as if the filing obligation will resolve itself, or that delay is neutral",
+        "severity": "CRITICAL"
+      },
+      {
+        "action": "Ignore the filing deadline or treat a placeholder submission as a completed obligation",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.",
+      "Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty."
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

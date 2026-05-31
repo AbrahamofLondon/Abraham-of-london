@@ -127,19 +127,18 @@ The system interprets this situation as a compliance or filing obligation with a
 
 | # | Action | Urgency |
 |---|--------|---------|
-| 1 | Establish who holds decision mandate before proceeding | IMMEDIATE |
-| 2 | Verify: Insufficient funds to execute the required action | IMMEDIATE |
-| 3 | Address: Statutory filing obligation (deadline: 14 days) | IMMEDIATE |
+| 1 | Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines. | IMMEDIATE |
+| 2 | Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty. | IMMEDIATE |
 
 ## 20. Forbidden Actions
 
-- **Ignore the filing deadline** (CRITICAL): Missing the deadline triggers penalty, strike-off, or director disqualification
+- **Proceed as if the filing obligation will resolve itself, or that delay is neutral** (CRITICAL): Statutory obligations compound with delay. Inaction is not a safe default — it is the highest-risk option.
+- **Ignore the filing deadline or treat a placeholder submission as a completed obligation** (CRITICAL): Missing the deadline triggers penalties, strike-off, or director disqualification. A provisional submission does not discharge the duty.
 
 ## 21. What Must Not Be Delayed
 
-- Establish who holds decision mandate before proceeding
-- Verify: Insufficient funds to execute the required action
-- Address: Statutory filing obligation (deadline: 14 days)
+- Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.
+- Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty.
 
 ## 22. Free Signal Output
 
@@ -176,7 +175,7 @@ CRITICAL
 
 ### Direction of Minimum Viable Move
 
-Establish who holds decision mandate before proceeding
+Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.
 
 ## 23. Basic Brief Output
 
@@ -420,23 +419,16 @@ Establish who holds decision mandate before proceeding
 [
   {
     "order": 1,
-    "action": "CLARIFY_AUTHORITY",
-    "description": "Establish who holds decision mandate before proceeding",
-    "rationale": "Without clear authority, any decision is vulnerable to challenge",
+    "action": "IDENTIFY_SPECIFIC_FILING_REQUIRED",
+    "description": "Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.",
+    "rationale": "Treating multiple obligations as one increases error risk. Separate and sequence them.",
     "urgency": "IMMEDIATE"
   },
   {
     "order": 2,
-    "action": "VALIDATE_CRITICAL_CONSTRAINTS",
-    "description": "Verify: Insufficient funds to execute the required action",
-    "rationale": "Critical constraints change the feasible set",
-    "urgency": "IMMEDIATE"
-  },
-  {
-    "order": 3,
-    "action": "ADDRESS_URGENT_OBLIGATIONS",
-    "description": "Address: Statutory filing obligation (deadline: 14 days)",
-    "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+    "action": "IDENTIFY_LOW_COST_PROFESSIONAL_PATH",
+    "description": "Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty.",
+    "rationale": "Cash constraint does not remove the legal obligation. Fixed-scope professional review is typically far cheaper than the cost of error or penalty.",
     "urgency": "IMMEDIATE"
   }
 ]
@@ -447,8 +439,13 @@ Establish who holds decision mandate before proceeding
 ```json
 [
   {
-    "action": "Ignore the filing deadline",
-    "reason": "Missing the deadline triggers penalty, strike-off, or director disqualification",
+    "action": "Proceed as if the filing obligation will resolve itself, or that delay is neutral",
+    "reason": "Statutory obligations compound with delay. Inaction is not a safe default — it is the highest-risk option.",
+    "severity": "CRITICAL"
+  },
+  {
+    "action": "Ignore the filing deadline or treat a placeholder submission as a completed obligation",
+    "reason": "Missing the deadline triggers penalties, strike-off, or director disqualification. A provisional submission does not discharge the duty.",
     "severity": "CRITICAL"
   }
 ]
@@ -460,16 +457,9 @@ Establish who holds decision mandate before proceeding
 [
   {
     "order": 2,
-    "action": "VALIDATE_CRITICAL_CONSTRAINTS",
-    "description": "Verify: Insufficient funds to execute the required action",
-    "rationale": "Critical constraints change the feasible set",
-    "urgency": "IMMEDIATE"
-  },
-  {
-    "order": 3,
-    "action": "ADDRESS_URGENT_OBLIGATIONS",
-    "description": "Address: Statutory filing obligation (deadline: 14 days)",
-    "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+    "action": "IDENTIFY_LOW_COST_PROFESSIONAL_PATH",
+    "description": "Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty.",
+    "rationale": "Cash constraint does not remove the legal obligation. Fixed-scope professional review is typically far cheaper than the cost of error or penalty.",
     "urgency": "IMMEDIATE"
   }
 ]
@@ -479,9 +469,8 @@ Establish who holds decision mandate before proceeding
 
 ```json
 [
-  "Establish who holds decision mandate before proceeding",
-  "Verify: Insufficient funds to execute the required action",
-  "Address: Statutory filing obligation (deadline: 14 days)"
+  "Address: Statutory filing obligation (deadline: 14 days). Separate what is required from Companies House, HMRC, and any other authority — these are distinct obligations with distinct deadlines.",
+  "Contact HMRC Business Payment Support (0300 200 3835) and explore fixed-scope accountant review. Free options: ICAEW Find a Firm, Citizens Advice Business, Business Debtline. A targeted review costs less than a penalty."
 ]
 ```
 
@@ -492,7 +481,7 @@ Establish who holds decision mandate before proceeding
   "caseReference": "PROOF-HMRC_FILING_RESCUE-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-05-31T12:58:47.933Z"
+  "generatedAt": "2026-05-31T16:10:45.701Z"
 }
 ```
 

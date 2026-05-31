@@ -1,0 +1,78 @@
+{
+  "scenario": "investor_pitch_unsupported_traction",
+  "title": "Investor Pitch with Unsupported Traction",
+  "rawSituation": "We are raising a Series A. The pitch deck claims 300% year-on-year growth. The actual growth is 40% if you exclude the founder's previous company customers that were migrated. The lead investor has asked for board references. The founder is reluctant to share them. The round closes in 6 weeks.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference",
+      "regulated_boundary"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "STANDARD",
+  "regulatedBoundaryHit": true,
+  "regulatedBoundaryType": "investment-promotion",
+  "professionalBriefGenerated": true,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 1,
+  "minimumViablePathSteps": 3,
+  "whatMustNotBeDelayed": [
+    "Address the primary identified risk: 2 claim(s) in the investor narrative would not survive due diligence: Growth rate or trajectory (growth), Customer or user base (customer). This is the failure point most likely to undermine the decision.",
+    "Identify and confirm who holds formal decision mandate.",
+    "Verify: Board approval required — decision cannot proceed without it"
+  ],
+  "evidenceCount": 9,
+  "authorityCount": 0,
+  "obligationCount": 0,
+  "constraintCount": 1,
+  "adversarialCount": 1,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

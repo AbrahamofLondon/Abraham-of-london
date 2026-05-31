@@ -1,0 +1,78 @@
+{
+  "scenario": "cash_constrained_survival",
+  "title": "Cash-Constrained Survival",
+  "rawSituation": "We have 6 weeks of cash runway. We have cut all non-essential costs. We are in late-stage discussions with two investors but neither has committed. A major customer has delayed payment by 60 days. The CEO is considering using personal credit cards to meet payroll. The company has no debt facility.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference",
+      "regulated_boundary"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "STANDARD",
+  "regulatedBoundaryHit": true,
+  "regulatedBoundaryType": "investment-advice",
+  "professionalBriefGenerated": true,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 2,
+  "minimumViablePathSteps": 3,
+  "whatMustNotBeDelayed": [
+    "Address the primary identified risk: Cash runway is critically short but required funding has not been secured or is delayed. This is the failure point most likely to undermine the decision.",
+    "Identify and confirm who holds formal decision mandate.",
+    "Verify: Cash position constrains available options"
+  ],
+  "evidenceCount": 6,
+  "authorityCount": 0,
+  "obligationCount": 0,
+  "constraintCount": 1,
+  "adversarialCount": 2,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

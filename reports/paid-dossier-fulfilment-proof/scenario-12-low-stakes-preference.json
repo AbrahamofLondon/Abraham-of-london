@@ -1,0 +1,74 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243846035-czwpmr",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Low-Stakes Preference",
+    "status": "dossier_generated",
+    "dossierTier": "free_signal",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "not_required",
+    "humanReviewTier": null,
+    "selfAdversarialPresent": false,
+    "regulatedBoundaryHit": false,
+    "forbiddenActionsCount": 0,
+    "minimumViablePathSteps": 1,
+    "evidenceCount": 1,
+    "authorityCount": 0,
+    "obligationCount": 0,
+    "constraintCount": 0,
+    "adversarialCount": 0,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:46.036Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Low-Stakes Preference",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:46.036Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:46.036Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "LOW_STAKES_PREFERENCE",
+      "alternativeClasses": [],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "No constraints mapped",
+    "evidenceSummary": "1 evidence node",
+    "adversarialChallenges": [],
+    "selfAdversarialChallenge": null,
+    "regulatedBoundary": {
+      "hit": false,
+      "type": null,
+      "professionalBrief": null
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "DECIDE_BY_PREFERENCE",
+        "urgency": "LOW"
+      }
+    ],
+    "forbiddenActions": [],
+    "whatMustNotBeDelayed": [],
+    "humanReviewState": "not_required",
+    "humanReviewTier": null,
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": []
+  }
+}

@@ -57,6 +57,16 @@ export class KernelLensRunner {
         return this.continuityLens(livingCase)
       case 'regulated-boundary':
         return this.regulatedBoundaryLens(livingCase)
+      case 'commercial-proof':
+        return this.commercialProofLens(livingCase)
+      case 'launch-readiness':
+        return this.launchReadinessLens(livingCase)
+      case 'supplier-dependency':
+        return this.supplierDependencyLens(livingCase)
+      case 'investor-diligence':
+        return this.investorDiligenceLens(livingCase)
+      case 'operational-ownership':
+        return this.operationalOwnershipLens(livingCase)
       default:
         return {
           lensId,
@@ -140,6 +150,16 @@ export class KernelLensRunner {
       { pattern: 'board', type: 'authority' as const, desc: 'Board approval required — decision cannot proceed without it', severity: 'HIGH' as const },
       { pattern: 'approval', type: 'authority' as const, desc: 'External approval required before proceeding', severity: 'HIGH' as const },
       { pattern: 'capacity', type: 'capacity' as const, desc: 'Insufficient capacity to execute', severity: 'HIGH' as const },
+      // Irrevocable commitment constraints
+      { pattern: 'no exit', type: 'legal' as const, desc: 'No exit clause — commitment cannot be unwound once signed', severity: 'CRITICAL' as const },
+      { pattern: 'ip rights', type: 'legal' as const, desc: 'IP rights transfer — permanent loss of intellectual property control', severity: 'CRITICAL' as const },
+      { pattern: 'derivative works', type: 'legal' as const, desc: 'Derivative works clause — potential loss of control over future IP development', severity: 'CRITICAL' as const },
+      { pattern: 'exclusive', type: 'legal' as const, desc: 'Exclusivity clause — restriction on ability to work with other partners', severity: 'HIGH' as const },
+      { pattern: 'sign quickly', type: 'time' as const, desc: 'External urgency pressure — timeline driven by partner preference, not obligation', severity: 'HIGH' as const },
+      { pattern: 'before they change their mind', type: 'time' as const, desc: 'Manufactured urgency — threat of withdrawal used to bypass proper review', severity: 'HIGH' as const },
+      // Reputational constraints
+      { pattern: 'potential proceedings', type: 'legal' as const, desc: 'Potential legal proceedings — any public communication requires legal clearance', severity: 'CRITICAL' as const },
+      { pattern: 'proceedings', type: 'legal' as const, desc: 'Legal proceedings risk — public statements may prejudice the case', severity: 'HIGH' as const },
     ]
 
     for (const { pattern, type, desc, severity } of constraintPatterns) {
@@ -780,5 +800,45 @@ export class KernelLensRunner {
       contradictions: [],
       recommendedEvents: [],
     }
+  }
+
+  /**
+   * Commercial Proof Lens — Assesses whether commercial claims can survive challenge.
+   */
+  private async commercialProofLens(livingCase: LivingDecisionCase): Promise<KernelLensResult> {
+    const { commercialProofLens: lens } = await import('./lenses/commercial-proof-lens')
+    return lens(livingCase.situationModel?.rawContext || '')
+  }
+
+  /**
+   * Launch Readiness Lens — Assesses product/service launch readiness.
+   */
+  private async launchReadinessLens(livingCase: LivingDecisionCase): Promise<KernelLensResult> {
+    const { launchReadinessLens: lens } = await import('./lenses/launch-readiness-lens')
+    return lens(livingCase.situationModel?.rawContext || '')
+  }
+
+  /**
+   * Supplier Dependency Lens — Assesses supplier/vendor dependency risk.
+   */
+  private async supplierDependencyLens(livingCase: LivingDecisionCase): Promise<KernelLensResult> {
+    const { supplierDependencyLens: lens } = await import('./lenses/supplier-dependency-lens')
+    return lens(livingCase.situationModel?.rawContext || '')
+  }
+
+  /**
+   * Investor Diligence Lens — Assesses investor pitch due diligence readiness.
+   */
+  private async investorDiligenceLens(livingCase: LivingDecisionCase): Promise<KernelLensResult> {
+    const { investorDiligenceLens: lens } = await import('./lenses/investor-diligence-lens')
+    return lens(livingCase.situationModel?.rawContext || '')
+  }
+
+  /**
+   * Operational Ownership Lens — Assesses operational ownership and accountability.
+   */
+  private async operationalOwnershipLens(livingCase: LivingDecisionCase): Promise<KernelLensResult> {
+    const { operationalOwnershipLens: lens } = await import('./lenses/operational-ownership-lens')
+    return lens(livingCase.situationModel?.rawContext || '')
   }
 }

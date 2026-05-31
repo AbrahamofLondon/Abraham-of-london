@@ -1,0 +1,135 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243845712-mmqnn4",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Board Decision Under Political Pressure",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": true,
+    "forbiddenActionsCount": 1,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 9,
+    "authorityCount": 3,
+    "obligationCount": 1,
+    "constraintCount": 2,
+    "adversarialCount": 1,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:45.737Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Board Decision Under Political Pressure",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:45.737Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:45.737Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "GOVERNANCE_AND_BOARD",
+      "alternativeClasses": [
+        {
+          "decisionClass": "STRATEGIC_AND_POSITIONING",
+          "confidence": "MEDIUM",
+          "reason": "Score 5 vs primary 10"
+        }
+      ],
+      "confidence": "LOW"
+    },
+    "situationSummary": "The system interprets this situation as a governance or board-level decision requiring proper process, documentation, and fiduciary consideration. Dimensions surfaced: authority.",
+    "authoritySummary": "3 authority entries mapped",
+    "obligationSummary": "1 obligation identified",
+    "constraintSummary": "2 constraints mapped (2 critical/high)",
+    "evidenceSummary": "9 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "board-pressure-vs-reservations",
+        "contradiction": "Board action is proposed but internal reservations or disagreement have not been resolved",
+        "severity": "HIGH"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Authority is held by Board of Directors",
+          "ifWrong": "The decision may not be valid, or escalation may be misdirected."
+        },
+        {
+          "assumption": "Board approval required — decision cannot proceed without it",
+          "ifWrong": "The minimum viable path may change."
+        },
+        {
+          "assumption": "External approval required before proceeding",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": []
+    },
+    "regulatedBoundary": {
+      "hit": true,
+      "type": "director-duty-advice",
+      "professionalBrief": {
+        "suggestedProfession": "a qualified solicitor",
+        "whatToBring": [
+          "This Living Decision Case reference and output",
+          "Authority documentation and delegation records",
+          "Relevant contracts, filings, or regulatory correspondence",
+          "Evidence of constraints (financial statements, timelines, capacity data)",
+          "Any documentation referenced in the evidence graph"
+        ],
+        "questionsToAsk": [
+          "What is the strength of the legal position and what are the limitation periods?",
+          "What are the director duties and potential liabilities in this situation?"
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "DELAY_OR_CONDITION_THE_VOTE",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "RECORD_FORMAL_OBJECTIONS",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "CLARIFY_CEO_DEADLINE",
+        "urgency": "HIGH"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Put the decision to a vote while material reservations or resignation threats from directors remain undocumented",
+        "severity": "HIGH"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.",
+      "Ensure any NED reservation or objection is formally minuted before any vote is called. This protects the directors who object and documents the governance record."
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

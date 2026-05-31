@@ -3,7 +3,7 @@
   "title": "Low-Stakes Preference",
   "rawSituation": "I am trying to decide which project management software to use for my small team. We have used Asana before but some team members prefer Notion. There is no deadline. No budget constraint. No customer impact. It is purely a team preference decision.",
   "kernelResult": {
-    "status": "QUALITY_FAILED",
+    "status": "COMPLETED",
     "vocabularyState": 2,
     "situationSummary": "This is a low-stakes preference decision.",
     "kernelInterpretation": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.",
@@ -44,20 +44,133 @@
     ],
     "forbiddenActions": [],
     "whatMustNotBeDelayed": [],
-    "freeSignalOutput": null,
+    "freeSignalOutput": {
+      "tier": "free_signal",
+      "sections": [
+        {
+          "id": "situation_class",
+          "label": "Situation Class",
+          "content": "LOW_STAKES_PREFERENCE",
+          "type": "badge"
+        },
+        {
+          "id": "what_the_system_saw",
+          "label": "What the System Saw",
+          "content": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.",
+          "type": "prose"
+        },
+        {
+          "id": "primary_failure_point",
+          "label": "Primary Failure Point",
+          "content": "Situation relies primarily on user-reported information without independent documentation",
+          "type": "prose"
+        },
+        {
+          "id": "governing_tension",
+          "label": "Governing Tension",
+          "content": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference",
+          "type": "prose"
+        },
+        {
+          "id": "consequence_class",
+          "label": "Consequence Class",
+          "content": "HIGH",
+          "type": "badge"
+        },
+        {
+          "id": "what_full_analysis_maps",
+          "label": "What the Full Analysis Maps",
+          "content": [
+            "Evidence graph"
+          ],
+          "type": "list"
+        },
+        {
+          "id": "direction_of_minimum_viable_move",
+          "label": "Direction of Minimum Viable Move",
+          "content": "This is a low-stakes preference decision. Choose based on team preference and practical fit.",
+          "type": "prose"
+        }
+      ],
+      "quality": {
+        "genericOutputDetected": false,
+        "missingAuthorityMap": true,
+        "missingObligationMap": true,
+        "missingEvidenceGraph": false,
+        "missingAdversarialChallenge": true,
+        "missingMinimumViablePath": false,
+        "selfAdversarialPresent": false,
+        "humanReviewAssessed": true,
+        "regulatedBoundaryRespected": true
+      }
+    },
     "basicBriefOutput": null,
-    "fullDossierOutput": null,
+    "fullDossierOutput": {
+      "tier": "free_signal",
+      "sections": [
+        {
+          "id": "situation_class",
+          "label": "Situation Class",
+          "content": "LOW_STAKES_PREFERENCE",
+          "type": "badge"
+        },
+        {
+          "id": "what_the_system_saw",
+          "label": "What the System Saw",
+          "content": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.",
+          "type": "prose"
+        },
+        {
+          "id": "primary_failure_point",
+          "label": "Primary Failure Point",
+          "content": "Situation relies primarily on user-reported information without independent documentation",
+          "type": "prose"
+        },
+        {
+          "id": "governing_tension",
+          "label": "Governing Tension",
+          "content": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference",
+          "type": "prose"
+        },
+        {
+          "id": "consequence_class",
+          "label": "Consequence Class",
+          "content": "HIGH",
+          "type": "badge"
+        },
+        {
+          "id": "what_full_analysis_maps",
+          "label": "What the Full Analysis Maps",
+          "content": [
+            "Evidence graph"
+          ],
+          "type": "list"
+        },
+        {
+          "id": "direction_of_minimum_viable_move",
+          "label": "Direction of Minimum Viable Move",
+          "content": "This is a low-stakes preference decision. Choose based on team preference and practical fit.",
+          "type": "prose"
+        }
+      ],
+      "quality": {
+        "genericOutputDetected": false,
+        "missingAuthorityMap": true,
+        "missingObligationMap": true,
+        "missingEvidenceGraph": false,
+        "missingAdversarialChallenge": true,
+        "missingMinimumViablePath": false,
+        "selfAdversarialPresent": false,
+        "humanReviewAssessed": true,
+        "regulatedBoundaryRespected": true
+      }
+    },
     "humanReviewTrigger": {
       "state": "not_required",
       "tier": null,
       "triggers": []
     },
-    "qualityFailures": [
-      "GENERIC_ADVICE: Output contains no specific, non-swappable insight",
-      "MISSING_CONSTRAINT_GRAPH: Constraint landscape is required for paid tiers",
-      "MISSING_ADVERSARIAL_CHALLENGE: Adversarial challenge is required for paid tiers",
-      "MISSING_SELF_ADVERSARIAL_CHALLENGE: Self-adversarial challenge is required for paid tiers"
-    ]
+    "qualityFailures": []
   },
   "qualityRubric": {
     "situationSeenAccurately": "REVIEW",

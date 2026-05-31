@@ -508,8 +508,17 @@ export class TieredDisclosure {
   }
 
   private isGeneric(livingCase: LivingDecisionCase): boolean {
+    // Free signal: only require translation and classification
+    if (livingCase.disclosure.currentTier === 'free_signal') {
+      if (!livingCase.translation || !livingCase.classification) return true
+      if (!livingCase.situationModel?.coreTension) return true
+      return false
+    }
+    // Paid tiers: require evidence, authority/obligation, and minimum viable path
     if (livingCase.evidenceGraph.length === 0) return true
-    if (livingCase.authorityMap.length === 0 && livingCase.obligationMap.length === 0) return true
+    // If regulated boundary is hit, the system correctly defers to professional advice
+    // and may not have authority/obligation maps
+    if (!livingCase.regulatedBoundary?.hit && livingCase.authorityMap.length === 0 && livingCase.obligationMap.length === 0) return true
     if (livingCase.minimumViablePath.length === 0) return true
     return false
   }

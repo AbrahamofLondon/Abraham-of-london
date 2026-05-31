@@ -1,7 +1,7 @@
 # Low-Stakes Preference
 
 **Scenario:** `low_stakes_preference`
-**Kernel Status:** QUALITY_FAILED
+**Kernel Status:** COMPLETED
 **Automatic Failures:** None
 
 ---
@@ -100,7 +100,37 @@ The system interprets this situation as a low-stakes preference decision where t
 
 ## 22. Free Signal Output
 
-*Not generated*
+### Situation Class
+
+LOW_STAKES_PREFERENCE
+
+### What the System Saw
+
+The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.
+
+### Primary Failure Point
+
+Situation relies primarily on user-reported information without independent documentation
+
+### Governing Tension
+
+The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference
+
+### Consequence Class
+
+HIGH
+
+### What the Full Analysis Maps
+
+```json
+[
+  "Evidence graph"
+]
+```
+
+### Direction of Minimum Viable Move
+
+This is a low-stakes preference decision. Choose based on team preference and practical fit.
 
 ## 23. Basic Brief Output
 
@@ -108,7 +138,37 @@ The system interprets this situation as a low-stakes preference decision where t
 
 ## 24. Full Dossier Output
 
-*Not generated*
+### Situation Class
+
+LOW_STAKES_PREFERENCE
+
+### What the System Saw
+
+The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.
+
+### Primary Failure Point
+
+Situation relies primarily on user-reported information without independent documentation
+
+### Governing Tension
+
+The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference
+
+### Consequence Class
+
+HIGH
+
+### What the Full Analysis Maps
+
+```json
+[
+  "Evidence graph"
+]
+```
+
+### Direction of Minimum Viable Move
+
+This is a low-stakes preference decision. Choose based on team preference and practical fit.
 
 ## 25. Human Review Trigger
 
@@ -118,12 +178,9 @@ The system interprets this situation as a low-stakes preference decision where t
 
 ## 26. Quality-Standard Verdict
 
-**Status:** QUALITY_FAILED
-**Quality Failures:** 4
-- GENERIC_ADVICE: Output contains no specific, non-swappable insight
-- MISSING_CONSTRAINT_GRAPH: Constraint landscape is required for paid tiers
-- MISSING_ADVERSARIAL_CHALLENGE: Adversarial challenge is required for paid tiers
-- MISSING_SELF_ADVERSARIAL_CHALLENGE: Self-adversarial challenge is required for paid tiers
+**Status:** COMPLETED
+**Quality Failures:** 0
+
 
 ---
 

@@ -1,0 +1,152 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243846029-spavpm",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Executive Reputational Exposure",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "URGENT",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": true,
+    "forbiddenActionsCount": 2,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 10,
+    "authorityCount": 0,
+    "obligationCount": 0,
+    "constraintCount": 3,
+    "adversarialCount": 2,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:46.030Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Executive Reputational Exposure",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:46.030Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:46.030Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "REPUTATIONAL_AND_EXPOSURE",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "FINANCIAL_AND_CAPITAL",
+          "confidence": "LOW",
+          "reason": "Constraint ambiguity suggests financial feasibility question"
+        }
+      ],
+      "confidence": "HIGH"
+    },
+    "situationSummary": "The system interprets this situation as a reputational or exposure decision where public perception, trust, or brand integrity is at risk.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "3 constraints mapped (3 critical/high)",
+    "evidenceSummary": "10 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "reputational-threat-vs-response-gap",
+        "contradiction": "Reputational threat is active but no reviewed, legally-cleared response plan exists",
+        "severity": "HIGH"
+      },
+      {
+        "id": "pr-vs-legal-conflict",
+        "contradiction": "PR team and legal team have conflicting recommendations — response strategy is unresolved",
+        "severity": "HIGH"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Board approval required — decision cannot proceed without it",
+          "ifWrong": "The minimum viable path may change."
+        },
+        {
+          "assumption": "Potential legal proceedings — any public communication requires legal clearance",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": true,
+      "type": "legal-advice",
+      "professionalBrief": {
+        "suggestedProfession": "a qualified solicitor",
+        "whatToBring": [
+          "This Living Decision Case reference and output",
+          "Evidence of constraints (financial statements, timelines, capacity data)",
+          "Any documentation referenced in the evidence graph"
+        ],
+        "questionsToAsk": [
+          "What is the strength of the legal position and what are the limitation periods?"
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "HOLD_PUBLIC_COMMUNICATIONS",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "BRIEF_DECISION_AUTHORITY",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "PRESERVE_EVIDENCE_RECORD",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Issue a public response before facts, decision authority, and legal exposure have been assessed and the response has been cleared",
+        "severity": "CRITICAL"
+      },
+      {
+        "action": "Issue any public statement tonight or before the board has met and legal counsel has confirmed no proceedings risk",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Do not issue any public statement until legal counsel has assessed whether it would prejudice potential proceedings. This applies regardless of PR pressure tonight.",
+      "Brief the board before it meets tomorrow. Provide both the PR recommendation and the legal position. Do not pre-decide the response.",
+      "Ensure all internal communications regarding the allegations are preserved. Document what was known, when, and by whom."
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "URGENT",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (URGENT)"
+    ]
+  }
+}

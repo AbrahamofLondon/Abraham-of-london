@@ -117,15 +117,17 @@ The system interprets this situation as a legal or contractual decision where ri
 
 | # | Action | Urgency |
 |---|--------|---------|
-| 1 | Verify: Fixed deadline constrains response time | IMMEDIATE |
-| 2 | Address: Time-sensitive obligation with defined deadline (deadline: Unknown) | IMMEDIATE |
+| 1 | Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision. | IMMEDIATE |
+| 2 | Verify: Fixed deadline constrains response time | IMMEDIATE |
+| 3 | Address: Time-sensitive obligation with defined deadline (deadline: Unknown) | IMMEDIATE |
 
 ## 20. Forbidden Actions
 
-*None identified*
+- **Proceed as if the filing obligation will resolve itself, or that delay is neutral** (CRITICAL): Statutory obligations compound with delay. Inaction is not a safe default — it is the highest-risk option.
 
 ## 21. What Must Not Be Delayed
 
+- Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision.
 - Verify: Fixed deadline constrains response time
 - Address: Time-sensitive obligation with defined deadline (deadline: Unknown)
 
@@ -165,7 +167,7 @@ CRITICAL
 
 ### Direction of Minimum Viable Move
 
-Verify: Fixed deadline constrains response time
+Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision.
 
 ## 23. Basic Brief Output
 
@@ -335,16 +337,23 @@ Verify: Fixed deadline constrains response time
 [
   {
     "order": 1,
-    "action": "VALIDATE_CRITICAL_CONSTRAINTS",
-    "description": "Verify: Fixed deadline constrains response time",
-    "rationale": "Critical constraints change the feasible set",
+    "action": "RESOLVE_PRIMARY_ADVERSARIAL_RISK",
+    "description": "Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision.",
+    "rationale": "The adversarial challenge (obligation-vs-resources) must be resolved or consciously accepted before the decision proceeds.",
     "urgency": "IMMEDIATE"
   },
   {
     "order": 2,
+    "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+    "description": "Verify: Fixed deadline constrains response time",
+    "rationale": "Critical constraints change what is feasible.",
+    "urgency": "IMMEDIATE"
+  },
+  {
+    "order": 3,
     "action": "ADDRESS_URGENT_OBLIGATIONS",
     "description": "Address: Time-sensitive obligation with defined deadline (deadline: Unknown)",
-    "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+    "rationale": "Time-sensitive obligations cannot be safely deferred.",
     "urgency": "IMMEDIATE"
   }
 ]
@@ -353,7 +362,13 @@ Verify: Fixed deadline constrains response time
 ### Forbidden Actions
 
 ```json
-[]
+[
+  {
+    "action": "Proceed as if the filing obligation will resolve itself, or that delay is neutral",
+    "reason": "Statutory obligations compound with delay. Inaction is not a safe default — it is the highest-risk option.",
+    "severity": "CRITICAL"
+  }
+]
 ```
 
 ### Fallback Path
@@ -362,9 +377,16 @@ Verify: Fixed deadline constrains response time
 [
   {
     "order": 2,
+    "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+    "description": "Verify: Fixed deadline constrains response time",
+    "rationale": "Critical constraints change what is feasible.",
+    "urgency": "IMMEDIATE"
+  },
+  {
+    "order": 3,
     "action": "ADDRESS_URGENT_OBLIGATIONS",
     "description": "Address: Time-sensitive obligation with defined deadline (deadline: Unknown)",
-    "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+    "rationale": "Time-sensitive obligations cannot be safely deferred.",
     "urgency": "IMMEDIATE"
   }
 ]
@@ -374,6 +396,7 @@ Verify: Fixed deadline constrains response time
 
 ```json
 [
+  "Address the primary identified risk: Obligation to meet deadline exists but resources to meet it do not. This is the failure point most likely to undermine the decision.",
   "Verify: Fixed deadline constrains response time",
   "Address: Time-sensitive obligation with defined deadline (deadline: Unknown)"
 ]
@@ -386,7 +409,7 @@ Verify: Fixed deadline constrains response time
   "caseReference": "PROOF-LEGAL_ADMIN_FAMILY_DEADLINE-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-05-31T12:58:47.983Z"
+  "generatedAt": "2026-05-31T16:10:45.990Z"
 }
 ```
 

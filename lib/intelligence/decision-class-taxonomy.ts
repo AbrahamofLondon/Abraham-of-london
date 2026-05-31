@@ -55,8 +55,8 @@ export class DecisionClassTaxonomy {
         class: 'GOVERNANCE_AND_BOARD',
         label: 'Governance & Board',
         description: 'A board-level decision requiring proper process, documentation, fiduciary consideration, and stakeholder alignment.',
-        mandatoryLenses: ['authority', 'obligation', 'evidence', 'adversarial', 'failure-mode', 'regulated-boundary'],
-        optionalLenses: ['constraint-reality', 'continuity', 'market-claim'],
+        mandatoryLenses: ['authority', 'obligation', 'evidence', 'adversarial', 'failure-mode', 'regulated-boundary', 'constraint-reality'],
+        optionalLenses: ['continuity', 'market-claim'],
         primaryAdversarialVectors: [
           'Board was not properly informed',
           'Fiduciary duty was not considered',
@@ -88,7 +88,7 @@ export class DecisionClassTaxonomy {
         class: 'COMMERCIAL_AND_MARKET',
         label: 'Commercial & Market',
         description: 'A commercial or market decision where positioning, pricing, partnership terms, or competitive response is at stake.',
-        mandatoryLenses: ['failure-mode', 'constraint-reality', 'evidence', 'market-claim', 'adversarial'],
+        mandatoryLenses: ['failure-mode', 'constraint-reality', 'evidence', 'market-claim', 'adversarial', 'commercial-proof', 'investor-diligence'],
         optionalLenses: ['authority', 'obligation', 'release-risk', 'continuity'],
         primaryAdversarialVectors: [
           'Market claim is unsupported',
@@ -119,7 +119,7 @@ export class DecisionClassTaxonomy {
         class: 'OPERATIONAL_AND_EXECUTION',
         label: 'Operational & Execution',
         description: 'An operational or execution decision where delivery, capacity, process reliability, or supply chain is the primary concern.',
-        mandatoryLenses: ['failure-mode', 'constraint-reality', 'evidence', 'adversarial', 'release-risk'],
+        mandatoryLenses: ['failure-mode', 'constraint-reality', 'evidence', 'adversarial', 'release-risk', 'launch-readiness', 'operational-ownership', 'commercial-proof'],
         optionalLenses: ['authority', 'obligation', 'continuity'],
         primaryAdversarialVectors: [
           'Execution capacity is overestimated',
@@ -181,7 +181,7 @@ export class DecisionClassTaxonomy {
           'Legal exposure from public statement',
           'Crisis escalates due to inadequate response',
         ],
-        regulatedBoundaryTriggers: ['legal-advice', 'defamation', 'regulatory-disclosure'],
+        regulatedBoundaryTriggers: ['legal-advice', 'defamation', 'regulatory-disclosure', 'litigation-advice'],
         defaultTier: 'urgent_operational',
         humanReviewThreshold: 'URGENT',
         forbiddenOutputClaims: [
@@ -204,7 +204,7 @@ export class DecisionClassTaxonomy {
         class: 'FINANCIAL_AND_CAPITAL',
         label: 'Financial & Capital',
         description: 'A financial or capital decision where cash, funding, balance sheet capacity, or financial structure constrains the feasible set.',
-        mandatoryLenses: ['constraint-reality', 'failure-mode', 'evidence', 'adversarial', 'regulated-boundary'],
+        mandatoryLenses: ['constraint-reality', 'failure-mode', 'evidence', 'adversarial', 'regulated-boundary', 'investor-diligence'],
         optionalLenses: ['authority', 'obligation', 'continuity'],
         primaryAdversarialVectors: [
           'Cash position is overestimated',
@@ -269,7 +269,7 @@ export class DecisionClassTaxonomy {
         class: 'PEOPLE_AND_AUTHORITY',
         label: 'People & Authority',
         description: 'A people or authority decision where mandate, leadership, organisational structure, or accountability is the primary variable.',
-        mandatoryLenses: ['authority', 'obligation', 'failure-mode', 'evidence', 'adversarial'],
+        mandatoryLenses: ['authority', 'obligation', 'failure-mode', 'evidence', 'adversarial', 'operational-ownership'],
         optionalLenses: ['constraint-reality', 'continuity'],
         primaryAdversarialVectors: [
           'Authority is assumed, not documented',
@@ -300,7 +300,7 @@ export class DecisionClassTaxonomy {
         class: 'TECHNOLOGY_AND_DEPENDENCY',
         label: 'Technology & Dependency',
         description: 'A technology or dependency decision where system reliability, migration, technical debt, or vendor dependency is the binding constraint.',
-        mandatoryLenses: ['constraint-reality', 'failure-mode', 'evidence', 'adversarial', 'release-risk', 'continuity'],
+        mandatoryLenses: ['constraint-reality', 'failure-mode', 'evidence', 'adversarial', 'release-risk', 'continuity', 'supplier-dependency', 'operational-ownership'],
         optionalLenses: ['authority', 'obligation', 'market-claim'],
         primaryAdversarialVectors: [
           'Technical debt is underestimated',

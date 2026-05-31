@@ -1,0 +1,69 @@
+{
+  "scenario": "low_stakes_preference",
+  "title": "Low-Stakes Preference",
+  "rawSituation": "I am trying to decide which project management software to use for my small team. We have used Asana before but some team members prefer Notion. There is no deadline. No budget constraint. No customer impact. It is purely a team preference decision.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": true,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": true,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "not_required",
+  "humanReviewTier": null,
+  "regulatedBoundaryHit": false,
+  "regulatedBoundaryType": null,
+  "professionalBriefGenerated": false,
+  "selfAdversarialPresent": false,
+  "forbiddenActions": 0,
+  "minimumViablePathSteps": 1,
+  "whatMustNotBeDelayed": [],
+  "evidenceCount": 1,
+  "authorityCount": 0,
+  "obligationCount": 0,
+  "constraintCount": 0,
+  "adversarialCount": 0,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

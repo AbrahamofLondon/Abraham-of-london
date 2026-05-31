@@ -1,0 +1,134 @@
+{
+  "record": {
+    "caseId": "fulfilment-1780243845978-8d9hzk",
+    "caseReference": "FULFIL-17802438",
+    "scenario": "Operational Failure with Unclear Owner",
+    "status": "dossier_generated",
+    "dossierTier": "full_dossier",
+    "qualityFailures": [],
+    "embarrassmentRisk": "LOW",
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "selfAdversarialPresent": true,
+    "regulatedBoundaryHit": false,
+    "forbiddenActionsCount": 1,
+    "minimumViablePathSteps": 3,
+    "evidenceCount": 5,
+    "authorityCount": 0,
+    "obligationCount": 0,
+    "constraintCount": 1,
+    "adversarialCount": 2,
+    "reviewEvents": [
+      {
+        "eventType": "FULFILMENT_GENERATED",
+        "timestamp": "2026-05-31T16:10:45.980Z",
+        "actorId": "system",
+        "notes": "Dossier generated for: Operational Failure with Unclear Owner",
+        "payload": {
+          "status": "COMPLETED",
+          "qualityFailures": []
+        }
+      }
+    ],
+    "deliverable": true,
+    "blockReasons": [],
+    "generatedAt": "2026-05-31T16:10:45.980Z"
+  },
+  "artefact": {
+    "caseReference": "FULFIL-17802438",
+    "generatedAt": "2026-05-31T16:10:45.980Z",
+    "kernelVersion": "1.0.0",
+    "contractVersion": "1.0.0",
+    "classification": {
+      "primaryClass": "TECHNOLOGY_AND_DEPENDENCY",
+      "alternativeClasses": [
+        {
+          "decisionClass": "GOVERNANCE_AND_BOARD",
+          "confidence": "LOW",
+          "reason": "Authority ambiguity suggests governance dimension"
+        },
+        {
+          "decisionClass": "FINANCIAL_AND_CAPITAL",
+          "confidence": "LOW",
+          "reason": "Constraint ambiguity suggests financial feasibility question"
+        }
+      ],
+      "confidence": "LOW"
+    },
+    "situationSummary": "The system interprets this situation as a technology or dependency decision where system reliability, migration, or technical debt is the binding constraint.",
+    "authoritySummary": "Authority structure not fully mapped — see ambiguities",
+    "obligationSummary": "Obligation landscape not fully mapped — see ambiguities",
+    "constraintSummary": "1 constraint mapped (1 critical/high)",
+    "evidenceSummary": "5 evidence nodes",
+    "adversarialChallenges": [
+      {
+        "id": "authority-vs-responsibility",
+        "contradiction": "Responsibility exists but authority to act is unclear or disputed",
+        "severity": "HIGH"
+      },
+      {
+        "id": "ownership-vs-accountability",
+        "contradiction": "Operational ownership is disputed — each party attributes responsibility elsewhere. Without clear ownership, no recovery action can be assigned and the failure will recur.",
+        "severity": "CRITICAL"
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "No clear owner for operational failure resolution — ownership is disputed between teams",
+          "ifWrong": "The minimum viable path may change."
+        }
+      ],
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed"
+        }
+      ]
+    },
+    "regulatedBoundary": {
+      "hit": false,
+      "type": null,
+      "professionalBrief": null
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "RESOLVE_PRIMARY_ADVERSARIAL_RISK",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "CLARIFY_AUTHORITY",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Proceed with operational recovery while ownership of the failure remains disputed between teams",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Address the primary identified risk: Operational ownership is disputed — each party attributes responsibility elsewhere. Without clear ownership, no recovery action can be assigned and the failure will recur.. This is the failure point most likely to undermine the decision.",
+      "Identify and confirm who holds formal decision mandate.",
+      "Verify: No clear owner for operational failure resolution — ownership is disputed between teams"
+    ],
+    "humanReviewState": "pending",
+    "humanReviewTier": "STANDARD",
+    "qualityVerdict": "PASS",
+    "qualityFailures": [],
+    "_adminNotes": [
+      "Human review required: pending (STANDARD)"
+    ]
+  }
+}

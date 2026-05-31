@@ -1,0 +1,77 @@
+{
+  "scenario": "operational_failure_unclear_owner",
+  "title": "Operational Failure with Unclear Owner",
+  "rawSituation": "A critical system went down for 6 hours. No one knows who is responsible for fixing it. The operations team says it is engineering. Engineering says it is infrastructure. Infrastructure says it is a vendor issue. The vendor says it is a configuration problem. The CEO wants someone held accountable.",
+  "freeSignal": {
+    "tier": "free_signal",
+    "sections": [
+      "situation_class",
+      "what_the_system_saw",
+      "primary_failure_point",
+      "governing_tension",
+      "consequence_class",
+      "what_full_analysis_maps",
+      "direction_of_minimum_viable_move"
+    ],
+    "quality": {
+      "genericOutputDetected": false,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": false,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "basicBrief": null,
+  "fullDossier": {
+    "tier": "full_dossier",
+    "sections": [
+      "authority_map",
+      "obligation_map",
+      "constraint_graph",
+      "evidence_graph",
+      "adversarial_challenge",
+      "self_adversarial_challenge",
+      "minimum_viable_path",
+      "forbidden_actions",
+      "fallback_path",
+      "what_must_not_be_delayed",
+      "record_reference"
+    ],
+    "quality": {
+      "genericOutputDetected": true,
+      "missingAuthorityMap": true,
+      "missingObligationMap": true,
+      "missingEvidenceGraph": false,
+      "missingAdversarialChallenge": false,
+      "missingMinimumViablePath": false,
+      "selfAdversarialPresent": true,
+      "humanReviewAssessed": true,
+      "regulatedBoundaryRespected": true
+    }
+  },
+  "humanReviewState": "pending",
+  "humanReviewTier": "STANDARD",
+  "regulatedBoundaryHit": false,
+  "regulatedBoundaryType": null,
+  "professionalBriefGenerated": false,
+  "selfAdversarialPresent": true,
+  "forbiddenActions": 1,
+  "minimumViablePathSteps": 3,
+  "whatMustNotBeDelayed": [
+    "Address the primary identified risk: Operational ownership is disputed — each party attributes responsibility elsewhere. Without clear ownership, no recovery action can be assigned and the failure will recur.. This is the failure point most likely to undermine the decision.",
+    "Identify and confirm who holds formal decision mandate.",
+    "Verify: No clear owner for operational failure resolution — ownership is disputed between teams"
+  ],
+  "evidenceCount": 5,
+  "authorityCount": 0,
+  "obligationCount": 0,
+  "constraintCount": 1,
+  "adversarialCount": 2,
+  "qualityFailures": [],
+  "embarrassmentRisk": "LOW",
+  "embarrassmentNotes": []
+}

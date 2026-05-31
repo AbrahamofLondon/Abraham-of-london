@@ -1,0 +1,328 @@
+/**
+ * components/kernel/FreeSignalResult.tsx — Public Free Signal Result Display
+ *
+ * Renders the FREE_SIGNAL output from the Decision Intelligence Kernel.
+ * Tightly controlled: no paid dossier content, no checkout, no over-selling.
+ *
+ * Output structure:
+ * 1. Situation Class
+ * 2. What the System Saw
+ * 3. Primary Failure Point
+ * 4. Governing Tension
+ * 5. Consequence Class
+ * 6. What the Full Analysis Would Map
+ * 7. Direction of Minimum Viable Move
+ * 8. Boundary / Review note if relevant
+ */
+
+import React from 'react'
+import type { KernelSignalResponse } from '@/pages/api/public/kernel-signal'
+
+const GOLD = '#C9A96E'
+
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+}
+
+const serif: React.CSSProperties = {
+  fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
+  fontWeight: 300,
+}
+
+interface FreeSignalResultProps {
+  signal: KernelSignalResponse
+  onReset?: () => void
+}
+
+export function FreeSignalResult({ signal, onReset }: FreeSignalResultProps) {
+  return (
+    <div style={{ backgroundColor: 'rgb(3,3,5)', color: 'white', minHeight: '100vh' }}>
+      <div className="mx-auto max-w-[800px] px-6 py-16">
+        {/* Header */}
+        <p style={{ ...mono, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+          Free Signal
+        </p>
+        <h1
+          style={{
+            ...serif,
+            fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+            lineHeight: 1.05,
+            color: '#F5F5F5',
+            fontStyle: 'italic',
+            letterSpacing: '-0.02em',
+            marginTop: '0.75rem',
+          }}
+        >
+          What the system saw
+        </h1>
+
+        {/* Clarification required */}
+        {signal.clarificationRequired && signal.clarificationQuestions && (
+          <div className="mt-8 border border-white/[0.08] bg-white/[0.02] p-5">
+            <p style={{ ...mono, fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '0.75rem' }}>
+              Clarification needed
+            </p>
+            <p className="text-[14px] leading-[1.8] text-white/60">
+              To provide a more accurate reading, the system needs additional context:
+            </p>
+            <ul className="mt-4 space-y-3">
+              {signal.clarificationQuestions.map((q, i) => (
+                <li key={i} className="border-l-2 border-white/[0.08] pl-4">
+                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+                    {q.domain}
+                  </p>
+                  <p className="mt-1 text-[14px] leading-[1.7] text-white/70">{q.question}</p>
+                </li>
+              ))}
+            </ul>
+            {onReset && (
+              <button
+                onClick={onReset}
+                className="mt-5 inline-flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                style={{
+                  borderColor: `${GOLD}40`,
+                  backgroundColor: `${GOLD}10`,
+                  color: '#F5F5F5',
+                  ...mono,
+                  letterSpacing: '0.12em',
+                }}
+              >
+                Return and clarify
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Situation Class */}
+        {signal.situationClass && !signal.clarificationRequired && (
+          <Section label="Situation Class">
+            <Badge>{signal.situationClass}</Badge>
+          </Section>
+        )}
+
+        {/* What the System Saw */}
+        {signal.whatTheSystemSaw && !signal.clarificationRequired && (
+          <Section label="What the System Saw">
+            <p className="text-[15px] leading-[1.85] text-white/70">{signal.whatTheSystemSaw}</p>
+          </Section>
+        )}
+
+        {/* Primary Failure Point */}
+        {signal.primaryFailurePoint && !signal.clarificationRequired && (
+          <Section label="Primary Failure Point">
+            <p className="text-[15px] leading-[1.85] text-white/70">{signal.primaryFailurePoint}</p>
+          </Section>
+        )}
+
+        {/* Governing Tension */}
+        {signal.governingTension && !signal.clarificationRequired && (
+          <Section label="Governing Tension">
+            <p className="text-[15px] leading-[1.85] text-white/70">{signal.governingTension}</p>
+          </Section>
+        )}
+
+        {/* Consequence Class */}
+        {signal.consequenceClass && !signal.clarificationRequired && (
+          <Section label="Consequence Class">
+            <Badge severity={signal.consequenceClass}>{signal.consequenceClass}</Badge>
+          </Section>
+        )}
+
+        {/* What the Full Analysis Would Map */}
+        {signal.whatFullAnalysisWouldMap.length > 0 && !signal.clarificationRequired && (
+          <Section label="What the Full Analysis Would Map">
+            <ul className="space-y-1.5">
+              {signal.whatFullAnalysisWouldMap.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-[14px] leading-[1.7] text-white/60">
+                  <span style={{ color: `${GOLD}88` }}>→</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* Direction of Minimum Viable Move */}
+        {signal.directionOfMinimumViableMove && !signal.clarificationRequired && (
+          <Section label="Direction of Minimum Viable Move">
+            <p className="text-[15px] leading-[1.85] text-white/70">{signal.directionOfMinimumViableMove}</p>
+          </Section>
+        )}
+
+        {/* Alternative Classes */}
+        {signal.alternativeClasses && signal.alternativeClasses.length > 0 && !signal.clarificationRequired && (
+          <Section label="Alternative Classifications Considered">
+            <div className="space-y-2">
+              {signal.alternativeClasses.map((alt, i) => (
+                <div key={i} className="border-l-2 border-white/[0.06] pl-3">
+                  <p className="text-[13px] leading-[1.6] text-white/60">
+                    <span style={{ color: `${GOLD}AA` }}>{alt.decisionClass}</span>
+                    <span className="text-white/40"> ({alt.confidence})</span>
+                  </p>
+                  <p className="text-[12px] leading-[1.5] text-white/40">{alt.reason}</p>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Surfaced Dimensions */}
+        {signal.surfacedDimensions.length > 0 && !signal.clarificationRequired && (
+          <Section label="Dimensions Surfaced">
+            <div className="flex flex-wrap gap-2">
+              {signal.surfacedDimensions.map((dim, i) => (
+                <span
+                  key={i}
+                  className="inline-block border px-3 py-1 text-[10px] uppercase tracking-wider"
+                  style={{
+                    borderColor: `${GOLD}30`,
+                    color: `${GOLD}AA`,
+                    ...mono,
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  {dim}
+                </span>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Preserved Ambiguities */}
+        {signal.preservedAmbiguities.length > 0 && !signal.clarificationRequired && (
+          <Section label="Ambiguities Preserved">
+            <p className="text-[13px] leading-[1.7] text-white/50 italic">
+              The system has identified areas where the situation is not yet clear enough for a definitive classification:
+            </p>
+            <ul className="mt-2 space-y-1">
+              {signal.preservedAmbiguities.map((amb, i) => (
+                <li key={i} className="text-[13px] leading-[1.6] text-white/50">
+                  • {amb.replace(/_/g, ' ')}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* Boundary Note */}
+        {signal.boundaryNote && !signal.clarificationRequired && (
+          <Section label="Regulatory Boundary">
+            <div className="border border-amber-500/20 bg-amber-500/5 p-4">
+              <p className="text-[13px] leading-[1.7] text-amber-300/80">{signal.boundaryNote}</p>
+            </div>
+          </Section>
+        )}
+
+        {/* Review Note */}
+        {signal.reviewNote && !signal.clarificationRequired && (
+          <Section label="Review Note">
+            <div className="border border-white/[0.08] bg-white/[0.02] p-4">
+              <p className="text-[13px] leading-[1.7] text-white/50">{signal.reviewNote}</p>
+            </div>
+          </Section>
+        )}
+
+        {/* Adversarial Preview — one specific challenge */}
+        {signal.adversarialPreview && !signal.clarificationRequired && (
+          <Section label="How this would be attacked">
+            <p className="text-[13px] leading-[1.7] text-white/50 italic">
+              If this decision were reviewed under pressure, this is the first weakness likely to be challenged.
+            </p>
+            <div className="mt-3 border-l-2 border-red-500/30 pl-4">
+              <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-red-400/70">
+                {signal.adversarialPreview.label}
+                {signal.adversarialPreview.challengedBy && (
+                  <> — challenged by {signal.adversarialPreview.challengedBy}</>
+                )}
+              </p>
+              <p className="mt-2 text-[14px] leading-[1.8] text-white/70">
+                {signal.adversarialPreview.challenge}
+              </p>
+              <p className="mt-2 text-[12px] leading-[1.6] text-white/40">
+                {signal.adversarialPreview.whyItMatters}
+              </p>
+            </div>
+            <p className="mt-4 text-[12px] leading-[1.6] text-white/30">
+              A Full Dossier maps the complete attack surface and defensive position.
+            </p>
+          </Section>
+        )}
+
+        {/* CTA — restrained */}
+        {!signal.clarificationRequired && (
+          <div className="mt-12 border-t border-white/[0.06] pt-8">
+            <p className="text-[12px] leading-[1.7] text-white/40" style={{ ...mono, fontSize: '9px', letterSpacing: '0.14em' }}>
+              This is a free signal — a perception check, not a full analysis.
+            </p>
+            <p className="mt-2 text-[12px] leading-[1.7] text-white/30">
+              A full governed analysis would map the authority structure, obligation landscape,
+              constraint graph, evidence quality, adversarial challenges, and minimum viable path.
+            </p>
+            {onReset && (
+              <button
+                onClick={onReset}
+                className="mt-5 inline-flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                style={{
+                  borderColor: `${GOLD}30`,
+                  color: `${GOLD}AA`,
+                  ...mono,
+                  letterSpacing: '0.12em',
+                }}
+              >
+                Test another situation
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Disclaimer */}
+        <div className="mt-8 border-t border-white/[0.04] pt-6">
+          <p className="text-[11px] leading-[1.7] text-white/25">
+            This is not professional, legal, tax, or financial advice. The system provides
+            a structured perception check only. No decision should be made solely on the
+            basis of this free signal. Full governed analysis requires an active case.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-8 border-t border-white/[0.06] pt-6">
+      <p
+        style={{
+          ...mono,
+          fontSize: '8px',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: `${GOLD}70`,
+          marginBottom: '0.75rem',
+        }}
+      >
+        {label}
+      </p>
+      {children}
+    </div>
+  )
+}
+
+function Badge({ children, severity }: { children: React.ReactNode; severity?: string }) {
+  const color = severity === 'CRITICAL' ? '#EF4444' : severity === 'HIGH' ? '#F59E0B' : severity === 'MEDIUM' ? '#3B82F6' : `${GOLD}AA`
+  return (
+    <span
+      className="inline-block border px-3 py-1 text-[11px] uppercase tracking-wider"
+      style={{
+        borderColor: `${color}40`,
+        color,
+        ...mono,
+        letterSpacing: '0.14em',
+      }}
+    >
+      {children}
+    </span>
+  )
+}
