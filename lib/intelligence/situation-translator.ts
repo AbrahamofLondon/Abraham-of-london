@@ -1,451 +1,681 @@
 /**
- * lib/intelligence/situation-translator.ts
+ * lib/intelligence/situation-translator.ts — First Gate
  *
- * Situation Translator — the first gate of the Decision Intelligence Kernel.
- *
- * Converts raw buyer language into institutional structure without
- * destroying ambiguity. The buyer does not arrive with a case.
- * The buyer arrives with a situation.
+ * Converts buyer language into institutional structure without destroying ambiguity.
  *
  * Translation law:
- *   Never collapse ambiguity into false precision.
- *   If authority is unclear, say so.
- *   If obligation may exist but is unconfirmed, preserve both readings.
- *   If the situation belongs to two decision classes, surface both.
+ * - Never collapse ambiguity into false precision.
+ * - If authority is unclear, say authority is unclear.
+ * - If obligation may exist but is not confirmed, say so.
+ * - If the situation may belong to two decision classes, preserve both.
+ * - False precision is worse than uncertainty.
  *
  * Vocabulary states:
  *   1 — Urgency without structure
  *   2 — Structure without diagnosis
  *   3 — Diagnosis without path
  *   4 — Path without governance
- *   5 — Misclassified stakes (low presented as high, or high as low)
+ *   5 — Misclassified stakes (high presented as low, or vice versa)
  *
- * Pure TypeScript. No side effects. Browser-safe.
+ * FIXES applied over Deepseek's initial pass:
+ *   - State 5 now means misclassified stakes, not "has all four signals"
+ *   - Multi-class scoring replaces first-match classification
+ *   - alternativeClasses preserved when two domains are plausible
+ *   - calculateConfidence uses class score gap + ambiguity, not vocabulary state
+ *   - detectedSignals added alongside surfacedDimensions for structured logic use
+ *   - generateSummary is now institutional, not just the first sentence
+ *   - Hidden stakes detects compliance trivialised as minor
  */
 
 import type {
   TranslationResult,
-  VocabularyState,
   ClarificationQuestion,
-  ActorCandidate,
-} from "./living-decision-case-contract";
-import type {
   DecisionClass,
+  DecisionClassCandidate,
+  ActorCandidate,
   ConfidenceLevel,
-} from "./decision-class-taxonomy";
+} from './types'
 
-// ─── Vocabulary state detector ────────────────────────────────────────────────
+type ClassScore = { cls: DecisionClass; score: number }
 
-function detectVocabularyState(lower: string): VocabularyState {
-  const hasUrgency = /\b(urgent|asap|deadline|must|need to|immediately|running out|by (monday|tuesday|wednesday|thursday|friday|today|tomorrow|this week|next week)|\d{1,2} (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|\d{1,2}\/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))\b/.test(lower);
-  const hasStructure = /\b(decision|options?|choice|alternatives?|path|route|approach|considering|evaluating)\b/.test(lower);
-  const hasDiagnosis = /\b(problem|issue|risk|fail|failing|concern|gap|missing|unknown|unclear|not sure|uncertain)\b/.test(lower);
-  const hasPath = /\b(plan|going to|will|decided|have decided|we have chosen|intend to|our plan|the plan)\b/.test(lower);
-  const hasGovernance = /\b(approved|authority|mandate|record|document|sign.?off|board|governance|compliance)\b/.test(lower);
+export class SituationTranslator {
+  /**
+   * Translate raw buyer language into institutional structure.
+   */
+  async translate(rawScenario: string): Promise<TranslationResult> {
+    const lower = rawScenario.toLowerCase()
 
-  // State 5: Misclassified stakes — high stakes described as minor/simple
-  const hasHighStakes = /\b(fine|penalty|court|board|statutory|legal|compliance|hmrc|£\d|thousands?|hundred.?thousand|million)\b/.test(lower);
-  const hasTrivialLanguage = /\b(minor|simple|quick|small|easy|just a|only a|shouldn.?t take long|shouldn.?t be (hard|difficult))\b/.test(lower);
-  if (hasHighStakes && hasTrivialLanguage) return 5;
+    const classScores = this.scoreDecisionClasses(lower)
+    const decisionClass = classScores[0]?.cls ?? 'STRATEGIC_AND_POSITIONING'
+    const alternativeClasses = this.buildAlternatives(classScores)
+    const classConfidence = this.classConfidenceFromScores(classScores)
 
-  // State 4: Path without governance
-  if (hasPath && !hasGovernance && !hasUrgency) return 4;
+    const vocabularyState = this.detectVocabularyState(lower)
+    const detectedSignals = this.detectStructuredSignals(lower, decisionClass)
+    const surfacedDimensions = this.buildDisplayDimensions(detectedSignals)
+    const initialActors = this.extractActors(lower)
+    const preservedAmbiguities = this.detectAmbiguities(lower, decisionClass, classConfidence)
+    const hiddenStakesDetected = this.detectHiddenStakes(lower, decisionClass)
 
-  // State 3: Diagnosis without path
-  if (hasDiagnosis && !hasPath && !hasUrgency) return 3;
+    const clarificationRequired = this.generateClarifications(
+      vocabularyState,
+      decisionClass,
+      preservedAmbiguities,
+      hiddenStakesDetected,
+    )
 
-  // State 2: Structure without diagnosis
-  if (hasStructure && !hasDiagnosis && !hasUrgency) return 2;
+    const translationConfidence = this.calculateConfidence(
+      classScores,
+      preservedAmbiguities,
+      vocabularyState,
+    )
 
-  // State 1: Urgency without structure
-  if (hasUrgency && !hasStructure && !hasDiagnosis) return 1;
-
-  // Default: urgency + structure, or diagnosis + urgency
-  return hasUrgency ? 1 : 2;
-}
-
-// ─── Decision class classifier ────────────────────────────────────────────────
-
-type ClassScore = { cls: DecisionClass; score: number };
-
-function scoreDecisionClasses(lower: string): ClassScore[] {
-  const scores: ClassScore[] = [
-    { cls: "COMPLIANCE_AND_FILING",     score: 0 },
-    { cls: "GOVERNANCE_AND_BOARD",      score: 0 },
-    { cls: "COMMERCIAL_AND_MARKET",     score: 0 },
-    { cls: "OPERATIONAL_AND_EXECUTION", score: 0 },
-    { cls: "STRATEGIC_AND_POSITIONING", score: 0 },
-    { cls: "REPUTATIONAL_AND_EXPOSURE", score: 0 },
-    { cls: "FINANCIAL_AND_CAPITAL",     score: 0 },
-    { cls: "LEGAL_AND_CONTRACTUAL",     score: 0 },
-    { cls: "PEOPLE_AND_AUTHORITY",      score: 0 },
-    { cls: "TECHNOLOGY_AND_DEPENDENCY", score: 0 },
-    { cls: "CONTINUITY_AND_TRANSITION", score: 0 },
-    { cls: "LOW_STAKES_PREFERENCE",     score: 0 },
-  ];
-
-  function boost(cls: DecisionClass, points: number) {
-    const entry = scores.find(s => s.cls === cls);
-    if (entry) entry.score += points;
+    return {
+      vocabularyState,
+      situationSummary: this.generateSummary(rawScenario, decisionClass, detectedSignals),
+      kernelInterpretation: this.generateInterpretation(lower, decisionClass, detectedSignals),
+      translationConfidence,
+      clarificationRequired,
+      decisionClass,
+      alternativeClasses,
+      initialActors,
+      surfacedDimensions,
+      detectedSignals,
+      preservedAmbiguities,
+      hiddenStakesDetected,
+    }
   }
 
-  // COMPLIANCE_AND_FILING
-  if (/\b(tax|taxes|hmrc|vat|ct600|corporation tax|self.?assessment|companies house|statutory accounts|annual accounts|annual return|confirmation statement|paye|national insurance|irs|ato|cra|inland revenue|tax return|tax filing|file accounts)\b/.test(lower)) boost("COMPLIANCE_AND_FILING", 10);
-  if (/\b(filing deadline|compliance deadline|statutory deadline|must file|must submit|overdue filing|compliance implications|regulatory compliance)\b/.test(lower)) boost("COMPLIANCE_AND_FILING", 5);
-  // payroll alone does not indicate compliance filing — only when combined with tax/hmrc context
-  if (/\bpayroll\b/.test(lower) && /\b(tax|hmrc|paye|national insurance)\b/.test(lower)) boost("COMPLIANCE_AND_FILING", 5);
+  // ─── Vocabulary state ───────────────────────────────────────────────────────
 
-  // GOVERNANCE_AND_BOARD
-  if (/\b(board (approval|decision|meeting|vote|sign.?off)|board of directors|shareholder (approval|vote|meeting)|trustee|fiduciary|committee approval|executive committee)\b/.test(lower)) boost("GOVERNANCE_AND_BOARD", 10);
-  if (/\b(governance|c.?suite|ceo|cfo|cto)\b/.test(lower)) boost("GOVERNANCE_AND_BOARD", 3);
+  /**
+   * Detects the structural completeness of the input.
+   *
+   * State 5 is SPECIFICALLY misclassified stakes — not "has all signals".
+   * A well-governed decision should return state 4, never state 5 simply
+   * because it mentions governance.
+   */
+  private detectVocabularyState(lower: string): 1 | 2 | 3 | 4 | 5 {
+    // State 5 check FIRST: misclassified stakes (high presented as low)
+    if (this.hasMisclassifiedStakes(lower)) return 5
 
-  // COMMERCIAL_AND_MARKET
-  if (/\b(market claim|positioning|messaging|value proposition|marketing copy|brand statement|product claim|offer|pitch|go.?to.?market|pricing strategy|competitive positioning|buyer|customer claim)\b/.test(lower)) boost("COMMERCIAL_AND_MARKET", 10);
-  if (/\b(claim|superlative|guarantee|industry.?leading|best.?in.?class|revolutionary|proven|certified)\b/.test(lower)) boost("COMMERCIAL_AND_MARKET", 4);
+    const hasStructure = this.hasInstitutionalStructure(lower)
+    const hasDiagnosis = this.hasDiagnosticLanguage(lower)
+    const hasPath = this.hasPathLanguage(lower)
+    const hasGovernance = this.hasGovernanceLanguage(lower)
 
-  // OPERATIONAL_AND_EXECUTION
-  if (/\b(release|deploy|deployment|launch|ship|go.?live|production (deploy|release)|feature flag|rollback|staging|pull request|ci.?cd|operational commitment)\b/.test(lower)) boost("OPERATIONAL_AND_EXECUTION", 10);
-  if (/\b(testing|qa|sign.?off|approval for|monitoring|alert|dashboard)\b/.test(lower)) boost("OPERATIONAL_AND_EXECUTION", 3);
+    // Well-formed decision question with an implied preference → state 2
+    // (Has implicit structure even if no institutional keywords)
+    const isWellFormedQuestion =
+      lower.startsWith('should') ||
+      lower.startsWith('can') ||
+      lower.startsWith('would it') ||
+      /^(which|what|how|when|where) (should|would|can|could|will|shall)/.test(lower)
 
-  // STRATEGIC_AND_POSITIONING
-  if (/\b(strategy|strategic|market entry|pivot|repositioning|strategic bet|long.?term (direction|investment|position)|competitive (advantage|moat|position)|exclusive (deal|agreement|distribution|partnership)|distribution deal|partnership (offer|deal|terms)|lose (our )?ability to|give up (our )?(direct|own))\b/.test(lower)) boost("STRATEGIC_AND_POSITIONING", 8);
-
-  // REPUTATIONAL_AND_EXPOSURE
-  if (/\b(reputat|brand (risk|damage)|public (statement|response|apology)|pr (risk|crisis)|media|press release|communication (strategy|response)|crisis)\b/.test(lower)) boost("REPUTATIONAL_AND_EXPOSURE", 10);
-
-  // FINANCIAL_AND_CAPITAL
-  if (/\b(investment decision|funding round|loan|debt|refinanc|equity|acquisition|merger|financial commitment|capital expenditure|capex|raise funding|investor|term sheet|bridge round|runway|weeks of runway|months of runway|wind down|wind.?down|out of cash|payroll (is )?due)\b/.test(lower)) boost("FINANCIAL_AND_CAPITAL", 10);
-
-  // LEGAL_AND_CONTRACTUAL
-  if (/\b(lawsuit|litigation|court|tribunal|gdpr|data protection|regulatory approval|contract dispute|breach of contract|legal obligation|terms of service|intellectual property|patent|trademark|employment law|unfair dismissal|redundancy|legal dispute|legal issue|legal matter|legal contract|contract issue|lawyer|solicitor|barrister|legal (problem|question|concern|implications|risk|review|advice|claim|action))\b/.test(lower)) boost("LEGAL_AND_CONTRACTUAL", 10);
-
-  // PEOPLE_AND_AUTHORITY
-  if (/\b(hire|hiring|fire|firing|redundan|dismiss|performance (management|review)|succession|promotion|demotion|authority (structure|delegation)|delegate|handover|reporting (line|structure))\b/.test(lower)) boost("PEOPLE_AND_AUTHORITY", 10);
-
-  // TECHNOLOGY_AND_DEPENDENCY
-  if (/\b(vendor (lock|dependency|contract)|supplier (change|failure|risk|acquired|dependency)|system (migration|replacement|outage)|critical (path|dependency|supplier)|technical debt|infrastructure (change|migration)|main supplier|key supplier|sole supplier|no alternative (supplier|vendor)|depend (on|upon) (them|it|the supplier)|60%|80%|90% (of production|of supply|of revenue))\b/.test(lower)) boost("TECHNOLOGY_AND_DEPENDENCY", 10);
-
-  // CONTINUITY_AND_TRANSITION
-  if (/\b(succession|handover|wind.?down|closure|transition|continuity (plan|record)|institutional (memory|knowledge)|what happens when|after (i|we) (leave|go|move on))\b/.test(lower)) boost("CONTINUITY_AND_TRANSITION", 10);
-
-  // LOW_STAKES_PREFERENCE
-  if (
-    /\b(prefer|favourite|which one|should (i|we) (choose|pick|go with|move|change|switch|reschedule)|best option|what do you think|opinion|recommendation for me|which (day|time|date|option))\b/.test(lower) &&
-    !/\b(penalty|deadline|fine|obligation|compliance|statutory|legal|court|risk|exposure|liability|board|contract|file|filing)\b/.test(lower)
-  ) boost("LOW_STAKES_PREFERENCE", 15);
-
-  return scores.sort((a, b) => b.score - a.score);
-}
-
-function scoreToConfidence(score: number, runnerUp: number): ConfidenceLevel {
-  if (score >= 10 && runnerUp === 0) return "HIGH";
-  if (score >= 10 && score - runnerUp >= 5) return "HIGH";
-  if (score >= 6 && score - runnerUp >= 3) return "MEDIUM";
-  if (score === 0) return "LOW";
-  return "MEDIUM";
-}
-
-// ─── Actor extractor ──────────────────────────────────────────────────────────
-
-function extractActors(lower: string): ActorCandidate[] {
-  const actors: ActorCandidate[] = [];
-
-  if (/\bhmrc\b/.test(lower) || (/\b(tax|taxes|tax return|tax filing)\b/.test(lower) && /\b(file|filing|submit|return)\b/.test(lower))) {
-    actors.push({ label: "HMRC", role: "regulator", named: true, authorityLevel: "confirmed" });
-  }
-  if (/\bcompanies house\b/.test(lower)) actors.push({ label: "Companies House", role: "regulator", named: true, authorityLevel: "confirmed" });
-  if (/\bboard( of directors)?\b/.test(lower)) actors.push({ label: "the board", role: "approver", named: false, authorityLevel: "inferred" });
-  if (/\bceo\b/.test(lower)) actors.push({ label: "the CEO", role: "decision_maker", named: false, authorityLevel: "inferred" });
-  if (/\bcfo\b/.test(lower)) actors.push({ label: "the CFO", role: "reviewer", named: false, authorityLevel: "inferred" });
-  if (/\bsolicitor\b|\blawyer\b|\babarrister\b|\battorney\b/.test(lower)) actors.push({ label: "legal adviser", role: "reviewer", named: false, authorityLevel: "unknown" });
-  if (/\baccountant\b/.test(lower)) actors.push({ label: "accountant", role: "reviewer", named: false, authorityLevel: "unknown" });
-  if (/\bcourt\b/.test(lower)) actors.push({ label: "the court", role: "regulator", named: false, authorityLevel: "confirmed" });
-  if (/\bteam\b/.test(lower)) actors.push({ label: "the team", role: "implementer", named: false, authorityLevel: "unknown" });
-
-  // I / we / the company (first person)
-  if (/\b(i |we |our (company|organisation|organization|business|team))\b/.test(lower)) {
-    actors.push({ label: "the decision-maker (self/organisation)", role: "decision_maker", named: false, authorityLevel: "inferred" });
+    if (!hasStructure && !isWellFormedQuestion) return 1
+    if (!hasDiagnosis) return 2
+    if (!hasPath) return 3
+    if (!hasGovernance) return 4
+    return 4
   }
 
-  return actors;
-}
+  private hasMisclassifiedStakes(lower: string): boolean {
+    // High-consequence signals present alongside trivialising language
+    const highConsequenceSignals = [
+      'fine', 'penalty', 'court', 'statutory', 'compliance', 'hmrc',
+      'legal obligation', 'must file', 'board approval', 'fiduciary',
+    ]
+    const trivialLanguage = [
+      'minor', 'simple', 'quick', 'small', 'easy', "shouldn't take long",
+      'just a', 'only a', 'not a big deal',
+    ]
+    const hasHighConsequence = highConsequenceSignals.some(s => lower.includes(s))
+    const hasTrivial = trivialLanguage.some(s => lower.includes(s))
 
-// ─── Dimension surfacing ──────────────────────────────────────────────────────
+    // Low classification + explicit high-stakes content
+    const looksLowStakes =
+      ['personal preference', 'which one', 'nice to have', 'no deadline', 'no budget'].some(s =>
+        lower.includes(s),
+      )
+    const containsHighStakes =
+      ['million', 'billion', 'board', 'director', 'regulatory', 'legal', 'penalty'].some(s =>
+        lower.includes(s),
+      )
 
-function surfaceDimensions(lower: string, cls: DecisionClass): string[] {
-  const dims: string[] = [];
-
-  if (
-    /\b(no funds|no money|can.?t afford|cannot afford|limited budget|no budget|do not have funds|not sure (i|we) can afford|may not be able to afford|afford a|runway|weeks of runway|months of runway|cash.?constrained|cash position|out of cash|tight on cash|no capital|raising (a )?(bridge|emergency) round)\b/.test(lower)
-  ) dims.push("constraint:cash");
-  if (/\b(complicated|complex|no expertise|no accountant|no professional)\b/.test(lower)) dims.push("constraint:capability");
-  if (
-    /\b(deadline|by \w+ \d{4}|must file|must submit|overdue|till|until|by end of|by (next|this)|within \d+ (day|week|month)|need to respond|respond (by|within)|response (is )?due|next week|next month|10 days|3 weeks|6 weeks)\b/.test(lower)
-  ) dims.push("obligation:deadline");
-  if (/\b(fine|penalty|penalt|enforcement|sanction|fine if|fined|huge fine|large fine)\b/.test(lower) && !/\b(seems fine|is fine|that.?s fine|quite fine|looks fine|all fine|seem fine)\b/.test(lower)) dims.push("consequence:penalty");
-  if (/\b(not sure who|unclear who|who (decides|approves|signs)|no (approval|authority) (yet|confirmed))\b/.test(lower)) dims.push("authority:unclear");
-  if (/\b(data|evidence|research|analysis|benchmark|measured)\b/.test(lower)) dims.push("evidence:present");
-  if (
-    /\b(assume|assuming|believ|think|probably|maybe|projecting|unvalidated|internally|our (view|estimate|assessment)|we (expect|hope|feel)|team (believes|thinks)|haven.?t (validated|verified|externally validated)|not (yet )?(externally )?validated|internal (projection|estimate|forecast))\b/.test(lower) ||
-    /\bprojection(s)?\b/.test(lower)
-  ) dims.push("evidence:assumed");
-  if (/\b(placeholder|provisional|estimated|missing records|no records)\b/.test(lower)) dims.push("constraint:records_incomplete");
-  if (/\b(irreversible|can.?t undo|no going back|irrevocable|once (filed|signed|executed))\b/.test(lower)) dims.push("reversibility:irreversible");
-  if (/\b(waiting for|blocked by|depends on|pending (approval|review|data))\b/.test(lower)) dims.push("dependency:unresolved");
-  if (cls === "COMPLIANCE_AND_FILING") dims.push("obligation:statutory");
-  if (cls === "GOVERNANCE_AND_BOARD") dims.push("authority:board_required");
-
-  return [...new Set(dims)];
-}
-
-// ─── Hidden stakes detector ───────────────────────────────────────────────────
-
-function detectHiddenStakes(lower: string, cls: DecisionClass): boolean {
-  // Stakes misclassified as LOW when they are actually HIGH
-  if (
-    cls === "LOW_STAKES_PREFERENCE" &&
-    /\b(fine|penalty|deadline|obligation|compliance|statutory|legal|court|board|contract|file|filing|hmrc|tax)\b/.test(lower)
-  ) return true;
-
-  // High-consequence situation described with trivial language
-  if (
-    /\b(fine|penalty|statutory|legal|court|compliance)\b/.test(lower) &&
-    /\b(minor|simple|quick|small|easy|just a|only a|shouldn.?t take long)\b/.test(lower)
-  ) return true;
-
-  // Compliance with "no risk" framing
-  if (
-    cls === "COMPLIANCE_AND_FILING" &&
-    /\b(low risk|no risk|not a big deal|shouldn.?t matter)\b/.test(lower)
-  ) return true;
-
-  return false;
-}
-
-// ─── Preserved ambiguities ────────────────────────────────────────────────────
-
-function detectAmbiguities(lower: string, cls: DecisionClass, confidence: ConfidenceLevel): string[] {
-  const ambiguities: string[] = [];
-
-  if (confidence !== "HIGH") {
-    ambiguities.push(`Decision class may be ${cls} or an adjacent class — more context needed`);
-  }
-  if (/\b(maybe|possibly|might be|could be|not sure if)\b/.test(lower)) {
-    ambiguities.push("Obligation status is not confirmed — may or may not be legally required");
-  }
-  if (/\b(some|partial|partly|not fully|almost|nearly)\b/.test(lower)) {
-    ambiguities.push("Constraint severity is partially described — full extent unclear");
-  }
-  if (/\b(they|them|someone|somebody|a person|the other party)\b/.test(lower) && !extractActors(lower).length) {
-    ambiguities.push("Actors referenced but not identified — authority chain is incomplete");
+    return (hasHighConsequence && hasTrivial) || (looksLowStakes && containsHighStakes)
   }
 
-  return ambiguities;
-}
-
-// ─── Clarification questions ──────────────────────────────────────────────────
-
-function buildClarificationQuestions(
-  lower: string,
-  cls: DecisionClass,
-  confidence: ConfidenceLevel,
-  dims: string[],
-): ClarificationQuestion[] {
-  const questions: ClarificationQuestion[] = [];
-
-  // Authority — missing for governance/board decisions
-  if (
-    (cls === "GOVERNANCE_AND_BOARD" || dims.includes("authority:unclear")) &&
-    !/\b(approved by|authorised by|signed off by|confirmed authority|board has decided|board approved|board voted)\b/.test(lower)
-  ) {
-    questions.push({
-      field: "authority",
-      question: "To map the authority structure accurately, we need to know: is the board being asked to approve this decision, ratify a decision already made, or receive information after management has already acted?",
-      whyNeeded: "The answer changes the authority failure risk and the minimum viable next move.",
-      exampleAnswer: "The CEO made the decision, the board needs to ratify it at the next meeting.",
-    });
+  private hasInstitutionalStructure(lower: string): boolean {
+    return [
+      'decision', 'deadline', 'obligation', 'board', 'authority',
+      'contract', 'compliance', 'filing', 'governance', 'stakeholder',
+      'director', 'company', 'organisation', 'committee',
+      // Tax / financial filing signals
+      'tax', 'accounts', 'turnover', 'revenue', 'fine', 'penalty',
+      // Legal
+      'legal', 'court', 'tribunal',
+    ].some(s => lower.includes(s))
   }
 
-  // Obligation — is there a legal/statutory requirement?
-  if (
-    cls === "COMPLIANCE_AND_FILING" &&
-    !dims.includes("obligation:statutory") &&
-    confidence !== "HIGH"
-  ) {
-    questions.push({
-      field: "obligation_source",
-      question: "Is this filing required by law (e.g. Companies Act, HMRC statutory filing), or is it something you have chosen to submit?",
-      whyNeeded: "Statutory obligations carry mandatory penalties. Voluntary submissions carry different risk profiles.",
-      exampleAnswer: "It is the mandatory annual corporation tax return — HMRC requires it.",
-    });
+  private hasDiagnosticLanguage(lower: string): boolean {
+    return [
+      'because', 'cause', 'reason', 'driver', 'root', 'source',
+      'due to', 'arising from', 'triggered by', 'result of',
+    ].some(s => lower.includes(s))
   }
 
-  // Constraint — is the ideal path genuinely inaccessible?
-  if (
-    /\b(no funds|can.?t afford|cannot afford|no (accountant|lawyer|adviser))\b/.test(lower) &&
-    !dims.includes("constraint:cash")
-  ) {
-    questions.push({
-      field: "constraint_confirmation",
-      question: "When you say you cannot afford professional help, do you mean: (a) no available funds at all, (b) funds are very limited but some fixed-fee engagement may be possible, or (c) the cost is prohibitive relative to the amount at stake?",
-      whyNeeded: "The answer determines whether the minimum viable path should include fixed-scope professional options or free-only routes.",
-      exampleAnswer: "Funds are very limited — I could pay for a targeted 1-hour review but not full preparation.",
-    });
+  private hasPathLanguage(lower: string): boolean {
+    return [
+      'option', 'path', 'approach', 'strategy', 'plan', 'next step',
+      'way forward', 'resolution', 'remedy', 'solution',
+    ].some(s => lower.includes(s))
   }
 
-  // Deadline — confirmed or estimated?
-  if (dims.includes("obligation:deadline") && !/\b(\d{1,2} (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|june 30|july 31|31 january|31 october)\b/.test(lower)) {
-    questions.push({
-      field: "deadline_confirmed",
-      question: "Is the deadline you mentioned confirmed (e.g. a statutory date from HMRC, a court notice), or is it estimated?",
-      whyNeeded: "A confirmed statutory deadline requires immediate action. An estimated deadline may allow more preparation time.",
-      exampleAnswer: "It is confirmed — HMRC correspondence states the deadline is 30 June 2026.",
-    });
+  private hasGovernanceLanguage(lower: string): boolean {
+    return [
+      'governance', 'oversight', 'review', 'approval', 'ratification',
+      'board resolution', 'committee', 'fiduciary', 'sign-off', 'approved',
+    ].some(s => lower.includes(s))
   }
 
-  return questions.slice(0, 3); // Cap at 3 to avoid cognitive overload
-}
+  // ─── Multi-class scoring ────────────────────────────────────────────────────
 
-// ─── Situation summary and interpretation ────────────────────────────────────
+  /**
+   * Scores all 12 decision classes and returns sorted results.
+   * Uses additive scoring to preserve alternatives — not first-match.
+   */
+  private scoreDecisionClasses(lower: string): ClassScore[] {
+    const scores: ClassScore[] = [
+      { cls: 'COMPLIANCE_AND_FILING',     score: 0 },
+      { cls: 'GOVERNANCE_AND_BOARD',      score: 0 },
+      { cls: 'COMMERCIAL_AND_MARKET',     score: 0 },
+      { cls: 'OPERATIONAL_AND_EXECUTION', score: 0 },
+      { cls: 'STRATEGIC_AND_POSITIONING', score: 0 },
+      { cls: 'REPUTATIONAL_AND_EXPOSURE', score: 0 },
+      { cls: 'FINANCIAL_AND_CAPITAL',     score: 0 },
+      { cls: 'LEGAL_AND_CONTRACTUAL',     score: 0 },
+      { cls: 'PEOPLE_AND_AUTHORITY',      score: 0 },
+      { cls: 'TECHNOLOGY_AND_DEPENDENCY', score: 0 },
+      { cls: 'CONTINUITY_AND_TRANSITION', score: 0 },
+      { cls: 'LOW_STAKES_PREFERENCE',     score: 0 },
+    ]
 
-function buildSituationSummary(
-  cls: DecisionClass,
-  vocabularyState: VocabularyState,
-  dims: string[],
-  hiddenStakes: boolean,
-): string {
-  const vocabDescriptions: Record<VocabularyState, string> = {
-    1: "The situation is presented with urgency but without structural clarity",
-    2: "The situation is described with some structure but the failure point has not been diagnosed",
-    3: "The problem has been identified but there is no clear path forward",
-    4: "A path has been chosen but it has not been formally governed or recorded",
-    5: "The stakes appear to be misclassified — the situation may be more serious than described",
-  };
+    const boost = (cls: DecisionClass, pts: number) => {
+      const e = scores.find(s => s.cls === cls)
+      if (e) e.score += pts
+    }
 
-  const classDescriptions: Partial<Record<DecisionClass, string>> = {
-    COMPLIANCE_AND_FILING: "This is a compliance or statutory filing situation",
-    GOVERNANCE_AND_BOARD: "This is a governance or board decision",
-    COMMERCIAL_AND_MARKET: "This is a market claim or commercial positioning decision",
-    OPERATIONAL_AND_EXECUTION: "This is an operational or release decision",
-    LEGAL_AND_CONTRACTUAL: "This is a legal or contractual matter",
-    FINANCIAL_AND_CAPITAL: "This is a financial or capital commitment decision",
-    REPUTATIONAL_AND_EXPOSURE: "This is a reputational or exposure situation",
-    STRATEGIC_AND_POSITIONING: "This is a strategic positioning decision",
-    PEOPLE_AND_AUTHORITY: "This is a people or authority decision",
-    TECHNOLOGY_AND_DEPENDENCY: "This is a technology or dependency situation",
-    CONTINUITY_AND_TRANSITION: "This is a continuity or transition matter",
-    LOW_STAKES_PREFERENCE: "This appears to be a low-stakes preference decision",
-  };
+    // Check LOW_STAKES first — only when no high-stakes signals present
+    if (this.isLowStakesPreference(lower)) {
+      boost('LOW_STAKES_PREFERENCE', 20)
+    }
 
-  const base = classDescriptions[cls] ?? "The decision class requires further clarification";
-  const vocab = vocabDescriptions[vocabularyState];
-  const hiddenNote = hiddenStakes ? " Note: the stakes may be higher than described." : "";
-  const constraint = dims.includes("constraint:cash") ? " Financial constraint is present." : "";
-  const deadline = dims.includes("obligation:deadline") ? " A deadline is referenced." : "";
+    // COMPLIANCE_AND_FILING
+    if (this.matchesAny(lower, ['hmrc', 'companies house', 'company tax', 'corporation tax', 'ct600', 'vat return', 'tax return', 'statutory accounts', 'annual accounts', 'annual return', 'confirmation statement', 'paye', 'national insurance', 'inland revenue', 'irs', 'ato', 'cra', 'self-assessment'])) boost('COMPLIANCE_AND_FILING', 10)
+    // "file my tax", "file the accounts", "file a return" etc.
+    if (this.matchesAny(lower, ['file accounts', 'file tax', 'file my tax', 'file the tax', 'file a return', 'submit accounts', 'regulatory filing', 'compliance deadline'])) boost('COMPLIANCE_AND_FILING', 6)
+    if (this.matchesAny(lower, ['filing', 'file accounts'])) boost('COMPLIANCE_AND_FILING', 3)
+    if (/\bfile\b/.test(lower) && /\btax\b/.test(lower)) boost('COMPLIANCE_AND_FILING', 6)
+    if (this.matchesAny(lower, ['statutory', 'statutory obligation', 'statutory deadline', 'must file', 'legally required', 'compliance implications', 'compliance requirement', 'compliance obligation'])) boost('COMPLIANCE_AND_FILING', 5)
 
-  return `${base}. ${vocab}.${constraint}${deadline}${hiddenNote}`;
-}
+    // GOVERNANCE_AND_BOARD
+    if (this.matchesAny(lower, ['board', 'board of directors', 'board approval', 'board decision', 'board meeting', 'governance', 'director duty', 'fiduciary', 'non-executive', 'nxd', 'chairman', 'board pack', 'agm', 'egm'])) boost('GOVERNANCE_AND_BOARD', 10)
+    if (this.matchesAny(lower, ['signs off', 'sign-off', 'ratification', 'board vote', 'board resolution', 'board needs to'])) boost('GOVERNANCE_AND_BOARD', 5)
 
-function buildKernelInterpretation(
-  cls: DecisionClass,
-  dims: string[],
-  vocabularyState: VocabularyState,
-): string {
-  const hasCash = dims.includes("constraint:cash");
-  const hasDeadline = dims.includes("obligation:deadline");
-  const hasStatutory = dims.includes("obligation:statutory");
-  const hasAuthorityUnclear = dims.includes("authority:unclear");
-  const hasPenalty = dims.includes("consequence:penalty");
-  const hasIncomplete = dims.includes("constraint:records_incomplete");
+    // COMMERCIAL_AND_MARKET
+    if (this.matchesAny(lower, ['market claim', 'positioning', 'pricing strategy', 'go-to-market', 'distribution deal', 'exclusive deal', 'competitive positioning', 'customer acquisition', 'sales strategy', 'contract negotiation', 'partnership terms', 'investor pitch', 'pitching to investors', 'pitch deck', 'investor presentation'])) boost('COMMERCIAL_AND_MARKET', 10)
+    if (this.matchesAny(lower, ['competitor', 'market share', 'customer', 'revenue model', 'commercial terms', 'buyer proof', 'traction', 'growth claim', 'year-on-year', 'pitching'])) boost('COMMERCIAL_AND_MARKET', 4)
 
-  if (cls === "COMPLIANCE_AND_FILING" && hasDeadline && hasCash) {
-    return "This is a constrained statutory compliance situation. The primary institutional question is not whether to comply — the obligation is legal. The question is what is the minimum viable rescue path given the resource constraint.";
+    // OPERATIONAL_AND_EXECUTION
+    if (this.matchesAny(lower, ['release', 'deploy', 'launch', 'ship', 'go-live', 'production deploy', 'rollback', 'staging', 'outage', 'system down', 'operational failure'])) boost('OPERATIONAL_AND_EXECUTION', 10)
+    if (this.matchesAny(lower, ['testing', 'qa', 'sign-off', 'monitoring', 'delivery', 'timeline', 'execution plan'])) boost('OPERATIONAL_AND_EXECUTION', 4)
+
+    // STRATEGIC_AND_POSITIONING
+    if (this.matchesAny(lower, ['strategy', 'strategic direction', 'market entry', 'pivot', 'repositioning', 'competitive advantage', 'long-term direction', 'strategic bet', 'exclusive distribution', 'lose ability to sell direct'])) boost('STRATEGIC_AND_POSITIONING', 8)
+    if (this.matchesAny(lower, ['direction', 'vision', 'transformation', 'restructure', 'reorganisation', 'expansion'])) boost('STRATEGIC_AND_POSITIONING', 4)
+
+    // REPUTATIONAL_AND_EXPOSURE
+    if (this.matchesAny(lower, ['reputation', 'reputational', 'crisis', 'brand damage', 'public statement', 'press release', 'media coverage', 'scandal', 'allegation', 'pr crisis', 'public perception'])) boost('REPUTATIONAL_AND_EXPOSURE', 10)
+    if (this.matchesAny(lower, ['press', 'media', 'public', 'trust', 'credibility'])) boost('REPUTATIONAL_AND_EXPOSURE', 3)
+
+    // FINANCIAL_AND_CAPITAL
+    if (this.matchesAny(lower, ['investment decision', 'funding round', 'bridge round', 'equity raise', 'loan', 'term sheet', 'runway', 'weeks of runway', 'months of runway', 'capital raise', 'balance sheet', 'wind down', 'insolvency', 'solvency'])) boost('FINANCIAL_AND_CAPITAL', 10)
+    if (this.matchesAny(lower, ['cash', 'budget', 'cost', 'funding', 'liquidity', 'expenditure', 'profit'])) boost('FINANCIAL_AND_CAPITAL', 4)
+
+    // LEGAL_AND_CONTRACTUAL
+    if (this.matchesAny(lower, ['lawsuit', 'litigation', 'court', 'tribunal', 'gdpr', 'data protection', 'contract dispute', 'breach of contract', 'legal obligation', 'legal dispute', 'legal issue', 'legal matter', 'legal action', 'legal claim', 'legal contract', 'legal implications', 'solicitor', 'barrister', 'letter before claim'])) boost('LEGAL_AND_CONTRACTUAL', 10)
+    if (this.matchesAny(lower, ['legal', 'contractual', 'liability', 'indemnity', 'warranty', 'breach', 'termination', 'dispute'])) boost('LEGAL_AND_CONTRACTUAL', 4)
+
+    // PEOPLE_AND_AUTHORITY — "team" alone is too generic; require more specific signals
+    if (this.matchesAny(lower, ['hire', 'hiring', 'fire', 'firing', 'redundancy', 'dismiss', 'performance management', 'succession planning', 'leadership change', 'authority delegation', 'mandate delegation'])) boost('PEOPLE_AND_AUTHORITY', 10)
+    if (this.matchesAny(lower, ['succession', 'handover', 'delegation', 'reporting line', 'authority structure'])) boost('PEOPLE_AND_AUTHORITY', 5)
+    // "team" without high-stakes context is weak signal — do not score it
+
+    // TECHNOLOGY_AND_DEPENDENCY
+    if (this.matchesAny(lower, ['vendor lock', 'supplier dependency', 'critical supplier', 'no alternative supplier', 'sole supplier', 'system migration', 'platform migration', 'technical debt', 'infrastructure change', 'cyber risk', 'security breach'])) boost('TECHNOLOGY_AND_DEPENDENCY', 10)
+    if (this.matchesAny(lower, ['technology', 'software', 'system', 'platform', 'data', 'infrastructure', 'it', 'migration'])) boost('TECHNOLOGY_AND_DEPENDENCY', 3)
+
+    // CONTINUITY_AND_TRANSITION
+    if (this.matchesAny(lower, ['succession', 'handover plan', 'business continuity', 'winding down', 'closure', 'exit plan', 'institutional memory', 'what happens when', 'after i leave', 'after we close'])) boost('CONTINUITY_AND_TRANSITION', 10)
+    if (this.matchesAny(lower, ['transition', 'continuity', 'wind-down', 'exit'])) boost('CONTINUITY_AND_TRANSITION', 4)
+
+    return scores.sort((a, b) => b.score - a.score)
   }
-  if (cls === "COMPLIANCE_AND_FILING" && hasStatutory) {
-    return "This is a statutory filing situation. The obligation is externally imposed and non-negotiable. The governing questions are: what exactly is required, by when, and what is the evidence/records state.";
-  }
-  if (cls === "GOVERNANCE_AND_BOARD" && hasAuthorityUnclear) {
-    return "This is a governance decision with unclear authority. The primary failure risk is not in the decision itself but in the mandate. Proceeding without confirmed authority creates reversal risk.";
-  }
-  if (cls === "COMMERCIAL_AND_MARKET") {
-    return "This is a market claim situation. The institutional question is not whether the claim is polished — it is whether the claim can survive serious challenge. Buyer validation and cited evidence are the governing tests.";
-  }
-  if (cls === "OPERATIONAL_AND_EXECUTION" && hasPenalty) {
-    return "This is an operational commitment with consequence exposure. The governing question is whether readiness is confirmed or whether date pressure is overriding it.";
-  }
-  if (hasAuthorityUnclear) {
-    return "Authority is unclear or unconfirmed. No decision can be binding without a named mandate holder. This is the primary failure point to resolve before any other analysis.";
-  }
-  if (hasCash && hasDeadline) {
-    return "Resource constraint meets external deadline. The system maps the minimum viable path rather than the ideal path, because the ideal path may not be accessible under current constraints.";
-  }
-  if (vocabularyState === 5) {
-    return "The situation may be more serious than the framing suggests. The language minimises what appears to be a material obligation or exposure. Stakes have been preserved at their higher reading.";
+
+  private buildAlternatives(scores: ClassScore[]): DecisionClassCandidate[] {
+    const top = scores[0]?.score ?? 0
+    return scores
+      .slice(1, 4)
+      .filter(s => s.score > 0 && s.score >= Math.max(1, top * 0.35)) // Within 35% of top score
+      .map(s => ({
+        decisionClass: s.cls,
+        confidence: (s.score >= top * 0.7 ? 'HIGH' : s.score >= top * 0.5 ? 'MEDIUM' : 'LOW') as ConfidenceLevel,
+        reason: `Score ${s.score} vs primary ${top}`,
+      }))
   }
 
-  return "The system has translated the raw situation into its institutional form. The governing questions are being mapped across authority, obligation, evidence, and constraint dimensions.";
-}
+  private classConfidenceFromScores(scores: ClassScore[]): ConfidenceLevel {
+    const top = scores[0]?.score ?? 0
+    const runner = scores[1]?.score ?? 0
+    if (top === 0) return 'LOW'
+    if (top >= 10 && runner === 0) return 'HIGH'
+    if (top >= 10 && top - runner >= 6) return 'HIGH'
+    if (top >= 6 && top - runner >= 3) return 'MEDIUM'
+    return 'LOW'
+  }
 
-// ─── Main translator ──────────────────────────────────────────────────────────
+  private matchesAny(text: string, patterns: string[]): boolean {
+    return patterns.some(p => text.includes(p))
+  }
 
-export function translateSituation(rawInput: string): TranslationResult {
-  const lower = rawInput.toLowerCase();
+  private isLowStakesPreference(text: string): boolean {
+    const lowSignals = [
+      'preference', 'which one', 'opinion', 'nice to have',
+      'personal choice', 'not urgent', 'no deadline', 'no budget',
+      'no customer impact', 'team preference', 'purely',
+      'decide which', 'trying to decide',
+      'should we move', 'should we change', 'should we switch', 'should we reschedule',
+      'should i move', 'should i change', 'should i switch',
+      'move the meeting', 'reschedule the', 'rename the',
+    ]
+    const highSignals = [
+      'obligation', 'critical', 'consequence', 'risk', 'exposure',
+      'liability', 'penalty', 'board', 'director', 'fiduciary',
+      'compliance', 'regulatory', 'filing', 'legal', 'contract',
+      'litigation', 'funding', 'investment', 'revenue', 'crisis',
+    ]
+    const hasLow = lowSignals.some(s => text.includes(s))
+    const hasHigh = highSignals.some(s => {
+      const regex = new RegExp(`(?:^|\\s)${s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}(?:$|\\s|[.,;!?])`, 'i')
+      return regex.test(text) && !text.includes(`no ${s}`) && !text.includes(`not ${s}`)
+    })
+    return hasLow && !hasHigh
+  }
 
-  // Step 1: Vocabulary state
-  const vocabularyState = detectVocabularyState(lower);
+  // ─── Structured signal detection ────────────────────────────────────────────
 
-  // Step 2: Decision class scoring
-  const classScores = scoreDecisionClasses(lower);
-  const topScore = classScores[0];
-  const runnerUp = classScores[1];
-  const confidence = scoreToConfidence(topScore?.score ?? 0, runnerUp?.score ?? 0);
-  const primaryClass: DecisionClass = topScore?.cls ?? "LOW_STAKES_PREFERENCE";
+  /**
+   * Detects structured signals used by downstream logic.
+   * Format: "dimension:signal" — e.g. "constraint:cash", "obligation:deadline"
+   */
+  private detectStructuredSignals(lower: string, cls: DecisionClass): string[] {
+    const signals: string[] = []
 
-  // Step 3: Alternative classes (score > 0, not primary)
-  const alternatives = classScores
-    .slice(1, 4)
-    .filter(s => s.score > 0)
-    .map(s => ({
-      cls: s.cls,
-      confidence: scoreToConfidence(s.score, classScores[2]?.score ?? 0) as ConfidenceLevel,
-    }));
+    // Cash constraint
+    if (this.matchesAny(lower, ['no funds', 'no money', 'cannot afford', "can't afford", 'no budget', 'limited budget', 'do not have funds', 'runway', 'not sure i can afford', 'may not be able to afford'])) {
+      signals.push('constraint:cash')
+    }
 
-  // Step 4: Actors
-  const initialActors = extractActors(lower);
+    // Capability gap
+    if (this.matchesAny(lower, ['no accountant', 'no solicitor', 'no lawyer', 'no expertise', 'complicated', 'complex accounts', 'no professional', 'cannot do this myself', "don't know how"])) {
+      signals.push('constraint:capability')
+    }
 
-  // Step 5: Dimensions
-  const surfacedDimensions = surfaceDimensions(lower, primaryClass);
+    // Records incomplete
+    if (this.matchesAny(lower, ['placeholder', 'provisional filing', 'missing records', 'no records', 'incomplete records'])) {
+      signals.push('constraint:records_incomplete')
+    }
 
-  // Step 6: Hidden stakes
-  const hiddenStakesDetected = detectHiddenStakes(lower, primaryClass);
+    // External deadline
+    if (
+      this.matchesAny(lower, [
+        'deadline', 'must file by', 'must respond', 'by end of', 'by next',
+        'within days', 'within weeks', 'within \d+ days', 'next week', 'next month',
+        'overdue', 'filing due', 'response due', 'court date',
+        'till june', 'till july', 'till august', 'till september', 'till october',
+        'till november', 'till december', 'till january', 'till february', 'till march',
+        'till april', 'till may',
+        'respond within', 'days to respond', 'days to file',
+      ]) ||
+      /till \w+ \d{4}/.test(lower) ||
+      /within \d+ (day|week|month)/.test(lower)
+    ) {
+      signals.push('obligation:deadline')
+    }
 
-  // Step 7: Ambiguities
-  const preservedAmbiguities = detectAmbiguities(lower, primaryClass, confidence);
+    // Statutory obligation
+    if (
+      cls === 'COMPLIANCE_AND_FILING' ||
+      this.matchesAny(lower, ['hmrc', 'statutory', 'must file', 'legally required', 'companies house', 'annual accounts']) ||
+      (/\bfile\b/.test(lower) && /\btax\b/.test(lower))
+    ) {
+      signals.push('obligation:statutory')
+    }
 
-  // Step 8: Clarification questions
-  const clarificationRequired = buildClarificationQuestions(
-    lower, primaryClass, confidence, surfacedDimensions,
-  );
+    // Penalty exposure
+    if (this.matchesAny(lower, ['fine', 'penalty', 'fined', 'penalised', 'enforcement', 'sanction', '£', 'huge fine', 'large fine']) && !this.matchesAny(lower, ['seems fine', 'is fine', 'all fine', 'quite fine'])) {
+      signals.push('consequence:penalty')
+    }
 
-  // Step 9: Narratives
-  const situationSummary = buildSituationSummary(
-    primaryClass, vocabularyState, surfacedDimensions, hiddenStakesDetected,
-  );
-  const kernelInterpretation = buildKernelInterpretation(
-    primaryClass, surfacedDimensions, vocabularyState,
-  );
+    // Authority unclear
+    if (this.matchesAny(lower, ['not sure who', 'unclear who', 'who decides', "don't know who", 'no approval yet', 'not confirmed', 'signs off'])) {
+      signals.push('authority:unclear')
+    }
 
-  return {
-    vocabularyState,
-    situationSummary,
-    kernelInterpretation,
-    translationConfidence: confidence,
-    clarificationRequired,
-    decisionClass: primaryClass,
-    alternativeClasses: alternatives,
-    initialActors,
-    surfacedDimensions,
-    preservedAmbiguities,
-    hiddenStakesDetected,
-  };
+    // Board authority required
+    if (cls === 'GOVERNANCE_AND_BOARD' || this.matchesAny(lower, ['board approval', 'board needs to', 'board must', 'shareholder approval'])) {
+      signals.push('authority:board_required')
+    }
+
+    // Evidence present
+    if (this.matchesAny(lower, ['data', 'evidence', 'research', 'analysis', 'report', 'study', 'survey', 'benchmark'])) {
+      signals.push('evidence:present')
+    }
+
+    // Evidence assumed
+    if (this.matchesAny(lower, ['assume', 'believe', 'thinks', 'probably', 'maybe', 'projection', 'projections', 'unvalidated', 'internally'])) {
+      signals.push('evidence:assumed')
+    }
+
+    // Dependency unresolved
+    if (this.matchesAny(lower, ['waiting for', 'blocked by', 'depends on', 'pending approval', 'pending review', 'pending data'])) {
+      signals.push('dependency:unresolved')
+    }
+
+    // Irreversible
+    if (this.matchesAny(lower, ['irreversible', "can't undo", 'no going back', 'irrevocable', 'once filed', 'once signed'])) {
+      signals.push('reversibility:irreversible')
+    }
+
+    return signals
+  }
+
+  /**
+   * Converts structured signals to short display labels.
+   * "constraint:cash" → "financial", "obligation:deadline" → "timing", etc.
+   */
+  private buildDisplayDimensions(signals: string[]): string[] {
+    const dims = new Set<string>()
+    const map: Record<string, string> = {
+      'constraint:cash': 'financial',
+      'constraint:capability': 'capability',
+      'constraint:records_incomplete': 'records',
+      'obligation:deadline': 'timing',
+      'obligation:statutory': 'obligation',
+      'consequence:penalty': 'consequence',
+      'authority:unclear': 'authority',
+      'authority:board_required': 'authority',
+      'evidence:present': 'evidence',
+      'evidence:assumed': 'evidence',
+      'dependency:unresolved': 'dependency',
+      'reversibility:irreversible': 'reversibility',
+    }
+    for (const s of signals) {
+      const display = map[s]
+      if (display) dims.add(display)
+    }
+    return [...dims]
+  }
+
+  // ─── Actor extraction ───────────────────────────────────────────────────────
+
+  private extractActors(lower: string): ActorCandidate[] {
+    const actors: ActorCandidate[] = []
+
+    const patterns: Array<{ pattern: RegExp; role: string; name: string }> = [
+      { pattern: /\b(ceo)\b/i, role: 'executive', name: 'ceo' },
+      { pattern: /\b(cfo)\b/i, role: 'executive', name: 'cfo' },
+      { pattern: /\b(coo)\b/i, role: 'executive', name: 'coo' },
+      { pattern: /\b(cto)\b/i, role: 'executive', name: 'cto' },
+      { pattern: /\b(board|directors?|chairman|non.executive|nxd)\b/i, role: 'board', name: 'board' },
+      { pattern: /\b(hmrc)\b/i, role: 'regulator', name: 'hmrc' },
+      { pattern: /\b(companies house)\b/i, role: 'regulator', name: 'companies house' },
+      { pattern: /\b(court)\b/i, role: 'regulator', name: 'court' },
+      { pattern: /\b(solicitor|barrister|lawyer|legal)\b/i, role: 'advisor', name: 'legal advisor' },
+      { pattern: /\b(accountant)\b/i, role: 'advisor', name: 'accountant' },
+      { pattern: /\b(founder|owner|principal)\b/i, role: 'principal', name: 'founder' },
+      { pattern: /\b(shareholder|investor)\b/i, role: 'stakeholder', name: 'investor' },
+    ]
+
+    // Also infer HMRC when tax filing context is present
+    if (this.matchesAny(lower, ['tax return', 'tax filing', 'file tax', 'file my tax', 'corporation tax', 'hmrc'])) {
+      if (!actors.some(a => a.name === 'hmrc')) {
+        actors.push({ name: 'hmrc', role: 'regulator', confidence: 'HIGH', source: 'inferred_from_context' })
+      }
+    }
+
+    for (const { pattern, role, name } of patterns) {
+      if (pattern.test(lower) && !actors.some(a => a.name === name)) {
+        actors.push({ name, role, confidence: 'HIGH', source: 'user_reported' })
+      }
+    }
+
+    return actors
+  }
+
+  // ─── Ambiguity detection ────────────────────────────────────────────────────
+
+  private detectAmbiguities(lower: string, cls: DecisionClass, confidence: ConfidenceLevel): string[] {
+    const ambiguities: string[] = []
+
+    // LOW_STAKES decisions do not generate authority/obligation/timing ambiguities
+    if (cls === 'LOW_STAKES_PREFERENCE') {
+      return ambiguities
+    }
+
+    if (confidence !== 'HIGH') {
+      ambiguities.push('decision_class_uncertain')
+    }
+
+    const authorityConfirmed = this.matchesAny(lower, [
+      'approved by', 'authorised by', 'authority confirmed', 'board has decided', 'signed off by',
+      'approved the', 'team lead approved', 'manager approved', 'everyone agrees', 'agreed by',
+    ])
+    if (!authorityConfirmed) {
+      ambiguities.push('authority_structure')
+    }
+
+    const obligationSignals = this.matchesAny(lower, [
+      'obligation', 'must', 'required by law', 'statutory', 'legally required',
+      'duty', 'filing', 'file', 'submit',
+    ])
+    if (!obligationSignals && ['COMPLIANCE_AND_FILING', 'GOVERNANCE_AND_BOARD', 'LEGAL_AND_CONTRACTUAL'].includes(cls)) {
+      ambiguities.push('obligation_landscape')
+    }
+
+    const constraintSignals = this.matchesAny(lower, [
+      'constraint', 'cannot', 'no budget', 'no funds', 'no time', 'limited',
+      'runway', 'afford', 'cash', 'capacity',
+    ])
+    if (!constraintSignals) {
+      ambiguities.push('constraint_landscape')
+    }
+
+    const timingSignals = this.matchesAny(lower, [
+      'deadline', 'urgent', 'asap', 'timeframe', 'by end of', 'within', 'due date',
+      'till', 'next week', 'next month', 'by next', 'days to', 'respond by',
+    ])
+    if (!timingSignals) {
+      ambiguities.push('timing_pressure')
+    }
+
+    return ambiguities
+  }
+
+  // ─── Hidden stakes ──────────────────────────────────────────────────────────
+
+  private detectHiddenStakes(lower: string, cls: DecisionClass): boolean {
+    // Pattern 1: Compliance/legal obligation trivialised as minor/simple
+    const highConsequence = ['fine', 'penalty', 'court', 'statutory', 'compliance', 'hmrc', 'legal obligation', 'must file', 'board approval', 'fiduciary']
+    const trivial = ['minor', 'simple', 'quick', 'small', 'easy', "shouldn't take long", 'just a', 'only a', 'not a big deal']
+    if (highConsequence.some(s => lower.includes(s)) && trivial.some(s => lower.includes(s))) return true
+
+    // Pattern 2: Financial magnitude mismatch
+    if (cls !== 'FINANCIAL_AND_CAPITAL' && ['million', 'billion', 'significant investment', 'material loss'].some(s => lower.includes(s))) return true
+
+    // Pattern 3: Reputational signal mismatch
+    if (cls !== 'REPUTATIONAL_AND_EXPOSURE' && ['reputation', 'brand damage', 'crisis', 'scandal', 'allegation'].some(s => lower.includes(s))) return true
+
+    // Pattern 4: Low-stakes classification but high-stakes language present
+    if (cls === 'LOW_STAKES_PREFERENCE' && ['deadline', 'penalty', 'legal', 'regulatory', 'board', 'director', 'compliance', 'filing'].some(s => lower.includes(s))) return true
+
+    return false
+  }
+
+  // ─── Clarification questions ────────────────────────────────────────────────
+
+  private generateClarifications(
+    vocabularyState: number,
+    cls: DecisionClass,
+    ambiguities: string[],
+    hiddenStakes: boolean,
+  ): ClarificationQuestion[] {
+    const questions: ClarificationQuestion[] = []
+
+    if (vocabularyState === 1) {
+      questions.push({
+        domain: 'structure',
+        question: 'To map this situation accurately, what kind of decision is this — a statutory filing obligation, a board decision, a commercial negotiation, a legal dispute, or something else?',
+        rationale: 'Without structural context the system cannot select the appropriate analysis lenses.',
+      })
+    }
+
+    if (ambiguities.includes('authority_structure')) {
+      questions.push({
+        domain: 'authority',
+        question: 'To map the authority structure accurately: is the board being asked to approve the decision, ratify one already made, or receive information after management has already acted?',
+        rationale: 'Authority structure determines whether the decision is valid and who can challenge it.',
+      })
+    }
+
+    if (ambiguities.includes('obligation_landscape')) {
+      questions.push({
+        domain: 'obligation',
+        question: 'Are there contractual, regulatory, or statutory obligations that apply? For example: filing deadlines, service level agreements, director duties, or investor commitments?',
+        rationale: 'Obligations define what must be performed regardless of preference or convenience.',
+      })
+    }
+
+    if (ambiguities.includes('constraint_landscape')) {
+      questions.push({
+        domain: 'constraint',
+        question: 'What makes the ideal path impossible? Common constraints: insufficient cash, time, authority, legal restrictions, or capability.',
+        rationale: 'Without constraints the system may recommend an inaccessible path.',
+      })
+    }
+
+    if (ambiguities.includes('timing_pressure')) {
+      questions.push({
+        domain: 'timing',
+        question: 'Is there a specific deadline or time pressure? Is it statutory, contractual, or self-imposed?',
+        rationale: 'Timing determines whether the response should be immediate, urgent, or considered.',
+      })
+    }
+
+    if (hiddenStakes) {
+      questions.push({
+        domain: 'stakes',
+        question: 'The situation appears to contain higher stakes than initially described. Is there a financial, legal, or reputational exposure that makes this more than a routine decision?',
+        rationale: 'Misclassified stakes lead to inappropriate lens selection and inadequate output depth.',
+      })
+    }
+
+    return questions.slice(0, 3)
+  }
+
+  // ─── Summary and interpretation ─────────────────────────────────────────────
+
+  private generateSummary(raw: string, cls: DecisionClass, signals: string[]): string {
+    const classLabels: Partial<Record<DecisionClass, string>> = {
+      COMPLIANCE_AND_FILING: 'a statutory or regulatory filing situation',
+      GOVERNANCE_AND_BOARD: 'a board-level governance decision',
+      COMMERCIAL_AND_MARKET: 'a commercial or market positioning decision',
+      OPERATIONAL_AND_EXECUTION: 'an operational or release decision',
+      LEGAL_AND_CONTRACTUAL: 'a legal or contractual matter',
+      FINANCIAL_AND_CAPITAL: 'a financial or capital commitment decision',
+      REPUTATIONAL_AND_EXPOSURE: 'a reputational or exposure situation',
+      STRATEGIC_AND_POSITIONING: 'a strategic positioning decision',
+      PEOPLE_AND_AUTHORITY: 'a people or authority decision',
+      TECHNOLOGY_AND_DEPENDENCY: 'a technology or dependency situation',
+      CONTINUITY_AND_TRANSITION: 'a continuity or transition matter',
+      LOW_STAKES_PREFERENCE: 'a low-stakes preference decision',
+    }
+    const classLabel = classLabels[cls] ?? 'a decision requiring structured analysis'
+    const constraintNote = signals.includes('constraint:cash') ? ' Financial constraint present.' : ''
+    const deadlineNote = signals.includes('obligation:deadline') ? ' A deadline is referenced.' : ''
+    return `This is ${classLabel}.${constraintNote}${deadlineNote}`
+  }
+
+  private generateInterpretation(lower: string, cls: DecisionClass, signals: string[]): string {
+    const classDescriptions: Record<DecisionClass, string> = {
+      COMPLIANCE_AND_FILING: 'a compliance or filing obligation with a defined deadline and consequence for missing it',
+      GOVERNANCE_AND_BOARD: 'a governance or board-level decision requiring proper process, documentation, and fiduciary consideration',
+      COMMERCIAL_AND_MARKET: 'a commercial or market decision where positioning, pricing, or partnership terms are at stake',
+      OPERATIONAL_AND_EXECUTION: 'an operational or execution decision where delivery, capacity, or process reliability is the primary concern',
+      STRATEGIC_AND_POSITIONING: 'a strategic or positioning decision where direction, structure, or competitive posture is being set',
+      REPUTATIONAL_AND_EXPOSURE: 'a reputational or exposure decision where public perception, trust, or brand integrity is at risk',
+      FINANCIAL_AND_CAPITAL: 'a financial or capital decision where cash, funding, or balance sheet capacity constrains the feasible set',
+      LEGAL_AND_CONTRACTUAL: 'a legal or contractual decision where rights, obligations, or liabilities are being determined or disputed',
+      PEOPLE_AND_AUTHORITY: 'a people or authority decision where mandate, leadership, or organisational structure is the primary variable',
+      TECHNOLOGY_AND_DEPENDENCY: 'a technology or dependency decision where system reliability, migration, or technical debt is the binding constraint',
+      CONTINUITY_AND_TRANSITION: 'a continuity or transition decision where succession, handover, or business continuity is the primary concern',
+      LOW_STAKES_PREFERENCE: 'a low-stakes preference decision where the primary variable is personal or organisational preference',
+    }
+
+    const base = `The system interprets this situation as ${classDescriptions[cls]}.`
+
+    // Add constraint-specific interpretation
+    const hasCashConstraint = signals.includes('constraint:cash')
+    const hasStatutory = signals.includes('obligation:statutory')
+    const hasDeadline = signals.includes('obligation:deadline')
+
+    if (cls === 'COMPLIANCE_AND_FILING' && hasCashConstraint && hasDeadline) {
+      return `${base} The primary institutional question is not whether to comply — the obligation is legal. The question is what is the minimum viable rescue path given the resource constraint.`
+    }
+    if (cls === 'COMPLIANCE_AND_FILING' && hasStatutory) {
+      return `${base} The obligation is externally imposed and non-negotiable. The governing questions are: what exactly is required, by when, and what is the evidence and records state.`
+    }
+    if (signals.includes('authority:unclear')) {
+      return `${base} The primary failure risk is not in the decision itself but in the mandate. Proceeding without confirmed authority creates reversal risk.`
+    }
+    if (hasCashConstraint && hasDeadline) {
+      return `${base} Resource constraint meets external deadline. The system maps the minimum viable path rather than the ideal path.`
+    }
+
+    const dimensionText = signals.length > 0 ? ` Dimensions surfaced: ${[...new Set(signals.map(s => s.split(':')[0]))].join(', ')}.` : ''
+    return `${base}${dimensionText}`
+  }
+
+  // ─── Confidence ─────────────────────────────────────────────────────────────
+
+  /**
+   * Confidence is based on class score gap and ambiguity count,
+   * NOT on vocabulary state. State 4 means "incomplete structure" — not high confidence.
+   */
+  private calculateConfidence(
+    scores: ClassScore[],
+    ambiguities: string[],
+    vocabularyState: number,
+  ): ConfidenceLevel {
+    const classConf = this.classConfidenceFromScores(scores)
+
+    // Too many ambiguities → downgrade
+    if (ambiguities.length >= 4) return 'LOW'
+    if (ambiguities.length >= 2 && classConf !== 'HIGH') return 'LOW'
+
+    // Very low vocabulary state → low confidence regardless
+    if (vocabularyState === 1) return 'LOW'
+
+    return classConf
+  }
 }
