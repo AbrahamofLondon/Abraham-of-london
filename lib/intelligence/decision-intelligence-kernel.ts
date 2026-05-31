@@ -109,11 +109,13 @@ export class DecisionIntelligenceKernel {
       }
     }
 
-    // Step 4: Classify decision
+    // Step 4: Classify decision — pass all translator signals so alternatives are preserved
     const classification = this.taxonomy.classify({
       decisionClass: translation.decisionClass,
       translationConfidence: translation.translationConfidence,
       hiddenStakesDetected: translation.hiddenStakesDetected,
+      alternativeClasses: translation.alternativeClasses,
+      preservedAmbiguities: translation.preservedAmbiguities,
     })
     this.events.record(input.caseId, 'CASE_CLASSIFIED', {
       primaryClass: classification.primaryClass,
@@ -163,8 +165,8 @@ export class DecisionIntelligenceKernel {
       })
     }
 
-    // Step 9: Build self-adversarial challenge
-    if (this.requiresSelfAdversarial(input.aperture)) {
+    // Step 9: Build self-adversarial challenge (skip for low-stakes — would be overengineering)
+    if (this.requiresSelfAdversarial(input.aperture) && classification.primaryClass !== 'LOW_STAKES_PREFERENCE') {
       livingCase.selfAdversarialChallenge = this.buildSelfAdversarialChallenge(livingCase, lensResults)
       this.events.record(input.caseId, 'SELF_ADVERSARIAL_COMPLETED', {})
     }
@@ -289,6 +291,18 @@ export class DecisionIntelligenceKernel {
    */
   private deriveMinimumViablePath(livingCase: LivingDecisionCase): DecisionMove[] {
     const path: DecisionMove[] = []
+
+    // For low-stakes preference decisions, provide a simple proportional path
+    if (livingCase.classification?.primaryClass === 'LOW_STAKES_PREFERENCE') {
+      path.push({
+        order: 1,
+        action: 'DECIDE_BY_PREFERENCE',
+        description: 'This is a low-stakes preference decision. Choose based on team preference and practical fit.',
+        rationale: 'No binding constraints, obligations, or consequences are at stake.',
+        urgency: 'LOW',
+      })
+      return path
+    }
 
     // If authority is unclear, first move is always authority clarification
     if (livingCase.authorityMap.length === 0) {
