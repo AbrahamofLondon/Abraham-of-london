@@ -1,0 +1,77 @@
+{
+  "scenario": "low_stakes_preference",
+  "title": "Low-Stakes Preference",
+  "rawSituation": "I am trying to decide which project management software to use for my small team. We have used Asana before but some team members prefer Notion. There is no deadline. No budget constraint. No customer impact. It is purely a team preference decision.",
+  "kernelResult": {
+    "status": "QUALITY_FAILED",
+    "vocabularyState": 2,
+    "situationSummary": "This is a low-stakes preference decision.",
+    "kernelInterpretation": "The system interprets this situation as a low-stakes preference decision where the primary variable is personal or organisational preference. No binding constraints, obligations, or consequences are at stake.",
+    "translationConfidence": "HIGH",
+    "primaryClass": "LOW_STAKES_PREFERENCE",
+    "alternativeClasses": [],
+    "surfacedDimensions": [],
+    "preservedAmbiguities": [],
+    "clarificationQuestions": null,
+    "actorMap": [],
+    "authorityState": [],
+    "obligationState": [],
+    "constraintGraph": [],
+    "evidenceState": [
+      {
+        "kind": "evidence_gap",
+        "label": "Evidence Gap: Low documentation",
+        "summary": "Situation relies primarily on user-reported information without independent documentation",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "evidence"
+      }
+    ],
+    "adversarialChallenges": [],
+    "selfAdversarialChallenge": null,
+    "regulatedBoundaryState": {
+      "hit": false
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "DECIDE_BY_PREFERENCE",
+        "description": "This is a low-stakes preference decision. Choose based on team preference and practical fit.",
+        "rationale": "No binding constraints, obligations, or consequences are at stake.",
+        "urgency": "LOW"
+      }
+    ],
+    "forbiddenActions": [],
+    "whatMustNotBeDelayed": [],
+    "freeSignalOutput": null,
+    "basicBriefOutput": null,
+    "fullDossierOutput": null,
+    "humanReviewTrigger": {
+      "state": "not_required",
+      "tier": null,
+      "triggers": []
+    },
+    "qualityFailures": [
+      "GENERIC_ADVICE: Output contains no specific, non-swappable insight",
+      "MISSING_CONSTRAINT_GRAPH: Constraint landscape is required for paid tiers",
+      "MISSING_ADVERSARIAL_CHALLENGE: Adversarial challenge is required for paid tiers",
+      "MISSING_SELF_ADVERSARIAL_CHALLENGE: Self-adversarial challenge is required for paid tiers"
+    ]
+  },
+  "qualityRubric": {
+    "situationSeenAccurately": "REVIEW",
+    "specificity": 3,
+    "nonGenericInsight": 3,
+    "ambiguityPreserved": "PASS",
+    "falsePrecisionAvoided": "PASS",
+    "minimumViablePathUseful": 3,
+    "impossibleAdviceAvoided": "N/A",
+    "regulatedBoundaryHandled": "N/A",
+    "humanReviewCorrectlyTriggered": "N/A",
+    "wouldBuyerPayAfterFreeSignal": "MAYBE",
+    "wouldFullDossierEmbarrassBrand": "MAYBE"
+  },
+  "automaticFailures": [],
+  "notes": "Auto-generated. Rubric requires human review."
+}

@@ -1,0 +1,139 @@
+{
+  "scenario": "procurement_supplier_risk",
+  "title": "Procurement Supplier Risk",
+  "rawSituation": "Our sole supplier for a critical component has issued a force majeure notice. They cannot guarantee delivery for 12 weeks. We have 4 weeks of inventory. Our customers have firm orders. Switching supplier requires 8 weeks of qualification. The CFO says we cannot absorb the penalty for late delivery.",
+  "kernelResult": {
+    "status": "QUALITY_FAILED",
+    "vocabularyState": 2,
+    "situationSummary": "This is a technology or dependency situation.",
+    "kernelInterpretation": "The system interprets this situation as a technology or dependency decision where system reliability, migration, or technical debt is the binding constraint. Dimensions surfaced: consequence.",
+    "translationConfidence": "HIGH",
+    "primaryClass": "TECHNOLOGY_AND_DEPENDENCY",
+    "alternativeClasses": [
+      {
+        "decisionClass": "GOVERNANCE_AND_BOARD",
+        "confidence": "LOW",
+        "reason": "Authority ambiguity suggests governance dimension"
+      },
+      {
+        "decisionClass": "OPERATIONAL_AND_EXECUTION",
+        "confidence": "LOW",
+        "reason": "Timing pressure suggests operational execution dimension"
+      }
+    ],
+    "surfacedDimensions": [
+      "consequence"
+    ],
+    "preservedAmbiguities": [
+      "authority_structure",
+      "timing_pressure"
+    ],
+    "clarificationQuestions": null,
+    "actorMap": [
+      {
+        "name": "cfo",
+        "role": "executive",
+        "confidence": "HIGH",
+        "source": "user_reported"
+      }
+    ],
+    "authorityState": [],
+    "obligationState": [],
+    "constraintGraph": [],
+    "evidenceState": [
+      {
+        "kind": "evidence_gap",
+        "label": "Evidence Gap: Low documentation",
+        "summary": "Situation relies primarily on user-reported information without independent documentation",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "evidence"
+      }
+    ],
+    "adversarialChallenges": [],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "The situation has been interpreted correctly based on the information provided",
+          "evidenceBasis": "User-reported context",
+          "ifWrong": "The entire analysis may be misdirected",
+          "verificationPath": "Review the situation classification and provide additional context"
+        }
+      ],
+      "classificationConfidence": {
+        "primaryClass": "TECHNOLOGY_AND_DEPENDENCY",
+        "confidence": "HIGH",
+        "alternativeClass": "GOVERNANCE_AND_BOARD",
+        "implication": "If classification is wrong, the entire lens selection and output structure changes."
+      },
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate",
+          "acquisitionPath": "Ask: Who has the formal authority to make this decision?"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed",
+          "acquisitionPath": "Ask: What contractual, regulatory, or fiduciary obligations apply?"
+        },
+        {
+          "gap": "Constraint landscape is unmapped",
+          "impact": "Minimum viable path may be invalid",
+          "acquisitionPath": "Ask: What makes the ideal path impossible? Cash, time, authority, or capacity?"
+        }
+      ],
+      "kernelLimitations": [
+        "This analysis is based on the information provided and available evidence.",
+        "The system cannot verify independently reported facts.",
+        "Human review is recommended for high-consequence decisions.",
+        "This does not constitute legal, tax, or regulated professional advice."
+      ]
+    },
+    "regulatedBoundaryState": {
+      "hit": false
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "CLARIFY_AUTHORITY",
+        "description": "Establish who holds decision mandate before proceeding",
+        "rationale": "Without clear authority, any decision is vulnerable to challenge",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [],
+    "whatMustNotBeDelayed": [
+      "Establish who holds decision mandate before proceeding"
+    ],
+    "freeSignalOutput": null,
+    "basicBriefOutput": null,
+    "fullDossierOutput": null,
+    "humanReviewTrigger": {
+      "state": "not_required",
+      "tier": null,
+      "triggers": []
+    },
+    "qualityFailures": [
+      "GENERIC_ADVICE: Output contains no specific, non-swappable insight",
+      "MISSING_CONSTRAINT_GRAPH: Constraint landscape is required for paid tiers",
+      "MISSING_ADVERSARIAL_CHALLENGE: Adversarial challenge is required for paid tiers"
+    ]
+  },
+  "qualityRubric": {
+    "situationSeenAccurately": "REVIEW",
+    "specificity": 3,
+    "nonGenericInsight": 3,
+    "ambiguityPreserved": "PASS",
+    "falsePrecisionAvoided": "PASS",
+    "minimumViablePathUseful": 3,
+    "impossibleAdviceAvoided": "N/A",
+    "regulatedBoundaryHandled": "N/A",
+    "humanReviewCorrectlyTriggered": "N/A",
+    "wouldBuyerPayAfterFreeSignal": "MAYBE",
+    "wouldFullDossierEmbarrassBrand": "MAYBE"
+  },
+  "automaticFailures": [],
+  "notes": "Auto-generated. Rubric requires human review."
+}

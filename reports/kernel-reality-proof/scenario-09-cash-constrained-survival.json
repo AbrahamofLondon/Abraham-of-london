@@ -1,0 +1,233 @@
+{
+  "scenario": "cash_constrained_survival",
+  "title": "Cash-Constrained Survival",
+  "rawSituation": "We have 6 weeks of cash runway. We have cut all non-essential costs. We are in late-stage discussions with two investors but neither has committed. A major customer has delayed payment by 60 days. The CEO is considering using personal credit cards to meet payroll. The company has no debt facility.",
+  "kernelResult": {
+    "status": "QUALITY_FAILED",
+    "vocabularyState": 2,
+    "situationSummary": "This is a financial or capital commitment decision. Financial constraint present.",
+    "kernelInterpretation": "The system interprets this situation as a financial or capital decision where cash, funding, or balance sheet capacity constrains the feasible set. Dimensions surfaced: constraint.",
+    "translationConfidence": "HIGH",
+    "primaryClass": "FINANCIAL_AND_CAPITAL",
+    "alternativeClasses": [
+      {
+        "decisionClass": "GOVERNANCE_AND_BOARD",
+        "confidence": "LOW",
+        "reason": "Authority ambiguity suggests governance dimension"
+      },
+      {
+        "decisionClass": "OPERATIONAL_AND_EXECUTION",
+        "confidence": "LOW",
+        "reason": "Timing pressure suggests operational execution dimension"
+      }
+    ],
+    "surfacedDimensions": [
+      "financial"
+    ],
+    "preservedAmbiguities": [
+      "authority_structure",
+      "timing_pressure"
+    ],
+    "clarificationQuestions": null,
+    "actorMap": [
+      {
+        "name": "ceo",
+        "role": "executive",
+        "confidence": "HIGH",
+        "source": "user_reported"
+      }
+    ],
+    "authorityState": [],
+    "obligationState": [],
+    "constraintGraph": [
+      {
+        "type": "cash",
+        "description": "Cash position constrains available options",
+        "severity": "HIGH",
+        "isBinding": false
+      }
+    ],
+    "evidenceState": [
+      {
+        "kind": "constraint",
+        "label": "Constraint: Cash position constrains available options",
+        "summary": "Cash position constrains available options",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "constraint-reality"
+      },
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Liquidity concern — cash position may constrain options",
+        "summary": "Liquidity concern — cash position may constrain options",
+        "severity": "HIGH",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "evidence_gap",
+        "label": "Evidence Gap: Low documentation",
+        "summary": "Situation relies primarily on user-reported information without independent documentation",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "evidence"
+      },
+      {
+        "kind": "contradiction",
+        "label": "Contradiction: Cash runway is critically short but required funding has not",
+        "summary": "Cash runway is critically short but required funding has not been secured or is delayed",
+        "severity": "CRITICAL",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "adversarial"
+      }
+    ],
+    "adversarialChallenges": [
+      {
+        "id": "runway-vs-funding-delay",
+        "between": [
+          "constraint-reality-lens",
+          "obligation-lens"
+        ],
+        "contradiction": "Cash runway is critically short but required funding has not been secured or is delayed",
+        "severity": "CRITICAL",
+        "resolutionRule": "ADVERSARIAL_CHALLENGE_PRESERVED",
+        "outputEffect": "Output blocked until contradiction is resolved by human review."
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Cash position constrains available options",
+          "evidenceBasis": "System-inferred from context",
+          "ifWrong": "The minimum viable path may change.",
+          "verificationPath": "Verify constraint with primary source."
+        }
+      ],
+      "classificationConfidence": {
+        "primaryClass": "FINANCIAL_AND_CAPITAL",
+        "confidence": "HIGH",
+        "alternativeClass": "GOVERNANCE_AND_BOARD",
+        "implication": "If classification is wrong, the entire lens selection and output structure changes."
+      },
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate",
+          "acquisitionPath": "Ask: Who has the formal authority to make this decision?"
+        },
+        {
+          "gap": "Obligation structure is unclear",
+          "impact": "Cannot determine what must be performed",
+          "acquisitionPath": "Ask: What contractual, regulatory, or fiduciary obligations apply?"
+        }
+      ],
+      "kernelLimitations": [
+        "This analysis is based on the information provided and available evidence.",
+        "The system cannot verify independently reported facts.",
+        "Human review is recommended for high-consequence decisions.",
+        "This does not constitute legal, tax, or regulated professional advice."
+      ]
+    },
+    "regulatedBoundaryState": {
+      "hit": true,
+      "type": "investment-advice",
+      "allTriggers": [
+        "investment-advice",
+        "financial-promotion"
+      ],
+      "output": {
+        "regulatedBoundaryIdentified": true,
+        "whatThisMeans": "The system has identified that this situation touches on regulated professional advice boundaries. The system cannot provide regulated professional advice, but it can help you prepare to engage the right professional.",
+        "whatWeCanStillMap": [
+          "Authority structure and decision mandate",
+          "Obligation landscape and constraints",
+          "Evidence quality and gaps",
+          "Consequence exposure and timing",
+          "Adversarial challenge and minimum viable path"
+        ],
+        "professionalBrief": {
+          "purpose": "This brief is designed to help you approach a regulated professional with structure.",
+          "suggestedProfession": "a regulated financial adviser",
+          "whatToBring": [
+            "This Living Decision Case reference and output",
+            "Evidence of constraints (financial statements, timelines, capacity data)",
+            "Any documentation referenced in the evidence graph"
+          ],
+          "questionsToAsk": [
+            "What are the regulatory requirements for any financial promotion or investment solicitation?"
+          ]
+        },
+        "whatToDoNext": [
+          "Review the mapped elements above.",
+          "Prepare the documentation listed in the professional brief.",
+          "Engage a qualified professional for the regulated element.",
+          "Return to the system with the professional's input to update the case."
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "CLARIFY_AUTHORITY",
+        "description": "Establish who holds decision mandate before proceeding",
+        "rationale": "Without clear authority, any decision is vulnerable to challenge",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "description": "Verify: Cash position constrains available options",
+        "rationale": "Critical constraints change the feasible set",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [],
+    "whatMustNotBeDelayed": [
+      "Establish who holds decision mandate before proceeding",
+      "Verify: Cash position constrains available options"
+    ],
+    "freeSignalOutput": null,
+    "basicBriefOutput": null,
+    "fullDossierOutput": null,
+    "humanReviewTrigger": {
+      "state": "pending",
+      "tier": "STANDARD",
+      "triggers": [
+        {
+          "type": "regulated_boundary",
+          "severity": "HIGH"
+        },
+        {
+          "type": "investment_financial_promotion_risk",
+          "severity": "HIGH"
+        },
+        {
+          "type": "kernel_contradiction_high_or_critical",
+          "severity": "STANDARD"
+        }
+      ]
+    },
+    "qualityFailures": [
+      "GENERIC_ADVICE: Output contains no specific, non-swappable insight"
+    ]
+  },
+  "qualityRubric": {
+    "situationSeenAccurately": "REVIEW",
+    "specificity": 3,
+    "nonGenericInsight": 3,
+    "ambiguityPreserved": "PASS",
+    "falsePrecisionAvoided": "PASS",
+    "minimumViablePathUseful": 3,
+    "impossibleAdviceAvoided": "N/A",
+    "regulatedBoundaryHandled": "N/A",
+    "humanReviewCorrectlyTriggered": "N/A",
+    "wouldBuyerPayAfterFreeSignal": "MAYBE",
+    "wouldFullDossierEmbarrassBrand": "MAYBE"
+  },
+  "automaticFailures": [],
+  "notes": "Auto-generated. Rubric requires human review."
+}

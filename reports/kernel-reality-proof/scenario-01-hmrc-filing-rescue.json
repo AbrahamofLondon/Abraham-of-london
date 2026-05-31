@@ -1,0 +1,762 @@
+{
+  "scenario": "hmrc_filing_rescue",
+  "title": "HMRC/Company Accounts Filing Rescue with No Funds",
+  "rawSituation": "We have a company accounts filing due at Companies House in 14 days. The accountant has resigned. The director is unwell. There are no funds to pay for an emergency filing. The company is solvent but cash-poor. If we miss the filing, the company will be struck off. The director's other directorates may also be affected.",
+  "kernelResult": {
+    "status": "COMPLETED",
+    "vocabularyState": 2,
+    "situationSummary": "This is a statutory or regulatory filing situation. Financial constraint present. A deadline is referenced.",
+    "kernelInterpretation": "The system interprets this situation as a compliance or filing obligation with a defined deadline and consequence for missing it. The primary institutional question is not whether to comply — the obligation is legal. The question is what is the minimum viable rescue path given the resource constraint.",
+    "translationConfidence": "HIGH",
+    "primaryClass": "COMPLIANCE_AND_FILING",
+    "alternativeClasses": [
+      {
+        "decisionClass": "GOVERNANCE_AND_BOARD",
+        "confidence": "LOW",
+        "reason": "Authority ambiguity suggests governance dimension"
+      },
+      {
+        "decisionClass": "OPERATIONAL_AND_EXECUTION",
+        "confidence": "LOW",
+        "reason": "Timing pressure suggests operational execution dimension"
+      }
+    ],
+    "surfacedDimensions": [
+      "financial",
+      "timing",
+      "obligation"
+    ],
+    "preservedAmbiguities": [
+      "authority_structure",
+      "timing_pressure"
+    ],
+    "clarificationQuestions": null,
+    "actorMap": [
+      {
+        "name": "board",
+        "role": "board",
+        "confidence": "HIGH",
+        "source": "user_reported"
+      },
+      {
+        "name": "companies house",
+        "role": "regulator",
+        "confidence": "HIGH",
+        "source": "user_reported"
+      },
+      {
+        "name": "accountant",
+        "role": "advisor",
+        "confidence": "HIGH",
+        "source": "user_reported"
+      }
+    ],
+    "authorityState": [],
+    "obligationState": [
+      {
+        "description": "Statutory filing obligation",
+        "type": "statutory",
+        "deadline": "14 days",
+        "consequence": "Company struck off, director disqualification",
+        "evidenceBasis": "User-reported",
+        "confidence": "MEDIUM"
+      }
+    ],
+    "constraintGraph": [
+      {
+        "type": "cash",
+        "description": "Insufficient funds to execute the required action",
+        "severity": "CRITICAL",
+        "isBinding": true
+      },
+      {
+        "type": "cash",
+        "description": "Cash position constrains available options",
+        "severity": "HIGH",
+        "isBinding": false
+      },
+      {
+        "type": "time",
+        "description": "14-day deadline imposes severe time constraint",
+        "severity": "CRITICAL",
+        "isBinding": true
+      }
+    ],
+    "evidenceState": [
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Cash constraint — insufficient resources to execute",
+        "summary": "Cash constraint — insufficient resources to execute",
+        "severity": "CRITICAL",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Liquidity concern — cash position may constrain options",
+        "summary": "Liquidity concern — cash position may constrain options",
+        "severity": "HIGH",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Key person dependency — critical role is vacant or departing",
+        "summary": "Key person dependency — critical role is vacant or departing",
+        "severity": "HIGH",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Key person dependency — decision-maker capacity is compromised",
+        "summary": "Key person dependency — decision-maker capacity is compromised",
+        "severity": "HIGH",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Existential threat — entity dissolution risk",
+        "summary": "Existential threat — entity dissolution risk",
+        "severity": "CRITICAL",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      },
+      {
+        "kind": "constraint",
+        "label": "Constraint: Insufficient funds to execute the required action",
+        "summary": "Insufficient funds to execute the required action",
+        "severity": "CRITICAL",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "constraint-reality"
+      },
+      {
+        "kind": "constraint",
+        "label": "Constraint: Cash position constrains available options",
+        "summary": "Cash position constrains available options",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "constraint-reality"
+      },
+      {
+        "kind": "constraint",
+        "label": "Constraint: 14-day deadline imposes severe time constraint",
+        "summary": "14-day deadline imposes severe time constraint",
+        "severity": "CRITICAL",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "constraint-reality"
+      },
+      {
+        "kind": "obligation",
+        "label": "Obligation: Statutory filing obligation",
+        "summary": "Statutory filing obligation",
+        "severity": "HIGH",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "obligation"
+      },
+      {
+        "kind": "evidence_gap",
+        "label": "Evidence Gap: Low documentation",
+        "summary": "Situation relies primarily on user-reported information without independent documentation",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "evidence"
+      },
+      {
+        "kind": "contradiction",
+        "label": "Contradiction: Obligation to meet deadline exists but resources to meet it ",
+        "summary": "Obligation to meet deadline exists but resources to meet it do not",
+        "severity": "CRITICAL",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "adversarial"
+      },
+      {
+        "kind": "contradiction",
+        "label": "Contradiction: Existential threat detected but resources to address it are ",
+        "summary": "Existential threat detected but resources to address it are constrained",
+        "severity": "CRITICAL",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "adversarial"
+      }
+    ],
+    "adversarialChallenges": [
+      {
+        "id": "obligation-vs-resources",
+        "between": [
+          "obligation-lens",
+          "constraint-reality-lens"
+        ],
+        "contradiction": "Obligation to meet deadline exists but resources to meet it do not",
+        "severity": "CRITICAL",
+        "resolutionRule": "ADVERSARIAL_CHALLENGE_PRESERVED",
+        "outputEffect": "Output blocked until contradiction is resolved by human review."
+      },
+      {
+        "id": "existential-threat-vs-resources",
+        "between": [
+          "failure-mode-lens",
+          "constraint-reality-lens"
+        ],
+        "contradiction": "Existential threat detected but resources to address it are constrained",
+        "severity": "CRITICAL",
+        "resolutionRule": "ADVERSARIAL_CHALLENGE_PRESERVED",
+        "outputEffect": "Output blocked until contradiction is resolved by human review."
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Insufficient funds to execute the required action",
+          "evidenceBasis": "System-inferred from context",
+          "ifWrong": "The minimum viable path may change.",
+          "verificationPath": "Verify constraint with primary source."
+        },
+        {
+          "assumption": "Cash position constrains available options",
+          "evidenceBasis": "System-inferred from context",
+          "ifWrong": "The minimum viable path may change.",
+          "verificationPath": "Verify constraint with primary source."
+        }
+      ],
+      "classificationConfidence": {
+        "primaryClass": "COMPLIANCE_AND_FILING",
+        "confidence": "HIGH",
+        "alternativeClass": "GOVERNANCE_AND_BOARD",
+        "implication": "If classification is wrong, the entire lens selection and output structure changes."
+      },
+      "informationGaps": [
+        {
+          "gap": "Authority structure is unclear",
+          "impact": "Cannot determine who holds decision mandate",
+          "acquisitionPath": "Ask: Who has the formal authority to make this decision?"
+        }
+      ],
+      "kernelLimitations": [
+        "This analysis is based on the information provided and available evidence.",
+        "The system cannot verify independently reported facts.",
+        "Human review is recommended for high-consequence decisions.",
+        "This does not constitute legal, tax, or regulated professional advice."
+      ]
+    },
+    "regulatedBoundaryState": {
+      "hit": true,
+      "type": "audit-opinion",
+      "allTriggers": [
+        "audit-opinion"
+      ],
+      "output": {
+        "regulatedBoundaryIdentified": true,
+        "whatThisMeans": "The system has identified that this situation touches on regulated professional advice boundaries. The system cannot provide regulated professional advice, but it can help you prepare to engage the right professional.",
+        "whatWeCanStillMap": [
+          "Authority structure and decision mandate",
+          "Obligation landscape and constraints",
+          "Evidence quality and gaps",
+          "Consequence exposure and timing",
+          "Adversarial challenge and minimum viable path"
+        ],
+        "professionalBrief": {
+          "purpose": "This brief is designed to help you approach a regulated professional with structure.",
+          "suggestedProfession": "a qualified auditor",
+          "whatToBring": [
+            "This Living Decision Case reference and output",
+            "Relevant contracts, filings, or regulatory correspondence",
+            "Evidence of constraints (financial statements, timelines, capacity data)",
+            "Any documentation referenced in the evidence graph"
+          ],
+          "questionsToAsk": [
+            "What are the key legal, regulatory, or professional obligations in this situation?"
+          ]
+        },
+        "whatToDoNext": [
+          "Review the mapped elements above.",
+          "Prepare the documentation listed in the professional brief.",
+          "Engage a qualified professional for the regulated element.",
+          "Return to the system with the professional's input to update the case."
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "CLARIFY_AUTHORITY",
+        "description": "Establish who holds decision mandate before proceeding",
+        "rationale": "Without clear authority, any decision is vulnerable to challenge",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 2,
+        "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+        "description": "Verify: Insufficient funds to execute the required action",
+        "rationale": "Critical constraints change the feasible set",
+        "urgency": "IMMEDIATE"
+      },
+      {
+        "order": 3,
+        "action": "ADDRESS_URGENT_OBLIGATIONS",
+        "description": "Address: Statutory filing obligation (deadline: 14 days)",
+        "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+        "urgency": "IMMEDIATE"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "Ignore the filing deadline",
+        "reason": "Missing the deadline triggers penalty, strike-off, or director disqualification",
+        "severity": "CRITICAL"
+      }
+    ],
+    "whatMustNotBeDelayed": [
+      "Establish who holds decision mandate before proceeding",
+      "Verify: Insufficient funds to execute the required action",
+      "Address: Statutory filing obligation (deadline: 14 days)"
+    ],
+    "freeSignalOutput": {
+      "tier": "free_signal",
+      "sections": [
+        {
+          "id": "situation_class",
+          "label": "Situation Class",
+          "content": "COMPLIANCE_AND_FILING",
+          "type": "badge"
+        },
+        {
+          "id": "what_the_system_saw",
+          "label": "What the System Saw",
+          "content": "The system interprets this situation as a compliance or filing obligation with a defined deadline and consequence for missing it. The primary institutional question is not whether to comply — the obligation is legal. The question is what is the minimum viable rescue path given the resource constraint.",
+          "type": "prose"
+        },
+        {
+          "id": "primary_failure_point",
+          "label": "Primary Failure Point",
+          "content": "Cash constraint — insufficient resources to execute",
+          "type": "prose"
+        },
+        {
+          "id": "governing_tension",
+          "label": "Governing Tension",
+          "content": "The system interprets this situation as a compliance or filing obligation with a defined deadline and consequence for missing it",
+          "type": "prose"
+        },
+        {
+          "id": "consequence_class",
+          "label": "Consequence Class",
+          "content": "CRITICAL",
+          "type": "badge"
+        },
+        {
+          "id": "what_full_analysis_maps",
+          "label": "What the Full Analysis Maps",
+          "content": [
+            "Obligation landscape",
+            "Constraint graph",
+            "Evidence graph",
+            "Adversarial challenge"
+          ],
+          "type": "list"
+        },
+        {
+          "id": "direction_of_minimum_viable_move",
+          "label": "Direction of Minimum Viable Move",
+          "content": "Establish who holds decision mandate before proceeding",
+          "type": "prose"
+        }
+      ]
+    },
+    "basicBriefOutput": null,
+    "fullDossierOutput": {
+      "tier": "full_dossier",
+      "sections": [
+        {
+          "id": "authority_map",
+          "label": "Authority Map",
+          "content": [],
+          "type": "structured"
+        },
+        {
+          "id": "obligation_map",
+          "label": "Obligation Map",
+          "content": [
+            {
+              "description": "Statutory filing obligation",
+              "type": "statutory",
+              "deadline": "14 days",
+              "consequence": "Company struck off, director disqualification",
+              "evidenceBasis": "User-reported",
+              "confidence": "MEDIUM"
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "constraint_graph",
+          "label": "Constraint Graph",
+          "content": [
+            {
+              "type": "cash",
+              "description": "Insufficient funds to execute the required action",
+              "severity": "CRITICAL",
+              "isBinding": true
+            },
+            {
+              "type": "cash",
+              "description": "Cash position constrains available options",
+              "severity": "HIGH",
+              "isBinding": false
+            },
+            {
+              "type": "time",
+              "description": "14-day deadline imposes severe time constraint",
+              "severity": "CRITICAL",
+              "isBinding": true
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "evidence_graph",
+          "label": "Evidence Graph",
+          "content": [
+            {
+              "kind": "failure_mode",
+              "label": "Failure Mode: Cash constraint — insufficient resources to execute",
+              "summary": "Cash constraint — insufficient resources to execute",
+              "severity": "CRITICAL",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "failure-mode"
+            },
+            {
+              "kind": "failure_mode",
+              "label": "Failure Mode: Liquidity concern — cash position may constrain options",
+              "summary": "Liquidity concern — cash position may constrain options",
+              "severity": "HIGH",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "failure-mode"
+            },
+            {
+              "kind": "failure_mode",
+              "label": "Failure Mode: Key person dependency — critical role is vacant or departing",
+              "summary": "Key person dependency — critical role is vacant or departing",
+              "severity": "HIGH",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "failure-mode"
+            },
+            {
+              "kind": "failure_mode",
+              "label": "Failure Mode: Key person dependency — decision-maker capacity is compromised",
+              "summary": "Key person dependency — decision-maker capacity is compromised",
+              "severity": "HIGH",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "failure-mode"
+            },
+            {
+              "kind": "failure_mode",
+              "label": "Failure Mode: Existential threat — entity dissolution risk",
+              "summary": "Existential threat — entity dissolution risk",
+              "severity": "CRITICAL",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "failure-mode"
+            },
+            {
+              "kind": "constraint",
+              "label": "Constraint: Insufficient funds to execute the required action",
+              "summary": "Insufficient funds to execute the required action",
+              "severity": "CRITICAL",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "constraint-reality"
+            },
+            {
+              "kind": "constraint",
+              "label": "Constraint: Cash position constrains available options",
+              "summary": "Cash position constrains available options",
+              "severity": "HIGH",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "constraint-reality"
+            },
+            {
+              "kind": "constraint",
+              "label": "Constraint: 14-day deadline imposes severe time constraint",
+              "summary": "14-day deadline imposes severe time constraint",
+              "severity": "CRITICAL",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "constraint-reality"
+            },
+            {
+              "kind": "obligation",
+              "label": "Obligation: Statutory filing obligation",
+              "summary": "Statutory filing obligation",
+              "severity": "HIGH",
+              "confidence": 0.7,
+              "sourceStage": "kernel",
+              "sourceLens": "obligation"
+            },
+            {
+              "kind": "evidence_gap",
+              "label": "Evidence Gap: Low documentation",
+              "summary": "Situation relies primarily on user-reported information without independent documentation",
+              "severity": "HIGH",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "evidence"
+            },
+            {
+              "kind": "contradiction",
+              "label": "Contradiction: Obligation to meet deadline exists but resources to meet it ",
+              "summary": "Obligation to meet deadline exists but resources to meet it do not",
+              "severity": "CRITICAL",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "adversarial"
+            },
+            {
+              "kind": "contradiction",
+              "label": "Contradiction: Existential threat detected but resources to address it are ",
+              "summary": "Existential threat detected but resources to address it are constrained",
+              "severity": "CRITICAL",
+              "confidence": 0.8,
+              "sourceStage": "kernel",
+              "sourceLens": "adversarial"
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "adversarial_challenge",
+          "label": "Adversarial Challenge",
+          "content": [
+            {
+              "id": "obligation-vs-resources",
+              "between": [
+                "obligation-lens",
+                "constraint-reality-lens"
+              ],
+              "contradiction": "Obligation to meet deadline exists but resources to meet it do not",
+              "severity": "CRITICAL",
+              "resolutionRule": "ADVERSARIAL_CHALLENGE_PRESERVED",
+              "outputEffect": "Output blocked until contradiction is resolved by human review."
+            },
+            {
+              "id": "existential-threat-vs-resources",
+              "between": [
+                "failure-mode-lens",
+                "constraint-reality-lens"
+              ],
+              "contradiction": "Existential threat detected but resources to address it are constrained",
+              "severity": "CRITICAL",
+              "resolutionRule": "ADVERSARIAL_CHALLENGE_PRESERVED",
+              "outputEffect": "Output blocked until contradiction is resolved by human review."
+            }
+          ],
+          "type": "structured"
+        },
+        {
+          "id": "self_adversarial_challenge",
+          "label": "Self-Adversarial Challenge",
+          "content": {
+            "loadBearingAssumptions": [
+              {
+                "assumption": "Insufficient funds to execute the required action",
+                "evidenceBasis": "System-inferred from context",
+                "ifWrong": "The minimum viable path may change.",
+                "verificationPath": "Verify constraint with primary source."
+              },
+              {
+                "assumption": "Cash position constrains available options",
+                "evidenceBasis": "System-inferred from context",
+                "ifWrong": "The minimum viable path may change.",
+                "verificationPath": "Verify constraint with primary source."
+              }
+            ],
+            "classificationConfidence": {
+              "primaryClass": "COMPLIANCE_AND_FILING",
+              "confidence": "HIGH",
+              "alternativeClass": "GOVERNANCE_AND_BOARD",
+              "implication": "If classification is wrong, the entire lens selection and output structure changes."
+            },
+            "informationGaps": [
+              {
+                "gap": "Authority structure is unclear",
+                "impact": "Cannot determine who holds decision mandate",
+                "acquisitionPath": "Ask: Who has the formal authority to make this decision?"
+              }
+            ],
+            "kernelLimitations": [
+              "This analysis is based on the information provided and available evidence.",
+              "The system cannot verify independently reported facts.",
+              "Human review is recommended for high-consequence decisions.",
+              "This does not constitute legal, tax, or regulated professional advice."
+            ]
+          },
+          "type": "structured"
+        },
+        {
+          "id": "minimum_viable_path",
+          "label": "Minimum Viable Path",
+          "content": [
+            {
+              "order": 1,
+              "action": "CLARIFY_AUTHORITY",
+              "description": "Establish who holds decision mandate before proceeding",
+              "rationale": "Without clear authority, any decision is vulnerable to challenge",
+              "urgency": "IMMEDIATE"
+            },
+            {
+              "order": 2,
+              "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+              "description": "Verify: Insufficient funds to execute the required action",
+              "rationale": "Critical constraints change the feasible set",
+              "urgency": "IMMEDIATE"
+            },
+            {
+              "order": 3,
+              "action": "ADDRESS_URGENT_OBLIGATIONS",
+              "description": "Address: Statutory filing obligation (deadline: 14 days)",
+              "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+              "urgency": "IMMEDIATE"
+            }
+          ],
+          "type": "ordered_actions"
+        },
+        {
+          "id": "forbidden_actions",
+          "label": "Forbidden Actions",
+          "content": [
+            {
+              "action": "Ignore the filing deadline",
+              "reason": "Missing the deadline triggers penalty, strike-off, or director disqualification",
+              "severity": "CRITICAL"
+            }
+          ],
+          "type": "list"
+        },
+        {
+          "id": "fallback_path",
+          "label": "Fallback Path",
+          "content": [
+            {
+              "order": 2,
+              "action": "VALIDATE_CRITICAL_CONSTRAINTS",
+              "description": "Verify: Insufficient funds to execute the required action",
+              "rationale": "Critical constraints change the feasible set",
+              "urgency": "IMMEDIATE"
+            },
+            {
+              "order": 3,
+              "action": "ADDRESS_URGENT_OBLIGATIONS",
+              "description": "Address: Statutory filing obligation (deadline: 14 days)",
+              "rationale": "Time-sensitive obligations cannot be deferred without consequence",
+              "urgency": "IMMEDIATE"
+            }
+          ],
+          "type": "ordered_actions"
+        },
+        {
+          "id": "what_must_not_be_delayed",
+          "label": "What Must Not Be Delayed",
+          "content": [
+            "Establish who holds decision mandate before proceeding",
+            "Verify: Insufficient funds to execute the required action",
+            "Address: Statutory filing obligation (deadline: 14 days)"
+          ],
+          "type": "list"
+        },
+        {
+          "id": "record_reference",
+          "label": "Record Reference",
+          "content": {
+            "caseReference": "PROOF-HMRC_FILING_RESCUE-DOSSIER",
+            "kernelVersion": "1.0.0",
+            "ontologyVersion": "1.0.0",
+            "generatedAt": "2026-05-31T12:58:47.933Z"
+          },
+          "type": "metadata"
+        },
+        {
+          "id": "regulated_boundary",
+          "label": "Regulated Boundary",
+          "content": {
+            "regulatedBoundaryIdentified": true,
+            "whatThisMeans": "The system has identified that this situation touches on regulated professional advice boundaries. The system cannot provide regulated professional advice, but it can help you prepare to engage the right professional.",
+            "whatWeCanStillMap": [
+              "Authority structure and decision mandate",
+              "Obligation landscape and constraints",
+              "Evidence quality and gaps",
+              "Consequence exposure and timing",
+              "Adversarial challenge and minimum viable path"
+            ],
+            "professionalBrief": {
+              "purpose": "This brief is designed to help you approach a regulated professional with structure.",
+              "suggestedProfession": "a qualified auditor",
+              "whatToBring": [
+                "This Living Decision Case reference and output",
+                "Relevant contracts, filings, or regulatory correspondence",
+                "Evidence of constraints (financial statements, timelines, capacity data)",
+                "Any documentation referenced in the evidence graph"
+              ],
+              "questionsToAsk": [
+                "What are the key legal, regulatory, or professional obligations in this situation?"
+              ]
+            },
+            "whatToDoNext": [
+              "Review the mapped elements above.",
+              "Prepare the documentation listed in the professional brief.",
+              "Engage a qualified professional for the regulated element.",
+              "Return to the system with the professional's input to update the case."
+            ]
+          },
+          "type": "structured"
+        }
+      ]
+    },
+    "humanReviewTrigger": {
+      "state": "pending",
+      "tier": "STANDARD",
+      "triggers": [
+        {
+          "type": "regulated_boundary",
+          "severity": "HIGH"
+        },
+        {
+          "type": "kernel_contradiction_high_or_critical",
+          "severity": "STANDARD"
+        }
+      ]
+    },
+    "qualityFailures": []
+  },
+  "qualityRubric": {
+    "situationSeenAccurately": "REVIEW",
+    "specificity": 3,
+    "nonGenericInsight": 3,
+    "ambiguityPreserved": "PASS",
+    "falsePrecisionAvoided": "PASS",
+    "minimumViablePathUseful": 3,
+    "impossibleAdviceAvoided": "N/A",
+    "regulatedBoundaryHandled": "N/A",
+    "humanReviewCorrectlyTriggered": "N/A",
+    "wouldBuyerPayAfterFreeSignal": "MAYBE",
+    "wouldFullDossierEmbarrassBrand": "MAYBE"
+  },
+  "automaticFailures": [],
+  "notes": "Auto-generated. Rubric requires human review."
+}

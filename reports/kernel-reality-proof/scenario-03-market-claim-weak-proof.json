@@ -1,0 +1,316 @@
+{
+  "scenario": "market_claim_strong_copy_weak_proof",
+  "title": "Market Claim with Strong Copy but Weak Proof",
+  "rawSituation": "We are launching a new product and the marketing team has prepared claims about market leadership and customer adoption. The actual customer data shows only 12 beta users, none of whom have completed the onboarding. The CEO wants to launch with the strong claims anyway. The product is not generating revenue yet.",
+  "kernelResult": {
+    "status": "COMPLETED",
+    "vocabularyState": 2,
+    "situationSummary": "This is a board-level governance decision.",
+    "kernelInterpretation": "The system interprets this situation as a governance or board-level decision requiring proper process, documentation, and fiduciary consideration. Dimensions surfaced: authority, evidence.",
+    "translationConfidence": "LOW",
+    "primaryClass": "GOVERNANCE_AND_BOARD",
+    "alternativeClasses": [
+      {
+        "decisionClass": "OPERATIONAL_AND_EXECUTION",
+        "confidence": "HIGH",
+        "reason": "Score 10 vs primary 10"
+      },
+      {
+        "decisionClass": "COMMERCIAL_AND_MARKET",
+        "confidence": "LOW",
+        "reason": "Score 4 vs primary 10"
+      }
+    ],
+    "surfacedDimensions": [
+      "authority",
+      "evidence"
+    ],
+    "preservedAmbiguities": [
+      "decision_class_uncertain",
+      "authority_structure",
+      "obligation_landscape",
+      "constraint_landscape",
+      "timing_pressure"
+    ],
+    "clarificationQuestions": null,
+    "actorMap": [
+      {
+        "name": "ceo",
+        "role": "executive",
+        "confidence": "HIGH",
+        "source": "user_reported"
+      }
+    ],
+    "authorityState": [
+      {
+        "holder": "Board of Directors",
+        "scope": "Strategic and governance decisions",
+        "limitation": null,
+        "evidenceBasis": "User-reported",
+        "confidence": "MEDIUM",
+        "source": "user_reported"
+      },
+      {
+        "holder": "Chief Executive Officer",
+        "scope": "Executive operational decisions",
+        "limitation": "May require board ratification for major decisions",
+        "evidenceBasis": "User-reported",
+        "confidence": "MEDIUM",
+        "source": "user_reported"
+      }
+    ],
+    "obligationState": [
+      {
+        "description": "Fiduciary duty to board and shareholders",
+        "type": "fiduciary",
+        "deadline": null,
+        "consequence": "Director liability",
+        "evidenceBasis": "User-reported",
+        "confidence": "MEDIUM"
+      }
+    ],
+    "constraintGraph": [],
+    "evidenceState": [
+      {
+        "kind": "authority",
+        "label": "Authority: Board of Directors",
+        "summary": "Board of Directors holds authority over Strategic and governance decisions",
+        "severity": "MEDIUM",
+        "confidence": 0.6,
+        "sourceStage": "kernel",
+        "sourceLens": "authority"
+      },
+      {
+        "kind": "authority",
+        "label": "Authority: Chief Executive Officer",
+        "summary": "Chief Executive Officer holds authority over Executive operational decisions",
+        "severity": "MEDIUM",
+        "confidence": 0.6,
+        "sourceStage": "kernel",
+        "sourceLens": "authority"
+      },
+      {
+        "kind": "obligation",
+        "label": "Obligation: Fiduciary duty to board and shareholders",
+        "summary": "Fiduciary duty to board and shareholders",
+        "severity": "MEDIUM",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "obligation"
+      },
+      {
+        "kind": "evidence_warning",
+        "label": "Evidence Warning: Unsupported claims",
+        "summary": "Situation contains claims or allegations that may not be independently verifiable",
+        "severity": "MEDIUM",
+        "confidence": 0.6,
+        "sourceStage": "kernel",
+        "sourceLens": "evidence"
+      },
+      {
+        "kind": "contradiction",
+        "label": "Contradiction: Claim is being made but evidence to support it is absent or ",
+        "summary": "Claim is being made but evidence to support it is absent or weak",
+        "severity": "HIGH",
+        "confidence": 0.8,
+        "sourceStage": "kernel",
+        "sourceLens": "adversarial"
+      },
+      {
+        "kind": "failure_mode",
+        "label": "Failure Mode: Governance pressure — board-level decision with fiduciary implications",
+        "summary": "Governance pressure — board-level decision with fiduciary implications",
+        "severity": "HIGH",
+        "confidence": 0.7,
+        "sourceStage": "kernel",
+        "sourceLens": "failure-mode"
+      }
+    ],
+    "adversarialChallenges": [
+      {
+        "id": "claim-vs-evidence",
+        "between": [
+          "market-claim-lens",
+          "evidence-lens"
+        ],
+        "contradiction": "Claim is being made but evidence to support it is absent or weak",
+        "severity": "HIGH",
+        "resolutionRule": "EVIDENCE_OVERRIDES_INFERENCE",
+        "outputEffect": "Output confidence downgraded. Human review recommended."
+      }
+    ],
+    "selfAdversarialChallenge": {
+      "loadBearingAssumptions": [
+        {
+          "assumption": "Authority is held by Board of Directors",
+          "evidenceBasis": "User-reported",
+          "ifWrong": "The decision may not be valid, or escalation may be misdirected.",
+          "verificationPath": "Verify authority documentation or delegation record."
+        }
+      ],
+      "classificationConfidence": {
+        "primaryClass": "GOVERNANCE_AND_BOARD",
+        "confidence": "LOW",
+        "alternativeClass": "OPERATIONAL_AND_EXECUTION",
+        "implication": "If classification is wrong, the entire lens selection and output structure changes."
+      },
+      "informationGaps": [
+        {
+          "gap": "Constraint landscape is unmapped",
+          "impact": "Minimum viable path may be invalid",
+          "acquisitionPath": "Ask: What makes the ideal path impossible? Cash, time, authority, or capacity?"
+        }
+      ],
+      "kernelLimitations": [
+        "This analysis is based on the information provided and available evidence.",
+        "The system cannot verify independently reported facts.",
+        "Human review is recommended for high-consequence decisions.",
+        "This does not constitute legal, tax, or regulated professional advice."
+      ]
+    },
+    "regulatedBoundaryState": {
+      "hit": true,
+      "type": "director-duty-advice",
+      "allTriggers": [
+        "director-duty-advice",
+        "legal-advice"
+      ],
+      "output": {
+        "regulatedBoundaryIdentified": true,
+        "whatThisMeans": "The system has identified that this situation touches on regulated professional advice boundaries. The system cannot provide regulated professional advice, but it can help you prepare to engage the right professional.",
+        "whatWeCanStillMap": [
+          "Authority structure and decision mandate",
+          "Obligation landscape and constraints",
+          "Evidence quality and gaps",
+          "Consequence exposure and timing",
+          "Adversarial challenge and minimum viable path"
+        ],
+        "professionalBrief": {
+          "purpose": "This brief is designed to help you approach a regulated professional with structure.",
+          "suggestedProfession": "a qualified solicitor",
+          "whatToBring": [
+            "This Living Decision Case reference and output",
+            "Authority documentation and delegation records",
+            "Relevant contracts, filings, or regulatory correspondence",
+            "Any documentation referenced in the evidence graph"
+          ],
+          "questionsToAsk": [
+            "What is the strength of the legal position and what are the limitation periods?",
+            "What are the director duties and potential liabilities in this situation?"
+          ]
+        },
+        "whatToDoNext": [
+          "Review the mapped elements above.",
+          "Prepare the documentation listed in the professional brief.",
+          "Engage a qualified professional for the regulated element.",
+          "Return to the system with the professional's input to update the case."
+        ]
+      }
+    },
+    "minimumViablePath": [
+      {
+        "order": 1,
+        "action": "ASSESS_OPTIONS",
+        "description": "Map available options against constraints and obligations",
+        "rationale": "Without a clear path, the first step is understanding what is feasible",
+        "urgency": "HIGH"
+      }
+    ],
+    "forbiddenActions": [],
+    "whatMustNotBeDelayed": [],
+    "freeSignalOutput": {
+      "tier": "free_signal",
+      "sections": [
+        {
+          "id": "situation_class",
+          "label": "Situation Class",
+          "content": "GOVERNANCE_AND_BOARD",
+          "type": "badge"
+        },
+        {
+          "id": "what_the_system_saw",
+          "label": "What the System Saw",
+          "content": "The system interprets this situation as a governance or board-level decision requiring proper process, documentation, and fiduciary consideration. Dimensions surfaced: authority, evidence.",
+          "type": "prose"
+        },
+        {
+          "id": "primary_failure_point",
+          "label": "Primary Failure Point",
+          "content": "Claim is being made but evidence to support it is absent or weak",
+          "type": "prose"
+        },
+        {
+          "id": "governing_tension",
+          "label": "Governing Tension",
+          "content": "The system interprets this situation as a governance or board-level decision requiring proper process, documentation, and fiduciary consideration",
+          "type": "prose"
+        },
+        {
+          "id": "consequence_class",
+          "label": "Consequence Class",
+          "content": "HIGH",
+          "type": "badge"
+        },
+        {
+          "id": "what_full_analysis_maps",
+          "label": "What the Full Analysis Maps",
+          "content": [
+            "Authority structure",
+            "Obligation landscape",
+            "Evidence graph",
+            "Adversarial challenge"
+          ],
+          "type": "list"
+        },
+        {
+          "id": "direction_of_minimum_viable_move",
+          "label": "Direction of Minimum Viable Move",
+          "content": "Map available options against constraints and obligations",
+          "type": "prose"
+        }
+      ]
+    },
+    "basicBriefOutput": null,
+    "fullDossierOutput": null,
+    "humanReviewTrigger": {
+      "state": "pending",
+      "tier": "STANDARD",
+      "triggers": [
+        {
+          "type": "board_fiduciary_exposure",
+          "severity": "HIGH"
+        },
+        {
+          "type": "regulated_boundary",
+          "severity": "HIGH"
+        },
+        {
+          "type": "low_confidence_on_primitives",
+          "severity": "STANDARD"
+        },
+        {
+          "type": "kernel_contradiction_high_or_critical",
+          "severity": "STANDARD"
+        }
+      ]
+    },
+    "qualityFailures": [
+      "MISSING_CONSTRAINT_GRAPH: Constraint landscape is required for paid tiers"
+    ]
+  },
+  "qualityRubric": {
+    "situationSeenAccurately": "REVIEW",
+    "specificity": 3,
+    "nonGenericInsight": 3,
+    "ambiguityPreserved": "PASS",
+    "falsePrecisionAvoided": "PASS",
+    "minimumViablePathUseful": 3,
+    "impossibleAdviceAvoided": "N/A",
+    "regulatedBoundaryHandled": "N/A",
+    "humanReviewCorrectlyTriggered": "N/A",
+    "wouldBuyerPayAfterFreeSignal": "MAYBE",
+    "wouldFullDossierEmbarrassBrand": "MAYBE"
+  },
+  "automaticFailures": [],
+  "notes": "Auto-generated. Rubric requires human review."
+}

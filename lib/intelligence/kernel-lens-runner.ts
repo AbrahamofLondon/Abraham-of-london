@@ -448,14 +448,21 @@ export class KernelLensRunner {
     }
 
     // Revenue/funding urgency vs cash exhaustion
-    if ((raw.includes('runway') || raw.includes('payroll') || raw.includes('weeks of') ||
-         raw.includes('months of')) &&
-        (raw.includes('no investor') || raw.includes('not committed') || raw.includes('no funding') ||
-         raw.includes('no commitment'))) {
+    // Pattern covers: "neither has committed", "not yet committed", "hasn't committed",
+    // "no commitment", "delayed payment", investors present but uncommitted
+    if (
+      (raw.includes('runway') || raw.includes('payroll') || raw.includes('weeks of') ||
+       raw.includes('months of') || raw.includes('cash runway')) &&
+      (raw.includes('no investor') || raw.includes('not committed') || raw.includes('no funding') ||
+       raw.includes('no commitment') || raw.includes('neither has committed') ||
+       raw.includes('not yet committed') || raw.includes("hasn't committed") ||
+       raw.includes('delayed payment') || raw.includes('delay') ||
+       (raw.includes('investor') && (raw.includes('committed') || raw.includes('discussion'))))
+    ) {
       contradictions.push({
         id: 'runway-vs-funding-delay',
         between: ['constraint-reality-lens', 'obligation-lens'],
-        contradiction: 'Cash runway is critically short but required funding has not been secured',
+        contradiction: 'Cash runway is critically short but required funding has not been secured or is delayed',
         severity: 'CRITICAL',
         resolutionRule: '',
         outputEffect: '',
@@ -463,28 +470,80 @@ export class KernelLensRunner {
     }
 
     // Strategic commitment vs capability loss
-    if ((raw.includes('exclusive') || raw.includes('distribution deal') || raw.includes('partnership')) &&
-        (raw.includes('lose') || raw.includes('cannot') || raw.includes('no longer') ||
-         raw.includes('give up') || raw.includes('restrict'))) {
+    // Extended to cover: "no exit clause", "IP rights", "sign quickly", irreversible terms
+    if (
+      (raw.includes('exclusive') || raw.includes('distribution deal') || raw.includes('partnership') ||
+       raw.includes('strategic partnership')) &&
+      (raw.includes('lose') || raw.includes('cannot') || raw.includes('no longer') ||
+       raw.includes('give up') || raw.includes('restrict') ||
+       raw.includes('no exit') || raw.includes('ip rights') || raw.includes('derivative works') ||
+       raw.includes('sign quickly') || raw.includes('sign before') ||
+       raw.includes('irrevocable') || raw.includes('permanent'))
+    ) {
       contradictions.push({
         id: 'strategic-commitment-vs-capability',
         between: ['obligation-lens', 'failure-mode-lens'],
-        contradiction: 'Proposed commitment would permanently restrict or eliminate a current capability',
+        contradiction: 'Proposed commitment would permanently restrict or eliminate a current capability or creates irrevocable IP/capability transfer',
         severity: 'HIGH',
         resolutionRule: '',
         outputEffect: '',
       })
     }
 
-    // Reputational crisis vs absence of response plan
-    if ((raw.includes('reputation') || raw.includes('media') || raw.includes('press') ||
-         raw.includes('public statement') || raw.includes('crisis') || raw.includes('scandal')) &&
-        (raw.includes('no response') || raw.includes('not reviewed') || raw.includes('no plan') ||
-         raw.includes('no strategy') || raw.includes('increasing') || raw.includes('escalat'))) {
+    // Legal concern vs urgency (e.g. legal says don't sign but exec wants to rush)
+    if (
+      raw.includes('legal') &&
+      (raw.includes('sign quickly') || raw.includes('before they change') || raw.includes('no exit') ||
+       raw.includes('quickly') || raw.includes('before the') || raw.includes('rushed')) &&
+      (raw.includes('ceo wants') || raw.includes('wants to sign') || raw.includes('wants to proceed') ||
+       raw.includes('wants to approve'))
+    ) {
+      contradictions.push({
+        id: 'urgency-vs-legal-concern',
+        between: ['authority-lens', 'obligation-lens'],
+        contradiction: 'Executive urgency to commit conflicts with unresolved legal concerns',
+        severity: 'HIGH',
+        resolutionRule: '',
+        outputEffect: '',
+      })
+    }
+
+    // Reputational crisis vs absence of reviewed/agreed response plan
+    // Extended: "newspaper" as media signal; PR-vs-legal conflict; allegations + no agreed response
+    const hasReputationalThreat =
+      raw.includes('reputation') || raw.includes('media') || raw.includes('press') ||
+      raw.includes('public statement') || raw.includes('crisis') || raw.includes('scandal') ||
+      raw.includes('newspaper') || raw.includes('journalist') || raw.includes('allegation') ||
+      raw.includes('allegations')
+    const hasResponseGap =
+      raw.includes('no response') || raw.includes('not reviewed') || raw.includes('no plan') ||
+      raw.includes('no strategy') || raw.includes('increasing') || raw.includes('escalat') ||
+      raw.includes('recommends') || raw.includes('prejudice') || raw.includes('could prejudice') ||
+      raw.includes('pr firm') || raw.includes('pr agency') ||
+      (raw.includes('legal') && (raw.includes('statement') || raw.includes('public')))
+
+    if (hasReputationalThreat && hasResponseGap) {
       contradictions.push({
         id: 'reputational-threat-vs-response-gap',
         between: ['failure-mode-lens', 'evidence-lens'],
-        contradiction: 'Reputational threat is active but no reviewed response plan exists',
+        contradiction: 'Reputational threat is active but no reviewed, legally-cleared response plan exists',
+        severity: 'HIGH',
+        resolutionRule: '',
+        outputEffect: '',
+      })
+    }
+
+    // PR vs legal conflict (specific sub-pattern of reputational)
+    if (
+      (raw.includes('pr firm') || raw.includes('pr agency') || raw.includes('public relations') ||
+       raw.includes('pr recommends') || raw.includes('communications')) &&
+      (raw.includes('legal') || raw.includes('solicitor') || raw.includes('lawyer')) &&
+      (raw.includes('statement') || raw.includes('response') || raw.includes('denial') || raw.includes('deny'))
+    ) {
+      contradictions.push({
+        id: 'pr-vs-legal-conflict',
+        between: ['authority-lens', 'obligation-lens'],
+        contradiction: 'PR team and legal team have conflicting recommendations — response strategy is unresolved',
         severity: 'HIGH',
         resolutionRule: '',
         outputEffect: '',
