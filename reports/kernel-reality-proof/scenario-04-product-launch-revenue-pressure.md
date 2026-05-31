@@ -618,7 +618,7 @@ Address the primary identified risk: Pressure to launch conflicts with unresolve
   "caseReference": "PROOF-PRODUCT_LAUNCH_REVENUE_PRESSURE-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-05-31T16:10:45.867Z"
+  "generatedAt": "2026-05-31T16:19:30.413Z"
 }
 ```
 

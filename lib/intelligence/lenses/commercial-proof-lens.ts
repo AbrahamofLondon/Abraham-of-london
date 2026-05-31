@@ -138,15 +138,18 @@ export async function commercialProofLens(rawContext: string): Promise<KernelLen
 
   // Minimum viable proof path
   if (unsupportedClaims.length > 0) {
-    findings.push({
-      domain: 'evidence',
-      data: {
-        type: 'minimum_viable_proof_path',
-        description: unsupportedClaims.length === 1
-          ? `Gather supporting evidence for: ${unsupportedClaims[0].claim}. A single data point, customer reference, or third-party validation may be sufficient.`
-          : `Prioritise evidence gathering for the most critical claim: ${unsupportedClaims[0].claim}. Then address remaining ${unsupportedClaims.length - 1} claim(s).`,
-      },
-    })
+    const firstUnsupported = unsupportedClaims[0]
+    if (firstUnsupported) {
+      findings.push({
+        domain: 'evidence',
+        data: {
+          type: 'minimum_viable_proof_path',
+          description: unsupportedClaims.length === 1
+            ? `Gather supporting evidence for: ${firstUnsupported.claim}. A single data point, customer reference, or third-party validation may be sufficient.`
+            : `Prioritise evidence gathering for the most critical claim: ${firstUnsupported.claim}. Then address remaining ${unsupportedClaims.length - 1} claim(s).`,
+        },
+      })
+    }
   }
 
   return {

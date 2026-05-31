@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780243846017-ky8far",
-    "caseReference": "FULFIL-17802438",
+    "caseId": "fulfilment-1780244370568-yunp2c",
+    "caseReference": "FULFIL-17802443",
     "scenario": "Cash-Constrained Survival",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-05-31T16:10:46.019Z",
+        "timestamp": "2026-05-31T16:19:30.570Z",
         "actorId": "system",
         "notes": "Dossier generated for: Cash-Constrained Survival",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-05-31T16:10:46.019Z"
+    "generatedAt": "2026-05-31T16:19:30.570Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17802438",
-    "generatedAt": "2026-05-31T16:10:46.019Z",
+    "caseReference": "FULFIL-17802443",
+    "generatedAt": "2026-05-31T16:19:30.570Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

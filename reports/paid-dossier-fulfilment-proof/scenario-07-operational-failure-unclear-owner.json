@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780243845978-8d9hzk",
-    "caseReference": "FULFIL-17802438",
+    "caseId": "fulfilment-1780244370525-jjh4po",
+    "caseReference": "FULFIL-17802443",
     "scenario": "Operational Failure with Unclear Owner",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-05-31T16:10:45.980Z",
+        "timestamp": "2026-05-31T16:19:30.527Z",
         "actorId": "system",
         "notes": "Dossier generated for: Operational Failure with Unclear Owner",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-05-31T16:10:45.980Z"
+    "generatedAt": "2026-05-31T16:19:30.527Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17802438",
-    "generatedAt": "2026-05-31T16:10:45.980Z",
+    "caseReference": "FULFIL-17802443",
+    "generatedAt": "2026-05-31T16:19:30.527Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

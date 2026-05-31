@@ -471,7 +471,7 @@ Do not issue any public statement until legal counsel has assessed whether it wo
   "caseReference": "PROOF-EXECUTIVE_REPUTATIONAL_EXPOSURE-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-05-31T16:10:46.067Z"
+  "generatedAt": "2026-05-31T16:19:30.669Z"
 }
 ```
 
