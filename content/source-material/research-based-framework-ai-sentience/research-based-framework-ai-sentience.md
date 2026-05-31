@@ -1,3 +1,4 @@
+---
 type: "SourceMaterial"
 title: "The Simulation of Self: An Advanced Production Sourcebook"
 description: "Enriched production-ready blueprints, granular scene breakdowns, explicit psychological mechanisms, and creative assets designed to eliminate generic outputs and build obsessive fanbases."
