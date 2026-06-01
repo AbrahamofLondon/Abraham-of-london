@@ -485,13 +485,33 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
           </Section>
         )}
 
-        {/* Refined evidence acknowledgement */}
+        {/* Refined evidence acknowledgement with delta */}
         {refined && (
           <Section label="Evidence incorporated">
             <div className="border border-emerald-500/20 bg-emerald-500/[0.03] p-4">
               <p className="text-[13px] leading-[1.7] text-white/60">
                 The system has incorporated this evidence into the reading.
               </p>
+              {signal.decisionIntelligence?.progressiveEvidenceDelta && (
+                <div className="mt-3 border-t border-emerald-500/10 pt-3">
+                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(110,231,183,0.55)' }}>
+                    What changed
+                  </p>
+                  <p className="mt-1 text-[13px] leading-[1.7] text-white/60">
+                    {signal.decisionIntelligence.progressiveEvidenceDelta.whatChanged}
+                  </p>
+                  {signal.decisionIntelligence.progressiveEvidenceDelta.newlyEligibleEngines.length > 0 && (
+                    <p className="mt-2 text-[11px] leading-[1.5] text-white/30">
+                      This allowed the system to test an additional decision dimension.
+                    </p>
+                  )}
+                  {signal.decisionIntelligence.progressiveEvidenceDelta.remainingMissingFields.length > 0 && (
+                    <p className="mt-1 text-[11px] leading-[1.5] text-white/25">
+                      {signal.decisionIntelligence.progressiveEvidenceDelta.remainingMissingFields.length} input(s) remain unresolved.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </Section>
         )}

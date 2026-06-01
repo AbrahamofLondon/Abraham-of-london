@@ -212,6 +212,13 @@ export type DecisionIntelligenceResult = {
   }>
   /** Progressive evidence capture — next best question to ask */
   progressiveEvidenceCapture?: ProgressiveEvidenceCaptureResult
+  /** Delta describing what changed due to progressive evidence refinement */
+  progressiveEvidenceDelta?: {
+    fieldAnswered: string
+    whatChanged: string
+    newlyEligibleEngines: string[]
+    remainingMissingFields: string[]
+  }
 }
 
 // ─── LAYER 1: Situation Understanding ────────────────────────────────────────
@@ -1041,6 +1048,7 @@ export async function runDecisionIntelligence(
     }
   }
   // Merge progressive evidence from inline refinement
+  const hasProgressiveEvidence = !!input.progressiveEvidence
   if (input.progressiveEvidence) {
     providedFields[input.progressiveEvidence.fieldKey] = input.progressiveEvidence.answer
   }
@@ -1059,6 +1067,64 @@ export async function runDecisionIntelligence(
     skippedEngines: skippedEngines.length > 0 ? skippedEngines : undefined,
     maxPrompts: input.surface === 'fast_diagnostic' ? 2 : 1,
   })
+
+  // ── PROGRESSIVE EVIDENCE DELTA ──────────────────────────────────────
+  // Build a conservative delta describing what changed due to refinement
+  let progressiveEvidenceDelta: DecisionIntelligenceResult['progressiveEvidenceDelta'] = undefined
+  if (hasProgressiveEvidence && input.progressiveEvidence) {
+    const fieldKey = input.progressiveEvidence.fieldKey
+    const safeAnswerExcerpt = input.progressiveEvidence.answer.slice(0, 80)
+
+    // Determine what changed based on the field answered
+    let whatChanged = `The system has incorporated the ${fieldKey.replace(/_/g, ' ')} into the reading.`
+    if (fieldKey === 'blocker' || fieldKey === 'perceived_blocker') {
+      whatChanged = 'The blocker is now clearer, but evidence strength remains limited.'
+    } else if (fieldKey === 'decision_owner' || fieldKey === 'perceived_owner') {
+      whatChanged = 'Authority can now be tested more specifically.'
+    } else if (fieldKey === 'consequence' || fieldKey === 'consequence_of_delay') {
+      whatChanged = 'The consequence is now clearer, enabling more precise urgency assessment.'
+    } else if (fieldKey === 'authority_uncertainty') {
+      whatChanged = 'Authority uncertainty has been reduced, enabling more specific constitutional analysis.'
+    } else if (fieldKey === 'evidence_uncertainty') {
+      whatChanged = 'Evidence strength can now be assessed with greater confidence.'
+    } else if (fieldKey === 'deadline') {
+      whatChanged = 'Time pressure is now clearer, enabling cost-of-delay estimation.'
+    }
+
+    // Determine newly eligible engines from the current engine trace
+    const newlyEligibleEngines = (engineTrace ?? [])
+      .filter(e => e.status === 'USED')
+      .map(e => e.engineId)
+
+    progressiveEvidenceDelta = {
+      fieldAnswered: fieldKey,
+      whatChanged,
+      newlyEligibleEngines,
+      remainingMissingFields: progressiveEvidenceCapture.missingFields,
+    }
+
+    // Append EVIDENCE_CAPTURED journey event for progressive evidence
+    if (input.persistJourney && input.caseId) {
+      try {
+        const { appendDiagnosticJourneyEvent } = await import('@/lib/product/diagnostic-journey-store')
+        await appendDiagnosticJourneyEvent({
+          caseId: input.caseId,
+          surface: 'fast_diagnostic',
+          type: 'EVIDENCE_CAPTURED',
+          engineId: 'progressive-evidence-capture',
+          summary: `Progressive evidence captured for ${fieldKey}.`,
+          payload: {
+            fieldKey,
+            safeAnswerExcerpt,
+            source: 'progressive_evidence_capture',
+          },
+          audienceSafe: true,
+        })
+      } catch {
+        // Journey event failure does not affect result
+      }
+    }
+  }
 
   // ── JOURNEY PERSISTENCE (non-blocking) ──────────────────────────────
   let journeyCaseId: string | undefined
@@ -1157,5 +1223,8 @@ export async function runDecisionIntelligence(
 
     // PROGRESSIVE EVIDENCE CAPTURE
     progressiveEvidenceCapture,
+
+    // PROGRESSIVE EVIDENCE DELTA
+    progressiveEvidenceDelta,
   }
 }
