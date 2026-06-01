@@ -483,12 +483,22 @@ describe('Corridor status integrity', () => {
       r => r.corridorStage === 'retainer_oversight'
     )
     for (const cap of retainerCapabilities) {
-      // Retainer capabilities should not be ACTIVE
+      // Retainer capabilities may be ACTIVE only if they are proven infrastructure
+      // (shared, or durable queue/decision path with typed Prisma client + auth guards)
       if (cap.status === 'ACTIVE') {
-        // Only signal continuity and governed memory are shared infrastructure
-        expect(['Signal Continuity', 'Governed Memory Presenter']).toContain(cap.capabilityId)
+        expect([
+          'Signal Continuity',
+          'Governed Memory Presenter',
+          'Retainer Review Queue', // ACTIVE: typed Prisma client post-generate, auth guards, durable persistence
+        ]).toContain(cap.capabilityId)
       }
     }
+    // The overall corridor readiness must remain GATED
+    const retainer = CAPABILITY_STATUS_RECORDS.filter(r => r.corridorStage === 'retainer_oversight')
+    const hasActiveCadence = retainer.some(r => r.capabilityId === 'Oversight Cadence Engine' && r.status === 'ACTIVE')
+    const hasActiveCycle = retainer.some(r => r.capabilityId === 'Oversight Cycle Comparison' && r.status === 'ACTIVE')
+    expect(hasActiveCadence).toBe(false)
+    expect(hasActiveCycle).toBe(false)
   })
 
   it('Team Assessment is ACTIVE with evidence of runtime path', () => {

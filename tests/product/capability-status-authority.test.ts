@@ -59,8 +59,8 @@ describe('Capability Status Authority', () => {
     expect(getCapabilityRecord('Oversight Cycle Comparison')!.status).toBe('GATED')
     // Operator decision path (approveForContact/declineReview/requestMoreHistory) is now wired
     expect(getCapabilityRecord('Oversight Review Decision Engine')!.status).toBe('PARTIALLY_WIRED')
-    // Review queue is wired but not yet durable-persisted via Prisma
-    expect(getCapabilityRecord('Retainer Review Queue')!.status).toBe('PARTIALLY_WIRED')
+    // Review queue is ACTIVE: Prisma client generated, typed (no any casts), auth routes present
+    expect(getCapabilityRecord('Retainer Review Queue')!.status).toBe('ACTIVE')
   })
 
   it('Boardroom Mode and Strategy Room remain partially wired, not retained history claims', () => {

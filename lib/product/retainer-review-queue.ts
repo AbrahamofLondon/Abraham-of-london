@@ -18,6 +18,7 @@
  */
 
 import type { RetainerOversightReadinessStatus } from '@/lib/product/retainer-oversight-readiness'
+import type { PrismaClient } from '@prisma/client'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,10 +69,10 @@ const queueStore = new Map<string, RetainerReviewQueueEntry[]>()
 // Prisma helper (same pattern as diagnostic-journey-store.ts)
 // ---------------------------------------------------------------------------
 
-async function getPrisma() {
+async function getPrisma(): Promise<PrismaClient | null> {
   try {
     const mod = await import('@/lib/prisma')
-    return mod.default
+    return mod.default as PrismaClient
   } catch {
     return null
   }
@@ -131,7 +132,7 @@ export async function createRetainerReviewQueueEntry(
   if (prisma) {
     try {
       // Deduplicate: check for existing PENDING_REVIEW with same caseId+readinessStatus
-      const existingPending = await (prisma as any).retainerReviewQueueEntry.findFirst({
+      const existingPending = await prisma.retainerReviewQueueEntry.findFirst({
         where: {
           caseId: input.caseId,
           readinessStatus: input.readinessStatus,
@@ -144,7 +145,7 @@ export async function createRetainerReviewQueueEntry(
 
       // DECLINED suppression: block re-creation if a DECLINED entry exists for this
       // caseId with the same readinessStatus. If readinessStatus has upgraded, allow through.
-      const declined = await (prisma as any).retainerReviewQueueEntry.findFirst({
+      const declined = await prisma.retainerReviewQueueEntry.findFirst({
         where: {
           caseId: input.caseId,
           readinessStatus: input.readinessStatus,
@@ -160,15 +161,15 @@ export async function createRetainerReviewQueueEntry(
       }
 
       // Create in Prisma
-      const created = await (prisma as any).retainerReviewQueueEntry.create({
+      const created = await prisma.retainerReviewQueueEntry.create({
         data: {
           caseId: input.caseId,
           accountId: input.accountId ?? null,
           orgId: null,
           readinessStatus: input.readinessStatus,
-          reasons: input.reasons as any,
-          availableSignals: input.availableSignals as any,
-          missingRequirements: input.missingRequirements as any,
+          reasons: input.reasons,
+          availableSignals: input.availableSignals,
+          missingRequirements: input.missingRequirements,
           status: 'PENDING_REVIEW',
         },
       })
@@ -256,7 +257,7 @@ export async function getRetainerReviewQueueEntryById(id: string): Promise<Retai
   const prisma = await getPrisma()
   if (prisma) {
     try {
-      const row = await (prisma as any).retainerReviewQueueEntry.findUnique({ where: { id } })
+      const row = await prisma.retainerReviewQueueEntry.findUnique({ where: { id } })
       if (row) {
         return mapPrismaToEntry(row)
       }
@@ -302,7 +303,7 @@ export async function approveForContact(
   const prisma = await getPrisma()
   if (prisma) {
     try {
-      await (prisma as any).retainerReviewQueueEntry.update({
+      await prisma.retainerReviewQueueEntry.update({
         where: { id: entryId },
         data: {
           status: 'APPROVED_FOR_CONTACT',
@@ -347,7 +348,7 @@ export async function declineReview(
   const prisma = await getPrisma()
   if (prisma) {
     try {
-      await (prisma as any).retainerReviewQueueEntry.update({
+      await prisma.retainerReviewQueueEntry.update({
         where: { id: entryId },
         data: {
           status: 'DECLINED',
@@ -391,7 +392,7 @@ export async function requestMoreHistory(
   const prisma = await getPrisma()
   if (prisma) {
     try {
-      await (prisma as any).retainerReviewQueueEntry.update({
+      await prisma.retainerReviewQueueEntry.update({
         where: { id: entryId },
         data: {
           status: 'NEEDS_MORE_HISTORY',
