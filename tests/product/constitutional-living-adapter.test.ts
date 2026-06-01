@@ -271,3 +271,239 @@ describe("failure modes", () => {
     expect(hasFailureGap).toBe(true);
   });
 });
+
+// ─── 11. Structural input: approvingAuthority influences evidenceBasis ───────
+
+describe("structural input: approvingAuthority", () => {
+  it("appears in evidenceBasis when provided", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        approvingAuthority: "Board of Directors",
+      },
+    });
+
+    const hasApprovingAuthority = vm.governedAction.evidenceBasis!.some(
+      b => b.includes("Approving authority")
+    );
+    expect(hasApprovingAuthority).toBe(true);
+  });
+
+  it("does not create authority unresolved item solely because decisionOwner is present", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport({ mandateFit: true }),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        decisionOwner: "CEO",
+        approvingAuthority: "Board of Directors",
+      },
+    });
+
+    // With approvingAuthority present, there should be no "approving authority not confirmed" item
+    const hasApprovingUnresolved = vm.nextLayer.unresolvedItems.some(
+      i => i.toLowerCase().includes("approving authority not confirmed")
+    );
+    expect(hasApprovingUnresolved).toBe(false);
+  });
+});
+
+// ─── 12. Structural input: missing approvingAuthority creates unresolved ─────
+
+describe("structural input: missing approvingAuthority", () => {
+  it("creates unresolved item when decisionOwner exists but approvingAuthority is missing", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        decisionOwner: "CEO",
+      },
+    });
+
+    const hasUnresolved = vm.nextLayer.unresolvedItems.some(
+      i => i.toLowerCase().includes("approving authority not confirmed")
+    );
+    expect(hasUnresolved).toBe(true);
+  });
+
+  it("does not create approving authority unresolved when neither decisionOwner nor approvingAuthority exist", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {},
+    });
+
+    const hasUnresolved = vm.nextLayer.unresolvedItems.some(
+      i => i.toLowerCase().includes("approving authority not confirmed")
+    );
+    expect(hasUnresolved).toBe(false);
+  });
+});
+
+// ─── 13. Structural input: blockingAuthority appears in unresolvedItems ──────
+
+describe("structural input: blockingAuthority", () => {
+  it("appears in unresolvedItems when provided", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        blockingAuthority: "Legal counsel",
+      },
+    });
+
+    const hasBlocking = vm.nextLayer.unresolvedItems.some(
+      i => i.includes("Blocking authority")
+    );
+    expect(hasBlocking).toBe(true);
+  });
+
+  it("triggers review when blockingAuthority is present", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        blockingAuthority: "Legal counsel",
+      },
+    });
+
+    expect(vm.review.required).toBe(true);
+  });
+});
+
+// ─── 14. Structural input: missing mandateSource appears as unresolved ───────
+
+describe("structural input: missing mandateSource", () => {
+  it("appears as unresolved item when mandateSource is missing and mandateFit is false", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport({ mandateFit: false }),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {},
+    });
+
+    const hasMandateUnresolved = vm.nextLayer.unresolvedItems.some(
+      i => i.toLowerCase().includes("mandate source not confirmed")
+    );
+    expect(hasMandateUnresolved).toBe(true);
+  });
+});
+
+// ─── 15. Structural input: failureMode affects governedAction ────────────────
+
+describe("structural input: failureMode", () => {
+  it("affects governedAction whyThisAction when rationale is absent", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision({ rationale: [] }),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        failureMode: "authority_ambiguity",
+      },
+    });
+
+    expect(vm.governedAction.whyThisAction).toContain("authority_ambiguity");
+  });
+
+  it("appears in changes.newEvidence when provided", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        failureMode: "authority_ambiguity",
+      },
+    });
+
+    const hasFailureEvidence = vm.changes.newEvidence.some(
+      e => e.includes("Failure mode")
+    );
+    expect(hasFailureEvidence).toBe(true);
+  });
+});
+
+// ─── 16. Structural input: repairCondition affects nextLayer and continuity ──
+
+describe("structural input: repairCondition", () => {
+  it("appears in nextLayer unresolvedItems when provided", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        repairCondition: "Clear mandate from board required",
+      },
+    });
+
+    const hasRepair = vm.nextLayer.unresolvedItems.some(
+      i => i.includes("Repair condition")
+    );
+    expect(hasRepair).toBe(true);
+  });
+
+  it("appears in continuity statement when provided", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {
+        repairCondition: "Clear mandate from board required",
+      },
+    });
+
+    expect(vm.continuity.continuityStatement).toContain("Repair condition");
+  });
+});
+
+// ─── 17. Score-only input does not create authority/memory claims ────────────
+
+describe("score-only input safety", () => {
+  it("does not create authority claims from scores alone", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {},
+    });
+
+    // Without structural input, the adapter should not fabricate authority claims
+    const serialized = JSON.stringify(vm);
+    expect(serialized).not.toContain("approvingAuthority");
+  });
+});
+
+// ─── 18. Adapter still works when structural input is absent ────────────────
+
+describe("adapter resilience", () => {
+  it("works when constitutionalStructural is undefined", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+    });
+
+    expect(vm).toBeDefined();
+    expect(vm.governedAction).toBeDefined();
+    expect(vm.nextLayer).toBeDefined();
+    expect(vm.changes).toBeDefined();
+    expect(vm.continuity).toBeDefined();
+  });
+
+  it("works when constitutionalStructural is empty", () => {
+    const vm = buildConstitutionalLivingViewModel({
+      report: makeMinimalReport(),
+      decision: makeDecision(),
+      routeSummary: makeRouteSummary(),
+      constitutionalStructural: {},
+    });
+
+    expect(vm).toBeDefined();
+    expect(vm.governedAction).toBeDefined();
+  });
+});
