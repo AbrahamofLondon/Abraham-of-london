@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780264697168-rb1uff",
-    "caseReference": "FULFIL-17802646",
+    "caseId": "fulfilment-1780334635898-vglhmh",
+    "caseReference": "FULFIL-17803346",
     "scenario": "Investor Pitch with Unsupported Traction",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-05-31T21:58:17.232Z",
+        "timestamp": "2026-06-01T17:23:55.978Z",
         "actorId": "system",
         "notes": "Dossier generated for: Investor Pitch with Unsupported Traction",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-05-31T21:58:17.232Z"
+    "generatedAt": "2026-06-01T17:23:55.978Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17802646",
-    "generatedAt": "2026-05-31T21:58:17.232Z",
+    "caseReference": "FULFIL-17803346",
+    "generatedAt": "2026-06-01T17:23:55.978Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

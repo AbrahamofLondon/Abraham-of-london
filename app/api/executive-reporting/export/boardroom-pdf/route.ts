@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma.server";
 import { getExecutiveReportingEntitlements } from "@/lib/server/billing/executive-reporting-entitlements";
 import { qualifiesForBoardroom, generateBoardroomDossier } from "@/lib/constitution/boardroom-mode";
+import { buildBoardroomIntelligenceSpine } from "@/lib/constitution/boardroom-spine-builder";
 
 function s(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -53,20 +54,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // ── Generate structured boardroom dossier from canonical data ──
+    // ── Build canonical Boardroom IntelligenceSpine from snapshot data ──
     const canonicalSnapshot = run.canonicalSnapshot as Record<string, unknown> | null;
     const viewModelSnapshot = run.viewModelSnapshot as Record<string, unknown> | null;
-    const spineForBoardroom = {
-      costOfDelay: viewModelSnapshot?.costOfDelay ?? canonicalSnapshot?.costOfDelay ?? null,
-      accuracy: viewModelSnapshot?.accuracy ?? canonicalSnapshot?.accuracy ?? null,
-      synthesis: viewModelSnapshot?.synthesis ?? canonicalSnapshot?.synthesis ?? null,
-      conditionClass: viewModelSnapshot?.conditionClass ?? canonicalSnapshot?.conditionClass ?? null,
-      decisionText: viewModelSnapshot?.decisionText ?? canonicalSnapshot?.decisionText ?? null,
-    } as any;
+    const mergedSource: Record<string, unknown> = {
+      ...(canonicalSnapshot ?? {}),
+      ...(viewModelSnapshot ?? {}),
+      costOfDelay: viewModelSnapshot?.costOfDelay ?? canonicalSnapshot?.costOfDelay ?? undefined,
+      accuracy: viewModelSnapshot?.accuracy ?? canonicalSnapshot?.accuracy ?? undefined,
+      synthesis: viewModelSnapshot?.synthesis ?? canonicalSnapshot?.synthesis ?? undefined,
+      conditionClass: viewModelSnapshot?.conditionClass ?? canonicalSnapshot?.conditionClass ?? undefined,
+      decisionText: viewModelSnapshot?.decisionText ?? canonicalSnapshot?.decisionText ?? undefined,
+    };
+    const spineForBoardroom = buildBoardroomIntelligenceSpine(mergedSource);
 
-    const boardroomQualification = qualifiesForBoardroom(spineForBoardroom);
+    const boardroomQualification = qualifiesForBoardroom(spineForBoardroom as any);
     const boardroomDossier = boardroomQualification.qualified
-      ? generateBoardroomDossier(spineForBoardroom)
+      ? generateBoardroomDossier(spineForBoardroom as any)
       : null;
 
     const existing = await prisma.executiveReportingArtifact.findFirst({

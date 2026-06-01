@@ -1,6 +1,6 @@
 # Paid Dossier Fulfilment Proof — Summary
 
-**Generated:** 2026-05-31
+**Generated:** 2026-06-01
 **Kernel Version:** 1.0.0
 **Contract Version:** 1.0.0
 

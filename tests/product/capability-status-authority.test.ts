@@ -57,15 +57,23 @@ describe('Capability Status Authority', () => {
     }
     expect(getCapabilityRecord('Oversight Cadence Engine')!.status).toBe('GATED')
     expect(getCapabilityRecord('Oversight Cycle Comparison')!.status).toBe('GATED')
-    expect(getCapabilityRecord('Oversight Review Decision Engine')!.status).toBe('GATED')
+    // Operator decision path (approveForContact/declineReview/requestMoreHistory) is now wired
+    expect(getCapabilityRecord('Oversight Review Decision Engine')!.status).toBe('PARTIALLY_WIRED')
+    // Review queue is wired but not yet durable-persisted via Prisma
+    expect(getCapabilityRecord('Retainer Review Queue')!.status).toBe('PARTIALLY_WIRED')
   })
 
   it('Boardroom Mode and Strategy Room remain partially wired, not retained history claims', () => {
-    expect(getCapabilityRecord('Boardroom Archive')!.status).toBe('PARTIALLY_WIRED')
+    // Boardroom Archive is ACTIVE because dossier generation is production-wired from Executive Reporting
+    expect(getCapabilityRecord('Boardroom Archive')!.status).toBe('ACTIVE')
+    // Boardroom Mode Adapter (Foundry simulation) remains PARTIALLY_WIRED
     expect(getCapabilityRecord('Boardroom Mode Adapter')!.status).toBe('PARTIALLY_WIRED')
+    // Strategy Room Adapter (Foundry simulation) remains PARTIALLY_WIRED
     expect(getCapabilityRecord('Strategy Room Adapter')!.status).toBe('PARTIALLY_WIRED')
-    expect(getCapabilityRecord('Strategy Room execution record persistence')!.status).toBe('PARTIALLY_WIRED')
+    // Strategy Room execution record persistence is now ACTIVE (end-to-end loop proven)
+    expect(getCapabilityRecord('Strategy Room execution record persistence')!.status).toBe('ACTIVE')
 
+    // Both corridor stages still have PARTIALLY_WIRED capabilities (Foundry adapters)
     expect(getCapabilitiesForCorridorStage('boardroom_mode').some(record => record.status === 'PARTIALLY_WIRED')).toBe(true)
     expect(getCapabilitiesForCorridorStage('strategy_room').some(record => record.status === 'PARTIALLY_WIRED')).toBe(true)
   })

@@ -90,9 +90,9 @@ describe('Paid Corridor Contract', () => {
     )
   })
 
-  it('Boardroom Mode and Strategy Room remain partially wired corridor stages', () => {
-    expect(getCorridorRecord('boardroom_mode')!.currentReadiness).toBe('PARTIALLY_WIRED')
-    expect(getCorridorRecord('strategy_room')!.currentReadiness).toBe('PARTIALLY_WIRED')
+  it('Boardroom Mode and Strategy Room corridor stages', () => {
+    expect(getCorridorRecord('boardroom_mode')!.currentReadiness).toBe('ACTIVE')
+    expect(getCorridorRecord('strategy_room')!.currentReadiness).toBe('ACTIVE')
   })
 
   it('No stage promises dormant-only capability as active', () => {

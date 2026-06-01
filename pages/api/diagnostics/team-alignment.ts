@@ -117,7 +117,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           email: data.userEmail ?? undefined,
         });
 
-        // Persist respondent evidence as a journey event for multi-respondent aggregation
+        // Persist respondent evidence as a journey event for multi-respondent aggregation.
+        // Persistence policy:
+        //   - Authenticated/paid users: data persists durably via Prisma (fire-and-forget)
+        //   - Anonymous/demo users: data is ephemeral (in-memory store, lost on server restart)
+        // The appendDiagnosticJourneyEvent function attempts Prisma first, falls back to in-memory.
         try {
           const { appendDiagnosticJourneyEvent } = await import(
             "@/lib/product/diagnostic-journey-store"

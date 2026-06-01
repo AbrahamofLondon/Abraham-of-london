@@ -18,6 +18,7 @@ type RetainerMemoryPreviewModel = {
   statusCopy: string;
   escalationLabel: string;
   summary: string;
+  operatorReviewRecommended: boolean;
   findings: Array<{
     statusLabel: string;
     severity: string;
@@ -102,6 +103,7 @@ export function buildRetainerMemoryPreviewModel(
   if (!preview) {
     return {
       empty: true,
+      operatorReviewRecommended: false,
       statusLabel: "Memory unavailable",
       statusCopy: "Retainer Cycle Memory will become available once there is enough archived oversight history to compare retained patterns across cycles.",
       escalationLabel: "No escalation required.",
@@ -116,6 +118,7 @@ export function buildRetainerMemoryPreviewModel(
       : "Retained memory is establishing its baseline. This is not yet recurrence.";
     return {
       empty: true,
+      operatorReviewRecommended: preview.operatorReviewRecommended === true,
       statusLabel: preview.status === "unavailable" ? "Evidence unavailable" : "Insufficient history",
       statusCopy,
       escalationLabel: getDecisionCentreRetainerMemoryEscalationLabel(preview.escalationLevel),
@@ -127,6 +130,7 @@ export function buildRetainerMemoryPreviewModel(
   const primaryStatus = preview.findings[0]?.status ?? "REPEATED_SIGNAL";
   return {
     empty: false,
+    operatorReviewRecommended: preview.operatorReviewRecommended === true,
     statusLabel: getDecisionCentreRetainerMemoryStatusLabel(primaryStatus),
     statusCopy: getDecisionCentreRetainerMemoryStatusCopy(primaryStatus),
     escalationLabel: getDecisionCentreRetainerMemoryEscalationLabel(preview.escalationLevel),
@@ -178,6 +182,27 @@ export default function RetainerMemoryPreview({
             {model.escalationLabel}
           </p>
         </div>
+
+        {model.operatorReviewRecommended && (
+          <div style={{ marginTop: "8px" }}>
+            <button
+              type="button"
+              style={{
+                ...mono,
+                fontSize: "9px",
+                letterSpacing: "0.12em",
+                color: GOLD,
+                background: "transparent",
+                border: `1px solid ${GOLD}55`,
+                padding: "5px 10px",
+                cursor: "pointer",
+                textTransform: "uppercase",
+              }}
+            >
+              Request retained oversight review
+            </button>
+          </div>
+        )}
 
         {model.findings.length > 0 && (
           <div style={{ display: "grid", gap: "10px" }}>

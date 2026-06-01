@@ -28,6 +28,8 @@ export type RecommendationOutcomeStatus =
   | 'REJECTED'
   | 'ACTED_ON'
   | 'IGNORED'
+  | 'BLOCKED'
+  | 'ABANDONED'
   | 'SUPERSEDED'
   | 'OUTCOME_REPORTED'
 
@@ -54,6 +56,8 @@ export type RecommendationLedgerSummary = {
   totalRecommendations: number
   acted: number
   ignored: number
+  blocked: number
+  abandoned: number
   outcomeReported: number
   verifiedOutcomes: number
   oldestRecommendation: string | null
@@ -307,6 +311,8 @@ export async function summariseRecommendationLedger(caseId: string): Promise<Rec
     totalRecommendations: entries.length,
     acted: entries.filter(e => e.status === 'ACTED_ON').length,
     ignored: entries.filter(e => e.status === 'IGNORED').length,
+    blocked: entries.filter(e => e.status === 'BLOCKED').length,
+    abandoned: entries.filter(e => e.status === 'ABANDONED').length,
     outcomeReported: entries.filter(e => e.status === 'OUTCOME_REPORTED').length,
     verifiedOutcomes: entries.filter(e => e.verified === true).length,
     oldestRecommendation: sorted[0]?.createdAt ?? null,
@@ -403,6 +409,43 @@ export async function markRecommendationIgnored(params: {
     recommendationId: params.recommendationId,
     status: 'IGNORED',
     outcomeSummary: params.evidenceSummary,
+  })
+}
+
+/**
+ * Mark a recommendation as BLOCKED (action was prevented by a constraint, not ignored by choice).
+ * BLOCKED is distinct from IGNORED: it records that an external constraint prevented execution.
+ * BLOCKED is not verified — it requires independent confirmation like any other outcome.
+ */
+export async function markRecommendationBlocked(params: {
+  caseId: string
+  recommendationId: string
+  evidenceSummary?: string
+}): Promise<RecommendationOutcomeLedgerEntry | null> {
+  return markRecommendationStatus({
+    caseId: params.caseId,
+    recommendationId: params.recommendationId,
+    status: 'BLOCKED',
+    outcomeSummary: params.evidenceSummary,
+    verified: false,
+  })
+}
+
+/**
+ * Mark a recommendation as ABANDONED (action was started but not completed, not merely ignored).
+ * ABANDONED is not verified — it requires independent confirmation like any other outcome.
+ */
+export async function markRecommendationAbandoned(params: {
+  caseId: string
+  recommendationId: string
+  evidenceSummary?: string
+}): Promise<RecommendationOutcomeLedgerEntry | null> {
+  return markRecommendationStatus({
+    caseId: params.caseId,
+    recommendationId: params.recommendationId,
+    status: 'ABANDONED',
+    outcomeSummary: params.evidenceSummary,
+    verified: false,
   })
 }
 

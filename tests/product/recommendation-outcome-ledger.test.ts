@@ -25,6 +25,8 @@ import {
   markRecommendationRejected,
   markRecommendationActedOn,
   markRecommendationIgnored,
+  markRecommendationBlocked,
+  markRecommendationAbandoned,
   markRecommendationSuperseded,
   attachOutcomeReport,
   getClientSafeRecommendations,
@@ -541,6 +543,105 @@ describe('named status update helpers', () => {
 
     expect(updated).toBeTruthy()
     expect(updated!.status).toBe('SUPERSEDED')
+  })
+
+  it('markRecommendationBlocked moves to BLOCKED (not IGNORED)', async () => {
+    const entry = await createRecommendationEntry({
+      caseId: 'named-test-006',
+      surface: 'strategy_room',
+      recommendedAction: 'Execute the plan.',
+      evidenceBasis: ['Plan exists'],
+    })
+
+    const updated = await markRecommendationBlocked({
+      caseId: 'named-test-006',
+      recommendationId: entry.recommendationId,
+      evidenceSummary: 'Blocker: regulatory approval required.',
+    })
+
+    expect(updated).toBeTruthy()
+    expect(updated!.status).toBe('BLOCKED')
+    expect(updated!.status).not.toBe('IGNORED')
+    expect(updated!.verified).toBe(false)
+    expect(updated!.outcomeSummary).toBe('Blocker: regulatory approval required.')
+  })
+
+  it('markRecommendationAbandoned moves to ABANDONED (not IGNORED)', async () => {
+    const entry = await createRecommendationEntry({
+      caseId: 'named-test-007',
+      surface: 'strategy_room',
+      recommendedAction: 'Restructure the team.',
+      evidenceBasis: ['Structure gap'],
+    })
+
+    const updated = await markRecommendationAbandoned({
+      caseId: 'named-test-007',
+      recommendationId: entry.recommendationId,
+      evidenceSummary: 'Action started but not completed; leadership changed.',
+    })
+
+    expect(updated).toBeTruthy()
+    expect(updated!.status).toBe('ABANDONED')
+    expect(updated!.status).not.toBe('IGNORED')
+    expect(updated!.verified).toBe(false)
+  })
+
+  it('BLOCKED is distinct from IGNORED', async () => {
+    const e1 = await createRecommendationEntry({
+      caseId: 'semantic-test-001',
+      surface: 'strategy_room',
+      recommendedAction: 'Action one.',
+      evidenceBasis: ['Basis'],
+    })
+    const e2 = await createRecommendationEntry({
+      caseId: 'semantic-test-001',
+      surface: 'strategy_room',
+      recommendedAction: 'Action two.',
+      evidenceBasis: ['Basis'],
+    })
+
+    await markRecommendationBlocked({ caseId: 'semantic-test-001', recommendationId: e1.recommendationId })
+    await markRecommendationIgnored({ caseId: 'semantic-test-001', recommendationId: e2.recommendationId })
+
+    const ledger = await getRecommendationLedger('semantic-test-001')
+    const blocked = ledger.find(e => e.recommendationId === e1.recommendationId)
+    const ignored = ledger.find(e => e.recommendationId === e2.recommendationId)
+
+    expect(blocked!.status).toBe('BLOCKED')
+    expect(ignored!.status).toBe('IGNORED')
+    expect(blocked!.status).not.toBe(ignored!.status)
+  })
+
+  it('none of ACTED_ON, BLOCKED, ABANDONED are verified automatically', async () => {
+    const e1 = await createRecommendationEntry({ caseId: 'auto-verify-test', surface: 'strategy_room', recommendedAction: 'A.', evidenceBasis: ['x'] })
+    const e2 = await createRecommendationEntry({ caseId: 'auto-verify-test', surface: 'strategy_room', recommendedAction: 'B.', evidenceBasis: ['x'] })
+    const e3 = await createRecommendationEntry({ caseId: 'auto-verify-test', surface: 'strategy_room', recommendedAction: 'C.', evidenceBasis: ['x'] })
+
+    const acted = await markRecommendationActedOn({ caseId: 'auto-verify-test', recommendationId: e1.recommendationId })
+    const blocked = await markRecommendationBlocked({ caseId: 'auto-verify-test', recommendationId: e2.recommendationId })
+    const abandoned = await markRecommendationAbandoned({ caseId: 'auto-verify-test', recommendationId: e3.recommendationId })
+
+    expect(acted!.verified).toBe(false)
+    expect(blocked!.verified).toBe(false)
+    expect(abandoned!.verified).toBe(false)
+  })
+
+  it('client-safe view exposes BLOCKED and ABANDONED statuses without internals', async () => {
+    const e1 = await createRecommendationEntry({ caseId: 'safe-status-test', surface: 'strategy_room', recommendedAction: 'Blocked action.', evidenceBasis: ['Internal constraint'], sourceEngineId: 'engine-x' })
+    const e2 = await createRecommendationEntry({ caseId: 'safe-status-test', surface: 'strategy_room', recommendedAction: 'Abandoned action.', evidenceBasis: ['Reason'], sourceEngineId: 'engine-x' })
+
+    await markRecommendationBlocked({ caseId: 'safe-status-test', recommendationId: e1.recommendationId })
+    await markRecommendationAbandoned({ caseId: 'safe-status-test', recommendationId: e2.recommendationId })
+
+    const safe = await getClientSafeRecommendations('safe-status-test')
+    expect(safe.some(r => r.status === 'BLOCKED')).toBe(true)
+    expect(safe.some(r => r.status === 'ABANDONED')).toBe(true)
+
+    for (const r of safe) {
+      expect((r as any).evidenceBasis).toBeUndefined()
+      expect((r as any).sourceEngineId).toBeUndefined()
+      expect((r as any).caseId).toBeUndefined()
+    }
   })
 
   it('returns null for unknown recommendationId in named helpers', async () => {

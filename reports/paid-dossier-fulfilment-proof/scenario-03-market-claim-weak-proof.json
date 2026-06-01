@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780264696953-10wrqt",
-    "caseReference": "FULFIL-17802646",
+    "caseId": "fulfilment-1780334635784-l1a4vu",
+    "caseReference": "FULFIL-17803346",
     "scenario": "Market Claim with Strong Copy but Weak Proof",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-05-31T21:58:17.091Z",
+        "timestamp": "2026-06-01T17:23:55.829Z",
         "actorId": "system",
         "notes": "Dossier generated for: Market Claim with Strong Copy but Weak Proof",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-05-31T21:58:17.091Z"
+    "generatedAt": "2026-06-01T17:23:55.829Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17802646",
-    "generatedAt": "2026-05-31T21:58:17.091Z",
+    "caseReference": "FULFIL-17803346",
+    "generatedAt": "2026-06-01T17:23:55.829Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

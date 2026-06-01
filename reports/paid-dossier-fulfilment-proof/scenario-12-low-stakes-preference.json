@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780264697350-c9zkfd",
-    "caseReference": "FULFIL-17802646",
+    "caseId": "fulfilment-1780334636174-jtyuod",
+    "caseReference": "FULFIL-17803346",
     "scenario": "Low-Stakes Preference",
     "status": "dossier_generated",
     "dossierTier": "free_signal",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-05-31T21:58:17.352Z",
+        "timestamp": "2026-06-01T17:23:56.176Z",
         "actorId": "system",
         "notes": "Dossier generated for: Low-Stakes Preference",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-05-31T21:58:17.352Z"
+    "generatedAt": "2026-06-01T17:23:56.176Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17802646",
-    "generatedAt": "2026-05-31T21:58:17.352Z",
+    "caseReference": "FULFIL-17803346",
+    "generatedAt": "2026-06-01T17:23:56.176Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

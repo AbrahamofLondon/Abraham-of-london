@@ -170,6 +170,10 @@ export type DecisionCentreIrreversibility = {
 
 export type DecisionCentreRetainerMemoryPreview = {
   status: "available" | "partial" | "insufficient" | "unavailable";
+  /** Readiness classifier status — NOT_READY, REVIEW_READY, or OVERSIGHT_READY */
+  readinessStatus?: "NOT_READY" | "REVIEW_READY" | "OVERSIGHT_READY";
+  /** Whether an operator review CTA should be shown */
+  operatorReviewRecommended?: boolean;
   escalationLevel: RetainerCycleMemoryEscalationLevel;
   escalationRequired: boolean;
   summary: string;

@@ -126,7 +126,7 @@ export function generateBoardroomDossier(
   });
 
   // 5. Decision Owner
-  const owner = spine.case.claimedOwner ?? "not identified";
+  const owner = spine.case.claimedOwner || "not identified";
   const falseAuth = spine.flags?.falseAuthority;
   sections.push({
     id: "owner",

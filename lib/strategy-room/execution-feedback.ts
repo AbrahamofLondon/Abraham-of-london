@@ -12,6 +12,13 @@
 
 import { prisma } from "@/lib/prisma.server";
 import { recordJourneyEvent } from "@/lib/analytics/decision-journey";
+import {
+  createOrSkipRecommendationEntry,
+  markRecommendationStatus,
+  markRecommendationActedOn,
+  markRecommendationBlocked,
+  markRecommendationAbandoned,
+} from "@/lib/product/recommendation-outcome-ledger";
 
 type DecisionSnapshot = {
   total: number;
@@ -54,6 +61,75 @@ export async function propagateDecisionChange(
     else if (blockRate > 0.4) trajectory = "DETERIORATING";
     else if (executionRate > 0.3) trajectory = "STAGNANT";
     else trajectory = "FRAGILE";
+
+    // ── Outcome ledger handoff: create/update entries for executed/blocked decisions ──
+    if (action === "status_changed") {
+      const changedDecision = session.decisions.find(d => d.id === decisionId);
+      if (changedDecision) {
+        const caseId = `strategy-${session.sessionKey}`;
+        if (changedDecision.status === "executed") {
+          // Create outcome ledger entry for executed decision
+          await createOrSkipRecommendationEntry({
+            caseId,
+            surface: "strategy_room",
+            recommendedAction: changedDecision.decision,
+            evidenceBasis: [
+              `Strategy Room execution session: ${session.sessionKey}`,
+              `Decision logged: ${changedDecision.decision.slice(0, 100)}`,
+              `Execution trajectory: ${trajectory}`,
+            ],
+            sourceEngineId: "strategy-room-execution",
+          }).catch(() => {});
+          // Use named helper to guarantee verified:false is always enforced
+          await markRecommendationActedOn({
+            caseId,
+            recommendationId: changedDecision.id,
+            evidenceSummary: `Decision executed in Strategy Room session ${session.sessionKey}. Trajectory: ${trajectory}.`,
+          }).catch(() => {});
+        } else if (
+          changedDecision.status === "blocked" ||
+          changedDecision.status === "blocker_emerged" ||
+          changedDecision.status === "checkpoint_missed"
+        ) {
+          // Create outcome ledger entry for blocked decision
+          await createOrSkipRecommendationEntry({
+            caseId,
+            surface: "strategy_room",
+            recommendedAction: changedDecision.decision,
+            evidenceBasis: [
+              `Strategy Room execution session: ${session.sessionKey}`,
+              `Decision blocked: ${changedDecision.decision.slice(0, 100)}`,
+              `Block rate: ${(blockRate * 100).toFixed(0)}%`,
+            ],
+            sourceEngineId: "strategy-room-execution",
+          }).catch(() => {});
+          // Use named helper to guarantee verified:false is always enforced
+          await markRecommendationBlocked({
+            caseId,
+            recommendationId: changedDecision.id,
+            evidenceSummary: `Decision blocked in Strategy Room session ${session.sessionKey}. Block rate: ${(blockRate * 100).toFixed(0)}%.`,
+          }).catch(() => {});
+        } else if (changedDecision.status === "action_abandoned") {
+          // Create outcome ledger entry for abandoned decision
+          await createOrSkipRecommendationEntry({
+            caseId,
+            surface: "strategy_room",
+            recommendedAction: changedDecision.decision,
+            evidenceBasis: [
+              `Strategy Room execution session: ${session.sessionKey}`,
+              `Decision abandoned: ${changedDecision.decision.slice(0, 100)}`,
+            ],
+            sourceEngineId: "strategy-room-execution",
+          }).catch(() => {});
+          // Use named helper to guarantee verified:false is always enforced
+          await markRecommendationAbandoned({
+            caseId,
+            recommendationId: changedDecision.id,
+            evidenceSummary: `Decision abandoned in Strategy Room session ${session.sessionKey}.`,
+          }).catch(() => {});
+        }
+      }
+    }
 
     // 4. Update session's canonical snapshot with execution state
     let canonical: Record<string, unknown> = {};
