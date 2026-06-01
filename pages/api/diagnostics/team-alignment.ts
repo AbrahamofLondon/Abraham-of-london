@@ -19,5 +19,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       submittedAt: new Date().toISOString(),
       userAgent: req.headers["user-agent"] || null,
     }),
+    afterCreate: async (data) => {
+      try {
+        const { runDecisionIntelligence } = await import(
+          "@/lib/intelligence/decision-intelligence-orchestrator"
+        );
+        const caseId = `team-${data.reference}`;
+        await runDecisionIntelligence({
+          surface: "team_assessment",
+          rawUserInput: `Team Assessment completed: ${data.severity} (score: ${data.score})`,
+          userAnswers: { score: data.score, severity: data.severity },
+          diagnosticResult: { score: data.score, severity: data.severity, reference: data.reference },
+          persistJourney: true,
+          caseId,
+          email: data.userEmail ?? undefined,
+        });
+      } catch {
+        // Non-blocking — journey persistence must not block the diagnostic result
+      }
+    },
   });
 }
