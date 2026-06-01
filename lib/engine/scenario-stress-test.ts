@@ -48,6 +48,19 @@ export type ScenarioAnalysis = {
   confidenceAlignment: "aligned" | "overconfident" | "underconfident";
 };
 
+/**
+ * Centralised enterprise scenario IDs.
+ * Use these constants in forms, tests, and analysis — never hardcode strings.
+ */
+export const ENTERPRISE_SCENARIO_IDS = {
+  DELAY_30: 'enterprise_delay_30',
+  OWNER_UNAVAILABLE: 'enterprise_owner_unavailable',
+  CHALLENGE_EVIDENCE: 'enterprise_challenge_evidence',
+  GOVERNANCE_TEST: 'enterprise_governance_test',
+} as const
+
+export type EnterpriseScenarioId = typeof ENTERPRISE_SCENARIO_IDS[keyof typeof ENTERPRISE_SCENARIO_IDS]
+
 // ─────────────────────────────────────────────────────────────────────────────
 // SCENARIO BANK
 // ─────────────────────────────────────────────────────────────────────────────
@@ -99,9 +112,63 @@ export const SCENARIOS: StressScenario[] = [
     testsDomains: ["trust", "coherence", "execution"],
   },
 
-  // ENTERPRISE
+  // ENTERPRISE — Scenario 1: Delay pressure
   {
-    id: "enterprise_governance_test",
+    id: ENTERPRISE_SCENARIO_IDS.DELAY_30,
+    assessmentType: "enterprise",
+    situation: "If this decision is delayed 30 days, what fails first?",
+    timeConstraint: "30 days",
+    stakes: "Internal delivery, cost, or ownership pressure vs external client, regulatory, market, or evidence pressure.",
+    options: [
+      "Internal delivery, cost, or ownership pressure",
+      "External client, regulatory, market, or evidence pressure",
+    ],
+    reveals: [
+      "Internal focus — you see the primary risk as operational breakdown within the organisation's own systems and commitments",
+      "External focus — you see the primary risk as loss of confidence, compliance standing, or market position outside the organisation",
+    ],
+    testsDomains: ["execution", "risk"],
+  },
+
+  // ENTERPRISE — Scenario 2: Owner dependency
+  {
+    id: ENTERPRISE_SCENARIO_IDS.OWNER_UNAVAILABLE,
+    assessmentType: "enterprise",
+    situation: "If the main owner becomes unavailable, who or what breaks?",
+    timeConstraint: "Immediate",
+    stakes: "Whether the decision can continue through defined delegation or depends materially on one owner or informal knowledge.",
+    options: [
+      "The decision can continue through defined delegation",
+      "The decision depends materially on one owner or informal knowledge",
+    ],
+    reveals: [
+      "Structural resilience — you have built delegation and continuity into the decision architecture",
+      "Single-point dependency — the decision is vulnerable to key-person risk and informal knowledge concentration",
+    ],
+    testsDomains: ["governance", "authority"],
+  },
+
+  // ENTERPRISE — Scenario 3: Evidence challenge
+  {
+    id: ENTERPRISE_SCENARIO_IDS.CHALLENGE_EVIDENCE,
+    assessmentType: "enterprise",
+    situation: "If the board, client, or regulator challenges the evidence, what proof survives?",
+    timeConstraint: "Before next review",
+    stakes: "Whether the evidence base can survive independent scrutiny or is incomplete, informal, or not independently defensible.",
+    options: [
+      "The evidence base can survive challenge",
+      "The evidence base is incomplete, informal, or not independently defensible",
+    ],
+    reveals: [
+      "Evidence confidence — you believe the supporting data, documentation, and reasoning can withstand external scrutiny",
+      "Evidence vulnerability — you recognise gaps in the evidence base that would not survive independent challenge",
+    ],
+    testsDomains: ["execution", "risk"],
+  },
+
+  // ENTERPRISE — Legacy scenario (backward compatibility)
+  {
+    id: ENTERPRISE_SCENARIO_IDS.GOVERNANCE_TEST,
     assessmentType: "enterprise",
     situation: "A critical enterprise decision has been deferred for 3 months because no one owns it. The cost of delay is now visible. A junior manager has started making decisions informally.",
     timeConstraint: "This week",

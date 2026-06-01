@@ -20,6 +20,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { ENTERPRISE_SCENARIO_IDS } from "@/lib/engine/scenario-stress-test";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -807,6 +808,25 @@ export default function EnterpriseAssessmentPage() {
   const [showResume, setShowResume] = React.useState(false);
   const [draftSnapshot, setDraftSnapshot] = React.useState<EnterpriseDraftSnapshot | null>(null);
   const [evidenceCapture, setEvidenceCapture] = React.useState<AssessmentEvidenceCapture>({});
+
+  // Enterprise stress inputs (optional enrichment)
+  // Each scenario has: chosenOption (0|1), explanation (free text)
+  const [enterpriseStressInputs, setEnterpriseStressInputs] = React.useState({
+    dependencyMap: '',
+    // Scenario 1: "If this decision is delayed 30 days, what fails first?"
+    scenarioDelayOption: null as number | null,
+    scenarioDelayExplanation: '',
+    // Scenario 2: "If the main owner becomes unavailable, who or what breaks?"
+    scenarioOwnerOption: null as number | null,
+    scenarioOwnerExplanation: '',
+    // Scenario 3: "If the board, client, or regulator challenges the evidence, what proof survives?"
+    scenarioChallengeOption: null as number | null,
+    scenarioChallengeExplanation: '',
+    financialExposure: '',
+    clientExposure: '',
+    regulatoryExposure: '',
+    boardChallengeReadiness: '',
+  });
   const startedAtRef = React.useRef(Date.now());
   const recentDecisionReady = identity.recentDecision.trim().length >= 40;
 
@@ -1001,6 +1021,27 @@ export default function EnterpriseAssessmentPage() {
       setIsSubmitting(false);
       return;
     }
+    // Build scenario responses from the three scenario prompts
+    // Each scenario has a chosenOption (0|1) and an optional explanation
+    const scenario1 = enterpriseStressInputs.scenarioDelayOption !== null
+      ? { scenarioId: ENTERPRISE_SCENARIO_IDS.DELAY_30, chosenOption: enterpriseStressInputs.scenarioDelayOption as 0 | 1, explanation: enterpriseStressInputs.scenarioDelayExplanation.trim() || undefined, severity: 'medium' }
+      : enterpriseStressInputs.scenarioDelayExplanation.trim()
+        ? { scenarioId: ENTERPRISE_SCENARIO_IDS.DELAY_30, explanation: enterpriseStressInputs.scenarioDelayExplanation.trim(), severity: 'medium' }
+        : null;
+    const scenario2 = enterpriseStressInputs.scenarioOwnerOption !== null
+      ? { scenarioId: ENTERPRISE_SCENARIO_IDS.OWNER_UNAVAILABLE, chosenOption: enterpriseStressInputs.scenarioOwnerOption as 0 | 1, explanation: enterpriseStressInputs.scenarioOwnerExplanation.trim() || undefined, severity: 'medium' }
+      : enterpriseStressInputs.scenarioOwnerExplanation.trim()
+        ? { scenarioId: ENTERPRISE_SCENARIO_IDS.OWNER_UNAVAILABLE, explanation: enterpriseStressInputs.scenarioOwnerExplanation.trim(), severity: 'medium' }
+        : null;
+    const scenario3 = enterpriseStressInputs.scenarioChallengeOption !== null
+      ? { scenarioId: ENTERPRISE_SCENARIO_IDS.CHALLENGE_EVIDENCE, chosenOption: enterpriseStressInputs.scenarioChallengeOption as 0 | 1, explanation: enterpriseStressInputs.scenarioChallengeExplanation.trim() || undefined, severity: 'medium' }
+      : enterpriseStressInputs.scenarioChallengeExplanation.trim()
+        ? { scenarioId: ENTERPRISE_SCENARIO_IDS.CHALLENGE_EVIDENCE, explanation: enterpriseStressInputs.scenarioChallengeExplanation.trim(), severity: 'medium' }
+        : null;
+    const scenarioResponses = [scenario1, scenario2, scenario3].filter(Boolean) as Array<{
+      scenarioId: string; chosenOption?: 0 | 1; explanation?: string; severity?: string
+    }>;
+
     const res = await submitDiagnostic({
       kind: "enterprise", version: "2026.1", source: "diagnostics", entry: "enterprise-assessment",
       intent: "enterprise-diagnostic", title: "Enterprise Assessment",
@@ -1015,6 +1056,12 @@ export default function EnterpriseAssessmentPage() {
         teamAlignmentPct,
         recentDecision: identity.recentDecision,
         decisionSignal: reading?.decisionSignal ?? null,
+        dependencyMap: enterpriseStressInputs.dependencyMap.trim() || undefined,
+        scenarioResponses: scenarioResponses.length > 0 ? scenarioResponses : undefined,
+        financialExposure: enterpriseStressInputs.financialExposure.trim() || undefined,
+        clientExposure: enterpriseStressInputs.clientExposure.trim() || undefined,
+        regulatoryExposure: enterpriseStressInputs.regulatoryExposure.trim() || undefined,
+        boardChallengeReadiness: enterpriseStressInputs.boardChallengeReadiness || undefined,
         authorityInput: reading ? {
           condition: reading.patternTitle,
           contradiction: reading.primaryReading,
@@ -1453,6 +1500,169 @@ export default function EnterpriseAssessmentPage() {
                                 />
                               </div>
                             ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Enterprise stress inputs — optional enrichment */}
+                      {instrumentPage === 1 && complete && (
+                        <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.5rem", marginTop: "1.5rem" }}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                              Enterprise stress inputs (optional)
+                            </span>
+                          </div>
+                          <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic", marginBottom: "1rem" }}>
+                            These answers allow the system to test how the decision behaves under delay, dependency pressure, and external challenge.
+                          </p>
+
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="sm:col-span-2">
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                                Which functions, people, systems, or external parties does this decision depend on?
+                              </label>
+                              <textarea value={enterpriseStressInputs.dependencyMap} onChange={e => setEnterpriseStressInputs(s => ({ ...s, dependencyMap: e.target.value }))}
+                                rows={2} placeholder="e.g. Board approval, CFO sign-off, regulatory filing, supplier contract renewal"
+                                style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                            </div>
+                          </div>
+
+                          {/* Scenario 1: Delay */}
+                          <div className="mt-4" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
+                              Scenario 1 — If this decision is delayed 30 days, what fails first?
+                            </label>
+                            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic", marginBottom: "0.6rem" }}>
+                              Choose the most likely failure point, then explain your reasoning.
+                            </p>
+                            <div className="flex gap-2 flex-wrap mb-3">
+                              {[
+                                { label: 'Delivery timeline', value: 0 },
+                                { label: 'Budget / cost control', value: 0 },
+                                { label: 'Client confidence', value: 0 },
+                                { label: 'Regulatory / compliance position', value: 1 },
+                                { label: 'Internal ownership', value: 1 },
+                                { label: 'Evidence quality', value: 1 },
+                                { label: 'Not sure', value: 1 },
+                              ].map(opt => {
+                                const isActive = enterpriseStressInputs.scenarioDelayOption === opt.value;
+                                return (
+                                  <button key={opt.label} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, scenarioDelayOption: opt.value }))}
+                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    {opt.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <textarea value={enterpriseStressInputs.scenarioDelayExplanation} onChange={e => setEnterpriseStressInputs(s => ({ ...s, scenarioDelayExplanation: e.target.value }))}
+                              rows={2} placeholder="Explain why this is the first failure point."
+                              style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                          </div>
+
+                          {/* Scenario 2: Owner unavailable */}
+                          <div className="mt-3" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
+                              Scenario 2 — If the main owner becomes unavailable, who or what breaks?
+                            </label>
+                            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic", marginBottom: "0.6rem" }}>
+                              Choose the most critical dependency, then explain.
+                            </p>
+                            <div className="flex gap-2 flex-wrap mb-3">
+                              {[
+                                { label: 'Decision stalls — no successor', value: 0 },
+                                { label: 'Execution fragments across teams', value: 0 },
+                                { label: 'Client relationship deteriorates', value: 0 },
+                                { label: 'Governance vacuum forms', value: 1 },
+                                { label: 'Informal authority fills the gap', value: 1 },
+                                { label: 'Not sure', value: 1 },
+                              ].map(opt => {
+                                const isActive = enterpriseStressInputs.scenarioOwnerOption === opt.value;
+                                return (
+                                  <button key={opt.label} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, scenarioOwnerOption: opt.value }))}
+                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    {opt.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <textarea value={enterpriseStressInputs.scenarioOwnerExplanation} onChange={e => setEnterpriseStressInputs(s => ({ ...s, scenarioOwnerExplanation: e.target.value }))}
+                              rows={2} placeholder="Explain the dependency risk."
+                              style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                          </div>
+
+                          {/* Scenario 3: Challenge evidence */}
+                          <div className="mt-3" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
+                              Scenario 3 — If the board, client, or regulator challenges the evidence, what proof survives?
+                            </label>
+                            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic", marginBottom: "0.6rem" }}>
+                              Choose the strongest evidence category, then explain.
+                            </p>
+                            <div className="flex gap-2 flex-wrap mb-3">
+                              {[
+                                { label: 'Quantitative data / metrics', value: 0 },
+                                { label: 'Independent third-party validation', value: 0 },
+                                { label: 'Internal documentation trail', value: 0 },
+                                { label: 'Expert testimony / legal opinion', value: 1 },
+                                { label: 'Stakeholder consensus / agreements', value: 1 },
+                                { label: 'Limited proof — would not survive', value: 1 },
+                              ].map(opt => {
+                                const isActive = enterpriseStressInputs.scenarioChallengeOption === opt.value;
+                                return (
+                                  <button key={opt.label} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, scenarioChallengeOption: opt.value }))}
+                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    {opt.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <textarea value={enterpriseStressInputs.scenarioChallengeExplanation} onChange={e => setEnterpriseStressInputs(s => ({ ...s, scenarioChallengeExplanation: e.target.value }))}
+                              rows={2} placeholder="Explain what evidence would withstand scrutiny."
+                              style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                          </div>
+
+                          <div className="grid gap-4 mt-4 sm:grid-cols-3">
+                            <div>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                                What financial exposure is attached?
+                              </label>
+                              <textarea value={enterpriseStressInputs.financialExposure} onChange={e => setEnterpriseStressInputs(s => ({ ...s, financialExposure: e.target.value }))}
+                                rows={2} placeholder="e.g. £500k quarterly revenue at risk"
+                                style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                            </div>
+                            <div>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                                What client or market exposure is attached?
+                              </label>
+                              <textarea value={enterpriseStressInputs.clientExposure} onChange={e => setEnterpriseStressInputs(s => ({ ...s, clientExposure: e.target.value }))}
+                                rows={2} placeholder="e.g. Key account retention at risk"
+                                style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                            </div>
+                            <div>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                                What legal, regulatory, or compliance exposure is attached?
+                              </label>
+                              <textarea value={enterpriseStressInputs.regulatoryExposure} onChange={e => setEnterpriseStressInputs(s => ({ ...s, regulatoryExposure: e.target.value }))}
+                                rows={2} placeholder="e.g. Pending regulatory filing deadline"
+                                style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
+                            </div>
+                          </div>
+
+                          <div className="mt-4">
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                              If challenged by a board or senior reviewer, how strong is the evidence base?
+                            </label>
+                            <div className="flex gap-3 mt-2">
+                              {["Low", "Moderate", "Strong", "Very strong"].map(level => {
+                                const isActive = enterpriseStressInputs.boardChallengeReadiness === level;
+                                return (
+                                  <button key={level} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, boardChallengeReadiness: level }))}
+                                    style={{ flex: 1, padding: "10px 8px", textAlign: "center", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    {level}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       )}
