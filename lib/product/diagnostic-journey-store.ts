@@ -28,6 +28,7 @@ import {
   createDiagnosticJourneyRecord,
   createJourneyEvent,
 } from '@/lib/product/diagnostic-journey-record'
+import type { TeamRespondentInput } from '@/lib/intelligence/team-respondent-aggregation'
 
 // ---------------------------------------------------------------------------
 // In-memory store (anonymous / free-tier / fallback)
@@ -306,6 +307,38 @@ export async function getDiagnosticJourney(
   }
 
   return null
+}
+
+/**
+ * Retrieve prior Team Assessment respondentData for aggregate-only analysis.
+ * These events are intentionally not audience-safe because they may contain
+ * respondent-specific free text; callers must only surface aggregates.
+ */
+export async function getTeamAssessmentRespondentData(
+  caseId: string,
+): Promise<TeamRespondentInput[]> {
+  const journey = await getDiagnosticJourney(caseId)
+  if (!journey) return []
+
+  return journey.events
+    .filter(event =>
+      event.surface === 'team_assessment' &&
+      event.type === 'EVIDENCE_CAPTURED' &&
+      event.payload?.respondentData &&
+      (event.payload?.audienceSafe === 'aggregate_only' || event.audienceSafe === false),
+    )
+    .map(event => event.payload.respondentData as Record<string, unknown>)
+    .map(data => ({
+      respondentRole: typeof data.respondentRole === 'string' ? data.respondentRole : undefined,
+      perceivedDecision: typeof data.perceivedDecision === 'string' ? data.perceivedDecision : undefined,
+      perceivedOwner: typeof data.perceivedOwner === 'string' ? data.perceivedOwner : undefined,
+      perceivedBlocker: typeof data.perceivedBlocker === 'string' ? data.perceivedBlocker : undefined,
+      authorityClarity: typeof data.authorityClarity === 'number' ? data.authorityClarity : undefined,
+      evidenceClarity: typeof data.evidenceClarity === 'number' ? data.evidenceClarity : undefined,
+      executionConfidence: typeof data.executionConfidence === 'number' ? data.executionConfidence : undefined,
+      consequenceAwareness: typeof data.consequenceAwareness === 'number' ? data.consequenceAwareness : undefined,
+      leadershipAvoidanceSignal: typeof data.leadershipAvoidanceSignal === 'string' ? data.leadershipAvoidanceSignal : undefined,
+    }))
 }
 
 /**

@@ -46,6 +46,26 @@ import type {
   DiagnosticSubmitResponse,
 } from "@/lib/diagnostics/types";
 
+type TeamRespondentData = {
+  respondentRole?: string;
+  perceivedDecision?: string;
+  perceivedOwner?: string;
+  perceivedBlocker?: string;
+  authorityClarity?: number;
+  evidenceClarity?: number;
+  executionConfidence?: number;
+  consequenceAwareness?: number;
+  leadershipAvoidanceSignal?: string;
+};
+
+type EnterpriseScenarioResponse = {
+  scenarioId: string;
+  chosenOption?: 0 | 1;
+  selectedLabel?: string;
+  explanation?: string;
+  severity?: string;
+};
+
 function safeString(v: unknown, fallback = ""): string {
   return typeof v === "string" && v.trim() ? v.trim() : fallback;
 }
@@ -150,6 +170,130 @@ function stageFromKind(kind: string): Parameters<typeof persistDiagnosticStage>[
   if (safeKind === "purpose-alignment") return "purpose_alignment";
   if (safeKind === "constitutional" || safeKind === "constitutional-diagnostic") return "constitutional";
   return null;
+}
+
+function normaliseJourneyCaseId(stage: "team" | "enterprise" | "executive_reporting", value: string): string {
+  const clean = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 96);
+  return `${stage}-${clean || stableInputHash(value).slice(0, 16)}`;
+}
+
+function readNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+function readTeamRespondentData(payload: DiagnosticSubmissionPayload): TeamRespondentData | null {
+  const metadata = isObject(payload.metadata) ? payload.metadata : {};
+  const rawRespondentData = isObject(metadata.respondentData) ? metadata.respondentData : {};
+  const sectionScores = Array.isArray(payload.summary.sectionScores) ? payload.summary.sectionScores : [];
+  const scoreFor = (sectionId: string) => sectionScores.find((section) => section.sectionId === sectionId)?.pct;
+
+  const data: TeamRespondentData = {
+    respondentRole: safeString(rawRespondentData.respondentRole) || safeString(payload.respondent?.role) || undefined,
+    perceivedDecision: safeString(rawRespondentData.perceivedDecision) || safeString(isObject(metadata.authorityInput) ? metadata.authorityInput.decisionText : undefined) || undefined,
+    perceivedOwner: safeString(rawRespondentData.perceivedOwner) || undefined,
+    perceivedBlocker: safeString(rawRespondentData.perceivedBlocker) || safeString(metadata.fragilityStatus) || undefined,
+    authorityClarity: readNumber(rawRespondentData.authorityClarity) ?? scoreFor("authority"),
+    evidenceClarity: readNumber(rawRespondentData.evidenceClarity) ?? scoreFor("direction"),
+    executionConfidence: readNumber(rawRespondentData.executionConfidence) ?? scoreFor("execution"),
+    consequenceAwareness: readNumber(rawRespondentData.consequenceAwareness) ?? scoreFor("trust"),
+    leadershipAvoidanceSignal: safeString(rawRespondentData.leadershipAvoidanceSignal) || undefined,
+  };
+
+  return Object.values(data).some((value) => value !== undefined) ? data : null;
+}
+
+async function runPaidCorridorDecisionIntelligence(params: {
+  payload: DiagnosticSubmissionPayload;
+  diagnosticRef: string;
+  email: string | null;
+  organisation: string | null;
+}) {
+  const stage = stageFromKind(params.payload.kind);
+  if (stage !== "team" && stage !== "enterprise" && stage !== "executive_reporting") return;
+
+  const metadata = isObject(params.payload.metadata) ? params.payload.metadata : {};
+  const { runDecisionIntelligence } = await import("@/lib/intelligence/decision-intelligence-orchestrator");
+
+  if (stage === "team") {
+    const respondentData = readTeamRespondentData(params.payload);
+    const caseReference =
+      safeString(metadata.caseId) ||
+      safeString(metadata.teamCaseReference) ||
+      safeString(params.organisation) ||
+      params.diagnosticRef;
+    const userAnswers = {
+      ...(respondentData ?? {}),
+      respondentCount: 1,
+    };
+
+    await runDecisionIntelligence({
+      surface: "team_assessment",
+      rawUserInput: `Team Assessment completed: ${params.payload.summary.severity} (${params.payload.summary.pct}%).`,
+      userAnswers,
+      diagnosticResult: {
+        score: params.payload.summary.pct,
+        severity: params.payload.summary.severity,
+        reference: params.diagnosticRef,
+        aggregateOnly: true,
+        teamAnswers: userAnswers,
+      },
+      persistJourney: true,
+      caseId: normaliseJourneyCaseId("team", caseReference),
+      email: params.email,
+      accountId: params.organisation,
+    });
+    return;
+  }
+
+  if (stage === "enterprise") {
+    const domainScores = Object.fromEntries(
+      params.payload.summary.sectionScores.map((section) => [section.sectionId, section.pct]),
+    );
+    const scenarioResponses = Array.isArray(metadata.scenarioResponses)
+      ? metadata.scenarioResponses.filter(isObject).map((scenario): EnterpriseScenarioResponse => ({
+          scenarioId: safeString(scenario.scenarioId),
+          chosenOption: scenario.chosenOption === 0 || scenario.chosenOption === 1 ? scenario.chosenOption : undefined,
+          selectedLabel: safeString(scenario.selectedLabel) || undefined,
+          explanation: safeString(scenario.explanation) || undefined,
+          severity: safeString(scenario.severity) || undefined,
+        })).filter((scenario) => Boolean(scenario.scenarioId))
+      : undefined;
+    const entAnswers = {
+      domainScores,
+      scenarioResponses,
+      dependencyMap: safeString(metadata.dependencyMap) || undefined,
+      financialExposure: safeString(metadata.financialExposure) || undefined,
+      clientExposure: safeString(metadata.clientExposure) || undefined,
+      regulatoryExposure: safeString(metadata.regulatoryExposure) || undefined,
+      boardChallengeReadiness: safeString(metadata.boardChallengeReadiness) || undefined,
+      totalPct: params.payload.summary.pct,
+    };
+    await runDecisionIntelligence({
+      surface: "enterprise_assessment",
+      rawUserInput: `Enterprise Assessment completed: ${params.payload.summary.severity} (${params.payload.summary.pct}%).`,
+      userAnswers: entAnswers,
+      diagnosticResult: {
+        score: params.payload.summary.pct,
+        severity: params.payload.summary.severity,
+        reference: params.diagnosticRef,
+        entAnswers,
+      },
+      persistJourney: true,
+      caseId: normaliseJourneyCaseId("enterprise", safeString(metadata.caseId) || params.diagnosticRef),
+      email: params.email,
+      accountId: params.organisation,
+    });
+  }
 }
 
 function readAuthorityPacket(stage: Parameters<typeof persistDiagnosticStage>[0]["stage"] | null, metadata: unknown): {
@@ -445,6 +589,15 @@ export default async function handler(
         decisionObject: authority.decisionObject,
       });
     }
+
+    await runPaidCorridorDecisionIntelligence({
+      payload,
+      diagnosticRef,
+      email: safeString(payload.respondent?.email) || actor.email || null,
+      organisation: safeString(payload.respondent?.organisation) || null,
+    }).catch(() => {
+      // Non-fatal: governed journey intelligence must not block the diagnostic submission.
+    });
   } catch (error) {
     console.error("[diagnostics.submit] persistence failure", error);
     return res.status(500).json({

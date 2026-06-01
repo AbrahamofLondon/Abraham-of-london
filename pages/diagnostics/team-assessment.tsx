@@ -192,6 +192,15 @@ type ScoreMap = Record<string, DualAxisAnswer>;
 type IdentityForm = {
   respondentName: string; respondentEmail: string; respondentRole: string;
   organisation: string; teamName: string; teamSize: string; notes: string;
+  caseReference: string;
+  perceivedDecision: string;
+  perceivedOwner: string;
+  perceivedBlocker: string;
+  authorityClarity: string;
+  evidenceClarity: string;
+  executionConfidence: string;
+  consequenceAwareness: string;
+  leadershipAvoidanceSignal: string;
 };
 type TeamDraftSnapshot = {
   phase: "identity" | "leader" | "reality";
@@ -706,7 +715,24 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
 export default function TeamAssessmentPage() {
   const [phase, setPhase]       = React.useState<Phase>("identity");
   const [assessmentResult, setAssessmentResult] = React.useState<AssessmentResult | null>(null);
-  const [identity, setIdentity] = React.useState<IdentityForm>({ respondentName: "", respondentEmail: "", respondentRole: "", organisation: "", teamName: "", teamSize: "", notes: "" });
+  const [identity, setIdentity] = React.useState<IdentityForm>({
+    respondentName: "",
+    respondentEmail: "",
+    respondentRole: "",
+    organisation: "",
+    teamName: "",
+    teamSize: "",
+    notes: "",
+    caseReference: "",
+    perceivedDecision: "",
+    perceivedOwner: "",
+    perceivedBlocker: "",
+    authorityClarity: "60",
+    evidenceClarity: "60",
+    executionConfidence: "60",
+    consequenceAwareness: "60",
+    leadershipAvoidanceSignal: "moderate",
+  });
   const [leaderScores, setLeaderScores]   = React.useState<ScoreMap>({});
   const [realityScores, setRealityScores] = React.useState<ScoreMap>({});
   const [submitResult, setSubmitResult]   = React.useState<DiagnosticSubmitResponse | null>(null);
@@ -792,6 +818,13 @@ export default function TeamAssessmentPage() {
 
   React.useEffect(() => {
     trackStageStart("team");
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const caseReference = params.get("caseId") || params.get("reference") || params.get("teamRef");
+      if (caseReference) {
+        setIdentity((current) => current.caseReference ? current : { ...current, caseReference });
+      }
+    } catch { /* ignore */ }
     // Load spine for inherited context + adaptive questions
     const loaded = loadSpineFromSession();
     if (loaded) {
@@ -968,6 +1001,23 @@ export default function TeamAssessmentPage() {
     const totalScore = answers.reduce((s, a) => s + a.value, 0);
     const maxScore   = answers.length * 5;
     const pct        = Math.round((totalScore / maxScore) * 100);
+    const toScale = (value: string) => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+    const teamCaseReference =
+      identity.caseReference.trim() ||
+      [identity.organisation, identity.teamName].map((part) => part.trim()).filter(Boolean).join("::") ||
+      `team-${Date.now().toString(36)}`;
+    const respondentData = {
+      respondentRole: identity.respondentRole.trim() || undefined,
+      perceivedDecision: identity.perceivedDecision.trim() || reading.decisionObject.decision || undefined,
+      perceivedOwner: identity.perceivedOwner.trim() || undefined,
+      perceivedBlocker: identity.perceivedBlocker.trim() || reading.urgentDomain || undefined,
+      authorityClarity: toScale(identity.authorityClarity),
+      evidenceClarity: toScale(identity.evidenceClarity),
+      executionConfidence: toScale(identity.executionConfidence),
+      consequenceAwareness: toScale(identity.consequenceAwareness),
+      leadershipAvoidanceSignal: identity.leadershipAvoidanceSignal || undefined,
+      audienceSafe: "aggregate_only",
+    };
     const res = await submitDiagnostic({
       kind: "team-alignment", version: "2026.2", source: "diagnostics", entry: "team-assessment",
       intent: "team-alignment-diagnostic", title: "Team Assessment — Perception Gap Analysis",
@@ -977,6 +1027,9 @@ export default function TeamAssessmentPage() {
       metadata: {
         ui: "team-assessment",
         evidenceCapture: cleanedEvidenceCapture,
+        caseId: teamCaseReference,
+        teamCaseReference,
+        respondentData,
         teamName: identity.teamName || null,
         nextStepHref: "/diagnostics/enterprise-assessment",
         nextRoute: reading.route === "ENTERPRISE" ? "ENTERPRISE" : "TEAM",
@@ -1226,6 +1279,59 @@ export default function TeamAssessmentPage() {
                         onFocus={e => { e.currentTarget.style.borderColor = `${GOLD}35`; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)"; }}
                         onBlur={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)"; }}
                       />
+                    </div>
+                    <div className="sm:col-span-2" style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1rem", marginTop: "0.25rem" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
+                        Respondent decision record
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2">
+                          <label style={labelStyle}>Shared case reference</label>
+                          <input value={identity.caseReference} onChange={e => setIdentity(prev => ({ ...prev, caseReference: e.target.value }))} placeholder="Use the same reference for every respondent" style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }} />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label style={labelStyle}>Decision being assessed</label>
+                          <textarea value={identity.perceivedDecision} onChange={e => setIdentity(prev => ({ ...prev, perceivedDecision: e.target.value }))} rows={2} placeholder="What decision do you believe the team is actually trying to make?" style={{ ...inputStyle, resize: "none", lineHeight: 1.65, minHeight: "44px", fontSize: "16px" }} />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Perceived owner</label>
+                          <input value={identity.perceivedOwner} onChange={e => setIdentity(prev => ({ ...prev, perceivedOwner: e.target.value }))} placeholder="Who owns the decision?" style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }} />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Perceived blocker</label>
+                          <input value={identity.perceivedBlocker} onChange={e => setIdentity(prev => ({ ...prev, perceivedBlocker: e.target.value }))} placeholder="What is blocking progress?" style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }} />
+                        </div>
+                        {[
+                          { key: "authorityClarity", label: "Authority clarity" },
+                          { key: "evidenceClarity", label: "Evidence clarity" },
+                          { key: "executionConfidence", label: "Execution confidence" },
+                          { key: "consequenceAwareness", label: "Consequence awareness" },
+                        ].map((field) => (
+                          <div key={field.key}>
+                            <div className="flex items-center justify-between gap-3">
+                              <label style={labelStyle}>{field.label}</label>
+                              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: `${GOLD}A8` }}>{identity[field.key as keyof IdentityForm]}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="5"
+                              value={identity[field.key as keyof IdentityForm]}
+                              onChange={e => setIdentity(prev => ({ ...prev, [field.key]: e.target.value }))}
+                              style={{ width: "100%", accentColor: GOLD }}
+                            />
+                          </div>
+                        ))}
+                        <div className="sm:col-span-2">
+                          <label style={labelStyle}>Leadership avoidance signal</label>
+                          <select value={identity.leadershipAvoidanceSignal} onChange={e => setIdentity(prev => ({ ...prev, leadershipAvoidanceSignal: e.target.value }))} style={{ ...inputStyle, minHeight: "44px", fontSize: "16px" }}>
+                            <option value="low">Low</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="high">High</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                     <details className="sm:col-span-2" style={{ marginTop: "0.5rem" }}>
                       <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>

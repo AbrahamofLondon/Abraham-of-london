@@ -42,6 +42,18 @@ const requestSchema = z
     organisation: z.string().trim().max(240).optional(),
     campaignId: z.string().trim().max(160).optional(),
     answers: z.record(z.any()),
+    structuralFacts: z
+      .object({
+        decisionOwner: z.string().trim().max(500).nullable().optional(),
+        approvingAuthority: z.string().trim().max(500).nullable().optional(),
+        blockingAuthority: z.string().trim().max(500).nullable().optional(),
+        mandateSource: z.string().trim().max(500).nullable().optional(),
+        currentRoute: z.string().trim().max(200).nullable().optional(),
+        failureMode: z.string().trim().max(200).nullable().optional(),
+        repairCondition: z.string().trim().max(500).nullable().optional(),
+      })
+      .strict()
+      .optional(),
     telemetry: z
       .object({
         startedAt: z.string().datetime().optional(),
@@ -292,7 +304,10 @@ export default async function handler(
       const { runDecisionIntelligence } = await import('@/lib/intelligence/decision-intelligence-orchestrator')
       await runDecisionIntelligence({
         surface: 'constitutional_diagnostic',
-        userAnswers: answers,
+        userAnswers: {
+          ...answers,
+          ...(body.structuralFacts ? { structuralFacts: body.structuralFacts } : {}),
+        },
         diagnosticResult: {
           report: result.bundle.report,
           decision: result.bundle.decision,

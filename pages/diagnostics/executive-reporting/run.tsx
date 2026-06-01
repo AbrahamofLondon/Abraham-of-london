@@ -1025,6 +1025,91 @@ function BoardroomDossierSection({
   );
 }
 
+function ExecutiveJudgementBlock({
+  judgement,
+}: {
+  judgement: ExecutiveReportingPublicResult["executiveJudgement"];
+}) {
+  const recommendationTone = judgement.recommendation.available
+    ? { border: `${GOLD}30`, bg: `${GOLD}06`, text: `${GOLD}CC` }
+    : { border: "rgba(252,165,165,0.24)", bg: "rgba(252,165,165,0.045)", text: "rgba(252,165,165,0.72)" };
+
+  return (
+    <section style={{ border: `1px solid ${GOLD}22`, backgroundColor: "rgba(255,255,255,0.018)", padding: "1.25rem", marginTop: "1rem" }}>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88` }}>
+        {judgement.title}
+      </span>
+
+      <div style={{ border: `1px solid ${recommendationTone.border}`, backgroundColor: recommendationTone.bg, padding: "0.9rem 1rem", marginTop: "0.9rem" }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.5, color: recommendationTone.text }}>
+          {judgement.recommendation.statement}
+        </p>
+        {judgement.recommendation.rationale.slice(0, 3).map((item) => (
+          <p key={item} style={{ marginTop: "0.35rem", fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.43)" }}>
+            {item}
+          </p>
+        ))}
+      </div>
+
+      {judgement.evidenceCarriedForward.length > 0 && (
+        <div style={{ marginTop: "1rem" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+            Evidence carried forward
+          </span>
+          <div style={{ display: "grid", gap: "8px", marginTop: "0.55rem" }}>
+            {judgement.evidenceCarriedForward.slice(0, 5).map((item) => (
+              <div key={item.id} style={{ borderLeft: `2px solid ${GOLD}55`, paddingLeft: "10px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}78` }}>
+                  {item.label} · {item.source.replace(/_/g, " ")}
+                </p>
+                <p style={{ marginTop: "0.2rem", fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
+                  {item.summary}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        {judgement.decisionOptions.map((option) => (
+          <div key={option.label} style={{ border: option.recommended ? `1px solid ${GOLD}30` : "1px solid rgba(255,255,255,0.07)", backgroundColor: option.recommended ? `${GOLD}05` : "rgba(255,255,255,0.014)", padding: "0.85rem" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: option.recommended ? `${GOLD}A0` : "rgba(255,255,255,0.28)" }}>
+              {option.recommended ? "Recommended · " : ""}{option.label}
+            </p>
+            <p style={{ marginTop: "0.35rem", fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.54)" }}>{option.judgement}</p>
+            <p style={{ marginTop: "0.35rem", fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.34)" }}>{option.riskBenefit}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gap: "10px", marginTop: "1rem" }}>
+        {[
+          ["Risk / benefit", judgement.riskBenefit.join(" ")],
+          ["Consequence of delay", judgement.consequenceOfDelay],
+          ["Governance conditions", judgement.governanceConditions.join(" ")],
+          ["Owner / sponsor implications", judgement.ownerSponsorImplications.join(" ")],
+          ["Boardroom dossier status", judgement.boardroomDossierStatus],
+        ].map(([label, value]) => (
+          <div key={label} style={{ display: "grid", gap: "4px" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>{label}</span>
+            <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {judgement.evidenceGaps.length > 0 && (
+        <div style={{ marginTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.8rem" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.56)" }}>Evidence gaps</span>
+          {judgement.evidenceGaps.slice(0, 4).map((gap) => (
+            <p key={gap} style={{ marginTop: "0.3rem", fontSize: "12px", lineHeight: 1.5, color: "rgba(252,165,165,0.45)" }}>{gap}</p>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ResultSurface({
   result,
   onRerun,
@@ -1250,6 +1335,9 @@ function ResultSurface({
 
         {/* ── BLOCK 0: BOARD SNAPSHOT ── */}
         <BoardSnapshot data={report.boardSnapshot} />
+        {report.executiveJudgement && (
+          <ExecutiveJudgementBlock judgement={report.executiveJudgement} />
+        )}
         {governanceEvidenceCarryForward && (
           <div style={{ marginTop: "1rem" }}>
             <GovernanceEvidenceCarryForward

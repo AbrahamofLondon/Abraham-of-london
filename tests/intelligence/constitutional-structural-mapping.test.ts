@@ -320,3 +320,176 @@ describe('decisionOwner vs approvingAuthority distinction', () => {
     expect(result.approvingAuthority).toBe('Board of Directors')
   })
 })
+
+// ─── 8. structuralFacts override (Priority 0) ────────────────────────────────
+
+describe('structuralFacts override (Priority 0)', () => {
+  it('structuralFacts override answer ID mapping', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      userAnswers: {
+        authority_owner: { text: 'CEO from answer' },
+      },
+      structuralFacts: {
+        decisionOwner: 'CEO from structural facts',
+      },
+    })
+    // structuralFacts has highest priority
+    expect(result.decisionOwner).toBe('CEO from structural facts')
+  })
+
+  it('structuralFacts override report/decision fallback', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      decision: { decisionOwner: 'CEO from decision' },
+      structuralFacts: {
+        decisionOwner: 'CEO from structural facts',
+      },
+    })
+    expect(result.decisionOwner).toBe('CEO from structural facts')
+  })
+
+  it('approvingAuthority from structuralFacts sets authority state', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        approvingAuthority: 'Board of Directors',
+      },
+    })
+    expect(result.approvingAuthority).toBe('Board of Directors')
+  })
+
+  it('decisionOwner alone does not establish approving authority', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        decisionOwner: 'CEO',
+      },
+    })
+    expect(result.decisionOwner).toBe('CEO')
+    expect(result.approvingAuthority).toBeUndefined()
+  })
+
+  it('blockingAuthority from structuralFacts is captured', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        blockingAuthority: 'Legal counsel',
+      },
+    })
+    expect(result.blockingAuthority).toBe('Legal counsel')
+  })
+
+  it('mandateSource from structuralFacts is captured', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        mandateSource: 'Board instruction',
+      },
+    })
+    expect(result.mandateSource).toBe('Board instruction')
+  })
+
+  it('currentRoute from structuralFacts is captured', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        currentRoute: 'Leadership review',
+      },
+    })
+    expect(result.currentRoute).toBe('Leadership review')
+  })
+
+  it('failureMode from structuralFacts is captured', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        failureMode: 'unclear ownership',
+      },
+    })
+    expect(result.failureMode).toBe('unclear ownership')
+  })
+
+  it('repairCondition from structuralFacts is captured', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        repairCondition: 'Confirm mandate from board',
+      },
+    })
+    expect(result.repairCondition).toBe('Confirm mandate from board')
+  })
+
+  it('all 7 structural fields can be set simultaneously', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      structuralFacts: {
+        decisionOwner: 'CEO',
+        approvingAuthority: 'Board',
+        blockingAuthority: 'Legal',
+        mandateSource: 'Shareholder agreement',
+        currentRoute: 'Board / executive approval',
+        failureMode: 'missing approval',
+        repairCondition: 'Get board sign-off',
+      },
+    })
+    expect(result.decisionOwner).toBe('CEO')
+    expect(result.approvingAuthority).toBe('Board')
+    expect(result.blockingAuthority).toBe('Legal')
+    expect(result.mandateSource).toBe('Shareholder agreement')
+    expect(result.currentRoute).toBe('Board / executive approval')
+    expect(result.failureMode).toBe('missing approval')
+    expect(result.repairCondition).toBe('Get board sign-off')
+  })
+})
+
+// ─── 9. Missing structuralFacts falls back safely ────────────────────────────
+
+describe('missing structuralFacts fallback', () => {
+  it('falls back to answer IDs when structuralFacts is undefined', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      userAnswers: {
+        authority_owner: { text: 'CEO from answer' },
+      },
+    })
+    expect(result.decisionOwner).toBe('CEO from answer')
+  })
+
+  it('falls back to report/decision when no answers or structuralFacts', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      decision: { route: 'STRATEGY' },
+    })
+    expect(result.currentRoute).toBe('STRATEGY')
+  })
+
+  it('returns empty result when nothing is provided', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({})
+    expect(result.decisionOwner).toBeUndefined()
+    expect(result.approvingAuthority).toBeUndefined()
+    expect(result.blockingAuthority).toBeUndefined()
+    expect(result.mandateSource).toBeUndefined()
+    expect(result.currentRoute).toBeUndefined()
+    expect(result.failureMode).toBeUndefined()
+    expect(result.repairCondition).toBeUndefined()
+  })
+})
+
+// ─── 10. Score-only input does not fabricate structural facts ────────────────
+
+describe('score-only input does not fabricate', () => {
+  it('does not fabricate any structural field from resonance/certainty scores', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      userAnswers: {
+        q1: { resonance: 3, certainty: 2 },
+        q2: { resonance: 8, certainty: 7 },
+        q3: { resonance: 1, certainty: 1 },
+      },
+    })
+    expect(result.decisionOwner).toBeUndefined()
+    expect(result.approvingAuthority).toBeUndefined()
+    expect(result.blockingAuthority).toBeUndefined()
+    expect(result.mandateSource).toBeUndefined()
+    expect(result.currentRoute).toBeUndefined()
+    expect(result.failureMode).toBeUndefined()
+    expect(result.repairCondition).toBeUndefined()
+  })
+
+  it('does not fabricate authority from low scores', () => {
+    const result = mapConstitutionalAnswersToStructuralInput({
+      report: { authorityScore: 2 },
+    })
+    // Low score should not fabricate a named authority
+    expect(result.approvingAuthority).toBeUndefined()
+    expect(result.decisionOwner).toBeUndefined()
+  })
+})

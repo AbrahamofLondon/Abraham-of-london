@@ -34,6 +34,12 @@ import {
   mergeAssessmentEvidenceCapture,
   type AssessmentEvidenceCapture,
 } from "@/lib/product/evidence-capture-contract";
+import {
+  buildExecutiveCaseEvidenceCarryForward,
+  type ExecutiveEvidenceCarryForwardItem,
+} from "@/lib/product/evidence-carry-forward-presenter";
+import type { DiagnosticJourneyRecord } from "@/lib/product/diagnostic-journey-record";
+import type { RecommendationOutcomeLedgerEntry } from "@/lib/product/recommendation-outcome-ledger";
 
 type AnyRecord = Record<string, unknown>;
 
@@ -142,6 +148,27 @@ export type ExecutiveReportingPublicResult = {
     impact: string;
     items: GovernedMemoryItem[];
   } | null;
+  executiveJudgement: {
+    title: string;
+    evidenceCarriedForward: ExecutiveEvidenceCarryForwardItem[];
+    evidenceGaps: string[];
+    decisionOptions: Array<{
+      label: string;
+      judgement: string;
+      riskBenefit: string;
+      recommended: boolean;
+    }>;
+    recommendation: {
+      available: boolean;
+      statement: string;
+      rationale: string[];
+    };
+    riskBenefit: string[];
+    consequenceOfDelay: string;
+    governanceConditions: string[];
+    ownerSponsorImplications: string[];
+    boardroomDossierStatus: string;
+  };
   aiTerrain: AITerrainAssessment | null;
   consequenceProjection: ConsequenceProjection | null;
   advantagePath: AdvantagePath | null;
@@ -207,6 +234,8 @@ export type ExecutiveReportingPublicInput = {
     reason?: string | null;
     dossier?: AnyRecord | null;
   } | null;
+  journey?: DiagnosticJourneyRecord | null;
+  recommendationLedger?: RecommendationOutcomeLedgerEntry[] | null;
   /** Pre-computed public-safe sovereign signal assessment. Pass null when not available. */
   sovereignSignals?: SovereignSignalAssessment | null;
 };
@@ -397,15 +426,16 @@ function buildAiConsequenceSummary(aiAdjustedConsequence: AnyRecord): ExecutiveR
 }
 
 function sanitiseBoardroom(boardroom: ExecutiveReportingPublicInput["boardroom"]): ExecutiveReportingPublicResult["boardroom"] {
+  const qualified = Boolean(boardroom?.qualified);
   const dossier = getObject(boardroom?.dossier);
   const rawSections = Array.isArray(dossier.sections) ? dossier.sections : [];
   const rawObjections = Array.isArray(dossier.objectionHandling) ? dossier.objectionHandling : [];
   const rawDecisionPath = Array.isArray(dossier.decisionPath) ? dossier.decisionPath : [];
 
   return {
-    qualified: Boolean(boardroom?.qualified),
+    qualified,
     reason: boardroom?.reason ?? null,
-    dossier: rawSections.length
+    dossier: qualified && rawSections.length
       ? {
           title: s(dossier.title) || null,
           classification: s(dossier.classification) || null,
@@ -436,6 +466,107 @@ function sanitiseBoardroom(boardroom: ExecutiveReportingPublicInput["boardroom"]
           }).filter((entry) => entry.option && entry.consequence),
         }
       : null,
+  };
+}
+
+function buildExecutiveJudgement(input: {
+  canonical: AnyRecord;
+  intake: AnyRecord;
+  journey?: DiagnosticJourneyRecord | null;
+  recommendationLedger?: RecommendationOutcomeLedgerEntry[] | null;
+  summary: AnyRecord;
+  constitution: AnyRecord;
+  boardroom: ExecutiveReportingPublicResult["boardroom"];
+  route: ExecutiveReportingPublicResult["route"];
+  topPriority: string;
+  nextAction: string;
+  costOfDelayText: string;
+  projectedCostOfDelay90: string | null;
+  totalExposureFormatted: string | null;
+}): ExecutiveReportingPublicResult["executiveJudgement"] {
+  const carriedForward = buildExecutiveCaseEvidenceCarryForward({
+    canonical: input.canonical,
+    intake: input.intake,
+    journey: input.journey,
+    recommendationLedger: input.recommendationLedger,
+  });
+  const sourceCount = carriedForward.sourceSurfaces.filter((source) => source !== "executive_intake").length;
+  const thresholdMet =
+    input.route !== "REJECT" &&
+    sourceCount >= 2;
+  const evidenceLabels = carriedForward.items.map((item) => item.label).slice(0, 4);
+  const priority = input.topPriority || s(input.summary.mandate) || input.nextAction || "Assign accountable ownership before escalation.";
+  const sponsorText = s(getObject(input.intake.governance).sponsorNameOrSeat)
+    || s(getObject(input.intake.governance).authorityScope)
+    || s(input.constitution.authorityType, "Named sponsor required");
+  const delayText = input.projectedCostOfDelay90
+    ? `Delay keeps the estimated 90-day exposure live at ${input.projectedCostOfDelay90}.`
+    : input.totalExposureFormatted
+      ? `Delay leaves the current priced exposure live at ${input.totalExposureFormatted}.`
+      : input.costOfDelayText
+        ? `Delay consequence: ${input.costOfDelayText}`
+        : "Delay consequence remains unpriced; treat that as an evidence gap, not as absence of risk.";
+
+  const recommendationStatement = thresholdMet
+    ? `Recommendation: ${priority}`
+    : "Board-grade recommendation withheld until the carried-forward evidence threshold is met.";
+
+  return {
+    title: "Board-grade decision judgement",
+    evidenceCarriedForward: carriedForward.items,
+    evidenceGaps: carriedForward.gaps,
+    decisionOptions: [
+      {
+        label: "Proceed with governed decision",
+        judgement: priority,
+        riskBenefit: "Benefit: resolves the named decision constraint. Risk: requires visible owner acceptance and near-term proof.",
+        recommended: thresholdMet && input.route !== "REJECT",
+      },
+      {
+        label: "Defer pending missing evidence",
+        judgement: carriedForward.gaps[0] || "Use only if authority, team, or enterprise evidence is materially incomplete.",
+        riskBenefit: "Benefit: avoids over-claiming. Risk: the consequence of delay remains live and must be explicitly accepted.",
+        recommended: !thresholdMet,
+      },
+      {
+        label: "Challenge the judgement",
+        judgement: "Introduce contrary evidence against the priority stack before execution starts.",
+        riskBenefit: "Benefit: improves decision quality. Risk: challenge without evidence becomes delay by another name.",
+        recommended: false,
+      },
+    ],
+    recommendation: {
+      available: thresholdMet,
+      statement: recommendationStatement,
+      rationale: thresholdMet
+        ? [
+            evidenceLabels.length ? `Evidence carried forward: ${evidenceLabels.join("; ")}.` : "Evidence threshold met from the current executive record.",
+            `Route judgement: ${input.route.toLowerCase()}.`,
+            `Owner/sponsor condition: ${sponsorText}.`,
+          ]
+        : [
+            "At least two non-intake evidence sources are required before this block claims board-grade recommendation status.",
+            carriedForward.gaps[0] || "Evidence remains too thin for final judgement.",
+          ],
+    },
+    riskBenefit: [
+      `Primary benefit: ${s(input.summary.mandate, "the decision can move from interpretation into governed action")}.`,
+      `Primary risk: ${s(input.summary.headline, "the governing condition remains active")}.`,
+      "Residual risk must be tracked through an owner, proof standard, and checkpoint rather than more analysis.",
+    ],
+    consequenceOfDelay: delayText,
+    governanceConditions: [
+      `Named owner or sponsor: ${sponsorText}.`,
+      `Proof condition: ${s(getObject(input.intake.decisionNeed).verificationCriteria, "define observable evidence before execution is accepted")}.`,
+      "Record any challenge as evidence, not preference.",
+    ],
+    ownerSponsorImplications: [
+      "A sponsor must either accept the recommendation, reject it with evidence, or assign a new accountable owner.",
+      "If authority is unclear, the next move is ownership clarification before execution work begins.",
+    ],
+    boardroomDossierStatus: input.boardroom.qualified
+      ? "Boardroom qualification earned; dossier material is available in the Boardroom section."
+      : input.boardroom.reason || "Boardroom adversarial dossier not generated; qualification has not been earned.",
   };
 }
 
@@ -563,6 +694,21 @@ export function toExecutiveReportingPublicResult(
     caseId: input.caseId,
     executiveRunId: input.executiveRunId,
     purposeAlignmentEvidence,
+  });
+  const executiveJudgement = buildExecutiveJudgement({
+    canonical,
+    intake,
+    journey: input.journey,
+    recommendationLedger: input.recommendationLedger,
+    summary,
+    constitution,
+    boardroom,
+    route: input.route,
+    topPriority,
+    nextAction: s(viewModel.nextAction, s(getObject(viewModel.recommendations).nextAction, s(summary.mandate))),
+    costOfDelayText,
+    projectedCostOfDelay90,
+    totalExposureFormatted,
   });
 
   return {
@@ -702,6 +848,7 @@ export function toExecutiveReportingPublicResult(
       requiredAction: s(viewModel.nextAction) || arr(summary.priorityStack)[0] || "Action required — see priority stack",
     },
     governanceEvidenceCarryForward,
+    executiveJudgement,
     aiTerrain,
     consequenceProjection,
     advantagePath,

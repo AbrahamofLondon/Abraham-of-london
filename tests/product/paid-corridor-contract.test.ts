@@ -1,127 +1,123 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   PAID_CORRIDOR_RECORDS,
-  getCorridorRecord,
   getCorridorCapabilities,
-  getAllMissingAssets,
+  getCorridorRecord,
   type PaidCorridorStage,
 } from '@/lib/product/paid-corridor-contract'
 
 const ALL_STAGES: PaidCorridorStage[] = [
-  'team_assessment', 'enterprise_assessment', 'executive_reporting',
-  'boardroom_mode', 'strategy_room', 'retainer_oversight',
+  'team_assessment',
+  'enterprise_assessment',
+  'executive_reporting',
+  'boardroom_mode',
+  'strategy_room',
+  'retainer_oversight',
 ]
 
 describe('Paid Corridor Contract', () => {
-  // 1. Every paid corridor stage has a record
-  it('every paid corridor stage has a record', () => {
-    for (const stage of ALL_STAGES) {
-      const record = getCorridorRecord(stage)
-      expect(record, `Missing corridor record for: ${stage}`).toBeDefined()
-      expect(record!.corridorRole.length).toBeGreaterThan(10)
-      expect(record!.coreQuestionAnswered.length).toBeGreaterThan(10)
-    }
-    expect(PAID_CORRIDOR_RECORDS.length).toBe(ALL_STAGES.length)
+  it('Team starts Operational Decision Intelligence paid corridor', () => {
+    expect(PAID_CORRIDOR_RECORDS.map(record => record.stage)).toEqual(ALL_STAGES)
+    expect(PAID_CORRIDOR_RECORDS[0]!.stage).toBe('team_assessment')
+    expect(PAID_CORRIDOR_RECORDS[0]!.corridorRole.toLowerCase()).toContain('divergence')
   })
 
-  // 2. Enterprise has more evidence/capability requirements than Team
-  it('enterprise has more evidence requirements than team', () => {
+  it('Team cannot claim divergence without at least two respondent records', () => {
+    const team = getCorridorRecord('team_assessment')!
+    const evidence = team.minimumEvidenceRequired.join(' ').toLowerCase()
+    const prohibited = team.mustNotShow.join(' ').toLowerCase()
+
+    expect(evidence).toContain('multi-respondent')
+    expect(evidence).toContain('minimum 2')
+    expect(team.mustShow.some(item => item.toLowerCase().includes('respondent count'))).toBe(true)
+    expect(prohibited).toContain('single respondent')
+    expect(prohibited).toContain('cross-respondent divergence')
+  })
+
+  it('Purpose Alignment is absent from paid corridor', () => {
+    expect(PAID_CORRIDOR_RECORDS.map(record => record.stage)).not.toContain('purpose_alignment')
+    expect(PAID_CORRIDOR_RECORDS.some(record => record.corridorRole.toLowerCase().includes('purpose alignment'))).toBe(false)
+  })
+
+  it('Enterprise has wider/deeper evidence requirements than Team', () => {
     const team = getCorridorRecord('team_assessment')!
     const enterprise = getCorridorRecord('enterprise_assessment')!
-    expect(enterprise.requiredEvidence.length).toBeGreaterThanOrEqual(team.requiredEvidence.length)
-    expect(enterprise.capabilitiesAvailable.length).toBeGreaterThan(team.capabilitiesAvailable.length)
+
+    expect(enterprise.minimumEvidenceRequired.length).toBeGreaterThanOrEqual(team.minimumEvidenceRequired.length)
+    expect(getCorridorCapabilities('enterprise_assessment').length).toBeGreaterThan(getCorridorCapabilities('team_assessment').length)
+    expect(enterprise.minimumEvidenceRequired.some(item => item.toLowerCase().includes('dependency'))).toBe(true)
+    expect(enterprise.minimumEvidenceRequired.some(item => item.toLowerCase().includes('scenario'))).toBe(true)
+    expect(enterprise.minimumEvidenceRequired.some(item => item.toLowerCase().includes('exposure'))).toBe(true)
+    expect(enterprise.minimumEvidenceRequired.some(item => item.toLowerCase().includes('board challenge'))).toBe(true)
+    expect(enterprise.mustNotShow.some(item => item.toLowerCase().includes('final board recommendation'))).toBe(true)
+    expect(enterprise.upgradeTrigger.toLowerCase()).toMatch(/board-level exposure|executive brief|governed execution/)
   })
 
-  // 3. Executive Reporting has a distinct board-grade role
-  it('executive reporting has distinct board-grade role', () => {
+  it('Executive Reporting is board-grade judgement, not Enterprise stress testing', () => {
     const exec = getCorridorRecord('executive_reporting')!
-    expect(exec.corridorRole.toLowerCase()).toContain('board')
-    expect(exec.outputsAllowed.some(o => o.toLowerCase().includes('executive') || o.toLowerCase().includes('brief'))).toBe(true)
-    // Must not duplicate enterprise stress-test role
-    expect(exec.outputsProhibited.some(o => o.toLowerCase().includes('enterprise') || o.toLowerCase().includes('stress'))).toBe(true)
+    expect(exec.corridorRole.toLowerCase()).toContain('board-grade')
+    expect(exec.corridorRole.toLowerCase()).toContain('judgement')
+    expect(exec.mustShow.some(item => item.toLowerCase().includes('evidence carry-forward'))).toBe(true)
+    expect(exec.mustShow.some(item => item.toLowerCase().includes('known, missing, and gated'))).toBe(true)
+    expect(exec.mustNotShow.some(item => item.toLowerCase().includes('enterprise stress-test'))).toBe(true)
+    expect(exec.nonOverlapBoundary.toLowerCase()).toContain('judges and packages evidence')
+    expect(exec.nonOverlapBoundary.toLowerCase()).toContain('enterprise stress-tests structure')
   })
 
-  // 4. Boardroom Mode does not duplicate Strategy Room
-  it('boardroom mode does not duplicate strategy room', () => {
+  it('Boardroom Mode does not duplicate Strategy Room', () => {
     const boardroom = getCorridorRecord('boardroom_mode')!
-    const strategyRoom = getCorridorRecord('strategy_room')!
-    // Boardroom prohibits execution management
-    expect(boardroom.outputsProhibited.some(o => o.toLowerCase().includes('execution') || o.toLowerCase().includes('strategy room'))).toBe(true)
-    // Strategy Room prohibits board-grade material
-    expect(strategyRoom.outputsProhibited.some(o => o.toLowerCase().includes('board') || o.toLowerCase().includes('executive'))).toBe(true)
-    // Different core questions
-    expect(boardroom.coreQuestionAnswered).not.toBe(strategyRoom.coreQuestionAnswered)
+    const strategy = getCorridorRecord('strategy_room')!
+
+    expect(boardroom.mustNotShow.some(item => item.toLowerCase().includes('execution'))).toBe(true)
+    expect(strategy.mustNotShow.some(item => item.toLowerCase().includes('board-grade'))).toBe(true)
+    expect(boardroom.nonOverlapBoundary).not.toBe(strategy.nonOverlapBoundary)
   })
 
-  // 5. Retainer Oversight requires recommendation/outcome memory
-  it('retainer oversight requires recommendation/outcome memory', () => {
+  it('Retainer Oversight requires recommendation/outcome memory', () => {
     const retainer = getCorridorRecord('retainer_oversight')!
-    expect(retainer.requiredEvidence.some(e => e.toLowerCase().includes('outcome') || e.toLowerCase().includes('recommendation'))).toBe(true)
-    expect(retainer.requiredEvidence.some(e => e.toLowerCase().includes('memory') || e.toLowerCase().includes('pattern'))).toBe(true)
+    const evidence = retainer.minimumEvidenceRequired.join(' ').toLowerCase()
+    expect(evidence).toContain('recommendation memory')
+    expect(evidence).toContain('outcome memory')
+    expect(evidence).toContain('recurrence')
+    expect(evidence).toContain('cadence')
+    expect(retainer.currentReadiness).toBe('GATED')
+    expect(retainer.gatedCapabilities.map(capability => capability.name)).toEqual(
+      expect.arrayContaining([
+        'Oversight Cadence Engine',
+        'Oversight Cycle Comparison',
+        'Oversight Review Decision Engine',
+      ]),
+    )
   })
 
-  // 6. Team cannot claim divergence without multi-respondent records
-  it('team requires multi-respondent evidence', () => {
-    const team = getCorridorRecord('team_assessment')!
-    expect(team.requiredEvidence.some(e => e.toLowerCase().includes('multi-respondent') || e.toLowerCase().includes('minimum 2'))).toBe(true)
-    expect(team.outputsProhibited.some(o => o.toLowerCase().includes('single respondent'))).toBe(true)
+  it('Boardroom Mode and Strategy Room remain partially wired corridor stages', () => {
+    expect(getCorridorRecord('boardroom_mode')!.currentReadiness).toBe('PARTIALLY_WIRED')
+    expect(getCorridorRecord('strategy_room')!.currentReadiness).toBe('PARTIALLY_WIRED')
   })
 
-  // 7. Enterprise requires scenario/dependency/exposure evidence
-  it('enterprise requires scenario/dependency/exposure evidence', () => {
-    const enterprise = getCorridorRecord('enterprise_assessment')!
-    expect(enterprise.requiredEvidence.some(e => e.toLowerCase().includes('scenario'))).toBe(true)
-    expect(enterprise.requiredEvidence.some(e => e.toLowerCase().includes('dependency'))).toBe(true)
-    expect(enterprise.requiredEvidence.some(e => e.toLowerCase().includes('exposure'))).toBe(true)
-  })
-
-  // 8. No paid stage promises output without matching capability or gated requirement
-  it('no stage promises output without capability backing', () => {
+  it('No stage promises dormant-only capability as active', () => {
     for (const record of PAID_CORRIDOR_RECORDS) {
-      const allCapNames = getCorridorCapabilities(record.stage).map(c => c.name.toLowerCase())
-      // Every stage must have at least some capabilities
-      expect(allCapNames.length, `Stage "${record.stage}" has no capabilities`).toBeGreaterThan(0)
-      // Every stage must have allowed outputs
-      expect(record.outputsAllowed.length, `Stage "${record.stage}" has no allowed outputs`).toBeGreaterThan(0)
+      expect(record.activeCapabilities.every(capability => capability.status === 'ACTIVE' || capability.status === 'PARTIALLY_WIRED')).toBe(true)
+      expect(record.activeCapabilities.map(capability => capability.name)).not.toEqual([])
+      expect(getCorridorCapabilities(record.stage).length).toBeGreaterThan(0)
     }
   })
 
-  // 9. Every ACTIVE capability has a user-visible or state-changing destination
-  it('every available capability maps to an allowed output', () => {
+  it('Every corridor stage has a non-overlap boundary', () => {
     for (const record of PAID_CORRIDOR_RECORDS) {
-      expect(
-        record.capabilitiesAvailable.length,
-        `Stage "${record.stage}" has no available capabilities but has allowed outputs`,
-      ).toBeGreaterThan(0)
+      expect(record.nonOverlapBoundary.length).toBeGreaterThan(10)
     }
   })
 
-  // 10. Every dormant high-value capability has a recommended next action
-  it('every stage with dormant capabilities has a next wiring priority', () => {
+  it('Every corridor stage has a payment justification', () => {
     for (const record of PAID_CORRIDOR_RECORDS) {
-      if (record.capabilitiesDormant.length > 0) {
-        expect(
-          record.nextWiringPriority.length,
-          `Stage "${record.stage}" has dormant capabilities but no next wiring priority`,
-        ).toBeGreaterThan(0)
-      }
+      expect(record.paymentJustification.length).toBeGreaterThan(10)
     }
   })
 
-  // Bonus: getAllMissingAssets returns entries
-  it('getAllMissingAssets returns non-empty list', () => {
-    const missing = getAllMissingAssets()
-    expect(missing.length).toBeGreaterThan(0)
-    for (const entry of missing) {
-      expect(entry.stage).toBeTruthy()
-      expect(entry.asset).toBeTruthy()
+  it('Every corridor stage has firstImpressionMoment', () => {
+    for (const record of PAID_CORRIDOR_RECORDS) {
+      expect(record.firstImpressionMoment.length).toBeGreaterThan(10)
     }
-  })
-
-  // Bonus: non-overlap boundaries are distinct
-  it('corridor stages have distinct non-overlap boundaries', () => {
-    const boundaries = PAID_CORRIDOR_RECORDS.map(r => r.nonOverlapBoundary)
-    const unique = new Set(boundaries)
-    expect(unique.size).toBe(boundaries.length)
   })
 })

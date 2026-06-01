@@ -389,11 +389,12 @@ export const ENGINE_ACTIVATION_REGISTRY: EngineActivationRecord[] = [
     engineName: 'DomainInterdependency',
     filePath: 'lib/engine/domain-interdependency.ts',
     layer: 'CONTRADICTION',
-    status: 'ACTIVE',
+    status: 'GATED',
     requiredInputs: ['contradictionGraph', 'domainScores'],
     eligibleSurfaces: DEEP_SURFACES,
-    activeSurfaces: DEEP_SURFACES,
+    activeSurfaces: [],
     outputContract: 'InterventionSequence',
+    gatedReason: 'Requires contradictionGraph and domainScores; domainScores exist but contradictionGraph is not yet produced by the orchestrator',
   },
 
   // =========================================================================
@@ -554,12 +555,12 @@ export const ENGINE_ACTIVATION_REGISTRY: EngineActivationRecord[] = [
     engineName: 'ScenarioStressTest',
     filePath: 'lib/engine/scenario-stress-test.ts',
     layer: 'SIMULATION',
-    status: 'GATED',
+    status: 'ACTIVE',
     requiredInputs: ['scenarioResponses'],
     eligibleSurfaces: ENTERPRISE_PLUS,
-    activeSurfaces: [],
+    activeSurfaces: ['enterprise_assessment'],
     outputContract: 'StressTestResult',
-    gatedReason: 'Engine exists but has zero imports outside its own file — not invoked by any production path',
+    userVisibleDestination: 'Enterprise scenario stress findings and orchestrator engine trace when valid scenario responses are supplied',
   },
 
   // =========================================================================

@@ -23,6 +23,8 @@ describe('Surface Instrument Contract', () => {
       const contract = getInstrumentContract(surface)
       expect(contract, `Missing instrument contract for: ${surface}`).toBeDefined()
       expect(contract!.surface).toBe(surface)
+      expect(contract!.productLine).toBeTruthy()
+      expect(contract!.instrumentRole).toBeTruthy()
       expect(contract!.primaryUserQuestion.length).toBeGreaterThan(10)
       expect(contract!.fields.length).toBeGreaterThan(0)
     }
@@ -99,10 +101,40 @@ describe('Surface Instrument Contract', () => {
     expect(requiredFields[0]!.key).toBe('situation')
   })
 
-  // 8. Enterprise requires scenario questions
-  it('enterprise_assessment requires scenario_responses in minimumViableInput', () => {
+  // 8. Enterprise requires domain_scores in minimumViableInput (scenario_responses is optional)
+  it('enterprise_assessment requires domain_scores in minimumViableInput', () => {
     const enterprise = getInstrumentContract('enterprise_assessment')!
-    expect(enterprise.minimumViableInput).toContain('scenario_responses')
+    expect(enterprise.minimumViableInput).toContain('domain_scores')
+    // scenario_responses is optional — not required for minimumViableInput
+    expect(enterprise.minimumViableInput).not.toContain('scenario_responses')
+  })
+
+  it('purpose_alignment supports personal behavioural enforcement fields', () => {
+    const purpose = getInstrumentContract('purpose_alignment')!
+    const keys = purpose.fields.map(field => field.key)
+    expect(purpose.productLine).toBe('PURPOSE_ALIGNMENT')
+    expect(purpose.instrumentRole).toBe('personal_behavioural_enforcement')
+    expect(keys).toContain('avoided_decision')
+    expect(keys).toContain('avoidedDecision')
+    expect(keys).toContain('tolerated_dysfunction')
+    expect(keys).toContain('toleratedDysfunction')
+    expect(keys).toContain('justifying_evidence')
+    expect(keys).toContain('justifyingEvidence')
+    expect(keys).toContain('pattern_breaker_contract')
+    expect(keys).toContain('commitment_verification')
+  })
+
+  it('corporate surfaces do not require Purpose Alignment fields as prerequisites', () => {
+    for (const surface of ['constitutional_diagnostic', 'team_assessment', 'enterprise_assessment'] as const) {
+      const contract = getInstrumentContract(surface)!
+      const fieldKeys = contract.fields.map(field => field.key)
+      expect(contract.productLine).toBe('OPERATIONAL_DECISION_INTELLIGENCE')
+      expect(contract.prohibitedPrerequisites).toContain('purpose_alignment_completion')
+      expect(contract.minimumViableInput).not.toContain('avoided_decision')
+      expect(contract.minimumViableInput).not.toContain('avoidedDecision')
+      expect(fieldKeys).not.toContain('pattern_breaker_contract')
+      expect(fieldKeys).not.toContain('commitment_verification')
+    }
   })
 
   // 9. Constitutional requires authority/mandate fields

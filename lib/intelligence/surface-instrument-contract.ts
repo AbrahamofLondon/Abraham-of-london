@@ -13,6 +13,8 @@
  */
 
 import type { ProductSurface } from '@/lib/intelligence/engine-activation-registry'
+import type { PaidCorridorStage } from '@/lib/product/paid-corridor-contract'
+import type { ProductLine } from '@/lib/product/product-line-contract'
 
 // Re-export for convenience
 export type { ProductSurface } from '@/lib/intelligence/engine-activation-registry'
@@ -33,6 +35,10 @@ export type SurfaceInstrumentField = {
 
 export type SurfaceInstrumentContract = {
   surface: ProductSurface
+  productLine: ProductLine
+  corridorStage?: PaidCorridorStage
+  instrumentRole: 'personal_behavioural_enforcement' | 'corporate_decision_enforcement' | 'shared_infrastructure'
+  prohibitedPrerequisites: string[]
   primaryUserQuestion: string
   fields: SurfaceInstrumentField[]
   minimumViableInput: string[]
@@ -51,6 +57,9 @@ export type SurfaceInstrumentContract = {
 
 const FREE_SIGNAL_CONTRACT: SurfaceInstrumentContract = {
   surface: 'free_signal',
+  productLine: 'SHARED_INFRASTRUCTURE',
+  instrumentRole: 'shared_infrastructure',
+  prohibitedPrerequisites: ['purpose_alignment_completion'],
   primaryUserQuestion: 'Describe the decision or situation you are facing.',
   fields: [
     {
@@ -87,6 +96,9 @@ const FREE_SIGNAL_CONTRACT: SurfaceInstrumentContract = {
 
 const FAST_DIAGNOSTIC_CONTRACT: SurfaceInstrumentContract = {
   surface: 'fast_diagnostic',
+  productLine: 'SHARED_INFRASTRUCTURE',
+  instrumentRole: 'shared_infrastructure',
+  prohibitedPrerequisites: ['purpose_alignment_completion'],
   primaryUserQuestion: 'What decision are you trying to make, and what is blocking it?',
   fields: [
     {
@@ -213,6 +225,9 @@ const FAST_DIAGNOSTIC_CONTRACT: SurfaceInstrumentContract = {
 
 const PURPOSE_ALIGNMENT_CONTRACT: SurfaceInstrumentContract = {
   surface: 'purpose_alignment',
+  productLine: 'PURPOSE_ALIGNMENT',
+  instrumentRole: 'personal_behavioural_enforcement',
+  prohibitedPrerequisites: [],
   primaryUserQuestion: 'What decision have you been avoiding, and what would it cost to keep avoiding it?',
   fields: [
     {
@@ -230,6 +245,15 @@ const PURPOSE_ALIGNMENT_CONTRACT: SurfaceInstrumentContract = {
       purpose: 'Core input for obligation conflict map and alignment drift',
       requiredForEngines: ['situation-translator', 'hidden-signals', 'adversarial-lens'],
       required: true,
+      inputType: 'textarea',
+      privacyLevel: 'client_safe',
+    },
+    {
+      key: 'avoidedDecision',
+      label: 'What decision have you been avoiding?',
+      purpose: 'Alias field for personal behavioural enforcement evidence from avoided decisions',
+      requiredForEngines: ['situation-translator', 'hidden-signals'],
+      required: false,
       inputType: 'textarea',
       privacyLevel: 'client_safe',
     },
@@ -252,6 +276,15 @@ const PURPOSE_ALIGNMENT_CONTRACT: SurfaceInstrumentContract = {
       privacyLevel: 'client_safe',
     },
     {
+      key: 'toleratedDysfunction',
+      label: 'What dysfunction have you been tolerating?',
+      purpose: 'Alias field for tolerated dysfunction evidence used by personal pattern enforcement',
+      requiredForEngines: ['hidden-signals', 'failure-mode-lens'],
+      required: false,
+      inputType: 'textarea',
+      privacyLevel: 'client_safe',
+    },
+    {
       key: 'consequence_of_delay',
       label: 'What happens if you delay this decision another 30 days?',
       purpose: 'Cost of delay quantification and simulation input',
@@ -265,6 +298,33 @@ const PURPOSE_ALIGNMENT_CONTRACT: SurfaceInstrumentContract = {
       label: 'What evidence would justify action?',
       purpose: 'Evidence gap detection and tier derivation',
       requiredForEngines: ['evidence-lens', 'evidence-tier-derivation'],
+      required: false,
+      inputType: 'textarea',
+      privacyLevel: 'client_safe',
+    },
+    {
+      key: 'justifyingEvidence',
+      label: 'What evidence would justify action?',
+      purpose: 'Alias field for evidence threshold and commitment verification',
+      requiredForEngines: ['evidence-lens', 'evidence-tier-derivation'],
+      required: false,
+      inputType: 'textarea',
+      privacyLevel: 'client_safe',
+    },
+    {
+      key: 'pattern_breaker_contract',
+      label: 'What contract would break the pattern?',
+      purpose: 'Pattern-breaker contract for personal behavioural enforcement',
+      requiredForEngines: ['synthesis-gate', 'stage-contribution-derivation'],
+      required: false,
+      inputType: 'textarea',
+      privacyLevel: 'client_safe',
+    },
+    {
+      key: 'commitment_verification',
+      label: 'How will the commitment be verified?',
+      purpose: 'Commitment verification for personal behavioural enforcement',
+      requiredForEngines: ['evidence-tier-derivation', 'signal-continuity'],
       required: false,
       inputType: 'textarea',
       privacyLevel: 'client_safe',
@@ -317,6 +377,9 @@ const PURPOSE_ALIGNMENT_CONTRACT: SurfaceInstrumentContract = {
 
 const CONSTITUTIONAL_DIAGNOSTIC_CONTRACT: SurfaceInstrumentContract = {
   surface: 'constitutional_diagnostic',
+  productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+  instrumentRole: 'corporate_decision_enforcement',
+  prohibitedPrerequisites: ['purpose_alignment_completion', 'purpose_alignment_fields'],
   primaryUserQuestion: 'What is the governance structure around this decision, and where does authority break down?',
   fields: [
     {
@@ -411,21 +474,38 @@ const CONSTITUTIONAL_DIAGNOSTIC_CONTRACT: SurfaceInstrumentContract = {
     'route is REJECT and disqualifiers present',
   ],
   engineUnlocks: [
-    { engineId: 'constitutional-engine', requiredFields: ['decision_owner', 'approving_authority', 'mandate_source'], outputEnabled: 'Full constitutional route assessment' },
-    { engineId: 'assessment-engine', requiredFields: ['decision_owner', 'mandate_source'], outputEnabled: 'Constitutional guidance assembly' },
-    { engineId: 'adversarial-preview', requiredFields: ['decision_owner', 'failure_mode'], outputEnabled: 'Adversarial challenge panel' },
-    { engineId: 'domain-interdependency', requiredFields: ['decision_owner', 'mandate_source'], outputEnabled: 'Cross-domain tension detection' },
-    { engineId: 'decision-simulation-engine', requiredFields: ['decision_owner', 'failure_mode'], outputEnabled: '30/60/90 day degradation projections' },
-    { engineId: 'synthesis-engine', requiredFields: ['decision_owner', 'repair_condition'], outputEnabled: 'Governed synthesis' },
-    // Gated
-    { engineId: 'escalation-engine', requiredFields: ['decision_owner', 'approving_authority', 'blocking_authority'], outputEnabled: 'Auto-escalation sweep (GATED — requires case memory)' },
-    { engineId: 'route-correction', requiredFields: ['current_route', 'repair_condition'], outputEnabled: 'Route correction from evidence (GATED — requires multi-turn)' },
-    { engineId: 'contradiction-forcing', requiredFields: ['decision_owner', 'blocking_authority'], outputEnabled: 'Forced contradiction from authority conflict (GATED)' },
+    // Core constitutional engine — requires authority + mandate clarity
+    { engineId: 'constitutional-engine', requiredFields: ['decision_owner', 'approving_authority', 'mandate_source'], outputEnabled: 'Full constitutional route assessment with authority state and mandate fit' },
+    { engineId: 'assessment-engine', requiredFields: ['decision_owner', 'mandate_source'], outputEnabled: 'Constitutional guidance assembly with mandate verification' },
+    // Authority lens — requires approving authority or blocking authority
+    { engineId: 'authority-lens', requiredFields: ['approving_authority', 'blocking_authority'], outputEnabled: 'Authority hierarchy mapping, veto detection, escalation path' },
+    // Evidence lens — requires mandate source and failure mode for evidence sufficiency
+    { engineId: 'evidence-lens', requiredFields: ['mandate_source', 'failure_mode'], outputEnabled: 'Evidence sufficiency assessment against mandate and failure risk' },
+    // Adversarial preview — requires decision owner + failure mode
+    { engineId: 'adversarial-preview', requiredFields: ['decision_owner', 'failure_mode'], outputEnabled: 'Adversarial challenge panel with failure mode vectors' },
+    // Domain interdependency — requires decision owner + mandate source
+    { engineId: 'domain-interdependency', requiredFields: ['decision_owner', 'mandate_source'], outputEnabled: 'Cross-domain tension detection from authority and mandate' },
+    // Decision simulation — requires decision owner + failure mode
+    { engineId: 'decision-simulation-engine', requiredFields: ['decision_owner', 'failure_mode'], outputEnabled: '30/60/90 day degradation projections with failure mode drivers' },
+    // Synthesis engine — requires decision owner + repair condition
+    { engineId: 'synthesis-engine', requiredFields: ['decision_owner', 'repair_condition'], outputEnabled: 'Governed synthesis with repair condition as action driver' },
+    // Arbitration service — requires route + blocking authority for conflict resolution
+    { engineId: 'arbitration-service', requiredFields: ['current_route', 'blocking_authority'], outputEnabled: 'Constitutional route arbitration when blocking authority conflicts with current route' },
+    // Escalation readiness — requires approving authority + blocking authority
+    { engineId: 'escalation-engine', requiredFields: ['decision_owner', 'approving_authority', 'blocking_authority'], outputEnabled: 'Auto-escalation sweep with authority hierarchy (GATED — requires case memory)' },
+    // Route correction — requires current route + repair condition
+    { engineId: 'route-correction', requiredFields: ['current_route', 'repair_condition'], outputEnabled: 'Route correction from evidence and repair condition (GATED — requires multi-turn)' },
+    // Contradiction forcing — requires decision owner + blocking authority
+    { engineId: 'contradiction-forcing', requiredFields: ['decision_owner', 'blocking_authority'], outputEnabled: 'Forced contradiction from authority conflict between owner and blocker (GATED)' },
   ],
 }
 
 const TEAM_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
   surface: 'team_assessment',
+  productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+  corridorStage: 'team_assessment',
+  instrumentRole: 'corporate_decision_enforcement',
+  prohibitedPrerequisites: ['purpose_alignment_completion', 'purpose_alignment_fields'],
   primaryUserQuestion: 'How does your team perceive this decision, and where do they diverge?',
   fields: [
     {
@@ -546,6 +626,10 @@ const TEAM_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
 
 const ENTERPRISE_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
   surface: 'enterprise_assessment',
+  productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+  corridorStage: 'enterprise_assessment',
+  instrumentRole: 'corporate_decision_enforcement',
+  prohibitedPrerequisites: ['purpose_alignment_completion', 'purpose_alignment_fields'],
   primaryUserQuestion: 'How does your organisation make decisions, and where do the structural weaknesses lie?',
   fields: [
     {
@@ -559,35 +643,26 @@ const ENTERPRISE_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
     },
     {
       key: 'dependency_map',
-      label: 'Which decisions depend on which other decisions?',
-      purpose: 'Intervention sequence and cross-domain tension detection',
+      label: 'Which functions, people, systems, or external parties does this decision depend on?',
+      purpose: 'Intervention sequence, cross-domain tension detection, and dependency risk mapping',
       requiredForEngines: ['domain-interdependency', 'contradiction-graph'],
-      required: true,
-      inputType: 'multi_select',
-      privacyLevel: 'client_safe',
-    },
-    {
-      key: 'escalation_triggers',
-      label: 'What triggers escalation in your organisation?',
-      purpose: 'Escalation pattern detection and constitutional assessment',
-      requiredForEngines: ['constitutional-engine', 'assessment-engine'],
       required: false,
       inputType: 'textarea',
       privacyLevel: 'client_safe',
     },
     {
       key: 'scenario_responses',
-      label: 'How would you handle these scenarios?',
+      label: 'How would the organisation respond under pressure? (3 scenarios)',
       purpose: 'Scenario stress testing and pressure response analysis',
       requiredForEngines: ['scenario-stress-test'],
-      required: true,
+      required: false,
       inputType: 'textarea',
       privacyLevel: 'client_safe',
     },
     {
       key: 'financial_exposure',
-      label: 'What is the financial exposure of current decision delays?',
-      purpose: 'Financial risk quantification and cost of delay',
+      label: 'What financial exposure is attached to this decision?',
+      purpose: 'Financial risk quantification, cost of delay, and commercial consequence',
       requiredForEngines: ['cost-of-delay', 'commercial-proof-lens'],
       required: false,
       inputType: 'textarea',
@@ -595,8 +670,8 @@ const ENTERPRISE_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
     },
     {
       key: 'client_exposure',
-      label: 'Which client relationships are at risk from decision delays?',
-      purpose: 'Client exposure mapping and commercial proof',
+      label: 'What client or market exposure is attached to this decision?',
+      purpose: 'Client exposure mapping, commercial proof, and market risk',
       requiredForEngines: ['commercial-proof-lens', 'supplier-dependency-lens'],
       required: false,
       inputType: 'textarea',
@@ -604,9 +679,27 @@ const ENTERPRISE_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
     },
     {
       key: 'regulatory_exposure',
-      label: 'Are there regulatory or compliance risks from current decision patterns?',
-      purpose: 'Regulated boundary detection and compliance risk',
+      label: 'What legal, regulatory, or compliance exposure is attached to this decision?',
+      purpose: 'Regulated boundary detection, compliance risk, and obligation mapping',
       requiredForEngines: ['regulated-boundary-lens', 'obligation-lens'],
+      required: false,
+      inputType: 'textarea',
+      privacyLevel: 'client_safe',
+    },
+    {
+      key: 'board_challenge_readiness',
+      label: 'If challenged by a board or senior reviewer, how strong is the evidence base?',
+      purpose: 'Governance readiness, evidence sufficiency, and executive reporting preparation',
+      requiredForEngines: ['assessment-engine', 'adversarial-preview'],
+      required: false,
+      inputType: 'scale',
+      privacyLevel: 'client_safe',
+    },
+    {
+      key: 'escalation_triggers',
+      label: 'What triggers escalation in your organisation?',
+      purpose: 'Escalation pattern detection and constitutional assessment',
+      requiredForEngines: ['constitutional-engine', 'assessment-engine'],
       required: false,
       inputType: 'textarea',
       privacyLevel: 'client_safe',
@@ -620,17 +713,8 @@ const ENTERPRISE_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
       inputType: 'text',
       privacyLevel: 'client_safe',
     },
-    {
-      key: 'board_challenge_readiness',
-      label: 'How prepared is leadership for board-level scrutiny of decision quality?',
-      purpose: 'Governance readiness and executive reporting preparation',
-      requiredForEngines: ['assessment-engine', 'adversarial-preview'],
-      required: false,
-      inputType: 'scale',
-      privacyLevel: 'client_safe',
-    },
   ],
-  minimumViableInput: ['domain_scores', 'dependency_map', 'scenario_responses'],
+  minimumViableInput: ['domain_scores'],
   wowOutputRequirements: [
     'domain_interdependency_map',
     'systemic_lock_detection',
@@ -644,24 +728,29 @@ const ENTERPRISE_ASSESSMENT_CONTRACT: SurfaceInstrumentContract = {
   ],
   refusalConditions: [
     'domain_scores is empty or incomplete',
-    'dependency_map is empty',
-    'scenario_responses is empty',
     'no organisational context available',
   ],
   engineUnlocks: [
-    { engineId: 'domain-interdependency', requiredFields: ['domain_scores', 'dependency_map'], outputEnabled: 'Cross-domain tension and intervention sequence' },
-    { engineId: 'decision-simulation-engine', requiredFields: ['domain_scores'], outputEnabled: '30/60/90 day degradation projections' },
+    // Core — domain scores alone unlock simulation
+    { engineId: 'domain-interdependency', requiredFields: ['domain_scores', 'dependency_map'], outputEnabled: 'Cross-domain tension and intervention sequence with dependency mapping (GATED — requires contradictionGraph)' },
+    { engineId: 'decision-simulation-engine', requiredFields: ['domain_scores'], outputEnabled: '30/60/90 day degradation projections from domain scores' },
+    // Constitutional — escalation triggers unlock constitutional assessment
     { engineId: 'constitutional-engine', requiredFields: ['escalation_triggers'], outputEnabled: 'Constitutional assessment from escalation patterns' },
-    { engineId: 'assessment-engine', requiredFields: ['domain_scores', 'board_challenge_readiness'], outputEnabled: 'Constitutional guidance assembly' },
-    { engineId: 'adversarial-preview', requiredFields: ['domain_scores', 'board_challenge_readiness'], outputEnabled: 'Adversarial challenge from governance gaps' },
-    { engineId: 'cost-of-delay', requiredFields: ['financial_exposure', 'operating_deadline'], outputEnabled: 'Financial urgency quantification' },
-    { engineId: 'commercial-proof-lens', requiredFields: ['financial_exposure', 'client_exposure'], outputEnabled: 'Commercial viability from exposure data' },
+    // Assessment — domain scores + board challenge readiness unlock guidance assembly
+    { engineId: 'assessment-engine', requiredFields: ['domain_scores', 'board_challenge_readiness'], outputEnabled: 'Constitutional guidance assembly with evidence readiness context' },
+    { engineId: 'adversarial-preview', requiredFields: ['domain_scores', 'board_challenge_readiness'], outputEnabled: 'Adversarial challenge from governance gaps and evidence readiness' },
+    // Cost & simulation — exposure fields unlock financial urgency
+    { engineId: 'cost-of-delay', requiredFields: ['financial_exposure', 'operating_deadline'], outputEnabled: 'Financial urgency quantification from exposure and deadline' },
+    { engineId: 'commercial-proof-lens', requiredFields: ['financial_exposure', 'client_exposure'], outputEnabled: 'Commercial viability from financial and client exposure data' },
+    // Regulatory — regulatory exposure unlocks boundary and obligation lenses
     { engineId: 'regulated-boundary-lens', requiredFields: ['regulatory_exposure'], outputEnabled: 'Regulatory boundary from compliance data' },
-    { engineId: 'obligation-lens', requiredFields: ['regulatory_exposure'], outputEnabled: 'Obligation mapping from compliance' },
+    { engineId: 'obligation-lens', requiredFields: ['regulatory_exposure'], outputEnabled: 'Obligation mapping from compliance exposure' },
     { engineId: 'supplier-dependency-lens', requiredFields: ['client_exposure'], outputEnabled: 'Supply chain risk from client exposure' },
-    { engineId: 'governed-memory-presenter', requiredFields: ['domain_scores'], outputEnabled: 'Governed memory items' },
-    // Gated
-    { engineId: 'scenario-stress-test', requiredFields: ['scenario_responses'], outputEnabled: 'Scenario stress analysis (GATED — engine not yet invoked)' },
+    // Memory
+    { engineId: 'governed-memory-presenter', requiredFields: ['domain_scores'], outputEnabled: 'Governed memory items from enterprise assessment' },
+    // Gated — scenario responses unlock scenario stress test
+    { engineId: 'scenario-stress-test', requiredFields: ['scenario_responses'], outputEnabled: 'Scenario stress analysis with pressure response patterns (GATED — requires scenario responses)' },
+    // Gated — escalation triggers unlock escalation engine
     { engineId: 'escalation-engine', requiredFields: ['escalation_triggers'], outputEnabled: 'Auto-escalation sweep (GATED — requires case memory)' },
     { engineId: 'intervention-engine', requiredFields: ['domain_scores', 'dependency_map'], outputEnabled: 'Intervention conversion (GATED — requires tribunal)' },
     { engineId: 'similar-case-surfacer', requiredFields: ['domain_scores'], outputEnabled: 'Similar case patterns (GATED)' },

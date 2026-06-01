@@ -96,7 +96,8 @@ describe('Product Operating Matrix', () => {
   // 8. enterprise_assessment prepares scenario stress and domain interdependency
   it('enterprise_assessment prepares scenario stress and domain interdependency', () => {
     const record = getOperatingRecord('enterprise_assessment')!
-    expect(record.futureEnginePreparation).toContain('scenario-stress-test')
+    expect(record.engines.allowed).toContain('scenario-stress-test')
+    expect(record.futureEnginePreparation).not.toContain('scenario-stress-test')
     expect(record.engines.allowed).toContain('domain-interdependency')
     expect(record.engines.allowed).toContain('decision-simulation-engine')
   })
@@ -167,6 +168,43 @@ describe('Product Operating Matrix', () => {
   it('every surface has a non-empty purpose', () => {
     for (const record of PRODUCT_OPERATING_MATRIX) {
       expect(record.purpose.length).toBeGreaterThan(10)
+    }
+  })
+
+  it('every surface declares product line authority and evidence policy', () => {
+    for (const record of PRODUCT_OPERATING_MATRIX) {
+      expect(record.productLine).toBeTruthy()
+      expect(record.allowedEvidenceTypes.length).toBeGreaterThan(0)
+      expect(record.contributionPolicy.length).toBeGreaterThan(10)
+      expect(record.prohibitedClaims.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('Purpose Alignment is separate from the Operational Decision Intelligence corridor', () => {
+    const purpose = getOperatingRecord('purpose_alignment')!
+    expect(purpose.productLine).toBe('PURPOSE_ALIGNMENT')
+    expect(purpose.corridorStage).toBeUndefined()
+    expect(purpose.allowedEvidenceTypes).toEqual([
+      'personal_pattern',
+      'behavioural_contract',
+      'contract_breach',
+      'avoided_decision',
+      'recurrence',
+    ])
+    expect(purpose.prohibitedClaims.join(' ')).toMatch(/corporate diagnosis/i)
+  })
+
+  it('corporate surfaces use Operational Decision Intelligence evidence policy', () => {
+    for (const surface of ['team_assessment', 'enterprise_assessment', 'executive_reporting', 'strategy_room'] as const) {
+      const record = getOperatingRecord(surface)!
+      expect(record.productLine).toBe('OPERATIONAL_DECISION_INTELLIGENCE')
+      expect(record.allowedEvidenceTypes).toContain('case_decision')
+      expect(record.allowedEvidenceTypes).toContain('stakeholder')
+      expect(record.allowedEvidenceTypes).toContain('outcome')
+      expect(record.allowedEvidenceTypes).toContain('authority_structure')
+      expect(record.allowedEvidenceTypes).toContain('scenario_stress')
+      expect(record.allowedEvidenceTypes).toContain('evidence_lineage')
+      expect(record.prohibitedClaims.join(' ')).not.toMatch(/requires purpose alignment/i)
     }
   })
 })

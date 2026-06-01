@@ -1,20 +1,11 @@
 /**
- * lib/product/paid-corridor-contract.ts
+ * Paid Corridor Authority Map.
  *
- * Paid Corridor Authority Map — defines what each paid surface stage
- * captures, proves, unlocks, and must not claim.
- *
- * Rules:
- *   - No stage may promise output without matching capability.
- *   - No stage may duplicate another stage's core role.
- *   - Retainer requires durable recommendation/outcome memory.
- *   - Team cannot claim divergence without multi-respondent records.
- *   - Enterprise requires scenario/dependency/exposure evidence.
+ * The paid corridor contains only Operational Decision Intelligence stages.
+ * Purpose Alignment is a separate product line: it may contribute optional,
+ * auditable behavioural evidence, but it is not a prerequisite, not a corridor
+ * stage, and not a corporate diagnosis.
  */
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 export type PaidCorridorStage =
   | 'team_assessment'
@@ -24,7 +15,7 @@ export type PaidCorridorStage =
   | 'strategy_room'
   | 'retainer_oversight'
 
-export type CorridorCapabilityStatus = 'AVAILABLE_NOW' | 'DORMANT' | 'GATED'
+export type CorridorCapabilityStatus = 'ACTIVE' | 'PARTIALLY_WIRED' | 'GATED' | 'DORMANT'
 
 export type CorridorCapability = {
   name: string
@@ -32,34 +23,39 @@ export type CorridorCapability = {
   gatedReason?: string
 }
 
+export type ReadinessStatus = 'ACTIVE' | 'PARTIALLY_WIRED' | 'GATED' | 'DORMANT'
+export type OverclaimRisk = 'LOW' | 'MEDIUM' | 'HIGH'
+
 export type PaidCorridorRecord = {
   stage: PaidCorridorStage
   corridorRole: string
   userPerceptionShift: string
   coreQuestionAnswered: string
-  requiredEvidence: string[]
-  capabilitiesAvailable: CorridorCapability[]
-  capabilitiesDormant: CorridorCapability[]
-  outputsAllowed: string[]
-  outputsProhibited: string[]
-  upgradeTrigger: string
-  nonOverlapBoundary: string
+  minimumEvidenceRequired: string[]
+  engineRequirements: string[]
+  activeCapabilities: CorridorCapability[]
+  gatedCapabilities: CorridorCapability[]
+  dormantRelevantCapabilities: CorridorCapability[]
+  primaryOutput: string
+  mustShow: string[]
+  mustNotShow: string[]
+  unlocksNext: PaidCorridorStage[]
   paymentJustification: string
-  missingAssets: string[]
-  nextWiringPriority: string
+  nonOverlapBoundary: string
+  upgradeTrigger: string
+  firstImpressionMoment: string
+  currentReadiness: ReadinessStatus
+  riskOfOverclaiming: OverclaimRisk
+  nextWiringAction: string
 }
-
-// ---------------------------------------------------------------------------
-// Corridor Records
-// ---------------------------------------------------------------------------
 
 const TEAM_ASSESSMENT: PaidCorridorRecord = {
   stage: 'team_assessment',
-  corridorRole: 'Detects perception divergence across team members on a single decision',
-  userPerceptionShift: 'From "I think the team agrees" to "Here is exactly where the team diverges and why it matters"',
+  corridorRole: 'Decision perception divergence across multiple respondents on one decision.',
+  userPerceptionShift: 'From "I think the team agrees" to "Here is where respondents diverge on decision, owner, blocker, evidence, and execution confidence."',
   coreQuestionAnswered: 'Does this team share a common understanding of the decision, its owner, its blocker, and its consequences?',
-  requiredEvidence: [
-    'Multi-respondent answers (minimum 2)',
+  minimumEvidenceRequired: [
+    'Multi-respondent records, minimum 2 respondents',
     'Perceived decision per respondent',
     'Perceived owner per respondent',
     'Perceived blocker per respondent',
@@ -67,297 +63,316 @@ const TEAM_ASSESSMENT: PaidCorridorRecord = {
     'Evidence clarity scale per respondent',
     'Execution confidence scale per respondent',
   ],
-  capabilitiesAvailable: [
-    { name: 'Cross-respondent contradiction detection', status: 'AVAILABLE_NOW' },
-    { name: 'Authority clarity measurement', status: 'AVAILABLE_NOW' },
-    { name: 'Evidence confidence aggregation', status: 'AVAILABLE_NOW' },
-    { name: 'Execution risk simulation', status: 'AVAILABLE_NOW' },
-    { name: 'Governed memory presentation', status: 'AVAILABLE_NOW' },
+  engineRequirements: [
+    'team respondent aggregation helper',
+    'cross-respondent contradiction summary',
+    'authority/evidence/execution scales',
   ],
-  capabilitiesDormant: [
-    { name: 'Contradiction forcing from answer patterns', status: 'GATED', gatedReason: 'ContradictionForcing engine not invoked in production' },
-    { name: 'Similar case surfacing', status: 'GATED', gatedReason: 'Requires populated case store' },
-    { name: 'Leadership avoidance detection from private signals', status: 'DORMANT', gatedReason: 'leadership_avoidance_signal field not yet captured' },
+  activeCapabilities: [
+    { name: 'Authority clarity measurement', status: 'ACTIVE' },
+    { name: 'Evidence confidence aggregation', status: 'ACTIVE' },
+    { name: 'Execution confidence aggregation', status: 'ACTIVE' },
+    { name: 'Team respondent aggregation', status: 'ACTIVE' },
   ],
-  outputsAllowed: [
-    'Team divergence analysis',
-    'Authority clarity score',
-    'Evidence clarity score',
-    'Execution confidence score',
-    'Blocker divergence map',
-    'Contradiction summary',
+  gatedCapabilities: [
+    { name: 'ContradictionForcing from respondent answer patterns', status: 'GATED', gatedReason: 'Engine exists but is not invoked by a production path.' },
+    { name: 'Similar case surfacing', status: 'GATED', gatedReason: 'Requires populated resolved case store.' },
+  ],
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Team divergence report with authority, evidence, blocker, and execution confidence deltas.',
+  mustShow: [
+    'Respondent count and aggregation basis',
+    'Divergence boundaries',
+    'Authority/evidence/execution confidence differences',
     'Next admissible move',
   ],
-  outputsProhibited: [
+  mustNotShow: [
     'Enterprise exposure analysis',
     'Domain interdependency map',
     'Board-grade recommendation',
     'Scenario stress test results',
-    'Financial exposure quantification',
-    'Cross-respondent insight from single respondent',
+    'Cross-respondent divergence from a single respondent',
   ],
-  upgradeTrigger: 'Team reveals structural or cross-domain issues beyond team-level perception',
-  nonOverlapBoundary: 'Team detects perception divergence; Enterprise tests structural dependencies and exposure',
-  paymentJustification: 'Multi-respondent intelligence that cannot be derived from a single diagnostic',
-  missingAssets: ['ContradictionForcing wiring', 'SimilarCaseSurfacer wiring', 'leadership_avoidance_signal field'],
-  nextWiringPriority: 'Wire ContradictionForcing to team respondent answer patterns',
+  unlocksNext: ['enterprise_assessment'],
+  paymentJustification: 'Multi-respondent intelligence that cannot be derived from an individual diagnostic or Purpose Alignment.',
+  nonOverlapBoundary: 'Team measures perception divergence; Enterprise analyses organisational stress architecture.',
+  upgradeTrigger: 'Divergence reveals structural dependencies, exposure, or board challenge readiness beyond team perception.',
+  firstImpressionMoment: 'The buyer sees named divergence across respondents that was invisible in ordinary meetings.',
+  currentReadiness: 'ACTIVE',
+  riskOfOverclaiming: 'LOW',
+  nextWiringAction: 'Keep expanding shared-reference invite mechanics while preserving aggregate-only output.',
 }
 
 const ENTERPRISE_ASSESSMENT: PaidCorridorRecord = {
   stage: 'enterprise_assessment',
-  corridorRole: 'Tests organisational decision dependencies, scenarios, exposure, and board challenge readiness',
-  userPerceptionShift: 'From "We have some issues" to "Here are the structural dependencies, exposure levels, and failure scenarios across your decision architecture"',
-  coreQuestionAnswered: 'Where do your organisational decisions depend on each other, and what breaks under pressure?',
-  requiredEvidence: [
+  corridorRole: 'Organisational stress architecture across dependency, scenario, exposure, and board challenge readiness.',
+  userPerceptionShift: 'From "We have decision problems" to "Here is what breaks across the organisation under dependency, exposure, and challenge pressure."',
+  coreQuestionAnswered: 'Where do organisational decisions depend on each other, and what breaks under pressure?',
+  minimumEvidenceRequired: [
     'Domain scores across key decision areas',
-    'Dependency map between decisions',
-    'Scenario stress responses (3 scenarios minimum)',
-    'Financial exposure data',
-    'Client/market exposure data',
-    'Regulatory/compliance exposure data',
-    'Board challenge readiness assessment',
+    'Dependency map between functions, people, systems, or external parties',
+    'Scenario stress responses using valid enterprise scenario bank IDs',
+    'Financial exposure evidence',
+    'Client or market exposure evidence',
+    'Regulatory or compliance exposure evidence',
+    'Board challenge readiness evidence',
   ],
-  capabilitiesAvailable: [
-    { name: 'Domain interdependency mapping', status: 'AVAILABLE_NOW' },
-    { name: 'Decision simulation (30/60/90 day)', status: 'AVAILABLE_NOW' },
-    { name: 'Cost of delay quantification', status: 'AVAILABLE_NOW' },
-    { name: 'Constitutional assessment', status: 'AVAILABLE_NOW' },
-    { name: 'Assessment engine (constitutional guidance)', status: 'AVAILABLE_NOW' },
-    { name: 'Adversarial preview', status: 'AVAILABLE_NOW' },
-    { name: 'Governed memory presentation', status: 'AVAILABLE_NOW' },
+  engineRequirements: [
+    'scenario-stress-test for valid scenario responses',
+    'decision-simulation-engine for degradation projection',
+    'domain-interdependency remains gated until contradictionGraph is produced',
   ],
-  capabilitiesDormant: [
-    { name: 'Scenario stress test analysis', status: 'GATED', gatedReason: 'ScenarioStressTest engine not invoked by orchestrator' },
-    { name: 'Escalation engine', status: 'GATED', gatedReason: 'Requires case memory store' },
-    { name: 'Intervention engine', status: 'GATED', gatedReason: 'Requires drift tribunal findings' },
-    { name: 'Breach detector', status: 'GATED', gatedReason: 'Requires contract store' },
-    { name: 'Drift rules/tribunal', status: 'GATED', gatedReason: 'Requires case memory with prior recommendations' },
-    { name: 'Assumption drift detector', status: 'GATED', gatedReason: 'Requires 100+ outcome records' },
-    { name: 'Failure pattern calibrator', status: 'GATED', gatedReason: 'Requires 500+ outcome records' },
+  activeCapabilities: [
+    { name: 'Scenario stress analysis from enterprise orchestrator', status: 'ACTIVE' },
+    { name: 'Decision simulation projections', status: 'ACTIVE' },
+    { name: 'Cost of delay quantification', status: 'ACTIVE' },
+    { name: 'Constitutional assessment', status: 'ACTIVE' },
+    { name: 'Adversarial preview', status: 'ACTIVE' },
+    { name: 'Enterprise dependency and exposure result surface', status: 'ACTIVE' },
   ],
-  outputsAllowed: [
-    'Domain interdependency map',
-    'Systemic lock detection',
-    'Scenario stress results',
-    'Degradation projection',
-    'Intervention sequence',
-    'Financial exposure summary',
-    'Governance readiness assessment',
-    'Next admissible move',
+  gatedCapabilities: [
+    { name: 'DomainInterdependency', status: 'GATED', gatedReason: 'Requires contradictionGraph plus domainScores; domainScores exist but contradictionGraph is not produced.' },
+    { name: 'Escalation engine', status: 'GATED', gatedReason: 'Requires case memory store.' },
+    { name: 'Intervention engine', status: 'GATED', gatedReason: 'Requires drift tribunal findings.' },
+    { name: 'Breach detector', status: 'GATED', gatedReason: 'Requires contract store.' },
   ],
-  outputsProhibited: [
-    'Final board recommendation (Executive Reporting role)',
-    'Governed execution management (Strategy Room role)',
-    'Adversarial scrutiny session (Boardroom Mode role)',
-    'Retained oversight (Retainer role)',
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Enterprise stress architecture report with dependency, scenario, exposure, and board challenge readiness.',
+  mustShow: [
+    'Dependency basis',
+    'Scenario stress summary when valid scenario responses exist',
+    'Financial/client/regulatory exposure evidence',
+    'Board challenge readiness',
+    'Gated domain-interdependency boundary',
   ],
-  upgradeTrigger: 'Enterprise reveals board-level exposure requiring executive-grade reporting or governed execution',
-  nonOverlapBoundary: 'Enterprise tests structural dependencies; Executive Reporting converts to board-grade material',
-  paymentJustification: 'Organisational-level intelligence across domains, scenarios, and exposure that cannot be derived from individual assessments',
-  missingAssets: ['ScenarioStressTest invocation', 'EscalationEngine wiring', 'InterventionEngine wiring'],
-  nextWiringPriority: 'Wire ScenarioStressTest engine to orchestrator for enterprise surface',
+  mustNotShow: [
+    'Final board recommendation',
+    'Governed execution management',
+    'Adversarial boardroom session',
+    'Retained oversight',
+  ],
+  unlocksNext: ['executive_reporting', 'strategy_room'],
+  paymentJustification: 'Wider and deeper organisational evidence than Team or Constitutional: dependencies, scenarios, exposure, and board readiness across the decision architecture.',
+  nonOverlapBoundary: 'Enterprise tests stress architecture; Executive Reporting converts evidence into board-grade judgement.',
+  upgradeTrigger: 'Enterprise evidence reveals board-level exposure requiring a judged executive brief or governed execution.',
+  firstImpressionMoment: 'The buyer sees a stress map that connects dependencies, scenarios, exposure, and board challenge risk.',
+  currentReadiness: 'ACTIVE',
+  riskOfOverclaiming: 'LOW',
+  nextWiringAction: 'Produce contradictionGraph before activating DomainInterdependency.',
 }
 
 const EXECUTIVE_REPORTING: PaidCorridorRecord = {
   stage: 'executive_reporting',
-  corridorRole: 'Converts accumulated intelligence into board-grade decision material with constitutional guidance',
-  userPerceptionShift: 'From "We have analysis" to "Here is a board-ready brief with constitutional guidance, governed memory, and degradation projections"',
-  coreQuestionAnswered: 'What should the board know, what evidence supports it, and what is the governed recommendation?',
-  requiredEvidence: [
-    'Prior case state from diagnostic/assessment stages',
-    'Constitutional assessment output',
+  corridorRole: 'Board-grade decision judgement from accumulated evidence carry-forward.',
+  userPerceptionShift: 'From "We have analysis" to "Here is the board-grade judgement, evidence basis, and governed recommendation."',
+  coreQuestionAnswered: 'What should senior decision makers know, what evidence supports it, and what judgement follows?',
+  minimumEvidenceRequired: [
+    'Prior case state from diagnostic or paid surfaces',
+    'Evidence carry-forward from earlier surfaces',
+    'Constitutional assessment or authority evidence',
     'Governed memory items',
-    'Evidence tier at multi_source or above',
-    'Degradation projections',
+    'Evidence lineage and confidence basis',
   ],
-  capabilitiesAvailable: [
-    { name: 'Constitutional guidance assembly', status: 'AVAILABLE_NOW' },
-    { name: 'Decision simulation projections', status: 'AVAILABLE_NOW' },
-    { name: 'Governed memory presentation', status: 'AVAILABLE_NOW' },
-    { name: 'Domain interdependency analysis', status: 'AVAILABLE_NOW' },
-    { name: 'Adversarial preview', status: 'AVAILABLE_NOW' },
-    { name: 'Cost of delay quantification', status: 'AVAILABLE_NOW' },
+  engineRequirements: [
+    'governed-memory-presenter',
+    'executive-reporting public DTO',
+    'evidence carry-forward presenter',
   ],
-  capabilitiesDormant: [
-    { name: 'Escalation engine', status: 'GATED', gatedReason: 'Requires case memory store' },
-    { name: 'Drift rules', status: 'GATED', gatedReason: 'Requires prior recommendation history' },
-    { name: 'Failure pattern calibrator', status: 'GATED', gatedReason: 'Requires outcome history' },
+  activeCapabilities: [
+    { name: 'Governed memory presentation', status: 'ACTIVE' },
+    { name: 'Constitutional guidance assembly', status: 'ACTIVE' },
+    { name: 'Executive Reporting Public DTO', status: 'ACTIVE' },
+    { name: 'Evidence Carry-Forward Presenter', status: 'ACTIVE' },
   ],
-  outputsAllowed: [
-    'Executive summary brief',
-    'Constitutional guidance with matched assets',
-    'Governed memory panel',
-    'Degradation projection',
-    'Evidence carry-forward',
-    'Next admissible move',
+  gatedCapabilities: [
+    { name: 'Escalation engine', status: 'GATED', gatedReason: 'Requires case memory store.' },
+    { name: 'Drift rules', status: 'GATED', gatedReason: 'Requires prior recommendation history.' },
   ],
-  outputsProhibited: [
-    'Enterprise stress-test execution (Enterprise role)',
-    'Governed execution checkpoints (Strategy Room role)',
-    'Adversarial scrutiny session (Boardroom Mode role)',
-    'Retained oversight cycles (Retainer role)',
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Board-grade executive report with judgement, evidence lineage, and recommended decision posture.',
+  mustShow: [
+    'Evidence carry-forward basis',
+    'Board-grade judgement',
+    'Constitutional or authority basis',
+    'What is known, missing, and gated',
   ],
-  upgradeTrigger: 'Board brief reveals execution gaps requiring governed intervention or adversarial scrutiny',
-  nonOverlapBoundary: 'Executive Reporting produces board material; Boardroom Mode tests it under adversarial pressure',
-  paymentJustification: 'Board-grade intelligence synthesis that requires multi-stage evidence accumulation',
-  missingAssets: ['Evidence carry-forward presenter wiring', 'Executive-specific PDF dossier generation'],
-  nextWiringPriority: 'Wire evidence carry-forward into executive report output',
+  mustNotShow: [
+    'Enterprise stress-test execution as the core product',
+    'Governed execution checkpoints',
+    'Adversarial boardroom session',
+    'Retained oversight cycles',
+  ],
+  unlocksNext: ['boardroom_mode', 'strategy_room'],
+  paymentJustification: 'Board-grade synthesis and judgement that requires accumulated evidence rather than a single assessment output.',
+  nonOverlapBoundary: 'Executive Reporting judges and packages evidence; Enterprise stress-tests structure and Strategy Room manages execution.',
+  upgradeTrigger: 'The report exposes objections or execution risk requiring boardroom scrutiny or governed execution.',
+  firstImpressionMoment: 'The buyer sees a defensible judgement with traceable evidence carry-forward.',
+  currentReadiness: 'ACTIVE',
+  riskOfOverclaiming: 'LOW',
+  nextWiringAction: 'Extend durable recommendation/outcome history inputs without duplicating Enterprise stress-test UI.',
 }
 
 const BOARDROOM_MODE: PaidCorridorRecord = {
   stage: 'boardroom_mode',
-  corridorRole: 'Adversarial scrutiny of decision quality — objections, trade-offs, decision paths under pressure',
-  userPerceptionShift: 'From "We have a recommendation" to "We have tested this recommendation against the hardest objections and it holds/fails"',
+  corridorRole: 'Adversarial board scrutiny of recommendation quality, objections, trade-offs, and decision paths.',
+  userPerceptionShift: 'From "We have a recommendation" to "This recommendation has survived or failed the hardest board challenge."',
   coreQuestionAnswered: 'If challenged by the most hostile stakeholder, does this recommendation survive?',
-  requiredEvidence: [
+  minimumEvidenceRequired: [
     'Executive report or equivalent board-grade brief',
-    'Constitutional assessment with route',
+    'Evidence tier at multi_source or better',
     'Adversarial challenge vectors',
-    'Evidence tier at multi_source or above',
-    'Governed memory with contradiction history',
+    'Contradiction or objection history',
   ],
-  capabilitiesAvailable: [
-    { name: 'Adversarial preview and challenge', status: 'AVAILABLE_NOW' },
-    { name: 'Constitutional route assessment', status: 'AVAILABLE_NOW' },
-    { name: 'Contradiction resolution', status: 'AVAILABLE_NOW' },
-    { name: 'Decision simulation under pressure', status: 'AVAILABLE_NOW' },
-    { name: 'Governed memory presentation', status: 'AVAILABLE_NOW' },
+  engineRequirements: [
+    'adversarial-preview',
+    'constitutional route assessment',
+    'boardroom archive for durable history',
   ],
-  capabilitiesDormant: [
-    { name: 'Boardroom archive history', status: 'DORMANT', gatedReason: 'boardroom-archive-contract exists but archive persistence not wired' },
-    { name: 'Boardroom dossier generation', status: 'DORMANT', gatedReason: 'boardroom-dossier-types exists but generation pipeline not wired' },
+  activeCapabilities: [
+    { name: 'Adversarial preview and challenge', status: 'ACTIVE' },
+    { name: 'Constitutional route assessment', status: 'ACTIVE' },
+    { name: 'Boardroom archive', status: 'PARTIALLY_WIRED' },
   ],
-  outputsAllowed: [
-    'Adversarial objection analysis',
+  gatedCapabilities: [
+    { name: 'Boardroom dossier generation', status: 'GATED', gatedReason: 'Dossier generation pipeline is not proven as a production boardroom path.' },
+  ],
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Adversarial board challenge record with objections, trade-offs, and recommendation resilience.',
+  mustShow: [
+    'Challenge basis',
+    'Recommendation stress result',
     'Trade-off map',
-    'Decision path comparison',
-    'Recommendation stress test',
-    'Governed memory with challenge history',
+    'Archive boundary',
   ],
-  outputsProhibited: [
-    'Governed execution management (Strategy Room role)',
-    'Checkpoint-based follow-up (Strategy Room role)',
-    'Retained oversight cycles (Retainer role)',
-    'Enterprise structural analysis (Enterprise role)',
+  mustNotShow: [
+    'Governed execution management',
+    'Checkpoint-based follow-up',
+    'Retained oversight',
+    'Enterprise structural analysis as the primary output',
   ],
-  upgradeTrigger: 'Boardroom scrutiny reveals execution gaps requiring governed intervention with checkpoints',
-  nonOverlapBoundary: 'Boardroom Mode tests recommendations; Strategy Room manages their execution',
-  paymentJustification: 'Adversarial quality assurance that cannot be safely self-administered',
-  missingAssets: ['Boardroom archive wiring', 'Boardroom dossier pipeline', 'Challenge history persistence'],
-  nextWiringPriority: 'Wire boardroom archive to persistent case memory',
+  unlocksNext: ['strategy_room'],
+  paymentJustification: 'Adversarial board scrutiny that cannot be safely self-administered by the same team producing the recommendation.',
+  nonOverlapBoundary: 'Boardroom Mode tests recommendation quality; Strategy Room manages execution after a decision is made.',
+  upgradeTrigger: 'Boardroom scrutiny reveals execution risk requiring governed checkpoints and owner pressure.',
+  firstImpressionMoment: 'The buyer sees objections surfaced before hostile stakeholders surface them.',
+  currentReadiness: 'PARTIALLY_WIRED',
+  riskOfOverclaiming: 'MEDIUM',
+  nextWiringAction: 'Connect boardroom archive persistence to production boardroom sessions.',
 }
 
 const STRATEGY_ROOM: PaidCorridorRecord = {
   stage: 'strategy_room',
-  corridorRole: 'Governed decision execution — intervention stacks, checkpoints, owner pressure, outcome accountability',
-  userPerceptionShift: 'From "We know what to do" to "We are executing under governed conditions with checkpoints, accountability, and course correction"',
+  corridorRole: 'Governed execution with checkpoint, intervention, owner pressure, and outcome verification logic.',
+  userPerceptionShift: 'From "We know what to do" to "Execution is governed with owners, checkpoints, intervention pressure, and consequences for drift."',
   coreQuestionAnswered: 'Is this decision being executed with structural accountability, and what happens if it drifts?',
-  requiredEvidence: [
-    'Prior case state with constitutional assessment',
-    'Recommendation outcome ledger entries',
-    'Evidence tier at multi_source or above',
-    'Governed memory items',
-    'Intervention stack',
-    'Constraint map',
+  minimumEvidenceRequired: [
+    'Prior case state',
+    'Named owner and accountable authority',
+    'Recommendation or decision to execute',
+    'Checkpoint basis',
+    'Intervention or constraint map',
+    'Outcome verification path',
   ],
-  capabilitiesAvailable: [
-    { name: 'Full engine suite (all ACTIVE engines)', status: 'AVAILABLE_NOW' },
-    { name: 'Constitutional guidance assembly', status: 'AVAILABLE_NOW' },
-    { name: 'Decision simulation projections', status: 'AVAILABLE_NOW' },
-    { name: 'Governed memory presentation', status: 'AVAILABLE_NOW' },
-    { name: 'Recommendation outcome tracking', status: 'AVAILABLE_NOW' },
+  engineRequirements: [
+    'recommendation outcome ledger',
+    'checkpoint service',
+    'governed memory presenter',
+    'intervention engines remain gated until drift/case memory exists',
   ],
-  capabilitiesDormant: [
-    { name: 'Escalation engine', status: 'GATED', gatedReason: 'Requires case memory store' },
-    { name: 'Intervention engine', status: 'GATED', gatedReason: 'Requires drift tribunal findings' },
-    { name: 'Drift rules/tribunal', status: 'GATED', gatedReason: 'Requires case memory with prior recommendations' },
-    { name: 'Route correction', status: 'GATED', gatedReason: 'Requires multi-turn evidence accumulation' },
-    { name: 'Assumption drift detector', status: 'GATED', gatedReason: 'Requires 100+ outcome records' },
-    { name: 'Failure pattern calibrator', status: 'GATED', gatedReason: 'Requires 500+ outcome records' },
+  activeCapabilities: [
+    { name: 'Recommendation outcome tracking', status: 'PARTIALLY_WIRED' },
+    { name: 'Checkpoint service', status: 'PARTIALLY_WIRED' },
+    { name: 'Governed memory presentation', status: 'ACTIVE' },
+    { name: 'Decision Centre living adapter', status: 'ACTIVE' },
   ],
-  outputsAllowed: [
-    'Intervention stack',
-    'Constraint map',
-    'Governed memory panel',
-    'Recommendation status tracking',
-    'Outcome tracking',
-    'Next admissible move',
-    'Living layer progress',
+  gatedCapabilities: [
+    { name: 'Escalation engine', status: 'GATED', gatedReason: 'Requires case memory persistence.' },
+    { name: 'Intervention engine', status: 'GATED', gatedReason: 'Requires drift tribunal findings.' },
+    { name: 'Drift rules/tribunal', status: 'GATED', gatedReason: 'Requires prior recommendations and outcome history.' },
+    { name: 'Route correction', status: 'GATED', gatedReason: 'Requires multi-turn evidence accumulation.' },
   ],
-  outputsProhibited: [
-    'Retained oversight without memory threshold (Retainer role)',
-    'Enterprise structural analysis (Enterprise role)',
-    'Board-grade material generation (Executive Reporting role)',
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Governed execution record with checkpoints, owner pressure, intervention posture, and outcome verification.',
+  mustShow: [
+    'Owner and authority pressure',
+    'Checkpoint/intervention logic',
+    'Recommendation status',
+    'Outcome verification path',
+    'Memory threshold before retainer claims',
   ],
-  upgradeTrigger: 'Strategy Room execution generates enough outcome history to justify retained oversight',
-  nonOverlapBoundary: 'Strategy Room manages execution; Retainer Oversight monitors patterns across executions',
-  paymentJustification: 'Governed execution management with structural accountability that prevents informal drift',
-  missingAssets: ['EscalationEngine wiring', 'InterventionEngine wiring', 'DriftRules/Tribunal wiring', 'RouteCorrection wiring'],
-  nextWiringPriority: 'Wire EscalationEngine once case memory persistence is production-ready',
+  mustNotShow: [
+    'Retained oversight without durable memory threshold',
+    'Enterprise stress architecture as the primary product',
+    'Board-grade material generation as the primary product',
+  ],
+  unlocksNext: ['retainer_oversight'],
+  paymentJustification: 'Execution governance and owner-pressure logic that prevents a recommendation from decaying into informal drift.',
+  nonOverlapBoundary: 'Strategy Room governs an execution; Retainer Oversight learns across multiple cycles.',
+  upgradeTrigger: 'Execution produces enough durable recommendation/outcome memory, recurrence, drift, and cadence evidence to justify retained oversight.',
+  firstImpressionMoment: 'The buyer sees exactly who owns the next checkpoint and what intervention follows drift.',
+  currentReadiness: 'PARTIALLY_WIRED',
+  riskOfOverclaiming: 'MEDIUM',
+  nextWiringAction: 'Close the checkpoint/outcome loop and feed durable memory into retained oversight.',
 }
 
 const RETAINER_OVERSIGHT: PaidCorridorRecord = {
   stage: 'retainer_oversight',
-  corridorRole: 'Institutional intelligence — recurrence detection, drift monitoring, outcome learning, oversight cadence',
-  userPerceptionShift: 'From "We handled that decision" to "We now have institutional memory that prevents the same failure pattern from recurring"',
-  coreQuestionAnswered: 'Is this organisation learning from its decisions, or is it repeating the same structural failures?',
-  requiredEvidence: [
-    'Durable recommendation outcome ledger with OUTCOME_REPORTED entries',
-    'Multiple resolved cases with outcome verification',
-    'Governed memory spanning multiple decision cycles',
-    'Behavioral trend data across time',
-    'Pattern recurrence evidence',
+  corridorRole: 'Institutional learning across cycles: recommendation/outcome memory, recurrence, drift, and oversight cadence.',
+  userPerceptionShift: 'From "We handled that decision" to "The organisation now learns across cycles and detects recurring failure patterns."',
+  coreQuestionAnswered: 'Is the organisation learning from decisions, or repeating the same structural failures across cycles?',
+  minimumEvidenceRequired: [
+    'Durable recommendation memory',
+    'Durable outcome memory',
+    'Multiple oversight or execution cycles',
+    'Recurrence evidence',
+    'Drift evidence',
+    'Oversight cadence',
   ],
-  capabilitiesAvailable: [
-    { name: 'Signal continuity tracking', status: 'AVAILABLE_NOW' },
-    { name: 'Governed memory presentation', status: 'AVAILABLE_NOW' },
-    { name: 'Pattern recurrence detection', status: 'AVAILABLE_NOW' },
-    { name: 'Cost of inaction quantification', status: 'AVAILABLE_NOW' },
+  engineRequirements: [
+    'retainer-cycle-memory-engine',
+    'oversight cadence engine',
+    'oversight cycle comparison',
+    'oversight review decision engine',
+    'behavioral trend engine',
   ],
-  capabilitiesDormant: [
-    { name: 'Assumption drift detector', status: 'GATED', gatedReason: 'Requires 100+ outcome records' },
-    { name: 'Failure pattern calibrator', status: 'GATED', gatedReason: 'Requires 500+ outcome records' },
-    { name: 'Drift rules/tribunal', status: 'GATED', gatedReason: 'Requires case memory with prior recommendations' },
-    { name: 'Breach detector', status: 'GATED', gatedReason: 'Requires contract store' },
-    { name: 'Oversight cadence engine', status: 'DORMANT', gatedReason: 'oversight-cadence-engine.ts exists but 0 imports' },
-    { name: 'Oversight cycle comparison', status: 'DORMANT', gatedReason: 'oversight-cycle-comparison.ts exists but 0 imports' },
-    { name: 'Oversight review decision engine', status: 'DORMANT', gatedReason: 'oversight-review-decision-engine.ts exists but 0 imports' },
-    { name: 'Behavioral trend engine', status: 'DORMANT', gatedReason: 'behavioral-trend-engine.ts partially wired (1 import)' },
+  activeCapabilities: [
+    { name: 'Retainer Cycle Memory Engine with supplied data', status: 'PARTIALLY_WIRED' },
+    { name: 'Oversight Brief Composer', status: 'PARTIALLY_WIRED' },
+    { name: 'Signal continuity tracking', status: 'ACTIVE' },
+    { name: 'Governed memory presentation', status: 'ACTIVE' },
   ],
-  outputsAllowed: [
-    'Institutional pattern report',
-    'Recurrence detection',
-    'Drift monitoring',
-    'Outcome learning summary',
-    'Oversight cadence recommendations',
-    'Cross-cycle comparison',
-    'Behavioral trend analysis',
+  gatedCapabilities: [
+    { name: 'Oversight Cadence Engine', status: 'GATED', gatedReason: 'Requires retained oversight account memory and recurring cycle data.' },
+    { name: 'Oversight Cycle Comparison', status: 'GATED', gatedReason: 'Requires two or more completed oversight cycles.' },
+    { name: 'Oversight Review Decision Engine', status: 'GATED', gatedReason: 'Requires durable recommendation/outcome memory.' },
+    { name: 'Behavioral Trend Engine in retained oversight', status: 'GATED', gatedReason: 'Trend computation exists but retained oversight production consumption is incomplete.' },
+    { name: 'Assumption drift detector', status: 'GATED', gatedReason: 'Requires outcome records.' },
+    { name: 'Failure pattern calibrator', status: 'GATED', gatedReason: 'Requires historical outcome records.' },
   ],
-  outputsProhibited: [
-    'New diagnostic analysis (Diagnostic surface role)',
-    'New team/enterprise assessment (Assessment surface role)',
-    'Execution management (Strategy Room role)',
-    'Board-grade material generation (Executive Reporting role)',
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Retained oversight brief and institutional learning record across cycles.',
+  mustShow: [
+    'Recommendation memory',
+    'Outcome memory',
+    'Recurrence and drift evidence',
+    'Oversight cadence basis',
+    'Cycle comparison boundary',
   ],
-  upgradeTrigger: 'N/A — Retainer is the terminal corridor stage',
-  nonOverlapBoundary: 'Retainer monitors patterns across executions; Strategy Room manages individual executions',
-  paymentJustification: 'Institutional intelligence that compounds over time — requires durable memory, outcome verification, and pattern learning that cannot exist without persistent data',
-  missingAssets: [
-    'Oversight cadence engine wiring',
-    'Oversight cycle comparison wiring',
-    'Oversight review decision engine wiring',
-    'Behavioral trend engine full wiring',
-    'AssumptionDriftDetector production activation (requires 100+ cases)',
-    'FailurePatternCalibrator production activation (requires 500+ cases)',
-    'DriftRules/Tribunal wiring',
-    'BreachDetector wiring',
+  mustNotShow: [
+    'New diagnostic analysis',
+    'New team or enterprise assessment',
+    'Single-execution Strategy Room management',
+    'Board-grade material generation as the primary product',
   ],
-  nextWiringPriority: 'Wire oversight cadence engine and cycle comparison for first retained oversight delivery',
+  unlocksNext: [],
+  paymentJustification: 'Institutional intelligence that compounds only with durable recommendation/outcome memory, recurrence detection, drift monitoring, and oversight cadence.',
+  nonOverlapBoundary: 'Retainer Oversight learns across cycles; Strategy Room governs one execution cycle.',
+  upgradeTrigger: 'N/A: terminal paid corridor stage.',
+  firstImpressionMoment: 'The buyer sees recurring decision patterns and drift across cycles, not a one-off report.',
+  currentReadiness: 'GATED',
+  riskOfOverclaiming: 'HIGH',
+  nextWiringAction: 'Connect durable recommendation/outcome/recurrence cadence before describing retainer oversight as active.',
 }
-
-// ---------------------------------------------------------------------------
-// Registry
-// ---------------------------------------------------------------------------
 
 export const PAID_CORRIDOR_RECORDS: PaidCorridorRecord[] = [
   TEAM_ASSESSMENT,
@@ -368,34 +383,35 @@ export const PAID_CORRIDOR_RECORDS: PaidCorridorRecord[] = [
   RETAINER_OVERSIGHT,
 ]
 
-// ---------------------------------------------------------------------------
-// Query functions
-// ---------------------------------------------------------------------------
-
 export function getCorridorRecord(stage: PaidCorridorStage): PaidCorridorRecord | undefined {
-  return PAID_CORRIDOR_RECORDS.find(r => r.stage === stage)
+  return PAID_CORRIDOR_RECORDS.find(record => record.stage === stage)
 }
 
 export function getCorridorCapabilities(stage: PaidCorridorStage): CorridorCapability[] {
   const record = getCorridorRecord(stage)
   if (!record) return []
-  return [...record.capabilitiesAvailable, ...record.capabilitiesDormant]
+  return [
+    ...record.activeCapabilities,
+    ...record.gatedCapabilities,
+    ...record.dormantRelevantCapabilities,
+  ]
 }
 
 export function getCorridorMissingAssets(stage: PaidCorridorStage): string[] {
-  return getCorridorRecord(stage)?.missingAssets ?? []
+  const record = getCorridorRecord(stage)
+  if (!record) return []
+  return [...record.gatedCapabilities, ...record.dormantRelevantCapabilities].map(capability => capability.name)
 }
 
 export function getAllMissingAssets(): Array<{ stage: PaidCorridorStage; asset: string }> {
-  const missing: Array<{ stage: PaidCorridorStage; asset: string }> = []
-  for (const record of PAID_CORRIDOR_RECORDS) {
-    for (const asset of record.missingAssets) {
-      missing.push({ stage: record.stage, asset })
-    }
-  }
-  return missing
+  return PAID_CORRIDOR_RECORDS.flatMap(record =>
+    getCorridorMissingAssets(record.stage).map(asset => ({ stage: record.stage, asset })),
+  )
 }
 
 export function getNextWiringPriorities(): Array<{ stage: PaidCorridorStage; priority: string }> {
-  return PAID_CORRIDOR_RECORDS.map(r => ({ stage: r.stage, priority: r.nextWiringPriority }))
+  return PAID_CORRIDOR_RECORDS.map(record => ({
+    stage: record.stage,
+    priority: record.nextWiringAction,
+  }))
 }

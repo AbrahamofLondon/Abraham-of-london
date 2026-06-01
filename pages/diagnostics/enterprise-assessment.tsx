@@ -20,7 +20,7 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { ENTERPRISE_SCENARIO_IDS } from "@/lib/engine/scenario-stress-test";
+import { ENTERPRISE_SCENARIO_IDS, SCENARIOS } from "@/lib/engine/scenario-stress-test";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -450,6 +450,89 @@ function bandColor(band: string) {
   }
 }
 
+type EnterpriseStressInputs = {
+  dependencyMap: string;
+  scenarioDelayOption: number | null;
+  scenarioDelayExplanation: string;
+  scenarioOwnerOption: number | null;
+  scenarioOwnerExplanation: string;
+  scenarioChallengeOption: number | null;
+  scenarioChallengeExplanation: string;
+  financialExposure: string;
+  clientExposure: string;
+  regulatoryExposure: string;
+  boardChallengeReadiness: string;
+};
+
+type EnterpriseScenarioFinding = {
+  scenarioId: string;
+  situation: string;
+  chosenOption: 0 | 1;
+  selectedLabel: string;
+  finding: string;
+  testedDomains: string[];
+};
+
+function summarizeEnterpriseInput(value: string | null | undefined, maxLength = 180): string {
+  const compact = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (!compact) return "Not supplied.";
+  if (compact.length <= maxLength) return compact;
+  const clipped = compact.slice(0, maxLength - 1).trimEnd();
+  return `${clipped}...`;
+}
+
+function scenarioFindingsFromInputs(inputs: EnterpriseStressInputs): EnterpriseScenarioFinding[] {
+  const submitted = [
+    { scenarioId: ENTERPRISE_SCENARIO_IDS.DELAY_30, chosenOption: inputs.scenarioDelayOption },
+    { scenarioId: ENTERPRISE_SCENARIO_IDS.OWNER_UNAVAILABLE, chosenOption: inputs.scenarioOwnerOption },
+    { scenarioId: ENTERPRISE_SCENARIO_IDS.CHALLENGE_EVIDENCE, chosenOption: inputs.scenarioChallengeOption },
+  ];
+
+  return submitted.flatMap((response) => {
+    if (response.chosenOption !== 0 && response.chosenOption !== 1) return [];
+    const scenario = SCENARIOS.find(
+      (candidate) =>
+        candidate.assessmentType === "enterprise" &&
+        candidate.id === response.scenarioId,
+    );
+    if (!scenario) return [];
+
+    const chosenOption = response.chosenOption as 0 | 1;
+    return [{
+      scenarioId: scenario.id,
+      situation: scenario.situation,
+      chosenOption,
+      selectedLabel: scenario.options[chosenOption],
+      finding: scenario.reveals[chosenOption],
+      testedDomains: scenario.testsDomains,
+    }];
+  });
+}
+
+function weakestSection(sections: SectionScore[]): SectionScore | null {
+  return [...sections].sort((a, b) => a.pct - b.pct)[0] ?? null;
+}
+
+function enterpriseConsequenceState(totalPct: number, readiness: string): string {
+  const readinessLower = readiness.toLowerCase();
+  if (totalPct < 40) return "Material organisational exposure. Delay is likely to increase cost, politics, or irreversibility.";
+  if (totalPct < 60) return "Active enterprise strain. The decision needs escalation discipline before pressure sets the sequence.";
+  if (readinessLower === "low" || readinessLower === "moderate") {
+    return "Moderate structural risk. The evidence base is not yet strong enough for board-grade judgement.";
+  }
+  return "Controlled enterprise pressure. Continue only with explicit ownership, dependencies, and challenge evidence.";
+}
+
+function recommendedEnterpriseEscalation(reading: EnterpriseReading, hasMaterialExposure: boolean): string {
+  if (reading.route === "EXECUTIVE_REPORTING" || hasMaterialExposure) {
+    return "Escalate to Executive Reporting for board-grade judgement once the evidence record is saved.";
+  }
+  if (reading.route === "STRATEGY_ROOM") {
+    return "Route to Strategy Room only after Executive Reporting has judged material exposure and governance conditions.";
+  }
+  return "Hold in watch state, refresh the dependency and exposure evidence, and escalate if pressure appears in more than one domain.";
+}
+
 function ScoreSelector({ value, onChange }: { value: DiagnosticAnswerValue | 0; onChange: (v: DiagnosticAnswerValue) => void }) {
   return (
     <div className="flex gap-1.5 mt-3">
@@ -473,9 +556,10 @@ function ScoreSelector({ value, onChange }: { value: DiagnosticAnswerValue | 0; 
 // RESULT SURFACE
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, teamAlignmentPct, evidenceCapture, onEvidenceChange, submitResult, onSubmit, isSubmitting, onRevise, constitutionalThread = null, matchedPlaybooks = [] }: {
+function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, teamAlignmentPct, enterpriseStressInputs, evidenceCapture, onEvidenceChange, submitResult, onSubmit, isSubmitting, onRevise, constitutionalThread = null, matchedPlaybooks = [] }: {
   reading: EnterpriseReading; sections: SectionScore[]; totalScore: number; maxScore: number; totalPct: number;
   teamAlignmentPct: number | null; submitResult: DiagnosticSubmitResponse | null;
+  enterpriseStressInputs: EnterpriseStressInputs;
   evidenceCapture: AssessmentEvidenceCapture;
   onEvidenceChange: (field: AssessmentEvidenceCaptureField, nextValue: string) => void;
   onSubmit: () => void; isSubmitting: boolean; onRevise: () => void;
@@ -503,6 +587,24 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
     STRATEGY_ROOM:       { href: "/strategy-room", label: "Enter Strategy Room", border: "rgba(52,211,153,0.30)", bg: "rgba(52,211,153,0.07)", text: "rgba(110,231,183,0.90)" },
     WATCH:               { href: "/diagnostics/watch?source=enterprise-assessment", label: "Enter Watch State", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)", text: "rgba(255,255,255,0.55)" },
   }[reading.route];
+  const scenarioFindings = scenarioFindingsFromInputs(enterpriseStressInputs);
+  const weakest = weakestSection(sections);
+  const hasMaterialExposure = [
+    enterpriseStressInputs.financialExposure,
+    enterpriseStressInputs.clientExposure,
+    enterpriseStressInputs.regulatoryExposure,
+  ].some((value) => value.trim().length > 0);
+  const boardChallengeReadiness = enterpriseStressInputs.boardChallengeReadiness || "Not assessed";
+  const enterpriseStressSummary = `${reading.band} enterprise stress at ${totalPct}%. ${
+    weakest
+      ? `${weakest.title} is the first pressure concentration at ${weakest.pct}%.`
+      : "No individual pressure concentration was isolated."
+  }`;
+  const firstFailurePoint = weakest
+    ? `${weakest.title}: ${weakest.pct}% structural strength.`
+    : "No first failure point identified.";
+  const consequenceState = enterpriseConsequenceState(totalPct, boardChallengeReadiness);
+  const escalationPath = recommendedEnterpriseEscalation(reading, hasMaterialExposure);
 
   function MRow({ label, value }: { label: string; value: string }) {
     return (
@@ -582,6 +684,92 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}><Eyebrow>Structural reading</Eyebrow></div>
             <div style={{ padding: "1.5rem" }}>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.78, color: "rgba(255,255,255,0.70)" }}>{reading.primaryReading}</p>
+            </div>
+          </div>
+
+          <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgba(255,255,255,0.015)", overflow: "hidden" }}>
+            <div style={{ padding: "0.85rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
+              <Eyebrow>Enterprise stress architecture</Eyebrow>
+            </div>
+            <div style={{ padding: "1.5rem" }} className="space-y-5">
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.5rem" }}>Enterprise stress summary</div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.65, color: "rgba(255,255,255,0.74)" }}>{enterpriseStressSummary}</p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.5rem" }}>Dependency map summary</div>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.62)" }}>
+                    {summarizeEnterpriseInput(enterpriseStressInputs.dependencyMap)}
+                  </p>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.5rem" }}>Board challenge readiness</div>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.62)" }}>
+                    {boardChallengeReadiness}. Evidence must survive independent challenge before judgement moves to Executive Reporting.
+                  </p>
+                </div>
+              </div>
+
+              {scenarioFindings.length > 0 && (
+                <div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>Scenario stress findings</div>
+                  <div className="space-y-3">
+                    {scenarioFindings.map((finding) => (
+                      <div key={finding.scenarioId} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.018)", padding: "0.95rem 1rem" }}>
+                        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.98rem", lineHeight: 1.45, color: "rgba(255,255,255,0.76)" }}>{finding.situation}</div>
+                        <p style={{ marginTop: "0.55rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.82rem", lineHeight: 1.65, color: "rgba(255,255,255,0.54)" }}>
+                          Selected: {finding.selectedLabel}. Finding: {finding.finding}
+                        </p>
+                        <div style={{ marginTop: "0.55rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                          Tests {finding.testedDomains.join(" / ")}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>Exposure map</div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {[
+                    ["Financial", enterpriseStressInputs.financialExposure],
+                    ["Client / market", enterpriseStressInputs.clientExposure],
+                    ["Regulatory / compliance", enterpriseStressInputs.regulatoryExposure],
+                  ].map(([label, value]) => (
+                    <div key={label} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(0,0,0,0.18)", padding: "0.85rem" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginBottom: "0.45rem" }}>{label}</div>
+                      <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(255,255,255,0.58)" }}>
+                        {summarizeEnterpriseInput(value, 120)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>First failure point</div>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.62)" }}>{firstFailurePoint}</p>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>Enterprise consequence state</div>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.62)" }}>{consequenceState}</p>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>Recommended escalation path</div>
+                  <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.62)" }}>{escalationPath}</p>
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.1rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.55rem" }}>What Executive Reporting would add</div>
+                <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
+                  This identifies where the decision breaks under organisational pressure. Executive Reporting converts this into board-grade judgement.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -1779,6 +1967,7 @@ export default function EnterpriseAssessmentPage() {
                     maxScore={maxScore}
                     totalPct={totalPct}
                     teamAlignmentPct={teamAlignmentPct}
+                    enterpriseStressInputs={enterpriseStressInputs}
                     evidenceCapture={evidenceCapture}
                     onEvidenceChange={(field, nextValue) =>
                       setEvidenceCapture((current) => ({ ...current, [field]: nextValue }))

@@ -84,15 +84,26 @@ const PROMPT_PATTERNS: Array<{
  * Map constitutional answers, report, decision, and routeSummary into
  * explicit structural fields.
  *
- * Priority:
- *   1. Explicit answer fields (by answer ID or prompt text)
- *   2. Report/decision/routeSummary fields
- *   3. Resonance/certainty scores (weak support only)
+ * Priority (strict order):
+ *   0. structuralFacts from request body (highest — explicit user input)
+ *   1. Explicit answer IDs (known question IDs mapped to structural fields)
+ *   2. Prompt text patterns (regex match on question text)
+ *   3. Report/decision/routeSummary fields
+ *   4. Weak score support only — never structural fabrication
+ *
+ * Rules:
+ *   - Never fabricate structural facts from vague scores.
+ *   - Never claim authority is established unless approvingAuthority or
+ *     mandateSource supports it.
+ *   - Never treat decisionOwner as approvingAuthority.
+ *   - Never expose raw unsafe answer text.
+ *   - Use unresolved language when fields are missing.
  *
  * @param params.userAnswers - The raw answers from the constitutional form
  * @param params.report - The constitutional report object
  * @param params.decision - The constitutional decision object
  * @param params.routeSummary - The constitutional route summary
+ * @param params.structuralFacts - Explicit structural facts from the form (Priority 0)
  * @returns ConstitutionalStructuralInput with available fields populated
  */
 export function mapConstitutionalAnswersToStructuralInput(params: {
@@ -100,6 +111,8 @@ export function mapConstitutionalAnswersToStructuralInput(params: {
   report?: Record<string, unknown>
   decision?: Record<string, unknown>
   routeSummary?: Record<string, unknown>
+  /** Explicit structural facts from the form — highest priority (Priority 0) */
+  structuralFacts?: Partial<ConstitutionalStructuralInput>
 }): ConstitutionalStructuralInput {
   const result: ConstitutionalStructuralInput = {}
 
@@ -108,8 +121,25 @@ export function mapConstitutionalAnswersToStructuralInput(params: {
   const decision = params.decision ?? {}
   const routeSummary = params.routeSummary ?? {}
 
+  // ── Priority 0: Extract from explicit structuralFacts (highest priority) ─
+  // These come directly from the user's Structural Authority Check inputs.
+  // They override any inferred values from answers, report, or scores.
+  if (params.structuralFacts) {
+    if (params.structuralFacts.decisionOwner) result.decisionOwner = params.structuralFacts.decisionOwner
+    if (params.structuralFacts.approvingAuthority) result.approvingAuthority = params.structuralFacts.approvingAuthority
+    if (params.structuralFacts.blockingAuthority) result.blockingAuthority = params.structuralFacts.blockingAuthority
+    if (params.structuralFacts.mandateSource) result.mandateSource = params.structuralFacts.mandateSource
+    if (params.structuralFacts.currentRoute) result.currentRoute = params.structuralFacts.currentRoute
+    if (params.structuralFacts.nonNegotiableConstraint) result.nonNegotiableConstraint = params.structuralFacts.nonNegotiableConstraint
+    if (params.structuralFacts.failureMode) result.failureMode = params.structuralFacts.failureMode
+    if (params.structuralFacts.repairCondition) result.repairCondition = params.structuralFacts.repairCondition
+  }
+
   // ── Step 1: Extract from answer IDs ──────────────────────────────────
+  // Only sets fields NOT already populated by structuralFacts (Priority 0)
   for (const [answerId, fieldKey] of Object.entries(ANSWER_ID_MAP)) {
+    // Skip if already set by structuralFacts
+    if (result[fieldKey]) continue
     const answer = userAnswers[answerId]
     if (answer && typeof answer === 'object') {
       const answerObj = answer as Record<string, unknown>
@@ -122,7 +152,7 @@ export function mapConstitutionalAnswersToStructuralInput(params: {
   }
 
   // ── Step 2: Extract from prompt text patterns ────────────────────────
-  // Some answers may have a 'prompt' field that contains the question text
+  // Only sets fields NOT already populated by structuralFacts or answer IDs
   for (const [answerId, answer] of Object.entries(userAnswers)) {
     if (answer && typeof answer === 'object') {
       const answerObj = answer as Record<string, unknown>
@@ -132,7 +162,7 @@ export function mapConstitutionalAnswersToStructuralInput(params: {
       // Check if this answer's prompt matches a structural field pattern
       for (const { pattern, field } of PROMPT_PATTERNS) {
         if (pattern.test(prompt)) {
-          // Only set if not already set by explicit ID mapping
+          // Only set if not already set by higher priority sources
           if (!result[field]) {
             const text = extractAnswerText(answerObj)
             if (text) {

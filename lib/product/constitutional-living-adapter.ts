@@ -139,6 +139,12 @@ function deriveEvidence(input: BuildConstitutionalLivingViewModelInput): LivingL
   if (constitutionalStructural?.approvingAuthority) {
     gaps.push(`Approving authority identified: ${constitutionalStructural.approvingAuthority}`)
   }
+  if (constitutionalStructural?.mandateSource) {
+    gaps.push(`Mandate source: ${constitutionalStructural.mandateSource}`)
+  }
+  if (constitutionalStructural?.currentRoute) {
+    gaps.push(`Current route: ${constitutionalStructural.currentRoute}`)
+  }
   if (constitutionalStructural?.failureMode) {
     gaps.push(`Failure mode: ${constitutionalStructural.failureMode}`)
   }
@@ -160,7 +166,27 @@ function deriveEvidence(input: BuildConstitutionalLivingViewModelInput): LivingL
 function deriveGovernedAction(input: BuildConstitutionalLivingViewModelInput): LivingLayerViewModel['governedAction'] {
   const { decision, routeSummary, constitutionalStructural } = input
 
-  const requiredAction = decision.recommendedInterventions[0] ?? routeSummary.description
+  // Determine required action — failureMode and repairCondition influence the action
+  let requiredAction = decision.recommendedInterventions[0] ?? routeSummary.description
+
+  // If failureMode is present, adjust the required action to address it
+  if (constitutionalStructural?.failureMode && !decision.recommendedInterventions[0]) {
+    const failureModeLower = constitutionalStructural.failureMode.toLowerCase()
+    if (failureModeLower.includes('ownership') || failureModeLower.includes('owner')) {
+      requiredAction = 'Confirm decision ownership before proceeding with the current route.'
+    } else if (failureModeLower.includes('approval') || failureModeLower.includes('authority')) {
+      requiredAction = 'Resolve the approval authority gap before proceeding.'
+    } else if (failureModeLower.includes('evidence')) {
+      requiredAction = 'Strengthen the evidence base before committing to a course of action.'
+    } else {
+      requiredAction = `Address the identified failure mode: ${constitutionalStructural.failureMode}.`
+    }
+  }
+
+  // If repairCondition is present, it should drive the governed action
+  if (constitutionalStructural?.repairCondition) {
+    requiredAction = constitutionalStructural.repairCondition
+  }
 
   let whyThisAction = ''
   if (decision.rationale[0]) {
@@ -168,6 +194,9 @@ function deriveGovernedAction(input: BuildConstitutionalLivingViewModelInput): L
   }
   if (constitutionalStructural?.failureMode && !whyThisAction) {
     whyThisAction = `The primary failure mode is ${constitutionalStructural.failureMode}. Address this before proceeding with the current route.`
+  }
+  if (constitutionalStructural?.repairCondition && !whyThisAction) {
+    whyThisAction = `A repair condition has been identified: ${constitutionalStructural.repairCondition}. This must be confirmed or resolved before the decision can responsibly proceed.`
   }
 
   // Derive evidence basis from constitutional result + structural input
@@ -234,9 +263,27 @@ function deriveNextLayer(input: BuildConstitutionalLivingViewModelInput): Living
   // Determine next stage based on route
   const isStrategyRoute = decision.route === 'STRATEGY'
   const nextStageName = isStrategyRoute ? 'Executive Reporting' : 'Team Assessment'
-  const nextStageDetects = isStrategyRoute
+  let nextStageDetects = isStrategyRoute
     ? 'Board-grade consequence: financial exposure, priority stack, required interventions with confidence bands.'
     : 'Whether your team perceives the same structural tensions you identified.'
+
+  // Enhance nextStageDetects with currentRoute and mandateSource when available
+  if (constitutionalStructural?.currentRoute) {
+    const routeLower = constitutionalStructural.currentRoute.toLowerCase()
+    if (routeLower.includes('informal') || routeLower.includes('workaround')) {
+      nextStageDetects += ' The current route is informal — formalising it may reduce risk.'
+    } else if (routeLower.includes('board') || routeLower.includes('executive')) {
+      nextStageDetects += ' The current route involves board or executive review, which supports governance discipline.'
+    } else if (routeLower.includes('regulatory') || routeLower.includes('legal')) {
+      nextStageDetects += ' The current route involves regulatory or legal review — compliance context is present.'
+    } else if (routeLower.includes('not clear')) {
+      nextStageDetects += ' The current route is unclear — route clarification should be prioritised.'
+    }
+  }
+
+  if (constitutionalStructural?.mandateSource) {
+    nextStageDetects += ` Mandate source identified: ${constitutionalStructural.mandateSource}.`
+  }
 
   // Derive real unresolved items
   const unresolvedItems: string[] = []
@@ -379,11 +426,13 @@ function deriveContinuity(input: BuildConstitutionalLivingViewModelInput): Livin
   let continuityStatement = 'This is a single-diagnostic assessment. Completing additional diagnostics strengthens the evidence base and enables continuity tracking.'
 
   if (constitutionalStructural?.repairCondition) {
-    continuityStatement = `Repair condition identified: ${constitutionalStructural.repairCondition.slice(0, 100)}. Completing additional diagnostics strengthens the evidence base.`
+    continuityStatement = `Repair condition identified: ${constitutionalStructural.repairCondition.slice(0, 100)}. This must be confirmed or resolved before the decision can responsibly proceed. Completing additional diagnostics strengthens the evidence base.`
   } else if (constitutionalStructural?.failureMode) {
-    continuityStatement = `Primary failure mode: ${constitutionalStructural.failureMode}. Completing additional diagnostics strengthens the evidence base.`
+    continuityStatement = `Primary failure mode: ${constitutionalStructural.failureMode}. This affects the next admissible move and should be addressed before escalation. Completing additional diagnostics strengthens the evidence base.`
+  } else if (constitutionalStructural?.currentRoute) {
+    continuityStatement = `Current route: ${constitutionalStructural.currentRoute}. The route affects admissibility and downstream routing decisions. Completing additional diagnostics strengthens the evidence base.`
   } else if (constitutionalStructural?.approvingAuthority) {
-    continuityStatement = `Approving authority identified: ${constitutionalStructural.approvingAuthority}. Completing additional diagnostics strengthens the evidence base.`
+    continuityStatement = `Approving authority identified: ${constitutionalStructural.approvingAuthority}. This establishes the authority state for downstream assessment. Completing additional diagnostics strengthens the evidence base.`
   }
 
   return {

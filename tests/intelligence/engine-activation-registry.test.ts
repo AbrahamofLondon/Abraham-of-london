@@ -94,7 +94,8 @@ describe('Engine Activation Registry', () => {
 
     expect(ids).toContain('constitutional-engine')
     expect(ids).toContain('assessment-engine')
-    expect(ids).toContain('domain-interdependency')
+    // domain-interdependency is now GATED (requires contradictionGraph) — not in ACTIVE results
+    expect(ids).not.toContain('domain-interdependency')
 
     // Should not include GATED or INTERNAL engines
     for (const engine of engines) {
@@ -205,12 +206,12 @@ describe('Engine Activation Registry', () => {
     expect(engine!.activeSurfaces).toEqual([])
   })
 
-  it('scenario-stress-test is GATED (not invoked in any production path)', () => {
+  it('scenario-stress-test is ACTIVE for enterprise assessment when valid scenario responses are supplied', () => {
     const engine = getEngineById('scenario-stress-test')
     expect(engine).toBeDefined()
-    expect(engine!.status).toBe('GATED')
-    expect(engine!.gatedReason).toBeTruthy()
-    expect(engine!.activeSurfaces).toEqual([])
+    expect(engine!.status).toBe('ACTIVE')
+    expect(engine!.activeSurfaces).toEqual(['enterprise_assessment'])
+    expect(engine!.userVisibleDestination).toMatch(/Enterprise scenario stress/i)
   })
 
   it('no engine status contains the word AVAILABLE', () => {

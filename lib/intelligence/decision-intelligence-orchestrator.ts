@@ -82,11 +82,13 @@ import { buildUserLanguageInterpretations } from '@/lib/product/user-language-in
 import { deriveStageContribution } from '@/lib/product/stage-contribution-derivation'
 import { deriveSignalContinuity } from '@/lib/product/signal-continuity'
 import { computeCostOfDelay } from '@/lib/engine/cost-of-delay'
+import { analyseScenarioResponse, SCENARIOS } from '@/lib/engine/scenario-stress-test'
 import { createGraph, addNode, addEdge, detectActiveConflicts, computeGraphHealth } from '@/lib/engine/contradiction-graph'
 import type { DecisionClass } from '@/lib/intelligence/types'
 import {
   getOrCreateDiagnosticJourney,
   appendDiagnosticJourneyEvent,
+  getTeamAssessmentRespondentData,
 } from '@/lib/product/diagnostic-journey-store'
 import { hashInput, type DiagnosticJourneySurface } from '@/lib/product/diagnostic-journey-record'
 import { hasConstitutionalOutput, adaptConstitutionalOutput } from '@/lib/intelligence/constitutional-orchestrator-adapter'
@@ -105,6 +107,8 @@ import { deriveDecisionIntelligenceDelta } from '@/lib/intelligence/decision-int
 import type { PreviousDecisionIntelligenceSnapshot } from '@/lib/intelligence/decision-intelligence-delta'
 import { mapConstitutionalAnswersToStructuralInput } from '@/lib/intelligence/constitutional-structural-mapping'
 import type { ConstitutionalStructuralInput } from '@/lib/intelligence/constitutional-structural-mapping'
+import { aggregateTeamRespondents } from '@/lib/intelligence/team-respondent-aggregation'
+import type { TeamRespondentInput, TeamRespondentAggregation } from '@/lib/intelligence/team-respondent-aggregation'
 
 // ─── Engine Instances (singletons) ────────────────────────────────────────────
 
@@ -692,6 +696,13 @@ function runSynthesis(
     toleratedDysfunction?: string
     justifyingEvidence?: string
     constitutionalStructural?: ConstitutionalStructuralInput
+    // Enterprise enrichment
+    dependencyMap?: string
+    scenarioResponses?: Array<{ scenarioId: string; chosenOption?: 0 | 1; selectedLabel?: string; explanation?: string; severity?: string }>
+    enterpriseFinancialExposure?: string
+    enterpriseClientExposure?: string
+    enterpriseRegulatoryExposure?: string
+    enterpriseBoardChallengeReadiness?: string
   },
 ) {
   const hasInput = rawInput.trim().length > 0
@@ -705,6 +716,20 @@ function runSynthesis(
   const hasJustifyingEvidence = !!extraInputs?.justifyingEvidence?.trim()
   const toleratedDysfunctionText = extraInputs?.toleratedDysfunction?.trim() ?? ''
   const justifyingEvidenceText = extraInputs?.justifyingEvidence?.trim() ?? ''
+
+  // Enterprise enrichment
+  const hasDependencyMap = !!extraInputs?.dependencyMap?.trim()
+  const dependencyMapText = extraInputs?.dependencyMap?.trim() ?? ''
+  const hasScenarioResponses = !!extraInputs?.scenarioResponses && extraInputs.scenarioResponses.length > 0
+  const scenarioResponsesList = extraInputs?.scenarioResponses ?? []
+  const hasFinancialExposure = !!extraInputs?.enterpriseFinancialExposure?.trim()
+  const financialExposureText = extraInputs?.enterpriseFinancialExposure?.trim() ?? ''
+  const hasClientExposure = !!extraInputs?.enterpriseClientExposure?.trim()
+  const clientExposureText = extraInputs?.enterpriseClientExposure?.trim() ?? ''
+  const hasRegulatoryExposure = !!extraInputs?.enterpriseRegulatoryExposure?.trim()
+  const regulatoryExposureText = extraInputs?.enterpriseRegulatoryExposure?.trim() ?? ''
+  const hasBoardChallengeReadiness = !!extraInputs?.enterpriseBoardChallengeReadiness?.trim()
+  const boardChallengeReadinessText = extraInputs?.enterpriseBoardChallengeReadiness?.trim() ?? ''
 
   let interpretedIssue: string
   let authorityState: string | null = null
@@ -756,6 +781,7 @@ function runSynthesis(
       // Apply constitutional structural enrichment
       const cs = extraInputs?.constitutionalStructural
       if (cs) {
+        // approvingAuthority sets authorityState
         if (cs.approvingAuthority) {
           authorityState = `Approving authority identified: ${cs.approvingAuthority}.`
         } else if (cs.decisionOwner) {
@@ -763,17 +789,105 @@ function runSynthesis(
         } else {
           authorityState = 'Authority structure is not yet clear.'
         }
+
+        // blockingAuthority creates unresolved item and review trigger
         if (cs.blockingAuthority) {
           unresolvedItems.push(`Blocking authority identified: ${cs.blockingAuthority}`)
         }
-        if (!cs.mandateSource) {
+
+        // mandateSource supports route/admissibility language
+        if (cs.mandateSource) {
+          evidenceBasis.push(`Mandate source: ${cs.mandateSource}`)
+        } else {
           unresolvedItems.push('Mandate source not confirmed')
         }
+
+        // currentRoute affects route/admissibility synthesis
+        if (cs.currentRoute) {
+          evidenceBasis.push(`Current route: ${cs.currentRoute}`)
+          const routeLower = cs.currentRoute.toLowerCase()
+          if (routeLower.includes('informal') || routeLower.includes('workaround')) {
+            unresolvedItems.push('Current route is informal — formalising may reduce risk')
+          } else if (routeLower.includes('not clear')) {
+            unresolvedItems.push('Current route is unclear — clarification needed')
+          }
+        }
+
+        // failureMode affects nextAdmissibleMove
         if (cs.failureMode) {
           evidenceBasis.push(`Failure mode identified: ${cs.failureMode}`)
+          const failureLower = cs.failureMode.toLowerCase()
+          if (failureLower.includes('ownership') || failureLower.includes('owner')) {
+            nextAdmissibleMove = 'Confirm decision ownership before proceeding with the current route.'
+          } else if (failureLower.includes('approval') || failureLower.includes('authority')) {
+            nextAdmissibleMove = 'Resolve the approval authority gap before proceeding.'
+          } else if (failureLower.includes('evidence')) {
+            nextAdmissibleMove = 'Strengthen the evidence base before committing to a course of action.'
+          } else if (failureLower.includes('stakeholder')) {
+            nextAdmissibleMove = 'Engage with stakeholders to resolve resistance before proceeding.'
+          } else if (failureLower.includes('capacity') || failureLower.includes('execution')) {
+            nextAdmissibleMove = 'Assess execution capacity before committing to the current route.'
+          } else if (failureLower.includes('legal') || failureLower.includes('regulatory')) {
+            nextAdmissibleMove = 'Confirm legal and regulatory compliance before proceeding.'
+          } else if (failureLower.includes('financial') || failureLower.includes('exposure')) {
+            nextAdmissibleMove = 'Quantify financial exposure before proceeding with the current route.'
+          } else if (failureLower.includes('timing') || failureLower.includes('pressure')) {
+            nextAdmissibleMove = 'Assess whether timing pressure is genuine or manufactured before proceeding.'
+          }
         }
+
+        // repairCondition affects governedAction and nextLayer
         if (cs.repairCondition) {
           evidenceBasis.push(`Repair condition identified: ${cs.repairCondition}`)
+          unresolvedItems.push(`Repair condition: ${cs.repairCondition}`)
+          nextAdmissibleMove = cs.repairCondition.length > 10
+            ? cs.repairCondition
+            : `Address the repair condition before proceeding: ${cs.repairCondition}`
+        }
+      }
+
+      // Apply enterprise enrichment
+      if (hasDependencyMap) {
+        evidenceBasis.push(`Dependency map: ${dependencyMapText.slice(0, 120)}`)
+        unresolvedItems.push(`Decision depends on: ${dependencyMapText.slice(0, 100)}`)
+      }
+      if (hasScenarioResponses) {
+        evidenceBasis.push(`${scenarioResponsesList.length} scenario response(s) provided for stress analysis`)
+        // Summarise scenario responses for interpretedIssue (use explanation or chosenOption label)
+        const scenarioSummaries = scenarioResponsesList
+          .map(sr => sr.explanation?.slice(0, 60) ?? (sr.chosenOption !== undefined ? `Option ${sr.chosenOption} selected` : null))
+          .filter((s): s is string => s !== null)
+        if (scenarioSummaries.length > 0) {
+          interpretedIssue = `${interpretedIssue} Scenario responses indicate: ${scenarioSummaries.join('; ')}.`
+        }
+      }
+      if (hasFinancialExposure) {
+        evidenceBasis.push(`Financial exposure: ${financialExposureText.slice(0, 120)}`)
+        consequenceState = `Financial exposure identified: ${financialExposureText.slice(0, 100)}`
+      }
+      if (hasClientExposure) {
+        evidenceBasis.push(`Client exposure: ${clientExposureText.slice(0, 120)}`)
+        if (!consequenceState) {
+          consequenceState = `Client exposure identified: ${clientExposureText.slice(0, 100)}`
+        } else {
+          consequenceState += ` Client exposure: ${clientExposureText.slice(0, 100)}`
+        }
+      }
+      if (hasRegulatoryExposure) {
+        evidenceBasis.push(`Regulatory exposure: ${regulatoryExposureText.slice(0, 120)}`)
+        if (!consequenceState) {
+          consequenceState = `Regulatory exposure identified: ${regulatoryExposureText.slice(0, 100)}`
+        } else {
+          consequenceState += ` Regulatory exposure: ${regulatoryExposureText.slice(0, 100)}`
+        }
+      }
+      if (hasBoardChallengeReadiness) {
+        evidenceBasis.push(`Board challenge readiness: ${boardChallengeReadinessText.slice(0, 120)}`)
+        evidenceState = `Evidence readiness assessed: ${boardChallengeReadinessText.slice(0, 100)}`
+        // Low board challenge readiness should affect nextAdmissibleMove
+        const readinessLower = boardChallengeReadinessText.toLowerCase()
+        if (readinessLower.includes('low') || readinessLower.includes('weak') || readinessLower.includes('1') || readinessLower.includes('2')) {
+          nextAdmissibleMove = 'Strengthen the evidence base before presenting to board or senior reviewers.'
         }
       }
 
@@ -851,6 +965,7 @@ function runSynthesis(
   // Apply constitutional structural enrichment (fallback path)
   const cs = extraInputs?.constitutionalStructural
   if (cs) {
+    // approvingAuthority sets authorityState
     if (cs.approvingAuthority) {
       authorityState = `Approving authority identified: ${cs.approvingAuthority}.`
     } else if (cs.decisionOwner) {
@@ -858,23 +973,107 @@ function runSynthesis(
     } else {
       authorityState = authorityState ?? 'Authority structure is not yet clear.'
     }
+
+    // blockingAuthority creates unresolved item and review trigger
     if (cs.blockingAuthority) {
       unresolvedItems.push(`Blocking authority identified: ${cs.blockingAuthority}`)
     }
-    if (!cs.mandateSource) {
+
+    // mandateSource supports route/admissibility language
+    if (cs.mandateSource) {
+      evidenceBasis.push(`Mandate source: ${cs.mandateSource}`)
+    } else {
       unresolvedItems.push('Mandate source not confirmed')
     }
-    if (cs.failureMode) {
-      evidenceBasis.push(`Failure mode identified: ${cs.failureMode}`)
-      if (cs.failureMode.toLowerCase().includes('authority') || cs.failureMode.toLowerCase().includes('approv')) {
-        nextAdmissibleMove = 'Resolve the authority gap before proceeding with the current route.'
+
+    // currentRoute affects route/admissibility synthesis
+    if (cs.currentRoute) {
+      evidenceBasis.push(`Current route: ${cs.currentRoute}`)
+      const routeLower = cs.currentRoute.toLowerCase()
+      if (routeLower.includes('informal') || routeLower.includes('workaround')) {
+        unresolvedItems.push('Current route is informal — formalising may reduce risk')
+      } else if (routeLower.includes('not clear')) {
+        unresolvedItems.push('Current route is unclear — clarification needed')
       }
     }
+
+    // failureMode affects nextAdmissibleMove
+    if (cs.failureMode) {
+      evidenceBasis.push(`Failure mode identified: ${cs.failureMode}`)
+      const failureLower = cs.failureMode.toLowerCase()
+      if (failureLower.includes('ownership') || failureLower.includes('owner')) {
+        nextAdmissibleMove = 'Confirm decision ownership before proceeding with the current route.'
+      } else if (failureLower.includes('approval') || failureLower.includes('authority')) {
+        nextAdmissibleMove = 'Resolve the approval authority gap before proceeding.'
+      } else if (failureLower.includes('evidence')) {
+        nextAdmissibleMove = 'Strengthen the evidence base before committing to a course of action.'
+      } else if (failureLower.includes('stakeholder')) {
+        nextAdmissibleMove = 'Engage with stakeholders to resolve resistance before proceeding.'
+      } else if (failureLower.includes('capacity') || failureLower.includes('execution')) {
+        nextAdmissibleMove = 'Assess execution capacity before committing to the current route.'
+      } else if (failureLower.includes('legal') || failureLower.includes('regulatory')) {
+        nextAdmissibleMove = 'Confirm legal and regulatory compliance before proceeding.'
+      } else if (failureLower.includes('financial') || failureLower.includes('exposure')) {
+        nextAdmissibleMove = 'Quantify financial exposure before proceeding with the current route.'
+      } else if (failureLower.includes('timing') || failureLower.includes('pressure')) {
+        nextAdmissibleMove = 'Assess whether timing pressure is genuine or manufactured before proceeding.'
+      }
+    }
+
+    // repairCondition affects governedAction and nextLayer
     if (cs.repairCondition) {
       evidenceBasis.push(`Repair condition identified: ${cs.repairCondition}`)
+      unresolvedItems.push(`Repair condition: ${cs.repairCondition}`)
+      nextAdmissibleMove = cs.repairCondition.length > 10
+        ? cs.repairCondition
+        : `Address the repair condition before proceeding: ${cs.repairCondition}`
     }
+
     if (constitutionalRoute === 'REJECT') {
       refusalReason = refusalReason ?? 'The constitutional assessment indicates this route is not admissible under current conditions.'
+    }
+  }
+
+  // Apply enterprise enrichment (fallback path)
+  if (hasDependencyMap) {
+    evidenceBasis.push(`Dependency map: ${dependencyMapText.slice(0, 120)}`)
+    unresolvedItems.push(`Decision depends on: ${dependencyMapText.slice(0, 100)}`)
+  }
+  if (hasScenarioResponses) {
+    evidenceBasis.push(`${scenarioResponsesList.length} scenario response(s) provided for stress analysis`)
+    const scenarioSummaries = scenarioResponsesList
+      .map(sr => sr.explanation?.slice(0, 60) ?? (sr.chosenOption !== undefined ? `Option ${sr.chosenOption} selected` : null))
+      .filter((s): s is string => s !== null)
+    if (scenarioSummaries.length > 0) {
+      interpretedIssue = `${interpretedIssue} Scenario responses indicate: ${scenarioSummaries.join('; ')}.`
+    }
+  }
+  if (hasFinancialExposure) {
+    evidenceBasis.push(`Financial exposure: ${financialExposureText.slice(0, 120)}`)
+    consequenceState = `Financial exposure identified: ${financialExposureText.slice(0, 100)}`
+  }
+  if (hasClientExposure) {
+    evidenceBasis.push(`Client exposure: ${clientExposureText.slice(0, 120)}`)
+    if (!consequenceState) {
+      consequenceState = `Client exposure identified: ${clientExposureText.slice(0, 100)}`
+    } else {
+      consequenceState += ` Client exposure: ${clientExposureText.slice(0, 100)}`
+    }
+  }
+  if (hasRegulatoryExposure) {
+    evidenceBasis.push(`Regulatory exposure: ${regulatoryExposureText.slice(0, 120)}`)
+    if (!consequenceState) {
+      consequenceState = `Regulatory exposure identified: ${regulatoryExposureText.slice(0, 100)}`
+    } else {
+      consequenceState += ` Regulatory exposure: ${regulatoryExposureText.slice(0, 100)}`
+    }
+  }
+  if (hasBoardChallengeReadiness) {
+    evidenceBasis.push(`Board challenge readiness: ${boardChallengeReadinessText.slice(0, 120)}`)
+    evidenceState = `Evidence readiness assessed: ${boardChallengeReadinessText.slice(0, 100)}`
+    const readinessLower = boardChallengeReadinessText.toLowerCase()
+    if (readinessLower.includes('low') || readinessLower.includes('weak') || readinessLower.includes('1') || readinessLower.includes('2')) {
+      nextAdmissibleMove = 'Strengthen the evidence base before presenting to board or senior reviewers.'
     }
   }
 
@@ -957,6 +1156,7 @@ async function persistJourneyEvents(params: {
   evidenceBasis: string[]
   email?: string | null
   accountId?: string | null
+  respondentData?: TeamRespondentInput
 }): Promise<void> {
   const journeySurface = params.surface as unknown as DiagnosticJourneySurface
   const inputH = params.rawInput ? hashInput(params.rawInput) : undefined
@@ -967,6 +1167,22 @@ async function persistJourneyEvents(params: {
     accountId: params.accountId,
     surface: journeySurface,
   })
+
+  if (params.surface === 'team_assessment' && params.respondentData) {
+    await appendDiagnosticJourneyEvent({
+      caseId: params.caseId,
+      surface: 'team_assessment',
+      type: 'EVIDENCE_CAPTURED',
+      engineId: 'team-respondent-capture',
+      inputHash: inputH,
+      summary: 'Team respondent evidence captured for aggregate-only analysis.',
+      payload: {
+        respondentData: params.respondentData,
+        audienceSafe: 'aggregate_only',
+      },
+      audienceSafe: false,
+    })
+  }
 
   // SITUATION_TRANSLATED
   if (params.situation.decisionClass || params.situation.detectedSignals.length > 0) {
@@ -1186,14 +1402,82 @@ export async function runDecisionIntelligence(
   const avoidedDecision = input.userAnswers?.avoidedDecision as string | undefined
 
   // ── Extract constitutional structural input for constitutional_diagnostic ──
+  // Priority 0: structuralFacts from request body (passed via userAnswers.structuralFacts)
+  // Priority 1-4: handled inside mapConstitutionalAnswersToStructuralInput
+  const structuralFactsFromBody = input.userAnswers?.structuralFacts as Record<string, unknown> | undefined
   const constitutionalStructural = input.surface === 'constitutional_diagnostic'
     ? mapConstitutionalAnswersToStructuralInput({
         userAnswers: input.userAnswers,
         report: (input.diagnosticResult as Record<string, unknown> | undefined)?.report as Record<string, unknown> | undefined,
         decision: (input.diagnosticResult as Record<string, unknown> | undefined)?.decision as Record<string, unknown> | undefined,
         routeSummary: (input.diagnosticResult as Record<string, unknown> | undefined)?.routeSummary as Record<string, unknown> | undefined,
+        structuralFacts: structuralFactsFromBody as Partial<ConstitutionalStructuralInput> | undefined,
       })
     : undefined
+
+  // ── Extract enterprise enrichment inputs for enterprise_assessment surface ──
+  const dependencyMap = input.surface === 'enterprise_assessment'
+    ? (input.userAnswers?.dependencyMap as string | undefined)
+    : undefined
+  const scenarioResponses = input.surface === 'enterprise_assessment'
+    ? (input.userAnswers?.scenarioResponses as Array<{ scenarioId: string; chosenOption?: 0 | 1; selectedLabel?: string; explanation?: string; severity?: string }> | undefined)
+    : undefined
+  const enterpriseFinancialExposure = input.surface === 'enterprise_assessment'
+    ? (input.userAnswers?.financialExposure as string | undefined)
+    : undefined
+  const enterpriseClientExposure = input.surface === 'enterprise_assessment'
+    ? (input.userAnswers?.clientExposure as string | undefined)
+    : undefined
+  const enterpriseRegulatoryExposure = input.surface === 'enterprise_assessment'
+    ? (input.userAnswers?.regulatoryExposure as string | undefined)
+    : undefined
+  const enterpriseBoardChallengeReadiness = input.surface === 'enterprise_assessment'
+    ? (input.userAnswers?.boardChallengeReadiness as string | undefined)
+    : undefined
+
+  // ── Extract team aggregation for team_assessment surface ────────────────
+  let teamAggregation: TeamRespondentAggregation | null = null
+  let currentTeamRespondent: TeamRespondentInput | undefined
+  if (input.surface === 'team_assessment') {
+    // Extract team responses from diagnosticResult or userAnswers
+    const diagnosticResult = input.diagnosticResult as Record<string, unknown> | undefined
+
+    // Build a single respondent input from the current submission
+    currentTeamRespondent = {
+      respondentRole: input.userAnswers?.respondentRole as string | undefined,
+      perceivedDecision: input.userAnswers?.perceivedDecision as string | undefined,
+      perceivedOwner: input.userAnswers?.perceivedOwner as string | undefined,
+      perceivedBlocker: input.userAnswers?.perceivedBlocker as string | undefined,
+      authorityClarity: input.userAnswers?.authorityClarity as number | undefined,
+      evidenceClarity: input.userAnswers?.evidenceClarity as number | undefined,
+      executionConfidence: input.userAnswers?.executionConfidence as number | undefined,
+      consequenceAwareness: input.userAnswers?.consequenceAwareness as number | undefined,
+      leadershipAvoidanceSignal: input.userAnswers?.leadershipAvoidanceSignal as string | undefined,
+    }
+
+    // Collect all responses for this case
+    const allResponses: TeamRespondentInput[] = [currentTeamRespondent]
+
+    // Try to load prior respondents from the journey store
+    if (input.caseId && input.persistJourney) {
+      try {
+        allResponses.push(...await getTeamAssessmentRespondentData(input.caseId))
+      } catch {
+        // Journey store unavailable — use current respondent only
+      }
+    }
+
+    // If there are prior responses stored in the diagnostic result, include them
+    const priorResponses = diagnosticResult?.priorRespondentAnswers as TeamRespondentInput[] | undefined
+    if (priorResponses && Array.isArray(priorResponses)) {
+      allResponses.push(...priorResponses)
+    }
+
+    teamAggregation = aggregateTeamRespondents({
+      caseId: input.caseId ?? `team-${Date.now()}`,
+      responses: allResponses,
+    })
+  }
 
   // ── LAYER 3: Contradiction ───────────────────────────────────────────
   const contradiction = runContradictionDetection(rawInput, lensResult.findings, {
@@ -1209,11 +1493,96 @@ export async function runDecisionIntelligence(
   // ── LAYER 5: Simulation ──────────────────────────────────────────────
   const simulation = runSimulation(rawInput, sessionContext)
 
+  // ── LAYER 5b: Scenario Stress Test (enterprise only, when scenarioResponses exist) ──
+  let scenarioFindings: DecisionIntelligenceFinding[] = []
+  let scenarioStressTestInvoked = false
+  let hasFreeTextOnlyScenarios = false
+  const unknownScenarioIds: string[] = []
+  if (input.surface === 'enterprise_assessment' && scenarioResponses && scenarioResponses.length > 0) {
+    try {
+      // Build domain scores from diagnostic result
+      const domainScores: Record<string, number> = {}
+      const entAnswers = (input.diagnosticResult as Record<string, unknown> | undefined)?.entAnswers as Record<string, unknown> | undefined
+      const rawDomainScores = entAnswers?.domainScores as Record<string, number> | undefined
+      if (rawDomainScores) {
+        Object.assign(domainScores, rawDomainScores)
+      }
+
+      // Match enterprise scenarios from the scenario bank
+      const enterpriseScenarios = SCENARIOS.filter(s => s.assessmentType === 'enterprise')
+
+      // Separate valid (with chosenOption) and free-text-only scenarios
+      const validScenarioResponses = scenarioResponses.filter(sr => sr.chosenOption !== undefined && sr.chosenOption !== null)
+      const freeTextOnlyResponses = scenarioResponses.filter(sr => (sr.chosenOption === undefined || sr.chosenOption === null) && sr.explanation)
+
+      hasFreeTextOnlyScenarios = freeTextOnlyResponses.length > 0
+
+      // Only invoke ScenarioStressTest for scenarios with a valid chosenOption AND known scenarioId
+      for (const sr of validScenarioResponses) {
+        // Find matching enterprise scenario by id
+        const scenario = enterpriseScenarios.find(s => s.id === sr.scenarioId)
+        if (!scenario) {
+          unknownScenarioIds.push(sr.scenarioId)
+          continue // Do not call analyseScenarioResponse for unknown scenario IDs
+        }
+
+        // Build a proper ScenarioResponse with the user's actual chosenOption
+        const scenarioResponse = {
+          scenarioId: sr.scenarioId,
+          chosenOption: sr.chosenOption as 0 | 1,
+          confidence: sr.severity === 'high' ? 8 : sr.severity === 'low' ? 3 : 5,
+          reasoning: sr.explanation ?? '',
+          responseTimeMs: 0, // not measured for free-text responses
+        }
+
+        const analysis = analyseScenarioResponse(scenario, scenarioResponse, domainScores)
+        scenarioFindings.push({
+          label: `Scenario stress test: ${scenario.id}`,
+          summary: `Scenario stress test identified: ${analysis.insight.slice(0, 200)}`,
+          severity: analysis.consistentWithScores ? 'MEDIUM' : 'HIGH',
+          evidenceBasis: [
+            `Scenario: ${scenario.situation.slice(0, 100)}`,
+            `Chosen: ${scenario.options[sr.chosenOption!]?.slice(0, 80) ?? 'Unknown'}`,
+            `Consistent with scores: ${analysis.consistentWithScores}`,
+          ].filter(Boolean),
+          sourceLens: 'scenario-stress-test',
+        })
+
+        if (analysis.inconsistencyNote) {
+          scenarioFindings.push({
+            label: `Scenario inconsistency: ${scenario.id}`,
+            summary: analysis.inconsistencyNote.slice(0, 200),
+            severity: 'HIGH',
+            evidenceBasis: [`Confidence alignment: ${analysis.confidenceAlignment}`],
+            sourceLens: 'scenario-stress-test',
+          })
+        }
+      }
+
+      // Only mark as invoked if at least one scenario was actually analysed
+      const analysedCount = validScenarioResponses.filter(sr =>
+        enterpriseScenarios.some(s => s.id === sr.scenarioId)
+      ).length
+      if (analysedCount > 0) {
+        scenarioStressTestInvoked = true
+      }
+    } catch {
+      // Scenario stress test failure is non-blocking
+    }
+  }
+
   // ── LAYER 6: Synthesis ───────────────────────────────────────────────
   const synthesis = runSynthesis(rawInput, sessionContext, contradiction.primaryContradiction, constitutional.constitutionalRoute, {
     toleratedDysfunction,
     justifyingEvidence,
     constitutionalStructural,
+    // Enterprise enrichment
+    dependencyMap,
+    scenarioResponses,
+    enterpriseFinancialExposure,
+    enterpriseClientExposure,
+    enterpriseRegulatoryExposure,
+    enterpriseBoardChallengeReadiness,
   })
 
   // ── LAYER 7: Evidence & Memory ───────────────────────────────────────
@@ -1224,6 +1593,34 @@ export async function runDecisionIntelligence(
     ...synthesis.evidenceBasis,
     ...lensResult.findings.slice(0, 3).map(f => `${f.label}: ${f.summary.slice(0, 100)}`),
   ]
+  // Add enterprise enrichment to evidence basis
+  if (dependencyMap) {
+    evidenceBasis.push(`Dependency map: ${dependencyMap.slice(0, 120)}`)
+  }
+  if (enterpriseFinancialExposure) {
+    evidenceBasis.push(`Financial exposure: ${enterpriseFinancialExposure.slice(0, 120)}`)
+  }
+  if (enterpriseClientExposure) {
+    evidenceBasis.push(`Client exposure: ${enterpriseClientExposure.slice(0, 120)}`)
+  }
+  if (enterpriseRegulatoryExposure) {
+    evidenceBasis.push(`Regulatory exposure: ${enterpriseRegulatoryExposure.slice(0, 120)}`)
+  }
+  if (enterpriseBoardChallengeReadiness) {
+    evidenceBasis.push(`Board challenge readiness: ${enterpriseBoardChallengeReadiness.slice(0, 120)}`)
+  }
+  if (scenarioResponses && scenarioResponses.length > 0) {
+    evidenceBasis.push(`${scenarioResponses.length} scenario response(s) provided for stress analysis`)
+  }
+  // Add scenario stress test findings to evidence basis
+  if (scenarioStressTestInvoked && scenarioFindings.length > 0) {
+    evidenceBasis.push(`Scenario stress test identified: ${scenarioFindings.length} finding(s) from ${scenarioFindings.filter(f => f.label.includes('inconsistency')).length > 0 ? 'consistency analysis' : 'scenario analysis'}`)
+    for (const sf of scenarioFindings) {
+      evidenceBasis.push(`  ${sf.label}: ${sf.summary.slice(0, 100)}`)
+    }
+  } else if (hasFreeTextOnlyScenarios) {
+    evidenceBasis.push('Scenario context provided, but structured stress testing requires a selected scenario response.')
+  }
 
   // ── Assemble unresolved items ────────────────────────────────────────
   const unresolvedItems = [
@@ -1236,6 +1633,33 @@ export async function runDecisionIntelligence(
   }
   if (situation.hiddenStakesDetected) {
     unresolvedItems.push('Possible hidden stakes detected')
+  }
+  // Add enterprise enrichment to unresolved items
+  if (dependencyMap) {
+    unresolvedItems.push(`Decision depends on: ${dependencyMap.slice(0, 100)}`)
+  }
+  // Add unresolved item for unknown scenario IDs
+  if (unknownScenarioIds.length > 0 && !scenarioStressTestInvoked) {
+    unresolvedItems.push(`Scenario response received but no matching stress scenario definition exists for: ${unknownScenarioIds.join(', ')}`)
+  }
+
+  // ── Add team aggregation to evidence basis and unresolved items ─────
+  if (teamAggregation) {
+    if (teamAggregation.respondentCount < 2) {
+      evidenceBasis.unshift('Single respondent only; team divergence cannot yet be assessed.')
+    } else {
+      // Add aggregate-only findings to evidence basis
+      evidenceBasis.unshift(...teamAggregation.aggregateOnlyFindings.slice(0, 4))
+      // Add disagreement themes to unresolved items
+      for (const theme of teamAggregation.disagreementThemes) {
+        unresolvedItems.push(theme)
+      }
+      // Update interpretedIssue via synthesis if divergence detected
+      if (teamAggregation.disagreementThemes.length > 0) {
+        evidenceBasis.unshift(`Team divergence detected: ${teamAggregation.disagreementThemes.length} area(s) of disagreement identified.`)
+        synthesis.nextAdmissibleMove = 'Resolve the aggregate team perception divergence before treating the decision as commonly understood.'
+      }
+    }
   }
 
   // ── ENGINE TRACE (internal only) ────────────────────────────────────
@@ -1276,6 +1700,61 @@ export async function runDecisionIntelligence(
     availableInputKeys.add('ConstitutionalAssessment')
   }
   const engineTrace = buildEngineTrace(input.surface, availableInputKeys)
+
+  // Override ScenarioStressTest engine trace based on actual invocation
+  const scenarioTraceIndex = (engineTrace ?? []).findIndex(e => e.engineId === 'scenario-stress-test')
+  if (scenarioTraceIndex >= 0) {
+    if (scenarioStressTestInvoked) {
+      const validCount = scenarioResponses?.filter(sr => sr.chosenOption !== undefined && sr.chosenOption !== null).length ?? 0
+      const unknownCount = unknownScenarioIds.length
+      let reason = `Invoked with ${validCount} valid scenario response(s) with chosenOption`
+      if (unknownCount > 0) {
+        reason += `; ${unknownCount} unknown scenario ID(s) skipped: ${unknownScenarioIds.join(', ')}`
+      }
+      engineTrace![scenarioTraceIndex] = {
+        engineId: 'scenario-stress-test',
+        status: 'USED',
+        reason,
+      }
+    } else if (input.surface !== 'enterprise_assessment') {
+      engineTrace![scenarioTraceIndex] = {
+        engineId: 'scenario-stress-test',
+        status: 'SKIPPED_NOT_APPLICABLE',
+        reason: `Surface "${input.surface}" is not enterprise-relevant`,
+      }
+    } else if (hasFreeTextOnlyScenarios) {
+      engineTrace![scenarioTraceIndex] = {
+        engineId: 'scenario-stress-test',
+        status: 'SKIPPED_GATED',
+        reason: 'Only free-text scenario context provided — structured stress testing requires a selected scenario response (chosenOption)',
+      }
+    } else if (unknownScenarioIds.length > 0 && !scenarioStressTestInvoked) {
+      engineTrace![scenarioTraceIndex] = {
+        engineId: 'scenario-stress-test',
+        status: 'SKIPPED_GATED',
+        reason: `ScenarioStressTest skipped: unknown scenarioId(s) [${unknownScenarioIds.join(', ')}]`,
+      }
+    }
+    // Otherwise leave as SKIPPED_GATED (scenarioResponses missing entirely)
+  }
+
+  // ── Add team aggregation engine trace ────────────────────────────────
+  if (input.surface === 'team_assessment') {
+    const respondentCount = teamAggregation?.respondentCount ?? 0
+    if (respondentCount >= 2) {
+      engineTrace?.push({
+        engineId: 'cross-respondent-analysis',
+        status: 'USED',
+        reason: `Cross-respondent analysis performed with ${respondentCount} respondent(s); ${teamAggregation!.disagreementThemes.length} divergence area(s) detected`,
+      })
+    } else {
+      engineTrace?.push({
+        engineId: 'cross-respondent-analysis',
+        status: 'SKIPPED_GATED',
+        reason: `Single respondent only (${respondentCount}); team divergence cannot yet be assessed`,
+      })
+    }
+  }
 
   // ── PROGRESSIVE EVIDENCE CAPTURE ────────────────────────────────────
   // Build providedFields from available inputs for progressive capture
@@ -1399,6 +1878,7 @@ export async function runDecisionIntelligence(
         evidenceBasis: [...new Set(evidenceBasis)].slice(0, 8),
         email: input.email,
         accountId: input.accountId,
+        respondentData: currentTeamRespondent,
       })
     } catch {
       // Journey persistence failure does not affect result
@@ -1421,8 +1901,8 @@ export async function runDecisionIntelligence(
     hiddenStakesDetected: situation.hiddenStakesDetected,
 
     // LAYER 2
-    findings: lensResult.findings,
-    lensCount: lensResult.lensCount,
+    findings: [...lensResult.findings, ...scenarioFindings],
+    lensCount: lensResult.lensCount + scenarioFindings.length,
 
     // LAYER 3
     primaryContradiction: contradiction.primaryContradiction,

@@ -21,6 +21,8 @@ import {
   ENGINE_ACTIVATION_REGISTRY,
   type ProductSurface,
 } from '@/lib/intelligence/engine-activation-registry'
+import type { PaidCorridorStage } from '@/lib/product/paid-corridor-contract'
+import type { EvidenceType, ProductLine } from '@/lib/product/product-line-contract'
 
 // Re-export for convenience
 export type { ProductSurface } from '@/lib/intelligence/engine-activation-registry'
@@ -63,6 +65,11 @@ export type SurfaceOutputPolicy = {
 
 export type ProductOperatingSurfaceRecord = {
   surface: ProductSurface
+  productLine: ProductLine
+  corridorStage?: PaidCorridorStage
+  allowedEvidenceTypes: EvidenceType[]
+  contributionPolicy: string
+  prohibitedClaims: string[]
   purpose: string
   captures: SurfaceCaptureRequirement
   requiredInputs: string[]
@@ -127,6 +134,19 @@ const DEEP_ANALYSIS_ENGINES = [
   'governed-memory-presenter',
 ]
 
+const PURPOSE_ALIGNMENT_EVIDENCE: EvidenceType[] = [
+  'personal_pattern', 'behavioural_contract', 'contract_breach', 'avoided_decision', 'recurrence',
+]
+
+const CORPORATE_DECISION_EVIDENCE: EvidenceType[] = [
+  'case_decision', 'stakeholder', 'outcome', 'recurrence',
+  'authority_structure', 'scenario_stress', 'evidence_lineage',
+]
+
+const SHARED_INFRASTRUCTURE_EVIDENCE: EvidenceType[] = [
+  'provenance', 'evidence_lineage', 'recurrence', 'behavioural_signal',
+]
+
 // ---------------------------------------------------------------------------
 // Matrix
 // ---------------------------------------------------------------------------
@@ -135,6 +155,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── FREE SIGNAL ────────────────────────────────────────────────────
   {
     surface: 'free_signal',
+    productLine: 'SHARED_INFRASTRUCTURE',
+    allowedEvidenceTypes: SHARED_INFRASTRUCTURE_EVIDENCE,
+    contributionPolicy: 'First-contact signal evidence may seed shared journey/provenance records but must not claim corporate diagnosis.',
+    prohibitedClaims: ['corporate diagnosis', 'paid corridor completion', 'board-grade recommendation'],
     purpose: 'First-contact signal detection — prove the system can read a situation without login or payment',
     captures: { inputs: ['rawUserInput'], collectsAnswers: false, capturesIdentity: false },
     requiredInputs: ['rawUserInput'],
@@ -168,6 +192,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── FAST DIAGNOSTIC ────────────────────────────────────────────────
   {
     surface: 'fast_diagnostic',
+    productLine: 'SHARED_INFRASTRUCTURE',
+    allowedEvidenceTypes: SHARED_INFRASTRUCTURE_EVIDENCE,
+    contributionPolicy: 'Diagnostic evidence may prepare shared journey records and optional escalation, but it is not a paid corridor stage.',
+    prohibitedClaims: ['Purpose Alignment completion', 'enterprise exposure analysis', 'board-grade recommendation'],
     purpose: 'Structured diagnostic producing decision class, contradiction, simulation, and next move',
     captures: { inputs: ['rawUserInput', 'userAnswers'], collectsAnswers: true, capturesIdentity: false },
     requiredInputs: ['rawUserInput'],
@@ -203,6 +231,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── PURPOSE ALIGNMENT ──────────────────────────────────────────────
   {
     surface: 'purpose_alignment',
+    productLine: 'PURPOSE_ALIGNMENT',
+    allowedEvidenceTypes: PURPOSE_ALIGNMENT_EVIDENCE,
+    contributionPolicy: 'May contribute personal-pattern, avoided-decision, and recurrence evidence through the typed auditable bridge; never a prerequisite for corporate surfaces.',
+    prohibitedClaims: ['Operational Decision Intelligence stage', 'paid corridor stage', 'corporate diagnosis', 'enterprise exposure analysis'],
     purpose: 'Deep personal decision audit — mandate, obligation conflicts, alignment drift, next admissible move',
     captures: { inputs: ['rawUserInput', 'userAnswers', 'contextAnswers'], collectsAnswers: true, capturesIdentity: true },
     requiredInputs: ['userAnswers'],
@@ -239,6 +271,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── CONSTITUTIONAL DIAGNOSTIC ──────────────────────────────────────
   {
     surface: 'constitutional_diagnostic',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    allowedEvidenceTypes: CORPORATE_DECISION_EVIDENCE,
+    contributionPolicy: 'Corporate authority and mandate evidence may seed ODI without requiring Purpose Alignment completion.',
+    prohibitedClaims: ['Purpose Alignment stage completion', 'retained oversight', 'final board recommendation'],
     purpose: 'Constitutional assessment — route, readiness, authority, posture, failure modes, bridge to deeper surfaces',
     captures: { inputs: ['userAnswers'], collectsAnswers: true, capturesIdentity: true },
     requiredInputs: ['userAnswers'],
@@ -276,6 +312,11 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── TEAM ASSESSMENT ────────────────────────────────────────────────
   {
     surface: 'team_assessment',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    corridorStage: 'team_assessment',
+    allowedEvidenceTypes: CORPORATE_DECISION_EVIDENCE,
+    contributionPolicy: 'Consumes multi-respondent evidence for divergence only; single-respondent answers cannot become team divergence.',
+    prohibitedClaims: ['enterprise exposure analysis', 'domain interdependency map', 'board-grade recommendation'],
     purpose: 'Multi-respondent team dynamics assessment with divergence analysis',
     captures: { inputs: ['userAnswers', 'respondentAnswers'], collectsAnswers: true, capturesIdentity: true },
     requiredInputs: ['userAnswers'],
@@ -308,6 +349,11 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── ENTERPRISE ASSESSMENT ──────────────────────────────────────────
   {
     surface: 'enterprise_assessment',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    corridorStage: 'enterprise_assessment',
+    allowedEvidenceTypes: CORPORATE_DECISION_EVIDENCE,
+    contributionPolicy: 'Consumes organisational dependency, scenario, exposure, and board-challenge evidence without producing final board recommendation.',
+    prohibitedClaims: ['final board recommendation', 'governed execution management', 'retained oversight'],
     purpose: 'Organisation-wide decision quality assessment with domain interdependency and scenario stress',
     captures: { inputs: ['userAnswers', 'organisationContext'], collectsAnswers: true, capturesIdentity: true },
     requiredInputs: ['userAnswers'],
@@ -315,7 +361,7 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
       allowed: [
         ...CORE_DIAGNOSTIC_ENGINES, ...CONSTITUTIONAL_ENGINES,
         'domain-interdependency', 'decision-simulation-engine',
-        'synthesis-engine', 'governed-memory-presenter',
+        'synthesis-engine', 'governed-memory-presenter', 'scenario-stress-test',
       ],
       prohibited: [],
     },
@@ -338,15 +384,21 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
     },
     unlocks: ['executive_reporting', 'strategy_room', 'decision_centre'],
     futureEnginePreparation: [
-      'scenario-stress-test', 'escalation-engine', 'intervention-engine',
-      'similar-case-surfacer', 'breach-detector', 'drift-rules',
-      'drift-tribunal', 'assumption-drift-detector', 'failure-pattern-calibrator',
+      'domain-interdependency', 'escalation-engine',
+      'intervention-engine', 'similar-case-surfacer', 'breach-detector',
+      'drift-rules', 'drift-tribunal', 'assumption-drift-detector',
+      'failure-pattern-calibrator',
     ],
   },
 
   // ─── EXECUTIVE REPORTING ────────────────────────────────────────────
   {
     surface: 'executive_reporting',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    corridorStage: 'executive_reporting',
+    allowedEvidenceTypes: CORPORATE_DECISION_EVIDENCE,
+    contributionPolicy: 'Consumes evidence carry-forward for board-grade judgement; does not rerun Enterprise stress-test as its core role.',
+    prohibitedClaims: ['enterprise stress-test execution', 'strategy room execution management', 'retained oversight'],
     purpose: 'Board-ready intelligence reporting with constitutional guidance and governed memory',
     captures: { inputs: ['executiveContext'], collectsAnswers: false, capturesIdentity: true },
     requiredInputs: ['priorCaseState'],
@@ -380,6 +432,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── DECISION CENTRE ───────────────────────────────────────────────
   {
     surface: 'decision_centre',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    allowedEvidenceTypes: CORPORATE_DECISION_EVIDENCE,
+    contributionPolicy: 'Presents case continuity and governed memory; does not make dormant capabilities active by displaying stored records.',
+    prohibitedClaims: ['new enterprise assessment', 'retained oversight without durable cadence', 'boardroom scrutiny session'],
     purpose: 'Central case management hub — continuity, memory, velocity, outcome tracking',
     captures: { inputs: ['caseActions'], collectsAnswers: false, capturesIdentity: true },
     requiredInputs: ['authenticatedUser'],
@@ -419,6 +475,11 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── STRATEGY ROOM ─────────────────────────────────────────────────
   {
     surface: 'strategy_room',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    corridorStage: 'strategy_room',
+    allowedEvidenceTypes: CORPORATE_DECISION_EVIDENCE,
+    contributionPolicy: 'Consumes prior case state for governed execution with checkpoints, interventions, owner pressure, and outcome verification.',
+    prohibitedClaims: ['retained oversight without memory threshold', 'enterprise structural diagnosis', 'board-grade material generation'],
     purpose: 'Governed decision execution — intervention stacks, constraint maps, outcome accountability',
     captures: { inputs: ['executionDecisions', 'outcomeReports'], collectsAnswers: true, capturesIdentity: true },
     requiredInputs: ['authenticatedUser', 'priorCaseState'],
@@ -462,6 +523,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── OVERSIGHT ──────────────────────────────────────────────────────
   {
     surface: 'oversight',
+    productLine: 'SHARED_INFRASTRUCTURE',
+    allowedEvidenceTypes: SHARED_INFRASTRUCTURE_EVIDENCE,
+    contributionPolicy: 'Internal operator evidence for safety, quality, and drift monitoring; not a client-facing product claim.',
+    prohibitedClaims: ['client-facing retained oversight', 'corporate diagnosis', 'paid corridor output'],
     purpose: 'Internal operator view — system health, quality gates, drift monitoring',
     captures: { inputs: [], collectsAnswers: false, capturesIdentity: true },
     requiredInputs: ['operatorAccess'],
@@ -493,6 +558,10 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
   // ─── ADMIN ─────────────────────────────────────────────────────────
   {
     surface: 'admin',
+    productLine: 'SHARED_INFRASTRUCTURE',
+    allowedEvidenceTypes: SHARED_INFRASTRUCTURE_EVIDENCE,
+    contributionPolicy: 'Administrative evidence for configuration, audit, and version tracking only.',
+    prohibitedClaims: ['client-facing diagnosis', 'paid corridor stage completion'],
     purpose: 'System administration — configuration, version tracking, audit trails',
     captures: { inputs: [], collectsAnswers: false, capturesIdentity: true },
     requiredInputs: ['adminAccess'],

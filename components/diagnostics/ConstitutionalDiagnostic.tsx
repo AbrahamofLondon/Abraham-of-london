@@ -267,6 +267,23 @@ export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalD
   const [showResume, setShowResume] = React.useState(false);
   const [draftSnapshot, setDraftSnapshot] = React.useState<DraftSnapshot | null>(null);
   const [loadingLineIndex, setLoadingLineIndex] = React.useState(0);
+  const [structuralFacts, setStructuralFacts] = React.useState<{
+    decisionOwner: string;
+    approvingAuthority: string;
+    blockingAuthority: string;
+    mandateSource: string;
+    currentRoute: string;
+    failureMode: string;
+    repairCondition: string;
+  }>({
+    decisionOwner: '',
+    approvingAuthority: '',
+    blockingAuthority: '',
+    mandateSource: '',
+    currentRoute: '',
+    failureMode: '',
+    repairCondition: '',
+  });
   const startedAtRef = React.useRef<string>(new Date().toISOString());
   const questionStartedAtRef = React.useRef<number>(Date.now());
   const timingRef = React.useRef<Record<string, number>>({});
@@ -438,6 +455,15 @@ export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalD
         body: JSON.stringify({
           source: "constitutional_diagnostic_public",
           answers,
+          structuralFacts: {
+            decisionOwner: structuralFacts.decisionOwner || null,
+            approvingAuthority: structuralFacts.approvingAuthority || null,
+            blockingAuthority: structuralFacts.blockingAuthority || null,
+            mandateSource: structuralFacts.mandateSource || null,
+            currentRoute: structuralFacts.currentRoute || null,
+            failureMode: structuralFacts.failureMode || null,
+            repairCondition: structuralFacts.repairCondition || null,
+          },
           telemetry: {
             startedAt: startedAtRef.current,
             submittedAt: new Date().toISOString(),
@@ -1019,6 +1045,82 @@ export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalD
               </div>
             </div>
           </div>
+
+          {/* Structural Authority Check — optional enrichment */}
+          {isComplete && (
+            <div className="rounded-3xl border border-amber-500/16 bg-amber-500/[0.03] p-6">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-amber-400/70" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/70">
+                  Structural Authority Check (optional)
+                </span>
+              </div>
+              <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+                Answering these sharpens the constitutional reading and enables more precise authority mapping.
+              </p>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">Who owns this decision?</label>
+                  <input type="text" value={structuralFacts.decisionOwner} onChange={e => setStructuralFacts(s => ({ ...s, decisionOwner: e.target.value }))}
+                    placeholder="e.g. CEO, Department head" className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">Who can approve the next step?</label>
+                  <input type="text" value={structuralFacts.approvingAuthority} onChange={e => setStructuralFacts(s => ({ ...s, approvingAuthority: e.target.value }))}
+                    placeholder="e.g. Board, CFO" className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">Who can block or challenge?</label>
+                  <input type="text" value={structuralFacts.blockingAuthority} onChange={e => setStructuralFacts(s => ({ ...s, blockingAuthority: e.target.value }))}
+                    placeholder="e.g. Legal, Regulator" className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">What gives this its mandate?</label>
+                  <input type="text" value={structuralFacts.mandateSource} onChange={e => setStructuralFacts(s => ({ ...s, mandateSource: e.target.value }))}
+                    placeholder="e.g. Board instruction, Regulation" className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70" />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">Current route</label>
+                  <select value={structuralFacts.currentRoute} onChange={e => setStructuralFacts(s => ({ ...s, currentRoute: e.target.value }))}
+                    className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70">
+                    <option value="">Select...</option>
+                    <option value="Direct owner decision">Direct owner decision</option>
+                    <option value="Leadership review">Leadership review</option>
+                    <option value="Board / executive approval">Board / executive approval</option>
+                    <option value="Client / external approval">Client / external approval</option>
+                    <option value="Regulatory / legal review">Regulatory / legal review</option>
+                    <option value="Informal workaround">Informal workaround</option>
+                    <option value="Not clear">Not clear</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">Likely failure mode</label>
+                  <select value={structuralFacts.failureMode} onChange={e => setStructuralFacts(s => ({ ...s, failureMode: e.target.value }))}
+                    className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70">
+                    <option value="">Select...</option>
+                    <option value="unclear ownership">Unclear ownership</option>
+                    <option value="missing approval">Missing approval</option>
+                    <option value="weak evidence">Weak evidence</option>
+                    <option value="stakeholder resistance">Stakeholder resistance</option>
+                    <option value="execution capacity">Execution capacity</option>
+                    <option value="legal/regulatory constraint">Legal/regulatory constraint</option>
+                    <option value="financial exposure">Financial exposure</option>
+                    <option value="timing pressure">Timing pressure</option>
+                    <option value="not clear">Not clear</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.12em] text-white/40">What must be repaired?</label>
+                  <input type="text" value={structuralFacts.repairCondition} onChange={e => setStructuralFacts(s => ({ ...s, repairCondition: e.target.value }))}
+                    placeholder="e.g. Confirm mandate from board" className="mt-1 w-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70" />
+                </div>
+              </div>
+            </div>
+          )}
 
           {isComplete ? (
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">

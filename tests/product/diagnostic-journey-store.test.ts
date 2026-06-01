@@ -3,6 +3,7 @@ import {
   getOrCreateDiagnosticJourney,
   appendDiagnosticJourneyEvent,
   getDiagnosticJourney,
+  getTeamAssessmentRespondentData,
   listDiagnosticJourneysForActor,
   _resetMemoryStore,
 } from '@/lib/product/diagnostic-journey-store'
@@ -196,6 +197,45 @@ describe('journey retrieval', () => {
     })
     expect(journeys.length).toBe(2)
     expect(journeys.map(j => j.caseId).sort()).toEqual(['case-a', 'case-b'])
+  })
+
+  it('retrieves aggregate-only team respondentData by caseId', async () => {
+    await getOrCreateDiagnosticJourney({
+      caseId: 'team-shared-case',
+      surface: 'team_assessment',
+    })
+
+    await appendDiagnosticJourneyEvent({
+      caseId: 'team-shared-case',
+      surface: 'team_assessment',
+      type: 'EVIDENCE_CAPTURED',
+      summary: 'Team respondent evidence captured.',
+      payload: {
+        respondentData: {
+          respondentRole: 'CEO',
+          perceivedDecision: 'Approve the operating model',
+          perceivedOwner: 'CEO',
+          perceivedBlocker: 'Budget',
+          authorityClarity: 80,
+          evidenceClarity: 75,
+          executionConfidence: 70,
+          consequenceAwareness: 85,
+          leadershipAvoidanceSignal: 'low',
+        },
+        audienceSafe: 'aggregate_only',
+      },
+      audienceSafe: false,
+    })
+
+    const respondents = await getTeamAssessmentRespondentData('team-shared-case')
+    expect(respondents).toEqual([
+      expect.objectContaining({
+        respondentRole: 'CEO',
+        perceivedOwner: 'CEO',
+        perceivedBlocker: 'Budget',
+        authorityClarity: 80,
+      }),
+    ])
   })
 })
 
