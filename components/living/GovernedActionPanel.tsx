@@ -5,6 +5,8 @@
  * and what proves progress. Consumes real engine output.
  */
 
+import { getLivingTheme, type LivingThemeVariant } from "@/lib/product/living-theme";
+
 type Props = {
   requiredAction: string | null;
   whyThisAction: string | null;
@@ -12,6 +14,7 @@ type Props = {
   whatHappensNext: string | null;
   evidenceBasis?: string[];
   className?: string;
+  variant?: LivingThemeVariant;
 };
 
 export default function GovernedActionPanel({
@@ -21,53 +24,55 @@ export default function GovernedActionPanel({
   whatHappensNext,
   evidenceBasis,
   className = "",
+  variant = "dark",
 }: Props) {
+  const theme = getLivingTheme(variant);
   if (!requiredAction) return null;
 
   return (
-    <div className={`border border-amber-500/20 bg-amber-500/[0.03] p-5 ${className}`}>
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-500/70 mb-3">
+    <div className={`p-5 ${className}`} style={{ border: `1px solid ${theme.amber}22`, backgroundColor: variant === 'dark' ? 'rgba(251,191,36,0.03)' : 'rgba(180,130,30,0.04)' }}>
+      <div className="font-mono text-[10px] uppercase tracking-[0.2em] mb-3" style={{ color: theme.amber }}>
         Required action
       </div>
 
-      <p className="text-base leading-7 text-white/85 mb-4">
+      <p className="text-base leading-7 mb-4" style={{ color: theme.heading }}>
         {requiredAction}
       </p>
 
       {whyThisAction && (
         <div className="mb-3">
-          <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500 mb-1">
+          <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1" style={{ color: theme.muted }}>
             Why this action
           </div>
-          <p className="text-sm leading-6 text-zinc-400">{whyThisAction}</p>
+          <p className="text-sm leading-6" style={{ color: theme.body }}>{whyThisAction}</p>
         </div>
       )}
 
       {whatProvesProgress && (
         <div className="mb-3">
-          <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500 mb-1">
+          <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1" style={{ color: theme.muted }}>
             What proves progress
           </div>
-          <p className="text-sm leading-6 text-zinc-400">{whatProvesProgress}</p>
+          <p className="text-sm leading-6" style={{ color: theme.body }}>{whatProvesProgress}</p>
         </div>
       )}
 
       {whatHappensNext && (
         <div className="mb-3">
-          <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500 mb-1">
+          <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1" style={{ color: theme.muted }}>
             What happens next
           </div>
-          <p className="text-sm leading-6 text-zinc-400">{whatHappensNext}</p>
+          <p className="text-sm leading-6" style={{ color: theme.body }}>{whatHappensNext}</p>
         </div>
       )}
 
       {evidenceBasis && evidenceBasis.length > 0 && (
-        <div className="border-t border-white/8 pt-3 mt-3">
-          <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-600 mb-1">
+        <div className="pt-3 mt-3" style={{ borderTop: `1px solid ${theme.divider}` }}>
+          <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1" style={{ color: theme.dim }}>
             Evidence basis
           </div>
           {evidenceBasis.map((e, i) => (
-            <div key={i} className="text-xs text-zinc-500 leading-5">{e}</div>
+            <div key={i} className="text-xs leading-5" style={{ color: theme.muted }}>{e}</div>
           ))}
         </div>
       )}

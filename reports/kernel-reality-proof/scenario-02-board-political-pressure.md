@@ -471,7 +471,7 @@ Do not bring the decision to a vote until all material reservations are formally
   "caseReference": "PROOF-BOARD_DECISION_POLITICAL_PRESSURE-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-05-31T16:19:30.265Z"
+  "generatedAt": "2026-05-31T21:58:16.964Z"
 }
 ```
 

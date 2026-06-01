@@ -12,9 +12,10 @@ import HomepageFinalCTA from "@/components/homepage/HomepageFinalCTA";
 import type { HomepageEditorialViewModel } from "@/lib/content/homepage-editorial-series";
 
 const ENTRY_CTAS = [
-  { label: "Test a Decision", href: "/foundry/decision-test", primary: true },
+  { label: "Test your decision", href: "/test-your-decision", primary: true },
+  { label: "View the decision pathway", href: "/decision-pathway" },
   { label: "Run the Fast Diagnostic", href: "/diagnostics/fast" },
-  { label: "Explore Library", href: "/library" },
+  { label: "Run an organisational scan", href: "/enterprise-decision-scan" },
 ];
 
 type Props = {

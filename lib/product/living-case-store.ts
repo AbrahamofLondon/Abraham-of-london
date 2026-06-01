@@ -22,6 +22,7 @@ import type { EvidenceTier } from "@/lib/product/living-intelligence-spine";
 import type { DiagnosticJourneyStage } from "@/lib/diagnostics/journey-store";
 import type { EvidenceOrigin } from "@/lib/product/evidence-classification";
 import type { SignalContinuity } from "@/lib/product/evidence-classification";
+import { deriveEvidenceTierFromInputs } from "@/lib/product/evidence-tier-derivation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -101,11 +102,52 @@ export type LivingCaseQuery = {
 // EVIDENCE TIER DERIVATION
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Map the canonical evidence level to the EvidenceTier type used by the Living Case.
+ *
+ * The canonical helper returns: none | single_source | multi_source | corroborated | verified
+ * The EvidenceTier type expects: insufficient | single_source | multi_source | outcome_verified | human_reviewed
+ *
+ * Mapping is conservative: corroborated maps to multi_source (not outcome_verified),
+ * and verified maps to outcome_verified (not human_reviewed).
+ */
+function mapCanonicalLevelToEvidenceTier(level: string): EvidenceTier {
+  switch (level) {
+    case "none":
+      return "insufficient";
+    case "single_source":
+      return "single_source";
+    case "multi_source":
+      return "multi_source";
+    case "corroborated":
+      return "multi_source";
+    case "verified":
+      return "outcome_verified";
+    default:
+      return "insufficient";
+  }
+}
+
+/**
+ * Derive evidence tier using the canonical helper.
+ *
+ * Delegates to deriveEvidenceTierFromInputs() from lib/product/evidence-tier-derivation.ts
+ * to ensure consistent evidence strength derivation across all surfaces.
+ *
+ * The canonical helper uses governed memory, completed stages, and session signals
+ * to determine evidence level. This is more accurate than the previous stage-count-only
+ * approach because it accounts for evidence origin quality and corroboration.
+ */
 function deriveEvidenceTier(stages: string[]): EvidenceTier {
-  if (stages.length >= 4) return "multi_source";
-  if (stages.length >= 2) return "multi_source";
-  if (stages.length >= 1) return "single_source";
-  return "insufficient";
+  const result = deriveEvidenceTierFromInputs({
+    completedStages: stages,
+    // governedMemory is not available in this context (server-side journey data).
+    // The canonical helper will derive from completed stages alone, which is safe
+    // and conservative. When governedMemory is available (e.g., via the Decision Centre
+    // adapter), it will produce a more accurate tier.
+    currentSessionSignals: stages.map((s) => ({ signal: s })),
+  });
+  return mapCanonicalLevelToEvidenceTier(result.level);
 }
 
 function deriveCaseStatus(

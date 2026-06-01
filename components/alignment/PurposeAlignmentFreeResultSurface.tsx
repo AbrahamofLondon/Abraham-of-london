@@ -2,14 +2,13 @@
 
 import React from "react";
 import type { PurposeProfileResult } from "@/lib/alignment/types";
-import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
-import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
-import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
-import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
-import GovernedActionPanel from "@/components/living/GovernedActionPanel";
-import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import LivingLayerShell from "@/components/living/LivingLayerShell";
+import { buildPurposeAlignmentViewModel } from "@/lib/product/purpose-alignment-living-adapter";
+import WhatTheSystemHeard from "@/components/living/WhatTheSystemHeard";
+import { extractPurposeAlignmentQuotes } from "@/lib/product/user-language-extraction";
+import { buildUserLanguageInterpretations } from "@/lib/product/user-language-interpretation";
 
 type AnchorNarrative = {
   opening: string;
@@ -138,6 +137,22 @@ export default function PurposeAlignmentFreeResultSurface({
               {signal}
             </span>
           ))}
+        </div>
+
+        {/* What the system heard — user's own words with derived interpretations */}
+        <div className="mt-6">
+          <WhatTheSystemHeard
+            quotes={extractPurposeAlignmentQuotes(contextAnswers)}
+            interpretations={buildUserLanguageInterpretations({
+              quotes: extractPurposeAlignmentQuotes(contextAnswers),
+              primaryFailurePoint: result.primaryPattern?.label ?? null,
+              governingTension: result.contradictions?.[0]?.evidence ?? null,
+              consequenceClass: result.severity ?? null,
+              directionOfMinimumViableMove: result.firstAction ?? null,
+            })}
+            contextLabel="Purpose Alignment"
+            variant="light"
+          />
         </div>
 
         {/* Narrative */}
@@ -415,51 +430,15 @@ export default function PurposeAlignmentFreeResultSurface({
           </p>
         </section>
 
-        {/* Living intelligence panels */}
+        {/* Living intelligence panels — powered by canonical view model */}
         <div className="mt-8 space-y-4">
-          <IntelligenceGainPanel
-            stage="Purpose Alignment"
-            findings={[
-              { label: "Pattern", value: result.primaryPattern?.label ?? "Pattern identified" },
-              { label: "Coherence", value: result.coherenceBand ?? "—" },
-              ...(result.firstAction ? [{ label: "First action", value: result.firstAction }] : []),
-              ...(result.corrections?.length ? [{ label: "Corrections", value: `${result.corrections.length} identified` }] : []),
-              ...(contextAnswers.avoidedDecision ? [{ label: "Avoided", value: contextAnswers.avoidedDecision }] : []),
-            ]}
+          <LivingLayerShell
+            viewModel={buildPurposeAlignmentViewModel({
+              result,
+              contextAnswers,
+            })}
+            variant="light"
           />
-          <EvidenceStrengthMeter
-            level="single_source"
-            stagesCompleted={2}
-            whatWouldStrengthen="Continue to Constitutional Diagnostic to reveal whether this internal conflict has structural consequences."
-          />
-          {result.firstAction && (
-            <GovernedActionPanel
-              requiredAction={result.firstAction}
-              whyThisAction={result.primaryPattern?.reasons?.[0] ?? null}
-              whatProvesProgress="Complete the first action within 14 days. The system tracks whether the alignment pattern improves or repeats."
-              whatHappensNext="Constitutional Diagnostic reveals structural posture. Team Assessment reveals execution divergence."
-            />
-          )}
-          <DecisionAdvantageSummary
-            advantages={[
-              ...(result.primaryPattern ? [{ label: "Internal authority conflict named", description: result.primaryPattern.label }] : []),
-              ...(contextAnswers.avoidedDecision ? [{ label: "Avoided decision surfaced", description: contextAnswers.avoidedDecision }] : []),
-              ...(contextAnswers.competingObligation ? [{ label: "Competing obligation identified", description: contextAnswers.competingObligation }] : []),
-            ]}
-            confidenceBand={result.coherenceBand === "SOVEREIGN" || result.coherenceBand === "ALIGNED" ? "high" : result.coherenceBand === "DRIFTING" ? "medium" : "low"}
-            limitations={["Purpose alignment is self-assessed. Combine with team or constitutional assessment for structural validation."]}
-          />
-          <NextLayerUnlockedPanel
-            currentStage="Purpose Alignment"
-            nextStage={{
-              name: "Constitutional Diagnostic",
-              href: "/diagnostics/constitutional-diagnostic",
-              whatItDetects: "Whether this internal conflict has structural consequences — governance posture, authority clarity, and institutional readiness.",
-              whyContinue: "Purpose alignment reveals conviction vs obligation. Constitutional assessment reveals whether the structure supports or undermines your intent.",
-            }}
-            unresolvedItems={result.corrections?.slice(0, 2)}
-          />
-          <HumanReviewPrompt context="Purpose Alignment" />
           <GovernanceDisclosure context="purpose_alignment" compact />
         </div>
       </div>

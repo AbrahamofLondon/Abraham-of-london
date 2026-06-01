@@ -17,6 +17,8 @@
 
 import React from 'react'
 import type { KernelSignalResponse } from '@/pages/api/public/kernel-signal'
+import WhatTheSystemHeard from '@/components/living/WhatTheSystemHeard'
+import { buildUserLanguageInterpretations } from '@/lib/product/user-language-interpretation'
 
 const GOLD = '#C9A96E'
 
@@ -105,6 +107,117 @@ export function FreeSignalResult({ signal, onReset }: FreeSignalResultProps) {
           <Section label="What the System Saw">
             <p className="text-[15px] leading-[1.85] text-white/70">{signal.whatTheSystemSaw}</p>
           </Section>
+        )}
+
+        {/* What the system heard — user's own words with derived interpretations */}
+        {!signal.clarificationRequired && (() => {
+          const quotes = signal.userLanguageEvidence ?? []
+          const interpretations = buildUserLanguageInterpretations({
+            quotes,
+            situationClass: signal.situationClass,
+            primaryFailurePoint: signal.primaryFailurePoint,
+            governingTension: signal.governingTension,
+            consequenceClass: signal.consequenceClass,
+            directionOfMinimumViableMove: signal.directionOfMinimumViableMove,
+          })
+          return (
+            <div className="mt-6">
+              <WhatTheSystemHeard
+                quotes={quotes}
+                interpretations={interpretations}
+                contextLabel="Fast Diagnostic"
+                variant="dark"
+              />
+            </div>
+          )
+        })()}
+
+        {/* Decision Intelligence — derived interpretation, contradiction, simulation */}
+        {signal.decisionIntelligence && !signal.clarificationRequired && (
+          <div className="mt-8 border-t border-white/[0.06] pt-6">
+            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '12px' }}>
+              Decision intelligence
+            </p>
+
+            {/* Situation read */}
+            <p className="text-[14px] leading-[1.8] text-white/70">
+              {signal.decisionIntelligence.situationRead}
+            </p>
+
+            {/* Core contradiction */}
+            {signal.decisionIntelligence.primaryContradiction && (
+              <div className="mt-4 border-l-2 border-amber-500/30 pl-4">
+                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '4px' }}>
+                  Core contradiction
+                </p>
+                <p className="text-[14px] leading-[1.8] text-white/70">
+                  {signal.decisionIntelligence.primaryContradiction}
+                </p>
+              </div>
+            )}
+
+            {/* Simulation paths */}
+            {signal.decisionIntelligence.simulationPaths.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '4px' }}>
+                  Simulated paths
+                </p>
+                {signal.decisionIntelligence.simulationPaths.map((path, i) => (
+                  <div key={i} className="border-l-2 pl-3 py-1" style={{
+                    borderColor: path.admissible ? 'rgba(110,231,183,0.30)' : 'rgba(252,165,165,0.30)',
+                  }}>
+                    <div className="flex items-center gap-2">
+                      <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: path.admissible ? 'rgba(110,231,183,0.60)' : 'rgba(252,165,165,0.60)' }}>
+                        {path.label}
+                      </span>
+                      <span style={{ ...mono, fontSize: '7px', color: 'rgba(255,255,255,0.25)' }}>
+                        Risk: {path.riskShift.toLowerCase()}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[12px] leading-[1.6] text-white/50">
+                      {path.likelyOutcome}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Next admissible move */}
+            <div className="mt-4 border border-amber-500/20 bg-amber-500/[0.03] p-4">
+              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '4px' }}>
+                Next admissible move
+              </p>
+              <p className="text-[14px] leading-[1.8] text-white/75">
+                {signal.decisionIntelligence.nextAdmissibleMove}
+              </p>
+            </div>
+
+            {/* Unresolved items */}
+            {signal.decisionIntelligence.unresolvedItems.length > 0 && (
+              <div className="mt-4">
+                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', marginBottom: '4px' }}>
+                  What remains unresolved
+                </p>
+                {signal.decisionIntelligence.unresolvedItems.map((item, i) => (
+                  <p key={i} className="text-[12px] leading-[1.6] text-white/40">
+                    {item}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {/* Refusal */}
+            {signal.decisionIntelligence.refusalReason && (
+              <div className="mt-4 border border-red-500/20 bg-red-500/[0.03] p-4">
+                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.70)', marginBottom: '4px' }}>
+                  System refusal
+                </p>
+                <p className="text-[13px] leading-[1.7] text-white/50">
+                  {signal.decisionIntelligence.refusalReason}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Primary Failure Point */}

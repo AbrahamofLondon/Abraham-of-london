@@ -36,13 +36,9 @@ import {
 import type { ConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
-import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
-import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
-import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
-import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
-import GovernedActionPanel from "@/components/living/GovernedActionPanel";
-import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
+import LivingLayerShell from "@/components/living/LivingLayerShell";
+import { buildConstitutionalLivingViewModel } from "@/lib/product/constitutional-living-adapter";
 import {
   clearVersionedAssessmentState,
   loadVersionedAssessmentState,
@@ -575,64 +571,14 @@ export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalD
 
             {/* ═══ LIVING INTELLIGENCE PANELS ═══ */}
             <div className="mt-6 space-y-4">
-              <IntelligenceGainPanel
-                stage="Constitutional Diagnostic"
-                findings={[
-                  ...(decision ? [{ label: "Route", value: decision.route }] : []),
-                  ...(decision ? [{ label: "Confidence", value: `${Math.round((decision.confidence ?? 0) * 100)}%` }] : []),
-                  ...(report ? [{ label: "Readiness", value: report.readinessTier?.replace(/_/g, " ") ?? "—" }] : []),
-                  ...(report ? [{ label: "Posture", value: report.posture ?? "—" }] : []),
-                  ...(decision?.disqualifiersTriggered?.length ? [{ label: "Restrictions", value: decision.disqualifiersTriggered.join(", ") }] : []),
-                ]}
+              <LivingLayerShell
+                viewModel={buildConstitutionalLivingViewModel({
+                  report: report!,
+                  decision: decision!,
+                  routeSummary: routeSummary!,
+                })}
+                variant="dark"
               />
-
-              <EvidenceStrengthMeter
-                level="single_source"
-                stagesCompleted={2}
-                whatWouldStrengthen="Add a Team Assessment to reveal execution divergence, or Enterprise Assessment for institutional pressure mapping."
-              />
-
-              {decision?.recommendedInterventions && decision.recommendedInterventions.length > 0 && (
-                <GovernedActionPanel
-                  requiredAction={decision.recommendedInterventions[0] ?? null}
-                  whyThisAction={decision.rationale?.[0] ?? null}
-                  whatProvesProgress="Complete the recommended next assessment within 14 days. The system tracks whether the structural pattern improves or repeats."
-                  whatHappensNext={routeSummary?.description ?? null}
-                />
-              )}
-
-              <DecisionAdvantageSummary
-                advantages={[
-                  ...(decision ? [{ label: "Constitutional route classified", description: `${decision.route} with ${Math.round((decision.confidence ?? 0) * 100)}% confidence` }] : []),
-                  ...(decision?.disqualifiersTriggered?.length ? [{ label: "Structural risks identified", description: decision.disqualifiersTriggered.slice(0, 2).join(", ") }] : []),
-                  ...(decision?.recommendedInterventions?.length ? [{ label: "Interventions mapped", description: `${decision.recommendedInterventions.length} governed interventions identified` }] : []),
-                ]}
-                confidenceBand={(decision?.confidence ?? 0) >= 0.7 ? "high" : (decision?.confidence ?? 0) >= 0.5 ? "medium" : "low"}
-                limitations={[
-                  "Constitutional reading is based on your responses — team or enterprise validation strengthens evidence.",
-                  ...(decision?.disqualifiersTriggered?.length ? ["Active disqualifiers may affect route accuracy."] : []),
-                ]}
-              />
-
-              <NextLayerUnlockedPanel
-                currentStage="Constitutional Diagnostic"
-                nextStage={bridge?.teamAssessment ? {
-                  name: "Team Assessment",
-                  href: "/diagnostics/team-assessment",
-                  whatItDetects: "Whether your team perceives the same structural tensions you identified. Divergence between leader and team reality is the strongest predictor of execution failure.",
-                  whyContinue: "The constitutional reading reveals posture. Team assessment reveals whether the organisation can actually execute the intervention the system recommends.",
-                } : bridge?.executiveReporting ? {
-                  name: "Executive Reporting",
-                  href: "/diagnostics/executive-reporting",
-                  whatItDetects: "Board-grade consequence: financial exposure, priority stack, required interventions with confidence bands.",
-                  whyContinue: "You now have structural posture. Executive Reporting converts that into actionable decision-grade output with evidence.",
-                } : null}
-                unresolvedItems={[
-                  ...(decision?.disqualifiersTriggered?.length ? decision.disqualifiersTriggered.map((d: string) => `Disqualifier: ${d}`) : []),
-                ]}
-              />
-
-              <HumanReviewPrompt context="Constitutional Diagnostic" />
               <GovernanceDisclosure context="constitutional_diagnostic" compact />
             </div>
           </div>

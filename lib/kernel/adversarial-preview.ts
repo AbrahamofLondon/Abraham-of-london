@@ -156,6 +156,8 @@ export function selectAdversarialPreview(livingCase: LivingDecisionCase): Advers
   // Fallback: if no meta found but challenges exist, create a generic one
   // Only use the highest-severity challenge
   const top = sorted[0]
+  if (!top) return null
+
   return {
     label: 'Adversarial risk identified',
     challenge: top.contradiction,

@@ -3,14 +3,13 @@
 import React from "react";
 import type { PurposeProfileResult } from "@/lib/alignment/types";
 import type { PurposeAlignmentPaidResult } from "@/lib/alignment/purpose-alignment-paid-contract";
-import IntelligenceGainPanel from "@/components/living/IntelligenceGainPanel";
-import EvidenceStrengthMeter from "@/components/living/EvidenceStrengthMeter";
-import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
-import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
-import GovernedActionPanel from "@/components/living/GovernedActionPanel";
-import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
+import LivingLayerShell from "@/components/living/LivingLayerShell";
+import { buildPurposeAlignmentViewModel } from "@/lib/product/purpose-alignment-living-adapter";
+import WhatTheSystemHeard from "@/components/living/WhatTheSystemHeard";
+import { extractPurposeAlignmentQuotes } from "@/lib/product/user-language-extraction";
+import { buildUserLanguageInterpretations } from "@/lib/product/user-language-interpretation";
 
 type AnchorNarrative = {
   opening: string;
@@ -177,6 +176,22 @@ export default function PurposeAlignmentPaidResultSurface({
             ))}
           </div>
         </section>
+
+        {/* What the system heard — user's own words with derived interpretations */}
+        <div className="mt-6">
+          <WhatTheSystemHeard
+            quotes={extractPurposeAlignmentQuotes(contextAnswers)}
+            interpretations={buildUserLanguageInterpretations({
+              quotes: extractPurposeAlignmentQuotes(contextAnswers),
+              primaryFailurePoint: result.primaryPattern?.label ?? null,
+              governingTension: result.contradictions?.[0]?.evidence ?? null,
+              consequenceClass: result.severity ?? null,
+              directionOfMinimumViableMove: result.firstAction ?? null,
+            })}
+            contextLabel="Purpose Alignment"
+            variant="light"
+          />
+        </div>
 
         {/* Anchor narrative if present */}
         {anchorNarrative && (
@@ -632,71 +647,15 @@ export default function PurposeAlignmentPaidResultSurface({
           </div>
         )}
 
-        {/* Living intelligence panels */}
+        {/* Living intelligence panels — powered by canonical view model */}
         <div className="mt-8 space-y-4">
-          <IntelligenceGainPanel
-            stage="Purpose Alignment"
-            findings={[
-              { label: "Pattern", value: result.primaryPattern?.label ?? "Pattern identified" },
-              { label: "Coherence", value: result.coherenceBand ?? "—" },
-              { label: "Mandate viability", value: mandateReading.mandateViability },
-              { label: "Integrity score", value: `${executionIntegrityImplication.integrityScore}/100` },
-              ...(nextAdmissibleMove.move ? [{ label: "Next move", value: nextAdmissibleMove.move.slice(0, 60) + (nextAdmissibleMove.move.length > 60 ? "…" : "") }] : []),
-            ]}
+          <LivingLayerShell
+            viewModel={buildPurposeAlignmentViewModel({
+              result,
+              contextAnswers,
+            })}
+            variant="light"
           />
-          <EvidenceStrengthMeter
-            level="single_source"
-            stagesCompleted={2}
-            whatWouldStrengthen="Continue to Constitutional Diagnostic to reveal whether this mandate conflict has structural consequences."
-          />
-          {nextAdmissibleMove.move && (
-            <GovernedActionPanel
-              requiredAction={nextAdmissibleMove.move}
-              whyThisAction={nextAdmissibleMove.rationale}
-              whatProvesProgress="Complete the next admissible move within the stated time sensitivity. The system tracks progress through Decision Centre memory."
-              whatHappensNext={
-                nextAdmissibleMove.escalationQualified
-                  ? `Evidence justifies escalation to ${nextAdmissibleMove.escalationTarget?.replace(/_/g, " ") ?? "the next layer"}.`
-                  : "Constitutional Diagnostic reveals structural posture. Team Assessment reveals execution divergence."
-              }
-            />
-          )}
-          <DecisionAdvantageSummary
-            advantages={[
-              { label: "Mandate dossier produced", description: "10 governed deliverables" },
-              ...(result.primaryPattern ? [{ label: "Decision pattern identified", description: result.primaryPattern.label }] : []),
-              ...(contextAnswers.avoidedDecision ? [{ label: "Avoided decision surfaced", description: contextAnswers.avoidedDecision }] : []),
-              ...(contextAnswers.competingObligation ? [{ label: "Competing obligation mapped", description: contextAnswers.competingObligation }] : []),
-            ]}
-            confidenceBand={
-              result.coherenceBand === "SOVEREIGN" || result.coherenceBand === "ALIGNED"
-                ? "high"
-                : result.coherenceBand === "DRIFTING"
-                  ? "medium"
-                  : "low"
-            }
-            limitations={[
-              "This assessment is self-reported. Combine with Constitutional Diagnostic for structural validation.",
-              "The mandate dossier does not constitute legal, financial, medical, or therapeutic advice.",
-            ]}
-          />
-          <NextLayerUnlockedPanel
-            currentStage="Purpose Alignment"
-            nextStage={{
-              name: corridorBridge.bridgeJustified && corridorBridge.targetSurface !== "NONE"
-                ? corridorBridge.targetSurface.replace(/_/g, " ")
-                : "Constitutional Diagnostic",
-              href: escalationHref,
-              whatItDetects: corridorBridge.bridgeJustified
-                ? "Whether the mandate pattern requires institutional-level intervention."
-                : "Whether this internal conflict has structural consequences — governance posture, authority clarity, and institutional readiness.",
-              whyContinue: corridorBridge.bridgeJustified
-                ? "The evidence from this assessment justifies escalation."
-                : "Purpose alignment reveals conviction vs obligation. Constitutional assessment reveals whether the structure supports or undermines your intent.",
-            }}
-            unresolvedItems={result.corrections?.slice(0, 2)}
-          />
-          <HumanReviewPrompt context="Purpose Alignment" />
           <GovernanceDisclosure context="purpose_alignment" compact />
         </div>
 

@@ -5,9 +5,12 @@
  *
  * Shows whether a signal is new, repeated, worsening, improving, resolved,
  * or a verified pattern. Institutional, precise, calm, not dramatic.
+ *
+ * Supports dark and light theme variants.
  */
 
 import * as React from "react";
+import { getLivingTheme, type LivingThemeVariant } from "@/lib/product/living-theme";
 
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
@@ -28,6 +31,7 @@ type ContinuityStatementProps = {
   lastObserved?: string | null;
   implication?: string | null;
   compact?: boolean;
+  variant?: LivingThemeVariant;
 };
 
 const CONTINUITY_CONFIG: Record<ContinuityType, { label: string; color: string; explanation: string }> = {
@@ -68,6 +72,17 @@ const CONTINUITY_CONFIG: Record<ContinuityType, { label: string; color: string; 
   },
 };
 
+// Light variant color overrides for the status dot and label
+const LIGHT_STATUS_COLORS: Record<ContinuityType, string> = {
+  NEW: "rgba(64,64,64,0.50)",
+  REPEATED: "rgba(180,130,30,0.65)",
+  WORSENING: "rgba(180,50,50,0.70)",
+  IMPROVING: "rgba(22,130,80,0.65)",
+  RESOLVED: "rgba(22,130,80,0.75)",
+  VERIFIED_PATTERN: "rgba(180,50,50,0.75)",
+  UNKNOWN: "rgba(64,64,64,0.25)",
+};
+
 export default function ContinuityStatement({
   continuity,
   reason,
@@ -76,14 +91,30 @@ export default function ContinuityStatement({
   lastObserved,
   implication,
   compact = false,
+  variant = "dark",
 }: ContinuityStatementProps) {
+  const theme = getLivingTheme(variant);
   const config = CONTINUITY_CONFIG[continuity];
+  const isDark = variant === "dark";
+
+  const statusColor = isDark ? config.color : LIGHT_STATUS_COLORS[continuity];
+
+  // Border color based on continuity type and variant
+  const borderColor = (() => {
+    if (continuity === "WORSENING" || continuity === "VERIFIED_PATTERN") {
+      return isDark ? "rgba(252,165,165,0.12)" : "rgba(180,50,50,0.15)";
+    }
+    if (continuity === "IMPROVING" || continuity === "RESOLVED") {
+      return isDark ? "rgba(110,231,183,0.10)" : "rgba(22,130,80,0.12)";
+    }
+    return theme.border;
+  })();
 
   return (
     <div
       style={{
-        border: `1px solid ${continuity === "WORSENING" || continuity === "VERIFIED_PATTERN" ? "rgba(252,165,165,0.12)" : continuity === "IMPROVING" || continuity === "RESOLVED" ? "rgba(110,231,183,0.10)" : "rgba(255,255,255,0.06)"}`,
-        backgroundColor: "rgba(255,255,255,0.015)",
+        border: `1px solid ${borderColor}`,
+        backgroundColor: theme.bg,
         padding: compact ? "10px 14px" : "16px 20px",
       }}
     >
@@ -95,20 +126,20 @@ export default function ContinuityStatement({
             width: "6px",
             height: "6px",
             borderRadius: "50%",
-            backgroundColor: config.color,
+            backgroundColor: statusColor,
             flexShrink: 0,
           }}
         />
-        <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: config.color }}>
+        <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: statusColor }}>
           {config.label}
         </span>
         {priorOccurrences != null && priorOccurrences > 0 && (
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.20)" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: theme.dim }}>
             {priorOccurrences} prior occurrence{priorOccurrences !== 1 ? "s" : ""}
           </span>
         )}
         {trend && trend !== "unknown" && (
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.20)" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: theme.dim }}>
             Trend: {trend}
           </span>
         )}
@@ -116,21 +147,21 @@ export default function ContinuityStatement({
 
       {/* Explanation */}
       {!compact && (
-        <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.40)", margin: 0 }}>
+        <p style={{ fontSize: "13px", lineHeight: 1.65, color: theme.body, margin: 0 }}>
           {reason || config.explanation}
         </p>
       )}
 
       {/* Last observed */}
       {lastObserved && !compact && (
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: theme.dim, marginTop: "6px" }}>
           Last observed: {lastObserved}
         </p>
       )}
 
       {/* Implication */}
       {implication && !compact && (
-        <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", marginTop: "6px", fontStyle: "italic" }}>
+        <p style={{ fontSize: "12px", lineHeight: 1.6, color: theme.muted, marginTop: "6px", fontStyle: "italic" }}>
           {implication}
         </p>
       )}

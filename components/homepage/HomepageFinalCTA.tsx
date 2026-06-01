@@ -38,7 +38,7 @@ export default function HomepageFinalCTA() {
         </p>
         <div className="mt-8">
           <Link
-            href="/diagnostics/fast"
+            href="/test-your-decision"
             className="group inline-flex min-h-[52px] items-center gap-3 border px-8 py-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderColor: `${HOMEPAGE_GOLD}60`,
@@ -50,7 +50,7 @@ export default function HomepageFinalCTA() {
               textTransform: "uppercase",
             }}
           >
-            Run the Fast Diagnostic
+            Test your decision
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>

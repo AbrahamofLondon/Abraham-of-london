@@ -4,6 +4,8 @@
  * Shows what changed because of this stage — deltas and new evidence.
  */
 
+import { getLivingTheme, type LivingThemeVariant } from "@/lib/product/living-theme";
+
 type Delta = {
   metric: string;
   before: string | number | null;
@@ -15,14 +17,21 @@ type Props = {
   deltas: Delta[];
   newEvidence?: string[];
   className?: string;
+  variant?: LivingThemeVariant;
 };
 
-export default function WhatChangedPanel({ deltas, newEvidence, className = "" }: Props) {
+export default function WhatChangedPanel({ deltas, newEvidence, className = "", variant = "dark" }: Props) {
+  const theme = getLivingTheme(variant);
   if (deltas.length === 0 && (!newEvidence || newEvidence.length === 0)) return null;
 
+  const directionColor = (direction: string) =>
+    direction === "improved" ? theme.emerald :
+    direction === "deteriorated" ? theme.red :
+    theme.body;
+
   return (
-    <div className={`border border-white/10 bg-white/[0.02] p-4 ${className}`}>
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-500/60 mb-3">
+    <div className={`p-4 ${className}`} style={{ border: `1px solid ${theme.border}`, backgroundColor: theme.bg }}>
+      <div className="font-mono text-[10px] uppercase tracking-[0.2em] mb-3" style={{ color: theme.accent }}>
         What changed
       </div>
 
@@ -30,17 +39,13 @@ export default function WhatChangedPanel({ deltas, newEvidence, className = "" }
         <div className="space-y-2 mb-3">
           {deltas.map((d) => (
             <div key={d.metric} className="flex items-center gap-3 text-sm">
-              <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-wide shrink-0 w-32">
+              <span className="font-mono text-[10px] uppercase tracking-wide shrink-0 w-32" style={{ color: theme.muted }}>
                 {d.metric}
               </span>
-              <span className={
-                d.direction === "improved" ? "text-emerald-400/80" :
-                d.direction === "deteriorated" ? "text-red-400/80" :
-                "text-zinc-400"
-              }>
+              <span style={{ color: directionColor(d.direction) }}>
                 {d.before != null ? `${d.before} → ` : ""}{d.after}
               </span>
-              <span className="text-[10px] font-mono text-zinc-600">
+              <span className="text-[10px] font-mono" style={{ color: theme.dim }}>
                 {d.direction}
               </span>
             </div>
@@ -49,12 +54,12 @@ export default function WhatChangedPanel({ deltas, newEvidence, className = "" }
       )}
 
       {newEvidence && newEvidence.length > 0 && (
-        <div className="border-t border-white/8 pt-3">
-          <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500 mb-2">
+        <div className="pt-3" style={{ borderTop: `1px solid ${theme.divider}` }}>
+          <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2" style={{ color: theme.muted }}>
             New evidence added
           </div>
           {newEvidence.map((e, i) => (
-            <div key={i} className="text-sm text-zinc-400 leading-6">{e}</div>
+            <div key={i} className="text-sm leading-6" style={{ color: theme.body }}>{e}</div>
           ))}
         </div>
       )}

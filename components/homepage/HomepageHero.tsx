@@ -6,22 +6,24 @@ export default function HomepageHero() {
   return (
     <section
       id="hero"
-      className="flex min-h-[78vh] items-start justify-center px-6 pb-14 pt-[132px] sm:min-h-[82vh] sm:items-center sm:pt-24"
+      className="flex min-h-[82vh] items-start justify-center px-6 pb-14 pt-[132px] sm:min-h-[86vh] sm:items-center sm:pt-24"
       style={{ backgroundColor: "rgb(3,3,5)" }}
     >
-      <div className="mx-auto max-w-[760px] text-center">
+      <div className="mx-auto max-w-[800px] text-center">
+        {/* Eyebrow */}
         <p
           style={{
             ...mono,
-            fontSize: "12px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
-            color: `${HOMEPAGE_GOLD}88`,
+            color: `${HOMEPAGE_GOLD}77`,
           }}
         >
-          Governed Decision Infrastructure by Abraham of London
+          Decision Infrastructure by Abraham of London
         </p>
 
+        {/* Headline */}
         <h1
           className="mt-6"
           style={{
@@ -33,27 +35,32 @@ export default function HomepageHero() {
             letterSpacing: "-0.02em",
           }}
         >
-          Test a decision before it becomes an expensive mistake.
+          Stop making serious decisions with weak evidence.
         </h1>
 
+        {/* Subheadline */}
         <p
-          className="mx-auto mt-6 max-w-[58ch] text-[16px] leading-[1.85]"
+          className="mx-auto mt-6 max-w-[60ch] text-[16px] leading-[1.85]"
           style={{ color: "rgba(255,255,255,0.58)" }}
         >
-          Describe a real decision. The Foundry returns a risk score, flags evidence gaps,
-          and identifies authority issues — in seconds. No sign-up required.
+          A governed decision system for leaders, teams, and organisations under pressure.
+          It detects contradictions between intent, evidence, authority, and execution
+          before decisions collapse.
         </p>
 
+        {/* Trust line */}
         <p
-          className="mx-auto mt-5 max-w-[48ch] text-[13px] leading-[1.75]"
-          style={{ color: "rgba(255,255,255,0.36)" }}
+          className="mx-auto mt-4 max-w-[56ch] text-[14px] leading-[1.75]"
+          style={{ color: "rgba(255,255,255,0.38)" }}
         >
-          Public preview. Results are illustrative. Full governed reviews issue verifiable records.
+          Unlike ordinary AI tools, this system can refuse to proceed when the evidence is too weak.
         </p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        {/* CTAs */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          {/* Primary CTA — routes to the unified entry layer */}
           <Link
-            href="/foundry/decision-test"
+            href="/test-your-decision"
             className="group inline-flex min-h-[52px] items-center gap-3 border px-8 py-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderColor: `${HOMEPAGE_GOLD}60`,
@@ -65,81 +72,41 @@ export default function HomepageHero() {
               textTransform: "uppercase",
             }}
           >
-            Test a Decision
+            Test your decision
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
-          <Link
-            href="/foundry/market-signal-test"
-            className="inline-flex min-h-[44px] items-center"
-            style={{
-              ...mono,
-              fontSize: "11px",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.36)",
-            }}
-          >
-            Check a Market Signal
-          </Link>
-        </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          {/* Secondary CTA */}
           <Link
-            href="/diagnostics/fast"
+            href="/decision-pathway"
+            className="inline-flex min-h-[44px] items-center gap-2"
             style={{
               ...mono,
               fontSize: "10px",
-              letterSpacing: "0.10em",
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: `${HOMEPAGE_GOLD}55`,
+              color: "rgba(255,255,255,0.40)",
             }}
           >
-            Or run the Fast Diagnostic →
+            View the decision pathway
+            <ArrowRight className="h-3 w-3" />
           </Link>
+
+          {/* Enterprise CTA */}
           <Link
-            href="/foundry"
+            href="/enterprise-decision-scan"
+            className="inline-flex min-h-[44px] items-center gap-2"
             style={{
               ...mono,
               fontSize: "10px",
-              letterSpacing: "0.10em",
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.30)",
             }}
           >
-            About the Foundry →
+            Run an organisational scan
+            <ArrowRight className="h-3 w-3" />
           </Link>
-        </div>
-
-        <div
-          className="mx-auto mt-10 max-w-[560px] border border-white/[0.06] bg-white/[0.015] px-5 py-4"
-          style={{ color: "rgba(255,255,255,0.54)" }}
-        >
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            {[
-              "Risk scored",
-              "Evidence checked",
-              "Authority flagged",
-              "Demo reference issued",
-            ].map((label) => (
-              <div key={label} className="flex items-center gap-2">
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: `${HOMEPAGE_GOLD}AA` }}
-                />
-                <span
-                  style={{
-                    ...mono,
-                    fontSize: "11px",
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.42)",
-                  }}
-                >
-                  {label}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>

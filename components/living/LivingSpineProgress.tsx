@@ -5,6 +5,8 @@
  * Each completed stage is checked; current stage is highlighted; future stages are dimmed.
  */
 
+import { getLivingTheme, type LivingThemeVariant } from "@/lib/product/living-theme";
+
 type Stage = {
   key: string;
   label: string;
@@ -15,6 +17,7 @@ type Stage = {
 type Props = {
   stages: Stage[];
   className?: string;
+  variant?: LivingThemeVariant;
 };
 
 const CANONICAL_STAGES: Array<{ key: string; label: string }> = [
@@ -28,12 +31,15 @@ const CANONICAL_STAGES: Array<{ key: string; label: string }> = [
   { key: "outcome_verification", label: "Outcome" },
 ];
 
-export default function LivingSpineProgress({ stages, className = "" }: Props) {
+export default function LivingSpineProgress({ stages, className = "", variant = "dark" }: Props) {
+  const theme = getLivingTheme(variant);
   const resolvedStages = stages.length > 0 ? stages : CANONICAL_STAGES.map((s) => ({
     ...s,
     completed: false,
     current: false,
   }));
+
+  const isDark = variant === "dark";
 
   return (
     <div className={`${className}`}>
@@ -46,21 +52,30 @@ export default function LivingSpineProgress({ stages, className = "" }: Props) {
                   ? "w-8 bg-amber-500/60"
                   : stage.current
                     ? "w-8 bg-amber-500/30 animate-pulse"
-                    : "w-4 bg-white/8"
+                    : "w-4"
               }`}
+              style={{
+                backgroundColor: stage.completed
+                  ? theme.amber
+                  : stage.current
+                    ? `${theme.amber}55`
+                    : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(64,64,64,0.12)',
+              }}
               title={`${stage.label}${stage.completed ? " (completed)" : stage.current ? " (current)" : ""}`}
             />
             {i < resolvedStages.length - 1 && (
-              <div className={`w-1 h-px ${stage.completed ? "bg-amber-500/30" : "bg-white/5"}`} />
+              <div className="w-1 h-px" style={{
+                backgroundColor: stage.completed ? `${theme.amber}55` : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(64,64,64,0.08)',
+              }} />
             )}
           </div>
         ))}
       </div>
       <div className="flex justify-between mt-1">
-        <span className="font-mono text-[9px] text-zinc-600">
+        <span className="font-mono text-[9px]" style={{ color: theme.dim }}>
           {resolvedStages.filter((s) => s.completed).length} of {resolvedStages.length}
         </span>
-        <span className="font-mono text-[9px] text-zinc-600">
+        <span className="font-mono text-[9px]" style={{ color: theme.dim }}>
           {resolvedStages.find((s) => s.current)?.label ?? ""}
         </span>
       </div>
