@@ -362,10 +362,25 @@ async function runLensAnalysis(
 function runContradictionDetection(
   rawInput: string,
   lensFindings: DecisionIntelligenceFinding[],
+  extraInputs?: {
+    toleratedDysfunction?: string
+    avoidedDecision?: string
+  },
 ) {
   let primaryContradiction: string | null = null
   let contradictionCount = 0
   let graphHealthResult: { nodeCount: number; edgeCount: number; activeConflicts: number } | null = null
+
+  // Purpose Alignment: toleratedDysfunction + avoidedDecision supports contradiction
+  const hasToleratedDysfunction = !!extraInputs?.toleratedDysfunction?.trim()
+  const hasAvoidedDecision = !!extraInputs?.avoidedDecision?.trim()
+  if (hasToleratedDysfunction && hasAvoidedDecision) {
+    primaryContradiction = 'The user is seeking alignment while continuing to tolerate a condition they identify as weakening the decision.'
+    contradictionCount++
+  } else if (hasToleratedDysfunction) {
+    // toleratedDysfunction alone is a finding, not a contradiction
+    // It will be handled in synthesis
+  }
 
   // Build a ContradictionGraph from findings
   const graph = createGraph()
@@ -592,6 +607,10 @@ function runSynthesis(
   sessionContext: LiveSessionContext | null,
   primaryContradiction: string | null,
   constitutionalRoute: string | null,
+  extraInputs?: {
+    toleratedDysfunction?: string
+    justifyingEvidence?: string
+  },
 ) {
   const hasInput = rawInput.trim().length > 0
   const lower = rawInput.toLowerCase()
@@ -599,6 +618,11 @@ function runSynthesis(
   const hasEvidenceGap = /\b(not sure|don't know|unsure|unclear|unknown|no evidence|missing|assume|guess|waiting on|still reviewing)\b/i.test(lower)
   const hasConsequence = /\b(cost|risk|exposure|penalty|loss|damage|liability|expensive|at stake)\b/i.test(lower)
   const hasTiming = /\b(deadline|urgent|immediate|overdue|asap)\b/i.test(lower)
+
+  const hasToleratedDysfunction = !!extraInputs?.toleratedDysfunction?.trim()
+  const hasJustifyingEvidence = !!extraInputs?.justifyingEvidence?.trim()
+  const toleratedDysfunctionText = extraInputs?.toleratedDysfunction?.trim() ?? ''
+  const justifyingEvidenceText = extraInputs?.justifyingEvidence?.trim() ?? ''
 
   let interpretedIssue: string
   let authorityState: string | null = null
@@ -633,6 +657,34 @@ function runSynthesis(
   }
 
   // Fallback: signal-based synthesis
+  // Purpose Alignment enrichment: toleratedDysfunction and justifyingEvidence
+  if (hasToleratedDysfunction && hasInput) {
+    interpretedIssue = `The user is seeking alignment while continuing to tolerate a condition they identify as weakening the decision: ${toleratedDysfunctionText.slice(0, 120)}.`
+    if (hasJustifyingEvidence) {
+      nextAdmissibleMove = `Test the current decision against the stated evidence threshold: ${justifyingEvidenceText.slice(0, 80)}.`
+    } else {
+      nextAdmissibleMove = 'Define the evidence threshold that would justify action before proceeding further.'
+    }
+    evidenceState = hasJustifyingEvidence
+      ? 'Evidence threshold stated, but not independently verified.'
+      : 'Evidence threshold for justified action remains unresolved.'
+    confidence = hasJustifyingEvidence ? 'MEDIUM' : 'LOW'
+    unresolvedItems.push('Tolerated dysfunction may be sustaining current drift')
+    if (!hasJustifyingEvidence) unresolvedItems.push('Evidence threshold for justified action remains unresolved')
+    evidenceBasis.push(`Tolerated dysfunction identified: ${toleratedDysfunctionText.slice(0, 80)}`)
+    if (hasJustifyingEvidence) evidenceBasis.push(`Evidence threshold stated: ${justifyingEvidenceText.slice(0, 80)}`)
+    return { interpretedIssue, authorityState, evidenceState, consequenceState, nextAdmissibleMove, refusalReason, confidence, evidenceBasis, unresolvedItems }
+  }
+
+  if (hasJustifyingEvidence && hasInput) {
+    interpretedIssue = 'The user has identified an evidence threshold for action, but it has not been independently verified.'
+    nextAdmissibleMove = `Test the current decision against the stated evidence threshold: ${justifyingEvidenceText.slice(0, 80)}.`
+    evidenceState = 'Evidence threshold stated, but not independently verified.'
+    confidence = 'MEDIUM'
+    evidenceBasis.push(`Evidence threshold stated: ${justifyingEvidenceText.slice(0, 80)}`)
+    return { interpretedIssue, authorityState, evidenceState, consequenceState, nextAdmissibleMove, refusalReason, confidence, evidenceBasis, unresolvedItems }
+  }
+
   if (constitutionalRoute === 'STRATEGY') {
     interpretedIssue = 'The constitutional assessment indicates readiness for strategic intervention. Authority and evidence support escalation.'
     nextAdmissibleMove = 'Proceed with the recommended intervention. The constitutional route supports escalation.'
@@ -665,7 +717,11 @@ function runSynthesis(
     confidence = 'LOW'
   }
 
-  evidenceState = hasInput ? 'A coherent situation description has been provided, but the evidence is self-reported.' : 'No input provided.'
+  evidenceState = hasJustifyingEvidence
+    ? 'Evidence threshold stated, but not independently verified.'
+    : hasInput
+      ? 'A coherent situation description has been provided, but the evidence is self-reported.'
+      : 'No input provided.'
   return { interpretedIssue, authorityState, evidenceState, consequenceState, nextAdmissibleMove, refusalReason, confidence, evidenceBasis, unresolvedItems }
 }
 
@@ -968,8 +1024,16 @@ export async function runDecisionIntelligence(
   // ── LAYER 2: Lens Analysis ───────────────────────────────────────────
   const lensResult = await runLensAnalysis(rawInput, situation.decisionClass, situation.detectedSignals)
 
+  // ── Extract enrichment inputs for purpose_alignment surface ──────────
+  const toleratedDysfunction = input.userAnswers?.toleratedDysfunction as string | undefined
+  const justifyingEvidence = input.userAnswers?.justifyingEvidence as string | undefined
+  const avoidedDecision = input.userAnswers?.avoidedDecision as string | undefined
+
   // ── LAYER 3: Contradiction ───────────────────────────────────────────
-  const contradiction = runContradictionDetection(rawInput, lensResult.findings)
+  const contradiction = runContradictionDetection(rawInput, lensResult.findings, {
+    toleratedDysfunction,
+    avoidedDecision,
+  })
 
   // ── LAYER 4: Constitutional ──────────────────────────────────────────
   const constitutional = input.diagnosticResult && hasConstitutionalOutput(input.diagnosticResult)
@@ -980,7 +1044,10 @@ export async function runDecisionIntelligence(
   const simulation = runSimulation(rawInput, sessionContext)
 
   // ── LAYER 6: Synthesis ───────────────────────────────────────────────
-  const synthesis = runSynthesis(rawInput, sessionContext, contradiction.primaryContradiction, constitutional.constitutionalRoute)
+  const synthesis = runSynthesis(rawInput, sessionContext, contradiction.primaryContradiction, constitutional.constitutionalRoute, {
+    toleratedDysfunction,
+    justifyingEvidence,
+  })
 
   // ── LAYER 7: Evidence & Memory ───────────────────────────────────────
   const evidence = runEvidenceAndMemory(rawInput, situation.detectedSignals)
