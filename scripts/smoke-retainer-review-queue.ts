@@ -21,6 +21,9 @@
  * Do NOT run this in CI without a test database.
  */
 
+// Load .env before anything else
+import 'dotenv/config'
+
 async function main() {
   console.log('[SMOKE] Retainer Review Queue — Durable Persistence Test')
   console.log('[SMOKE] ================================================')
