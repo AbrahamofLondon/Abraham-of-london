@@ -18,6 +18,8 @@ export type DiagnosticSubmitConfig = {
     severity: string;
     reference: string;
     userEmail: string | null;
+    /** Raw request body — for extracting structured answers in the hook */
+    body?: Record<string, unknown>;
   }) => Promise<void>;
 };
 
@@ -89,6 +91,7 @@ export async function handleDiagnosticSubmit(
           severity,
           reference: record.reference,
           userEmail: record.userEmail ?? null,
+          body: body as Record<string, unknown>,
         });
       } catch {
         // non-fatal — verification record creation must not block the result
