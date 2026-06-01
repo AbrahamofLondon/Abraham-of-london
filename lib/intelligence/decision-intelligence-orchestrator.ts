@@ -103,6 +103,8 @@ import { deriveProgressiveEvidenceCapture } from '@/lib/intelligence/progressive
 import type { ProgressiveEvidenceCaptureResult } from '@/lib/intelligence/progressive-evidence-capture'
 import { deriveDecisionIntelligenceDelta } from '@/lib/intelligence/decision-intelligence-delta'
 import type { PreviousDecisionIntelligenceSnapshot } from '@/lib/intelligence/decision-intelligence-delta'
+import { mapConstitutionalAnswersToStructuralInput } from '@/lib/intelligence/constitutional-structural-mapping'
+import type { ConstitutionalStructuralInput } from '@/lib/intelligence/constitutional-structural-mapping'
 
 // ─── Engine Instances (singletons) ────────────────────────────────────────────
 
@@ -689,6 +691,7 @@ function runSynthesis(
   extraInputs?: {
     toleratedDysfunction?: string
     justifyingEvidence?: string
+    constitutionalStructural?: ConstitutionalStructuralInput
   },
 ) {
   const hasInput = rawInput.trim().length > 0
@@ -748,6 +751,30 @@ function runSynthesis(
         nextAdmissibleMove = enriched.nextAdmissibleMove ?? nextAdmissibleMove
         if (enriched.evidenceBasis) evidenceBasis.push(...enriched.evidenceBasis)
         if (enriched.unresolvedItems) unresolvedItems.push(...enriched.unresolvedItems)
+      }
+
+      // Apply constitutional structural enrichment
+      const cs = extraInputs?.constitutionalStructural
+      if (cs) {
+        if (cs.approvingAuthority) {
+          authorityState = `Approving authority identified: ${cs.approvingAuthority}.`
+        } else if (cs.decisionOwner) {
+          authorityState = `Decision owner identified: ${cs.decisionOwner}, but approving authority not confirmed.`
+        } else {
+          authorityState = 'Authority structure is not yet clear.'
+        }
+        if (cs.blockingAuthority) {
+          unresolvedItems.push(`Blocking authority identified: ${cs.blockingAuthority}`)
+        }
+        if (!cs.mandateSource) {
+          unresolvedItems.push('Mandate source not confirmed')
+        }
+        if (cs.failureMode) {
+          evidenceBasis.push(`Failure mode identified: ${cs.failureMode}`)
+        }
+        if (cs.repairCondition) {
+          evidenceBasis.push(`Repair condition identified: ${cs.repairCondition}`)
+        }
       }
 
       return { interpretedIssue, authorityState, evidenceState, consequenceState, nextAdmissibleMove, refusalReason, confidence, evidenceBasis, unresolvedItems }
@@ -820,6 +847,37 @@ function runSynthesis(
     : hasInput
       ? 'A coherent situation description has been provided, but the evidence is self-reported.'
       : 'No input provided.'
+
+  // Apply constitutional structural enrichment (fallback path)
+  const cs = extraInputs?.constitutionalStructural
+  if (cs) {
+    if (cs.approvingAuthority) {
+      authorityState = `Approving authority identified: ${cs.approvingAuthority}.`
+    } else if (cs.decisionOwner) {
+      authorityState = `Decision owner identified: ${cs.decisionOwner}, but approving authority not confirmed.`
+    } else {
+      authorityState = authorityState ?? 'Authority structure is not yet clear.'
+    }
+    if (cs.blockingAuthority) {
+      unresolvedItems.push(`Blocking authority identified: ${cs.blockingAuthority}`)
+    }
+    if (!cs.mandateSource) {
+      unresolvedItems.push('Mandate source not confirmed')
+    }
+    if (cs.failureMode) {
+      evidenceBasis.push(`Failure mode identified: ${cs.failureMode}`)
+      if (cs.failureMode.toLowerCase().includes('authority') || cs.failureMode.toLowerCase().includes('approv')) {
+        nextAdmissibleMove = 'Resolve the authority gap before proceeding with the current route.'
+      }
+    }
+    if (cs.repairCondition) {
+      evidenceBasis.push(`Repair condition identified: ${cs.repairCondition}`)
+    }
+    if (constitutionalRoute === 'REJECT') {
+      refusalReason = refusalReason ?? 'The constitutional assessment indicates this route is not admissible under current conditions.'
+    }
+  }
+
   return { interpretedIssue, authorityState, evidenceState, consequenceState, nextAdmissibleMove, refusalReason, confidence, evidenceBasis, unresolvedItems }
 }
 
@@ -1127,6 +1185,16 @@ export async function runDecisionIntelligence(
   const justifyingEvidence = input.userAnswers?.justifyingEvidence as string | undefined
   const avoidedDecision = input.userAnswers?.avoidedDecision as string | undefined
 
+  // ── Extract constitutional structural input for constitutional_diagnostic ──
+  const constitutionalStructural = input.surface === 'constitutional_diagnostic'
+    ? mapConstitutionalAnswersToStructuralInput({
+        userAnswers: input.userAnswers,
+        report: (input.diagnosticResult as Record<string, unknown> | undefined)?.report as Record<string, unknown> | undefined,
+        decision: (input.diagnosticResult as Record<string, unknown> | undefined)?.decision as Record<string, unknown> | undefined,
+        routeSummary: (input.diagnosticResult as Record<string, unknown> | undefined)?.routeSummary as Record<string, unknown> | undefined,
+      })
+    : undefined
+
   // ── LAYER 3: Contradiction ───────────────────────────────────────────
   const contradiction = runContradictionDetection(rawInput, lensResult.findings, {
     toleratedDysfunction,
@@ -1145,6 +1213,7 @@ export async function runDecisionIntelligence(
   const synthesis = runSynthesis(rawInput, sessionContext, contradiction.primaryContradiction, constitutional.constitutionalRoute, {
     toleratedDysfunction,
     justifyingEvidence,
+    constitutionalStructural,
   })
 
   // ── LAYER 7: Evidence & Memory ───────────────────────────────────────
