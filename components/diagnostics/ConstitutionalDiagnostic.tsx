@@ -39,6 +39,7 @@ import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import LivingLayerShell from "@/components/living/LivingLayerShell";
 import { buildConstitutionalLivingViewModel } from "@/lib/product/constitutional-living-adapter";
+import { mapConstitutionalAnswersToStructuralInput } from "@/lib/intelligence/constitutional-structural-mapping";
 import {
   clearVersionedAssessmentState,
   loadVersionedAssessmentState,
@@ -576,6 +577,12 @@ export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalD
                   report: report!,
                   decision: decision!,
                   routeSummary: routeSummary!,
+                  constitutionalStructural: mapConstitutionalAnswersToStructuralInput({
+                    userAnswers: answers as unknown as Record<string, unknown>,
+                    report: report! as unknown as Record<string, unknown>,
+                    decision: decision! as unknown as Record<string, unknown>,
+                    routeSummary: routeSummary! as unknown as Record<string, unknown>,
+                  }),
                 })}
                 variant="dark"
               />
