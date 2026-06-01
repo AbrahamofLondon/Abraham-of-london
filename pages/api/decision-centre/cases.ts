@@ -11,13 +11,15 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
 import { getDiagnosticJourney, type DiagnosticJourneyRecord } from "@/lib/diagnostics/journey-store";
+import { getDiagnosticJourney as getProductDiagnosticJourney } from "@/lib/product/diagnostic-journey-store";
+import { extractSignalsFromJourney, hasSignalContinuityData, getAudienceSafeEvents } from "@/lib/product/diagnostic-journey-record";
+import { buildGovernedMemoryFromJourney } from "@/lib/product/journey-governed-memory-adapter";
 import {
   deriveLivingCase,
   isAdmissibleFor,
   type LivingCase,
 } from "@/lib/product/living-case-store";
-import {
-  deriveCognitiveState,
+import { deriveCognitiveState,
   type DecisionCentreCase,
   type DecisionCentreResponse,
   type SurfaceAdmissionStatus,
@@ -28,6 +30,7 @@ import {
   type StrategyRoomSessionRef,
 } from "@/lib/product/decision-centre-contract";
 import type { StageEntry } from "@/lib/product/evidence-stage-contract";
+import { deriveStageContributions } from "@/lib/product/stage-contribution-derivation";
 import { qualifiesForBoardroom } from "@/lib/constitution/boardroom-mode";
 import { deriveDecisionCreditGovernanceEffect } from "@/lib/product/decision-credit-governance";
 import { detectPatternRecurrenceV0 } from "@/lib/product/pattern-recurrence";
@@ -60,6 +63,7 @@ import {
   type ComparableCaseState,
 } from "@/lib/analytics/what-changed";
 import { buildCrossAssessmentIntelligence } from "@/lib/analytics/cross-assessment-intelligence";
+import { getClientSafeRecommendations } from "@/lib/product/recommendation-outcome-ledger";
 import { buildContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
 import type { IntelligenceDataQuality, IntelligenceScope } from "@/lib/product/intelligence-contract";
 import { createFieldProvenance } from "@/lib/product/field-provenance-contract";
@@ -264,20 +268,21 @@ function buildStageChecklist(livingCase: LivingCase): StageEntry[] {
     { key: "outcome_verification", label: "Outcome Verification", status: "not_started" },
   ];
 
-  // Add bespoke contributions from evidence nodes
-  for (const stage of stages) {
-    if (stage.status !== "completed") continue;
-    const stageKey = stage.key === "fast_diagnostic" ? "purpose_alignment" : stage.key;
-    const nodes = livingCase.evidenceNodes.filter((n) => n.sourceStage === stageKey);
-    const contradictions = nodes.filter((n) => n.kind === "contradiction");
-    if (contradictions.length > 0 && contradictions[0]) {
-      stage.contribution = contradictions[0].summary;
-    } else if (nodes.length > 0 && nodes[0]) {
-      stage.contribution = nodes[0].summary;
-    }
-  }
-
-  return stages;
+  // Derive bespoke contributions from evidence nodes and contradictions
+  return deriveStageContributions(stages, {
+    stageKey: "",
+    evidenceNodes: livingCase.evidenceNodes.map((n) => ({
+      sourceStage: n.sourceStage,
+      summary: n.summary,
+      label: n.label,
+      kind: n.kind,
+      severity: n.severity,
+    })),
+    contradictions: livingCase.contradictions.map((c) => ({
+      summary: c.summary,
+      severity: c.severity,
+    })),
+  });
 }
 
 function buildAdmissionStatus(
@@ -885,6 +890,38 @@ export default async function handler(
       // Decision credit is best-effort — not critical
     }
 
+    // ── Journey-based signal continuity ──────────────────────────────────
+    const journeyRecord = await getProductDiagnosticJourney(livingCase.caseId)
+    const journeyContinuity: {
+      available: boolean
+      eventCount: number
+      lastSurface?: string
+      signalCount: number
+      contradictionCount: number
+      lastRecommendedAction?: string | null
+      summary: string
+    } = journeyRecord
+      ? (() => {
+          const safeEvents = getAudienceSafeEvents(journeyRecord)
+          const signals = hasSignalContinuityData(journeyRecord)
+            ? extractSignalsFromJourney(journeyRecord)
+            : []
+          const actionEvent = safeEvents.filter(e => e.type === 'ACTION_RECOMMENDED').at(-1)
+          const contradictionEvents = safeEvents.filter(e => e.type === 'CONTRADICTION_DETECTED')
+          return {
+            available: true,
+            eventCount: safeEvents.length,
+            lastSurface: journeyRecord.currentSurface,
+            signalCount: signals.length,
+            contradictionCount: contradictionEvents.length,
+            lastRecommendedAction: actionEvent?.summary ?? null,
+            summary: signals.length > 0
+              ? `${signals.length} signal(s) tracked across ${safeEvents.length} engine event(s)`
+              : `${safeEvents.length} engine event(s) recorded`,
+          }
+        })()
+      : { available: false, eventCount: 0, signalCount: 0, contradictionCount: 0, summary: 'No engine journey record available' }
+
     const caseCard: DecisionCentreCase = {
       caseId: livingCase.caseId,
       scope: {
@@ -911,16 +948,24 @@ export default async function handler(
         executiveReporting: buildAdmissionStatus(livingCase, "executive_reporting"),
         strategyRoom: buildAdmissionStatus(livingCase, "strategy_room"),
       },
-      continuity: livingCase.contradictions.length > 0
+      continuity: journeyContinuity.available && journeyContinuity.signalCount > 0
         ? {
-            status: livingCase.contradictions.length >= 3 ? "VERIFIED_PATTERN" : "REPEATED",
-            priorOccurrences: livingCase.contradictions.length,
-            trend: "stable",
-            summary: livingCase.contradictions[0]?.summary || undefined,
+            status: journeyContinuity.signalCount >= 3 ? 'VERIFIED_PATTERN' as const : 'REPEATED' as const,
+            priorOccurrences: journeyContinuity.signalCount,
+            trend: 'stable' as const,
+            summary: journeyContinuity.summary,
           }
-        : livingCase.stageCount > 0
-          ? { status: "NEW", summary: "Case under initial evidence gathering." }
-          : null,
+        : livingCase.contradictions.length > 0
+          ? {
+              status: livingCase.contradictions.length >= 3 ? 'VERIFIED_PATTERN' as const : 'REPEATED' as const,
+              priorOccurrences: livingCase.contradictions.length,
+              trend: 'stable' as const,
+              summary: livingCase.contradictions[0]?.summary || undefined,
+            }
+          : livingCase.stageCount > 0
+            ? { status: 'NEW' as const, summary: 'Case under initial evidence gathering.' }
+            : null,
+      journeyContinuity,
       commercial: {
         ownedProducts: owned,
         eligibleProducts: eligible,
@@ -1042,6 +1087,14 @@ export default async function handler(
         governedMemory.push(...paMemoryItems);
       }
 
+      // ── Journey engine memory items ──────────────────────────────────
+      if (journeyRecord) {
+        const journeyMemoryItems = buildGovernedMemoryFromJourney(journeyRecord)
+        if (journeyMemoryItems.length > 0) {
+          governedMemory.push(...journeyMemoryItems)
+        }
+      }
+
       const { loadCheckpointsForCase } = await import("@/lib/product/checkpoint-service");
       const caseCheckpoints = await loadCheckpointsForCase(livingCase.caseId);
       const sortedCaseCheckpoints = [...caseCheckpoints].sort(
@@ -1138,6 +1191,10 @@ export default async function handler(
       caseCard.governedMemory = governedMemory.length ? governedMemory : null;
       caseCard.scope.journeyId = journey.journeyKey;
     }
+
+    // ── RECOMMENDATIONS ──────────────────────────────────────────────────────
+    // Inject client-safe recommendations from the recommendation-outcome ledger.
+    caseCard.recommendations = await getClientSafeRecommendations(livingCase.caseId);
 
     const retainerReadiness = deriveRetainerReadiness({
       livingCase,

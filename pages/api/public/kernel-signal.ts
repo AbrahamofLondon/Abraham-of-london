@@ -16,6 +16,9 @@ import { DecisionIntelligenceKernel } from '@/lib/intelligence/decision-intellig
 import { createLivingDecisionCase } from '@/lib/intelligence/living-decision-case-contract'
 import { selectAdversarialPreview } from '@/lib/kernel/adversarial-preview'
 import type { AdversarialPreview } from '@/lib/kernel/adversarial-preview'
+import { extractSafeUserLanguageQuotes } from '@/lib/product/user-language-extraction'
+import { runDecisionIntelligence } from '@/lib/intelligence/decision-intelligence-orchestrator'
+import type { DecisionIntelligenceResult } from '@/lib/intelligence/decision-intelligence-orchestrator'
 
 const kernel = new DecisionIntelligenceKernel()
 
@@ -36,6 +39,8 @@ export type KernelSignalResponse = {
   preservedAmbiguities: string[]
   clarificationRequired: boolean
   clarificationQuestions: Array<{ domain: string; question: string }> | null
+  userLanguageEvidence?: string[]
+  decisionIntelligence?: DecisionIntelligenceResult
   error?: string
 }
 
@@ -55,11 +60,14 @@ export default async function handler(
       directionOfMinimumViableMove: null,
       boundaryNote: null,
       reviewNote: null,
+      adversarialPreview: null,
       alternativeClasses: null,
       surfacedDimensions: [],
       preservedAmbiguities: [],
       clarificationRequired: false,
       clarificationQuestions: null,
+      userLanguageEvidence: [],
+      decisionIntelligence: undefined,
       error: 'Method not allowed. Use POST.',
     })
     return
@@ -82,11 +90,14 @@ export default async function handler(
       directionOfMinimumViableMove: null,
       boundaryNote: null,
       reviewNote: null,
+      adversarialPreview: null,
       alternativeClasses: null,
       surfacedDimensions: [],
       preservedAmbiguities: [],
       clarificationRequired: false,
       clarificationQuestions: null,
+      userLanguageEvidence: [],
+      decisionIntelligence: undefined,
       error: 'Situation text is required.',
     })
     return
@@ -127,6 +138,13 @@ export default async function handler(
           domain: q.domain,
           question: q.question,
         })) || null,
+        userLanguageEvidence: extractSafeUserLanguageQuotes([situation.trim()]),
+        decisionIntelligence: await runDecisionIntelligence({
+          surface: 'fast_diagnostic',
+          rawUserInput: situation.trim(),
+          persistJourney: true,
+          caseId,
+        }),
       })
       return
     }
@@ -160,8 +178,16 @@ export default async function handler(
 
     let reviewNote: string | null = null
     if (livingCase?.review?.state !== 'not_required') {
-      reviewNote = `This situation may require human review (${livingCase.review.tier || 'standard'} tier) before a full analysis can be delivered.`
+      reviewNote = `This situation may require human review (${livingCase?.review?.tier || 'standard'} tier) before a full analysis can be delivered.`
     }
+
+    // Run decision intelligence orchestrator
+    const decisionIntelligence = await runDecisionIntelligence({
+      surface: 'fast_diagnostic',
+      rawUserInput: situation.trim(),
+      persistJourney: true,
+      caseId,
+    })
 
     res.status(200).json({
       caseId,
@@ -180,6 +206,8 @@ export default async function handler(
       preservedAmbiguities: result.translation?.preservedAmbiguities || [],
       clarificationRequired: false,
       clarificationQuestions: null,
+      userLanguageEvidence: extractSafeUserLanguageQuotes([situation.trim()]),
+      decisionIntelligence,
     })
   } catch (error) {
     console.error('[KERNEL_SIGNAL] Error:', error)
@@ -200,6 +228,8 @@ export default async function handler(
       preservedAmbiguities: [],
       clarificationRequired: false,
       clarificationQuestions: null,
+      userLanguageEvidence: [],
+      decisionIntelligence: undefined,
       error: 'An internal error occurred while processing your situation.',
     })
   }

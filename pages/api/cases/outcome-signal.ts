@@ -2,11 +2,21 @@
  * pages/api/cases/outcome-signal.ts
  *
  * Captures an outcome signal for a governed case.
+ * When recommendationId is provided, binds the outcome to the recommendation
+ * ledger and appends an OUTCOME_REPORTED journey event.
  *
  * POST /api/cases/outcome-signal
  *
  * Body:
- *   { caseId: string; source: string; signal: OutcomeSignal; blocker?: string; freeText?: string }
+ *   {
+ *     caseId: string;
+ *     source: string;
+ *     signal: OutcomeSignal;
+ *     blocker?: string;
+ *     freeText?: string;
+ *     recommendationId?: string;
+ *     whatChanged?: string;
+ *   }
  *
  * Privacy:
  *   - Optional free text is not persisted in v1
@@ -43,10 +53,14 @@ const signalSchema = z.object({
     ])
     .optional(),
   freeText: z.string().max(2000).optional(),
+  /** recommendationId to bind this outcome to a specific recommendation ledger entry */
+  recommendationId: z.string().min(1).max(200).optional(),
+  /** whatChanged description for the outcome report */
+  whatChanged: z.string().min(1).max(2000).optional(),
 });
 
 type Response =
-  | { ok: true }
+  | { ok: true; recommendationUpdated?: boolean }
   | { ok: false; error: string };
 
 export default async function handler(
@@ -68,7 +82,7 @@ export default async function handler(
     return res.status(400).json({ ok: false, error: "Invalid request body" });
   }
 
-  const { caseId, source, signal, blocker, freeText } = parsed.data;
+  const { caseId, source, signal, blocker, freeText, recommendationId, whatChanged } = parsed.data;
 
   try {
     const { prisma } = await import("@/lib/prisma.server");
@@ -90,12 +104,67 @@ export default async function handler(
           blocker: blocker ?? null,
           hasFreeText: Boolean(freeText),
           freeTextStored: false,
+          recommendationId: recommendationId ?? null,
           capturedAt: new Date().toISOString(),
         },
       },
     });
 
-    return res.status(200).json({ ok: true });
+    // ── Recommendation ledger binding ──────────────────────────────────────
+    // If recommendationId is provided, update the recommendation ledger and
+    // append an OUTCOME_REPORTED journey event.
+    let recommendationUpdated = false;
+    if (recommendationId) {
+      try {
+        const { attachOutcomeReport } = await import("@/lib/product/recommendation-outcome-ledger");
+        const { appendDiagnosticJourneyEvent } = await import("@/lib/product/diagnostic-journey-store");
+
+        // Build a safe outcome summary from the signal data
+        const outcomeSummary = whatChanged
+          ? `${signal}: ${whatChanged.slice(0, 500)}`
+          : blocker
+            ? `${signal}: Blocked by ${blocker}`
+            : `${signal}: User reported outcome`;
+
+        // Update the recommendation ledger
+        const updated = await attachOutcomeReport({
+          caseId,
+          recommendationId,
+          outcomeSummary,
+          verified: false, // User-reported — never automatically verified
+        });
+
+        if (updated !== null) {
+          recommendationUpdated = true;
+
+          // Append OUTCOME_REPORTED journey event (non-blocking)
+          try {
+            await appendDiagnosticJourneyEvent({
+              caseId,
+              surface: 'fast_diagnostic',
+              type: 'OUTCOME_REPORTED',
+              engineId: 'outcome-signal',
+              summary: outcomeSummary.slice(0, 200),
+              payload: {
+                recommendationId,
+                outcomeSummary,
+                verificationStatus: 'USER_REPORTED',
+                verified: false,
+                signal,
+                blocker: blocker ?? null,
+              },
+              audienceSafe: true,
+            });
+          } catch {
+            // Journey event failure does not affect the response
+          }
+        }
+      } catch {
+        // Recommendation ledger binding failure does not block the response
+      }
+    }
+
+    return res.status(200).json({ ok: true, recommendationUpdated });
   } catch (error) {
     console.error("[outcome-signal] Failed to capture signal:", error);
     return res.status(500).json({ ok: false, error: "Failed to capture outcome signal" });

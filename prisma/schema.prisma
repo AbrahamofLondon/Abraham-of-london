@@ -4513,3 +4513,30 @@ model DecisionBriefOrder {
   @@index([createdAt])
   @@map("decision_brief_orders")
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RECOMMENDATION OUTCOME LEDGER
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RecommendationOutcomeLedgerEntry {
+  id                  String   @id @default(cuid())
+  recommendationId    String
+  caseId              String
+  surface             String
+  recommendedAction   String
+  evidenceBasisJson   Json?
+  status              String   @default("RECOMMENDED")
+  sourceEngineId      String?
+  journeyEventId      String?
+  outcomeSummary      String?
+  verified            Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([caseId])
+  @@index([recommendationId])
+  @@index([caseId, status])
+  @@index([caseId, surface])
+  @@index([createdAt])
+  @@map("recommendation_outcome_ledger")
+}

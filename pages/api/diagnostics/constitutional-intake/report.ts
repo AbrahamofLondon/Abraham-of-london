@@ -287,6 +287,25 @@ export default async function handler(
       },
     });
 
+    // ── Persist journey events ────────────────────────────────────────
+    try {
+      const { runDecisionIntelligence } = await import('@/lib/intelligence/decision-intelligence-orchestrator')
+      await runDecisionIntelligence({
+        surface: 'constitutional_diagnostic',
+        userAnswers: answers,
+        diagnosticResult: {
+          report: result.bundle.report,
+          decision: result.bundle.decision,
+          routeSummary: result.bundle.routeSummary,
+        },
+        persistJourney: true,
+        caseId: created.id,
+        email: body.email ?? undefined,
+      })
+    } catch {
+      // Journey persistence is non-blocking
+    }
+
     const stateToken = createEncryptedStateToken({
       kind: "constitutional_handoff",
       reportId: created.id,

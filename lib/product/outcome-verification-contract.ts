@@ -62,6 +62,8 @@ export type OutcomeVerificationRequest = OutcomeVerificationReference & {
   systemDiagnosisAccuracy: OutcomeAccuracyAnswer;
   requiredMoveUsefulness: OutcomeUsefulnessAnswer;
   rememberNote?: string | null;
+  /** Optional recommendationId to bind this outcome to a specific recommendation ledger entry */
+  recommendationId?: string | null;
 };
 
 export type OutcomeVerificationContext = OutcomeVerificationReference & {

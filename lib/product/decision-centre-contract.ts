@@ -18,6 +18,7 @@ import type { WhatChangedSummary } from "@/lib/analytics/what-changed";
 import type { CrossAssessmentIntelligence } from "@/lib/analytics/cross-assessment-intelligence";
 import type { ContradictionMapView } from "@/lib/analytics/contradiction-graph-presenter";
 import type { IntelligenceDataQuality, IntelligenceEmptyState, IntelligenceScope } from "@/lib/product/intelligence-contract";
+import type { ClientSafeRecommendation } from "@/lib/product/recommendation-outcome-ledger";
 import type { FieldProvenance } from "@/lib/product/field-provenance-contract";
 import type {
   RetainerCycleMemoryEscalationLevel,
@@ -215,6 +216,16 @@ export type DecisionCentreCase = {
   };
   /** Continuity status */
   continuity?: CaseContinuity | null;
+  /** Journey-based engine continuity — derived from DiagnosticJourneyRecord */
+  journeyContinuity?: {
+    available: boolean;
+    eventCount: number;
+    lastSurface?: string;
+    signalCount: number;
+    contradictionCount: number;
+    lastRecommendedAction?: string | null;
+    summary: string;
+  };
   /** Commercial status */
   commercial: {
     ownedProducts: string[];
@@ -278,6 +289,12 @@ export type DecisionCentreCase = {
   strategyRoomRecord?: StrategyRoomSessionRef | null;
   /** Governed memory carried with explicit source, date, and evidence posture */
   governedMemory?: GovernedMemoryItem[] | null;
+  /**
+   * Client-safe recommendations from the recommendation-outcome ledger.
+   * Each entry includes recommendationId for outcome verification binding.
+   * Does not expose raw ledger internals (evidenceBasis, sourceEngineId, etc.).
+   */
+  recommendations?: ClientSafeRecommendation[];
   /**
    * Commercial exposure estimate — only present when a basis exists.
    * Basis must be USER_REPORTED, SYSTEM_ESTIMATED, or NOT_AVAILABLE.

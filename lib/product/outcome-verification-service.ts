@@ -22,6 +22,9 @@ import type {
   OutcomeVerificationResult,
 } from "@/lib/product/outcome-verification-contract";
 import { classifyOutcomeVerification } from "@/lib/product/outcome-verification-contract";
+import { attachOutcomeReport, getRecommendationLedger } from "@/lib/product/recommendation-outcome-ledger";
+import { appendDiagnosticJourneyEvent } from "@/lib/product/diagnostic-journey-store";
+import type { DiagnosticJourneySurface } from "@/lib/product/diagnostic-journey-record";
 
 const OUTCOME_TOKEN_PURPOSE = "outcome_verification";
 const KERNEL_MODEL_KEY = "decision_kernel";
@@ -574,6 +577,56 @@ export async function submitOutcomeVerification(input: {
         observedAt: createdAt,
       },
     });
+  }
+
+  // ── RECOMMENDATION LEDGER BINDING ────────────────────────────────────────
+  // If recommendationId is provided, update the recommendation ledger and
+  // append an OUTCOME_REPORTED journey event.
+  const recommendationId = normalizeText(mergedRequest.recommendationId);
+  if (recommendationId) {
+    const caseIdForLedger = context.caseId ?? decisionContext.journey?.journeyKey ?? undefined;
+    if (caseIdForLedger) {
+      // Determine verified status carefully:
+      //   - verified=true only if evidencePosture is VERIFIED (independently confirmed)
+      //   - otherwise verified=false (user-reported is not verified)
+      const isVerified = derived.evidencePosture === 'VERIFIED';
+
+      // Build a safe outcome summary from the verification data
+      const outcomeSummary = mergedRequest.whatChanged
+        ? `${derived.outcomeClassification}: ${mergedRequest.whatChanged.slice(0, 500)}`
+        : `${derived.outcomeClassification}: ${derived.status}`;
+
+      // Update the recommendation ledger
+      attachOutcomeReport({
+        caseId: caseIdForLedger,
+        recommendationId,
+        outcomeSummary,
+        verified: isVerified,
+      });
+
+      // Append OUTCOME_REPORTED journey event
+      const journeySurface = (context.sourceSurface ?? 'fast_diagnostic') as DiagnosticJourneySurface;
+      try {
+        await appendDiagnosticJourneyEvent({
+          caseId: caseIdForLedger,
+          surface: journeySurface,
+          type: 'OUTCOME_REPORTED',
+          engineId: 'outcome-verification-service',
+          summary: outcomeSummary.slice(0, 200),
+          payload: {
+            recommendationId,
+            outcomeSummary,
+            verificationStatus: derived.status,
+            verified: isVerified,
+            outcomeClassification: derived.outcomeClassification,
+            evidencePosture: derived.evidencePosture,
+          },
+          audienceSafe: true,
+        });
+      } catch {
+        // Journey event failure does not affect the verification result
+      }
+    }
   }
 
   const record: OutcomeVerificationRecord = {

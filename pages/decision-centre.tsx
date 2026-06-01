@@ -37,6 +37,7 @@ import type {
   CognitiveState,
   StrategyRoomSessionRef,
 } from "@/lib/product/decision-centre-contract";
+import type { ClientSafeRecommendation } from "@/lib/product/recommendation-outcome-ledger";
 import {
   formatMemorySourceLabel,
   isMemoryDisplaySafe,
@@ -51,6 +52,8 @@ import StaleCaseAlert from "@/components/product/StaleCaseAlert";
 import { detectStaleCases } from "@/lib/product/stale-governed-case-detector";
 import DecisionCentreChecklist from "@/components/onboarding/DecisionCentreChecklist";
 import TrialExpiredCaseSelection from "@/components/product/TrialExpiredCaseSelection";
+import DecisionCentreLivingLayerPanel from "@/components/decision-centre/DecisionCentreLivingLayerPanel";
+import { buildDecisionCentreLivingViewModel } from "@/lib/product/decision-centre-living-adapter";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -82,6 +85,253 @@ function formatDisplayDate(value: string | null | undefined): string | null {
     month: "short",
     year: "numeric",
   });
+}
+
+// ─── Recommendation Row Component ──────────────────────────────────────────
+
+function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; caseId: string }) {
+  const [reporting, setReporting] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const canReport = rec.status === 'RECOMMENDED' || rec.status === 'ACCEPTED' || rec.status === 'ACTED_ON';
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const signal = formData.get('signal') as string;
+    const whatChanged = formData.get('whatChanged') as string;
+    const blocker = formData.get('blocker') as string | undefined;
+
+    try {
+      const response = await fetch('/api/cases/outcome-signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caseId,
+          source: 'decision_centre',
+          signal,
+          blocker: blocker || undefined,
+          whatChanged: whatChanged || undefined,
+          recommendationId: rec.recommendationId,
+        }),
+      });
+
+      const json = await response.json();
+      if (json.ok) {
+        setSubmitted(true);
+        setReporting(false);
+      } else {
+        setError(json.error || 'Failed to report outcome');
+      }
+    } catch {
+      setError('Network error');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div style={{ borderLeft: `1px solid rgba(110,231,183,0.42)`, paddingLeft: "10px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.65)" }}>
+              {rec.recommendedAction}
+            </p>
+            <div style={{ display: "flex", gap: "8px", marginTop: "4px", flexWrap: "wrap" }}>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+                OUTCOME REPORTED
+              </span>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
+                Outcome submitted
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ borderLeft: `1px solid ${GOLD}42`, paddingLeft: "10px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.65)" }}>
+            {rec.recommendedAction}
+          </p>
+          <div style={{ display: "flex", gap: "8px", marginTop: "4px", flexWrap: "wrap" }}>
+            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: rec.status === "OUTCOME_REPORTED" ? "rgba(110,231,183,0.55)" : rec.status === "ACTED_ON" ? "rgba(110,231,183,0.55)" : rec.status === "ACCEPTED" ? `${GOLD}88` : rec.status === "REJECTED" ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.30)" }}>
+              {rec.status.replace(/_/g, " ")}
+            </span>
+            {rec.outcomeSummary && (
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.30)" }}>
+                {rec.outcomeSummary.slice(0, 80)}{rec.outcomeSummary.length > 80 ? "..." : ""}
+              </span>
+            )}
+            {rec.verified && (
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(110,231,183,0.55)" }}>
+                Verified
+              </span>
+            )}
+            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
+              {formatDisplayDate(rec.lastUpdated)}
+            </span>
+          </div>
+        </div>
+        {canReport && !reporting && (
+          <button
+            type="button"
+            onClick={() => setReporting(true)}
+            style={{
+              ...mono,
+              fontSize: "7px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: `${GOLD}AA`,
+              border: `1px solid ${GOLD}30`,
+              backgroundColor: `${GOLD}08`,
+              padding: "4px 10px",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            Report outcome
+          </button>
+        )}
+      </div>
+
+      {reporting && (
+        <form onSubmit={handleSubmit} style={{ marginTop: "8px", borderTop: `1px solid ${GOLD}18`, paddingTop: "8px" }}>
+          {error && (
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(252,165,165,0.62)", marginBottom: "6px" }}>
+              {error}
+            </p>
+          )}
+
+          <div style={{ display: "grid", gap: "6px" }}>
+            <div>
+              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "2px" }}>
+                Outcome
+              </label>
+              <select
+                name="signal"
+                required
+                style={{
+                  ...mono,
+                  fontSize: "8px",
+                  color: "rgba(255,255,255,0.65)",
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  padding: "4px 8px",
+                  width: "100%",
+                }}
+              >
+                <option value="ACTED">Acted on it</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="DELAYED">Delayed</option>
+                <option value="BLOCKED">Blocked</option>
+                <option value="ABANDONED">Abandoned</option>
+                <option value="WORSENED">Worsened</option>
+                <option value="NEEDS_REOPEN">Needs reopening</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "2px" }}>
+                What changed
+              </label>
+              <textarea
+                name="whatChanged"
+                rows={2}
+                style={{
+                  ...mono,
+                  fontSize: "8px",
+                  color: "rgba(255,255,255,0.65)",
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  padding: "4px 8px",
+                  width: "100%",
+                  resize: "vertical",
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "2px" }}>
+                Blocker (optional)
+              </label>
+              <select
+                name="blocker"
+                style={{
+                  ...mono,
+                  fontSize: "8px",
+                  color: "rgba(255,255,255,0.65)",
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  padding: "4px 8px",
+                  width: "100%",
+                }}
+              >
+                <option value="">None</option>
+                <option value="AUTHORITY_UNCLEAR">Authority unclear</option>
+                <option value="EVIDENCE_INSUFFICIENT">Evidence insufficient</option>
+                <option value="STAKEHOLDER_RESISTANCE">Stakeholder resistance</option>
+                <option value="BUDGET_CHANGED">Budget changed</option>
+                <option value="TIMING_CHANGED">Timing changed</option>
+                <option value="CAPACITY_MISSING">Capacity missing</option>
+                <option value="RISK_INCREASED">Risk increased</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end", marginTop: "4px" }}>
+              <button
+                type="button"
+                onClick={() => { setReporting(false); setError(null); }}
+                disabled={submitting}
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.30)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  backgroundColor: "transparent",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: submitting ? "rgba(255,255,255,0.20)" : `${GOLD}CC`,
+                  border: `1px solid ${GOLD}40`,
+                  backgroundColor: `${GOLD}0E`,
+                  padding: "4px 10px",
+                  cursor: submitting ? "default" : "pointer",
+                }}
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
+  );
 }
 
 function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: boolean }) {
@@ -383,6 +633,20 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         </div>
       )}
 
+      {/* Recommendations */}
+      {c.recommendations && c.recommendations.length > 0 && (
+        <div style={{ marginBottom: "16px", border: "1px solid rgba(201,169,110,0.10)", backgroundColor: "rgba(201,169,110,0.03)", padding: "10px 14px" }}>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+            Recommendations
+          </span>
+          <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
+            {c.recommendations.map((rec) => (
+              <RecommendationRow key={rec.recommendationId} rec={rec} caseId={c.caseId} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Return Briefs */}
       <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
         <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
@@ -513,6 +777,17 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
           />
         </div>
       )}
+
+      {/* Living Layer Panel — production living case view */}
+      <div style={{ marginBottom: "20px" }}>
+        <DecisionCentreLivingLayerPanel
+          viewModel={buildDecisionCentreLivingViewModel({
+            caseData: c,
+            governedMemory: c.governedMemory ?? [],
+          })}
+          caseTitle={c.title}
+        />
+      </div>
 
       {/* Next required action */}
       {c.nextRequiredAction && (

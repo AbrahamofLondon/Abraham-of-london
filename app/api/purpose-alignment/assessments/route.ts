@@ -301,6 +301,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ── Persist journey events ────────────────────────────────────────
+    try {
+      const { runDecisionIntelligence } = await import('@/lib/intelligence/decision-intelligence-orchestrator')
+      await runDecisionIntelligence({
+        surface: 'purpose_alignment',
+        rawUserInput: parsed.data.reflections?.avoidedDecision ?? '',
+        userAnswers: parsed.data.reflections ?? undefined,
+        diagnosticResult: result,
+        persistJourney: true,
+        caseId: assessmentId,
+        email: undefined,
+      })
+    } catch {
+      // Journey persistence is non-blocking — failure does not affect result
+    }
+
     return noStoreJson({
       ok: true,
       assessmentId,
