@@ -80,7 +80,12 @@ export default function KernelSignalPage() {
           <meta name="description" content="Governed decision signal — free perception check" />
           <meta name="robots" content="noindex, nofollow" />
         </Head>
-        <FreeSignalResult signal={signal} onReset={handleReset} />
+        <FreeSignalResult
+          signal={signal}
+          onReset={handleReset}
+          originalSituation={situation}
+          onRefined={(updated) => setSignal(updated)}
+        />
       </>
     )
   }

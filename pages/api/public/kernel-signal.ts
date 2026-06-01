@@ -73,9 +73,10 @@ export default async function handler(
     return
   }
 
-  const { situation, clarifications } = req.body as {
+  const { situation, clarifications, progressiveEvidence } = req.body as {
     situation?: string
     clarifications?: Record<string, string>
+    progressiveEvidence?: { fieldKey: string; answer: string }
   }
 
   if (!situation || typeof situation !== 'string' || situation.trim().length === 0) {
@@ -144,6 +145,7 @@ export default async function handler(
           rawUserInput: situation.trim(),
           persistJourney: true,
           caseId,
+          ...(progressiveEvidence ? { progressiveEvidence } : {}),
         }),
       })
       return
@@ -187,6 +189,7 @@ export default async function handler(
       rawUserInput: situation.trim(),
       persistJourney: true,
       caseId,
+      ...(progressiveEvidence ? { progressiveEvidence } : {}),
     })
 
     res.status(200).json({

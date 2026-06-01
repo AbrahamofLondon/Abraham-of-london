@@ -129,6 +129,11 @@ export type DecisionIntelligenceInput = {
   caseId?: string
   email?: string | null
   accountId?: string | null
+  /** Progressive evidence from inline refinement — field key + answer to merge */
+  progressiveEvidence?: {
+    fieldKey: string
+    answer: string
+  }
 }
 
 export type DecisionIntelligenceFinding = {
@@ -1034,6 +1039,10 @@ export async function runDecisionIntelligence(
     for (const [key, value] of Object.entries(input.userAnswers)) {
       providedFields[key] = value
     }
+  }
+  // Merge progressive evidence from inline refinement
+  if (input.progressiveEvidence) {
+    providedFields[input.progressiveEvidence.fieldKey] = input.progressiveEvidence.answer
   }
   // Extract field keys from engine trace skipped engines
   const skippedEngines = (engineTrace ?? [])

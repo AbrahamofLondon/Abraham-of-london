@@ -34,9 +34,55 @@ const serif: React.CSSProperties = {
 interface FreeSignalResultProps {
   signal: KernelSignalResponse
   onReset?: () => void
+  /** Original situation text — required for progressive refinement resubmit */
+  originalSituation?: string
+  /** Callback when progressive refinement produces an updated result */
+  onRefined?: (updated: KernelSignalResponse) => void
 }
 
-export function FreeSignalResult({ signal, onReset }: FreeSignalResultProps) {
+export function FreeSignalResult({ signal, onReset, originalSituation, onRefined }: FreeSignalResultProps) {
+  const [refining, setRefining] = React.useState(false);
+  const [refineAnswer, setRefineAnswer] = React.useState('');
+  const [refiningLoading, setRefiningLoading] = React.useState(false);
+  const [refined, setRefined] = React.useState(false);
+  const [refineError, setRefineError] = React.useState<string | null>(null);
+
+  async function handleRefineSubmit() {
+    if (!originalSituation || !signal.decisionIntelligence?.progressiveEvidenceCapture?.nextBestCapture) return;
+    const fieldKey = signal.decisionIntelligence.progressiveEvidenceCapture.nextBestCapture.fieldKey;
+    if (!refineAnswer.trim()) return;
+
+    setRefiningLoading(true);
+    setRefineError(null);
+
+    try {
+      const response = await fetch('/api/public/kernel-signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          situation: originalSituation,
+          progressiveEvidence: {
+            fieldKey,
+            answer: refineAnswer.trim(),
+          },
+        }),
+      });
+      const json: KernelSignalResponse = await response.json();
+      if (json.error) {
+        setRefineError(json.error);
+      } else {
+        setRefined(true);
+        setRefining(false);
+        if (onRefined) {
+          onRefined(json);
+        }
+      }
+    } catch {
+      setRefineError('Network error');
+    } finally {
+      setRefiningLoading(false);
+    }
+  }
   return (
     <div style={{ backgroundColor: 'rgb(3,3,5)', color: 'white', minHeight: '100vh' }}>
       <div className="mx-auto max-w-[800px] px-6 py-16">
@@ -361,8 +407,8 @@ export function FreeSignalResult({ signal, onReset }: FreeSignalResultProps) {
           </Section>
         )}
 
-        {/* Progressive Evidence Capture — next best question */}
-        {signal.decisionIntelligence?.progressiveEvidenceCapture?.nextBestCapture && !signal.clarificationRequired && (
+        {/* Progressive Evidence Capture — next best question with inline refinement */}
+        {signal.decisionIntelligence?.progressiveEvidenceCapture?.nextBestCapture && !signal.clarificationRequired && !refined && (
           <Section label="To sharpen this reading">
             <div className="border border-amber-500/20 bg-amber-500/[0.03] p-4">
               <p className="text-[15px] leading-[1.8] text-white/80" style={{ ...serif, fontStyle: 'italic' }}>
@@ -376,6 +422,76 @@ export function FreeSignalResult({ signal, onReset }: FreeSignalResultProps) {
                   This would allow the system to test: {signal.decisionIntelligence.progressiveEvidenceCapture.nextBestCapture.unlocksEngines.length} additional dimension(s) of your decision situation.
                 </p>
               )}
+
+              {refining && (
+                <div className="mt-4 space-y-3">
+                  <textarea
+                    value={refineAnswer}
+                    onChange={(e) => setRefineAnswer(e.target.value)}
+                    rows={2}
+                    placeholder="Your answer..."
+                    className="w-full border bg-white/[0.02] p-3 text-[13px] leading-[1.6] text-white/70"
+                    style={{ borderColor: 'rgba(255,255,255,0.10)', resize: 'vertical' }}
+                  />
+                  {refineError && (
+                    <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.10em', color: 'rgba(252,165,165,0.62)' }}>
+                      {refineError}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setRefining(false); setRefineAnswer(''); setRefineError(null); }}
+                      disabled={refiningLoading}
+                      style={{
+                        ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        color: 'rgba(255,255,255,0.30)', border: '1px solid rgba(255,255,255,0.10)',
+                        backgroundColor: 'transparent', padding: '6px 12px', cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRefineSubmit}
+                      disabled={refiningLoading || !refineAnswer.trim()}
+                      style={{
+                        ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        color: refiningLoading ? 'rgba(255,255,255,0.20)' : `${GOLD}CC`,
+                        border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`,
+                        padding: '6px 12px', cursor: refiningLoading ? 'default' : 'pointer',
+                      }}
+                    >
+                      {refiningLoading ? 'Sharpening...' : 'Sharpen reading'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!refining && originalSituation && (
+                <button
+                  type="button"
+                  onClick={() => setRefining(true)}
+                  style={{
+                    ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                    color: `${GOLD}AA`, border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}08`,
+                    padding: '6px 12px', cursor: 'pointer', marginTop: '8px',
+                  }}
+                >
+                  Answer this
+                </button>
+              )}
+            </div>
+          </Section>
+        )}
+
+        {/* Refined evidence acknowledgement */}
+        {refined && (
+          <Section label="Evidence incorporated">
+            <div className="border border-emerald-500/20 bg-emerald-500/[0.03] p-4">
+              <p className="text-[13px] leading-[1.7] text-white/60">
+                The system has incorporated this evidence into the reading.
+              </p>
             </div>
           </Section>
         )}
