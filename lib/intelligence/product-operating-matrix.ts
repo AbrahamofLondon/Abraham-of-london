@@ -339,7 +339,8 @@ export const PRODUCT_OPERATING_MATRIX: ProductOperatingSurfaceRecord[] = [
     unlocks: ['executive_reporting', 'strategy_room', 'decision_centre'],
     futureEnginePreparation: [
       'scenario-stress-test', 'escalation-engine', 'intervention-engine',
-      'similar-case-surfacer',
+      'similar-case-surfacer', 'breach-detector', 'drift-rules',
+      'drift-tribunal', 'assumption-drift-detector', 'failure-pattern-calibrator',
     ],
   },
 

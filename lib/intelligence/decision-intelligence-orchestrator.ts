@@ -97,6 +97,7 @@ import {
   type EngineActivationRecord,
 } from '@/lib/intelligence/engine-activation-registry'
 import { assertSurfaceMayUseEngine } from '@/lib/intelligence/product-operating-matrix'
+import { getMissingFieldsForEngines, type SurfaceInstrumentContract } from '@/lib/intelligence/surface-instrument-contract'
 import { createOrSkipRecommendationEntry } from '@/lib/product/recommendation-outcome-ledger'
 
 // ─── Engine Instances (singletons) ────────────────────────────────────────────
@@ -199,6 +200,8 @@ export type DecisionIntelligenceResult = {
     engineId: string
     status: 'USED' | 'SKIPPED_GATED' | 'SKIPPED_NOT_APPLICABLE'
     reason?: string
+    missingFields?: string[]
+    suggestedNextCapture?: string
   }>
 }
 
@@ -874,15 +877,25 @@ async function persistJourneyEvents(params: {
 function buildEngineTrace(
   surface: DecisionSurface,
   inputKeys: Set<string>,
-): Array<{ engineId: string; status: 'USED' | 'SKIPPED_GATED' | 'SKIPPED_NOT_APPLICABLE'; reason?: string }> {
+): Array<{ engineId: string; status: 'USED' | 'SKIPPED_GATED' | 'SKIPPED_NOT_APPLICABLE'; reason?: string; missingFields?: string[]; suggestedNextCapture?: string }> {
   const registrySurface = surface as ProductSurface
-  const trace: Array<{ engineId: string; status: 'USED' | 'SKIPPED_GATED' | 'SKIPPED_NOT_APPLICABLE'; reason?: string }> = []
+  const trace: Array<{ engineId: string; status: 'USED' | 'SKIPPED_GATED' | 'SKIPPED_NOT_APPLICABLE'; reason?: string; missingFields?: string[]; suggestedNextCapture?: string }> = []
+
+  // Get instrument-level missing fields for this surface
+  const instrumentMissing = getMissingFieldsForEngines(registrySurface, [...inputKeys])
 
   for (const engine of ENGINE_ACTIVATION_REGISTRY) {
     if (!engine.eligibleSurfaces.includes(registrySurface)) continue
 
     if (engine.status === 'GATED') {
-      trace.push({ engineId: engine.engineId, status: 'SKIPPED_GATED', reason: engine.gatedReason })
+      const fieldGap = instrumentMissing.find(m => m.engineId === engine.engineId)
+      trace.push({
+        engineId: engine.engineId,
+        status: 'SKIPPED_GATED',
+        reason: engine.gatedReason,
+        missingFields: fieldGap?.missingFields,
+        suggestedNextCapture: fieldGap?.missingFields?.[0],
+      })
     } else if (engine.status === 'INTERNAL') {
       trace.push({ engineId: engine.engineId, status: 'SKIPPED_NOT_APPLICABLE', reason: 'Internal engine — not client-facing' })
     } else if (engine.status === 'DEPRECATED') {
@@ -897,7 +910,14 @@ function buildEngineTrace(
       }
       const missingInputs = engine.requiredInputs.filter(input => !inputKeys.has(input))
       if (missingInputs.length > 0) {
-        trace.push({ engineId: engine.engineId, status: 'SKIPPED_NOT_APPLICABLE', reason: `Missing inputs: ${missingInputs.join(', ')}` })
+        const fieldGap = instrumentMissing.find(m => m.engineId === engine.engineId)
+        trace.push({
+          engineId: engine.engineId,
+          status: 'SKIPPED_NOT_APPLICABLE',
+          reason: `Missing inputs: ${missingInputs.join(', ')}`,
+          missingFields: fieldGap?.missingFields,
+          suggestedNextCapture: fieldGap?.missingFields?.[0],
+        })
       } else {
         trace.push({ engineId: engine.engineId, status: 'USED' })
       }
