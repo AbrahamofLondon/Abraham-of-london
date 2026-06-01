@@ -4540,3 +4540,30 @@ model RecommendationOutcomeLedgerEntry {
   @@index([createdAt])
   @@map("recommendation_outcome_ledger")
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RETAINER REVIEW QUEUE
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RetainerReviewQueueEntry {
+  id                  String   @id @default(cuid())
+  caseId              String
+  accountId           String?
+  orgId               String?
+  readinessStatus     String
+  reasons             Json
+  availableSignals    Json
+  missingRequirements Json
+  status              String   @default("PENDING_REVIEW")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  reviewedAt          DateTime?
+  reviewedBy          String?
+  reviewNote          String?
+
+  @@index([caseId])
+  @@index([accountId])
+  @@index([orgId])
+  @@index([status])
+  @@index([readinessStatus])
+}

@@ -231,10 +231,11 @@ const BOARDROOM_MODE: PaidCorridorRecord = {
   activeCapabilities: [
     { name: 'Adversarial preview and challenge', status: 'ACTIVE' },
     { name: 'Constitutional route assessment', status: 'ACTIVE' },
-    { name: 'Boardroom archive', status: 'PARTIALLY_WIRED' },
+    { name: 'Boardroom dossier generation', status: 'ACTIVE' },
+    { name: 'Boardroom archive', status: 'ACTIVE' },
   ],
   gatedCapabilities: [
-    { name: 'Boardroom dossier generation', status: 'GATED', gatedReason: 'Dossier generation pipeline is not proven as a production boardroom path.' },
+    { name: 'Boardroom dossier export pipeline', status: 'GATED', gatedReason: 'PDF export route exists but full boardroom session/archive loop is not proven as a single production path.' },
   ],
   dormantRelevantCapabilities: [],
   primaryOutput: 'Adversarial board challenge record with objections, trade-offs, and recommendation resilience.',
@@ -255,9 +256,9 @@ const BOARDROOM_MODE: PaidCorridorRecord = {
   nonOverlapBoundary: 'Boardroom Mode tests recommendation quality; Strategy Room manages execution after a decision is made.',
   upgradeTrigger: 'Boardroom scrutiny reveals execution risk requiring governed checkpoints and owner pressure.',
   firstImpressionMoment: 'The buyer sees objections surfaced before hostile stakeholders surface them.',
-  currentReadiness: 'PARTIALLY_WIRED',
-  riskOfOverclaiming: 'MEDIUM',
-  nextWiringAction: 'Connect boardroom archive persistence to production boardroom sessions.',
+  currentReadiness: 'ACTIVE',
+  riskOfOverclaiming: 'LOW',
+  nextWiringAction: 'Connect boardroom archive persistence to production boardroom sessions for longitudinal scrutiny history.',
 }
 
 const STRATEGY_ROOM: PaidCorridorRecord = {
@@ -280,6 +281,11 @@ const STRATEGY_ROOM: PaidCorridorRecord = {
     'intervention engines remain gated until drift/case memory exists',
   ],
   activeCapabilities: [
+    { name: 'Strategy Room admission gate', status: 'ACTIVE' },
+    { name: 'Canonical snapshot builder', status: 'ACTIVE' },
+    { name: 'Execution record persistence', status: 'ACTIVE' },
+    { name: 'Execution feedback loop', status: 'ACTIVE' },
+    { name: 'Execution Flow UI component', status: 'ACTIVE' },
     { name: 'Recommendation outcome tracking', status: 'PARTIALLY_WIRED' },
     { name: 'Checkpoint service', status: 'PARTIALLY_WIRED' },
     { name: 'Governed memory presentation', status: 'ACTIVE' },
@@ -310,9 +316,9 @@ const STRATEGY_ROOM: PaidCorridorRecord = {
   nonOverlapBoundary: 'Strategy Room governs an execution; Retainer Oversight learns across multiple cycles.',
   upgradeTrigger: 'Execution produces enough durable recommendation/outcome memory, recurrence, drift, and cadence evidence to justify retained oversight.',
   firstImpressionMoment: 'The buyer sees exactly who owns the next checkpoint and what intervention follows drift.',
-  currentReadiness: 'PARTIALLY_WIRED',
-  riskOfOverclaiming: 'MEDIUM',
-  nextWiringAction: 'Close the checkpoint/outcome loop and feed durable memory into retained oversight.',
+  currentReadiness: 'ACTIVE',
+  riskOfOverclaiming: 'LOW',
+  nextWiringAction: 'Feed durable execution memory into retained oversight when recurrence and cadence evidence accumulates.',
 }
 
 const RETAINER_OVERSIGHT: PaidCorridorRecord = {

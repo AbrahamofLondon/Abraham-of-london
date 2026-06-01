@@ -1635,6 +1635,40 @@ export const ROUTE_REGISTRY: RouteEntry[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // API_DYNAMIC
+  // App Router API routes (route.ts). Auth enforced per-route.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    path: "/api/retainer/review-queue",
+    class: "API_DYNAMIC",
+    owner: "product",
+    intent: "Public-facing retainer review queue submission (POST, requires user auth)",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+  {
+    path: "/api/admin/retainer/review-queue/[id]",
+    class: "API_DYNAMIC",
+    owner: "product",
+    intent: "Admin operator review of retainer queue entries (PATCH, requires admin auth)",
+    deployable: true,
+    requiresAuth: true,
+    requiresDatabase: true,
+    requiresRuntime: "nodejs",
+    platform: "vercel",
+    physicalRouteAllowed: true,
+    redirectConfigured: false,
+    productionDeployable: true,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // DEBUG_INTERNAL
   // (none active — all retired to REDIRECT_ONLY or LEGACY_DISABLED)
   // ═══════════════════════════════════════════════════════════════════════════
