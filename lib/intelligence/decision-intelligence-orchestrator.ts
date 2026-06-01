@@ -101,6 +101,8 @@ import { getMissingFieldsForEngines, type SurfaceInstrumentContract } from '@/li
 import { createOrSkipRecommendationEntry } from '@/lib/product/recommendation-outcome-ledger'
 import { deriveProgressiveEvidenceCapture } from '@/lib/intelligence/progressive-evidence-capture'
 import type { ProgressiveEvidenceCaptureResult } from '@/lib/intelligence/progressive-evidence-capture'
+import { deriveDecisionIntelligenceDelta } from '@/lib/intelligence/decision-intelligence-delta'
+import type { PreviousDecisionIntelligenceSnapshot } from '@/lib/intelligence/decision-intelligence-delta'
 
 // ─── Engine Instances (singletons) ────────────────────────────────────────────
 
@@ -134,6 +136,8 @@ export type DecisionIntelligenceInput = {
     fieldKey: string
     answer: string
   }
+  /** Client-safe snapshot of the previous decision intelligence result for delta comparison */
+  previousDecisionIntelligence?: PreviousDecisionIntelligenceSnapshot | null
 }
 
 export type DecisionIntelligenceFinding = {
@@ -216,6 +220,7 @@ export type DecisionIntelligenceResult = {
   progressiveEvidenceDelta?: {
     fieldAnswered: string
     whatChanged: string
+    changedFields: string[]
     newlyEligibleEngines: string[]
     remainingMissingFields: string[]
   }
@@ -1069,36 +1074,42 @@ export async function runDecisionIntelligence(
   })
 
   // ── PROGRESSIVE EVIDENCE DELTA ──────────────────────────────────────
-  // Build a conservative delta describing what changed due to refinement
+  // Build a real before/after delta using the decision intelligence delta helper
   let progressiveEvidenceDelta: DecisionIntelligenceResult['progressiveEvidenceDelta'] = undefined
   if (hasProgressiveEvidence && input.progressiveEvidence) {
     const fieldKey = input.progressiveEvidence.fieldKey
     const safeAnswerExcerpt = input.progressiveEvidence.answer.slice(0, 80)
 
-    // Determine what changed based on the field answered
-    let whatChanged = `The system has incorporated the ${fieldKey.replace(/_/g, ' ')} into the reading.`
-    if (fieldKey === 'blocker' || fieldKey === 'perceived_blocker') {
-      whatChanged = 'The blocker is now clearer, but evidence strength remains limited.'
-    } else if (fieldKey === 'decision_owner' || fieldKey === 'perceived_owner') {
-      whatChanged = 'Authority can now be tested more specifically.'
-    } else if (fieldKey === 'consequence' || fieldKey === 'consequence_of_delay') {
-      whatChanged = 'The consequence is now clearer, enabling more precise urgency assessment.'
-    } else if (fieldKey === 'authority_uncertainty') {
-      whatChanged = 'Authority uncertainty has been reduced, enabling more specific constitutional analysis.'
-    } else if (fieldKey === 'evidence_uncertainty') {
-      whatChanged = 'Evidence strength can now be assessed with greater confidence.'
-    } else if (fieldKey === 'deadline') {
-      whatChanged = 'Time pressure is now clearer, enabling cost-of-delay estimation.'
-    }
+    // Compute real delta from previous snapshot vs current result
+    const delta = deriveDecisionIntelligenceDelta({
+      previous: input.previousDecisionIntelligence,
+      current: {
+        situationRead: synthesis.interpretedIssue,
+        interpretedIssue: synthesis.interpretedIssue,
+        primaryContradiction: contradiction.primaryContradiction,
+        authorityState: synthesis.authorityState,
+        evidenceState: synthesis.evidenceState,
+        consequenceState: synthesis.consequenceState,
+        nextAdmissibleMove: synthesis.nextAdmissibleMove,
+        unresolvedItems: [...new Set(unresolvedItems)].slice(0, 8),
+        confidence: synthesis.confidence,
+      } as DecisionIntelligenceResult,
+      answeredField: fieldKey,
+    })
+
+    const whatChanged = delta?.headline ?? `The system has incorporated the ${fieldKey.replace(/_/g, ' ')} into the reading.`
 
     // Determine newly eligible engines from the current engine trace
     const newlyEligibleEngines = (engineTrace ?? [])
       .filter(e => e.status === 'USED')
       .map(e => e.engineId)
 
+    const changedFields = delta?.changedFields.map(c => c.field) ?? []
+
     progressiveEvidenceDelta = {
       fieldAnswered: fieldKey,
       whatChanged,
+      changedFields,
       newlyEligibleEngines,
       remainingMissingFields: progressiveEvidenceCapture.missingFields,
     }

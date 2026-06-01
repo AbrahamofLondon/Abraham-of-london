@@ -73,10 +73,21 @@ export default async function handler(
     return
   }
 
-  const { situation, clarifications, progressiveEvidence } = req.body as {
+  const { situation, clarifications, progressiveEvidence, previousDecisionIntelligence } = req.body as {
     situation?: string
     clarifications?: Record<string, string>
     progressiveEvidence?: { fieldKey: string; answer: string }
+    previousDecisionIntelligence?: {
+      situationRead?: string
+      interpretedIssue?: string
+      primaryContradiction?: string | null
+      authorityState?: string | null
+      evidenceState?: string
+      consequenceState?: string | null
+      nextAdmissibleMove?: string
+      unresolvedItems?: string[]
+      confidence?: 'LOW' | 'MEDIUM' | 'HIGH'
+    }
   }
 
   if (!situation || typeof situation !== 'string' || situation.trim().length === 0) {
@@ -146,6 +157,7 @@ export default async function handler(
           persistJourney: true,
           caseId,
           ...(progressiveEvidence ? { progressiveEvidence } : {}),
+          ...(previousDecisionIntelligence ? { previousDecisionIntelligence } : {}),
         }),
       })
       return
@@ -190,6 +202,7 @@ export default async function handler(
       persistJourney: true,
       caseId,
       ...(progressiveEvidence ? { progressiveEvidence } : {}),
+      ...(previousDecisionIntelligence ? { previousDecisionIntelligence } : {}),
     })
 
     res.status(200).json({

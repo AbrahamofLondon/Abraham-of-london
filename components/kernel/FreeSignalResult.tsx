@@ -55,6 +55,20 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
     setRefiningLoading(true);
     setRefineError(null);
 
+    // Build client-safe previous snapshot from current result
+    const di = signal.decisionIntelligence;
+    const previousSnapshot = {
+      situationRead: di.situationRead,
+      interpretedIssue: di.interpretedIssue,
+      primaryContradiction: di.primaryContradiction,
+      authorityState: di.authorityState,
+      evidenceState: di.evidenceState,
+      consequenceState: di.consequenceState,
+      nextAdmissibleMove: di.nextAdmissibleMove,
+      unresolvedItems: di.unresolvedItems,
+      confidence: di.confidence,
+    };
+
     try {
       const response = await fetch('/api/public/kernel-signal', {
         method: 'POST',
@@ -65,6 +79,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             fieldKey,
             answer: refineAnswer.trim(),
           },
+          previousDecisionIntelligence: previousSnapshot,
         }),
       });
       const json: KernelSignalResponse = await response.json();
@@ -485,7 +500,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
           </Section>
         )}
 
-        {/* Refined evidence acknowledgement with delta */}
+        {/* Refined evidence acknowledgement with result-derived delta */}
         {refined && (
           <Section label="Evidence incorporated">
             <div className="border border-emerald-500/20 bg-emerald-500/[0.03] p-4">
@@ -500,8 +515,13 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
                   <p className="mt-1 text-[13px] leading-[1.7] text-white/60">
                     {signal.decisionIntelligence.progressiveEvidenceDelta.whatChanged}
                   </p>
-                  {signal.decisionIntelligence.progressiveEvidenceDelta.newlyEligibleEngines.length > 0 && (
+                  {signal.decisionIntelligence.progressiveEvidenceDelta.changedFields.length > 0 && (
                     <p className="mt-2 text-[11px] leading-[1.5] text-white/30">
+                      {signal.decisionIntelligence.progressiveEvidenceDelta.changedFields.length} aspect(s) of the reading updated.
+                    </p>
+                  )}
+                  {signal.decisionIntelligence.progressiveEvidenceDelta.newlyEligibleEngines.length > 0 && (
+                    <p className="mt-1 text-[11px] leading-[1.5] text-white/25">
                       This allowed the system to test an additional decision dimension.
                     </p>
                   )}
