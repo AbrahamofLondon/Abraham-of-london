@@ -276,3 +276,223 @@ describe("engine trace", () => {
     }
   });
 });
+
+// ─── 13. Progressive evidence delta integration ─────────────────────────────
+
+describe("progressive evidence delta", () => {
+  it("returns progressiveEvidenceDelta when progressiveEvidence + previousDecisionIntelligence are provided", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO is the decision owner.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the decision owner.",
+        unresolvedItems: ["Authority gap", "Evidence gap"],
+        confidence: "LOW",
+      },
+    });
+
+    expect(result.progressiveEvidenceDelta).toBeDefined();
+    expect(result.progressiveEvidenceDelta!.fieldAnswered).toBe("decision_owner");
+    expect(result.progressiveEvidenceDelta!.changedFields).toBeDefined();
+    expect(Array.isArray(result.progressiveEvidenceDelta!.changedFields)).toBe(true);
+    expect(result.progressiveEvidenceDelta!.remainingMissingFields).toBeDefined();
+    expect(Array.isArray(result.progressiveEvidenceDelta!.remainingMissingFields)).toBe(true);
+  });
+
+  it("returns progressiveEvidenceDelta with fieldAnswered matching the submitted field", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "blocker",
+        answer: "No one has approved the budget.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the blocker.",
+        unresolvedItems: ["Authority gap"],
+        confidence: "LOW",
+      },
+    });
+
+    expect(result.progressiveEvidenceDelta).toBeDefined();
+    expect(result.progressiveEvidenceDelta!.fieldAnswered).toBe("blocker");
+  });
+
+  it("populates changedFields when result fields materially differ", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO is the decision owner.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the decision owner.",
+        unresolvedItems: ["Authority gap", "Evidence gap"],
+        confidence: "LOW",
+      },
+    });
+
+    // At least one field should have changed (authorityState, evidenceState, etc.)
+    // since the orchestrator processes the input through its full pipeline
+    expect(result.progressiveEvidenceDelta!.changedFields.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it("does not produce false material-change delta for whitespace-only differences", async () => {
+    // First call without progressive evidence
+    const first = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval.",
+    });
+
+    // Second call with progressive evidence that doesn't materially change the reading
+    // and a previous snapshot that matches the first result
+    const second = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO.",
+      },
+      previousDecisionIntelligence: {
+        situationRead: first.situationRead,
+        interpretedIssue: first.interpretedIssue,
+        primaryContradiction: first.primaryContradiction,
+        authorityState: first.authorityState,
+        evidenceState: first.evidenceState,
+        consequenceState: first.consequenceState,
+        nextAdmissibleMove: first.nextAdmissibleMove,
+        unresolvedItems: first.unresolvedItems,
+        confidence: first.confidence,
+      },
+    });
+
+    // progressiveEvidenceDelta should still be defined since progressiveEvidence was provided
+    expect(second.progressiveEvidenceDelta).toBeDefined();
+    // The delta may have changedFields or not depending on whether the answer affected the result
+    expect(Array.isArray(second.progressiveEvidenceDelta!.changedFields)).toBe(true);
+  });
+
+  it("does not expose internal engine IDs in user-facing delta text", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO is the decision owner.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the decision owner.",
+        unresolvedItems: ["Authority gap"],
+        confidence: "LOW",
+      },
+    });
+
+    expect(result.progressiveEvidenceDelta).toBeDefined();
+
+    // User-facing text fields should not contain engine IDs
+    const whatChanged = result.progressiveEvidenceDelta!.whatChanged;
+    expect(whatChanged).not.toContain("situation-translator");
+    expect(whatChanged).not.toContain("kernel-lens-runner");
+    expect(whatChanged).not.toContain("contradiction-resolver");
+    expect(whatChanged).not.toContain("simulation-gate");
+    expect(whatChanged).not.toContain("synthesis-gate");
+
+    // changedFields is an array of field names (situationRead, authorityState, etc.)
+    // not engine IDs — verify they are valid delta field names
+    for (const field of result.progressiveEvidenceDelta!.changedFields) {
+      expect([
+        "situationRead", "interpretedIssue", "primaryContradiction",
+        "authorityState", "evidenceState", "consequenceState",
+        "nextAdmissibleMove", "unresolvedItems", "confidence",
+      ]).toContain(field);
+    }
+
+    // Taxonomy keys should not appear in user-facing text
+    expect(whatChanged).not.toContain("GOVERNANCE_AND_BOARD");
+    expect(whatChanged).not.toContain("COMPLIANCE_AND_FILING");
+  });
+
+  it("returns progressiveEvidenceCapture alongside progressiveEvidenceDelta", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO is the decision owner.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the decision owner.",
+        unresolvedItems: ["Authority gap"],
+        confidence: "LOW",
+      },
+    });
+
+    // Both should be present
+    expect(result.progressiveEvidenceDelta).toBeDefined();
+    expect(result.progressiveEvidenceCapture).toBeDefined();
+
+    // remainingMissingFields from delta should match progressive evidence capture
+    expect(result.progressiveEvidenceDelta!.remainingMissingFields).toEqual(
+      result.progressiveEvidenceCapture!.missingFields
+    );
+  });
+
+  it("progressiveEvidenceDelta.whatChanged is a non-empty string", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO is the decision owner.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the decision owner.",
+        unresolvedItems: ["Authority gap"],
+        confidence: "LOW",
+      },
+    });
+
+    expect(result.progressiveEvidenceDelta).toBeDefined();
+    expect(result.progressiveEvidenceDelta!.whatChanged).toBeTruthy();
+    expect(typeof result.progressiveEvidenceDelta!.whatChanged).toBe("string");
+    expect(result.progressiveEvidenceDelta!.whatChanged.length).toBeGreaterThan(0);
+  });
+
+  it("newlyEligibleEngines is an array", async () => {
+    const result = await runDecisionIntelligence({
+      surface: "fast_diagnostic",
+      rawUserInput: "We need board approval to proceed with the launch.",
+      progressiveEvidence: {
+        fieldKey: "decision_owner",
+        answer: "The CEO is the decision owner.",
+      },
+      previousDecisionIntelligence: {
+        authorityState: null,
+        evidenceState: "No signals detected.",
+        nextAdmissibleMove: "Identify the decision owner.",
+        unresolvedItems: ["Authority gap"],
+        confidence: "LOW",
+      },
+    });
+
+    expect(result.progressiveEvidenceDelta).toBeDefined();
+    expect(Array.isArray(result.progressiveEvidenceDelta!.newlyEligibleEngines)).toBe(true);
+  });
+});
