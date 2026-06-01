@@ -600,6 +600,85 @@ function runSimulation(
   return { paths, preferredPath, costOfDelay, degradationProjection }
 }
 
+// ─── PURPOSE ALIGNMENT ENRICHMENT HELPER ─────────────────────────────────────
+
+/**
+ * Apply Purpose Alignment enrichment overlay to a synthesis result.
+ * This is used to enrich the SynthesisGate output when toleratedDysfunction
+ * or justifyingEvidence are present, without discarding the SynthesisGate result.
+ *
+ * Rules:
+ *   - Never claim verified evidence from justifyingEvidence.
+ *   - Never fabricate contradiction from toleratedDysfunction alone.
+ *   - Never produce judgmental language about the user.
+ */
+function applyPurposeAlignmentEnrichmentToSynthesis(params: {
+  interpretedIssue: string
+  evidenceState: string
+  nextAdmissibleMove: string
+  evidenceBasis: string[]
+  unresolvedItems: string[]
+  toleratedDysfunction?: string
+  justifyingEvidence?: string
+}): {
+  interpretedIssue?: string
+  evidenceState?: string
+  nextAdmissibleMove?: string
+  evidenceBasis?: string[]
+  unresolvedItems?: string[]
+} {
+  const result: ReturnType<typeof applyPurposeAlignmentEnrichmentToSynthesis> = {}
+  const hasTD = !!params.toleratedDysfunction?.trim()
+  const hasJE = !!params.justifyingEvidence?.trim()
+  const tdText = params.toleratedDysfunction?.trim() ?? ''
+  const jeText = params.justifyingEvidence?.trim() ?? ''
+
+  // Enrich interpretedIssue
+  if (hasTD) {
+    result.interpretedIssue = `${params.interpretedIssue} The user also reports a tolerated dysfunction: ${tdText.slice(0, 120)}.`
+  }
+
+  // Enrich evidenceState
+  if (hasJE) {
+    result.evidenceState = 'Evidence threshold stated, but not independently verified.'
+  } else if (hasTD) {
+    result.evidenceState = 'Evidence threshold for justified action remains unresolved.'
+  }
+
+  // Enrich nextAdmissibleMove
+  if (hasJE) {
+    result.nextAdmissibleMove = `Test the current decision against the stated evidence threshold: ${jeText.slice(0, 80)}.`
+  } else if (hasTD) {
+    result.nextAdmissibleMove = 'Define the evidence threshold that would justify action before proceeding further.'
+  }
+
+  // Enrich evidenceBasis
+  const extraEvidenceBasis: string[] = []
+  if (hasTD) {
+    extraEvidenceBasis.push(`Tolerated dysfunction identified: ${tdText.slice(0, 80)}`)
+  }
+  if (hasJE) {
+    extraEvidenceBasis.push(`Evidence threshold stated: ${jeText.slice(0, 80)}`)
+  }
+  if (extraEvidenceBasis.length > 0) {
+    result.evidenceBasis = extraEvidenceBasis
+  }
+
+  // Enrich unresolvedItems
+  const extraUnresolved: string[] = []
+  if (hasTD) {
+    extraUnresolved.push('Tolerated dysfunction may be sustaining current drift')
+  }
+  if (!hasJE) {
+    extraUnresolved.push('Evidence threshold for justified action remains unresolved')
+  }
+  if (extraUnresolved.length > 0) {
+    result.unresolvedItems = extraUnresolved
+  }
+
+  return result
+}
+
 // ─── LAYER 6: Synthesis ──────────────────────────────────────────────────────
 
 function runSynthesis(
@@ -652,6 +731,25 @@ function runSynthesis(
       const hasAuthoritySignal = sessionContext.signals.some(s => s.key.includes('authority'))
       authorityState = hasAuthoritySignal ? (hasOwner ? `Authority referenced but may not be confirmed: ${sessionContext.actors.map(a => a.name).join(', ')}` : 'Authority is not confirmed.') : null
       evidenceState = sessionContext.signals.length > 0 ? `${sessionContext.signals.length} signal(s) detected.` : 'No signals detected.'
+
+      // Apply Purpose Alignment enrichment overlay when enrichment inputs exist
+      if (hasToleratedDysfunction || hasJustifyingEvidence) {
+        const enriched = applyPurposeAlignmentEnrichmentToSynthesis({
+          interpretedIssue,
+          evidenceState,
+          nextAdmissibleMove,
+          evidenceBasis,
+          unresolvedItems,
+          toleratedDysfunction: toleratedDysfunctionText,
+          justifyingEvidence: justifyingEvidenceText,
+        })
+        interpretedIssue = enriched.interpretedIssue ?? interpretedIssue
+        evidenceState = enriched.evidenceState ?? evidenceState
+        nextAdmissibleMove = enriched.nextAdmissibleMove ?? nextAdmissibleMove
+        if (enriched.evidenceBasis) evidenceBasis.push(...enriched.evidenceBasis)
+        if (enriched.unresolvedItems) unresolvedItems.push(...enriched.unresolvedItems)
+      }
+
       return { interpretedIssue, authorityState, evidenceState, consequenceState, nextAdmissibleMove, refusalReason, confidence, evidenceBasis, unresolvedItems }
     } catch { /* fall through */ }
   }
