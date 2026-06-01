@@ -13,6 +13,7 @@ import type { HomepageEditorialViewModel } from "@/lib/content/homepage-editoria
 
 const ENTRY_CTAS = [
   { label: "Test your decision", href: "/test-your-decision", primary: true },
+  { label: "Explore products", href: "/products" },
   { label: "View the decision pathway", href: "/decision-pathway" },
   { label: "Run the Fast Diagnostic", href: "/diagnostics/fast" },
   { label: "Run an organisational scan", href: "/enterprise-decision-scan" },
