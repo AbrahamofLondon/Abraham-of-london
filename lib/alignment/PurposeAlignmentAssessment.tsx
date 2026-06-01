@@ -32,6 +32,8 @@ type ContextAnswers = {
   avoidedDecision: string;
   competingObligation: string;
   consequence: string;
+  toleratedDysfunction: string;
+  justifyingEvidence: string;
 };
 
 type AnchorNarrativeShape = {
@@ -65,24 +67,38 @@ type ChallengeResult = {
 const CONTEXT_STEPS = [
   {
     id: "avoidedDecision" as const,
-    label: "Step 1 of 3",
+    label: "Step 1 of 5",
     question: "What decision are you currently avoiding or deferring?",
     helper: "Name the specific choice, not the general direction.",
     placeholder: "e.g. Leave current role / Confront a relationship / Commit to a new direction",
   },
   {
     id: "competingObligation" as const,
-    label: "Step 2 of 3",
+    label: "Step 2 of 5",
     question: "What competing obligation or priority is pulling against that decision?",
     helper: "This is usually the thing you are protecting while the decision waits.",
     placeholder: "e.g. Financial stability / Family expectations / Current commitments",
   },
   {
     id: "consequence" as const,
-    label: "Step 3 of 3",
+    label: "Step 3 of 5",
     question: "What becomes worse if this remains unresolved?",
     helper: "Be specific. Vague consequences produce vague analysis.",
     placeholder: "e.g. I continue doing delivery work myself and delay commercial outreach",
+  },
+  {
+    id: "toleratedDysfunction" as const,
+    label: "Step 4 of 5",
+    question: "What are you currently tolerating that you already know is weakening the decision?",
+    helper: "This exposes normalised dysfunction, avoidance, drift, or tolerated contradiction.",
+    placeholder: "e.g. A team member who consistently misses deadlines / A process everyone knows is broken",
+  },
+  {
+    id: "justifyingEvidence" as const,
+    label: "Step 5 of 5",
+    question: "What evidence would make action justified rather than reactive?",
+    helper: "This reveals the evidence threshold required for legitimate action.",
+    placeholder: "e.g. Three months of consistent data / A second opinion from an external advisor",
   },
 ] as const;
 
@@ -96,6 +112,8 @@ const INITIAL_CONTEXT: ContextAnswers = {
   avoidedDecision: "",
   competingObligation: "",
   consequence: "",
+  toleratedDysfunction: "",
+  justifyingEvidence: "",
 };
 
 function createInitialResponses() {
@@ -299,6 +317,8 @@ export default function PurposeAlignmentAssessment({ onScored, isPaidEntitled }:
             dissenter: contextAnswers.competingObligation || null,
             consequence: contextAnswers.consequence || null,
             competingObligation: contextAnswers.competingObligation || null,
+            toleratedDysfunction: contextAnswers.toleratedDysfunction || null,
+            justifyingEvidence: contextAnswers.justifyingEvidence || null,
           },
           clientMeta: {
             startedAt,
@@ -355,6 +375,8 @@ export default function PurposeAlignmentAssessment({ onScored, isPaidEntitled }:
           avoidedDecision: contextAnswers.avoidedDecision || null,
           lastSevenDays: contextAnswers.consequence || null,
           dissenter: contextAnswers.competingObligation || null,
+          toleratedDysfunction: contextAnswers.toleratedDysfunction || null,
+          justifyingEvidence: contextAnswers.justifyingEvidence || null,
         },
       },
     });

@@ -15,6 +15,8 @@ export type PurposeAssessmentSnapshot = {
     avoidedDecision: string;
     competingObligation: string;
     consequence: string;
+    toleratedDysfunction: string;
+    justifyingEvidence: string;
   };
   dualAxisResponses: Record<string, DualAxisAnswer>;
   currentStep: AssessmentCurrentStep;

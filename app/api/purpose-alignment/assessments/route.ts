@@ -53,6 +53,10 @@ const requestSchema = z.object({
     consequence: z.string().trim().max(1000).nullable().optional(),
     /** Properly-named field for competing obligation */
     competingObligation: z.string().trim().max(1000).nullable().optional(),
+    /** Dysfunction the user is tolerating — feeds hidden-signals and failure-mode-lens */
+    toleratedDysfunction: z.string().trim().max(1000).nullable().optional(),
+    /** Evidence threshold that would justify action — feeds evidence-lens and tier derivation */
+    justifyingEvidence: z.string().trim().max(1000).nullable().optional(),
   }).strict().optional(),
 }).strict();
 
@@ -258,6 +262,8 @@ export async function POST(req: NextRequest) {
           avoidedDecision: parsed.data.reflections?.avoidedDecision ?? "",
           competingObligation: parsed.data.reflections?.competingObligation ?? "",
           consequence: parsed.data.reflections?.consequence ?? "",
+          toleratedDysfunction: parsed.data.reflections?.toleratedDysfunction ?? "",
+          justifyingEvidence: parsed.data.reflections?.justifyingEvidence ?? "",
         };
 
         paidResult = buildPaidResult({
@@ -307,7 +313,13 @@ export async function POST(req: NextRequest) {
       await runDecisionIntelligence({
         surface: 'purpose_alignment',
         rawUserInput: parsed.data.reflections?.avoidedDecision ?? '',
-        userAnswers: parsed.data.reflections ?? undefined,
+        userAnswers: {
+          avoidedDecision: parsed.data.reflections?.avoidedDecision ?? '',
+          competingObligation: parsed.data.reflections?.competingObligation ?? '',
+          consequence: parsed.data.reflections?.consequence ?? '',
+          toleratedDysfunction: parsed.data.reflections?.toleratedDysfunction ?? '',
+          justifyingEvidence: parsed.data.reflections?.justifyingEvidence ?? '',
+        },
         diagnosticResult: result,
         persistJourney: true,
         caseId: assessmentId,

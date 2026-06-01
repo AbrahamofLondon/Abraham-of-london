@@ -44,6 +44,10 @@ export type PurposeAlignmentContext = {
     consequence?: string | null;
     /** Properly-named: what pulls against the decision */
     competingObligation?: string | null;
+    /** Dysfunction the user is tolerating — feeds hidden-signals and failure-mode-lens */
+    toleratedDysfunction?: string | null;
+    /** Evidence threshold that would justify action — feeds evidence-lens and tier derivation */
+    justifyingEvidence?: string | null;
   } | null;
 };
 

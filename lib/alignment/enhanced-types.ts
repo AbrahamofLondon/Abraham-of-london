@@ -49,7 +49,7 @@ export interface DecisionTrace {
   
   // Inputs gathered
   assessmentAnswers: Record<string, DualAxisAnswer>;
-  reflections: { avoidedDecision: string; lastSevenDays: string; dissenter: string };
+  reflections: { avoidedDecision: string; lastSevenDays: string; dissenter: string; toleratedDysfunction?: string; justifyingEvidence?: string };
   demographicContext: DemographicData;
   
   // Policies applied
