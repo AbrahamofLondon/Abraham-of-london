@@ -21,6 +21,7 @@
 
 import type { LivingLayerViewModel, LivingLayerContinuityView } from '@/lib/kernel/living-layer-view-model'
 import { deriveEvidenceTierFromInputs } from '@/lib/product/evidence-tier-derivation'
+import type { ConstitutionalStructuralInput } from '@/lib/intelligence/constitutional-structural-mapping'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,8 @@ export type BuildConstitutionalLivingViewModelInput = {
   decision: ConstitutionalDecision
   routeSummary: ConstitutionalRouteSummary
   userAnswers?: Record<string, unknown>
+  /** Structural fields mapped from constitutional answers — enriches output when available */
+  constitutionalStructural?: ConstitutionalStructuralInput
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -114,7 +117,7 @@ function deriveProgress(): LivingLayerViewModel['progress'] {
 // ─── Evidence Derivation ─────────────────────────────────────────────────────
 
 function deriveEvidence(input: BuildConstitutionalLivingViewModelInput): LivingLayerViewModel['evidence'] {
-  const { report } = input
+  const { report, constitutionalStructural } = input
 
   const derived = deriveEvidenceTierFromInputs({
     completedStages: ['constitutional'],
@@ -133,6 +136,15 @@ function deriveEvidence(input: BuildConstitutionalLivingViewModelInput): LivingL
   if (report.failureModeCount > 0) {
     gaps.push(`${report.failureModeCount} failure mode(s) identified but not yet structurally verified`)
   }
+  if (constitutionalStructural?.approvingAuthority) {
+    gaps.push(`Approving authority identified: ${constitutionalStructural.approvingAuthority}`)
+  }
+  if (constitutionalStructural?.failureMode) {
+    gaps.push(`Failure mode: ${constitutionalStructural.failureMode}`)
+  }
+  if (constitutionalStructural?.repairCondition) {
+    gaps.push(`Repair condition: ${constitutionalStructural.repairCondition}`)
+  }
   gaps.push('Single diagnostic — combine with Team or Enterprise assessment for corroboration')
 
   return {
@@ -146,7 +158,7 @@ function deriveEvidence(input: BuildConstitutionalLivingViewModelInput): LivingL
 // ─── Governed Action Derivation ──────────────────────────────────────────────
 
 function deriveGovernedAction(input: BuildConstitutionalLivingViewModelInput): LivingLayerViewModel['governedAction'] {
-  const { decision, routeSummary } = input
+  const { decision, routeSummary, constitutionalStructural } = input
 
   const requiredAction = decision.recommendedInterventions[0] ?? routeSummary.description
 
@@ -154,13 +166,25 @@ function deriveGovernedAction(input: BuildConstitutionalLivingViewModelInput): L
   if (decision.rationale[0]) {
     whyThisAction = decision.rationale[0]
   }
+  if (constitutionalStructural?.failureMode && !whyThisAction) {
+    whyThisAction = `The primary failure mode is ${constitutionalStructural.failureMode}. Address this before proceeding with the current route.`
+  }
 
-  // Derive evidence basis from constitutional result
+  // Derive evidence basis from constitutional result + structural input
   const evidenceBasisParts: string[] = []
   evidenceBasisParts.push(`Route: ${decision.route}`)
   evidenceBasisParts.push(`Confidence: ${Math.round(decision.confidence * 100)}%`)
   if (decision.disqualifiersTriggered.length > 0) {
     evidenceBasisParts.push(`${decision.disqualifiersTriggered.length} disqualifier(s) triggered`)
+  }
+  if (constitutionalStructural?.approvingAuthority) {
+    evidenceBasisParts.push('Approving authority identified')
+  }
+  if (constitutionalStructural?.failureMode) {
+    evidenceBasisParts.push(`Failure mode: ${constitutionalStructural.failureMode}`)
+  }
+  if (constitutionalStructural?.repairCondition) {
+    evidenceBasisParts.push(`Repair condition: ${constitutionalStructural.repairCondition}`)
   }
 
   return {
@@ -205,7 +229,7 @@ function deriveAdvantage(input: BuildConstitutionalLivingViewModelInput): Living
 // ─── Next Layer Derivation ───────────────────────────────────────────────────
 
 function deriveNextLayer(input: BuildConstitutionalLivingViewModelInput): LivingLayerViewModel['nextLayer'] {
-  const { report, decision } = input
+  const { report, decision, constitutionalStructural } = input
 
   // Determine next stage based on route
   const isStrategyRoute = decision.route === 'STRATEGY'
@@ -220,6 +244,15 @@ function deriveNextLayer(input: BuildConstitutionalLivingViewModelInput): Living
   if (!report.mandateFit) {
     unresolvedItems.push('Authority holder not confirmed — mandate may not align with stated purpose')
   }
+  if (constitutionalStructural?.decisionOwner && !constitutionalStructural?.approvingAuthority) {
+    unresolvedItems.push('Approving authority not confirmed')
+  }
+  if (constitutionalStructural?.blockingAuthority) {
+    unresolvedItems.push(`Blocking authority identified: ${constitutionalStructural.blockingAuthority}`)
+  }
+  if (!constitutionalStructural?.mandateSource && report.mandateFit === false) {
+    unresolvedItems.push('Mandate source not confirmed')
+  }
   if (decision.disqualifiersTriggered.length > 0) {
     unresolvedItems.push(...decision.disqualifiersTriggered.slice(0, 3))
   }
@@ -228,6 +261,9 @@ function deriveNextLayer(input: BuildConstitutionalLivingViewModelInput): Living
   }
   if (report.failureModeCount > 0) {
     unresolvedItems.push(`${report.failureModeCount} failure mode(s) require resolution before escalation`)
+  }
+  if (constitutionalStructural?.repairCondition) {
+    unresolvedItems.push(`Repair condition: ${constitutionalStructural.repairCondition}`)
   }
 
   return {
@@ -270,7 +306,7 @@ function deriveMemory(input: BuildConstitutionalLivingViewModelInput): LivingLay
 // ─── Changes Derivation ──────────────────────────────────────────────────────
 
 function deriveChanges(input: BuildConstitutionalLivingViewModelInput): LivingLayerViewModel['changes'] {
-  const { report, decision } = input
+  const { report, decision, constitutionalStructural } = input
   const deltas: LivingLayerViewModel['changes']['deltas'] = []
   const newEvidence: string[] = []
 
@@ -292,21 +328,35 @@ function deriveChanges(input: BuildConstitutionalLivingViewModelInput): LivingLa
   newEvidence.push(`Posture: ${report.posture}`)
   newEvidence.push(`Readiness: ${report.readinessTier}`)
 
+  if (constitutionalStructural?.approvingAuthority) {
+    newEvidence.push(`Approving authority: ${constitutionalStructural.approvingAuthority}`)
+  }
+  if (constitutionalStructural?.failureMode) {
+    newEvidence.push(`Failure mode: ${constitutionalStructural.failureMode}`)
+  }
+  if (constitutionalStructural?.repairCondition) {
+    newEvidence.push(`Repair condition: ${constitutionalStructural.repairCondition}`)
+  }
+
   return { deltas, newEvidence }
 }
 
 // ─── Review Derivation ───────────────────────────────────────────────────────
 
 function deriveReview(input: BuildConstitutionalLivingViewModelInput): LivingLayerViewModel['review'] {
-  const { decision } = input
+  const { decision, constitutionalStructural } = input
   const isRejected = decision.route === 'REJECT'
   const hasDisqualifiers = decision.disqualifiersTriggered.length > 0
   const lowConfidence = decision.confidence < 0.5
+  const hasBlockingAuthority = !!constitutionalStructural?.blockingAuthority
+  const missingMandate = !constitutionalStructural?.mandateSource
 
   const triggers: string[] = []
   if (isRejected) triggers.push('route rejected — insufficient evidence')
   if (hasDisqualifiers) triggers.push('disqualifiers triggered')
   if (lowConfidence) triggers.push('low confidence in route classification')
+  if (hasBlockingAuthority) triggers.push('blocking authority identified')
+  if (missingMandate) triggers.push('mandate source not confirmed')
 
   const required = triggers.length > 0
 
@@ -323,7 +373,19 @@ function deriveReview(input: BuildConstitutionalLivingViewModelInput): LivingLay
 
 // ─── Continuity Derivation ───────────────────────────────────────────────────
 
-function deriveContinuity(): LivingLayerContinuityView {
+function deriveContinuity(input: BuildConstitutionalLivingViewModelInput): LivingLayerContinuityView {
+  const { constitutionalStructural } = input
+
+  let continuityStatement = 'This is a single-diagnostic assessment. Completing additional diagnostics strengthens the evidence base and enables continuity tracking.'
+
+  if (constitutionalStructural?.repairCondition) {
+    continuityStatement = `Repair condition identified: ${constitutionalStructural.repairCondition.slice(0, 100)}. Completing additional diagnostics strengthens the evidence base.`
+  } else if (constitutionalStructural?.failureMode) {
+    continuityStatement = `Primary failure mode: ${constitutionalStructural.failureMode}. Completing additional diagnostics strengthens the evidence base.`
+  } else if (constitutionalStructural?.approvingAuthority) {
+    continuityStatement = `Approving authority identified: ${constitutionalStructural.approvingAuthority}. Completing additional diagnostics strengthens the evidence base.`
+  }
+
   return {
     sessionContinuity: {
       status: 'active_session',
@@ -334,7 +396,7 @@ function deriveContinuity(): LivingLayerContinuityView {
       summary: 'No prior diagnostic result is available in this browser session.',
     },
     signalContinuity: [],
-    continuityStatement: 'This is a single-diagnostic assessment. Completing additional diagnostics strengthens the evidence base and enables continuity tracking.',
+    continuityStatement,
   }
 }
 
@@ -352,6 +414,6 @@ export function buildConstitutionalLivingViewModel(
     memory: deriveMemory(input),
     changes: deriveChanges(input),
     review: deriveReview(input),
-    continuity: deriveContinuity(),
+    continuity: deriveContinuity(input),
   }
 }
