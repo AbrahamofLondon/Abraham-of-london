@@ -61,8 +61,6 @@ type GatewayCardProps = {
   gold?: boolean;
 };
 
-const SOFT_GOLD = "#C9A96E";
-
 const SOCIAL_ICON_MAP: Partial<Record<SocialLink["kind"], React.ElementType>> = {
   x: Twitter,
   twitter: Twitter,
@@ -171,7 +169,7 @@ function DirectoryColumn({
             <Link
               href={link.href}
               className={[
-                "group flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em]",
+                "group flex min-w-0 items-center gap-2 break-words font-mono text-[10px] uppercase tracking-[0.18em] sm:tracking-[0.22em]",
                 "transition-colors duration-200",
                 link.highlight
                   ? "text-[#C9A96E] hover:text-[#E0BD82]"
@@ -186,7 +184,7 @@ function DirectoryColumn({
                     : "w-0 bg-[#C9A96E]/65 group-hover:w-3",
                 ].join(" ")}
               />
-              {link.label}
+              <span className="min-w-0 break-words leading-[1.45]">{link.label}</span>
             </Link>
           </li>
         ))}
@@ -257,7 +255,7 @@ export default function EnhancedFooter(): React.ReactElement {
       href: "/frameworks",
       eyebrow: "Instruments",
       title: "Frameworks & Playbooks",
-      body: "Decision instruments, practical frameworks, and operational playbooks for serious operators.",
+      body: "Decision instruments, practical frameworks, and operational playbooks for serious decision work.",
       icon: Crown,
       tag: "FRM·V1",
       gold: true,
@@ -274,7 +272,7 @@ export default function EnhancedFooter(): React.ReactElement {
       href: "/engagements",
       eyebrow: "Selective",
       title: "Engagement Pathways",
-      body: "Selective operator pilot, retainer readiness review, and counsel continuation pathways.",
+      body: "Selective governed pilot review, retainer readiness review, and counsel continuation pathways.",
       icon: ScanSearch,
       tag: "ENG·V3",
     },
@@ -302,6 +300,8 @@ export default function EnhancedFooter(): React.ReactElement {
   ],
   Products: [
     { label: "Product Directory", href: "/products", highlight: true },
+    { label: "Enterprise", href: "/enterprise" },
+    { label: "Professionals", href: "/professionals" },
     { label: "Decision Instruments", href: "/decision-instruments" },
     { label: "Free Decision Signal", href: "/decision-instruments/signal" },
     { label: "Frameworks", href: "/frameworks" },
@@ -318,8 +318,7 @@ export default function EnhancedFooter(): React.ReactElement {
     { label: "Proof Pack", href: "/account/proof-pack" },
   ],
   Engagements: [
-    { label: "Operator Pilot", href: "/engagements/operator-pilot" },
-    { label: "Retainer Review", href: "/engagements/retained-oversight" },
+    { label: "Governed Pilot Review", href: "/engagements/operator-pilot" },
     { label: "Counsel Review", href: "/counsel" },
     { label: "Diagnostics", href: "/diagnostics" },
     { label: "Evidence Standards", href: "/evidence/standards" },

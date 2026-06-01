@@ -1,36 +1,21 @@
 /**
- * pages/decision-pressure.tsx — Decision Pressure Signal
+ * pages/decision-pressure.tsx - Low-friction public pressure signal.
  *
- * A fast, viral, shareable public signal that gives users an immediate "aha" moment
- * without requiring them to understand the full product.
- *
- * This is the top-of-funnel engine.
- *
- * Free output:
- *   1. Pressure Band (Low / Live / Escalating / Critical)
- *   2. Primary Friction
- *   3. One-line consequence
- *   4. Minimum viable move
- *   5. Adversarial challenge
- *   6. Refusal state where input is too vague
- *
- * No account required. No email wall. No payment wall.
+ * Free output only. The result deliberately does not render or share the raw
+ * submitted decision text.
  */
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { ArrowRight, RefreshCw, Share2 } from 'lucide-react'
+import { ArrowRight, Check, Copy, RefreshCw, Share2 } from 'lucide-react'
 import Layout from '@/components/Layout'
-import { GovernedRefusalBlock, type RefusalCategory } from '@/components/kernel/GovernedRefusalBlock'
-import { WhatSystemNoticedBlock } from '@/components/kernel/WhatSystemNoticedBlock'
-import { buildPressureSignalTranslation, buildRefusalMessage } from '@/lib/kernel/public-situation-translation'
 import { track } from '@/lib/analytics/track'
 
 const GOLD = '#C9A96E'
+const GREEN = '#6EE7B7'
 const AMBER = '#F59E0B'
-const EMERALD = '#6EE7B7'
-const ROSE = '#FB7185'
+const RED = '#FB7185'
 
 const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
@@ -41,296 +26,228 @@ const serif: React.CSSProperties = {
   fontWeight: 300,
 }
 
-type PressureBand = 'LOW' | 'LIVE' | 'ESCALATING' | 'CRITICAL'
+type PressureBand = 'Green' | 'Amber' | 'Red'
 
-type FrictionType =
-  | 'EVIDENCE_GAP'
-  | 'AUTHORITY_GAP'
-  | 'EXECUTION_DRIFT'
-  | 'INCENTIVE_CONFLICT'
-  | 'MANDATE_AMBIGUITY'
-  | 'TIMING_PRESSURE'
-  | 'STAKEHOLDER_CONTRADICTION'
-
-interface SignalOutput {
-  pressureBand: PressureBand
-  primaryFriction: FrictionType
-  frictionLabel: string
-  consequence: string
-  minimumViableMove: string
-  adversarialChallenge: string
+interface PressureSignal {
+  band: PressureBand
+  bandReason: string
+  missingEvidence: string[]
+  authorityOwnershipRisk: string | null
+  consequenceDelayRisk: string
+  nextAdmissibleMove: string
+  compactSummary: string
 }
 
-const FRICTION_META: Record<FrictionType, string> = {
-  EVIDENCE_GAP: 'Evidence gap',
-  AUTHORITY_GAP: 'Authority gap',
-  EXECUTION_DRIFT: 'Execution drift',
-  INCENTIVE_CONFLICT: 'Incentive conflict',
-  MANDATE_AMBIGUITY: 'Mandate ambiguity',
-  TIMING_PRESSURE: 'Timing pressure',
-  STAKEHOLDER_CONTRADICTION: 'Stakeholder contradiction',
+interface PressureRefusal {
+  reason: string
+  nextAdmissibleInput: string
 }
 
 const BAND_COLORS: Record<PressureBand, string> = {
-  LOW: EMERALD,
-  LIVE: `${GOLD}CC`,
-  ESCALATING: AMBER,
-  CRITICAL: ROSE,
+  Green: GREEN,
+  Amber: AMBER,
+  Red: RED,
 }
 
-const BAND_LABELS: Record<PressureBand, string> = {
-  LOW: 'Low',
-  LIVE: 'Live',
-  ESCALATING: 'Escalating',
-  CRITICAL: 'Critical',
+function hasAny(input: string, words: RegExp): boolean {
+  return words.test(input)
 }
 
-function computeSignal(input: string): { output: SignalOutput } | { refusal: RefusalCategory } {
-  const trimmed = input.trim()
-  const wordCount = trimmed.split(/\s+/).length
+function computePressureSignal(rawInput: string): { signal: PressureSignal } | { refusal: PressureRefusal } {
+  const input = rawInput.trim()
+  const words = input.split(/\s+/).filter(Boolean)
 
-  // Refusal: too vague
-  if (wordCount < 8 || trimmed.length < 40) {
-    return { refusal: 'VAGUE_DECISION' }
+  if (input.length < 44 || words.length < 9) {
+    return {
+      refusal: {
+        reason: 'The input is too vague to produce a responsible pressure signal.',
+        nextAdmissibleInput:
+          'Name the decision, who can decide it, what is blocking it, what evidence is missing, and what happens if it is delayed.',
+      },
+    }
   }
 
-  // Refusal: no decision owner mentioned
-  const hasOwner = /\b(I|we|the\s+(board|ceo|founder|team|director|lead|head|manager|owner|committee|executive))\b/i.test(trimmed)
-  if (!hasOwner) {
-    return { refusal: 'MISSING_OWNER' }
+  const hasDecisionShape = hasAny(input, /\b(decide|decision|choose|approve|reject|hire|fire|launch|stop|delay|buy|sell|sign|commit|invest|acquire|settle|escalate)\b/i)
+  const hasOwner = hasAny(input, /\b(i|we|our|me|board|ceo|founder|director|partner|owner|committee|team|client|investor|legal|finance|ops|manager|lead)\b/i)
+  const hasStakes = hasAny(input, /\b(risk|cost|loss|revenue|client|legal|regulator|compliance|deadline|penalty|delay|damage|reputation|cash|runway|exposure|consequence)\b/i)
+
+  if (!hasDecisionShape) {
+    return {
+      refusal: {
+        reason: 'The system can see concern, but not a concrete decision.',
+        nextAdmissibleInput:
+          'Rewrite it as: "We need to decide whether to [specific action], but [blocker], because [consequence if delayed]."',
+      },
+    }
   }
 
-  // Refusal: no consequence mentioned
-  const hasConsequence = /\b(cost|risk|exposure|deadline|penalty|loss|damage|fail|consequence|delay|urgent|pressure|liability)\b/i.test(trimmed)
-  if (!hasConsequence) {
-    return { refusal: 'MISSING_CONSEQUENCE' }
+  if (!hasOwner || !hasStakes) {
+    return {
+      refusal: {
+        reason: 'The decision lacks either a clear owner or a consequence of delay.',
+        nextAdmissibleInput:
+          'Add who has authority to decide, who can block, and what material consequence appears if no decision is made.',
+      },
+    }
   }
 
-  // --- Signal computation ---
+  const urgent = (input.match(/\b(today|tomorrow|urgent|asap|overdue|deadline|critical|immediate|this week|late)\b/gi) ?? []).length
+  const highStakes = (input.match(/\b(board|investor|legal|regulator|compliance|revenue|cash|runway|client|reputation|penalty|lawsuit|breach|acquire|funding)\b/gi) ?? []).length
+  const stuck = (input.match(/\b(avoiding|delaying|stuck|blocked|split|unclear|waiting|stalling|cannot decide|can't decide|disagree|conflict)\b/gi) ?? []).length
+  const weakEvidence = (input.match(/\b(assume|guess|not sure|unclear|unknown|missing|no evidence|lack|unproven|still reviewing|waiting for data)\b/gi) ?? []).length
+  const authoritySignals = (input.match(/\b(authority|owner|approval|sign.?off|mandate|permission|who decides|accountable|responsible|board|ceo|committee|legal)\b/gi) ?? []).length
 
-  // Pressure indicators
-  const urgencyWords = /\b(urgent|immediate|today|tomorrow|deadline|critical|emergency|ASAP|overdue)\b/gi
-  const urgencyMatches = (trimmed.match(urgencyWords) || []).length
+  const score = urgent * 3 + highStakes * 2 + stuck * 2 + weakEvidence + authoritySignals
+  const band: PressureBand = score >= 11 ? 'Red' : score >= 5 ? 'Amber' : 'Green'
 
-  const stakeWords = /\b(board|investor|regulator|client|revenue|legal|compliance|reputation|existential)\b/gi
-  const stakeMatches = (trimmed.match(stakeWords) || []).length
+  const missingEvidence = [
+    !hasAny(input, /\b(data|evidence|proof|numbers|forecast|model|contract|terms|legal review|review|quote|customer|market|financial|cash|runway)\b/i)
+      ? 'Decision evidence standard: what proof would change the decision.'
+      : null,
+    !hasAny(input, /\b(deadline|today|tomorrow|this week|date|by friday|month|quarter|overdue)\b/i)
+      ? 'Real decision clock: whether the deadline is external, internal, or manufactured.'
+      : null,
+    !hasAny(input, /\b(owner|authority|approval|sign.?off|mandate|accountable|responsible|board|ceo|director|committee)\b/i)
+      ? 'Named decision authority: who can decide and who can block.'
+      : null,
+  ].filter((item): item is string => Boolean(item))
 
-  const stuckWords = /\b(stuck|blocked|avoiding|delaying|circling|stalled|frozen|can't decide|unresolved)\b/gi
-  const stuckMatches = (trimmed.match(stuckWords) || []).length
-
-  const compositeScore = urgencyMatches * 3 + stakeMatches * 2 + stuckMatches * 2
-
-  const pressureBand: PressureBand =
-    compositeScore >= 10 ? 'CRITICAL' :
-    compositeScore >= 6 ? 'ESCALATING' :
-    compositeScore >= 3 ? 'LIVE' :
-    'LOW'
-
-  // Determine primary friction
-  const hasEvidenceGap = /\b(not sure|don't know|unsure|unclear|unknown|no evidence|missing|assume|guess)\b/i.test(trimmed)
-  const hasAuthorityGap = /\b(who|approval|permission|sign.?off|authority|mandate|escalat)\b/i.test(trimmed)
-  const hasExecutionDrift = /\b(plan|execute|action|implement|done|progress|stalled|stuck|delay)\b/i.test(trimmed)
-  const hasIncentiveConflict = /\b(but|however|conflict|disagree|oppose|resist|politics|agenda)\b/i.test(trimmed)
-  const hasMandateAmbiguity = /\b(role|responsible|accountable|job|supposed to|who should)\b/i.test(trimmed)
-  const hasTimingPressure = /\b(time|deadline|urgent|soon|quick|fast|immediate|overdue|late)\b/i.test(trimmed)
-
-  const frictions: Array<{ type: FrictionType; score: number }> = [
-    { type: 'EVIDENCE_GAP', score: hasEvidenceGap ? 3 : 0 },
-    { type: 'AUTHORITY_GAP', score: hasAuthorityGap ? 4 : 0 },
-    { type: 'EXECUTION_DRIFT', score: hasExecutionDrift ? 2 : 0 },
-    { type: 'INCENTIVE_CONFLICT', score: hasIncentiveConflict ? 3 : 0 },
-    { type: 'MANDATE_AMBIGUITY', score: hasMandateAmbiguity ? 2 : 0 },
-    { type: 'TIMING_PRESSURE', score: hasTimingPressure ? 1 : 0 },
-    { type: 'STAKEHOLDER_CONTRADICTION', score: (hasAuthorityGap && hasIncentiveConflict) ? 5 : 0 },
-  ]
-  frictions.sort((a, b) => b.score - a.score)
-  const topFriction = frictions[0]
-  const primaryFriction: FrictionType = topFriction ? topFriction.type : 'AUTHORITY_GAP'
-
-  // Consequence lines
-  const CONSEQUENCES: Record<PressureBand, string[]> = {
-    LOW: [
-      'This decision is not yet under pressure, but unresolved low-stakes decisions compound into structural problems.',
-      'No immediate consequence — but the pattern of deferral is worth noting before it becomes habitual.',
-    ],
-    LIVE: [
-      'This will not fail because the idea is weak. It will fail because ownership is unclear.',
-      'The decision is being delayed because the evidence standard has not been named.',
-      'You are treating an authority problem as a planning problem.',
-    ],
-    ESCALATING: [
-      'The cost of delay is now measurable. In 30 days, it will be materially higher than it is today.',
-      'This decision is approaching a threshold where options begin to close. The window is narrowing.',
-      'What started as a simple decision is becoming a structural risk because no one has forced resolution.',
-    ],
-    CRITICAL: [
-      'The consequence window is closing. What is at stake may no longer be recoverable if delayed further.',
-      'This decision appears overdue. Delay is compounding daily — the cost is no longer linear.',
-      'The system detects an unresolved decision at critical pressure. Immediate structured intervention is warranted.',
-    ],
+  if (missingEvidence.length === 0 && weakEvidence > 0) {
+    missingEvidence.push('Evidence quality: whether the current evidence is decision-grade or only directional.')
   }
 
-  const consequenceOptions = CONSEQUENCES[pressureBand]
-  const consequence: string = consequenceOptions[0]!
+  const authorityOwnershipRisk =
+    authoritySignals > 0 || hasAny(input, /\b(split|committee|legal|board|approval|sign.?off|who|accountable|responsible)\b/i)
+      ? 'Authority or ownership may be unclear. Confirm the accountable decider and the blockers before treating this as an execution problem.'
+      : null
 
-  // Minimum viable moves
-  const MOVES: Record<FrictionType, string[]> = {
-    EVIDENCE_GAP: [
-      'Name the evidence that would change this decision. Then find it before deciding.',
-      'Run the Decision Exposure Instrument to price what you do not yet know.',
-    ],
-    AUTHORITY_GAP: [
-      'Confirm in writing who holds the authority to decide and who can block. Until then, the decision is not ready.',
-      'Map the decision authority chain before proceeding further.',
-    ],
-    EXECUTION_DRIFT: [
-      'Assign one accountable owner and one deadline. Without both, the decision will continue to drift.',
-      'Run the Fast Diagnostic to identify where execution is breaking from intent.',
-    ],
-    INCENTIVE_CONFLICT: [
-      'Surface the conflicting incentives openly before attempting to resolve the decision. Hidden conflicts will resurface.',
-      'Map who benefits from the status quo and who benefits from the decision. The conflict will not resolve until incentives align.',
-    ],
-    MANDATE_AMBIGUITY: [
-      'Clarify the mandate in writing. A decision made without clear mandate is vulnerable to challenge regardless of its merits.',
-      'Define who is responsible, who is accountable, who must be consulted, and who must be informed.',
-    ],
-    TIMING_PRESSURE: [
-      'Separate genuine deadlines from manufactured urgency. Then decide whether the timeline is real or imposed.',
-      'Price the cost of moving faster versus the cost of delay. The optimal pace is rarely the fastest.',
-    ],
-    STAKEHOLDER_CONTRADICTION: [
-      'Map all stakeholders and their stated positions. The contradiction will not resolve until each position is tested against evidence.',
-      'Run the Team Assessment to surface the stakeholder contradictions that individual analysis cannot detect.',
-    ],
-  }
+  const consequenceDelayRisk =
+    band === 'Red'
+      ? 'Delay is likely compounding. Options may narrow, costs may rise, and the decision may move from choice to damage control.'
+      : band === 'Amber'
+        ? 'Delay is becoming material. The main risk is letting uncertainty harden into a default decision.'
+        : 'Delay is not yet structurally dangerous, but the unresolved evidence and ownership questions should be closed before momentum builds.'
 
-  const moveOptions = MOVES[primaryFriction]
-  const minimumViableMove: string = moveOptions[0]!
+  const nextAdmissibleMove =
+    missingEvidence.some((item) => item.includes('authority')) || authorityOwnershipRisk
+      ? 'Write a one-line decision mandate: named decider, blockers, deadline, and evidence required to proceed.'
+      : missingEvidence.length > 0
+        ? 'Name the missing evidence that would change the decision, then obtain or explicitly waive it.'
+        : 'Set the smallest reversible move, owner, and review point before the decision drifts again.'
 
-  // Adversarial challenge
-  const CHALLENGES: Record<PressureBand, string[]> = {
-    LOW: [
-      'A reviewer would ask: "What evidence supports the claim that this decision needs attention at all?"',
-    ],
-    LIVE: [
-      'A reviewer would ask: "Who specifically owns this decision, and what authority do they have to execute it?"',
-    ],
-    ESCALATING: [
-      'A reviewer would ask: "What has changed in the last 30 days that makes this more urgent than it was?"',
-    ],
-    CRITICAL: [
-      'A reviewer would ask: "Why has this not been resolved already, and is the reason still valid today?"',
-    ],
-  }
-
-  const challengeOptions = CHALLENGES[pressureBand]
-  const adversarialChallenge: string = challengeOptions[0]!
+  const bandReason =
+    band === 'Red'
+      ? 'High pressure: urgency, stakes, and unresolved ownership or evidence are present together.'
+      : band === 'Amber'
+        ? 'Live pressure: delay has a material cost, but the decision is still recoverable with a tighter mandate.'
+        : 'Lower pressure: the decision is not yet critical, but it still needs evidence and ownership discipline.'
 
   return {
-    output: {
-      pressureBand,
-      primaryFriction,
-      frictionLabel: FRICTION_META[primaryFriction],
-      consequence,
-      minimumViableMove,
-      adversarialChallenge,
+    signal: {
+      band,
+      bandReason,
+      missingEvidence: missingEvidence.length > 0 ? missingEvidence : ['No major evidence gap detected from the submitted wording.'],
+      authorityOwnershipRisk,
+      consequenceDelayRisk,
+      nextAdmissibleMove,
+      compactSummary: `Pressure band: ${band}. ${bandReason} Next admissible move: ${nextAdmissibleMove}`,
     },
   }
 }
 
-function getNextHref(band: PressureBand): string {
-  switch (band) {
-    case 'LOW':
-    case 'LIVE':
-      return '/diagnostics/fast'
-    case 'ESCALATING':
-      return '/diagnostics/fast'
-    case 'CRITICAL':
-      return '/decision-centre'
-  }
-}
-
-function getNextLabel(band: PressureBand): string {
-  switch (band) {
-    case 'LOW':
-    case 'LIVE':
-      return 'Run the Fast Diagnostic'
-    case 'ESCALATING':
-      return 'Map the contradiction properly'
-    case 'CRITICAL':
-      return 'Enter the Decision Centre'
-  }
+function buildShareText(signal: PressureSignal): string {
+  return [
+    'Decision Pressure Signal',
+    `Pressure band: ${signal.band}`,
+    `Missing evidence: ${signal.missingEvidence[0]}`,
+    `Delay risk: ${signal.consequenceDelayRisk}`,
+    `Next move: ${signal.nextAdmissibleMove}`,
+    'Run your own signal: https://abrahamoflondon.com/decision-pressure',
+  ].join('\n')
 }
 
 export default function DecisionPressurePage() {
   const [input, setInput] = useState('')
-  const [result, setResult] = useState<SignalOutput | null>(null)
-  const [refusal, setRefusal] = useState<RefusalCategory | null>(null)
+  const [result, setResult] = useState<PressureSignal | null>(null)
+  const [refusal, setRefusal] = useState<PressureRefusal | null>(null)
   const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
+
+  const shareText = useMemo(() => (result ? buildShareText(result) : ''), [result])
 
   const handleSubmit = useCallback(() => {
     if (!input.trim()) return
 
     setLoading(true)
-    // Simulate brief processing delay for perceived depth
-    setTimeout(() => {
-      const computed = computeSignal(input)
-      if ('output' in computed) {
-        setResult(computed.output)
+    setCopied(false)
+
+    window.setTimeout(() => {
+      const computed = computePressureSignal(input)
+
+      if ('signal' in computed) {
+        setResult(computed.signal)
         setRefusal(null)
-        track('decision_pressure_completed', { pressureBand: computed.output.pressureBand, friction: computed.output.primaryFriction })
+        track('decision_pressure_completed', { pressureBand: computed.signal.band })
       } else {
         setRefusal(computed.refusal)
         setResult(null)
-        track('decision_pressure_refused', { category: computed.refusal })
+        track('decision_pressure_refused', { reason: computed.refusal.reason })
       }
+
       setLoading(false)
-      // Scroll to result
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
-    }, 600)
+      window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80)
+    }, 350)
   }, [input])
 
   const handleReset = useCallback(() => {
+    setInput('')
     setResult(null)
     setRefusal(null)
-    setInput('')
+    setCopied(false)
   }, [])
 
-  const handleShare = useCallback(() => {
-    if (!result) return
-    const text = `Decision Pressure: ${BAND_LABELS[result.pressureBand]}\nFriction: ${result.frictionLabel}\n${result.consequence}\n\nTest your decision pressure: https://abrahamoflondon.com/decision-pressure`
-    if (navigator.share) {
-      navigator.share({ text }).catch(() => {})
-    } else {
-      navigator.clipboard.writeText(text).catch(() => {})
-    }
-    track('decision_pressure_shared', { pressureBand: result.pressureBand })
-  }, [result])
+  const handleCopy = useCallback(async () => {
+    if (!shareText) return
 
-  const bandColor = result ? BAND_COLORS[result.pressureBand] : GOLD
+    try {
+      if (navigator.share) {
+        await navigator.share({ text: shareText })
+      } else {
+        await navigator.clipboard.writeText(shareText)
+        setCopied(true)
+      }
+      track('decision_pressure_shared', { pressureBand: result?.band })
+    } catch {
+      // Sharing is optional; keep the result visible if the browser blocks it.
+    }
+  }, [result?.band, shareText])
 
   return (
     <Layout
       title="Decision Pressure Signal | Abraham of London"
-      description="Describe a decision you are avoiding, delaying, or struggling to land. Get an immediate pressure reading — free, no account required."
+      description="Paste the decision you are avoiding. Get a free pressure band, missing evidence, risk signal, and next admissible move."
       canonicalUrl="/decision-pressure"
       fullWidth
       headerTransparent
     >
       <Head>
-        <meta name="description" content="Describe a decision under pressure. Get an immediate signal: pressure band, primary friction, consequence, and next move. Free. No account required." />
-        <meta property="og:title" content="Decision Pressure Signal — Abraham of London" />
-        <meta property="og:description" content="Test your decision pressure. Free signal in under 45 seconds." />
+        <meta
+          name="description"
+          content="Paste the decision you are avoiding. The system will show the pressure band, missing evidence, and next admissible move."
+        />
+        <meta property="og:title" content="Decision Pressure Signal - Abraham of London" />
+        <meta
+          property="og:description"
+          content="A low-friction free pressure signal for avoided decisions."
+        />
       </Head>
 
       <div style={{ backgroundColor: 'rgb(3,3,5)', minHeight: '100vh', color: 'white' }}>
-        {/* Hero / Input section */}
-        <section className="px-6 pb-16 pt-[128px] md:pt-36">
-          <div className="mx-auto max-w-[700px]">
+        <section className="px-6 pb-14 pt-[128px] md:pt-36">
+          <div className="mx-auto max-w-[760px]">
             <p style={{ ...mono, fontSize: '9px', letterSpacing: '0.24em', textTransform: 'uppercase', color: `${GOLD}88` }}>
-              Decision Pressure Signal
+              Free Decision Pressure Signal
             </p>
             <h1
               className="mt-6"
@@ -340,32 +257,30 @@ export default function DecisionPressurePage() {
                 lineHeight: 1.02,
                 color: '#F5F5F5',
                 fontStyle: 'italic',
-                letterSpacing: '-0.02em',
               }}
             >
-              Describe the decision you are avoiding, delaying, or struggling to land.
+              Paste the decision you are avoiding.
             </h1>
-            <p className="mt-4 text-[15px] leading-[1.8]" style={{ color: 'rgba(255,255,255,0.50)' }}>
-              One sentence minimum. No account required. The system will read your decision pressure and return a signal — or refuse if the input is too vague.
+            <p className="mt-4 max-w-[62ch] text-[15px] leading-[1.85]" style={{ color: 'rgba(255,255,255,0.52)' }}>
+              The system will show the pressure band, missing evidence, and next admissible move. No account required.
             </p>
 
-            {/* Input */}
             <div className="mt-8">
               <textarea
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="e.g. We need to decide whether to acquire the competitor, but the board is split and the CEO wants to move fast while legal is still reviewing the exposure..."
-                rows={4}
-                className="w-full border bg-white/[0.02] p-5 text-[15px] leading-[1.7] text-white placeholder:text-white/20 focus:outline-none"
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="Example: We need to decide whether to sign the new client contract this week, but legal is still reviewing liability and the founder wants to proceed before the board call."
+                rows={5}
+                className="w-full border bg-white/[0.02] p-5 text-[14px] leading-[1.7] text-white placeholder:text-white/22 focus:outline-none"
                 style={{
                   borderColor: input.trim() ? `${GOLD}40` : 'rgba(255,255,255,0.10)',
                   resize: 'vertical',
-                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: '13px',
+                  ...mono,
                 }}
               />
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <button
+                  type="button"
                   onClick={handleSubmit}
                   disabled={!input.trim() || loading}
                   className="group inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-30"
@@ -379,195 +294,137 @@ export default function DecisionPressurePage() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {loading ? 'Reading...' : 'Read my decision pressure'}
+                  {loading ? 'Reading pressure...' : 'Show pressure signal'}
                   {!loading && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />}
                 </button>
-                {result || refusal ? (
+
+                {(result || refusal) && (
                   <button
+                    type="button"
                     onClick={handleReset}
                     className="inline-flex items-center gap-2"
-                    style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}
+                    style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}
                   >
                     <RefreshCw className="h-3 w-3" />
                     Try another
                   </button>
-                ) : null}
+                )}
               </div>
             </div>
 
-            {/* Trust signal */}
-            <p className="mt-6 text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.25)' }}>
-              This system is designed to refuse weak inputs before they become expensive decisions. The refusal is the feature.
+            <p className="mt-6 max-w-[60ch] text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.28)' }}>
+              The public result is a derived signal only. It does not display your pasted decision back to you.
             </p>
           </div>
         </section>
 
-        {/* Result section */}
         {(result || refusal) && (
-          <section ref={resultRef} className="border-t px-6 py-16" style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.01)' }}>
-            <div className="mx-auto max-w-[700px]">
-              {/* Refusal state */}
-              {refusal && (() => {
-                const refusalMsg = buildRefusalMessage(refusal, input)
-                return (
-                  <div>
-                    <div
-                      className="border p-6"
-                      style={{
-                        borderColor: 'rgba(248,113,113,0.18)',
-                        backgroundColor: 'rgba(248,113,113,0.03)',
-                      }}
-                    >
-                      {/* Refusal badge */}
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex h-8 w-8 items-center justify-center"
-                          style={{
-                            border: '1px solid rgba(248,113,113,0.30)',
-                            borderRadius: '50%',
-                          }}
-                        >
-                          <span style={{ ...mono, fontSize: '13px', color: 'rgba(248,113,113,0.70)' }}>!</span>
+          <section ref={resultRef} className="border-t px-6 py-14" style={{ borderColor: 'rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.012)' }}>
+            <div className="mx-auto max-w-[760px]">
+              {refusal && (
+                <div className="border p-6 md:p-7" style={{ borderColor: 'rgba(248,113,113,0.22)', backgroundColor: 'rgba(248,113,113,0.035)' }}>
+                  <p style={{ ...mono, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(248,113,113,0.82)' }}>
+                    Useful refusal
+                  </p>
+                  <h2 className="mt-4" style={{ ...serif, fontSize: '1.8rem', lineHeight: 1.1, color: '#F5F5F5', fontStyle: 'italic' }}>
+                    The input is not yet decision-grade.
+                  </h2>
+                  <p className="mt-4 text-[15px] leading-[1.8]" style={{ color: 'rgba(255,255,255,0.68)' }}>
+                    {refusal.reason}
+                  </p>
+                  <div className="mt-5 border-t pt-5" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                    <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                      Next admissible input
+                    </p>
+                    <p className="mt-2 text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.66)' }}>
+                      {refusal.nextAdmissibleInput}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {result && (
+                <div>
+                  <div className="border p-6 md:p-8" style={{ borderColor: `${BAND_COLORS[result.band]}35`, backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>
+                          Pressure band
+                        </p>
+                        <div className="mt-3 flex items-center gap-3">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: BAND_COLORS[result.band] }} />
+                          <span style={{ ...mono, fontSize: '18px', letterSpacing: '0.08em', textTransform: 'uppercase', color: BAND_COLORS[result.band] }}>
+                            {result.band}
+                          </span>
                         </div>
-                        <p style={{ ...mono, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(248,113,113,0.80)' }}>
-                          The system cannot responsibly produce this output yet
-                        </p>
                       </div>
-
-                      {/* Reason */}
-                      <div className="mt-5">
-                        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88` }}>
-                          Reason
-                        </p>
-                        <p className="mt-1 text-[15px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                          {refusalMsg.reason}
-                        </p>
-                      </div>
-
-                      {/* Next admissible input */}
-                      <div className="mt-5 border-t pt-5" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
-                          Next admissible input
-                        </p>
-                        <p className="mt-1 whitespace-pre-line text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.70)' }}>
-                          {refusalMsg.nextAdmissibleInput}
-                        </p>
-                      </div>
-
-                      {/* Market framing footer */}
-                      <p className="mt-6 text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.30)' }}>
-                        The refusal is the feature. It protects the decision from false confidence.
+                      <p className="max-w-[420px] text-[13px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {result.bandReason}
                       </p>
                     </div>
-                    <div className="mt-6">
+
+                    <ResultSection label="Missing evidence">
+                      <ul className="space-y-2">
+                        {result.missingEvidence.map((item) => (
+                          <li key={item} className="flex gap-3 text-[14px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.68)' }}>
+                            <span style={{ color: `${GOLD}AA` }}>-</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </ResultSection>
+
+                    <ResultSection label="Authority / ownership risk">
+                      <p className="text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.68)' }}>
+                        {result.authorityOwnershipRisk ?? 'No explicit authority or ownership risk was detected from the submitted wording.'}
+                      </p>
+                    </ResultSection>
+
+                    <ResultSection label="Consequence / delay risk">
+                      <p className="text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.68)' }}>
+                        {result.consequenceDelayRisk}
+                      </p>
+                    </ResultSection>
+
+                    <ResultSection label="Next admissible move">
+                      <p className="text-[15px] leading-[1.8]" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                        {result.nextAdmissibleMove}
+                      </p>
+                    </ResultSection>
+                  </div>
+
+                  <div className="mt-5 border p-5" style={{ borderColor: 'rgba(255,255,255,0.08)', backgroundColor: 'rgba(255,255,255,0.015)' }}>
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+                          Shareable compact result
+                        </p>
+                        <p className="mt-3 max-w-[560px] text-[13px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                          {result.compactSummary}
+                        </p>
+                      </div>
                       <button
-                        onClick={() => {
-                          setInput('')
-                          setRefusal(null)
-                          document.querySelector('textarea')?.focus()
+                        type="button"
+                        onClick={handleCopy}
+                        className="inline-flex min-h-[40px] items-center gap-2 border px-4 py-2 transition-all hover:-translate-y-0.5"
+                        style={{
+                          borderColor: `${GOLD}35`,
+                          color: `${GOLD}CC`,
+                          ...mono,
+                          fontSize: '9px',
+                          letterSpacing: '0.13em',
+                          textTransform: 'uppercase',
                         }}
-                        className="inline-flex items-center gap-2"
-                        style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}CC` }}
                       >
-                        <RefreshCw className="h-3 w-3" />
-                        Rewrite the decision with evidence
+                        {copied ? <Check className="h-3.5 w-3.5" /> : navigatorCanShareIcon()}
+                        {copied ? 'Copied' : 'Copy / share'}
                       </button>
                     </div>
                   </div>
-                )
-              })()}
 
-              {/* Signal result */}
-              {result && (
-                <div>
-                  {/* Shareable signal card */}
-                  <div
-                    className="border p-6 md:p-8"
-                    style={{
-                      borderColor: `${bandColor}30`,
-                      backgroundColor: 'rgba(255,255,255,0.02)',
-                    }}
-                  >
-                    {/* Pressure band */}
-                    <div className="flex items-center justify-between">
-                      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
-                        Decision pressure band
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full" style={{ backgroundColor: bandColor }} />
-                        <span style={{ ...mono, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: bandColor }}>
-                          {BAND_LABELS[result.pressureBand]}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Primary friction */}
-                    <div className="mt-6">
-                      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
-                        Primary friction
-                      </p>
-                      <p className="mt-1 text-[16px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.80), ...serif' }}>
-                        {result.frictionLabel}
-                      </p>
-                    </div>
-
-                    {/* Consequence */}
-                    <div className="mt-6 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
-                        One-line consequence
-                      </p>
-                      <p className="mt-2 text-[15px] leading-[1.75] italic" style={{ color: 'rgba(255,255,255,0.70)' }}>
-                        "{result.consequence}"
-                      </p>
-                    </div>
-
-                    {/* Minimum viable move */}
-                    <div className="mt-6 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
-                        Minimum viable move
-                      </p>
-                      <p className="mt-2 text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                        {result.minimumViableMove}
-                      </p>
-                    </div>
-
-                    {/* Adversarial challenge */}
-                    <div className="mt-6 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(248,113,113,0.60)' }}>
-                        How this would be attacked
-                      </p>
-                      <p className="mt-2 text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        {result.adversarialChallenge}
-                      </p>
-                    </div>
-
-                    {/* Evidence posture */}
-                    <div className="mt-6 border-t pt-5" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                      <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.20)' }}>
-                        Evidence posture: USER_REPORTED — this is a first signal, not a full diagnosis
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* What the system noticed — compact variant */}
-                  <div className="mt-6">
-                    <WhatSystemNoticedBlock
-                      variant="compact"
-                      {...buildPressureSignalTranslation(
-                        input,
-                        result.pressureBand,
-                        result.frictionLabel,
-                        result.consequence,
-                        result.minimumViableMove,
-                        result.adversarialChallenge,
-                      )}
-                    />
-                  </div>
-
-                  {/* Actions */}
                   <div className="mt-6 flex flex-wrap items-center gap-4">
                     <Link
-                      href={getNextHref(result.pressureBand)}
+                      href="/boardroom-brief"
                       className="group inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5"
                       style={{
                         borderColor: `${GOLD}50`,
@@ -579,28 +436,32 @@ export default function DecisionPressurePage() {
                         textTransform: 'uppercase',
                       }}
                     >
-                      {getNextLabel(result.pressureBand)}
+                      Generate Boardroom Brief
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                     </Link>
+                    <Link
+                      href="/products"
+                      className="inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.12)',
+                        color: 'rgba(255,255,255,0.62)',
+                        ...mono,
+                        fontSize: '10px',
+                        letterSpacing: '0.16em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      View Products
+                    </Link>
                     <button
-                      onClick={handleShare}
+                      type="button"
+                      onClick={handleCopy}
                       className="inline-flex items-center gap-2"
-                      style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)' }}
+                      style={{ ...mono, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)' }}
                     >
                       <Share2 className="h-3.5 w-3.5" />
-                      Share signal
+                      Share text
                     </button>
-                  </div>
-
-                  {/* Pathway link */}
-                  <div className="mt-8 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                    <p className="text-[13px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                      This is a first signal, not a full diagnosis.{' '}
-                      <Link href="/decision-pathway" style={{ color: `${GOLD}CC`, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                        View the full decision pathway
-                      </Link>{' '}
-                      to see what the system can detect at each level.
-                    </p>
                   </div>
                 </div>
               )}
@@ -609,5 +470,24 @@ export default function DecisionPressurePage() {
         )}
       </div>
     </Layout>
+  )
+}
+
+function navigatorCanShareIcon() {
+  if (typeof navigator !== 'undefined' && 'share' in navigator) {
+    return <Share2 className="h-3.5 w-3.5" />
+  }
+
+  return <Copy className="h-3.5 w-3.5" />
+}
+
+function ResultSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-6 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}90`, marginBottom: '0.65rem' }}>
+        {label}
+      </p>
+      {children}
+    </div>
   )
 }

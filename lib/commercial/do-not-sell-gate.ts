@@ -24,7 +24,7 @@ export type GateResult = {
  */
 export async function checkDoNotSellGate(
   email: string,
-  _productCode: string,
+  productCode: string,
 ): Promise<GateResult> {
   if (!email) {
     return {
@@ -32,6 +32,10 @@ export async function checkDoNotSellGate(
       reason: "NO_EMAIL",
       message: "You are not ready to purchase. Complete the diagnostic properly or leave.",
     };
+  }
+
+  if (productCode === "boardroom_brief") {
+    return { allowed: true };
   }
 
   // Find completed diagnostic journey with spine data

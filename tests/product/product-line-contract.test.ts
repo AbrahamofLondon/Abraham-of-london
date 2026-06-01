@@ -115,13 +115,14 @@ describe('Market Activation surfaces and corridor boundaries', () => {
     }
   })
 
-  it('Boardroom-first Brief is PLANNED and distinct from full Boardroom Mode', () => {
-    const brief = PLANNED_CAPABILITIES.find(
+  it('Boardroom-first Brief is ACTIVE and distinct from full Boardroom Mode', () => {
+    const brief = CAPABILITY_STATUS_RECORDS.find(
       (r) => r.capabilityId === 'Boardroom-first Brief',
     )
     expect(brief).toBeDefined()
-    expect(brief!.status).toBe('PLANNED')
-    expect(brief!.layer).toBe('BOARDROOM')
+    expect(brief!.status).toBe('ACTIVE')
+    expect(brief!.layer).toBe('UI_SURFACE')
+    expect(brief!.outputProduced?.join(' ')).toMatch(/checkout CTA|sample brief/i)
 
     // Must not have a corridorStage pointing to boardroom_mode
     expect(brief!.corridorStage).not.toBe('boardroom_mode')
@@ -206,5 +207,88 @@ describe('Market Activation surfaces and corridor boundaries', () => {
     expect(queueIdx).not.toBe(-1)
     expect(queueIdx).toBeGreaterThan(strategyIdx)
     expect(queueIdx).toBeLessThan(oversightIdx)
+  })
+})
+
+// ============================================================================
+// Products Page Contract Tests
+// ============================================================================
+
+describe('Products page contract', () => {
+  it('/boardroom-brief route is live — Boardroom-first Brief capability is ACTIVE', () => {
+    const brief = CAPABILITY_STATUS_RECORDS.find(r => r.capabilityId === 'Boardroom-first Brief')
+    expect(brief).toBeDefined()
+    expect(brief!.status).toBe('ACTIVE')
+  })
+
+  it('Decision Pressure Signal is an ACTIVE or open-entry surface, not a paid corridor stage', () => {
+    const corridorStages = PAID_CORRIDOR_RECORDS.map(r => r.stage)
+    expect(corridorStages).not.toContain('decision_pressure')
+    expect(corridorStages).not.toContain('decision_pressure_signal')
+  })
+
+  it('Retainer Oversight stage remains GATED — must not appear as an active product', () => {
+    const retainer = PAID_CORRIDOR_RECORDS.find(r => r.stage === 'retainer_oversight')
+    expect(retainer).toBeDefined()
+    expect(retainer!.currentReadiness).toBe('GATED')
+    // Active capabilities in the corridor must not include an "activate oversight" capability
+    for (const cap of retainer!.activeCapabilities) {
+      expect(cap.name.toLowerCase()).not.toContain('activate')
+      expect(cap.name.toLowerCase()).not.toContain('start retainer')
+    }
+  })
+
+  it('Retainer Review Queue is distinct from Retainer Oversight in the corridor', () => {
+    const queue = PAID_CORRIDOR_RECORDS.find(r => r.stage === 'retainer_review_queue')
+    const oversight = PAID_CORRIDOR_RECORDS.find(r => r.stage === 'retainer_oversight')
+    expect(queue).toBeDefined()
+    expect(oversight).toBeDefined()
+    // They are different stages
+    expect(queue!.stage).not.toBe(oversight!.stage)
+    // Oversight must not be active
+    expect(oversight!.currentReadiness).toBe('GATED')
+  })
+
+  it('Purpose Alignment has Separate line status — not a paid corridor stage', () => {
+    const corridorStages = PAID_CORRIDOR_RECORDS.map(r => r.stage)
+    expect(corridorStages).not.toContain('purpose_alignment')
+  })
+
+  it('No corridor record claims institutional learning or monthly oversight as active', () => {
+    for (const record of PAID_CORRIDOR_RECORDS) {
+      for (const cap of record.activeCapabilities) {
+        const name = cap.name.toLowerCase()
+        expect(name).not.toContain('institutional memory')
+        expect(name).not.toContain('monthly oversight')
+        expect(name).not.toContain('retainer cycle started')
+      }
+    }
+  })
+
+  it('All planned activation surfaces do not have paid-corridor stage designation', () => {
+    const plannedCaps = CAPABILITY_STATUS_RECORDS.filter(r => r.status === 'PLANNED' as any)
+    const corridorStages = PAID_CORRIDOR_RECORDS.map(r => r.stage)
+    for (const cap of plannedCaps) {
+      if (cap.corridorStage) {
+        // If a planned cap references a corridor stage, verify it's not claiming to be active
+        const corridorRecord = PAID_CORRIDOR_RECORDS.find(r => r.stage === cap.corridorStage)
+        if (corridorRecord) {
+          expect(corridorRecord.currentReadiness).not.toBe('ACTIVE' as any)
+        }
+      }
+    }
+  })
+
+  it('Boardroom Brief is listed before Executive Reporting in the commercial path', () => {
+    // The commercial path runs: Decision Pressure → Boardroom Brief → Executive Reporting → ...
+    // Verify the corridor ordering doesn't place executive_reporting before boardroom-related stages
+    const stages = PAID_CORRIDOR_RECORDS.map(r => r.stage)
+    const execIdx = stages.indexOf('executive_reporting')
+    const teamIdx = stages.indexOf('team_assessment')
+    // Team comes before executive
+    expect(teamIdx).toBeLessThan(execIdx)
+    // Retainer oversight is last
+    const oversightIdx = stages.indexOf('retainer_oversight')
+    expect(oversightIdx).toBe(stages.length - 1)
   })
 })

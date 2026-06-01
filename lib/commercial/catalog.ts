@@ -131,6 +131,41 @@ export const CATALOG: Record<string, CatalogProduct> = {
     upgradePath: ["personal_decision_audit", "executive_reporting", "strategy_room"],
   },
 
+  boardroom_brief: {
+    code: "boardroom_brief",
+    displayName: "Boardroom Brief",
+    marketName: "Boardroom Brief",
+    publicLabel: "Boardroom Brief",
+    amount: 9900,
+    displayPrice: "£99",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "boardroom-brief",
+    tier: "boardroom-brief",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    active: true,
+    commercialStatus: "paid",
+    requiresCheckout: true,
+    requiresContract: false,
+    futurePaidCandidate: false,
+    successPath: "/boardroom-brief",
+    cancelPath: "/boardroom-brief",
+    cookieName: "aol_paid_boardroom_brief",
+    includes: [],
+    shortDescription: "A first paid boardroom-readiness proof built from a focused decision intake.",
+    userPromise: "Receive a fuller Boardroom Brief with decision statement, contradiction, consequence, objection handling, and next admissible move from the evidence provided.",
+    pricingNote: "Starter proof-of-value path. Stripe checkout may use inline catalog pricing until a dedicated Price ID is attached.",
+    primaryCta: "Get full Boardroom Brief",
+    upgradePath: ["executive_reporting", "strategy_room"],
+    deliveryFormat: "pdf_dossier",
+    estimatedCompletionMinutes: 8,
+    writesToDecisionMemory: false,
+    dossierEligible: true,
+    nextAdmissibleMove: "Executive Reporting where evidence justifies deeper judgement",
+  },
+
   personal_decision_audit: {
     code: "personal_decision_audit",
     displayName: "Personal Decision Audit",
@@ -1150,6 +1185,7 @@ export function getProductByEntitlementSlug(slug: string): CatalogProduct | null
 export const PRICING_FAMILIES: Record<string, PricingFamily> = {
   // Free entry
   fast_diagnostic: "free_entry",
+  boardroom_brief: "governed_instruments",
   // Professional subscription
   professional: "professional_subscription",
   professional_annual: "professional_subscription",
@@ -1254,7 +1290,7 @@ export function checkCheckoutEligibility(code: string): CheckoutEligibility {
   if (product.requiresCheckout !== true) {
     return { eligible: false, reason: "CHECKOUT_NOT_AVAILABLE" };
   }
-  if (!product.stripePriceId) {
+  if (!product.stripePriceId && product.amount <= 0) {
     return { eligible: false, reason: "STRIPE_PRICE_MISSING" };
   }
   if (product.commercialStatus !== "paid") {
@@ -1284,11 +1320,11 @@ export function resolveProductCode(codeOrSlug: string): CatalogProduct | null {
 
 export type CatalogIntegrityError = { code: string; message: string };
 
-/** Assert all active self-serve checkout products have Stripe price IDs. */
+/** Assert all active self-serve checkout products have a Stripe price ID or inline catalog price. */
 export function assertActiveProductsHavePriceIds(): CatalogIntegrityError[] {
   return getActiveProducts()
-    .filter((p) => p.commercialStatus === "paid" && p.requiresCheckout === true && !p.stripePriceId)
-    .map((p) => ({ code: p.code, message: `Active checkout product "${p.code}" has no stripePriceId` }));
+    .filter((p) => p.commercialStatus === "paid" && p.requiresCheckout === true && !p.stripePriceId && p.amount <= 0)
+    .map((p) => ({ code: p.code, message: `Active checkout product "${p.code}" has no stripePriceId or inline amount` }));
 }
 
 /** Assert no duplicate product codes exist. */
@@ -1317,7 +1353,7 @@ export function isCheckoutAvailable(product: CatalogProduct): boolean {
       product.commercialStatus === "paid" &&
       product.requiresCheckout === true &&
       product.amount > 0 &&
-      product.stripePriceId
+      (product.stripePriceId || product.amount > 0)
   );
 }
 

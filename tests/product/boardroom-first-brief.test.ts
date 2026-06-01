@@ -22,6 +22,8 @@ import { buildBoardroomIntelligenceSpine } from '@/lib/constitution/boardroom-sp
 import { generateBoardroomDossier, qualifiesForBoardroom } from '@/lib/constitution/boardroom-mode'
 import { PAID_CORRIDOR_RECORDS } from '@/lib/product/paid-corridor-contract'
 import { CAPABILITY_STATUS_RECORDS, getCapabilityRecord } from '@/lib/product/capability-status-authority'
+import { CATALOG, checkCheckoutEligibility } from '@/lib/commercial/catalog'
+import { resolvePricingAction } from '@/lib/commercial/pricing-actions'
 
 // ─── 1. Boardroom-first Brief is not a paid corridor stage ──────────────────
 
@@ -32,11 +34,50 @@ describe('Boardroom-first Brief is not a paid corridor stage', () => {
     expect(stageNames).not.toContain('boardroom_brief')
   })
 
-  it('is listed in capability-status-authority as PARTIALLY_WIRED', () => {
+  it('is listed in capability-status-authority as ACTIVE market activation surface', () => {
     const record = getCapabilityRecord('Boardroom-first Brief')
     expect(record).toBeDefined()
-    expect(record!.status).toBe('PARTIALLY_WIRED')
+    expect(record!.status).toBe('ACTIVE')
     expect(record!.layer).toBe('UI_SURFACE')
+    expect(record!.outputProduced?.join(' ')).toMatch(/checkout CTA|sample brief/i)
+  })
+})
+
+// ─── 1b. Boardroom Brief is first paid proof-of-value product ───────────────
+
+describe('Boardroom Brief commercial product', () => {
+  it('is an active paid catalog product in the starter price range', () => {
+    const product = CATALOG.boardroom_brief
+    expect(product).toBeDefined()
+    expect(product.displayName).toBe('Boardroom Brief')
+    expect(product.amount).toBeGreaterThanOrEqual(4900)
+    expect(product.amount).toBeLessThanOrEqual(14900)
+    expect(product.commercialStatus).toBe('paid')
+    expect(product.requiresCheckout).toBe(true)
+    expect(product.primaryCta).toBe('Get full Boardroom Brief')
+  })
+
+  it('resolves to the existing checkout action flow', () => {
+    const product = CATALOG.boardroom_brief!
+    expect(checkCheckoutEligibility(product.code)).toMatchObject({
+      eligible: true,
+      product,
+    })
+    expect(resolvePricingAction(product)).toMatchObject({
+      type: 'checkout',
+      label: 'Get full Boardroom Brief',
+      href: '/boardroom-brief',
+    })
+  })
+
+  it('does not market the paid brief as Executive Reporting, Retainer, or Oversight', () => {
+    const product = CATALOG.boardroom_brief!
+    const serialized = JSON.stringify(product).toLowerCase()
+    expect(product.displayName).toBe('Boardroom Brief')
+    expect(serialized).not.toContain('retainer')
+    expect(serialized).not.toContain('oversight')
+    expect(serialized).not.toContain('full boardroom mode')
+    expect(product.displayName).not.toBe('Executive Reporting')
   })
 })
 

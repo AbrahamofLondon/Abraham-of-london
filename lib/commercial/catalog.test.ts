@@ -11,11 +11,11 @@ describe("catalog integrity", () => {
       expect(undefined_.length, `${undefined_.length} products missing commercialStatus: ${undefined_.map((p) => p.code).join(", ")}`).toBe(0);
     });
 
-    it("active paid checkout products require a Stripe price ID", () => {
+    it("active paid checkout products require a Stripe price ID or inline catalog price", () => {
       const missing = allProducts.filter(
-        (p) => p.active && p.commercialStatus === "paid" && p.requiresCheckout && !p.stripePriceId,
+        (p) => p.active && p.commercialStatus === "paid" && p.requiresCheckout && !p.stripePriceId && p.amount <= 0,
       );
-      expect(missing.length, `${missing.length} active paid checkout products missing Stripe price IDs: ${missing.map((p) => p.code).join(", ")}`).toBe(0);
+      expect(missing.length, `${missing.length} active paid checkout products missing Stripe price IDs or inline prices: ${missing.map((p) => p.code).join(", ")}`).toBe(0);
     });
 
     it("requiresCheckout=true is only used for paid products", () => {
@@ -90,6 +90,16 @@ describe("catalog integrity", () => {
       expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
       expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false);
       expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Current decision window: Q2 2026");
+    });
+
+    it("keeps Boardroom Brief as the active first paid proof-of-value product", () => {
+      expect(CATALOG.boardroom_brief!.active).toBe(true);
+      expect(CATALOG.boardroom_brief!.commercialStatus).toBe("paid");
+      expect(CATALOG.boardroom_brief!.requiresCheckout).toBe(true);
+      expect(CATALOG.boardroom_brief!.amount).toBeGreaterThanOrEqual(4900);
+      expect(CATALOG.boardroom_brief!.amount).toBeLessThanOrEqual(14900);
+      expect(CATALOG.boardroom_brief!.successPath).toBe("/boardroom-brief");
+      expect(checkCheckoutEligibility("boardroom_brief").eligible).toBe(true);
     });
 
     it("keeps Return Brief and advanced benchmark access aligned with Professional gating", () => {

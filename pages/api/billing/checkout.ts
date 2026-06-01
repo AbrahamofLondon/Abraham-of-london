@@ -169,7 +169,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── HubSpot sync (fire and forget) ──
   hubspotSync({
-    event: code === "strategy_room" ? "strategy_room_checkout" : "executive_reporting_checkout",
+    event: code === "strategy_room"
+      ? "strategy_room_checkout"
+      : code === "boardroom_brief"
+        ? "boardroom_brief_checkout"
+        : "executive_reporting_checkout",
     email: String(email || ""),
     data: { amount: product.amount / 100, productCode: code },
   }).catch(() => {});

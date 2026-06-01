@@ -16,6 +16,7 @@ export type HubSpotEvent =
   | "deal_flow_qualified"
   | "diagnostic_submitted"
   | "diagnostic_completed"
+  | "boardroom_brief_checkout"
   | "executive_reporting_checkout"
   | "strategy_room_checkout"
   | "payment_confirmed"
@@ -98,6 +99,17 @@ export async function hubspotSync(input: HubSpotSyncInput): Promise<void> {
       });
     }
 
+    if (event === "boardroom_brief_checkout") {
+      const amount = resolveHubSpotProductAmount(data.productCode);
+      if (amount == null) return;
+      await createDeal({
+        contactId,
+        dealName: `${data.organisation || email} — Boardroom Brief`,
+        amount,
+        stage: "report_purchased",
+      });
+    }
+
     if (event === "strategy_room_checkout") {
       const amount = resolveHubSpotProductAmount(data.productCode);
       if (amount == null) return;
@@ -130,6 +142,7 @@ function deriveLifecycleStage(event: HubSpotEvent): string | undefined {
     case "diagnostic_completed":
     case "inner_circle_registered":
       return "lead";
+    case "boardroom_brief_checkout":
     case "executive_reporting_checkout":
     case "strategy_room_checkout":
     case "payment_confirmed":
@@ -172,6 +185,8 @@ function buildActivityBody(
       return `Diagnostic submitted: type=${d.diagnosticType || "—"}, score=${d.score ?? "—"}, severity=${d.severity || "—"}`;
     case "diagnostic_completed":
       return `Diagnostic completed: type=${d.diagnosticType || "—"}, verdict=${d.verdict || "—"}, trajectory=${d.trajectory || "—"}`;
+    case "boardroom_brief_checkout":
+      return `Boardroom Brief checkout initiated (${resolveHubSpotProductPrice(d.productCode) || "catalog price unavailable"}). Organisation: ${d.organisation || "—"}`;
     case "executive_reporting_checkout":
       return `Executive Reporting checkout initiated (${resolveHubSpotProductPrice(d.productCode) || "catalog price unavailable"}). Organisation: ${d.organisation || "—"}`;
     case "strategy_room_checkout":

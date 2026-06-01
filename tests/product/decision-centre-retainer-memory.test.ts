@@ -13,7 +13,7 @@
  *   - Decision Centre CTA uses review language only (not start/activate/institutional).
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
   createRetainerReviewQueueEntry,
   getRetainerReviewQueueEntries,
@@ -28,8 +28,30 @@ import { buildRetainerMemoryPreviewModel } from '@/components/decision-centre/Re
 import { PAID_CORRIDOR_RECORDS, getCorridorRecord } from '@/lib/product/paid-corridor-contract'
 import type { RetainerCycleMemorySummary } from '@/lib/product/retainer-cycle-memory-contract'
 
-beforeEach(() => {
+// Known test caseId prefixes — safe to purge from DB between runs
+const TEST_CASE_IDS = [
+  'case-not-ready', 'case-review-ready', 'case-oversight-ready', 'case-dedup',
+  'case-safe', 'case-gated', 'case-approve', 'case-approve-gate',
+  'case-decline', 'case-decline-gate', 'case-more-history', 'case-more-history-gate',
+  'case-declined-suppress', 'case-upgrade-after-decline', 'case-byid',
+  'case-oversight-gate', 'case-not-found', 'upgrade-test', 'acted-on-helper',
+  'memory-fallback-proof',
+]
+
+async function cleanPrismaTestEntries() {
+  try {
+    const { default: prismaClient } = await import('@/lib/prisma')
+    await (prismaClient as any).retainerReviewQueueEntry?.deleteMany({
+      where: { caseId: { in: TEST_CASE_IDS } },
+    })
+  } catch {
+    // Prisma unavailable or model not in client — safe to ignore
+  }
+}
+
+beforeEach(async () => {
   _resetRetainerReviewQueueStore()
+  await cleanPrismaTestEntries()
 })
 
 // ---------------------------------------------------------------------------

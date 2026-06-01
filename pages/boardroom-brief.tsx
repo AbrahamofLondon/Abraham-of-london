@@ -17,7 +17,7 @@
  *   - Do not weaken or bypass the paid corridor.
  *   - Do not overclaim board readiness from thin evidence.
  *   - Do not expose raw unsafe user input.
- *   - Do not describe the product as an AI tool.
+ *   - Use qualified language when evidence is thin.
  *   - Use qualified language when evidence is thin.
  */
 
@@ -27,13 +27,16 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ArrowRight, Shield, FileText, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import Layout from '@/components/Layout'
+import CheckoutButton from '@/components/commercial/CheckoutButton'
+import { CATALOG } from '@/lib/commercial/catalog'
 import { buildBoardroomIntelligenceSpine } from '@/lib/constitution/boardroom-spine-builder'
-import { generateBoardroomDossier, qualifiesForBoardroom } from '@/lib/constitution/boardroom-mode'
+import { generateBoardroomDossier } from '@/lib/constitution/boardroom-mode'
 import type { BoardroomDossier } from '@/lib/constitution/boardroom-mode'
 
 const GOLD = '#C9A96E'
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" }
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 }
+const BOARDROOM_BRIEF_PRODUCT = CATALOG.boardroom_brief
 
 type IntakeForm = {
   decision: string
@@ -245,7 +248,7 @@ export default function BoardroomBriefPage() {
                 Test whether this decision can survive serious challenge.
               </h1>
               <p style={{ ...serif, fontSize: '1rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.45)', marginTop: '1rem', maxWidth: '52ch' }}>
-                Answer a few questions and receive a boardroom-style decision brief showing likely objections, evidence weaknesses, trade-offs, and the next admissible move.
+                Answer a few questions and receive an early boardroom-readiness preview. The paid Boardroom Brief expands the evidence read into objections, trade-offs, decision paths, and the next admissible move.
               </p>
               <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.20em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginTop: '0.75rem' }}>
                 This is not a full executive report. It is an early boardroom-readiness brief built from the evidence you provide.
@@ -337,7 +340,7 @@ export default function BoardroomBriefPage() {
                   style={{ padding: '13px 28px', border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: '8.5px', letterSpacing: '0.28em', textTransform: 'uppercase', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = `${GOLD}65`; e.currentTarget.style.backgroundColor = `${GOLD}18` }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = `${GOLD}42`; e.currentTarget.style.backgroundColor = `${GOLD}10` }}>
-                  Generate brief <ArrowRight style={{ width: '12px', height: '12px' }} />
+                  Generate preview <ArrowRight style={{ width: '12px', height: '12px' }} />
                 </button>
                 <Link href="/boardroom-brief?sample=true" style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)', textDecoration: 'none' }}>
                   View sample Boardroom brief
@@ -402,7 +405,9 @@ export default function BoardroomBriefPage() {
   if (!dossier) return null
 
   const isQualified = dossier.qualifiedForBoard
-  const sectionIds = dossier.sections.map(s => s.id)
+  const isSampleResult = router.query.sample === 'true'
+  const previewSections = isSampleResult ? dossier.sections : dossier.sections.slice(0, Math.min(2, dossier.sections.length))
+  const hasPreviewSections = previewSections.length > 0
 
   return (
     <Layout title="Boardroom Brief | Abraham of London" description="Your boardroom-style decision brief" canonicalUrl="/boardroom-brief" fullWidth headerTransparent>
@@ -414,7 +419,7 @@ export default function BoardroomBriefPage() {
             <div className="flex items-center gap-2 mb-2">
               <Shield style={{ width: '14px', height: '14px', color: isQualified ? `${GOLD}99` : 'rgba(252,165,165,0.60)' }} />
               <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.32em', textTransform: 'uppercase', color: isQualified ? `${GOLD}99` : 'rgba(252,165,165,0.60)' }}>
-                {isQualified ? 'Early boardroom-readiness brief' : 'Boardroom brief — limited evidence'}
+                {isSampleResult ? 'Sample Boardroom Brief' : isQualified ? 'Boardroom Brief preview' : 'Boardroom brief — limited evidence'}
               </span>
             </div>
             <h1 style={{ ...serif, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', lineHeight: 1.1, color: 'rgba(255,255,255,0.88)', marginTop: '0.5rem' }}>
@@ -422,13 +427,13 @@ export default function BoardroomBriefPage() {
             </h1>
             {!isQualified && (
               <p style={{ ...serif, fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(252,165,165,0.60)', marginTop: '0.5rem' }}>
-                Evidence is limited. Full Boardroom Mode requires stronger evidence carry-forward.
+                Evidence is limited. Boardroom Mode remains unavailable until stronger evidence carry-forward meets the qualification threshold.
               </p>
             )}
           </div>
 
           {/* Sample disclaimer */}
-          {router.query.sample === 'true' && (
+          {isSampleResult && (
             <div className="mt-6" style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: '1.25rem' }}>
               <p style={{ ...serif, fontSize: '0.85rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.45)', fontStyle: 'italic' }}>
                 This is a sample Boardroom Brief using fictional demonstration data. It is provided to show the kind of decision challenge the system can produce.
@@ -442,9 +447,33 @@ export default function BoardroomBriefPage() {
             </div>
           )}
 
+          {!isSampleResult && (
+            <div className="mt-6" style={{ border: `1px solid ${GOLD}28`, backgroundColor: `${GOLD}05`, padding: '1.25rem' }}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: `${GOLD}99`, marginBottom: '0.45rem' }}>
+                    Preview generated from your input
+                  </p>
+                  <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.55)' }}>
+                    This preview shows the early read. The paid Boardroom Brief expands the argument, objection handling, decision paths, and next admissible move.
+                  </p>
+                </div>
+                {BOARDROOM_BRIEF_PRODUCT && (
+                  <CheckoutButton
+                    productCode={BOARDROOM_BRIEF_PRODUCT.code}
+                    originPath="/boardroom-brief"
+                    style={{ padding: '12px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    Get full Boardroom Brief — {BOARDROOM_BRIEF_PRODUCT.displayPrice}
+                  </CheckoutButton>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Sections */}
           <div className="mt-6 space-y-4">
-            {dossier.sections.map(section => (
+            {hasPreviewSections ? previewSections.map(section => (
               <div key={section.id} style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
                 <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
                   {section.label}
@@ -453,11 +482,27 @@ export default function BoardroomBriefPage() {
                   {section.content}
                 </p>
               </div>
-            ))}
+            )) : (
+              <div style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
+                <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
+                  Preview boundary
+                </p>
+                <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.65)' }}>
+                  {dossier.gateMessage || 'The input is too thin for a boardroom-readiness preview. Add clearer evidence, consequence, and authority context before escalation.'}
+                </p>
+              </div>
+            )}
+            {!isSampleResult && dossier.sections.length > previewSections.length && (
+              <div style={{ border: `1px solid ${GOLD}20`, padding: '1rem', backgroundColor: `${GOLD}04` }}>
+                <p style={{ ...serif, fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.48)' }}>
+                  {dossier.sections.length - previewSections.length} further sections are held for the full Boardroom Brief.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Objection handling */}
-          {dossier.objectionHandling.length > 0 && (
+          {isSampleResult && dossier.objectionHandling.length > 0 && (
             <div className="mt-6">
               <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.75rem' }}>
                 Likely objections
@@ -484,7 +529,7 @@ export default function BoardroomBriefPage() {
           )}
 
           {/* Decision paths */}
-          {dossier.decisionPath.length > 0 && (
+          {isSampleResult && dossier.decisionPath.length > 0 && (
             <div className="mt-6">
               <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.75rem' }}>
                 Decision paths
@@ -507,15 +552,37 @@ export default function BoardroomBriefPage() {
             </div>
           )}
 
+          {!isSampleResult && (dossier.objectionHandling.length > 0 || dossier.decisionPath.length > 0) && (
+            <div className="mt-6" style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
+              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
+                Held for full brief
+              </p>
+              <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.58)' }}>
+                The full Boardroom Brief includes objection handling and decision-path consequences. This preview only shows the initial evidence read.
+              </p>
+            </div>
+          )}
+
           {/* Boundary footer */}
           <div className="mt-8 border-t border-white/[0.05] pt-6">
             <p style={{ ...serif, fontSize: '0.85rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.30)', fontStyle: 'italic' }}>
-              This brief is an early boardroom-readiness view. Executive Reporting converts the case into board-grade judgement. Full Boardroom Mode tests that judgement under deeper adversarial scrutiny.
+              {isQualified
+                ? 'This brief is an early boardroom-readiness view. The evidence may justify Executive Reporting next. Boardroom Mode and Strategy Room remain downstream surfaces, available only where the qualification and execution conditions are met.'
+                : 'This brief is an early boardroom-readiness view from limited evidence. Executive Reporting, Boardroom Mode, and Strategy Room require stronger case evidence before they should be treated as eligible next steps.'}
             </p>
           </div>
 
           {/* Upgrade routing */}
           <div className="mt-6 flex flex-wrap gap-3">
+            {!isSampleResult && BOARDROOM_BRIEF_PRODUCT && (
+              <CheckoutButton
+                productCode={BOARDROOM_BRIEF_PRODUCT.code}
+                originPath="/boardroom-brief"
+                style={{ padding: '11px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                Get full Boardroom Brief
+              </CheckoutButton>
+            )}
             <Link href="/test-your-decision"
               style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               Run Quick Decision Health Check <ArrowRight style={{ width: '11px', height: '11px' }} />
@@ -527,7 +594,19 @@ export default function BoardroomBriefPage() {
             {isQualified && (
               <Link href="/diagnostics/executive-reporting"
                 style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                Proceed to Executive Reporting <ArrowRight style={{ width: '11px', height: '11px' }} />
+                Consider Executive Reporting <ArrowRight style={{ width: '11px', height: '11px' }} />
+              </Link>
+            )}
+            {isQualified && (
+              <Link href="/boardroom"
+                style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                Check Boardroom Mode eligibility <ArrowRight style={{ width: '11px', height: '11px' }} />
+              </Link>
+            )}
+            {isQualified && (
+              <Link href="/strategy-room"
+                style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                Consider Strategy Room <ArrowRight style={{ width: '11px', height: '11px' }} />
               </Link>
             )}
           </div>
