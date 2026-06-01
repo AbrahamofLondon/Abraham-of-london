@@ -58,6 +58,27 @@ export type DecisionIntelligenceDelta = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Normalise a string value for comparison: trim whitespace, collapse internal
+ * whitespace, and convert null/undefined to empty string.
+ */
+function normaliseString(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  const str = String(value).trim().replace(/\s+/g, ' ')
+  return str
+}
+
+/**
+ * Check if two arrays have the same content as sets (order-independent,
+ * case-insensitive, whitespace-normalised).
+ */
+function arraySetsEqual(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const normalisedA = a.map(v => normaliseString(v).toLowerCase())
+  const normalisedB = new Set(b.map(v => normaliseString(v).toLowerCase()))
+  return normalisedA.every(v => normalisedB.has(v))
+}
+
+/**
  * Compare two values and return a significance level.
  */
 function compareField(
@@ -65,26 +86,37 @@ function compareField(
   before: unknown,
   after: unknown,
 ): { changed: boolean; significance: 'LOW' | 'MEDIUM' | 'HIGH'; summary: string } {
-  const beforeStr = before === null || before === undefined ? '' : String(before)
-  const afterStr = after === null || after === undefined ? '' : String(after)
+  // Normalise strings first — catches whitespace/case-only differences
+  const beforeStr = normaliseString(before)
+  const afterStr = normaliseString(after)
 
+  // Normalised string comparison
   if (beforeStr === afterStr) {
     return { changed: false, significance: 'LOW', summary: 'No change.' }
   }
 
-  // Compare arrays (unresolvedItems)
+  // Compare arrays (unresolvedItems) as normalised sets — order-independent
   if (Array.isArray(before) && Array.isArray(after)) {
-    if (before.length === after.length && before.every((v, i) => v === after[i])) {
+    const beforeNormalised = before.map(v => normaliseString(v)).filter(v => v.length > 0)
+    const afterNormalised = after.map(v => normaliseString(v)).filter(v => v.length > 0)
+
+    if (arraySetsEqual(beforeNormalised, afterNormalised)) {
       return { changed: false, significance: 'LOW', summary: 'No change.' }
     }
-    const resolved = before.filter(v => !after.includes(v))
-    const added = after.filter(v => !before.includes(v))
+
+    const resolved = beforeNormalised.filter(v => !afterNormalised.includes(v))
+    const added = afterNormalised.filter(v => !beforeNormalised.includes(v))
     const parts: string[] = []
     if (resolved.length > 0) parts.push(`${resolved.length} item(s) resolved`)
     if (added.length > 0) parts.push(`${added.length} item(s) added`)
     const summary = parts.length > 0 ? parts.join('; ') : 'Unresolved items changed.'
     const significance = resolved.length > 0 ? 'HIGH' : 'MEDIUM'
     return { changed: true, significance, summary }
+  }
+
+  // If one is array and other isn't, they're different
+  if (Array.isArray(before) !== Array.isArray(after)) {
+    return { changed: true, significance: 'MEDIUM', summary: 'Type of value changed.' }
   }
 
   // Determine significance based on field type
