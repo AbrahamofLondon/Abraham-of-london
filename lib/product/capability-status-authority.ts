@@ -10,6 +10,7 @@ export type CapabilityStatus =
   | 'DUPLICATE'
   | 'INTERNAL'
   | 'UNKNOWN'
+  | 'PLANNED'
 
 export type CapabilityLayer =
   | 'CAPTURE'
@@ -418,6 +419,62 @@ export const CAPABILITY_STATUS_RECORDS: CapabilityRecord[] = [
     dataRequired: ['validated source evidence', 'current time-series inputs', 'publication quality gates'],
     gatingReason: 'Predictive/research engines are not production corridor capabilities unless invoked by a production path and labelled with evidence class.',
     recommendation: 'Keep predictive engines out of paid corridor claims until production invocation and disclosure are proven.',
+    lastVerifiedCommit: VERIFIED_COMMIT,
+  },
+  {
+    capabilityId: 'Boardroom-first Brief',
+    filePath: 'PLANNED — no file yet',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    layer: 'BOARDROOM',
+    status: 'PLANNED' as CapabilityStatus,
+    corridorStage: undefined,
+    tests: [],
+    outputDestination: ['Market Activation Layer — boardroom readiness preview'],
+    outputProduced: ['Boardroom readiness score, objections, evidence weaknesses, trade-offs, decision paths'],
+    dataRequired: ['decision, owner, blocker, consequence, deadline, evidence, authority uncertainty'],
+    recommendation: 'Implement as first Market Activation surface. Uses buildBoardroomIntelligenceSpine() and generateBoardroomDossier() which are currently dormant.',
+    lastVerifiedCommit: VERIFIED_COMMIT,
+  },
+  {
+    capabilityId: 'Scenario Stress Test Hook',
+    filePath: 'PLANNED — no file yet',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    layer: 'CAPTURE',
+    status: 'PLANNED' as CapabilityStatus,
+    corridorStage: undefined,
+    tests: [],
+    outputDestination: ['Market Activation Layer — scenario stress preview'],
+    outputProduced: ['Scenario insight, consistency check, board challenge implication'],
+    dataRequired: ['Three scenario choices, optional explanation'],
+    recommendation: 'Implement using existing ENTERPRISE_SCENARIO_IDS and analyseScenarioResponse(). Low effort.',
+    lastVerifiedCommit: VERIFIED_COMMIT,
+  },
+  {
+    capabilityId: 'Quick Decision Health Check',
+    filePath: 'PLANNED — no file yet',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    layer: 'CAPTURE',
+    status: 'PLANNED' as CapabilityStatus,
+    corridorStage: undefined,
+    tests: [],
+    outputDestination: ['Market Activation Layer — fast decision health preview'],
+    outputProduced: ['Decision class, authority state, evidence state, consequence state, next admissible move'],
+    dataRequired: ['decision, owner (optional), blocker (optional), consequence (optional), deadline (optional)'],
+    recommendation: 'Implement using existing runDecisionIntelligence() with fast_diagnostic surface. Lowest effort activation surface.',
+    lastVerifiedCommit: VERIFIED_COMMIT,
+  },
+  {
+    capabilityId: 'Sample Boardroom Dossier',
+    filePath: 'PLANNED — no file yet',
+    productLine: 'OPERATIONAL_DECISION_INTELLIGENCE',
+    layer: 'BOARDROOM',
+    status: 'PLANNED' as CapabilityStatus,
+    corridorStage: undefined,
+    tests: [],
+    outputDestination: ['Market Activation Layer — static sample dossier download'],
+    outputProduced: ['Pre-generated sample boardroom dossier'],
+    dataRequired: ['None — uses canned sample spine'],
+    recommendation: 'Generate once using buildBoardroomIntelligenceSpine() then serve as static asset.',
     lastVerifiedCommit: VERIFIED_COMMIT,
   },
 ]

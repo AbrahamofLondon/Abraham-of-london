@@ -13,6 +13,7 @@ export type PaidCorridorStage =
   | 'executive_reporting'
   | 'boardroom_mode'
   | 'strategy_room'
+  | 'retainer_review_queue'
   | 'retainer_oversight'
 
 export type CorridorCapabilityStatus = 'ACTIVE' | 'PARTIALLY_WIRED' | 'GATED' | 'DORMANT'
@@ -311,7 +312,7 @@ const STRATEGY_ROOM: PaidCorridorRecord = {
     'Enterprise stress architecture as the primary product',
     'Board-grade material generation as the primary product',
   ],
-  unlocksNext: ['retainer_oversight'],
+  unlocksNext: ['retainer_review_queue'],
   paymentJustification: 'Execution governance and owner-pressure logic that prevents a recommendation from decaying into informal drift.',
   nonOverlapBoundary: 'Strategy Room governs an execution; Retainer Oversight learns across multiple cycles.',
   upgradeTrigger: 'Execution produces enough durable recommendation/outcome memory, recurrence, drift, and cadence evidence to justify retained oversight.',
@@ -380,12 +381,60 @@ const RETAINER_OVERSIGHT: PaidCorridorRecord = {
   nextWiringAction: 'Connect durable recommendation/outcome/recurrence cadence before describing retainer oversight as active.',
 }
 
+const RETAINER_REVIEW_QUEUE: PaidCorridorRecord = {
+  stage: 'retainer_review_queue',
+  corridorRole: 'Operator-reviewed readiness gate between execution and retained oversight — validates that sufficient recommendation and outcome memory exists before activating institutional intelligence',
+  userPerceptionShift: 'From "We have been executing" to "An operator has reviewed our case history and confirmed readiness for retained oversight"',
+  coreQuestionAnswered: 'Has this case accumulated enough recommendation history, outcome data, and governed memory to justify retained institutional oversight?',
+  minimumEvidenceRequired: [
+    'Recommendation ledger entries from prior execution cycles',
+    'Outcome reports with verification status',
+    'Governed memory items accumulated during strategy room execution',
+  ],
+  engineRequirements: [
+    'retainer-review-queue entry creation',
+    'oversight-review-decision-engine operator actions',
+    'readiness assessment from recommendation/outcome ledger',
+  ],
+  activeCapabilities: [
+    { name: 'Retainer review queue entry creation', status: 'ACTIVE' },
+    { name: 'Operator review decisions (approve, decline, request more history)', status: 'PARTIALLY_WIRED' },
+  ],
+  gatedCapabilities: [
+    { name: 'Oversight cadence activation', status: 'GATED', gatedReason: 'Requires operator approval and sufficient case history.' },
+    { name: 'Oversight cycle comparison', status: 'GATED', gatedReason: 'Requires completed oversight cycles post-approval.' },
+    { name: 'Institutional memory activation', status: 'GATED', gatedReason: 'Requires durable recommendation/outcome memory confirmed by operator review.' },
+  ],
+  dormantRelevantCapabilities: [],
+  primaryOutput: 'Operator review decision on case readiness for retained oversight.',
+  mustShow: [
+    'Review queue status',
+    'Operator decision (approved, declined, needs more history)',
+    'Readiness assessment basis',
+  ],
+  mustNotShow: [
+    'Start retainer',
+    'Activate monthly oversight',
+    'Institutional memory active',
+    'Retainer cycle started',
+  ],
+  unlocksNext: ['retainer_oversight'],
+  paymentJustification: 'Operator review of case readiness ensures retainer investment is justified by sufficient evidence history',
+  nonOverlapBoundary: 'Retainer Review Queue validates readiness; Retainer Oversight delivers institutional intelligence',
+  upgradeTrigger: 'Operator approves case as ready for retained oversight based on accumulated recommendation/outcome memory.',
+  firstImpressionMoment: 'The buyer sees that an operator has independently confirmed their case history justifies retained oversight.',
+  currentReadiness: 'ACTIVE',
+  riskOfOverclaiming: 'LOW',
+  nextWiringAction: 'Connect automated readiness scoring from recommendation/outcome ledger to operator review queue.',
+}
+
 export const PAID_CORRIDOR_RECORDS: PaidCorridorRecord[] = [
   TEAM_ASSESSMENT,
   ENTERPRISE_ASSESSMENT,
   EXECUTIVE_REPORTING,
   BOARDROOM_MODE,
   STRATEGY_ROOM,
+  RETAINER_REVIEW_QUEUE,
   RETAINER_OVERSIGHT,
 ]
 

@@ -536,9 +536,17 @@ describe('Corridor status integrity', () => {
     expect(strategy!.activeCapabilities.length).toBeGreaterThan(0)
   })
 
-  it('no paid corridor stage claims Retainer/Oversight capability as active', () => {
+  it('Retainer Review Queue is ACTIVE in paid-corridor-contract', () => {
+    const queue = getCorridorRecord('retainer_review_queue')
+    expect(queue).toBeDefined()
+    expect(queue!.currentReadiness).toBe('ACTIVE')
+    expect(queue!.activeCapabilities.length).toBeGreaterThan(0)
+  })
+
+  it('no paid corridor stage claims Retainer/Oversight capability as active (except retainer_review_queue and retainer_oversight)', () => {
     for (const record of PAID_CORRIDOR_RECORDS) {
-      if (record.stage === 'retainer_oversight') continue // Skip retainer itself
+      if (record.stage === 'retainer_oversight') continue
+      if (record.stage === 'retainer_review_queue') continue
       for (const cap of record.activeCapabilities) {
         expect(cap.name.toLowerCase()).not.toContain('retainer')
         expect(cap.name.toLowerCase()).not.toContain('oversight')

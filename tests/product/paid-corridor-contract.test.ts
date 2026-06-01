@@ -12,6 +12,7 @@ const ALL_STAGES: PaidCorridorStage[] = [
   'executive_reporting',
   'boardroom_mode',
   'strategy_room',
+  'retainer_review_queue',
   'retainer_oversight',
 ]
 
@@ -93,6 +94,31 @@ describe('Paid Corridor Contract', () => {
   it('Boardroom Mode and Strategy Room corridor stages', () => {
     expect(getCorridorRecord('boardroom_mode')!.currentReadiness).toBe('ACTIVE')
     expect(getCorridorRecord('strategy_room')!.currentReadiness).toBe('ACTIVE')
+  })
+
+  it('Retainer Review Queue is an operator readiness gate between Strategy Room and Retainer Oversight', () => {
+    const queue = getCorridorRecord('retainer_review_queue')!
+    expect(queue).toBeDefined()
+    expect(queue.currentReadiness).toBe('ACTIVE')
+    expect(queue.corridorRole.toLowerCase()).toContain('operator')
+    expect(queue.corridorRole.toLowerCase()).toContain('readiness')
+    expect(queue.unlocksNext).toContain('retainer_oversight')
+
+    // Strategy Room unlocks Retainer Review Queue
+    const strategy = getCorridorRecord('strategy_room')!
+    expect(strategy.unlocksNext).toContain('retainer_review_queue')
+
+    // Retainer Review Queue appears between Strategy Room and Retainer Oversight in corridor order
+    const stages = PAID_CORRIDOR_RECORDS.map(r => r.stage)
+    const strategyIdx = stages.indexOf('strategy_room')
+    const queueIdx = stages.indexOf('retainer_review_queue')
+    const oversightIdx = stages.indexOf('retainer_oversight')
+    expect(queueIdx).toBeGreaterThan(strategyIdx)
+    expect(queueIdx).toBeLessThan(oversightIdx)
+  })
+
+  it('Paid corridor has exactly 7 stages', () => {
+    expect(PAID_CORRIDOR_RECORDS.length).toBe(7)
   })
 
   it('No stage promises dormant-only capability as active', () => {
