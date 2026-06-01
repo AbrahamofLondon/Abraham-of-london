@@ -67,37 +67,39 @@ type ChallengeResult = {
 const CONTEXT_STEPS = [
   {
     id: "avoidedDecision" as const,
-    label: "Step 1 of 5",
+    label: "Step 1 of 3",
     question: "What decision are you currently avoiding or deferring?",
     helper: "Name the specific choice, not the general direction.",
     placeholder: "e.g. Leave current role / Confront a relationship / Commit to a new direction",
   },
   {
     id: "competingObligation" as const,
-    label: "Step 2 of 5",
+    label: "Step 2 of 3",
     question: "What competing obligation or priority is pulling against that decision?",
     helper: "This is usually the thing you are protecting while the decision waits.",
     placeholder: "e.g. Financial stability / Family expectations / Current commitments",
   },
   {
     id: "consequence" as const,
-    label: "Step 3 of 5",
+    label: "Step 3 of 3",
     question: "What becomes worse if this remains unresolved?",
     helper: "Be specific. Vague consequences produce vague analysis.",
     placeholder: "e.g. I continue doing delivery work myself and delay commercial outreach",
   },
+] as const;
+
+/** Optional enrichment prompts shown after the main result to sharpen the reading */
+const ENRICHMENT_PROMPTS = [
   {
     id: "toleratedDysfunction" as const,
-    label: "Step 4 of 5",
     question: "What are you currently tolerating that you already know is weakening the decision?",
-    helper: "This exposes normalised dysfunction, avoidance, drift, or tolerated contradiction.",
+    helper: "This answer helps the system distinguish responsible action from reactive movement. It exposes normalised dysfunction, avoidance, drift, or tolerated contradiction.",
     placeholder: "e.g. A team member who consistently misses deadlines / A process everyone knows is broken",
   },
   {
     id: "justifyingEvidence" as const,
-    label: "Step 5 of 5",
     question: "What evidence would make action justified rather than reactive?",
-    helper: "This reveals the evidence threshold required for legitimate action.",
+    helper: "This answer helps the system distinguish responsible action from reactive movement. It reveals the evidence threshold required for legitimate action.",
     placeholder: "e.g. Three months of consistent data / A second opinion from an external advisor",
   },
 ] as const;
@@ -693,6 +695,55 @@ export default function PurposeAlignmentAssessment({ onScored, isPaidEntitled }:
                 analysisError={analysisError}
                 retryAnalysis={retryAnalysis}
               />
+            )}
+
+            {/* Optional enrichment prompts — sharpen the reading */}
+            {ENRICHMENT_PROMPTS.map((prompt) => {
+              const answered = contextAnswers[prompt.id]?.trim().length > 0;
+              if (answered) return null;
+              return (
+                <div
+                  key={prompt.id}
+                  className="mt-4 border border-amber-500/20 bg-amber-500/[0.03] p-4"
+                >
+                  <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-amber-400/60">
+                    Sharpen the reading (optional)
+                  </p>
+                  <p className="mt-2 text-[14px] leading-[1.7] text-white/80 font-serif italic">
+                    {prompt.question}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-[1.5] text-white/40">
+                    {prompt.helper}
+                  </p>
+                  <textarea
+                    value={contextAnswers[prompt.id]}
+                    onChange={(e) => setContextAnswers(prev => ({ ...prev, [prompt.id]: e.target.value }))}
+                    rows={2}
+                    placeholder={prompt.placeholder}
+                    className="mt-3 w-full border bg-white/[0.02] p-3 text-[13px] leading-[1.6] text-white/70"
+                    style={{ borderColor: 'rgba(255,255,255,0.10)', resize: 'vertical' }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Re-score button when enrichment fields are filled */}
+            {ENRICHMENT_PROMPTS.some(p => contextAnswers[p.id]?.trim().length > 0) && (
+              <button
+                type="button"
+                onClick={handleScore}
+                disabled={submitting}
+                className="mt-2 inline-flex items-center gap-2 self-start border px-5 py-3 text-[10px] uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                style={{
+                  borderColor: `${'#C9A96E'}40`,
+                  backgroundColor: `${'#C9A96E'}10`,
+                  color: '#F5F5F5',
+                  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                  letterSpacing: '0.12em',
+                }}
+              >
+                {submitting ? 'Re-scoring...' : 'Update reading'}
+              </button>
             )}
           </section>
         ) : null}

@@ -24,6 +24,8 @@ export type BuildPurposeAlignmentViewModelInput = {
     avoidedDecision: string
     competingObligation: string
     consequence: string
+    toleratedDysfunction?: string
+    justifyingEvidence?: string
   }
   decisionIntelligence?: DecisionIntelligenceResult
 }
@@ -64,7 +66,7 @@ function deriveProgress(): LivingLayerViewModel['progress'] {
 // ─── Evidence Derivation ─────────────────────────────────────────────────────
 
 function deriveEvidence(input: BuildPurposeAlignmentViewModelInput): LivingLayerViewModel['evidence'] {
-  const { result } = input
+  const { result, contextAnswers } = input
 
   const derived = deriveEvidenceTierFromInputs({
     completedStages: ['purpose_alignment'],
@@ -78,12 +80,19 @@ function deriveEvidence(input: BuildPurposeAlignmentViewModelInput): LivingLayer
   if (result.contradictions && result.contradictions.length > 0) {
     gaps.push(`${result.contradictions.length} contradiction(s) identified but not yet structurally verified`)
   }
+  if (contextAnswers.justifyingEvidence) {
+    gaps.push(`Evidence threshold for justified action is clearer: ${contextAnswers.justifyingEvidence.slice(0, 80)}`)
+  } else {
+    gaps.push('Evidence threshold for justified action remains unresolved')
+  }
   gaps.push('Single diagnostic — combine with Constitutional or Team assessment for corroboration')
 
   return {
     level: derived.level,
     stagesCompleted: 1,
-    summary: derived.summary,
+    summary: contextAnswers.justifyingEvidence
+      ? `Evidence threshold identified: ${contextAnswers.justifyingEvidence.slice(0, 100)}.`
+      : derived.summary,
     gaps,
   }
 }
@@ -117,6 +126,10 @@ function deriveGovernedAction(input: BuildPurposeAlignmentViewModelInput): Livin
   } else if (contextAnswers.avoidedDecision) {
     whyThisAction = `The avoided decision "${contextAnswers.avoidedDecision}" is the most likely source of the pattern.`
   }
+  if (contextAnswers.toleratedDysfunction) {
+    const toleratedSuffix = whyThisAction ? ' Additionally, a tolerated dysfunction was detected.' : ''
+    whyThisAction = `The system detected a tolerated dysfunction: ${contextAnswers.toleratedDysfunction.slice(0, 100)}. This may be sustaining the current drift.${toleratedSuffix}`
+  }
 
   const evidenceBasisParts: string[] = []
   if (result.primaryPattern) {
@@ -127,6 +140,12 @@ function deriveGovernedAction(input: BuildPurposeAlignmentViewModelInput): Livin
   }
   if (result.contradictions && result.contradictions.length > 0) {
     evidenceBasisParts.push(`${result.contradictions.length} contradiction(s) identified`)
+  }
+  if (contextAnswers.justifyingEvidence) {
+    evidenceBasisParts.push('Evidence threshold for action identified')
+  }
+  if (contextAnswers.toleratedDysfunction) {
+    evidenceBasisParts.push('Tolerated dysfunction surfaced')
   }
 
   return {
@@ -166,6 +185,12 @@ function deriveAdvantage(input: BuildPurposeAlignmentViewModelInput): LivingLaye
   if (contextAnswers.competingObligation) {
     advantages.push(`Competing obligation identified: ${contextAnswers.competingObligation}`)
   }
+  if (contextAnswers.toleratedDysfunction) {
+    advantages.push(`Tolerated dysfunction surfaced: ${contextAnswers.toleratedDysfunction.slice(0, 80)}`)
+  }
+  if (contextAnswers.justifyingEvidence) {
+    advantages.push(`Evidence threshold for action identified: ${contextAnswers.justifyingEvidence.slice(0, 80)}`)
+  }
 
   const confidenceBand = decisionIntelligence
     ? (decisionIntelligence.confidence === 'HIGH' ? 'HIGH' : decisionIntelligence.confidence === 'MEDIUM' ? 'MEDIUM' : 'LOW')
@@ -185,7 +210,7 @@ function deriveAdvantage(input: BuildPurposeAlignmentViewModelInput): LivingLaye
 // ─── Next Layer Derivation ───────────────────────────────────────────────────
 
 function deriveNextLayer(input: BuildPurposeAlignmentViewModelInput): LivingLayerViewModel['nextLayer'] {
-  const { result, decisionIntelligence } = input
+  const { result, contextAnswers, decisionIntelligence } = input
 
   // Derive real unresolved items — prefer orchestrator when available
   const unresolvedItems: string[] = []
@@ -203,6 +228,12 @@ function deriveNextLayer(input: BuildPurposeAlignmentViewModelInput): LivingLaye
   }
   if (!result.firstAction) {
     unresolvedItems.push('First correction action not yet determined')
+  }
+  if (contextAnswers.toleratedDysfunction) {
+    unresolvedItems.push('Tolerated dysfunction may be sustaining current drift')
+  }
+  if (!contextAnswers.justifyingEvidence) {
+    unresolvedItems.push('Evidence threshold for justified action remains unresolved')
   }
 
   return {
@@ -241,6 +272,22 @@ function deriveMemory(input: BuildPurposeAlignmentViewModelInput): LivingLayerVi
     })
   }
 
+  if (contextAnswers.toleratedDysfunction) {
+    entries.push({
+      label: 'Tolerated dysfunction surfaced',
+      summary: contextAnswers.toleratedDysfunction.length > 80 ? contextAnswers.toleratedDysfunction.slice(0, 80) + '…' : contextAnswers.toleratedDysfunction,
+      timestamp: '',
+    })
+  }
+
+  if (contextAnswers.justifyingEvidence) {
+    entries.push({
+      label: 'Evidence threshold identified',
+      summary: contextAnswers.justifyingEvidence.length > 80 ? contextAnswers.justifyingEvidence.slice(0, 80) + '…' : contextAnswers.justifyingEvidence,
+      timestamp: '',
+    })
+  }
+
   return {
     entries,
     dominantPattern: result.primaryPattern?.label ?? null,
@@ -251,7 +298,7 @@ function deriveMemory(input: BuildPurposeAlignmentViewModelInput): LivingLayerVi
 // ─── Changes Derivation ──────────────────────────────────────────────────────
 
 function deriveChanges(input: BuildPurposeAlignmentViewModelInput): LivingLayerViewModel['changes'] {
-  const { result, decisionIntelligence } = input
+  const { result, contextAnswers, decisionIntelligence } = input
   const deltas: LivingLayerViewModel['changes']['deltas'] = []
   const newEvidence: string[] = []
 
@@ -286,6 +333,14 @@ function deriveChanges(input: BuildPurposeAlignmentViewModelInput): LivingLayerV
     }
   }
 
+  // New enrichment fields
+  if (contextAnswers.toleratedDysfunction) {
+    newEvidence.push(`Tolerated dysfunction: ${contextAnswers.toleratedDysfunction.slice(0, 80)}`)
+  }
+  if (contextAnswers.justifyingEvidence) {
+    newEvidence.push(`Evidence threshold: ${contextAnswers.justifyingEvidence.slice(0, 80)}`)
+  }
+
   return { deltas, newEvidence }
 }
 
@@ -316,7 +371,17 @@ function deriveReview(input: BuildPurposeAlignmentViewModelInput): LivingLayerVi
 // ─── Continuity Derivation ───────────────────────────────────────────────────
 
 function deriveContinuity(input: BuildPurposeAlignmentViewModelInput): LivingLayerContinuityView {
-  const { decisionIntelligence } = input
+  const { contextAnswers, decisionIntelligence } = input
+
+  let continuityStatement = 'This is a single-diagnostic assessment. Completing additional diagnostics strengthens the evidence base and enables continuity tracking.'
+
+  if (decisionIntelligence?.primaryContradiction) {
+    continuityStatement = `The orchestrator identified a core contradiction: ${decisionIntelligence.primaryContradiction.slice(0, 120)}. This is a single-diagnostic assessment — completing additional diagnostics strengthens the evidence base.`
+  } else if (contextAnswers.toleratedDysfunction) {
+    continuityStatement = `A tolerated dysfunction was identified: ${contextAnswers.toleratedDysfunction.slice(0, 80)}. This may be sustaining current drift. Completing additional diagnostics strengthens the evidence base.`
+  } else if (contextAnswers.justifyingEvidence) {
+    continuityStatement = `The evidence threshold for responsible action is now clearer: ${contextAnswers.justifyingEvidence.slice(0, 80)}. Completing additional diagnostics strengthens the evidence base.`
+  }
 
   return {
     sessionContinuity: {
@@ -334,9 +399,7 @@ function deriveContinuity(input: BuildPurposeAlignmentViewModelInput): LivingLay
           summary: s.summary,
         }))
       : [],
-    continuityStatement: decisionIntelligence?.primaryContradiction
-      ? `The orchestrator identified a core contradiction: ${decisionIntelligence.primaryContradiction.slice(0, 120)}. This is a single-diagnostic assessment — completing additional diagnostics strengthens the evidence base.`
-      : 'This is a single-diagnostic assessment. Completing additional diagnostics strengthens the evidence base and enables continuity tracking.',
+    continuityStatement,
   }
 }
 
