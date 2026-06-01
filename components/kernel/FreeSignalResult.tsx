@@ -361,6 +361,25 @@ export function FreeSignalResult({ signal, onReset }: FreeSignalResultProps) {
           </Section>
         )}
 
+        {/* Progressive Evidence Capture — next best question */}
+        {signal.decisionIntelligence?.progressiveEvidenceCapture?.nextBestCapture && !signal.clarificationRequired && (
+          <Section label="To sharpen this reading">
+            <div className="border border-amber-500/20 bg-amber-500/[0.03] p-4">
+              <p className="text-[15px] leading-[1.8] text-white/80" style={{ ...serif, fontStyle: 'italic' }}>
+                {signal.decisionIntelligence.progressiveEvidenceCapture.nextBestCapture.question}
+              </p>
+              <p className="mt-3 text-[12px] leading-[1.6] text-white/40">
+                {signal.decisionIntelligence.progressiveEvidenceCapture.nextBestCapture.reason}
+              </p>
+              {signal.decisionIntelligence.progressiveEvidenceCapture.nextBestCapture.unlocksEngines.length > 0 && (
+                <p className="mt-2 text-[11px] leading-[1.5] text-white/30">
+                  This would allow the system to test: {signal.decisionIntelligence.progressiveEvidenceCapture.nextBestCapture.unlocksEngines.length} additional dimension(s) of your decision situation.
+                </p>
+              )}
+            </div>
+          </Section>
+        )}
+
         {/* CTA — restrained */}
         {!signal.clarificationRequired && (
           <div className="mt-12 border-t border-white/[0.06] pt-8">

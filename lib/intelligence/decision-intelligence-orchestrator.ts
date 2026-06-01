@@ -99,6 +99,8 @@ import {
 import { assertSurfaceMayUseEngine } from '@/lib/intelligence/product-operating-matrix'
 import { getMissingFieldsForEngines, type SurfaceInstrumentContract } from '@/lib/intelligence/surface-instrument-contract'
 import { createOrSkipRecommendationEntry } from '@/lib/product/recommendation-outcome-ledger'
+import { deriveProgressiveEvidenceCapture } from '@/lib/intelligence/progressive-evidence-capture'
+import type { ProgressiveEvidenceCaptureResult } from '@/lib/intelligence/progressive-evidence-capture'
 
 // ─── Engine Instances (singletons) ────────────────────────────────────────────
 
@@ -203,6 +205,8 @@ export type DecisionIntelligenceResult = {
     missingFields?: string[]
     suggestedNextCapture?: string
   }>
+  /** Progressive evidence capture — next best question to ask */
+  progressiveEvidenceCapture?: ProgressiveEvidenceCaptureResult
 }
 
 // ─── LAYER 1: Situation Understanding ────────────────────────────────────────
@@ -1022,6 +1026,31 @@ export async function runDecisionIntelligence(
   }
   const engineTrace = buildEngineTrace(input.surface, availableInputKeys)
 
+  // ── PROGRESSIVE EVIDENCE CAPTURE ────────────────────────────────────
+  // Build providedFields from available inputs for progressive capture
+  const providedFields: Record<string, unknown> = {}
+  if (rawInput) providedFields['situation'] = rawInput
+  if (input.userAnswers) {
+    for (const [key, value] of Object.entries(input.userAnswers)) {
+      providedFields[key] = value
+    }
+  }
+  // Extract field keys from engine trace skipped engines
+  const skippedEngines = (engineTrace ?? [])
+    .filter(e => e.status === 'SKIPPED_GATED' || e.status === 'SKIPPED_NOT_APPLICABLE')
+    .map(e => ({
+      engineId: e.engineId,
+      reason: e.reason,
+      missingFields: e.missingFields,
+    }))
+
+  const progressiveEvidenceCapture = deriveProgressiveEvidenceCapture({
+    surface: input.surface as any,
+    providedFields,
+    skippedEngines: skippedEngines.length > 0 ? skippedEngines : undefined,
+    maxPrompts: input.surface === 'fast_diagnostic' ? 2 : 1,
+  })
+
   // ── JOURNEY PERSISTENCE (non-blocking) ──────────────────────────────
   let journeyCaseId: string | undefined
   if (input.persistJourney && input.caseId) {
@@ -1116,5 +1145,8 @@ export async function runDecisionIntelligence(
 
     // ENGINE TRACE
     engineTrace,
+
+    // PROGRESSIVE EVIDENCE CAPTURE
+    progressiveEvidenceCapture,
   }
 }
