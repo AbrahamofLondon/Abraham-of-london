@@ -11,7 +11,9 @@ export type TeamDiagnosticAnswers = {
   /** The respondent's role within the team */
   respondentRole?: string
   /** Who holds decision authority for the condition being assessed */
-  decisionOwner?: string
+  perceivedOwner?: string
+  /** Decision being assessed */
+  perceivedDecision?: string
   /** The primary blocker the respondent identified */
   perceivedBlocker?: string
   /** Clarity of authority (0-100, derived from authority domain scores) */
@@ -73,14 +75,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const trustScore = sectionScores.find(s => s.sectionId === 'trust');
         const authorityScore = sectionScores.find(s => s.sectionId === 'authority');
 
+        // Explicit perception fields take priority over derived values
+        const respondentData = (metadata.respondentData as Record<string, unknown> | undefined) ?? {};
         const teamAnswers: TeamDiagnosticAnswers = {
-          respondentRole: (metadata.respondent as Record<string, unknown> | undefined)?.role as string | undefined,
-          decisionOwner: (authorityInput?.condition as string) ?? undefined,
-          perceivedBlocker: (metadata.fragilityStatus as string) ?? undefined,
-          authorityClarity: typeof authorityScore?.pct === 'number' ? authorityScore.pct : undefined,
-          evidenceClarity: typeof directionScore?.pct === 'number' ? directionScore.pct : undefined,
-          executionConfidence: typeof executionScore?.pct === 'number' ? executionScore.pct : undefined,
-          consequenceAwareness: typeof trustScore?.pct === 'number' ? trustScore.pct : undefined,
+          respondentRole: (respondentData.respondentRole as string | undefined) ?? (metadata.respondent as Record<string, unknown> | undefined)?.role as string | undefined,
+          perceivedDecision: (respondentData.perceivedDecision as string | undefined) ?? (authorityInput?.decisionText as string | undefined),
+          perceivedOwner: respondentData.perceivedOwner as string | undefined,
+          perceivedBlocker: (respondentData.perceivedBlocker as string | undefined) ?? (metadata.fragilityStatus as string) ?? undefined,
+          authorityClarity: typeof respondentData.authorityClarity === 'number' ? respondentData.authorityClarity : typeof authorityScore?.pct === 'number' ? authorityScore.pct : undefined,
+          evidenceClarity: typeof respondentData.evidenceClarity === 'number' ? respondentData.evidenceClarity : typeof directionScore?.pct === 'number' ? directionScore.pct : undefined,
+          executionConfidence: typeof respondentData.executionConfidence === 'number' ? respondentData.executionConfidence : typeof executionScore?.pct === 'number' ? executionScore.pct : undefined,
+          consequenceAwareness: typeof respondentData.consequenceAwareness === 'number' ? respondentData.consequenceAwareness : typeof trustScore?.pct === 'number' ? trustScore.pct : undefined,
           disagreementArea: (metadata.urgentDomain as string) ?? undefined,
           recommendedMove: (authorityInput?.firstMove as string) ?? undefined,
           overallLeader: typeof metadata.overallLeader === 'number' ? metadata.overallLeader : undefined,
@@ -90,7 +95,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           respondentCount: 1, // Single respondent by default
         };
 
-        const caseId = `team-${data.reference}`;
+        const caseReference = typeof metadata.caseId === "string"
+          ? metadata.caseId
+          : typeof metadata.teamCaseReference === "string"
+            ? metadata.teamCaseReference
+            : data.reference;
+        const caseId = `team-${caseReference.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`;
         await runDecisionIntelligence({
           surface: "team_assessment",
           rawUserInput: `Team Assessment completed: ${data.severity} (score: ${data.score})`,
@@ -106,6 +116,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           caseId,
           email: data.userEmail ?? undefined,
         });
+
+        // Persist respondent evidence as a journey event for multi-respondent aggregation
+        try {
+          const { appendDiagnosticJourneyEvent } = await import(
+            "@/lib/product/diagnostic-journey-store"
+          );
+          const respondentDataPayload: Record<string, unknown> = {};
+          if (teamAnswers.respondentRole) respondentDataPayload.respondentRole = teamAnswers.respondentRole;
+          if (teamAnswers.perceivedDecision) respondentDataPayload.perceivedDecision = teamAnswers.perceivedDecision;
+          if (teamAnswers.perceivedOwner) respondentDataPayload.perceivedOwner = teamAnswers.perceivedOwner;
+          if (teamAnswers.perceivedBlocker) respondentDataPayload.perceivedBlocker = teamAnswers.perceivedBlocker;
+          if (teamAnswers.authorityClarity !== undefined) respondentDataPayload.authorityClarity = teamAnswers.authorityClarity;
+          if (teamAnswers.evidenceClarity !== undefined) respondentDataPayload.evidenceClarity = teamAnswers.evidenceClarity;
+          if (teamAnswers.executionConfidence !== undefined) respondentDataPayload.executionConfidence = teamAnswers.executionConfidence;
+          if (teamAnswers.consequenceAwareness !== undefined) respondentDataPayload.consequenceAwareness = teamAnswers.consequenceAwareness;
+
+          await appendDiagnosticJourneyEvent({
+            caseId,
+            surface: "team_assessment",
+            type: "EVIDENCE_CAPTURED",
+            engineId: "team-respondent-capture",
+            summary: "Team respondent evidence captured.",
+            audienceSafe: false,
+            payload: {
+              respondentData: respondentDataPayload,
+            },
+          });
+        } catch {
+          // Non-blocking — respondent persistence must not block the diagnostic result
+        }
       } catch {
         // Non-blocking — journey persistence must not block the diagnostic result
       }
