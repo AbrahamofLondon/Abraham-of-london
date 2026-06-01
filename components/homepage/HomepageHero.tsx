@@ -44,8 +44,8 @@ export default function HomepageHero() {
           style={{ color: "rgba(255,255,255,0.58)" }}
         >
           A governed decision system for leaders, teams, and organisations under pressure.
-          It detects contradictions between intent, evidence, authority, and execution
-          before decisions collapse.
+          It tests whether a decision has enough evidence, authority, ownership, and
+          execution clarity before it moves forward.
         </p>
 
         {/* Trust line */}
@@ -53,7 +53,7 @@ export default function HomepageHero() {
           className="mx-auto mt-4 max-w-[56ch] text-[14px] leading-[1.75]"
           style={{ color: "rgba(255,255,255,0.38)" }}
         >
-          Unlike ordinary AI tools, this system can refuse to proceed when the evidence is too weak.
+          Built to challenge weak evidence, unclear authority, and unsupported decisions before they become expensive mistakes.
         </p>
 
         {/* CTAs */}
