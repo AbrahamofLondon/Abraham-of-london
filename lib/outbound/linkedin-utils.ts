@@ -306,7 +306,18 @@ export function validatePost(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Read all LinkedIn posts from the outbound directory.
+ * Read LinkedIn posts from the **root** of content/outbound/linkedin/ only.
+ *
+ * SCOPE: reads .mdx files at the top level + optionally the posted/ subfolder.
+ * Does NOT recurse into campaign subdirectories (the-burden-changes-hands,
+ * the-truth-in-the-frame, what-survived). Campaign posts are served by the
+ * campaign console via getLinkedInCampaignPosts() in outbound-content-loader.ts.
+ *
+ * Do not rename or widen this function without updating the LinkedIn console
+ * (pages/admin/outbound/linkedin.tsx) and its campaign-queue navigation block.
+ *
+ * See also: getRootLinkedInPostsOnly() — explicit-scope alias for callers that
+ * want to be unambiguous about the narrow read.
  */
 export function getAllLinkedInPosts(includePosted = false): LinkedInPost[] {
   assertServerRuntime();
@@ -381,6 +392,13 @@ function buildPost(
     classification,
   };
 }
+
+/**
+ * Explicit-scope alias for getAllLinkedInPosts.
+ * Use this in new call sites to make the narrow read scope unmistakable.
+ * Identical behaviour; the name prevents silent scope confusion.
+ */
+export const getRootLinkedInPostsOnly = getAllLinkedInPosts;
 
 /**
  * Get a single LinkedIn post by filename.

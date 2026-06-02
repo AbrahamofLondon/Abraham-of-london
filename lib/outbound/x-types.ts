@@ -5,7 +5,7 @@
  * Twitter API v2 — POST /2/tweets.
  */
 
-export type XAssetType = "blog" | "editorial" | "gmi" | "custom";
+export type XAssetType = "blog" | "editorial" | "gmi" | "custom" | "outbound";
 
 export type XConnectionState =
   | "not_connected"

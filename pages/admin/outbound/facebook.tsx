@@ -35,6 +35,7 @@ import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
 import {
   getAllFacebookPublishableAssets,
 } from "@/lib/outbound/facebook-content-resolver";
+import { getFacebookOutboundPosts } from "@/lib/outbound/outbound-content-loader";
 import { canPublishFacebookPost } from "@/lib/outbound/facebook-publish-gate";
 import type { FacebookConnectionStatus, FacebookPublishedAsset } from "@/lib/outbound/facebook-types";
 import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
@@ -73,6 +74,8 @@ type ConsoleViewModel = {
   attempts: AttemptSummary[];
   xConnected: boolean;  // true if X is connected and can publish
   publishingEnabled: boolean;
+  outboundDraftCount: number;   // discovered from content/outbound/facebook/ recursive loader
+  outboundExcludedCount: number;
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -89,10 +92,11 @@ export const getServerSideProps: GetServerSideProps<{
     typeof ctx.query.error === "string" ? ctx.query.error : null;
   const flashConnected = ctx.query.connected === "1";
 
-  const [connection, rawAssets, xStatus] = await Promise.all([
+  const [connection, rawAssets, xStatus, outboundResult] = await Promise.all([
     getFacebookConnectionStatus(),
     Promise.resolve(getAllFacebookPublishableAssets()),
     getXConnectionStatus(),
+    Promise.resolve(getFacebookOutboundPosts()),
   ]);
   const xConnected = xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true";
 
@@ -149,6 +153,8 @@ export const getServerSideProps: GetServerSideProps<{
         attempts,
         xConnected,
         publishingEnabled: process.env.FACEBOOK_PUBLISHING_ENABLED === "true",
+        outboundDraftCount: outboundResult.acceptedCount,
+        outboundExcludedCount: outboundResult.excludedCount,
       },
       flashError,
       flashConnected,
@@ -642,7 +648,7 @@ export default function FacebookOutboundAdminPage({
   flashError,
   flashConnected,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { connection, assets, attempts } = consoleState;
+  const { connection, assets, attempts, outboundDraftCount, outboundExcludedCount } = consoleState;
 
   return (
     <AdminLayout title="Facebook Outbound">
@@ -691,6 +697,31 @@ export default function FacebookOutboundAdminPage({
           connection={connection}
           publishingEnabled={consoleState.publishingEnabled}
         />
+
+        {/* Outbound draft estate notice */}
+        <section className="border border-blue-400/15 bg-blue-400/5 p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-blue-200/55">
+                Recursive outbound drafts discovered
+              </p>
+              <p className="mt-1 text-sm text-white/70">
+                <span className="font-medium text-white">{outboundDraftCount}</span> draft posts discovered in{" "}
+                <code className="font-mono text-blue-200/70">content/outbound/facebook/</code>
+                {outboundExcludedCount > 0 && (
+                  <span className="ml-1 text-white/40">({outboundExcludedCount} excluded as posted/archive)</span>
+                )}
+              </p>
+            </div>
+            {!consoleState.publishingEnabled && (
+              <AdminStatusBadge label="Publishing requires Facebook OAuth configuration" tone="warning" />
+            )}
+          </div>
+          <p className="mt-2 text-xs text-white/35">
+            Draft posts are queued but cannot publish until Facebook OAuth is connected and{" "}
+            <code className="font-mono">FACEBOOK_PUBLISHING_ENABLED=true</code> is set.
+          </p>
+        </section>
 
         {/* Section 2: Permissions */}
         <PermissionsPanel connection={connection} />

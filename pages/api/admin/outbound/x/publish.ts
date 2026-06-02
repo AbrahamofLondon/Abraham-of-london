@@ -24,6 +24,7 @@ import {
   buildCustomXAsset,
   adaptFacebookTextToTweet,
 } from "@/lib/outbound/x-content-resolver";
+import { getOutboundXAssetBySlug } from "@/lib/outbound/x-outbound-adapter";
 import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
 import { publishTweetToX } from "@/lib/outbound/x-publishing-client";
 import { recordXPublishingAuditSafe } from "@/lib/outbound/x-publishing-audit";
@@ -160,7 +161,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       link: body.customLink?.trim() || null,
     });
   } else if (body.slug) {
-    asset = getXAssetBySlug(body.slug);
+    // Try blog-series resolver first, then outbound draft adapter.
+    asset = getXAssetBySlug(body.slug) ?? getOutboundXAssetBySlug(body.slug);
     if (!asset) {
       return res.status(404).json({
         ok: false,

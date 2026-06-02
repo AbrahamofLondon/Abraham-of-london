@@ -34,6 +34,7 @@ import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
 import {
   getAllXPublishableAssets,
 } from "@/lib/outbound/x-content-resolver";
+import { getOutboundDraftXAssets } from "@/lib/outbound/x-outbound-adapter";
 import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
 import { countTweetChars } from "@/lib/outbound/x-publish-gate";
 import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
@@ -52,6 +53,20 @@ type AssetViewModel = {
   publishable: boolean;
   blockers: string[];
   warnings: string[];
+  // Outbound-draft specific fields (only present for outbound-x assets)
+  outboundStatus?: string;
+  outboundApprovalStatus?: string;
+  campaign?: string | null;
+  postType?: string;
+};
+
+type OutboundDiscoverySummary = {
+  discoveredCount: number;
+  acceptedCount: number;
+  publishableCount: number;
+  blockedCount: number;
+  excludedCount: number;
+  excludedReasons: Record<string, number>;
 };
 
 type AttemptSummary = {
@@ -71,7 +86,9 @@ type AttemptSummary = {
 
 type ConsoleViewModel = {
   connection: XConnectionStatus;
-  assets: AssetViewModel[];
+  assets: AssetViewModel[];                    // blog-series assets
+  outboundAssets: AssetViewModel[];            // recursive outbound draft queue
+  outboundDiscovery: OutboundDiscoverySummary;
   attempts: AttemptSummary[];
   facebookConnected: boolean;
   publishingEnabled: boolean;
@@ -91,10 +108,11 @@ export const getServerSideProps: GetServerSideProps<{
     typeof ctx.query.error === "string" ? ctx.query.error : null;
   const flashConnected = ctx.query.connected === "1";
 
-  const [connection, rawAssets, fbStatus] = await Promise.all([
+  const [connection, rawAssets, fbStatus, outboundDraftResult] = await Promise.all([
     getXConnectionStatus(),
     Promise.resolve(getAllXPublishableAssets()),
     getFacebookConnectionStatus(),
+    Promise.resolve(getOutboundDraftXAssets()),
   ]);
   const facebookConnected = fbStatus.canPublish && process.env.FACEBOOK_PUBLISHING_ENABLED === "true";
 
@@ -118,6 +136,46 @@ export const getServerSideProps: GetServerSideProps<{
     if (!a.publishable && b.publishable) return 1;
     return a.title.localeCompare(b.title);
   });
+
+  const outboundAssets: AssetViewModel[] = outboundDraftResult.posts.map((post, i) => {
+    const asset = outboundDraftResult.assets[i]!;
+    const gate = canPublishXPost(asset, connection);
+    return {
+      slug: asset.slug,
+      assetType: asset.assetType,
+      title: asset.title,
+      text: asset.text,
+      link: asset.link,
+      charCount: countTweetChars(asset.text),
+      publishable: gate.allowed,
+      blockers: gate.blockers,
+      warnings: gate.warnings,
+      outboundStatus: post.status,
+      outboundApprovalStatus: post.approvalStatus,
+      campaign: post.campaign,
+      postType: post.postType,
+    };
+  });
+
+  outboundAssets.sort((a, b) => {
+    if (a.publishable && !b.publishable) return -1;
+    if (!a.publishable && b.publishable) return 1;
+    return a.title.localeCompare(b.title);
+  });
+
+  const outboundResult = outboundDraftResult.result;
+  const excludedReasons: Record<string, number> = {};
+  for (const ex of outboundResult.excluded) {
+    excludedReasons[ex.reason] = (excludedReasons[ex.reason] ?? 0) + 1;
+  }
+  const outboundDiscovery: OutboundDiscoverySummary = {
+    discoveredCount: outboundResult.discoveredCount,
+    acceptedCount: outboundResult.acceptedCount,
+    publishableCount: outboundAssets.filter((a) => a.publishable).length,
+    blockedCount: outboundAssets.filter((a) => !a.publishable).length,
+    excludedCount: outboundResult.excludedCount,
+    excludedReasons,
+  };
 
   let attempts: AttemptSummary[] = [];
   try {
@@ -148,6 +206,8 @@ export const getServerSideProps: GetServerSideProps<{
       consoleState: {
         connection,
         assets,
+        outboundAssets,
+        outboundDiscovery,
         attempts,
         facebookConnected,
         publishingEnabled: process.env.X_PUBLISHING_ENABLED === "true",
@@ -438,6 +498,18 @@ function AssetCard({
               label={asset.publishable ? "publishable" : "blocked"}
               tone={asset.publishable ? "success" : "danger"}
             />
+            {asset.outboundStatus && (
+              <AdminStatusBadge label={`status: ${asset.outboundStatus}`} tone="muted" />
+            )}
+            {asset.outboundApprovalStatus && (
+              <AdminStatusBadge
+                label={asset.outboundApprovalStatus}
+                tone={asset.outboundApprovalStatus === "approved" ? "success" : asset.outboundApprovalStatus === "rejected" ? "danger" : "warning"}
+              />
+            )}
+            {asset.campaign && (
+              <AdminStatusBadge label={asset.campaign} tone="info" />
+            )}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -632,6 +704,29 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
   );
 }
 
+// ─── Outbound queue ───────────────────────────────────────────────────────────
+
+function OutboundDiscoveryBar({ discovery }: { discovery: OutboundDiscoverySummary }) {
+  return (
+    <div className="border-b border-white/5 pb-4">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <AdminMetricCard label="Discovered" value={discovery.discoveredCount} variant="inner" />
+        <AdminMetricCard label="Accepted" value={discovery.acceptedCount} variant="inner" tone="success" />
+        <AdminMetricCard label="Publishable" value={discovery.publishableCount} variant="inner" tone={discovery.publishableCount > 0 ? "success" : "muted"} />
+        <AdminMetricCard label="Blocked" value={discovery.blockedCount} variant="inner" tone={discovery.blockedCount > 0 ? "warning" : "muted"} />
+        <AdminMetricCard label="Excluded" value={discovery.excludedCount} variant="inner" tone={discovery.excludedCount > 0 ? "info" : "muted"} />
+      </div>
+      {discovery.excludedCount > 0 && (
+        <ul className="mt-2 flex flex-wrap gap-x-4 text-[10px] text-white/30">
+          {Object.entries(discovery.excludedReasons).map(([reason, n]) => (
+            <li key={reason}>{reason.replace(/_/g, " ")}: {n}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function XOutboundAdminPage({
@@ -639,7 +734,7 @@ export default function XOutboundAdminPage({
   flashError,
   flashConnected,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { connection, assets, attempts, facebookConnected } = consoleState;
+  const { connection, assets, outboundAssets, outboundDiscovery, attempts, facebookConnected } = consoleState;
 
   return (
     <AdminLayout title="X Outbound">
@@ -706,19 +801,21 @@ export default function XOutboundAdminPage({
           />
         </section>
 
-        {/* Section 3–5: Assets + gate */}
+        {/* Section 3: Outbound Draft Queue — content/outbound/x recursive estate */}
         <section className="space-y-4">
           <div>
-            <h2 className="font-serif text-2xl text-white">Tweet Queue</h2>
+            <h2 className="font-serif text-2xl text-white">Outbound Draft Queue</h2>
             <p className="mt-1 text-sm text-white/45">
-              Run the gate check first. Final approval required before posting.
+              Recursive discovery from <code className="font-mono text-white/60">content/outbound/x/</code>.
+              Each post requires gate check + final approval before posting.
               {facebookConnected ? " Facebook sync available after gate passes." : ""}
             </p>
           </div>
-          {assets.length === 0 ? (
-            <p className="text-sm text-white/40">No publishable X assets found.</p>
+          <OutboundDiscoveryBar discovery={outboundDiscovery} />
+          {outboundAssets.length === 0 ? (
+            <p className="text-sm text-white/40">No outbound draft assets found.</p>
           ) : (
-            assets.map((asset) => (
+            outboundAssets.map((asset) => (
               <AssetCard
                 key={asset.slug}
                 asset={asset}
@@ -729,6 +826,27 @@ export default function XOutboundAdminPage({
             ))
           )}
         </section>
+
+        {/* Section 4: Blog-series assets (legacy resolver) */}
+        {assets.length > 0 && (
+          <section className="space-y-4">
+            <div>
+              <h2 className="font-serif text-2xl text-white">Blog Series Assets</h2>
+              <p className="mt-1 text-sm text-white/45">
+                Published blog-series parts resolved from the blog catalogue.
+              </p>
+            </div>
+            {assets.map((asset) => (
+              <AssetCard
+                key={asset.slug}
+                asset={asset}
+                connectionCanPublish={connection.canPublish}
+                facebookConnected={facebookConnected}
+                publishingEnabled={consoleState.publishingEnabled}
+              />
+            ))}
+          </section>
+        )}
 
         {/* Section 6: Attempt history */}
         <AttemptHistory attempts={attempts} />
