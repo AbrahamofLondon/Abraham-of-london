@@ -77,6 +77,8 @@ const STATUS_TONE_MAP: Record<string, AdminBadgeTone> = {
   DISABLED:              "muted",
   GATED:                 "muted",
   NEEDS_ATTENTION:       "warning",
+  CREDIT_BLOCKED:        "warning",
+  CREDIT_REQUIRED:       "warning",
   MANUAL:                "info",
   GATE_OK:               "success",
   GATE_BLOCKED:          "danger",

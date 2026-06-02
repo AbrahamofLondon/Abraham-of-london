@@ -432,7 +432,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       actorEmailHash,
     }).catch(() => null);
 
-    return res.status(result.errorCode === "X_RATE_LIMITED" ? 429 : 400).json({
+    const httpStatus =
+      result.errorCode === "X_RATE_LIMITED" ? 429 :
+      result.errorCode === "X_CREDIT_BLOCKED" ? 402 :
+      400;
+    return res.status(httpStatus).json({
       ok: false,
       errorCode: result.errorCode,
       error: result.safeMessage,

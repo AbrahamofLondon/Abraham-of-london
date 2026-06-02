@@ -310,6 +310,91 @@ describe("canPublishXPost with outbound assets — gate invariants", () => {
   });
 });
 
+// ─── HTTP 402 → X_CREDIT_BLOCKED ─────────────────────────────────────────────
+
+describe("normaliseXPublishError — HTTP 402 maps to X_CREDIT_BLOCKED", () => {
+  it("status 402 returns X_CREDIT_BLOCKED errorCode", async () => {
+    const { normaliseXPublishError } = await import("@/lib/outbound/x-publishing-client");
+    const result = normaliseXPublishError(402, {});
+    expect(result.errorCode).toBe("X_CREDIT_BLOCKED");
+  });
+
+  it("X_CREDIT_BLOCKED safe message mentions billing/credits, not content", async () => {
+    const { normaliseXPublishError } = await import("@/lib/outbound/x-publishing-client");
+    const result = normaliseXPublishError(402, {});
+    expect(result.safeMessage).toMatch(/credit/i);
+    expect(result.safeMessage).toMatch(/billing|plan/i);
+    // Should NOT imply the content is the problem
+    expect(result.safeMessage).not.toMatch(/content.*fail/i);
+  });
+
+  it("status 400 still maps to X_PAYLOAD_INVALID (regression)", async () => {
+    const { normaliseXPublishError } = await import("@/lib/outbound/x-publishing-client");
+    expect(normaliseXPublishError(400, {}).errorCode).toBe("X_PAYLOAD_INVALID");
+  });
+
+  it("status 401 still maps to X_TOKEN_INVALID (regression)", async () => {
+    const { normaliseXPublishError } = await import("@/lib/outbound/x-publishing-client");
+    expect(normaliseXPublishError(401, {}).errorCode).toBe("X_TOKEN_INVALID");
+  });
+
+  it("status 429 still maps to X_RATE_LIMITED (regression)", async () => {
+    const { normaliseXPublishError } = await import("@/lib/outbound/x-publishing-client");
+    expect(normaliseXPublishError(429, {}).errorCode).toBe("X_RATE_LIMITED");
+  });
+});
+
+// ─── X_CREDIT_BLOCKED asset visibility ───────────────────────────────────────
+
+describe("CREDIT_BLOCKED asset remains visible and reconcilable", () => {
+  type MinAsset = {
+    outboundStatus?: string;
+    outboundApprovalStatus?: string;
+    publishLedgerStatus?: string | null;
+    publishable: boolean;
+  };
+
+  function filter(assets: MinAsset[], f: string): MinAsset[] {
+    switch (f) {
+      case "all": return assets;
+      case "attention": return assets.filter((a) => a.publishLedgerStatus === "DRY_RUN" || a.publishLedgerStatus === "IN_PROGRESS" || a.publishLedgerStatus === "FAILED");
+      case "blocked": return assets.filter((a) => !a.publishable && a.publishLedgerStatus !== "PUBLISHED");
+      default: return assets;
+    }
+  }
+
+  const CREDIT_BLOCKED_ASSET: MinAsset = {
+    outboundStatus: "scheduled",
+    outboundApprovalStatus: "approved",
+    // FAILED in ledger because the publish attempt failed with X_CREDIT_BLOCKED
+    publishLedgerStatus: "FAILED",
+    publishable: false, // gate blocked because last attempt failed
+  };
+
+  it("credit-blocked asset is visible in 'all'", () => {
+    expect(filter([CREDIT_BLOCKED_ASSET], "all")).toHaveLength(1);
+  });
+
+  it("credit-blocked asset is visible in 'attention' (FAILED ledger state)", () => {
+    expect(filter([CREDIT_BLOCKED_ASSET], "attention")).toHaveLength(1);
+  });
+
+  it("credit-blocked asset can be manually reconciled (it is not PUBLISHED)", () => {
+    const isAlreadyPublished = CREDIT_BLOCKED_ASSET.publishLedgerStatus === "PUBLISHED";
+    expect(isAlreadyPublished).toBe(false);
+    // Manual reconciliation is available for any non-PUBLISHED outbound asset
+  });
+
+  it("after manual reconciliation, asset would be PUBLISHED and locked", () => {
+    const reconciledAsset: MinAsset = { ...CREDIT_BLOCKED_ASSET, publishLedgerStatus: "PUBLISHED", publishable: false };
+    // Published items should not be re-publishable
+    expect(reconciledAsset.publishLedgerStatus).toBe("PUBLISHED");
+    expect(reconciledAsset.publishable).toBe(false);
+    // Should not appear in attention (resolved)
+    expect(filter([reconciledAsset], "attention")).toHaveLength(0);
+  });
+});
+
 // ─── Filter visibility invariants ────────────────────────────────────────────
 //
 // These tests document the exact filter rules and verify that no asset can

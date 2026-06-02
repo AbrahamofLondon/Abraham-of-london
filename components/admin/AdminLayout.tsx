@@ -88,8 +88,8 @@ function NavSection({
                   isActive
                     ? "border-l-2 border-amber-500/70 bg-amber-500/8 text-white font-medium pl-2.5"
                     : isStub
-                    ? "text-white/30 hover:text-white/50 hover:bg-white/5"
-                    : "text-white/65 hover:text-white/90 hover:bg-white/5"
+                    ? "text-white/35 hover:text-white/55 hover:bg-white/5"
+                    : "text-white/70 hover:text-white/95 hover:bg-white/5"
                 }`}
               >
                 <span className="truncate">{item.label}</span>

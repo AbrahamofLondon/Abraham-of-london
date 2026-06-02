@@ -101,6 +101,7 @@ type ConsoleViewModel = {
   attempts: AttemptSummary[];
   facebookConnected: boolean;
   publishingEnabled: boolean;
+  hasCreditBlocker: boolean;                   // any recent X_CREDIT_BLOCKED attempt
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -249,6 +250,8 @@ export const getServerSideProps: GetServerSideProps<{
     attempts = [];
   }
 
+  const hasCreditBlocker = attempts.some((a) => a.errorCode === "X_CREDIT_BLOCKED");
+
   return {
     props: {
       consoleState: {
@@ -259,6 +262,7 @@ export const getServerSideProps: GetServerSideProps<{
         attempts,
         facebookConnected,
         publishingEnabled: process.env.X_PUBLISHING_ENABLED === "true",
+        hasCreditBlocker,
       },
       flashError,
       flashConnected,
@@ -1174,7 +1178,7 @@ export default function XOutboundAdminPage({
   flashError,
   flashConnected,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { connection, assets, outboundAssets, outboundDiscovery, attempts, facebookConnected } = consoleState;
+  const { connection, assets, outboundAssets, outboundDiscovery, attempts, facebookConnected, hasCreditBlocker } = consoleState;
   const [queueFilter, setQueueFilter] = React.useState<QueueFilter>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [expandedSlug, setExpandedSlug] = React.useState<string | null>(null);
@@ -1227,6 +1231,25 @@ export default function XOutboundAdminPage({
               OAuth error: {flashError.replace(/_/g, " ")}. Try reconnecting or check
               X_CLIENT_ID / X_REDIRECT_URI configuration.
             </p>
+          </div>
+        )}
+
+        {/* Credit-blocked notice */}
+        {hasCreditBlocker && (
+          <div className="border border-amber-400/25 bg-amber-950/20 p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-200/90">X API credits exhausted (HTTP 402)</p>
+                <p className="mt-1 text-xs leading-5 text-amber-100/60">
+                  A recent publish was rejected by X because the account has no remaining API credits.
+                  This is a billing issue — content and OAuth token are fine.
+                  Upgrade the X Developer plan, or use <strong>Mark as manually posted</strong> on any
+                  item you have already posted via the X web interface.
+                </p>
+              </div>
+              <AdminStatusBadge label="CREDIT BLOCKED" tone="warning" />
+            </div>
           </div>
         )}
 

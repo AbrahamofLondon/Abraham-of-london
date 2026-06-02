@@ -30,6 +30,17 @@ export function normaliseXPublishError(
       safeMessage: `X rejected the tweet payload. ${detail}`.trim(),
     };
   }
+  if (status === 402) {
+    // HTTP 402 = Payment Required: X API plan has no credits.
+    // This is a billing issue — the content and token are valid.
+    return {
+      errorCode: "X_CREDIT_BLOCKED",
+      safeMessage:
+        "X rejected this publish because the account has insufficient API credits. " +
+        "This is a billing/plan issue — not a content or token problem. " +
+        "Upgrade the X API plan or use manual reconciliation to record a manually posted tweet.",
+    };
+  }
   if (status === 401) {
     return {
       errorCode: "X_TOKEN_INVALID",
