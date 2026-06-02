@@ -33,6 +33,7 @@ import {
 
 import Layout from "@/components/Layout";
 import { CATALOG } from "@/lib/commercial/catalog";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -368,10 +369,11 @@ function StatusBadge({ status }: { status: ProductStatus }) {
   );
 }
 
-function PrimaryBtn({ href, children, large }: { href: string; children: React.ReactNode; large?: boolean }) {
+function PrimaryBtn({ href, children, large, onClick }: { href: string; children: React.ReactNode; large?: boolean; onClick?: () => void }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className="group inline-flex items-center gap-2 border transition-all duration-150 hover:-translate-y-px"
       style={{ ...mono, borderColor: `${GOLD}50`, backgroundColor: `${GOLD}12`, color: "#F5F5F5", fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", minHeight: large ? "52px" : "44px", padding: large ? "0 1.5rem" : "0 1.1rem" }}
     >
@@ -381,10 +383,11 @@ function PrimaryBtn({ href, children, large }: { href: string; children: React.R
   );
 }
 
-function GhostBtn({ href, children }: { href: string; children: React.ReactNode }) {
+function GhostBtn({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className="group inline-flex items-center gap-2 border border-white/[0.09] px-5 py-3 transition-all duration-150 hover:-translate-y-px hover:border-white/[0.16]"
       style={{ ...mono, color: "rgba(255,255,255,0.52)", fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", minHeight: "44px" }}
     >
@@ -836,7 +839,7 @@ function BoardroomBriefFeature() {
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <PrimaryBtn href="/boardroom-brief" large>Generate a brief</PrimaryBtn>
+                <PrimaryBtn href="/boardroom-brief" large onClick={() => trackLaunch("products_to_boardroom", "/products")}>Generate a brief</PrimaryBtn>
                 <GhostBtn href="/boardroom-brief?sample=true">View sample</GhostBtn>
                 <Link href="/diagnostics/executive-reporting"
                   className="inline-flex items-center gap-1.5"
@@ -1038,7 +1041,7 @@ function EnterpriseAndProfessionalSection() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <PrimaryBtn href="/enterprise">View Enterprise pathway</PrimaryBtn>
-              <GhostBtn href="/enterprise-decision-scan">Run organisational scan</GhostBtn>
+              <GhostBtn href="/enterprise-decision-scan" onClick={() => trackLaunch("enterprise_to_enterprise_scan", "/products")}>Run organisational scan</GhostBtn>
             </div>
           </div>
 
@@ -1137,10 +1140,10 @@ export default function ProductsPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
-              <PrimaryBtn href="/artifacts/global-market-outlook-q1-2026-public">
+              <PrimaryBtn href="/artifacts/global-market-outlook-q1-2026-public" onClick={() => trackLaunch("products_to_gmi_outlook", "/products")}>
                 View intelligence line
               </PrimaryBtn>
-              <GhostBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")}>
+              <GhostBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")} onClick={() => trackLaunch("gmi_outlook_to_full_report", "/products")}>
                 View latest report
               </GhostBtn>
             </div>

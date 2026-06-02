@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -525,6 +526,7 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                   >
                     <Link
                       href="/artifacts/global-market-intelligence-report-q1-2026"
+                      onClick={() => trackLaunch("gmi_outlook_to_full_report", "/artifacts/global-market-outlook-q1-2026-public")}
                       className="group inline-flex items-center gap-2.5 transition-all duration-300"
                       style={{
                         padding: "10px 20px",

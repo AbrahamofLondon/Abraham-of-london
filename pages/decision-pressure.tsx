@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { ArrowRight, Check, Copy, RefreshCw, Share2 } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { track } from '@/lib/analytics/track'
+import { trackLaunch } from '@/lib/analytics/client-launch-events'
 
 const GOLD = '#C9A96E'
 const GREEN = '#6EE7B7'
@@ -425,6 +426,7 @@ export default function DecisionPressurePage() {
                   <div className="mt-6 flex flex-wrap items-center gap-4">
                     <Link
                       href="/boardroom-brief"
+                      onClick={() => trackLaunch("decision_pressure_to_boardroom", "/decision-pressure")}
                       className="group inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5"
                       style={{
                         borderColor: `${GOLD}50`,

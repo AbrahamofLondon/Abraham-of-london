@@ -56,7 +56,14 @@ export type LaunchEventName =
   | "free_limit_reached"
   | "case_archived_after_trial"
   | "professional_upgrade_clicked"
-  | "pricing_viewed_from_prompt";
+  | "pricing_viewed_from_prompt"
+  // ── Conversion tracking ──
+  | "decision_pressure_to_boardroom"
+  | "products_to_boardroom"
+  | "boardroom_to_checkout"
+  | "products_to_gmi_outlook"
+  | "gmi_outlook_to_full_report"
+  | "enterprise_to_enterprise_scan";
 
 // ─── Event payload ──────────────────────────────────────────────────────────
 

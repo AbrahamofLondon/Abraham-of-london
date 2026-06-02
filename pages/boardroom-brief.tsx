@@ -29,6 +29,7 @@ import { ArrowRight, Shield, FileText, AlertTriangle, CheckCircle2 } from 'lucid
 import Layout from '@/components/Layout'
 import CheckoutButton from '@/components/commercial/CheckoutButton'
 import { CATALOG } from '@/lib/commercial/catalog'
+import { trackLaunch } from '@/lib/analytics/client-launch-events'
 import { buildBoardroomIntelligenceSpine } from '@/lib/constitution/boardroom-spine-builder'
 import { generateBoardroomDossier } from '@/lib/constitution/boardroom-mode'
 import type { BoardroomDossier } from '@/lib/constitution/boardroom-mode'
@@ -462,6 +463,7 @@ export default function BoardroomBriefPage() {
                   <CheckoutButton
                     productCode={BOARDROOM_BRIEF_PRODUCT.code}
                     originPath="/boardroom-brief"
+                    onCheckoutStart={() => trackLaunch("boardroom_to_checkout", "/boardroom-brief")}
                     style={{ padding: '12px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     Get full Boardroom Brief — {BOARDROOM_BRIEF_PRODUCT.displayPrice}
@@ -578,6 +580,7 @@ export default function BoardroomBriefPage() {
               <CheckoutButton
                 productCode={BOARDROOM_BRIEF_PRODUCT.code}
                 originPath="/boardroom-brief"
+                onCheckoutStart={() => trackLaunch("boardroom_to_checkout", "/boardroom-brief")}
                 style={{ padding: '11px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 Get full Boardroom Brief
