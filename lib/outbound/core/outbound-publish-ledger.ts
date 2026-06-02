@@ -78,6 +78,12 @@ export type CreateLedgerInput = {
   forceRepublishActorId?: string | null;
   forceRepublishNote?: string | null;
   source?: string; // "manual" | "scheduler"
+  /**
+   * Override the computed idempotency key entirely.
+   * Use for audit-only writes (e.g. DRY_RUN) that must not occupy the live
+   * publish slot. When provided, buildIdempotencyKey is not called.
+   */
+  idempotencyKeyOverride?: string;
 };
 
 // ─── Idempotency key builder ──────────────────────────────────────────────────
@@ -201,18 +207,53 @@ export async function claimPublishSlot(
       });
 
       if (existingClaim) {
-        const status = existingClaim.status;
-        if (status === "PUBLISHED") {
+        const existingStatus = existingClaim.status;
+
+        if (existingStatus === "PUBLISHED") {
           return {
             claimed: false,
             entry: existingClaim as unknown as OutboundPublishLedgerEntry,
             reason: `Item already published (ledger ID: ${existingClaim.id}).`,
           };
         }
+
+        // Terminal / superseded states — allow live publish to proceed by
+        // updating the existing row to IN_PROGRESS rather than inserting.
+        // Includes DRY_RUN to recover legacy rows written under the live-slot
+        // key before the dry-run key fix (new dry-runs now use a separate key).
+        if (
+          existingStatus === "DRY_RUN" ||
+          existingStatus === "FAILED" ||
+          existingStatus === "BLOCKED" ||
+          existingStatus === "SKIPPED"
+        ) {
+          try {
+            const reclaimed = await prisma.outboundPublishLedger.update({
+              where: { id: existingClaim.id },
+              data: {
+                status: "IN_PROGRESS",
+                actorId: input.actorId ?? existingClaim.actorId,
+                actorEmailHash: input.actorEmailHash ?? existingClaim.actorEmailHash,
+                errorCode: null,
+                safeMessage: null,
+                completedAt: null,
+              },
+            });
+            return { claimed: true, entry: reclaimed as unknown as OutboundPublishLedgerEntry };
+          } catch {
+            return {
+              claimed: false,
+              entry: existingClaim as unknown as OutboundPublishLedgerEntry,
+              reason: `Could not re-claim ${existingStatus} slot (ledger ID: ${existingClaim.id}).`,
+            };
+          }
+        }
+
+        // IN_PROGRESS — another publish is actively in flight. Block.
         return {
           claimed: false,
           entry: existingClaim as unknown as OutboundPublishLedgerEntry,
-          reason: `Publish slot is already claimed by another process (status: ${status}, ledger ID: ${existingClaim.id}).`,
+          reason: `Publish slot is already claimed by another process (status: ${existingStatus}, ledger ID: ${existingClaim.id}).`,
         };
       }
 
@@ -259,6 +300,12 @@ export async function completePublishSlot(
 /**
  * Create a ledger entry (non-claimed path).
  * Used for DRY_RUN, BLOCKED, SKIPPED statuses that don't need race protection.
+ *
+ * For DRY_RUN entries: always pass idempotencyKeyOverride with a per-invocation
+ * unique key (e.g. "x:dry-run:{outboundItemId}:{requestId}") so the dry-run
+ * row does NOT occupy the live publish slot. The live slot key is
+ * "{provider}:{outboundItemId}:{scheduledFor}" — if a DRY_RUN row exists under
+ * that key, claimPublishSlot will be blocked by the unique constraint.
  */
 export async function createLedgerEntry(
   input: CreateLedgerInput,
@@ -268,11 +315,8 @@ export async function createLedgerEntry(
     throw new Error("createLedgerEntry requires a status. Use claimPublishSlot for race-safe publishing.");
   }
 
-  const idempotencyKey = buildIdempotencyKey(
-    input.provider,
-    input.outboundItemId,
-    input.scheduledFor ?? null,
-  );
+  const idempotencyKey = input.idempotencyKeyOverride
+    ?? buildIdempotencyKey(input.provider, input.outboundItemId, input.scheduledFor ?? null);
 
   const row = await prisma.outboundPublishLedger.create({
     data: {
@@ -375,6 +419,59 @@ export async function getFailureSummary(
       .map((b) => b.safeMessage)
       .filter((m): m is string => m !== null),
   };
+}
+
+// ─── Serialisable snapshot (for getServerSideProps props) ────────────────────
+
+export type LedgerStatusSnapshot = {
+  outboundItemId: string;
+  status: LedgerStatus;
+  providerPostId: string | null;
+  providerPostUrl: string | null;
+  completedAt: string | null;
+  errorCode: string | null;
+  safeMessage: string | null;
+};
+
+/**
+ * Load the most-recent ledger entry for every outbound item of a provider,
+ * returning a Map<outboundItemId, LedgerStatusSnapshot>.
+ *
+ * One DB round-trip for all items — use this in getServerSideProps to enrich
+ * console asset lists without N+1 queries.
+ *
+ * Key space: outboundItemId may be an OutboundPost.id (for draft-queue assets)
+ * or an asset.slug (for blog-series assets where we use the slug as the id).
+ */
+export async function getBulkPublishStatus(
+  provider: OutboundProvider,
+): Promise<Map<string, LedgerStatusSnapshot>> {
+  const map = new Map<string, LedgerStatusSnapshot>();
+  try {
+    const rows = await prisma.outboundPublishLedger.findMany({
+      where: {
+        provider,
+        status: { in: ["PUBLISHED", "IN_PROGRESS", "FAILED", "DRY_RUN", "BLOCKED"] },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    for (const row of rows) {
+      if (!map.has(row.outboundItemId)) {
+        map.set(row.outboundItemId, {
+          outboundItemId: row.outboundItemId,
+          status: row.status as LedgerStatus,
+          providerPostId: row.providerPostId,
+          providerPostUrl: row.providerPostUrl,
+          completedAt: row.completedAt ? row.completedAt.toISOString() : null,
+          errorCode: row.errorCode,
+          safeMessage: row.safeMessage,
+        });
+      }
+    }
+  } catch {
+    // Ledger unavailable — return empty map; console degrades gracefully.
+  }
+  return map;
 }
 
 /**

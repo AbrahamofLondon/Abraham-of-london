@@ -557,7 +557,27 @@ export default function LinkedInOutboundAdminPage({
               <ChevronRight className="h-4 w-4 text-sky-400/60" />
               <span>
                 <strong className="text-white">The Burden Changes Hands</strong>
-                <span className="ml-2 text-white/40">7 weeks · 21 posts · awaiting Week 1 approval</span>
+                <span className="ml-2 text-white/40">7 weeks · 21 posts</span>
+              </span>
+            </Link>
+            <Link
+              href="/admin/outbound/linkedin/campaigns/the-truth-in-the-frame"
+              className="inline-flex items-center gap-3 border border-white/10 bg-black/25 px-4 py-3 text-sm text-white/70 hover:border-sky-400/25 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4 text-sky-400/60" />
+              <span>
+                <strong className="text-white">The Truth in the Frame</strong>
+                <span className="ml-2 text-white/40">9 weeks · 27 posts</span>
+              </span>
+            </Link>
+            <Link
+              href="/admin/outbound/linkedin/campaigns/what-survived"
+              className="inline-flex items-center gap-3 border border-white/10 bg-black/25 px-4 py-3 text-sm text-white/70 hover:border-sky-400/25 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4 text-sky-400/60" />
+              <span>
+                <strong className="text-white">What Survived</strong>
+                <span className="ml-2 text-white/40">7 weeks · 21 posts</span>
               </span>
             </Link>
           </div>

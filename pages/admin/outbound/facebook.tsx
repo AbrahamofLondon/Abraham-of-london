@@ -35,7 +35,7 @@ import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
 import {
   getAllFacebookPublishableAssets,
 } from "@/lib/outbound/facebook-content-resolver";
-import { getFacebookOutboundPosts } from "@/lib/outbound/outbound-content-loader";
+import { getOutboundDraftFBAssets } from "@/lib/outbound/facebook-outbound-adapter";
 import { canPublishFacebookPost } from "@/lib/outbound/facebook-publish-gate";
 import type { FacebookConnectionStatus, FacebookPublishedAsset } from "@/lib/outbound/facebook-types";
 import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
@@ -68,14 +68,35 @@ type AttemptSummary = {
   completedAt: string | null;
 };
 
+type FBDraftAsset = {
+  slug: string;
+  title: string;
+  text: string;
+  link: string | null;
+  campaign: string | null;
+  outboundStatus: string;
+  outboundApprovalStatus: string;
+  charCount: number;
+  contentGatePass: boolean;   // true if content-only gate passes (ignores connection)
+  contentBlockers: string[];  // blockers excluding connection issues
+  allBlockers: string[];
+};
+
 type ConsoleViewModel = {
   connection: FacebookConnectionStatus;
   assets: AssetViewModel[];
   attempts: AttemptSummary[];
-  xConnected: boolean;  // true if X is connected and can publish
+  xConnected: boolean;
   publishingEnabled: boolean;
-  outboundDraftCount: number;   // discovered from content/outbound/facebook/ recursive loader
+  outboundDraftCount: number;
   outboundExcludedCount: number;
+  outboundDraftAssets: FBDraftAsset[];
+  outboundDiscovery: {
+    discoveredCount: number;
+    acceptedCount: number;
+    excludedCount: number;
+    excludedReasons: Record<string, number>;
+  };
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -92,12 +113,48 @@ export const getServerSideProps: GetServerSideProps<{
     typeof ctx.query.error === "string" ? ctx.query.error : null;
   const flashConnected = ctx.query.connected === "1";
 
-  const [connection, rawAssets, xStatus, outboundResult] = await Promise.all([
+  const [connection, rawAssets, xStatus, outboundDraftResult] = await Promise.all([
     getFacebookConnectionStatus(),
     Promise.resolve(getAllFacebookPublishableAssets()),
     getXConnectionStatus(),
-    Promise.resolve(getFacebookOutboundPosts()),
+    Promise.resolve(getOutboundDraftFBAssets()),
   ]);
+  const outboundResult = outboundDraftResult.result;
+
+  // A disconnected stub for content-only gate checks — strips connection blockers
+  // so the queue shows content quality, not "not connected" on every row.
+  const disconnectedStub = { ...connection, connected: false } as typeof connection;
+
+  const outboundDraftAssets: FBDraftAsset[] = outboundDraftResult.posts.map((post, i) => {
+    const asset = outboundDraftResult.assets[i]!;
+    const fullGate = canPublishFacebookPost(asset, connection);
+    const contentGate = canPublishFacebookPost(asset, disconnectedStub);
+    // Content-only blockers = blockers that are NOT about the connection state
+    const connectionBlockers = new Set([
+      "Facebook Page connection is not active.",
+      "Facebook token is invalid or expired. Reconnect via OAuth.",
+      "Facebook app configuration is incomplete.",
+    ]);
+    const contentBlockers = fullGate.blockers.filter((b) => !connectionBlockers.has(b));
+    return {
+      slug: asset.slug,
+      title: asset.title,
+      text: asset.text,
+      link: asset.link,
+      campaign: post.campaign,
+      outboundStatus: post.status,
+      outboundApprovalStatus: post.approvalStatus,
+      charCount: asset.text.length,
+      contentGatePass: contentGate.blockers.filter((b) => !connectionBlockers.has(b)).length === 0,
+      contentBlockers,
+      allBlockers: fullGate.blockers,
+    };
+  });
+
+  const excludedReasons: Record<string, number> = {};
+  for (const ex of outboundResult.excluded) {
+    excludedReasons[ex.reason] = (excludedReasons[ex.reason] ?? 0) + 1;
+  }
   const xConnected = xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true";
 
   const assets: AssetViewModel[] = rawAssets.map((asset: FacebookPublishedAsset) => {
@@ -155,6 +212,13 @@ export const getServerSideProps: GetServerSideProps<{
         publishingEnabled: process.env.FACEBOOK_PUBLISHING_ENABLED === "true",
         outboundDraftCount: outboundResult.acceptedCount,
         outboundExcludedCount: outboundResult.excludedCount,
+        outboundDraftAssets,
+        outboundDiscovery: {
+          discoveredCount: outboundResult.discoveredCount,
+          acceptedCount: outboundResult.acceptedCount,
+          excludedCount: outboundResult.excludedCount,
+          excludedReasons,
+        },
       },
       flashError,
       flashConnected,
@@ -641,6 +705,112 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
   );
 }
 
+// ─── Facebook outbound draft queue ────────────────────────────────────────────
+
+function FBDraftQueueSection({
+  assets,
+  discovery,
+  publishingEnabled,
+}: {
+  assets: FBDraftAsset[];
+  discovery: ConsoleViewModel["outboundDiscovery"];
+  publishingEnabled: boolean;
+}) {
+  return (
+    <section className="space-y-4">
+      <div>
+        <h2 className="font-serif text-2xl text-white">Outbound Draft Queue</h2>
+        <p className="mt-1 text-sm text-white/45">
+          Recursive discovery from <code className="font-mono text-white/60">content/outbound/facebook/</code>.
+          {!publishingEnabled && (
+            <span className="ml-1 text-amber-200/70">Publishing blocked until Facebook OAuth is configured.</span>
+          )}
+        </p>
+      </div>
+
+      {/* Discovery stats */}
+      <div className="grid grid-cols-4 gap-2">
+        <div className="border border-white/10 bg-black/20 p-3 text-center">
+          <p className="text-2xl font-light text-white">{discovery.discoveredCount}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-white/35">Discovered</p>
+        </div>
+        <div className="border border-white/10 bg-black/20 p-3 text-center">
+          <p className="text-2xl font-light text-emerald-300">{discovery.acceptedCount}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-white/35">Accepted</p>
+        </div>
+        <div className="border border-white/10 bg-black/20 p-3 text-center">
+          <p className="text-2xl font-light text-white/60">{assets.filter((a) => a.contentGatePass).length}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-white/35">Content OK</p>
+        </div>
+        <div className="border border-white/10 bg-black/20 p-3 text-center">
+          <p className="text-2xl font-light text-amber-300/80">{discovery.excludedCount}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-white/35">Excluded</p>
+        </div>
+      </div>
+      {discovery.excludedCount > 0 && (
+        <p className="text-[11px] text-white/30">
+          Exclusions: {Object.entries(discovery.excludedReasons).map(([r, n]) => `${r.replace(/_/g, " ")}: ${n}`).join(" · ")}
+        </p>
+      )}
+
+      {/* Draft post rows */}
+      <div className="space-y-2">
+        {assets.map((asset) => (
+          <div key={asset.slug} className="border border-white/10 bg-black/25 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">{asset.slug}</p>
+                <p className="mt-1 text-sm text-white/75">{asset.title}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className={`inline-block border px-2 py-0.5 text-[10px] font-mono ${asset.contentGatePass ? "border-emerald-400/20 text-emerald-300/70" : "border-rose-400/20 text-rose-300/60"}`}>
+                    content: {asset.contentGatePass ? "pass" : "fail"}
+                  </span>
+                  <span className="inline-block border border-white/10 px-2 py-0.5 text-[10px] font-mono text-white/40">
+                    {asset.outboundStatus}
+                  </span>
+                  <span className={`inline-block border px-2 py-0.5 text-[10px] font-mono ${
+                    asset.outboundApprovalStatus === "approved"
+                      ? "border-emerald-400/20 text-emerald-300/70"
+                      : "border-amber-400/20 text-amber-200/60"
+                  }`}>
+                    {asset.outboundApprovalStatus.replace("_", " ")}
+                  </span>
+                  {asset.campaign && (
+                    <span className="inline-block border border-sky-400/20 px-2 py-0.5 text-[10px] font-mono text-sky-200/60">
+                      {asset.campaign}
+                    </span>
+                  )}
+                  <span className="inline-block border border-white/10 px-2 py-0.5 text-[10px] font-mono text-white/30">
+                    {asset.charCount} chars
+                  </span>
+                </div>
+                {asset.contentBlockers.length > 0 && (
+                  <ul className="mt-2 space-y-0.5">
+                    {asset.contentBlockers.map((b) => (
+                      <li key={b} className="text-[11px] text-rose-200/65">— {b}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="shrink-0">
+                {!publishingEnabled ? (
+                  <span className="inline-block border border-white/10 px-3 py-1.5 text-[11px] text-white/25 cursor-not-allowed">
+                    Publish blocked
+                  </span>
+                ) : (
+                  <span className="inline-block border border-amber-400/20 px-3 py-1.5 text-[11px] text-amber-200/50 cursor-not-allowed">
+                    Connect OAuth first
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FacebookOutboundAdminPage({
@@ -648,7 +818,11 @@ export default function FacebookOutboundAdminPage({
   flashError,
   flashConnected,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { connection, assets, attempts, outboundDraftCount, outboundExcludedCount } = consoleState;
+  const {
+    connection, assets, attempts,
+    outboundDraftCount, outboundExcludedCount,
+    outboundDraftAssets, outboundDiscovery,
+  } = consoleState;
 
   return (
     <AdminLayout title="Facebook Outbound">
@@ -726,7 +900,14 @@ export default function FacebookOutboundAdminPage({
         {/* Section 2: Permissions */}
         <PermissionsPanel connection={connection} />
 
-        {/* Section 3: Metrics */}
+        {/* Section 3: Outbound draft queue */}
+        <FBDraftQueueSection
+          assets={outboundDraftAssets}
+          discovery={outboundDiscovery}
+          publishingEnabled={consoleState.publishingEnabled}
+        />
+
+        {/* Section 4: Blog-series metrics */}
         <section className="grid gap-4 sm:grid-cols-3">
           <AdminMetricCard
             label="Total assets"

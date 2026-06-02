@@ -4,7 +4,7 @@
  * Shared type definitions for Facebook outbound publishing.
  */
 
-export type FacebookAssetType = "blog" | "editorial" | "gmi" | "custom";
+export type FacebookAssetType = "blog" | "editorial" | "gmi" | "custom" | "outbound";
 
 export type FacebookConnectionState =
   | "not_connected"

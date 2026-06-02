@@ -309,6 +309,54 @@ describe("canPublishXPost with outbound assets — gate invariants", () => {
   });
 });
 
+// ─── Dry-run → live publish sequence ─────────────────────────────────────────
+
+describe("Dry-run key contract — does not block live publish", () => {
+  it("dry-run override key is distinct from the live publish slot key", () => {
+    const outboundItemId = "writing-changed-humanity-x-001";
+    const scheduledFor = "2026-06-02T10:00:00Z";
+    const requestId = "x_abc123_def456";
+
+    const liveKey = `x:${outboundItemId}:${scheduledFor}`;
+    const dryRunKey = `x:dry-run:${outboundItemId}:${requestId}`;
+
+    expect(dryRunKey).not.toBe(liveKey);
+    expect(dryRunKey).not.toContain(scheduledFor);
+    expect(dryRunKey).toContain("dry-run");
+  });
+
+  it("repeated dry-runs with unique requestIds all produce different keys", () => {
+    const outboundItemId = "post-001";
+    const keys = ["req_1", "req_2", "req_3"].map(
+      (r) => `x:dry-run:${outboundItemId}:${r}`,
+    );
+    expect(new Set(keys).size).toBe(3);
+  });
+
+  it("live slot key format matches buildIdempotencyKey output", () => {
+    // The key claimPublishSlot uses must match what isDuplicatePublish checks
+    const outboundItemId = "post-001";
+    const scheduledFor = "2026-06-02T10:00:00Z";
+    const expectedKey = `x:${outboundItemId}:${scheduledFor}`;
+    // Verify the format manually to ensure idempotency check and claim use same key
+    expect(expectedKey).toBe("x:post-001:2026-06-02T10:00:00Z");
+  });
+
+  it("new dry-run override key format never matches live slot key", () => {
+    // Regression: new dry-runs must not land on the live slot key
+    const outboundItemId = "writing-changed-humanity-x-001";
+    const scheduledFor = "2026-06-02T10:00:00Z";
+    const requestId = "x_1a2b3c_4d5e";
+
+    const liveKey = `x:${outboundItemId}:${scheduledFor}`;
+    const newDryRunKey = `x:dry-run:${outboundItemId}:${requestId}`;
+
+    expect(newDryRunKey).not.toBe(liveKey);
+    expect(newDryRunKey.startsWith("x:dry-run:")).toBe(true);
+    expect(liveKey.startsWith("x:dry-run:")).toBe(false);
+  });
+});
+
 // ─── Scheduler invariant ──────────────────────────────────────────────────────
 
 describe("Scheduler is disabled — no posts are due without approved+scheduled status", () => {

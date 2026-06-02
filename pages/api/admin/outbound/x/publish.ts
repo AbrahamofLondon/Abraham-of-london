@@ -196,14 +196,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  // ── Idempotency check (outbound draft posts only) ──────────────────────────
-  // Blog-series and custom assets don't carry a stable outboundItemId, so
-  // idempotency is only enforced for content/outbound/x/* posts.
-  if (sourcePost && !dryRun) {
+  // ── Idempotency check ─────────────────────────────────────────────────────
+  // Outbound draft posts: use OutboundPost.id + scheduledFor as the key.
+  // Blog-series assets: use asset.slug as the stable id, "manual" as scheduledFor.
+  // Custom assets and Facebook-sync mode are ephemeral — idempotency not enforced.
+  const idempotencyItemId = sourcePost
+    ? sourcePost.id
+    : (asset.assetType !== "custom" && !body.facebookText) ? asset.slug : null;
+  const idempotencyScheduledFor = sourcePost
+    ? (sourcePost.scheduledFor ?? null)
+    : "manual";
+
+  if (idempotencyItemId && !dryRun) {
     const existingPublish = await isDuplicatePublish(
       "x",
-      sourcePost.id,
-      sourcePost.scheduledFor,
+      idempotencyItemId,
+      idempotencyScheduledFor,
     );
     if (existingPublish) {
       await createAttempt({
@@ -280,19 +288,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       actorId,
       actorEmailHash,
     });
-    // Write a DRY_RUN entry to the outbound ledger for outbound draft posts.
-    if (sourcePost) {
+    // Write a DRY_RUN audit entry. Uses a per-invocation key so the dry-run row
+    // does NOT occupy the live publish slot (which uses the stable key
+    // "x:{outboundItemId}:{scheduledFor}"). Without this override the
+    // unique constraint would block a later live publish.
+    if (idempotencyItemId) {
       await createLedgerEntry({
         provider: "x",
-        outboundItemId: sourcePost.id,
-        campaign: sourcePost.campaign ?? null,
+        outboundItemId: idempotencyItemId,
+        campaign: sourcePost?.campaign ?? null,
         assetSlug: asset.slug,
-        sourcePath: sourcePost.sourcePath ?? null,
-        scheduledFor: sourcePost.scheduledFor ?? null,
+        sourcePath: sourcePost?.sourcePath ?? null,
+        scheduledFor: idempotencyScheduledFor,
         actorId,
         actorEmailHash,
         status: "DRY_RUN",
         source: "manual",
+        idempotencyKeyOverride: `x:dry-run:${idempotencyItemId}:${id}`,
       }).catch(() => null);
     }
     await recordXPublishingAuditSafe({
@@ -354,18 +366,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     actorEmailHash,
   });
 
-  // For outbound draft posts: atomically claim the publish slot in the ledger.
-  // This is the race-condition-safe path that enforces idempotency via a unique
-  // constraint on (idempotencyKey). Blog-series and custom assets skip this path.
+  // Atomically claim the publish slot in the ledger for any stable asset.
+  // This is the race-condition-safe path. Custom assets and Facebook-sync mode
+  // are ephemeral (no stable id) and skip this path.
   let ledgerEntryId: string | null = null;
-  if (sourcePost) {
+  if (idempotencyItemId) {
     const claim = await claimPublishSlot({
       provider: "x",
-      outboundItemId: sourcePost.id,
-      campaign: sourcePost.campaign ?? null,
+      outboundItemId: idempotencyItemId,
+      campaign: sourcePost?.campaign ?? null,
       assetSlug: asset.slug,
-      sourcePath: sourcePost.sourcePath ?? null,
-      scheduledFor: sourcePost.scheduledFor ?? null,
+      sourcePath: sourcePost?.sourcePath ?? null,
+      scheduledFor: idempotencyScheduledFor,
       actorId,
       actorEmail: null,
       actorEmailHash,

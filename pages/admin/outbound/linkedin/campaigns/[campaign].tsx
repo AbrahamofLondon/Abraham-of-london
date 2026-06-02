@@ -251,7 +251,7 @@ function PostCard({ post, weekIsApproved }: { post: PostItem; weekIsApproved: bo
           {!validation.valid && post.approvalStatus !== "approved" && (
             <p className="mt-2 text-xs text-amber-200/65">
               To approve: open the file at{" "}
-              <code className="font-mono text-amber-100/80">content/outbound/linkedin/the-burden-changes-hands/{post.slug}.md</code>{" "}
+              <code className="font-mono text-amber-100/80">content/outbound/linkedin/[campaign]/{post.slug}.md</code>{" "}
               and change <code className="font-mono text-amber-100/80">approvalStatus: needs_review</code> to{" "}
               <code className="font-mono text-amber-100/80">approvalStatus: approved</code>.
             </p>

@@ -88,6 +88,7 @@ type OutboundReadinessRow = {
   publishLive: "Yes" | "No";
   state: string;
   blockers: string[];
+  nextAction: string;
 };
 
 // ─── Server-side ──────────────────────────────────────────────────────────────
@@ -201,6 +202,13 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
               : []),
             ...(liStatus.publishingEnabled ? [] : ["LINKEDIN_PUBLISHING_ENABLED is not true"]),
           ],
+          nextAction: !liStatus.connected
+            ? "Connect LinkedIn OAuth via /admin/outbound/linkedin"
+            : liStatus.selectedPublishingTarget.status !== "ready"
+            ? "Verify organisation URN and scope w_organization_social"
+            : !liStatus.publishingEnabled
+            ? "Set LINKEDIN_PUBLISHING_ENABLED=true after scope verified"
+            : "Run dry-run on a selected LinkedIn campaign post",
         },
         {
           channel: "Facebook",
@@ -223,6 +231,13 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
               ? []
               : ["FACEBOOK_PUBLISHING_ENABLED is not true"]),
           ],
+          nextAction: !fbStatus.oauthConfigured
+            ? "Set FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_REDIRECT_URI"
+            : !fbStatus.connected
+            ? "Connect Facebook Page via OAuth at /admin/outbound/facebook"
+            : fbStatus.missingPermissions.length > 0
+            ? `Grant missing permissions: ${fbStatus.missingPermissions.join(", ")}`
+            : "Set FACEBOOK_PUBLISHING_ENABLED=true and run a dry-run",
         },
         {
           channel: "X",
@@ -245,6 +260,17 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
               ? []
               : ["X_PUBLISHING_ENABLED is not true"]),
           ],
+          nextAction: !xStatus.oauthConfigured
+            ? "Set X_CLIENT_ID, X_CLIENT_SECRET, X_REDIRECT_URI, X_OAUTH_SCOPES"
+            : !xStatus.connected
+            ? "Connect X account via OAuth at /admin/outbound/x"
+            : xStatus.missingScopes.length > 0
+            ? `Missing scopes: ${xStatus.missingScopes.join(", ")}`
+            : !xStatus.canPublish
+            ? "Check X token scopes include tweet.write"
+            : process.env.X_PUBLISHING_ENABLED !== "true"
+            ? "Set X_PUBLISHING_ENABLED=true"
+            : "Ready — run dry-run on writing-changed-humanity-x-001",
         },
       ],
       schedulerEnabled: process.env.OUTBOUND_SCHEDULER_ENABLED === "true",
@@ -363,6 +389,10 @@ function OutboundReadinessMatrix({ rows }: { rows: OutboundReadinessRow[] }) {
             ) : (
               <p className="mt-2 text-xs text-emerald-200/55">No current blockers reported.</p>
             )}
+            <div className="mt-3 border-t border-white/5 pt-2">
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/25">Next action</p>
+              <p className="mt-1 text-[11px] leading-4 text-sky-200/60">{row.nextAction}</p>
+            </div>
           </div>
         ))}
       </div>
