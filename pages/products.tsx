@@ -1137,7 +1137,7 @@ export default function ProductsPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
-              <PrimaryBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")}>
+              <PrimaryBtn href="/artifacts/global-market-outlook-q1-2026-public">
                 View intelligence line
               </PrimaryBtn>
               <GhostBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")}>
