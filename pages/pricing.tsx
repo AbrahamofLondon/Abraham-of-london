@@ -97,7 +97,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
         fontSize: "8px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
-        color: "rgba(255,255,255,0.28)",
+        color: "rgba(255,255,255,0.45)",
         marginBottom: "8px",
       }}
     >
@@ -145,7 +145,7 @@ function FreePill() {
         ...mono,
         fontSize: "11px",
         letterSpacing: "0.10em",
-        color: "rgba(255,255,255,0.40)",
+        color: "rgba(255,255,255,0.55)",
         background: "rgba(255,255,255,0.04)",
         border: "1px solid rgba(255,255,255,0.10)",
         padding: "4px 10px",
@@ -196,7 +196,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
           style={{
             ...mono,
             fontSize: "9px",
-            color: "rgba(255,255,255,0.38)",
+            color: "rgba(255,255,255,0.55)",
             lineHeight: 1.65,
           }}
         >
@@ -211,7 +211,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
             fontSize: "7.5px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "rgba(253,186,116,0.55)",
+            color: "rgba(253,186,116,0.70)",
           }}
         >
           Controlled release · assisted access
@@ -225,7 +225,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
             fontSize: "7.5px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.28)",
+            color: "rgba(255,255,255,0.45)",
           }}
         >
           Contracted access
@@ -239,7 +239,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
             ...mono,
             fontSize: "8px",
             letterSpacing: "0.14em",
-            color: "rgba(255,255,255,0.22)",
+            color: "rgba(255,255,255,0.38)",
           }}
         >
           Est. {product.estimatedCompletionMinutes} min
@@ -324,7 +324,7 @@ function RetainerCard({ product }: { product: CatalogProduct }) {
             ...mono,
             fontSize: "9px",
             letterSpacing: "0.14em",
-            color: "rgba(255,255,255,0.30)",
+            color: "rgba(255,255,255,0.45)",
             border: "1px solid rgba(255,255,255,0.08)",
             padding: "4px 10px",
             flexShrink: 0,
@@ -337,7 +337,7 @@ function RetainerCard({ product }: { product: CatalogProduct }) {
         style={{
           ...mono,
           fontSize: "9px",
-          color: "rgba(255,255,255,0.35)",
+          color: "rgba(255,255,255,0.50)",
           lineHeight: 1.65,
         }}
       >
@@ -515,7 +515,7 @@ export default function PricingPage() {
                   }}
                 >
                   <div>
-                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)", lineHeight: 1.5, marginBottom: "3px" }}>
+                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.50)", lineHeight: 1.5, marginBottom: "3px" }}>
                       {condition}
                     </p>
                     <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.68)", lineHeight: 1.55 }}>
@@ -526,7 +526,7 @@ export default function PricingPage() {
               ))}
             </div>
             <div style={{ marginTop: "14px" }}>
-              <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.28)", lineHeight: 1.6, marginBottom: "8px" }}>
+              <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", lineHeight: 1.6, marginBottom: "8px" }}>
                 Not sure where you fit?
               </p>
               <Link
@@ -561,11 +561,11 @@ export default function PricingPage() {
                 ...mono,
                 fontSize: "8px",
                 letterSpacing: "0.12em",
-                color: "rgba(255,255,255,0.30)",
+                color: "rgba(255,255,255,0.45)",
                 lineHeight: 1.7,
               }}
             >
-              <strong style={{ color: "rgba(255,255,255,0.45)", fontWeight: "normal" }}>Access note.</strong>{" "}
+              <strong style={{ color: "rgba(255,255,255,0.55)", fontWeight: "normal" }}>Access note.</strong>{" "}
               All figures shown are access fees for governed decision instruments.
               They are not financial advice, investment recommendations, or regulated
               professional services. No outcome is guaranteed. Governed records produced
@@ -593,7 +593,7 @@ export default function PricingPage() {
               style={{
                 ...mono,
                 fontSize: "9px",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.48)",
                 lineHeight: 1.6,
                 marginBottom: "24px",
                 maxWidth: "500px",
@@ -689,7 +689,7 @@ export default function PricingPage() {
               <h2 style={{ ...serif, fontSize: "22px", color: "rgba(255,255,255,0.80)", marginBottom: "6px" }}>
                 Boardroom Brief
               </h2>
-              <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.32)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
+              <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.48)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
                 Generate a boardroom-readiness brief from one serious decision intake. The first recommended paid step before the deeper corridor.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.04)" }}>
@@ -711,7 +711,7 @@ export default function PricingPage() {
               <h2 style={{ ...serif, fontSize: "22px", color: "rgba(255,255,255,0.80)", marginBottom: "6px" }}>
                 Global Market Intelligence
               </h2>
-              <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.32)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
+              <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.48)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
                 Quarterly market intelligence built on prior-call review, not prediction theatre. Each report verifies material calls from the previous quarter before issuing the next.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.04)" }}>
@@ -743,7 +743,7 @@ export default function PricingPage() {
               style={{
                 ...mono,
                 fontSize: "9px",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.48)",
                 lineHeight: 1.6,
                 marginBottom: "24px",
                 maxWidth: "500px",
@@ -952,7 +952,7 @@ export default function PricingPage() {
               style={{
                 ...mono,
                 fontSize: "9px",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.48)",
                 lineHeight: 1.6,
                 marginBottom: "24px",
                 maxWidth: "500px",
@@ -996,7 +996,7 @@ export default function PricingPage() {
               style={{
                 ...mono,
                 fontSize: "9px",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.48)",
                 lineHeight: 1.6,
                 marginBottom: "24px",
                 maxWidth: "500px",
@@ -1041,16 +1041,15 @@ export default function PricingPage() {
                 style={{
                   ...mono,
                   fontSize: "9px",
-                  color: "rgba(255,255,255,0.32)",
-                  lineHeight: 1.6,
-                  marginBottom: "24px",
-                  maxWidth: "500px",
-                }}
-              >
-                Facilitated decision frameworks. Each run produces a governed
-                commitment record and writes conclusions to Decision Centre.
-                Controlled-release access is assisted while self-serve checkout is not enabled.
-              </p>
+                                  color: "rgba(255,255,255,0.48)",
+                                  lineHeight: 1.6,
+                                  marginBottom: "24px",
+                                  maxWidth: "500px",
+                                }}
+                              >
+                                  Facilitated decision frameworks. Each run produces a governed
+                                  commitment record and writes conclusions to Decision Centre.
+                                  Controlled-release access is assisted while self-serve checkout is not enabled.              </p>
               <div
                 style={{
                   display: "grid",
@@ -1087,7 +1086,7 @@ export default function PricingPage() {
               style={{
                 ...mono,
                 fontSize: "9px",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.48)",
                 lineHeight: 1.6,
                 marginBottom: "8px",
                 maxWidth: "500px",
@@ -1102,7 +1101,7 @@ export default function PricingPage() {
                 ...mono,
                 fontSize: "8px",
                 letterSpacing: "0.12em",
-                color: "rgba(255,255,255,0.22)",
+                color: "rgba(255,255,255,0.38)",
                 lineHeight: 1.6,
                 marginBottom: "24px",
                 maxWidth: "500px",
@@ -1144,7 +1143,7 @@ export default function PricingPage() {
               style={{
                 ...mono,
                 fontSize: "9px",
-                color: "rgba(255,255,255,0.32)",
+                color: "rgba(255,255,255,0.48)",
                 lineHeight: 1.6,
                 marginBottom: "24px",
                 maxWidth: "500px",
@@ -1172,7 +1171,7 @@ export default function PricingPage() {
                     <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.75)", marginBottom: "2px" }}>
                       {f.displayName}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.30)", lineHeight: 1.5 }}>
+                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
                       {f.description}
                     </p>
                   </div>
@@ -1213,7 +1212,7 @@ export default function PricingPage() {
                     <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.70)", marginBottom: "2px" }}>
                       {f.displayName}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.28)", lineHeight: 1.5 }}>
+                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
                       {f.description}
                     </p>
                   </div>
@@ -1222,7 +1221,7 @@ export default function PricingPage() {
                       ...mono,
                       fontSize: "8px",
                       letterSpacing: "0.14em",
-                      color: "rgba(255,255,255,0.22)",
+                      color: "rgba(255,255,255,0.38)",
                       whiteSpace: "nowrap",
                       flexShrink: 0,
                     }}
@@ -1259,7 +1258,7 @@ export default function PricingPage() {
                   fontSize: "8px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.35)",
+                  color: "rgba(255,255,255,0.50)",
                   textDecoration: "none",
                 }}
               >
@@ -1274,7 +1273,7 @@ export default function PricingPage() {
               ...mono,
               fontSize: "7px",
               letterSpacing: "0.10em",
-              color: "rgba(255,255,255,0.18)",
+              color: "rgba(255,255,255,0.32)",
               lineHeight: 1.8,
               marginTop: "32px",
               maxWidth: "720px",

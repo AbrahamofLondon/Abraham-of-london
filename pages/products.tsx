@@ -112,9 +112,9 @@ const statusStyles: Record<ProductStatus, { color: string; border: string; backg
   "Organisational":    { color: "rgba(147,197,253,0.90)", border: "rgba(147,197,253,0.22)", background: "rgba(147,197,253,0.06)" },
   "Evidence-gated":    { color: "rgba(216,180,254,0.90)", border: "rgba(216,180,254,0.22)", background: "rgba(216,180,254,0.06)" },
   "Review-gated":      { color: "rgba(148,163,184,0.90)", border: "rgba(148,163,184,0.22)", background: "rgba(148,163,184,0.06)" },
-  "Gated":             { color: "rgba(252,165,165,0.50)", border: "rgba(252,165,165,0.14)", background: "rgba(252,165,165,0.04)" },
+  "Gated":             { color: "rgba(252,165,165,0.65)", border: "rgba(252,165,165,0.14)", background: "rgba(252,165,165,0.04)" },
   "Selective access":  { color: "rgba(251,191,36,0.84)",  border: "rgba(251,191,36,0.22)",  background: "rgba(251,191,36,0.06)" },
-  "Planned":           { color: "rgba(255,255,255,0.35)", border: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.018)" },
+  "Planned":           { color: "rgba(255,255,255,0.50)", border: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.018)" },
   "Sample":            { color: "rgba(255,255,255,0.58)", border: "rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.025)" },
   "Separate line":     { color: "rgba(252,211,77,0.88)",  border: "rgba(252,211,77,0.20)",  background: "rgba(252,211,77,0.055)" },
   "Public instrument": { color: "rgba(147,197,253,0.90)", border: "rgba(147,197,253,0.22)", background: "rgba(147,197,253,0.06)" },
@@ -398,15 +398,15 @@ function ProductCard({ item }: { item: ProductItem }) {
       <h3 className="mt-4" style={{ ...serif, color: "rgba(255,255,255,0.90)", fontSize: "1.35rem", lineHeight: 1.05, fontStyle: "italic" }}>
         {item.name}
       </h3>
-      <p className="mt-3 text-[13px] leading-[1.7] text-white/[0.55]">{item.role}</p>
+      <p className="mt-3 text-[13px] leading-[1.7] text-white/[0.68]">{item.role}</p>
       <div className="mt-4 space-y-3">
         <div>
-          <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Produces</p>
-          <p className="mt-1 text-[13px] leading-[1.65] text-white/[0.48]">{item.produces}</p>
+          <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Produces</p>
+          <p className="mt-1 text-[13px] leading-[1.65] text-white/[0.62]">{item.produces}</p>
         </div>
       </div>
       {item.accessNote && (
-        <p className="mt-4 border-t border-white/[0.06] pt-4" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", lineHeight: 1.65, color: "rgba(255,255,255,0.28)", textTransform: "uppercase" }}>
+        <p className="mt-4 border-t border-white/[0.06] pt-4" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", lineHeight: 1.65, color: "rgba(255,255,255,0.42)", textTransform: "uppercase" }}>
           {item.accessNote}
         </p>
       )}
@@ -450,7 +450,7 @@ function StickyActionBar() {
       style={{ backgroundColor: "rgba(3,3,5,0.96)", borderTop: `1px solid ${GOLD}22` }}
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-3 lg:px-12">
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
           Not sure where to start?
         </p>
         <div className="flex flex-wrap gap-3">
@@ -481,8 +481,8 @@ function CollapsibleSection({ title, intro, children }: { title: string; intro: 
         className="flex w-full items-center justify-between px-6 py-5 text-left transition-colors hover:bg-white/[0.012] lg:px-12"
       >
         <div>
-          <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>{title}</p>
-          <p className="mt-1 text-[13px] text-white/[0.40]">{intro}</p>
+          <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90` }}>{title}</p>
+          <p className="mt-1 text-[13px] text-white/[0.55]">{intro}</p>
         </div>
         {open ? <ChevronUp className="h-4 w-4 shrink-0 text-white/30" /> : <ChevronDown className="h-4 w-4 shrink-0 text-white/30" />}
       </button>
@@ -503,7 +503,7 @@ function InstrumentList({ items }: { items: InstrumentItem[] }) {
           <div className="flex items-center gap-2.5 min-w-0">
             <StatusBadge status={item.status} />
             {item.href ? (
-              <Link href={item.href} className="truncate text-[13px] text-white/[0.65] transition-colors hover:text-white/[0.90]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em" }}>
+              <Link href={item.href} className="truncate text-[13px] text-white/[0.78] transition-colors hover:text-white/[0.90]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em" }}>
                 {item.name}
               </Link>
             ) : (
@@ -533,7 +533,7 @@ function CollapsibleBriefPreview() {
         className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-white/[0.015]"
       >
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70` }}>What the brief shows</p>
+          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>What the brief shows</p>
           <p className="mt-1 text-[11px] text-white/[0.35]">Sample structure using fictional demonstration data</p>
         </div>
         {open ? <ChevronUp className="h-4 w-4 text-white/30" /> : <ChevronDown className="h-4 w-4 text-white/30" />}
@@ -542,11 +542,11 @@ function CollapsibleBriefPreview() {
         <div className="space-y-4 border-t border-white/[0.06] p-4">
           {previewSections.map((s) => (
             <div key={s.label}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}55` }}>{s.label}</p>
+              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70` }}>{s.label}</p>
               <p className="mt-1 text-[12px] leading-relaxed text-white/[0.42]" style={{ ...serif, fontStyle: "italic" }}>{s.sample}</p>
             </div>
           ))}
-          <p className="border-t border-white/[0.04] pt-3" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+          <p className="border-t border-white/[0.04] pt-3" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
             Sample structure. Fictional demonstration data only.
           </p>
         </div>
@@ -566,7 +566,7 @@ function CorridorStageRow({ stage, index, isLast }: { stage: CorridorStageData; 
           className="relative z-10 flex h-8 w-8 items-center justify-center border"
           style={{ borderColor: dimmed ? "rgba(255,255,255,0.06)" : `${GOLD}28`, backgroundColor: dimmed ? "rgba(255,255,255,0.008)" : `${GOLD}08` }}
         >
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: dimmed ? "rgba(255,255,255,0.22)" : `${GOLD}88` }}>{stage.number}</span>
+          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: dimmed ? "rgba(255,255,255,0.35)" : `${GOLD}88` }}>{stage.number}</span>
         </div>
         {!isLast && <div className="w-px flex-1 bg-white/[0.06]" style={{ minHeight: "28px" }} />}
       </div>
@@ -575,12 +575,12 @@ function CorridorStageRow({ stage, index, isLast }: { stage: CorridorStageData; 
       <div className="flex-1 pb-6 pl-4 pt-1">
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={stage.status} />
-          <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)" }}>{stage.price}</span>
+          <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>{stage.price}</span>
         </div>
-        <h3 className="mt-2" style={{ ...serif, fontSize: "1.35rem", lineHeight: 1.1, fontStyle: "italic", color: dimmed ? "rgba(255,255,255,0.38)" : "rgba(255,255,255,0.86)" }}>
+        <h3 className="mt-2" style={{ ...serif, fontSize: "1.35rem", lineHeight: 1.1, fontStyle: "italic", color: dimmed ? "rgba(255,255,255,0.50)" : "rgba(255,255,255,0.86)" }}>
           {stage.name}
         </h3>
-        <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed" style={{ color: dimmed ? "rgba(255,255,255,0.26)" : "rgba(255,255,255,0.48)" }}>
+        <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed" style={{ color: dimmed ? "rgba(255,255,255,0.38)" : "rgba(255,255,255,0.62)" }}>
           {stage.purpose}
         </p>
         <div className="mt-3">
@@ -594,9 +594,9 @@ function CorridorStageRow({ stage, index, isLast }: { stage: CorridorStageData; 
               <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
             </Link>
           ) : stage.cta && !stage.href ? (
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>{stage.cta}</span>
+            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>{stage.cta}</span>
           ) : (
-            <span className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            <span className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               <Lock className="h-3 w-3" /> No public activation
             </span>
           )}
@@ -626,7 +626,7 @@ function SectionNav() {
       <div className="mx-auto flex max-w-7xl flex-wrap gap-2">
         {links.map((l) => (
           <a key={l.href} href={l.href}
-            className="border border-white/[0.08] px-4 py-2 text-white/[0.40] transition-colors hover:border-white/[0.15] hover:text-white/[0.64]"
+            className="border border-white/[0.08] px-4 py-2 text-white/[0.55] transition-colors hover:border-white/[0.15] hover:text-white/[0.78]"
             style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
             {l.label}
           </a>
@@ -660,7 +660,7 @@ function HeroSection() {
               <GhostBtn href="/boardroom-brief">Generate Boardroom Brief</GhostBtn>
               <Link href="/pricing"
                 className="inline-flex items-center gap-1.5"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
                 View pricing and access
                 <ArrowRight className="h-3 w-3" />
               </Link>
@@ -671,13 +671,13 @@ function HeroSection() {
           <div className="border border-white/[0.075] bg-white/[0.018] p-5 lg:p-6">
             <div className="flex items-center gap-3">
               <Building2 className="h-4 w-4" style={{ color: `${GOLD}AA` }} />
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Route strategy</p>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>Route strategy</p>
             </div>
             <div className="mt-5 grid gap-px bg-white/[0.05]">
               {routePrinciples.map((p) => (
                 <div key={p.title} className="bg-[#030305] p-4">
                   <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>{p.title}</p>
-                  <p className="mt-2 text-[13px] leading-[1.7] text-white/[0.46]">{p.body}</p>
+                  <p className="mt-2 text-[13px] leading-[1.7] text-white/[0.60]">{p.body}</p>
                 </div>
               ))}
             </div>
@@ -709,14 +709,14 @@ function PressureSignalBand() {
               <p className="mt-3 max-w-prose text-[14px] leading-[1.75] text-white/[0.60]">
                 Paste the decision you are avoiding or delaying. The system will return a pressure band, missing evidence, and the next admissible move.
               </p>
-              <p className="mt-2" style={{ ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+              <p className="mt-2" style={{ ...mono, fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
                 Free, no account required. 30-second first read.
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {["Pressure band", "Missing evidence", "Authority or ownership risk", "Consequence signal", "Next admissible move"].map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <span className="h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: `${GOLD}AA` }} />
-                    <span className="text-[12px] text-white/[0.48]">{item}</span>
+                    <span className="text-[12px] text-white/[0.62]">{item}</span>
                   </div>
                 ))}
               </div>
@@ -753,7 +753,7 @@ function StartHereSection() {
                 <h3 className="mt-4" style={{ ...serif, color: "rgba(255,255,255,0.90)", fontSize: "1.2rem", lineHeight: 1.1, fontStyle: "italic" }}>
                   {card.title}
                 </h3>
-                <p className="mt-3 text-[13px] leading-[1.65] text-white/[0.50]">{card.description}</p>
+                <p className="mt-3 text-[13px] leading-[1.65] text-white/[0.65]">{card.description}</p>
                 <div className="mt-auto pt-5">
                   <span
                     className="inline-flex min-h-[40px] items-center gap-2 border px-4 py-2"
@@ -796,7 +796,7 @@ function BoardroomBriefFeature() {
                 >
                   {displayPrice}
                 </span>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", fontStyle: "italic" }}>
+                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)", fontStyle: "italic" }}>
                   Recommended first paid step
                 </span>
               </div>
@@ -809,17 +809,17 @@ function BoardroomBriefFeature() {
               </p>
 
               <div className="mt-5">
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Who it is for</p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-white/[0.50]">
+                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>Who it is for</p>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-white/[0.65]">
                   Leaders preparing a decision that may face board, investor, client, regulator, or internal challenge.
                 </p>
               </div>
 
               <div className="mt-5">
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Produces</p>
+                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>Produces</p>
                 <div className="mt-2 grid grid-cols-2 gap-1.5">
                   {["Likely objections", "Evidence weaknesses", "Trade-offs", "Decision paths", "Boardroom-readiness status", "Next admissible move"].map((item) => (
-                    <div key={item} className="flex items-center gap-2 text-[13px] text-white/[0.48]">
+                    <div key={item} className="flex items-center gap-2 text-[13px] text-white/[0.62]">
                       <span className="h-1 w-1 shrink-0 rounded-full" style={{ backgroundColor: `${GOLD}70` }} />
                       {item}
                     </div>
@@ -827,7 +827,7 @@ function BoardroomBriefFeature() {
                 </div>
               </div>
 
-              <p className="mt-5" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)" }}>
+              <p className="mt-5" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
                 Time: 5–7 minutes
               </p>
 
@@ -836,7 +836,7 @@ function BoardroomBriefFeature() {
                 <GhostBtn href="/boardroom-brief?sample=true">View sample</GhostBtn>
                 <Link href="/diagnostics/executive-reporting"
                   className="inline-flex items-center gap-1.5"
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
                   Proceed to Executive Reporting
                   <ArrowRight className="h-3 w-3" />
                 </Link>
@@ -877,7 +877,7 @@ function SupportingLayerCard({
         <Link
           href={route}
           className="group inline-flex items-center gap-1.5 transition-colors hover:text-white/[0.70]"
-          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}
+          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}
         >
           Open
           <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
@@ -1029,7 +1029,7 @@ function EnterpriseAndProfessionalSection() {
             <h3 className="mt-4" style={{ ...serif, fontSize: "1.8rem", lineHeight: 1.05, fontStyle: "italic", color: "rgba(255,255,255,0.90)" }}>
               Enterprise pathway
             </h3>
-            <p className="mt-3 text-[14px] leading-[1.75] text-white/[0.55]">
+            <p className="mt-3 text-[14px] leading-[1.75] text-white/[0.68]">
               When serious decisions fail because authority, evidence, ownership, and execution are misaligned across the organisation.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -1048,7 +1048,7 @@ function EnterpriseAndProfessionalSection() {
               </h3>
               <StatusBadge status="Selective access" />
             </div>
-            <p className="mt-3 text-[14px] leading-[1.75] text-white/[0.55]">
+            <p className="mt-3 text-[14px] leading-[1.75] text-white/[0.68]">
               Use Decision Infrastructure to challenge, evidence, and govern client decisions.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -1078,7 +1078,7 @@ function PageEndingSection() {
           <GhostBtn href="/boardroom-brief">Generate Boardroom Brief</GhostBtn>
           <Link href="/pricing"
             className="inline-flex items-center gap-1.5"
-            style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+            style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
             View pricing and access
             <ArrowRight className="h-3 w-3" />
           </Link>
@@ -1123,12 +1123,12 @@ export default function ProductsPage() {
                   Global Market Intelligence
                 </h2>
               </div>
-              <p className="max-w-[70ch] text-[15px] leading-[1.85] text-white/[0.52] lg:justify-self-end">
+              <p className="max-w-[70ch] text-[15px] leading-[1.85] text-white/[0.65] lg:justify-self-end">
                 Quarterly market intelligence that reviews prior material calls before issuing the next report.
               </p>
             </div>
             <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
-              <p className="text-[13px] leading-relaxed text-white/[0.45]">
+              <p className="text-[13px] leading-relaxed text-white/[0.58]">
                 Each quarterly report reviews material calls from the previous quarter before issuing the next. Built for operators who need disciplined market judgement.
               </p>
             </div>
@@ -1156,7 +1156,7 @@ export default function ProductsPage() {
         <div id="playbooks">
           <CollapsibleSection title="Governed Playbooks" intro="Controlled-release governed methodology runs for execution restoration, alignment audit, and drift detection.">
             <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
-              <p className="text-[13px] leading-relaxed text-white/[0.45]">
+              <p className="text-[13px] leading-relaxed text-white/[0.58]">
                 Each playbook is a governed methodology run. Access is currently available by request while self-serve checkout is being enabled.
               </p>
             </div>
@@ -1167,7 +1167,7 @@ export default function ProductsPage() {
         <div id="purpose">
           <CollapsibleSection title="Purpose Alignment" intro="A separate product line for personal mandate and behavioural enforcement.">
             <div className="mb-5 border-l-2 border-[#FCCD4D]/40 pl-4">
-              <p className="text-[13px] leading-relaxed text-white/[0.45]">
+              <p className="text-[13px] leading-relaxed text-white/[0.58]">
                 Purpose Alignment may contribute behavioural evidence, but it is not a prerequisite for Operational Decision Intelligence.
               </p>
             </div>
