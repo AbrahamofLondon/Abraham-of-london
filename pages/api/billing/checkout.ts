@@ -12,7 +12,7 @@ import { resolveProductIdentity } from "@/lib/commercial/product-identity";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
 import { evaluateERAdmission } from "@/lib/diagnostics/executive-reporting/admission";
-import { trackLaunch } from "@/lib/analytics/client-launch-events";
+import { trackServerLaunch } from "@/lib/analytics/server-launch-event";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey
@@ -169,7 +169,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // ── Launch analytics (fire and forget) ──
-  trackLaunch("checkout_session_created", `/api/billing/checkout`, {
+  trackServerLaunch("checkout_session_created", `/api/billing/checkout`, {
     productCode: code,
     route: successPath,
   });
