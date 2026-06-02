@@ -831,7 +831,7 @@ export default function FacebookOutboundAdminPage({
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <div className="space-y-6">
+      <div className="space-y-6 pb-20">
         {/* Header */}
         <section className="border border-blue-400/15 bg-gradient-to-br from-blue-500/10 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-blue-200/55">

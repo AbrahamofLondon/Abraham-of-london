@@ -534,7 +534,39 @@ export default function OutboundIndexPage({
           )}
         </section>
 
-        {/* Summary row */}
+        {/* Status command strip */}
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {readinessMatrix.map((row) => {
+            const isReady = row.publishLive === "Yes";
+            const tone = isReady ? "success" : row.state === "READY_TO_CONNECT" ? "info" : "warning";
+            return (
+              <Link
+                key={row.channel}
+                href={`/admin/outbound/${row.channel.toLowerCase()}`}
+                className={`border p-3 transition-colors hover:border-white/20 ${
+                  isReady ? "border-emerald-400/20 bg-emerald-950/20" : "border-white/10 bg-black/20"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-white/80">{row.channel}</span>
+                  <AdminStatusBadge label={row.state} tone={tone} />
+                </div>
+                <p className="mt-1.5 text-[11px] text-white/35 leading-4">{row.nextAction}</p>
+              </Link>
+            );
+          })}
+          <div className={`border p-3 ${schedulerEnabled ? "border-amber-400/20 bg-amber-950/10" : "border-white/10 bg-black/20"}`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-white/80">Scheduler</span>
+              <AdminStatusBadge label={schedulerEnabled ? "Enabled" : "Disabled"} tone={schedulerEnabled ? "warning" : "success"} />
+            </div>
+            <p className="mt-1.5 text-[11px] text-white/35 leading-4">
+              {schedulerEnabled ? "Auto-publish active — verify approval gate" : "Keep disabled until manual publish verified"}
+            </p>
+          </div>
+        </div>
+
+        {/* Summary metrics */}
         <div className="grid grid-cols-3 gap-3">
           <AdminMetricCard
             label="Pending review"

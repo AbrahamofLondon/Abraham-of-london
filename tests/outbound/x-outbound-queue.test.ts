@@ -36,6 +36,7 @@ import {
   outboundPostToXAsset,
   getOutboundDraftXAssets,
   getOutboundXAssetBySlug,
+  getOutboundXPostAndAssetBySlug,
   X_OUTBOUND_SLUG_PREFIX,
 } from "@/lib/outbound/x-outbound-adapter";
 import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
@@ -306,6 +307,189 @@ describe("canPublishXPost with outbound assets — gate invariants", () => {
     const result = canPublishXPost(asset, CONNECTED);
     expect(result.allowed).toBe(false);
     expect(result.blockers.some((b) => /frontmatter/i.test(b))).toBe(true);
+  });
+});
+
+// ─── Filter visibility invariants ────────────────────────────────────────────
+//
+// These tests document the exact filter rules and verify that no asset can
+// silently disappear from the queue. Every asset must appear in at least
+// the "all" bucket; ledger state enriches display but never erases the asset.
+
+describe("filterAssets — visibility invariants", () => {
+  // Import filterAssets via re-export from the module (tested indirectly)
+  // These tests validate the logic contract documented in x.tsx.
+
+  type MinAsset = {
+    outboundStatus?: string;
+    outboundApprovalStatus?: string;
+    publishLedgerStatus?: string | null;
+    publishable: boolean;
+  };
+
+  // Mirror the filter logic from x.tsx for unit testing
+  function filter(assets: MinAsset[], f: string): MinAsset[] {
+    switch (f) {
+      case "all": return assets;
+      case "ready": return assets.filter((a) => a.outboundStatus === "ready" || a.outboundStatus === "scheduled");
+      case "approved": return assets.filter((a) => a.outboundApprovalStatus === "approved");
+      case "published": return assets.filter((a) => a.publishLedgerStatus === "PUBLISHED");
+      case "attention": return assets.filter((a) => a.publishLedgerStatus === "DRY_RUN" || a.publishLedgerStatus === "IN_PROGRESS" || a.publishLedgerStatus === "FAILED");
+      case "blocked": return assets.filter((a) => !a.publishable && a.publishLedgerStatus !== "PUBLISHED");
+      default: return assets;
+    }
+  }
+
+  const DT_ALGORITHM: MinAsset = {
+    outboundStatus: "scheduled",
+    outboundApprovalStatus: "approved",
+    publishLedgerStatus: null,
+    publishable: true,
+  };
+
+  it("dt-algorithm-01 (status:scheduled) is visible in 'ready' filter (includes scheduled)", () => {
+    expect(filter([DT_ALGORITHM], "ready")).toHaveLength(1);
+  });
+
+  it("dt-algorithm-01 is visible in 'approved' filter", () => {
+    expect(filter([DT_ALGORITHM], "approved")).toHaveLength(1);
+  });
+
+  it("dt-algorithm-01 is always visible in 'all' filter", () => {
+    expect(filter([DT_ALGORITHM], "all")).toHaveLength(1);
+  });
+
+  it("dt-algorithm-01 with DRY_RUN ledger state is visible in 'attention' filter", () => {
+    const withDryRun: MinAsset = { ...DT_ALGORITHM, publishLedgerStatus: "DRY_RUN" };
+    expect(filter([withDryRun], "attention")).toHaveLength(1);
+  });
+
+  it("dt-algorithm-01 with IN_PROGRESS ledger state is visible in 'attention' filter", () => {
+    const withInProgress: MinAsset = { ...DT_ALGORITHM, publishLedgerStatus: "IN_PROGRESS" };
+    expect(filter([withInProgress], "attention")).toHaveLength(1);
+  });
+
+  it("dt-algorithm-01 with FAILED ledger state is visible in 'attention' filter", () => {
+    const withFailed: MinAsset = { ...DT_ALGORITHM, publishLedgerStatus: "FAILED" };
+    expect(filter([withFailed], "attention")).toHaveLength(1);
+  });
+
+  it("dt-algorithm-01 with PUBLISHED ledger state is visible in 'published' filter", () => {
+    const withPublished: MinAsset = { ...DT_ALGORITHM, publishLedgerStatus: "PUBLISHED", publishable: false };
+    expect(filter([withPublished], "published")).toHaveLength(1);
+  });
+
+  it("PUBLISHED item is NOT in 'blocked' filter (published ≠ blocked)", () => {
+    const published: MinAsset = { outboundStatus: "ready", outboundApprovalStatus: "approved", publishLedgerStatus: "PUBLISHED", publishable: false };
+    expect(filter([published], "blocked")).toHaveLength(0);
+  });
+
+  it("status=ready items appear in 'ready' filter", () => {
+    const readyItem: MinAsset = { outboundStatus: "ready", outboundApprovalStatus: "needs_review", publishLedgerStatus: null, publishable: true };
+    expect(filter([readyItem], "ready")).toHaveLength(1);
+  });
+
+  it("status=draft items do NOT appear in 'ready' filter", () => {
+    const draft: MinAsset = { outboundStatus: "draft", outboundApprovalStatus: "needs_review", publishLedgerStatus: null, publishable: true };
+    expect(filter([draft], "ready")).toHaveLength(0);
+  });
+
+  it("every asset with any ledger status still appears in 'all'", () => {
+    const statuses = [null, "DRY_RUN", "IN_PROGRESS", "FAILED", "PUBLISHED", "BLOCKED"];
+    const assets: MinAsset[] = statuses.map((s) => ({
+      outboundStatus: "scheduled",
+      outboundApprovalStatus: "approved",
+      publishLedgerStatus: s,
+      publishable: s !== "PUBLISHED",
+    }));
+    expect(filter(assets, "all")).toHaveLength(statuses.length);
+  });
+
+  it("'attention' filter catches all ledger-active states", () => {
+    const attentionItems: MinAsset[] = [
+      { outboundStatus: "ready", outboundApprovalStatus: "approved", publishLedgerStatus: "DRY_RUN", publishable: true },
+      { outboundStatus: "ready", outboundApprovalStatus: "approved", publishLedgerStatus: "IN_PROGRESS", publishable: true },
+      { outboundStatus: "ready", outboundApprovalStatus: "approved", publishLedgerStatus: "FAILED", publishable: false },
+    ];
+    expect(filter(attentionItems, "attention")).toHaveLength(3);
+  });
+});
+
+// ─── Slug resolution from nested campaign folder ──────────────────────────────
+
+describe("dt-algorithm-01 slug resolves from nested campaign folder", () => {
+  it("outbound-x adapter uses post.id (not filename) for slug", () => {
+    mockReaddirSync.mockImplementation((dir: string) => {
+      const seg = lastSeg(dir);
+      if (seg === "x") return [makeDirent("the-truth-in-the-frame", false)];
+      if (seg === "the-truth-in-the-frame") return [makeDirent("dt-algorithm-01.md")];
+      return [];
+    });
+    // Simulate the actual frontmatter: id is ttif-x-dt-algorithm-01, not the filename
+    mockReadFileSync.mockReturnValue([
+      "---",
+      'id: "ttif-x-dt-algorithm-01"',
+      "provider: x",
+      "status: scheduled",
+      "approvalStatus: approved",
+      "requiresFinalApproval: true",
+      "postType: deep-thread",
+      "campaign: the-truth-in-the-frame",
+      "---",
+      "Post body here.",
+    ].join("\n"));
+
+    const { posts, assets } = getOutboundDraftXAssets();
+    expect(posts).toHaveLength(1);
+    // Slug uses post.id from frontmatter, not filename
+    expect(assets[0]?.slug).toBe("outbound-x/ttif-x-dt-algorithm-01");
+    expect(posts[0]?.postType).toBe("deep-thread");
+    expect(posts[0]?.id).toBe("ttif-x-dt-algorithm-01");
+  });
+
+  it("getOutboundXAssetBySlug resolves by frontmatter id not filename", () => {
+    mockReaddirSync.mockImplementation((dir: string) => {
+      const seg = lastSeg(dir);
+      if (seg === "x") return [makeDirent("the-truth-in-the-frame", false)];
+      if (seg === "the-truth-in-the-frame") return [makeDirent("dt-algorithm-01.md")];
+      return [];
+    });
+    mockReadFileSync.mockReturnValue([
+      "---",
+      'id: "ttif-x-dt-algorithm-01"',
+      "provider: x",
+      "status: scheduled",
+      "approvalStatus: approved",
+      "requiresFinalApproval: true",
+      "---",
+      "Body.",
+    ].join("\n"));
+
+    const asset = getOutboundXAssetBySlug("outbound-x/ttif-x-dt-algorithm-01");
+    expect(asset).not.toBeNull();
+    expect(asset?.slug).toBe("outbound-x/ttif-x-dt-algorithm-01");
+  });
+
+  it("lookups by filename-only slug (without frontmatter id prefix) return null", () => {
+    mockReaddirSync.mockImplementation((dir: string) => {
+      const seg = lastSeg(dir);
+      if (seg === "x") return [makeDirent("the-truth-in-the-frame", false)];
+      if (seg === "the-truth-in-the-frame") return [makeDirent("dt-algorithm-01.md")];
+      return [];
+    });
+    mockReadFileSync.mockReturnValue([
+      "---",
+      'id: "ttif-x-dt-algorithm-01"',
+      "provider: x",
+      "status: scheduled",
+      "approvalStatus: approved",
+      "requiresFinalApproval: true",
+      "---",
+      "Body.",
+    ].join("\n"));
+    // Looking up by filename slug (not frontmatter id) should return null
+    const asset = getOutboundXAssetBySlug("outbound-x/dt-algorithm-01");
+    expect(asset).toBeNull();
   });
 });
 

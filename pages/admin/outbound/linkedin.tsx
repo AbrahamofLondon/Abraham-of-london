@@ -498,7 +498,7 @@ export default function LinkedInOutboundAdminPage({
         <title>LinkedIn Outbound | Admin</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
-      <div className="space-y-6">
+      <div className="space-y-6 pb-20">
         <section className="border border-sky-400/15 bg-gradient-to-br from-sky-400/10 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-sky-200/55">Governed outbound publishing</p>
           <h1 className="mt-3 font-serif text-3xl text-white">LinkedIn Publishing Console</h1>

@@ -751,18 +751,76 @@ function AttemptHistory({ attempts }: { attempts: AttemptSummary[] }) {
 
 // ─── Filter types ─────────────────────────────────────────────────────────────
 
-type QueueFilter = "all" | "ready" | "approved" | "published" | "blocked" | "failed";
+// ─── Filter system ────────────────────────────────────────────────────────────
+//
+// Filter definitions — every asset has a home in exactly one non-"all" bucket:
+//
+//   ready      — outboundStatus is "ready" or "scheduled" (action-ready content)
+//   approved   — approvalStatus is "approved" (regardless of ledger state)
+//   published  — ledger PUBLISHED
+//   attention  — has ledger activity requiring review: DRY_RUN, IN_PROGRESS, FAILED
+//   blocked    — gate blockers present (not already published)
+//
+// "all" always shows everything — no item can disappear.
+//
+// NOTE: an item can appear in multiple buckets (e.g. approved + attention).
+
+type QueueFilter = "all" | "ready" | "approved" | "published" | "attention" | "blocked";
+
+function isAttentionItem(a: AssetViewModel): boolean {
+  return (
+    a.publishLedgerStatus === "DRY_RUN" ||
+    a.publishLedgerStatus === "IN_PROGRESS" ||
+    a.publishLedgerStatus === "FAILED"
+  );
+}
 
 function filterAssets(assets: AssetViewModel[], filter: QueueFilter): AssetViewModel[] {
   switch (filter) {
-    case "all": return assets;
-    case "ready": return assets.filter((a) => a.outboundStatus === "ready");
-    case "approved": return assets.filter((a) => a.outboundApprovalStatus === "approved");
-    case "published": return assets.filter((a) => a.publishLedgerStatus === "PUBLISHED");
-    case "blocked": return assets.filter((a) => !a.publishable && a.publishLedgerStatus !== "PUBLISHED");
-    case "failed": return assets.filter((a) => a.publishLedgerStatus === "FAILED");
+    case "all":
+      return assets;
+    case "ready":
+      // Include "scheduled" alongside "ready" — both signal the content is
+      // action-ready. Before this fix, scheduled items like dt-algorithm-01
+      // (status: scheduled) were invisible in the ready bucket.
+      return assets.filter(
+        (a) => a.outboundStatus === "ready" || a.outboundStatus === "scheduled",
+      );
+    case "approved":
+      return assets.filter((a) => a.outboundApprovalStatus === "approved");
+    case "published":
+      return assets.filter((a) => a.publishLedgerStatus === "PUBLISHED");
+    case "attention":
+      // Items with ledger activity (DRY_RUN, IN_PROGRESS, FAILED) — these need
+      // operator review. Previously had no dedicated bucket → items disappeared.
+      return assets.filter(isAttentionItem);
+    case "blocked":
+      return assets.filter(
+        (a) => !a.publishable && a.publishLedgerStatus !== "PUBLISHED",
+      );
   }
 }
+
+function searchAssets(assets: AssetViewModel[], query: string): AssetViewModel[] {
+  if (!query.trim()) return assets;
+  const q = query.toLowerCase();
+  return assets.filter(
+    (a) =>
+      a.title.toLowerCase().includes(q) ||
+      a.slug.toLowerCase().includes(q) ||
+      (a.campaign ?? "").toLowerCase().includes(q) ||
+      (a.outboundStatus ?? "").includes(q),
+  );
+}
+
+const QUEUE_FILTER_LABELS: Record<QueueFilter, string> = {
+  all: "All",
+  ready: "Ready / Scheduled",
+  approved: "Approved",
+  published: "Published",
+  attention: "Needs Attention",
+  blocked: "Blocked",
+};
 
 function FilterTabs({
   assets,
@@ -775,29 +833,179 @@ function FilterTabs({
 }) {
   const counts: Record<QueueFilter, number> = {
     all: assets.length,
-    ready: assets.filter((a) => a.outboundStatus === "ready").length,
+    ready: assets.filter((a) => a.outboundStatus === "ready" || a.outboundStatus === "scheduled").length,
     approved: assets.filter((a) => a.outboundApprovalStatus === "approved").length,
     published: assets.filter((a) => a.publishLedgerStatus === "PUBLISHED").length,
+    attention: assets.filter(isAttentionItem).length,
     blocked: assets.filter((a) => !a.publishable && a.publishLedgerStatus !== "PUBLISHED").length,
-    failed: assets.filter((a) => a.publishLedgerStatus === "FAILED").length,
   };
-  const tabs: QueueFilter[] = ["all", "ready", "approved", "published", "blocked", "failed"];
+  const tabs: QueueFilter[] = ["all", "ready", "approved", "published", "attention", "blocked"];
   return (
     <div className="flex flex-wrap gap-1">
-      {tabs.map((tab) => (
-        <button
-          key={tab}
-          type="button"
-          onClick={() => onChange(tab)}
-          className={`px-3 py-1 text-[11px] font-mono uppercase tracking-wider border transition-colors ${
-            active === tab
-              ? "border-sky-400/40 bg-sky-400/10 text-sky-200"
-              : "border-white/10 text-white/35 hover:text-white/60"
-          }`}
-        >
-          {tab} ({counts[tab]})
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const hasItems = counts[tab] > 0;
+        const isAttentionTab = tab === "attention" && hasItems;
+        return (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => onChange(tab)}
+            className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider border transition-colors ${
+              active === tab
+                ? "border-sky-400/40 bg-sky-400/10 text-sky-200"
+                : isAttentionTab
+                ? "border-amber-400/30 text-amber-200/70 hover:text-amber-100"
+                : "border-white/10 text-white/35 hover:text-white/60"
+            }`}
+          >
+            {QUEUE_FILTER_LABELS[tab]}
+            <span className="ml-1.5 opacity-60">({counts[tab]})</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Compact queue row ────────────────────────────────────────────────────────
+
+function ledgerBadge(status: AssetViewModel["publishLedgerStatus"]): {
+  label: string;
+  cls: string;
+} | null {
+  if (!status) return null;
+  const map: Record<string, { label: string; cls: string }> = {
+    PUBLISHED: { label: "Published", cls: "border-emerald-400/30 text-emerald-300/80" },
+    DRY_RUN: { label: "Dry run", cls: "border-sky-400/30 text-sky-300/70" },
+    IN_PROGRESS: { label: "In progress", cls: "border-amber-400/30 text-amber-200/70" },
+    FAILED: { label: "Failed", cls: "border-rose-400/30 text-rose-300/70" },
+    BLOCKED: { label: "Blocked", cls: "border-white/20 text-white/40" },
+  };
+  return map[status] ?? null;
+}
+
+function OutboundQueueRow({
+  asset,
+  expanded,
+  onToggle,
+  connectionCanPublish,
+  facebookConnected,
+  publishingEnabled,
+}: {
+  asset: AssetViewModel;
+  expanded: boolean;
+  onToggle: () => void;
+  connectionCanPublish: boolean;
+  facebookConnected: boolean;
+  publishingEnabled: boolean;
+}) {
+  const lBadge = ledgerBadge(asset.publishLedgerStatus);
+  const isPublished = asset.publishLedgerStatus === "PUBLISHED";
+  const needsAttention = isAttentionItem(asset);
+
+  return (
+    <div
+      className={`border transition-colors ${
+        isPublished
+          ? "border-emerald-400/20 bg-emerald-950/20"
+          : needsAttention
+          ? "border-amber-400/15 bg-amber-950/10"
+          : expanded
+          ? "border-sky-400/20 bg-sky-950/15"
+          : "border-white/10 bg-black/20 hover:border-white/20"
+      }`}
+    >
+      {/* ── Compact header row ── */}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full text-left p-3 flex items-start gap-3"
+      >
+        {/* Campaign pill */}
+        {asset.campaign && (
+          <span className="mt-0.5 shrink-0 rounded-sm border border-sky-400/25 bg-sky-400/8 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider text-sky-200/60 whitespace-nowrap">
+            {asset.campaign.replace(/-/g, " ").slice(0, 20)}
+          </span>
+        )}
+
+        {/* Title + slug */}
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-sm font-medium text-white/80">{asset.title}</p>
+          <p className="mt-0.5 font-mono text-[10px] text-white/30 truncate">{asset.slug}</p>
+        </div>
+
+        {/* Status badges */}
+        <div className="shrink-0 flex flex-wrap items-center justify-end gap-1.5">
+          {lBadge && (
+            <span className={`border px-1.5 py-0.5 text-[9px] font-mono uppercase ${lBadge.cls}`}>
+              {lBadge.label}
+            </span>
+          )}
+          {!lBadge && (
+            <span className={`border px-1.5 py-0.5 text-[9px] font-mono uppercase ${
+              asset.publishable
+                ? "border-emerald-400/25 text-emerald-300/60"
+                : "border-rose-400/20 text-rose-300/50"
+            }`}>
+              {asset.publishable ? "gate ok" : "gate blocked"}
+            </span>
+          )}
+          {asset.outboundApprovalStatus === "approved" && (
+            <span className="border border-emerald-400/20 px-1.5 py-0.5 text-[9px] font-mono uppercase text-emerald-200/50">
+              approved
+            </span>
+          )}
+          <span className="text-[10px] text-white/30 w-12 text-right">
+            {asset.charCount}c
+          </span>
+          <span className={`text-white/30 transition-transform text-xs ${expanded ? "rotate-90" : ""}`}>▶</span>
+        </div>
+      </button>
+
+      {/* ── Published URL line (always visible when published) ── */}
+      {isPublished && asset.providerPostUrl && (
+        <div className="px-3 pb-2 flex items-center gap-2">
+          <span className="text-[10px] text-emerald-300/60">✓ Posted</span>
+          <a
+            href={asset.providerPostUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[10px] text-sky-300/60 underline hover:text-sky-200 truncate"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {asset.providerPostUrl}
+          </a>
+          {asset.lastPublishedAt && (
+            <span className="text-[10px] text-white/25 shrink-0">
+              {new Date(asset.lastPublishedAt).toLocaleDateString("en-GB")}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* ── Failed / attention note (always visible) ── */}
+      {asset.publishLedgerStatus === "FAILED" && (
+        <p className="px-3 pb-2 text-[10px] text-rose-300/60">
+          Last publish attempt failed — expand to retry.
+        </p>
+      )}
+      {asset.publishLedgerStatus === "IN_PROGRESS" && (
+        <p className="px-3 pb-2 text-[10px] text-amber-200/60">
+          Publish in progress — refresh to check status.
+        </p>
+      )}
+
+      {/* ── Expanded full card ── */}
+      {expanded && (
+        <div className="border-t border-white/10 p-1">
+          <AssetCard
+            asset={asset}
+            connectionCanPublish={connectionCanPublish}
+            facebookConnected={facebookConnected}
+            publishingEnabled={publishingEnabled}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -806,21 +1014,12 @@ function FilterTabs({
 
 function OutboundDiscoveryBar({ discovery }: { discovery: OutboundDiscoverySummary }) {
   return (
-    <div className="border-b border-white/5 pb-4">
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-        <AdminMetricCard label="Discovered" value={discovery.discoveredCount} variant="inner" />
-        <AdminMetricCard label="Accepted" value={discovery.acceptedCount} variant="inner" tone="success" />
-        <AdminMetricCard label="Publishable" value={discovery.publishableCount} variant="inner" tone={discovery.publishableCount > 0 ? "success" : "muted"} />
-        <AdminMetricCard label="Blocked" value={discovery.blockedCount} variant="inner" tone={discovery.blockedCount > 0 ? "warning" : "muted"} />
-        <AdminMetricCard label="Excluded" value={discovery.excludedCount} variant="inner" tone={discovery.excludedCount > 0 ? "info" : "muted"} />
-      </div>
-      {discovery.excludedCount > 0 && (
-        <ul className="mt-2 flex flex-wrap gap-x-4 text-[10px] text-white/30">
-          {Object.entries(discovery.excludedReasons).map(([reason, n]) => (
-            <li key={reason}>{reason.replace(/_/g, " ")}: {n}</li>
-          ))}
-        </ul>
-      )}
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <AdminMetricCard label="Discovered" value={discovery.discoveredCount} variant="inner" />
+      <AdminMetricCard label="Accepted" value={discovery.acceptedCount} variant="inner" tone="success" />
+      <AdminMetricCard label="Publishable" value={discovery.publishableCount} variant="inner" tone={discovery.publishableCount > 0 ? "success" : "muted"} />
+      <AdminMetricCard label="Blocked" value={discovery.blockedCount} variant="inner" tone={discovery.blockedCount > 0 ? "warning" : "muted"} />
+      <AdminMetricCard label="Excluded" value={discovery.excludedCount} variant="inner" tone={discovery.excludedCount > 0 ? "info" : "muted"} />
     </div>
   );
 }
@@ -834,7 +1033,17 @@ export default function XOutboundAdminPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const { connection, assets, outboundAssets, outboundDiscovery, attempts, facebookConnected } = consoleState;
   const [queueFilter, setQueueFilter] = React.useState<QueueFilter>("all");
-  const filteredOutboundAssets = filterAssets(outboundAssets, queueFilter);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [expandedSlug, setExpandedSlug] = React.useState<string | null>(null);
+
+  const filteredOutboundAssets = searchAssets(
+    filterAssets(outboundAssets, queueFilter),
+    searchQuery,
+  );
+
+  function toggleExpand(slug: string) {
+    setExpandedSlug((prev) => (prev === slug ? null : slug));
+  }
 
   return (
     <AdminLayout title="X Outbound">
@@ -843,7 +1052,7 @@ export default function XOutboundAdminPage({
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <div className="space-y-6">
+      <div className="space-y-6 pb-20">
         {/* Header */}
         <section className="border border-sky-400/15 bg-gradient-to-br from-sky-500/10 to-transparent p-6">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-sky-200/55">
@@ -901,32 +1110,83 @@ export default function XOutboundAdminPage({
           />
         </section>
 
-        {/* Section 3: Outbound Draft Queue — content/outbound/x recursive estate */}
+        {/* Section 3: Outbound Draft Queue */}
         <section className="space-y-4">
-          <div>
-            <h2 className="font-serif text-2xl text-white">Outbound Draft Queue</h2>
-            <p className="mt-1 text-sm text-white/45">
-              Recursive discovery from <code className="font-mono text-white/60">content/outbound/x/</code>.
-              Each post requires gate check + final approval before posting.
-              {facebookConnected ? " Facebook sync available after gate passes." : ""}
-            </p>
+          {/* Header */}
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="font-serif text-2xl text-white">Outbound Draft Queue</h2>
+              <p className="mt-1 text-sm text-white/40">
+                <code className="font-mono text-white/55">content/outbound/x/</code> · recursive · {outboundDiscovery.acceptedCount} posts
+                {facebookConnected && <span className="ml-2 text-blue-300/50">Facebook sync available</span>}
+              </p>
+            </div>
           </div>
+
+          {/* Discovery stats */}
           <OutboundDiscoveryBar discovery={outboundDiscovery} />
-          <FilterTabs assets={outboundAssets} active={queueFilter} onChange={setQueueFilter} />
-          {filteredOutboundAssets.length === 0 ? (
-            <p className="text-sm text-white/40">
-              No assets match filter "{queueFilter}".
-            </p>
-          ) : (
-            filteredOutboundAssets.map((asset) => (
-              <AssetCard
-                key={asset.slug}
-                asset={asset}
-                connectionCanPublish={connection.canPublish}
-                facebookConnected={facebookConnected}
-                publishingEnabled={consoleState.publishingEnabled}
+
+          {/* Filters + search */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <FilterTabs assets={outboundAssets} active={queueFilter} onChange={setQueueFilter} />
+            <div className="sm:ml-auto">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search title / slug / campaign…"
+                className="w-full sm:w-64 border border-white/15 bg-black/30 px-3 py-1.5 text-xs text-white placeholder-white/25 focus:border-sky-400/30 focus:outline-none"
               />
-            ))
+            </div>
+          </div>
+
+          {/* Results summary */}
+          {(searchQuery || queueFilter !== "all") && (
+            <p className="text-[11px] text-white/30">
+              Showing {filteredOutboundAssets.length} of {outboundAssets.length} assets
+              {searchQuery && ` matching "${searchQuery}"`}
+              {queueFilter !== "all" && ` · filter: ${QUEUE_FILTER_LABELS[queueFilter]}`}
+            </p>
+          )}
+
+          {/* Queue rows */}
+          {filteredOutboundAssets.length === 0 ? (
+            <div className="border border-white/10 bg-black/20 p-6 text-center">
+              <p className="text-sm text-white/40">
+                {searchQuery
+                  ? `No assets match "${searchQuery}" in the ${QUEUE_FILTER_LABELS[queueFilter]} filter.`
+                  : queueFilter === "attention"
+                  ? "No items need attention — no active DRY_RUN, IN_PROGRESS, or FAILED ledger entries."
+                  : queueFilter === "published"
+                  ? "No published assets yet."
+                  : queueFilter === "blocked"
+                  ? "No assets are currently blocked by gate checks."
+                  : `No assets match the "${QUEUE_FILTER_LABELS[queueFilter]}" filter.`}
+              </p>
+              {queueFilter !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => setQueueFilter("all")}
+                  className="mt-3 text-xs text-sky-300/60 underline hover:text-sky-200"
+                >
+                  Show all {outboundAssets.length} assets
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filteredOutboundAssets.map((asset) => (
+                <OutboundQueueRow
+                  key={asset.slug}
+                  asset={asset}
+                  expanded={expandedSlug === asset.slug}
+                  onToggle={() => toggleExpand(asset.slug)}
+                  connectionCanPublish={connection.canPublish}
+                  facebookConnected={facebookConnected}
+                  publishingEnabled={consoleState.publishingEnabled}
+                />
+              ))}
+            </div>
           )}
         </section>
 

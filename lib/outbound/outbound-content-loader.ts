@@ -43,6 +43,7 @@ export type OutboundPostType =
   | "quote-card"
   | "discussion"
   | "thread"
+  | "deep-thread"
   | "launch"
   | "thesis"
   | "applied";
