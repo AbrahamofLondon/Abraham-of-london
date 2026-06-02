@@ -58,9 +58,9 @@ export default function HomepageHero() {
 
         {/* CTAs */}
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          {/* Primary CTA — routes to the unified entry layer */}
+          {/* Primary CTA */}
           <Link
-            href="/test-your-decision"
+            href="/decision-pressure"
             className="group inline-flex min-h-[52px] items-center gap-3 border px-8 py-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderColor: `${HOMEPAGE_GOLD}60`,
@@ -78,33 +78,35 @@ export default function HomepageHero() {
 
           {/* Secondary CTA */}
           <Link
-            href="/decision-pathway"
-            className="inline-flex min-h-[44px] items-center gap-2"
+            href="/boardroom-brief"
+            className="group inline-flex min-h-[48px] items-center gap-2 border px-6 py-3 transition-all duration-200 hover:-translate-y-0.5"
             style={{
+              borderColor: `${HOMEPAGE_GOLD}30`,
+              backgroundColor: `${HOMEPAGE_GOLD}08`,
+              color: "rgba(255,255,255,0.75)",
               ...mono,
               fontSize: "10px",
-              letterSpacing: "0.12em",
+              letterSpacing: "0.14em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.40)",
             }}
           >
-            View the decision pathway
-            <ArrowRight className="h-3 w-3" />
+            Generate Boardroom Brief
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
           </Link>
 
-          {/* Enterprise CTA */}
+          {/* Tertiary */}
           <Link
-            href="/enterprise-decision-scan"
+            href="/products"
             className="inline-flex min-h-[44px] items-center gap-2"
             style={{
               ...mono,
               fontSize: "10px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.30)",
+              color: "rgba(255,255,255,0.32)",
             }}
           >
-            Run an organisational scan
+            Explore products
             <ArrowRight className="h-3 w-3" />
           </Link>
         </div>

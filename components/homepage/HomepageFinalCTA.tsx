@@ -34,11 +34,11 @@ export default function HomepageFinalCTA() {
           Start with one real decision.
         </h2>
         <p className="mx-auto mt-5 max-w-[52ch] text-[15px] leading-[1.85] text-white/50">
-          If the evidence supports escalation, the system can progress into reporting, intervention, oversight, and provenance-backed accountability.
+          The fastest way to understand the system is to test a decision that already matters.
         </p>
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
-            href="/test-your-decision"
+            href="/decision-pressure"
             className="group inline-flex min-h-[52px] items-center gap-3 border px-8 py-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderColor: `${HOMEPAGE_GOLD}60`,
@@ -53,31 +53,47 @@ export default function HomepageFinalCTA() {
             Test your decision
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
+          <Link
+            href="/boardroom-brief"
+            className="group inline-flex min-h-[48px] items-center gap-2 border px-6 py-3 transition-all duration-200 hover:-translate-y-0.5"
+            style={{
+              borderColor: `${HOMEPAGE_GOLD}30`,
+              backgroundColor: `${HOMEPAGE_GOLD}08`,
+              color: "rgba(255,255,255,0.72)",
+              ...mono,
+              fontSize: "10px",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+            }}
+          >
+            Generate Boardroom Brief
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
         <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
           <Link
-            href="/engagements/operator-pilot"
+            href="/products"
             style={{
               ...mono,
               fontSize: "9px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.48)",
+              color: "rgba(255,255,255,0.42)",
             }}
           >
-            Request governed pilot review
+            Explore products
           </Link>
           <Link
-            href="/engagements"
+            href="/pricing"
             style={{
               ...mono,
               fontSize: "9px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.38)",
+              color: "rgba(255,255,255,0.32)",
             }}
           >
-            Selective engagements
+            View pricing
           </Link>
         </div>
       </div>
