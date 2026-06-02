@@ -228,7 +228,7 @@ export default function BoardroomBriefPage() {
     return {
       display: 'block', marginBottom: '0.45rem',
       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-      fontSize: '7px', letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.26)',
+      fontSize: '7px', letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)',
     }
   }
 
@@ -247,10 +247,10 @@ export default function BoardroomBriefPage() {
               <h1 style={{ ...serif, fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 1.02, color: 'rgba(255,255,255,0.92)', fontStyle: 'italic', marginTop: '1rem' }}>
                 Test whether this decision can survive serious challenge.
               </h1>
-              <p style={{ ...serif, fontSize: '1rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.45)', marginTop: '1rem', maxWidth: '52ch' }}>
+              <p style={{ ...serif, fontSize: '1rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.58)', marginTop: '1rem', maxWidth: '52ch' }}>
                 Answer a few questions and receive an early boardroom-readiness preview. The paid Boardroom Brief expands the evidence read into objections, trade-offs, decision paths, and the next admissible move.
               </p>
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.20em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginTop: '0.75rem' }}>
+              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.20em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)', marginTop: '0.75rem' }}>
                 This is not a full executive report. It is an early boardroom-readiness brief built from the evidence you provide.
               </p>
             </div>
@@ -322,7 +322,7 @@ export default function BoardroomBriefPage() {
               </div>
 
               <details style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
-                <summary style={{ cursor: 'pointer', ...mono, fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>
+                <summary style={{ cursor: 'pointer', ...mono, fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.50)' }}>
                   Optional: cost of delay
                 </summary>
                 <div className="mt-3">
@@ -342,7 +342,7 @@ export default function BoardroomBriefPage() {
                   onMouseLeave={e => { e.currentTarget.style.borderColor = `${GOLD}42`; e.currentTarget.style.backgroundColor = `${GOLD}10` }}>
                   Generate preview <ArrowRight style={{ width: '12px', height: '12px' }} />
                 </button>
-                <Link href="/boardroom-brief?sample=true" style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)', textDecoration: 'none' }}>
+                <Link href="/boardroom-brief?sample=true" style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>
                   View sample Boardroom brief
                 </Link>
               </div>
@@ -350,15 +350,15 @@ export default function BoardroomBriefPage() {
 
             {/* Upgrade routing */}
             <div className="mt-12 border-t border-white/[0.05] pt-8 max-w-2xl">
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.20)', marginBottom: '0.75rem' }}>
+              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: '0.75rem' }}>
                 Need more than a brief?
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/test-your-decision" style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}99`, textDecoration: 'none', border: `1px solid ${GOLD}20`, padding: '8px 14px' }}>
+                <Link href="/quick-check" style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}99`, textDecoration: 'none', border: `1px solid ${GOLD}20`, padding: '8px 14px' }}>
                   Run Quick Decision Health Check
                 </Link>
-                <Link href="/enterprise-decision-scan" style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)', padding: '8px 14px' }}>
-                  Run organisational scan
+                <Link href="/enterprise" style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)', padding: '8px 14px' }}>
+                  View Enterprise pathway
                 </Link>
               </div>
             </div>
@@ -583,13 +583,13 @@ export default function BoardroomBriefPage() {
                 Get full Boardroom Brief
               </CheckoutButton>
             )}
-            <Link href="/test-your-decision"
+            <Link href="/quick-check"
               style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               Run Quick Decision Health Check <ArrowRight style={{ width: '11px', height: '11px' }} />
             </Link>
-            <Link href="/enterprise-decision-scan"
+            <Link href="/enterprise"
               style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              Run organisational scan <ArrowRight style={{ width: '11px', height: '11px' }} />
+              View Enterprise pathway <ArrowRight style={{ width: '11px', height: '11px' }} />
             </Link>
             {isQualified && (
               <Link href="/diagnostics/executive-reporting"

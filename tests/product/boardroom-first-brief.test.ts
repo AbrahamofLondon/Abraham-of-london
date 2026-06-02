@@ -292,14 +292,14 @@ describe('does not claim Retainer/Oversight', () => {
 // ─── 10. CTA routing points into correct corridor surface ───────────────────
 
 describe('CTA routing', () => {
-  it('health check routes to /test-your-decision', () => {
-    const href = '/test-your-decision'
-    expect(href).toBe('/test-your-decision')
+  it('health check routes to /quick-check', () => {
+    const href = '/quick-check'
+    expect(href).toBe('/quick-check')
   })
 
-  it('organisational scan routes to /enterprise-decision-scan', () => {
-    const href = '/enterprise-decision-scan'
-    expect(href).toBe('/enterprise-decision-scan')
+  it('organisational scan routes to /enterprise', () => {
+    const href = '/enterprise'
+    expect(href).toBe('/enterprise')
   })
 
   it('executive reporting routes to /diagnostics/executive-reporting', () => {
@@ -418,8 +418,8 @@ describe('sample Boardroom brief', () => {
 
   it('sample data includes upgrade CTAs', () => {
     const ctas = [
-      '/test-your-decision',
-      '/enterprise-decision-scan',
+      '/quick-check',
+      '/enterprise',
       '/diagnostics/executive-reporting',
     ]
     for (const cta of ctas) {

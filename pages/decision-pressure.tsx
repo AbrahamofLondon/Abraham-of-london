@@ -312,7 +312,7 @@ export default function DecisionPressurePage() {
               </div>
             </div>
 
-            <p className="mt-6 max-w-[60ch] text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.28)' }}>
+            <p className="mt-6 max-w-[60ch] text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.42)' }}>
               The public result is a derived signal only. It does not display your pasted decision back to you.
             </p>
           </div>
@@ -348,7 +348,7 @@ export default function DecisionPressurePage() {
                   <div className="border p-6 md:p-8" style={{ borderColor: `${BAND_COLORS[result.band]}35`, backgroundColor: 'rgba(255,255,255,0.02)' }}>
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>
+                        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>
                           Pressure band
                         </p>
                         <div className="mt-3 flex items-center gap-3">
@@ -440,6 +440,36 @@ export default function DecisionPressurePage() {
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                     </Link>
                     <Link
+                      href="/quick-check"
+                      className="inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.12)',
+                        color: 'rgba(255,255,255,0.62)',
+                        ...mono,
+                        fontSize: '10px',
+                        letterSpacing: '0.16em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Quick Decision Health Check
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                    <Link
+                      href="/scenario-stress-test"
+                      className="inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.12)',
+                        color: 'rgba(255,255,255,0.62)',
+                        ...mono,
+                        fontSize: '10px',
+                        letterSpacing: '0.16em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Scenario Stress Test
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                    <Link
                       href="/products"
                       className="inline-flex min-h-[48px] items-center gap-3 border px-7 py-3 transition-all duration-200 hover:-translate-y-0.5"
                       style={{
@@ -451,7 +481,8 @@ export default function DecisionPressurePage() {
                         textTransform: 'uppercase',
                       }}
                     >
-                      View Products
+                      View all products
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                     </Link>
                     <button
                       type="button"
