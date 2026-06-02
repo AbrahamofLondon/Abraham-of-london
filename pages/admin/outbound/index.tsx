@@ -42,6 +42,7 @@ import OutboundLedgerTable, { type LedgerEntry } from "@/components/admin/outbou
 import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
 import { getConnectionStatus, getLinkedInOAuthSmokeDiagnostics } from "@/lib/outbound/linkedin-oauth";
 import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
+import { prisma } from "@/lib/prisma.server";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -129,6 +130,19 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       getFacebookConnectionStatus(),
       getXConnectionStatus(),
     ]);
+
+  // Detect recent X_CREDIT_BLOCKED attempts (last 24 h) from xPublishAttempt.
+  // This is a billing signal — OAuth + scopes are still valid.
+  const xCreditBlockedAttempt = await prisma.xPublishAttempt
+    .findFirst({
+      where: {
+        errorCode: "X_CREDIT_BLOCKED",
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+    .catch(() => null);
+  const xHasCreditBlocker = !!xCreditBlockedAttempt;
 
   function buildCard(
     provider: ProviderCard["provider"],
@@ -252,15 +266,18 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
             xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true"
               ? "Yes"
               : "No",
-          state: xStatus.readiness,
+          state: xHasCreditBlocker ? "CREDIT_BLOCKED" : xStatus.readiness,
           blockers: [
+            ...(xHasCreditBlocker ? ["X API credits exhausted (HTTP 402). Live publish disabled."] : []),
             ...(xStatus.oauthConfigured ? [] : ["X OAuth configuration required"]),
             ...xStatus.missingScopes,
             ...(process.env.X_PUBLISHING_ENABLED === "true"
               ? []
               : ["X_PUBLISHING_ENABLED is not true"]),
           ],
-          nextAction: !xStatus.oauthConfigured
+          nextAction: xHasCreditBlocker
+            ? "Add X API credits or verify billing at developer.x.com. Dry-run and manual reconciliation remain available."
+            : !xStatus.oauthConfigured
             ? "Set X_CLIENT_ID, X_CLIENT_SECRET, X_REDIRECT_URI, X_OAUTH_SCOPES"
             : !xStatus.connected
             ? "Connect X account via OAuth at /admin/outbound/x"
@@ -270,7 +287,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
             ? "Check X token scopes include tweet.write"
             : process.env.X_PUBLISHING_ENABLED !== "true"
             ? "Set X_PUBLISHING_ENABLED=true"
-            : "Ready — run dry-run on writing-changed-humanity-x-001",
+            : "Ready — run dry-run on selected approved post",
         },
       ],
       schedulerEnabled: process.env.OUTBOUND_SCHEDULER_ENABLED === "true",
@@ -317,6 +334,7 @@ function liveTone(value: OutboundReadinessRow["publishLive"]): AdminBadgeTone {
 function stateTone(state: string): AdminBadgeTone {
   if (state === "READY" || state === "CONNECTED") return "success";
   if (state === "READY_TO_CONNECT") return "info";
+  if (state === "CREDIT_BLOCKED") return "warning";
   if (state === "CONFIG_MISSING" || state === "ORG_URN_MISSING") return "warning";
   return "danger";
 }

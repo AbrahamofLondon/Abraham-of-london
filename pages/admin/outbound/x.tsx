@@ -101,7 +101,9 @@ type ConsoleViewModel = {
   attempts: AttemptSummary[];
   facebookConnected: boolean;
   publishingEnabled: boolean;
-  hasCreditBlocker: boolean;                   // any recent X_CREDIT_BLOCKED attempt
+  hasCreditBlocker: boolean;
+  /** true when hasCreditBlocker — convenience alias used by child components */
+  creditBlocked: boolean;
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -252,10 +254,16 @@ export const getServerSideProps: GetServerSideProps<{
 
   const hasCreditBlocker = attempts.some((a) => a.errorCode === "X_CREDIT_BLOCKED");
 
+  // Augment connection readiness to CREDIT_BLOCKED when detected.
+  // OAuth + tweet.write remain valid — this is a billing issue only.
+  const augmentedConnection = hasCreditBlocker
+    ? { ...connection, readiness: "CREDIT_BLOCKED" as const }
+    : connection;
+
   return {
     props: {
       consoleState: {
-        connection,
+        connection: augmentedConnection,
         assets,
         outboundAssets,
         outboundDiscovery,
@@ -263,6 +271,7 @@ export const getServerSideProps: GetServerSideProps<{
         facebookConnected,
         publishingEnabled: process.env.X_PUBLISHING_ENABLED === "true",
         hasCreditBlocker,
+        creditBlocked: hasCreditBlocker,
       },
       flashError,
       flashConnected,
@@ -275,6 +284,7 @@ export const getServerSideProps: GetServerSideProps<{
 function readinessTone(readiness: XConnectionStatus["readiness"]): AdminBadgeTone {
   if (readiness === "READY") return "success";
   if (readiness === "READY_TO_CONNECT") return "info";
+  if (readiness === "CREDIT_BLOCKED") return "warning";
   if (readiness === "MISSING_SCOPE") return "danger";
   if (readiness === "TOKEN_INVALID") return "danger";
   if (readiness === "CONFIG_MISSING") return "warning";
@@ -313,8 +323,20 @@ function ConnectionPanel({
               tone={readinessTone(connection.readiness)}
             />
             <AdminStatusBadge
-              label={publishingEnabled && connection.canPublish ? "Can tweet" : "Publishing blocked"}
-              tone={publishingEnabled && connection.canPublish ? "success" : "danger"}
+              label={
+                connection.readiness === "CREDIT_BLOCKED"
+                  ? "Credits exhausted"
+                  : publishingEnabled && connection.canPublish
+                  ? "Can tweet"
+                  : "Publishing blocked"
+              }
+              tone={
+                connection.readiness === "CREDIT_BLOCKED"
+                  ? "warning"
+                  : publishingEnabled && connection.canPublish
+                  ? "success"
+                  : "danger"
+              }
             />
           </div>
 
@@ -469,11 +491,13 @@ function AssetCard({
   connectionCanPublish,
   facebookConnected,
   publishingEnabled,
+  creditBlocked = false,
 }: {
   asset: AssetViewModel;
   connectionCanPublish: boolean;
   facebookConnected: boolean;
   publishingEnabled: boolean;
+  creditBlocked?: boolean;
 }) {
   const [gateRun, setGateRun] = React.useState(false);
   const [finalApproved, setFinalApproved] = React.useState(false);
@@ -487,7 +511,8 @@ function AssetCard({
     facebookSync?: { ok: boolean; postUrl?: string | null } | null;
   } | null>(null);
 
-  const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish && publishingEnabled;
+  // creditBlocked disables LIVE publish only — dry-run and manual reconciliation remain available
+  const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish && publishingEnabled && !creditBlocked;
 
   async function runDryRun() {
     setDryRunning(true);
@@ -601,10 +626,11 @@ function AssetCard({
             type="button"
             onClick={publish}
             disabled={!canPublish || publishing}
+            title={creditBlocked ? "Live publish blocked — X API credits exhausted. Add credits or use manual reconciliation." : undefined}
             className="inline-flex items-center gap-2 border border-sky-400/25 bg-sky-400/10 px-3 py-2 text-xs text-sky-100 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            Post to X
+            {creditBlocked ? "Credits exhausted" : "Post to X"}
           </button>
         </div>
       </div>
@@ -621,6 +647,16 @@ function AssetCard({
       </div>
 
       {/* Blockers & warnings */}
+      {creditBlocked && (
+        <div className="mt-3 border border-amber-400/20 bg-amber-950/15 p-3">
+          <p className="text-xs font-medium text-amber-200/80">Live publish blocked — X API credits exhausted</p>
+          <p className="mt-1 text-xs text-amber-100/55">
+            The X developer account has no remaining API credits (HTTP 402). This is a billing issue — content and token are fine.
+            Add credits at <span className="font-mono">developer.x.com</span>, or use <strong>Mark as manually posted</strong> below if you have already posted this via the X web interface.
+          </p>
+          <p className="mt-1 text-[10px] text-amber-100/40">Dry-run and manual reconciliation remain available.</p>
+        </div>
+      )}
       {!publishingEnabled && (
         <p className="mt-3 text-xs text-rose-200/65">
           - Live X publishing is blocked by configuration. Dry-run gate checks remain available.
@@ -1033,6 +1069,7 @@ function OutboundQueueRow({
   connectionCanPublish,
   facebookConnected,
   publishingEnabled,
+  creditBlocked = false,
 }: {
   asset: AssetViewModel;
   expanded: boolean;
@@ -1040,6 +1077,7 @@ function OutboundQueueRow({
   connectionCanPublish: boolean;
   facebookConnected: boolean;
   publishingEnabled: boolean;
+  creditBlocked?: boolean;
 }) {
   const lBadge = ledgerBadge(asset.publishLedgerStatus);
   const isPublished = asset.publishLedgerStatus === "PUBLISHED";
@@ -1150,6 +1188,7 @@ function OutboundQueueRow({
             connectionCanPublish={connectionCanPublish}
             facebookConnected={facebookConnected}
             publishingEnabled={publishingEnabled}
+            creditBlocked={creditBlocked}
           />
         </div>
       )}
@@ -1378,6 +1417,7 @@ export default function XOutboundAdminPage({
                   connectionCanPublish={connection.canPublish}
                   facebookConnected={facebookConnected}
                   publishingEnabled={consoleState.publishingEnabled}
+                  creditBlocked={consoleState.creditBlocked}
                 />
               ))}
             </div>

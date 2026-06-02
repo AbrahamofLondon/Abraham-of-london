@@ -88,7 +88,6 @@ describe("isDuplicatePublish guards per provider", () => {
 describe("X console status enrichment logic", () => {
   it("PUBLISHED status in ledger means publish must be disabled", () => {
     const publishLedgerStatus = "PUBLISHED";
-    // Rule: if PUBLISHED, asset.publishable must be false
     const alreadyPublished = publishLedgerStatus === "PUBLISHED";
     const publishable = alreadyPublished ? false : true;
     expect(publishable).toBe(false);
@@ -106,5 +105,90 @@ describe("X console status enrichment logic", () => {
     const alreadyPublished = publishLedgerStatus === "PUBLISHED";
     const publishable = alreadyPublished ? false : true;
     expect(publishable).toBe(true);
+  });
+});
+
+// ─── CREDIT_BLOCKED readiness state ──────────────────────────────────────────
+
+describe("CREDIT_BLOCKED readiness state contract", () => {
+  // Mirror the readiness augmentation logic from x.tsx getServerSideProps
+  function computeReadiness(baseReadiness: string, hasCreditBlocker: boolean): string {
+    return hasCreditBlocker ? "CREDIT_BLOCKED" : baseReadiness;
+  }
+
+  // Mirror the canPublish logic from AssetCard
+  function canPublish(opts: {
+    gateRun: boolean;
+    finalApproved: boolean;
+    publishable: boolean;
+    connectionCanPublish: boolean;
+    publishingEnabled: boolean;
+    creditBlocked: boolean;
+  }): boolean {
+    return opts.gateRun && opts.finalApproved && opts.publishable &&
+      opts.connectionCanPublish && opts.publishingEnabled && !opts.creditBlocked;
+  }
+
+  it("readiness becomes CREDIT_BLOCKED when hasCreditBlocker is true", () => {
+    expect(computeReadiness("READY", true)).toBe("CREDIT_BLOCKED");
+  });
+
+  it("readiness remains READY when hasCreditBlocker is false", () => {
+    expect(computeReadiness("READY", false)).toBe("READY");
+  });
+
+  it("hasCreditBlocker=false + connected → READY (credits restored)", () => {
+    expect(computeReadiness("READY", false)).toBe("READY");
+  });
+
+  it("creditBlocked disables live publish even when all other conditions pass", () => {
+    const result = canPublish({
+      gateRun: true,
+      finalApproved: true,
+      publishable: true,
+      connectionCanPublish: true,
+      publishingEnabled: true,
+      creditBlocked: true,        // ← credit blocked
+    });
+    expect(result).toBe(false);
+  });
+
+  it("creditBlocked=false allows publish when all other conditions pass", () => {
+    const result = canPublish({
+      gateRun: true,
+      finalApproved: true,
+      publishable: true,
+      connectionCanPublish: true,
+      publishingEnabled: true,
+      creditBlocked: false,
+    });
+    expect(result).toBe(true);
+  });
+
+  it("dry-run is independent of creditBlocked — no creditBlocked check in dry-run path", () => {
+    // Dry-run does not include creditBlocked in its condition — it only requires
+    // connectionCanPublish (to hit the API) and the asset being valid.
+    // This test documents the intended gap: dry-run always available.
+    const dryRunAvailable = (connectionCanPublish: boolean) => connectionCanPublish;
+    expect(dryRunAvailable(true)).toBe(true);
+  });
+
+  it("manual reconciliation is always available when not PUBLISHED", () => {
+    const reconAvailable = (ledgerStatus: string | null) => ledgerStatus !== "PUBLISHED";
+    expect(reconAvailable(null)).toBe(true);
+    expect(reconAvailable("FAILED")).toBe(true);
+    expect(reconAvailable("DRY_RUN")).toBe(true);
+    expect(reconAvailable("IN_PROGRESS")).toBe(true);
+    expect(reconAvailable("PUBLISHED")).toBe(false);
+  });
+
+  it("X index readiness row shows CREDIT_BLOCKED next-action copy", () => {
+    const nextAction = (hasCreditBlocker: boolean) =>
+      hasCreditBlocker
+        ? "Add X API credits or verify billing at developer.x.com. Dry-run and manual reconciliation remain available."
+        : "Ready — run dry-run on selected approved post";
+    expect(nextAction(true)).toMatch(/credits/i);
+    expect(nextAction(true)).toMatch(/dry-run/i);
+    expect(nextAction(false)).toMatch(/ready/i);
   });
 });

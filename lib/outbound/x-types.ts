@@ -21,7 +21,11 @@ export type XPublishReadiness =
   | "MISSING_SCOPE"
   | "TOKEN_INVALID"
   | "CONFIG_MISSING"
-  | "API_ERROR";
+  | "API_ERROR"
+  | "CREDIT_BLOCKED";
+  // CREDIT_BLOCKED: OAuth + tweet.write are fine but the X developer account
+  // has no API credits (HTTP 402). Dry-run and manual reconciliation remain
+  // available; live publish is disabled until credits are restored.
 
 export type XConnectionStatus = {
   connected: boolean;
