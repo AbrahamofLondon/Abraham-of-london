@@ -275,21 +275,25 @@ const marketActivationItems: ProductItem[] = [
   },
   {
     name: "Scenario Stress Test",
-    status: "Planned",
-    role: "Standalone scenario pressure test.",
+    status: "Active",
+    role: "Standalone scenario pressure test for decision quality under simulated pressure.",
     answers: "How does a decision behave under a defined pressure scenario?",
-    produces: "Stress findings when the standalone route is available.",
-    accessNote: "Enterprise currently contains the production scenario hooks.",
+    produces: "Pressure finding, likely break point, weakness category, and strengthening recommendation.",
+    href: "/scenario-stress-test",
+    cta: "Run scenario test",
+    accessNote: "Free public proof surface. Deeper governance available inside the paid corridor.",
     alternateHref: "/diagnostics/enterprise-assessment",
     alternateLabel: "Use Enterprise Assessment",
   },
   {
     name: "Quick Decision Health Check",
-    status: "Planned",
+    status: "Active",
     role: "Fast public check for decision condition and next move.",
     answers: "Is this decision healthy enough to proceed?",
-    produces: "A short health signal and route recommendation.",
-    accessNote: "Planned route: /quick-check.",
+    produces: "Decision condition, key weakness, next admissible move, and recommended route.",
+    href: "/quick-check",
+    cta: "Start health check",
+    accessNote: "Free, no account required. 2 minutes.",
     alternateHref: "/diagnostics/fast",
     alternateLabel: "Run Fast Diagnostic",
   },
@@ -863,27 +867,27 @@ function SupportingLayerCard({
   boundaryNote: string;
 }) {
   return (
-    <div className="border border-white/[0.05] bg-white/[0.008] p-3.5 transition-colors hover:border-white/[0.10] hover:bg-white/[0.016]">
+    <div className="border border-white/[0.06] bg-white/[0.012] p-4 transition-colors hover:border-white/[0.12] hover:bg-white/[0.02]">
       <div className="flex items-center gap-2">
         <span
           className="inline-flex items-center border px-2 py-0.5"
-          style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}28`, color: `${GOLD}99`, backgroundColor: `${GOLD}06` }}
+          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}AA`, backgroundColor: `${GOLD}08` }}
         >
           {label}
         </span>
       </div>
-      <p className="mt-2 text-[12px] leading-[1.6] text-white/[0.50]">{copy}</p>
-      <div className="mt-2 flex items-center gap-2">
+      <p className="mt-2.5 text-[13px] leading-[1.65] text-white/[0.58]">{copy}</p>
+      <div className="mt-3 flex items-center gap-2">
         <Link
           href={route}
-          className="group inline-flex items-center gap-1.5 transition-colors hover:text-white/[0.70]"
-          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}
+          className="group inline-flex items-center gap-1.5 transition-colors hover:text-white/[0.80]"
+          style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.60)" }}
         >
           Open
           <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
-      <p className="mt-2 border-t border-white/[0.04] pt-2 text-[10px] leading-[1.5] text-white/[0.28]" style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.10em", lineHeight: 1.5 }}>
+      <p className="mt-2.5 border-t border-white/[0.04] pt-2.5 text-[11px] leading-[1.5] text-white/[0.35]" style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.10em", lineHeight: 1.5 }}>
         {boundaryNote}
       </p>
     </div>
@@ -963,13 +967,13 @@ function PaidCorridorSection() {
           {/* Right rail — adjacent and supporting layers */}
           <div>
             <div className="border border-white/[0.06] bg-white/[0.012] p-4 lg:p-5">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70` }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                 Adjacent and supporting layers
               </p>
-              <p className="mt-2 text-[11px] leading-[1.6] text-white/[0.38]" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.08em", lineHeight: 1.65 }}>
+              <p className="mt-2.5 text-[12px] leading-[1.7] text-white/[0.48]" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.08em", lineHeight: 1.7 }}>
                 Not every useful surface is a corridor stage. Some products sit beside the corridor. Others support entry, authority testing, evidence memory, or return to the right decision surface.
               </p>
-              <div className="mt-4 space-y-3">
+              <div className="mt-5 space-y-3">
                 {supportingLayers.map((layer) => (
                   <SupportingLayerCard key={layer.label} {...layer} />
                 ))}

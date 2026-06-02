@@ -131,6 +131,42 @@ export const PRODUCT_ESTATE: ProductEstateItem[] = [
     shouldAppearOnHomepage: false,
   },
 
+  {
+    id: 'quick_decision_health_check',
+    family: 'market_activation',
+    name: 'Quick Decision Health Check',
+    shortDescription: 'Fast public check for decision condition and next move.',
+    buyerDescription: 'Four quick questions. Returns decision condition, key weakness, next admissible move, and recommended route.',
+    availability: 'free',
+    route: '/quick-check',
+    priceLabel: 'Free',
+    primaryCTA: 'Start health check',
+    governed: true,
+    live: true,
+    purchasable: false,
+    shouldAppearOnProducts: true,
+    shouldAppearOnPricing: false,
+    shouldAppearOnHomepage: false,
+  },
+
+  {
+    id: 'scenario_stress_test',
+    family: 'market_activation',
+    name: 'Scenario Stress Test',
+    shortDescription: 'Standalone scenario pressure test for decision quality under simulated pressure.',
+    buyerDescription: 'Tests how a decision behaves under a defined pressure scenario. Returns pressure finding, likely break point, weakness category, and strengthening recommendation.',
+    availability: 'free',
+    route: '/scenario-stress-test',
+    priceLabel: 'Free',
+    primaryCTA: 'Run scenario test',
+    governed: true,
+    live: true,
+    purchasable: false,
+    shouldAppearOnProducts: true,
+    shouldAppearOnPricing: false,
+    shouldAppearOnHomepage: false,
+  },
+
   // ═══════════════════════════════════════════════════════════════════════════
   // OPERATIONAL DECISION CORRIDOR
   // ═══════════════════════════════════════════════════════════════════════════
