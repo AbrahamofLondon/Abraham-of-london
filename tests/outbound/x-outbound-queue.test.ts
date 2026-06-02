@@ -415,6 +415,159 @@ describe("filterAssets — visibility invariants", () => {
   });
 });
 
+// ─── Queue sort order ─────────────────────────────────────────────────────────
+
+describe("outbound queue sort priority — attention items first", () => {
+  type SortAsset = {
+    publishLedgerStatus?: string | null;
+    outboundApprovalStatus?: string;
+    outboundStatus?: string;
+    scheduledFor?: string | null;
+    title: string;
+  };
+
+  // Mirror the sort logic from x.tsx
+  function sortPriority(a: SortAsset): number {
+    if (a.publishLedgerStatus === "IN_PROGRESS") return 0;
+    if (a.publishLedgerStatus === "FAILED") return 1;
+    if (a.publishLedgerStatus === "DRY_RUN") return 2;
+    if (a.outboundApprovalStatus === "approved" &&
+        (a.outboundStatus === "scheduled" || a.outboundStatus === "ready")) return 3;
+    if (a.outboundApprovalStatus === "approved") return 4;
+    if (a.outboundStatus === "scheduled" || a.outboundStatus === "ready") return 5;
+    return 6;
+  }
+
+  function sortAssets(assets: SortAsset[]): SortAsset[] {
+    return [...assets].sort((a, b) => {
+      const pa = sortPriority(a);
+      const pb = sortPriority(b);
+      if (pa !== pb) return pa - pb;
+      if (a.scheduledFor && b.scheduledFor) return a.scheduledFor.localeCompare(b.scheduledFor);
+      if (a.scheduledFor) return -1;
+      if (b.scheduledFor) return 1;
+      return a.title.localeCompare(b.title);
+    });
+  }
+
+  it("IN_PROGRESS sorts first", () => {
+    const assets: SortAsset[] = [
+      { title: "b", publishLedgerStatus: null, outboundApprovalStatus: "approved", outboundStatus: "scheduled" },
+      { title: "a", publishLedgerStatus: "IN_PROGRESS", outboundApprovalStatus: "approved", outboundStatus: "scheduled" },
+    ];
+    const sorted = sortAssets(assets);
+    expect(sorted[0]?.publishLedgerStatus).toBe("IN_PROGRESS");
+  });
+
+  it("FAILED sorts before DRY_RUN", () => {
+    const assets: SortAsset[] = [
+      { title: "dry", publishLedgerStatus: "DRY_RUN", outboundApprovalStatus: "approved", outboundStatus: "ready" },
+      { title: "fail", publishLedgerStatus: "FAILED", outboundApprovalStatus: "approved", outboundStatus: "ready" },
+    ];
+    expect(sortAssets(assets)[0]?.publishLedgerStatus).toBe("FAILED");
+  });
+
+  it("DRY_RUN sorts before approved+scheduled", () => {
+    const assets: SortAsset[] = [
+      { title: "appSched", publishLedgerStatus: null, outboundApprovalStatus: "approved", outboundStatus: "scheduled" },
+      { title: "dry", publishLedgerStatus: "DRY_RUN", outboundApprovalStatus: "approved", outboundStatus: "ready" },
+    ];
+    expect(sortAssets(assets)[0]?.publishLedgerStatus).toBe("DRY_RUN");
+  });
+
+  it("dt-algorithm-01 (DRY_RUN, approved, scheduled) sorts before dt-algorithm-02 (no ledger, approved, scheduled)", () => {
+    const dtAlgo01: SortAsset = {
+      title: "[the-truth-in-the-frame] dt-algorithm-01",
+      publishLedgerStatus: "DRY_RUN",
+      outboundApprovalStatus: "approved",
+      outboundStatus: "scheduled",
+      scheduledFor: "2026-08-25T09:00:00Z",
+    };
+    const dtAlgo02: SortAsset = {
+      title: "[the-truth-in-the-frame] dt-algorithm-02",
+      publishLedgerStatus: null,
+      outboundApprovalStatus: "approved",
+      outboundStatus: "scheduled",
+      scheduledFor: "2026-08-26T09:00:00Z",
+    };
+    const sorted = sortAssets([dtAlgo02, dtAlgo01]);
+    expect(sorted[0]?.title).toContain("dt-algorithm-01");
+  });
+
+  it("within same priority, scheduledFor ascending (earlier dates first)", () => {
+    const assets: SortAsset[] = [
+      { title: "later", publishLedgerStatus: null, outboundApprovalStatus: "approved", outboundStatus: "scheduled", scheduledFor: "2026-09-01T09:00:00Z" },
+      { title: "earlier", publishLedgerStatus: null, outboundApprovalStatus: "approved", outboundStatus: "scheduled", scheduledFor: "2026-08-01T09:00:00Z" },
+    ];
+    expect(sortAssets(assets)[0]?.title).toBe("earlier");
+  });
+
+  it("items with scheduledFor sort before unscheduled (within same priority)", () => {
+    const assets: SortAsset[] = [
+      { title: "no-date", publishLedgerStatus: null, outboundApprovalStatus: "approved", outboundStatus: "scheduled", scheduledFor: null },
+      { title: "has-date", publishLedgerStatus: null, outboundApprovalStatus: "approved", outboundStatus: "scheduled", scheduledFor: "2026-08-01T09:00:00Z" },
+    ];
+    expect(sortAssets(assets)[0]?.title).toBe("has-date");
+  });
+});
+
+// ─── Search ────────────────────────────────────────────────────────────────────
+
+describe("searchAssets — finds dt-algorithm-01 by slug fragment", () => {
+  type SearchAsset = { title: string; slug: string; campaign?: string | null; outboundStatus?: string };
+
+  function search(assets: SearchAsset[], q: string): SearchAsset[] {
+    if (!q.trim()) return assets;
+    const lower = q.toLowerCase();
+    return assets.filter(
+      (a) =>
+        a.title.toLowerCase().includes(lower) ||
+        a.slug.toLowerCase().includes(lower) ||
+        (a.campaign ?? "").toLowerCase().includes(lower) ||
+        (a.outboundStatus ?? "").includes(lower),
+    );
+  }
+
+  const DT_ALGO: SearchAsset = {
+    title: "[the-truth-in-the-frame] dt-algorithm-01",
+    slug: "outbound-x/ttif-x-dt-algorithm-01",
+    campaign: "the-truth-in-the-frame",
+    outboundStatus: "scheduled",
+  };
+  const OTHER: SearchAsset = {
+    title: "[writing-changed-humanity] wch-01",
+    slug: "outbound-x/writing-changed-humanity-x-001",
+    campaign: "writing-changed-humanity",
+    outboundStatus: "ready",
+  };
+
+  it("finds by slug fragment 'dt-algorithm-01'", () => {
+    expect(search([DT_ALGO, OTHER], "dt-algorithm-01")).toHaveLength(1);
+    expect(search([DT_ALGO, OTHER], "dt-algorithm-01")[0]?.slug).toContain("ttif");
+  });
+
+  it("finds by partial slug 'algorithm'", () => {
+    expect(search([DT_ALGO, OTHER], "algorithm")).toHaveLength(1);
+  });
+
+  it("finds by campaign 'the-truth-in-the-frame'", () => {
+    expect(search([DT_ALGO, OTHER], "the-truth-in-the-frame")).toHaveLength(1);
+  });
+
+  it("finds by short campaign fragment 'truth'", () => {
+    expect(search([DT_ALGO, OTHER], "truth")).toHaveLength(1);
+  });
+
+  it("empty search returns all assets", () => {
+    expect(search([DT_ALGO, OTHER], "")).toHaveLength(2);
+    expect(search([DT_ALGO, OTHER], "  ")).toHaveLength(2);
+  });
+
+  it("search for unknown slug returns empty", () => {
+    expect(search([DT_ALGO, OTHER], "no-such-asset")).toHaveLength(0);
+  });
+});
+
 // ─── Slug resolution from nested campaign folder ──────────────────────────────
 
 describe("dt-algorithm-01 slug resolves from nested campaign folder", () => {

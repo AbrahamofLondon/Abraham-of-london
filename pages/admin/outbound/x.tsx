@@ -62,6 +62,7 @@ type AssetViewModel = {
   outboundApprovalStatus?: string;
   campaign?: string | null;
   postType?: string;
+  scheduledFor?: string | null;
   // Ledger-enriched publish state (from outboundPublishLedger)
   publishLedgerStatus?: LedgerStatusSnapshot["status"] | null;
   providerPostUrl?: string | null;
@@ -173,15 +174,40 @@ export const getServerSideProps: GetServerSideProps<{
       outboundApprovalStatus: post.approvalStatus,
       campaign: post.campaign,
       postType: post.postType,
+      scheduledFor: post.scheduledFor,
       publishLedgerStatus: ledger?.status ?? null,
       providerPostUrl: ledger?.providerPostUrl ?? null,
       lastPublishedAt: ledger?.completedAt ?? null,
     };
   });
 
+  // Priority sort — operators must see items that need attention first:
+  //  0. IN_PROGRESS  — active publish in flight
+  //  1. FAILED       — needs retry or investigation
+  //  2. DRY_RUN      — gate passed, ready for live publish
+  //  3. approved + scheduled/ready — next logical publish candidates
+  //  4. approved (any status)
+  //  5. ready/scheduled (not yet approved)
+  //  6. everything else — alphabetical
+  function outboundSortPriority(a: AssetViewModel): number {
+    if (a.publishLedgerStatus === "IN_PROGRESS") return 0;
+    if (a.publishLedgerStatus === "FAILED") return 1;
+    if (a.publishLedgerStatus === "DRY_RUN") return 2;
+    if (a.outboundApprovalStatus === "approved" &&
+        (a.outboundStatus === "scheduled" || a.outboundStatus === "ready")) return 3;
+    if (a.outboundApprovalStatus === "approved") return 4;
+    if (a.outboundStatus === "scheduled" || a.outboundStatus === "ready") return 5;
+    return 6;
+  }
+
   outboundAssets.sort((a, b) => {
-    if (a.publishable && !b.publishable) return -1;
-    if (!a.publishable && b.publishable) return 1;
+    const pa = outboundSortPriority(a);
+    const pb = outboundSortPriority(b);
+    if (pa !== pb) return pa - pb;
+    // Within same priority group: scheduledFor ascending, unscheduled last
+    if (a.scheduledFor && b.scheduledFor) return a.scheduledFor.localeCompare(b.scheduledFor);
+    if (a.scheduledFor) return -1;
+    if (b.scheduledFor) return 1;
     return a.title.localeCompare(b.title);
   });
 
@@ -687,7 +713,119 @@ function AssetCard({
           )}
         </div>
       )}
+
+      {/* Manual reconciliation — for posts published outside the system */}
+      {asset.assetType === "outbound" && asset.publishLedgerStatus !== "PUBLISHED" && (
+        <ManualReconcilePanel asset={asset} />
+      )}
     </article>
+  );
+}
+
+function ManualReconcilePanel({ asset }: { asset: AssetViewModel }) {
+  const [open, setOpen] = React.useState(false);
+  const [tweetUrl, setTweetUrl] = React.useState("");
+  const [note, setNote] = React.useState("");
+  const [confirm, setConfirm] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const [result, setResult] = React.useState<{ ok: boolean; message?: string } | null>(null);
+
+  // Extract outboundItemId from "outbound-x/{id}"
+  const outboundItemId = asset.slug.startsWith("outbound-x/")
+    ? asset.slug.slice("outbound-x/".length)
+    : null;
+
+  if (!outboundItemId) return null;
+
+  async function submit() {
+    if (!confirm || !tweetUrl.trim()) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/admin/outbound/x/reconcile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          outboundItemId,
+          assetSlug: asset.slug,
+          tweetUrl: tweetUrl.trim(),
+          scheduledFor: asset.scheduledFor ?? null,
+          note: note.trim() || undefined,
+          finalConfirmation: true,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setResult({ ok: res.ok, message: res.ok ? `Marked as manually published. Ledger ID: ${data.ledgerId}` : data.error ?? "Request failed" });
+    } catch {
+      setResult({ ok: false, message: "Network error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 border border-white/8 bg-black/20">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-2.5 text-[11px] font-mono uppercase tracking-wider text-white/30 hover:text-white/55 transition-colors"
+      >
+        <span>Mark as manually posted</span>
+        <span>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="border-t border-white/8 px-4 py-4 space-y-3">
+          <p className="text-[11px] text-white/40 leading-4">
+            Use this only if this post was published outside the system. It locks the item against future system publish.
+          </p>
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-white/35 mb-1">Tweet URL (required)</label>
+            <input
+              type="url"
+              value={tweetUrl}
+              onChange={(e) => setTweetUrl(e.target.value)}
+              placeholder="https://x.com/username/status/1234567890"
+              className="w-full border border-white/15 bg-black/40 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-sky-400/30 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono uppercase tracking-wider text-white/35 mb-1">Note (optional)</label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="e.g. Posted manually during X downtime"
+              className="w-full border border-white/15 bg-black/40 px-3 py-2 text-xs text-white placeholder-white/20 focus:border-white/25 focus:outline-none"
+            />
+          </div>
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirm}
+              onChange={(e) => setConfirm(e.target.checked)}
+              className="mt-0.5 h-3.5 w-3.5"
+            />
+            <span className="text-[11px] text-white/55">
+              I confirm this post was published manually and the system should not publish it again.
+            </span>
+          </label>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={busy || !confirm || !tweetUrl.trim()}
+            className="inline-flex items-center gap-2 border border-white/20 px-4 py-2 text-xs text-white/65 hover:text-white disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+          >
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+            Record as manually posted
+          </button>
+          {result && (
+            <p className={`text-[11px] ${result.ok ? "text-emerald-300/70" : "text-rose-300/65"}`}>
+              {result.message}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -955,6 +1093,11 @@ function OutboundQueueRow({
               approved
             </span>
           )}
+          {asset.scheduledFor && (
+            <span className="hidden sm:inline text-[10px] text-white/25 font-mono whitespace-nowrap">
+              {new Date(asset.scheduledFor).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+            </span>
+          )}
           <span className="text-[10px] text-white/30 w-12 text-right">
             {asset.charCount}c
           </span>
@@ -1147,6 +1290,34 @@ export default function XOutboundAdminPage({
               {searchQuery && ` matching "${searchQuery}"`}
               {queueFilter !== "all" && ` · filter: ${QUEUE_FILTER_LABELS[queueFilter]}`}
             </p>
+          )}
+
+          {/* Needs Attention callout — only on "all" filter when attention items exist */}
+          {queueFilter === "all" && !searchQuery && (
+            (() => {
+              const attentionItems = outboundAssets.filter(isAttentionItem);
+              if (attentionItems.length === 0) return null;
+              return (
+                <div className="border border-amber-400/20 bg-amber-950/15 p-3 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-medium text-amber-200/80">
+                      {attentionItems.length} item{attentionItems.length !== 1 ? "s" : ""} need attention
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-amber-100/50">
+                      {attentionItems.map((a) => a.slug.split("/").pop()).slice(0, 3).join(", ")}
+                      {attentionItems.length > 3 && ` +${attentionItems.length - 3} more`}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setQueueFilter("attention")}
+                    className="shrink-0 border border-amber-400/25 px-3 py-1.5 text-[11px] text-amber-200/70 hover:text-amber-100 transition-colors"
+                  >
+                    View attention items
+                  </button>
+                </div>
+              );
+            })()
           )}
 
           {/* Queue rows */}

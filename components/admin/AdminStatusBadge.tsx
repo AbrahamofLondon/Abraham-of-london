@@ -63,6 +63,23 @@ export function toneForSeverity(severity: string): AdminBadgeTone {
 }
 
 const STATUS_TONE_MAP: Record<string, AdminBadgeTone> = {
+  // outbound publishing states
+  PUBLISHED:             "success",
+  PUBLISHED_MANUAL:      "success",
+  READY:                 "success",
+  DRY_RUN:               "info",
+  DRY_RUN_PASSED:        "info",
+  IN_PROGRESS:           "warning",
+  CONFIG_REQUIRED:       "warning",
+  CONFIG_PENDING:        "warning",
+  SCOPE_REQUIRED:        "warning",
+  PARTIAL:               "warning",
+  DISABLED:              "muted",
+  GATED:                 "muted",
+  NEEDS_ATTENTION:       "warning",
+  MANUAL:                "info",
+  GATE_OK:               "success",
+  GATE_BLOCKED:          "danger",
   // success
   PASS:                  "success",
   HEALTHY:               "success",
