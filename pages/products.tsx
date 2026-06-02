@@ -851,6 +851,78 @@ function BoardroomBriefFeature() {
   );
 }
 
+function SupportingLayerCard({
+  label,
+  copy,
+  route,
+  boundaryNote,
+}: {
+  label: string;
+  copy: string;
+  route: string;
+  boundaryNote: string;
+}) {
+  return (
+    <div className="border border-white/[0.05] bg-white/[0.008] p-3.5 transition-colors hover:border-white/[0.10] hover:bg-white/[0.016]">
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-flex items-center border px-2 py-0.5"
+          style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}28`, color: `${GOLD}99`, backgroundColor: `${GOLD}06` }}
+        >
+          {label}
+        </span>
+      </div>
+      <p className="mt-2 text-[12px] leading-[1.6] text-white/[0.50]">{copy}</p>
+      <div className="mt-2 flex items-center gap-2">
+        <Link
+          href={route}
+          className="group inline-flex items-center gap-1.5 transition-colors hover:text-white/[0.70]"
+          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}
+        >
+          Open
+          <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+      <p className="mt-2 border-t border-white/[0.04] pt-2 text-[10px] leading-[1.5] text-white/[0.28]" style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.10em", lineHeight: 1.5 }}>
+        {boundaryNote}
+      </p>
+    </div>
+  );
+}
+
+const supportingLayers = [
+  {
+    label: "Separate product line",
+    copy: "Personal mandate, behavioural contradiction, and commitment enforcement.",
+    route: "/diagnostics/purpose-alignment",
+    boundaryNote: "Not a prerequisite for the corporate decision corridor.",
+  },
+  {
+    label: "Authority lens",
+    copy: "Tests authority, mandate, blocker, route, and repair conditions.",
+    route: "/diagnostics/constitutional-diagnostic",
+    boundaryNote: "Can strengthen Enterprise or Executive Reporting, but does not replace them.",
+  },
+  {
+    label: "Public proof surface",
+    copy: "Public tests for decision quality, market signal, and release risk.",
+    route: "/foundry",
+    boundaryNote: "Low-friction proof surface; deeper governance happens inside the corridor.",
+  },
+  {
+    label: "Continuity console",
+    copy: "Governed case console for memory, recommendations, outcomes, and return briefs.",
+    route: "/decision-centre",
+    boundaryNote: "Available where a case record exists.",
+  },
+  {
+    label: "Evidence memory layer",
+    copy: "Carries decisions, evidence, recommendations, and outcomes across eligible surfaces.",
+    route: "/decision-pathway",
+    boundaryNote: "Supports the estate; not a standalone public product unless explicitly productised.",
+  },
+];
+
 function PaidCorridorSection() {
   return (
     <section id="paid-corridor" className="border-t border-white/[0.06] px-6 py-14 lg:px-12 lg:py-16">
@@ -870,16 +942,46 @@ function PaidCorridorSection() {
           </p>
         </div>
 
-        <div className="space-y-0">
-          {corridorStages.map((stage, i) => (
-            <CorridorStageRow key={stage.id} stage={stage} index={i} isLast={i === corridorStages.length - 1} />
-          ))}
+        {/* Two-column layout: left = corridor stages, right = supporting layers */}
+        <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+          {/* Left rail — paid ODI progression */}
+          <div>
+            <div className="space-y-0">
+              {corridorStages.map((stage, i) => (
+                <CorridorStageRow key={stage.id} stage={stage} index={i} isLast={i === corridorStages.length - 1} />
+              ))}
+            </div>
+
+            <div className="mt-8 border border-white/[0.06] bg-white/[0.012] p-4">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}65` }}>Boundary</p>
+              <p className="mt-2 max-w-[80ch] text-[13px] leading-relaxed text-white/[0.45]">
+                Retainer Review Queue is active. Retainer Oversight is not automatically activated and requires readiness review.
+              </p>
+            </div>
+          </div>
+
+          {/* Right rail — adjacent and supporting layers */}
+          <div>
+            <div className="border border-white/[0.06] bg-white/[0.012] p-4 lg:p-5">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70` }}>
+                Adjacent and supporting layers
+              </p>
+              <p className="mt-2 text-[11px] leading-[1.6] text-white/[0.38]" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.08em", lineHeight: 1.65 }}>
+                Not every useful surface is a corridor stage. Some products sit beside the corridor. Others support entry, authority testing, evidence memory, or return to the right decision surface.
+              </p>
+              <div className="mt-4 space-y-3">
+                {supportingLayers.map((layer) => (
+                  <SupportingLayerCard key={layer.label} {...layer} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-8 border border-white/[0.06] bg-white/[0.012] p-4">
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}65` }}>Boundary</p>
-          <p className="mt-2 max-w-[80ch] text-[13px] leading-relaxed text-white/[0.45]">
-            Retainer Review Queue is active. Retainer Oversight is not automatically activated and requires readiness review.
+        {/* Mobile-only supporting layers heading */}
+        <div className="mt-8 lg:hidden">
+          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}60` }}>
+            Supporting layers
           </p>
         </div>
       </div>
