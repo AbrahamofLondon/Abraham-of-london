@@ -83,4 +83,46 @@ describe('products page surfacing', () => {
     expect(item!.live).toBe(true)
     expect(item!.availability).toBe('operator_review')
   })
+
+  it('all governed playbooks appear on products page', () => {
+    const playbookIds = ['execution_integrity_protocol', 'alignment_audit_playbook', 'drift_detection_framework']
+    for (const id of playbookIds) {
+      const item = directoryItems.find(p => p.id === id)
+      expect(item, `Playbook '${id}' missing from products page`).toBeDefined()
+      expect(item!.live, `Playbook '${id}' not marked live`).toBe(true)
+      expect(item!.governed, `Playbook '${id}' not marked governed`).toBe(true)
+    }
+  })
+
+  it('no live governed instrument is marked Planned', () => {
+    const instruments = getProductsByFamily('governed_instruments')
+    for (const item of instruments.filter(p => p.live && p.governed)) {
+      expect(item.availability, `${item.name}: live governed instrument marked as planned`).not.toBe('planned')
+    }
+  })
+
+  it('GMI copy does not use prediction or AI certainty language', () => {
+    const gmiItems = getProductsByFamily('market_intelligence')
+    const prohibited = ['ai predicts', 'prediction engine', 'forecast certainty', 'market oracle', 'guaranteed market']
+    for (const item of gmiItems) {
+      const text = `${item.name} ${item.shortDescription} ${item.buyerDescription}`.toLowerCase()
+      for (const term of prohibited) {
+        expect(text, `GMI '${item.name}' contains prohibited term '${term}'`).not.toContain(term)
+      }
+    }
+  })
+
+  it('Boardroom Brief remains visible as first paid proof product', () => {
+    const item = directoryItems.find(p => p.id === 'boardroom_brief')
+    expect(item).toBeDefined()
+    expect(item!.shouldAppearOnProducts).toBe(true)
+    expect(item!.availability).toBe('paid')
+  })
+
+  it('Retainer Oversight remains gated', () => {
+    const item = directoryItems.find(p => p.id === 'retainer_oversight')
+    expect(item).toBeDefined()
+    expect(item!.live).toBe(false)
+    expect(item!.availability).toBe('retainer_gated')
+  })
 })

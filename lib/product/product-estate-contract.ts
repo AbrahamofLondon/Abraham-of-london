@@ -535,7 +535,7 @@ export const PRODUCT_ESTATE: ProductEstateItem[] = [
     live: true,
     purchasable: false,
     gatedReason: 'Controlled release — request access while self-serve checkout is not enabled.',
-    shouldAppearOnProducts: false,
+    shouldAppearOnProducts: true,
     shouldAppearOnPricing: true,
   },
 
@@ -554,7 +554,7 @@ export const PRODUCT_ESTATE: ProductEstateItem[] = [
     live: true,
     purchasable: false,
     gatedReason: 'Controlled release — request access while self-serve checkout is not enabled.',
-    shouldAppearOnProducts: false,
+    shouldAppearOnProducts: true,
     shouldAppearOnPricing: true,
   },
 
@@ -573,7 +573,7 @@ export const PRODUCT_ESTATE: ProductEstateItem[] = [
     live: true,
     purchasable: false,
     gatedReason: 'Controlled release — request access while self-serve checkout is not enabled.',
-    shouldAppearOnProducts: false,
+    shouldAppearOnProducts: true,
     shouldAppearOnPricing: true,
   },
 

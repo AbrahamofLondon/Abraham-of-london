@@ -330,6 +330,12 @@ const gmiItems: InstrumentItem[] = [
   { name: "Market Intelligence Archive",                  status: "Active", href: "/intelligence/market" },
 ];
 
+const playbookItems: InstrumentItem[] = [
+  { name: "Execution Integrity Protocol",        status: "Active", href: catalogPath("execution_integrity_protocol", "/playbooks/execution-integrity-protocol") },
+  { name: "The Alignment Audit Playbook",        status: "Active", href: catalogPath("alignment_audit_playbook", "/playbooks/the-alignment-audit-playbook") },
+  { name: "The Drift Detection Framework",       status: "Active", href: catalogPath("drift_detection_framework", "/playbooks/the-drift-detection-framework") },
+];
+
 // ─── Components ───────────────────────────────────────────────────────────────
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -611,6 +617,7 @@ function SectionNav() {
     { href: "#enterprise",      label: "Enterprise" },
     { href: "#intelligence",    label: "Market Intelligence" },
     { href: "#instruments",     label: "Instruments" },
+    { href: "#playbooks",       label: "Playbooks" },
     { href: "#purpose",         label: "Purpose Alignment" },
     { href: "#knowledge",       label: "Knowledge" },
   ];
@@ -1001,27 +1008,57 @@ export default function ProductsPage() {
         <MarketActivationSection />
         <EnterpriseAndProfessionalSection />
 
-        {/* Collapsible secondary sections */}
-        <div className="border-t border-white/[0.06]">
-          <div className="mx-auto max-w-7xl py-8 px-6 lg:px-12">
-            <Eyebrow>Secondary surfaces</Eyebrow>
-          </div>
-        </div>
-
-        <div id="intelligence">
-          <CollapsibleSection title="Global Market Intelligence" intro="Quarterly market intelligence built on prior-call review, not prediction theatre.">
+        {/* Global Market Intelligence — standalone section */}
+        <section id="intelligence" className="border-t border-white/[0.06] px-6 py-14 lg:px-12 lg:py-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8 grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+              <div>
+                <div className="flex items-center gap-3">
+                  <Gauge className="h-4 w-4" style={{ color: `${GOLD}AA` }} />
+                  <Eyebrow>Market Intelligence</Eyebrow>
+                </div>
+                <h2 className="mt-5 max-w-[30rem]" style={{ ...serif, color: "rgba(255,255,255,0.90)", fontSize: "clamp(1.9rem, 5vw, 3rem)", lineHeight: 1, fontStyle: "italic" }}>
+                  Global Market Intelligence
+                </h2>
+              </div>
+              <p className="max-w-[70ch] text-[15px] leading-[1.85] text-white/[0.52] lg:justify-self-end">
+                Quarterly market intelligence that reviews prior material calls before issuing the next report.
+              </p>
+            </div>
             <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
               <p className="text-[13px] leading-relaxed text-white/[0.45]">
                 Each quarterly report reviews material calls from the previous quarter before issuing the next. Built for operators who need disciplined market judgement.
               </p>
             </div>
-            <InstrumentList items={gmiItems} />
+            <div className="flex flex-wrap gap-4">
+              <PrimaryBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")}>
+                View intelligence line
+              </PrimaryBtn>
+              <GhostBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")}>
+                View latest report
+              </GhostBtn>
+            </div>
+            <div className="mt-6">
+              <InstrumentList items={gmiItems} />
+            </div>
+          </div>
+        </section>
+
+        <div id="instruments">
+          <CollapsibleSection title="Governed Decision Instruments" intro="All instruments are live and governed. Each writes to Decision Centre memory.">
+            <InstrumentList items={instrumentItems} />
           </CollapsibleSection>
         </div>
 
-        <div id="instruments">
-          <CollapsibleSection title="Specialised Decision Instruments" intro="All instruments are live and governed. Each writes to Decision Centre memory.">
-            <InstrumentList items={instrumentItems} />
+        {/* Governed Playbooks — collapsible */}
+        <div id="playbooks">
+          <CollapsibleSection title="Governed Playbooks" intro="Controlled-release governed methodology runs for execution restoration, alignment audit, and drift detection.">
+            <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
+              <p className="text-[13px] leading-relaxed text-white/[0.45]">
+                Each playbook is a governed methodology run. Access is currently available by request while self-serve checkout is being enabled.
+              </p>
+            </div>
+            <InstrumentList items={playbookItems} />
           </CollapsibleSection>
         </div>
 

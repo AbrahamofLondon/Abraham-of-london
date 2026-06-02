@@ -116,4 +116,29 @@ describe('product estate family coverage', () => {
       expect(item.governed).toBe(true)
     }
   })
+
+  it('governed_playbooks family contains all three playbooks', () => {
+    const playbooks = getProductsByFamily('governed_playbooks')
+    const codes = playbooks.map(p => p.id)
+    expect(codes).toContain('execution_integrity_protocol')
+    expect(codes).toContain('alignment_audit_playbook')
+    expect(codes).toContain('drift_detection_framework')
+    expect(playbooks.length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('all governed playbooks are live and appear on products page', () => {
+    const playbooks = getProductsByFamily('governed_playbooks')
+    for (const item of playbooks) {
+      expect(item.live, `${item.name}: playbook not marked live`).toBe(true)
+      expect(item.governed, `${item.name}: playbook not marked governed`).toBe(true)
+      expect(item.shouldAppearOnProducts, `${item.name}: playbook hidden from products page`).toBe(true)
+    }
+  })
+
+  it('no governed playbook is marked planned', () => {
+    const playbooks = getProductsByFamily('governed_playbooks')
+    for (const item of playbooks) {
+      expect(item.availability, `${item.name}: live playbook marked planned`).not.toBe('planned')
+    }
+  })
 })
