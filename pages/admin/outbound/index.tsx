@@ -61,6 +61,13 @@ type ProviderCard = {
   lastFailureAt: string | null;
   lastSuccessAt: string | null;
   lastDryRunAt: string | null;
+  // Discovery stats
+  discoveredCount: number;
+  acceptedCount: number;
+  publishableCount: number;
+  blockedCount: number;
+  excludedCount: number;
+  excludedReasons: Record<string, number>;
 };
 
 type PageProps = {
@@ -130,6 +137,10 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     fail: Awaited<ReturnType<typeof getFailureSummary>> | null,
   ): ProviderCard {
     const posts = result.posts;
+    const excludedReasons: Record<string, number> = {};
+    for (const ex of result.excluded) {
+      excludedReasons[ex.reason] = (excludedReasons[ex.reason] ?? 0) + 1;
+    }
     return {
       provider,
       label,
@@ -146,6 +157,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       lastFailureAt: fail?.lastFailure ? new Date(fail.lastFailure.createdAt).toISOString() : null,
       lastSuccessAt: fail?.lastSuccess ? new Date(fail.lastSuccess.createdAt).toISOString() : null,
       lastDryRunAt: fail?.lastDryRun ? new Date(fail.lastDryRun.createdAt).toISOString() : null,
+      discoveredCount: result.discoveredCount,
+      acceptedCount: result.acceptedCount,
+      publishableCount: result.publishableCount,
+      blockedCount: result.blockedCount,
+      excludedCount: result.excludedCount,
+      excludedReasons,
     };
   }
 
@@ -389,6 +406,24 @@ function ProviderCard({ card }: { card: ProviderCard }) {
         )}
         {card.lastDryRunAt && (
           <span>Last dry-run: {fmt(card.lastDryRunAt)}</span>
+        )}
+      </div>
+
+      <div className="border-t border-white/5 pt-3">
+        <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-white/25">Discovery</p>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          <AdminMetricCard label="Discovered" value={card.discoveredCount} variant="inner" />
+          <AdminMetricCard label="Accepted" value={card.acceptedCount} variant="inner" tone={card.acceptedCount > 0 ? "success" : "muted"} />
+          <AdminMetricCard label="Publishable" value={card.publishableCount} variant="inner" tone={card.publishableCount > 0 ? "success" : "muted"} />
+          <AdminMetricCard label="Blocked" value={card.blockedCount} variant="inner" tone={card.blockedCount > 0 ? "warning" : "muted"} />
+          <AdminMetricCard label="Excluded" value={card.excludedCount} variant="inner" tone={card.excludedCount > 0 ? "info" : "muted"} />
+        </div>
+        {card.excludedCount > 0 && (
+          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-white/30">
+            {Object.entries(card.excludedReasons).map(([reason, count]) => (
+              <li key={reason}>{reason.replace(/_/g, " ")}: {count}</li>
+            ))}
+          </ul>
         )}
       </div>
 

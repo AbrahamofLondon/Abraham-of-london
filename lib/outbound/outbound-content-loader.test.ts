@@ -780,15 +780,16 @@ describe("File filters", () => {
     expect(posts).toHaveLength(2);
   });
 
-  it("skips directory entries (subdirectories)", () => {
-    mockReaddirSync.mockImplementation((dir: string) =>
-      dir.includes("facebook")
-        ? [makeDirent("subdir", false), makeDirent("real.md", true)]
-        : [],
-    );
+  it("recurses into subdirectories to discover nested files", () => {
+    mockReaddirSync.mockImplementation((dir: string) => {
+      const seg = dir.split(/[\\/]/).filter(Boolean).pop() ?? "";
+      if (seg === "facebook") return [makeDirent("campaign", false), makeDirent("root.md", true)];
+      if (seg === "campaign") return [makeDirent("nested.md", true)];
+      return [];
+    });
     mockReadFileSync.mockReturnValue(makeFileContent(BASE_FB));
     const { posts } = getFacebookOutboundPosts();
-    expect(posts).toHaveLength(1);
+    expect(posts).toHaveLength(2);
   });
 });
 

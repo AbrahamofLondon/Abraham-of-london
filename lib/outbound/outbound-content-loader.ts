@@ -98,9 +98,34 @@ export type OutboundPost = {
   createdBy: string | null;
 };
 
+export type ExclusionReason =
+  | "posted_archive"
+  | "backup_file"
+  | "unsupported_extension"
+  | "parse_error"
+  | "provider_mismatch";
+
+export type ExcludedFile = {
+  /** Filename relative to the provider root (e.g. "posted/01-foo.mdx"). */
+  filename: string;
+  reason: ExclusionReason;
+  detail?: string;
+};
+
 export type OutboundPostsResult = {
   posts: OutboundPost[];
   errors: Array<{ filename: string; message: string }>;
+  excluded: ExcludedFile[];
+  /** All .md/.mdx non-backup files found, including those in excluded dirs. */
+  discoveredCount: number;
+  /** Files successfully parsed into posts (=== posts.length). */
+  acceptedCount: number;
+  /** Posts with status "ready" or ("scheduled" + approvalStatus "approved"). */
+  publishableCount: number;
+  /** Accepted posts that cannot publish yet (draft, needs_review, etc.). */
+  blockedCount: number;
+  /** Files skipped before parsing (posted/archive dirs, unsupported ext). */
+  excludedCount: number;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -321,37 +346,109 @@ function frontmatterToPost(
 
 // ─── Directory reader ─────────────────────────────────────────────────────────
 
-function readOutboundDirectory(
+/** Subdirectory names that are excluded from discovery and explicitly recorded. */
+const EXCLUDED_DIR_NAMES = new Set(["posted", "archive"]);
+
+/**
+ * Walk an excluded directory and record every .md/.mdx file as excluded.
+ * Files inside excluded dirs count toward discoveredCount and excludedCount.
+ */
+function recordExcludedDir(
+  dirPath: string,
+  relativePrefix: string,
+  result: OutboundPostsResult,
+): void {
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      recordExcludedDir(
+        path.join(dirPath, entry.name),
+        `${relativePrefix}/${entry.name}`,
+        result,
+      );
+      continue;
+    }
+    if (!entry.isFile()) continue;
+    const name = entry.name;
+    if (name.includes(".backup-")) continue;
+    if (!/\.(md|mdx)$/i.test(name)) continue;
+    result.discoveredCount++;
+    result.excludedCount++;
+    result.excluded.push({
+      filename: `${relativePrefix}/${name}`,
+      reason: "posted_archive",
+      detail: `File is inside excluded directory '${relativePrefix.split("/")[0]}'`,
+    });
+  }
+}
+
+/**
+ * Recursively scan a directory tree, collecting posts.
+ * Subdirectory names in EXCLUDED_DIR_NAMES are skipped and their files are
+ * recorded with reason "posted_archive".
+ */
+function readOutboundDirectoryRecursive(
   dirPath: string,
   provider: OutboundPostProvider,
-): OutboundPostsResult {
-  assertServerRuntime();
-
-  const result: OutboundPostsResult = { posts: [], errors: [] };
-
-  if (!fs.existsSync(dirPath)) {
-    return result;
-  }
+  result: OutboundPostsResult,
+  relativeDir = "",
+): void {
+  if (!fs.existsSync(dirPath)) return;
 
   let entries: fs.Dirent[];
   try {
     entries = fs.readdirSync(dirPath, { withFileTypes: true });
   } catch {
-    return result;
+    return;
   }
 
   for (const entry of entries) {
+    if (entry.isDirectory()) {
+      if (EXCLUDED_DIR_NAMES.has(entry.name)) {
+        const prefix = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+        recordExcludedDir(path.join(dirPath, entry.name), prefix, result);
+      } else {
+        const nextRel = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+        readOutboundDirectoryRecursive(
+          path.join(dirPath, entry.name),
+          provider,
+          result,
+          nextRel,
+        );
+      }
+      continue;
+    }
+
     if (!entry.isFile()) continue;
     const name = entry.name;
-    if (!/\.(md|mdx)$/i.test(name)) continue;
+
     if (name.includes(".backup-")) continue;
+
+    if (!/\.(md|mdx)$/i.test(name)) {
+      result.excluded.push({
+        filename: relativeDir ? `${relativeDir}/${name}` : name,
+        reason: "unsupported_extension",
+      });
+      result.excludedCount++;
+      continue;
+    }
+
+    result.discoveredCount++;
 
     const filePath = path.join(dirPath, name);
     let content: string;
     try {
       content = fs.readFileSync(filePath, "utf8");
     } catch (err) {
-      result.errors.push({ filename: name, message: String(err) });
+      const rel = relativeDir ? `${relativeDir}/${name}` : name;
+      result.errors.push({ filename: rel, message: String(err) });
+      result.excluded.push({ filename: rel, reason: "parse_error", detail: String(err) });
+      result.excludedCount++;
       continue;
     }
 
@@ -360,18 +457,41 @@ function readOutboundDirectory(
       const post = frontmatterToPost(frontmatter, body, name, provider);
       result.posts.push(post);
     } catch (err) {
-      result.errors.push({ filename: name, message: String(err) });
+      const rel = relativeDir ? `${relativeDir}/${name}` : name;
+      result.errors.push({ filename: rel, message: String(err) });
+      result.excluded.push({ filename: rel, reason: "parse_error", detail: String(err) });
+      result.excludedCount++;
     }
   }
+}
 
-  // Sort by scheduledFor ascending (unscheduled last)
+function makeEmptyResult(): OutboundPostsResult {
+  return {
+    posts: [],
+    errors: [],
+    excluded: [],
+    discoveredCount: 0,
+    acceptedCount: 0,
+    publishableCount: 0,
+    blockedCount: 0,
+    excludedCount: 0,
+  };
+}
+
+function finaliseResult(result: OutboundPostsResult): OutboundPostsResult {
   result.posts.sort((a, b) => {
     if (!a.scheduledFor && !b.scheduledFor) return a.slug.localeCompare(b.slug);
     if (!a.scheduledFor) return 1;
     if (!b.scheduledFor) return -1;
     return a.scheduledFor.localeCompare(b.scheduledFor);
   });
-
+  result.acceptedCount = result.posts.length;
+  result.publishableCount = result.posts.filter(
+    (p) =>
+      p.status === "ready" ||
+      (p.status === "scheduled" && p.approvalStatus === "approved"),
+  ).length;
+  result.blockedCount = result.acceptedCount - result.publishableCount;
   return result;
 }
 
@@ -382,67 +502,59 @@ const X_DIR = path.join(process.cwd(), "content", "outbound", "x");
 const LINKEDIN_CAMPAIGNS_BASE = path.join(process.cwd(), "content", "outbound", "linkedin");
 
 /**
- * Load all Facebook outbound post drafts from content/outbound/facebook/.
+ * Load all Facebook outbound post drafts from content/outbound/facebook/,
+ * including nested campaign subdirectories.
+ * The "posted" and "archive" subdirectories are excluded and their files are
+ * recorded in result.excluded with reason "posted_archive".
  */
 export function getFacebookOutboundPosts(): OutboundPostsResult {
-  return readOutboundDirectory(FACEBOOK_DIR, "facebook");
+  assertServerRuntime();
+  const result = makeEmptyResult();
+  readOutboundDirectoryRecursive(FACEBOOK_DIR, "facebook", result);
+  return finaliseResult(result);
 }
 
 /**
- * Load all X outbound post drafts from content/outbound/x/.
+ * Load all X outbound post drafts from content/outbound/x/,
+ * including nested campaign subdirectories.
+ * The "posted" and "archive" subdirectories are excluded and their files are
+ * recorded in result.excluded with reason "posted_archive".
  */
 export function getXOutboundPosts(): OutboundPostsResult {
-  return readOutboundDirectory(X_DIR, "x");
+  assertServerRuntime();
+  const result = makeEmptyResult();
+  readOutboundDirectoryRecursive(X_DIR, "x", result);
+  return finaliseResult(result);
 }
 
 /**
  * Load LinkedIn outbound posts for a named campaign subdirectory.
- * Reads from content/outbound/linkedin/<campaignSlug>/.
+ * Reads recursively from content/outbound/linkedin/<campaignSlug>/.
  */
 export function getLinkedInCampaignPosts(campaignSlug: string): OutboundPostsResult {
-  return readOutboundDirectory(
+  assertServerRuntime();
+  const result = makeEmptyResult();
+  readOutboundDirectoryRecursive(
     path.join(LINKEDIN_CAMPAIGNS_BASE, campaignSlug),
     "linkedin",
+    result,
   );
+  return finaliseResult(result);
 }
 
 /**
- * Load all LinkedIn outbound posts across all campaign subdirectories.
- * Scans each immediate subdirectory of content/outbound/linkedin/ that
- * contains .md/.mdx files and merges the results.
+ * Load all LinkedIn outbound posts.
+ * Scans content/outbound/linkedin/ recursively, including root-level files and
+ * all campaign subdirectories.
+ * The "posted" subdirectory is excluded — files there are recorded with
+ * reason "posted_archive". This is an intentional exclusion: posted/ contains
+ * already-published content that should not re-enter the publish queue.
  */
 export function getLinkedInOutboundPosts(): OutboundPostsResult {
   assertServerRuntime();
-  const merged: OutboundPostsResult = { posts: [], errors: [] };
-
-  if (!fs.existsSync(LINKEDIN_CAMPAIGNS_BASE)) return merged;
-
-  let entries: fs.Dirent[];
-  try {
-    entries = fs.readdirSync(LINKEDIN_CAMPAIGNS_BASE, { withFileTypes: true });
-  } catch {
-    return merged;
-  }
-
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const { posts, errors } = readOutboundDirectory(
-      path.join(LINKEDIN_CAMPAIGNS_BASE, entry.name),
-      "linkedin",
-    );
-    merged.posts.push(...posts);
-    merged.errors.push(...errors);
-  }
-
-  // Re-sort merged results by scheduledFor ascending (unscheduled last)
-  merged.posts.sort((a, b) => {
-    if (!a.scheduledFor && !b.scheduledFor) return a.slug.localeCompare(b.slug);
-    if (!a.scheduledFor) return 1;
-    if (!b.scheduledFor) return -1;
-    return a.scheduledFor.localeCompare(b.scheduledFor);
-  });
-
-  return merged;
+  const result = makeEmptyResult();
+  readOutboundDirectoryRecursive(LINKEDIN_CAMPAIGNS_BASE, "linkedin", result);
+  return finaliseResult(result);
 }
 
 /**
