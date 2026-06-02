@@ -103,6 +103,9 @@ export default function BoardroomBriefPage() {
       return
     }
 
+    // Track start (before spine build — not sample mode)
+    trackLaunch("boardroom_brief_started", "/boardroom-brief")
+
     // Build spine from intake
     const costDelay = s(form.costOfDelay)
     const parsedCost = costDelay ? parseFloat(costDelay.replace(/[^0-9.]/g, '')) : 0
@@ -148,6 +151,8 @@ export default function BoardroomBriefPage() {
     const result = generateBoardroomDossier(spine as any)
     setDossier(result)
     setPhase('result')
+    // Track result generation (not sample mode)
+    trackLaunch("boardroom_brief_result_generated", "/boardroom-brief")
   }
 
   // ── Sample data generation ────────────────────────────────────────────────

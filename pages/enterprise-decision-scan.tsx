@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { ArrowRight, RefreshCw, FileText, Users, Building2, Crown, ShieldCheck } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { track } from '@/lib/analytics/track'
+import { trackLaunch } from '@/lib/analytics/client-launch-events'
 
 const GOLD = '#C9A96E'
 const EMERALD = '#6EE7B7'
@@ -185,12 +186,16 @@ export default function EnterpriseDecisionScanPage() {
   const handleSubmit = useCallback(() => {
     if (!input.unresolvedDecision.trim()) return
 
+    trackLaunch("enterprise_scan_started", "/enterprise-decision-scan")
     setLoading(true)
     setTimeout(() => {
       const r = computeScan(input)
       setResult(r)
       setLoading(false)
-      track('enterprise_scan_completed', { costBand: r.costBand, orgLevel: input.orgLevel })
+      trackLaunch("enterprise_scan_completed", "/enterprise-decision-scan", {
+        productCode: "enterprise",
+        route: "/enterprise-decision-scan",
+      })
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
     }, 800)
   }, [input])

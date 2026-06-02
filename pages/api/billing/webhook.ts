@@ -17,6 +17,7 @@ import {
 } from "@/lib/commercial/catalog";
 import { syncRetainerContractFromSubscription } from "@/lib/retainers/retainer-service";
 import { generatePaidExecutiveReport } from "@/lib/commercial/paid-er-generation";
+import { trackLaunch } from "@/lib/analytics/client-launch-events";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -173,6 +174,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         return res.status(500).json({
           error: "ENTITLEMENT_SYNC_FAILED",
+        });
+      }
+
+      // ── Launch analytics on successful payment completion ──
+      const pc: string = productCode
+      if (pc === "boardroom-brief" || pc === "boardroom_brief") {
+        trackLaunch("boardroom_checkout_completed", "/api/billing/webhook", {
+          productCode: pc,
+          route: catalogProduct?.successPath ?? "/boardroom-brief",
+        });
+      } else if (pc === "global-market-intelligence-report-q1-2026" || pc === "gmi_q1_2026") {
+        trackLaunch("gmi_full_report_purchase_completed", "/api/billing/webhook", {
+          productCode: pc,
+          route: catalogProduct?.successPath ?? "/artifacts/global-market-intelligence-report-q1-2026",
         });
       }
 

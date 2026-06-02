@@ -63,7 +63,15 @@ export type LaunchEventName =
   | "boardroom_to_checkout"
   | "products_to_gmi_outlook"
   | "gmi_outlook_to_full_report"
-  | "enterprise_to_enterprise_scan";
+  | "enterprise_to_enterprise_scan"
+  // ── Revenue and completion events ──
+  | "checkout_session_created"
+  | "boardroom_checkout_completed"
+  | "boardroom_brief_started"
+  | "boardroom_brief_result_generated"
+  | "gmi_full_report_purchase_completed"
+  | "enterprise_scan_started"
+  | "enterprise_scan_completed";
 
 // ─── Event payload ──────────────────────────────────────────────────────────
 
