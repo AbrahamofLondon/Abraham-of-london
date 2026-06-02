@@ -296,14 +296,19 @@ const marketActivationItems: ProductItem[] = [
 ];
 
 const instrumentItems: InstrumentItem[] = [
-  { name: "Decision Signal",                status: "Open entry",       href: "/decision-instruments/signal" },
-  { name: "Decision Exposure Instrument",   status: "Active",            href: catalogPath("decision_exposure_instrument", "/decision-instruments/decision-exposure-instrument/start") },
-  { name: "Mandate Clarity Framework",      status: "Active",            href: catalogPath("mandate_clarity_framework", "/decision-instruments/mandate-clarity-framework/start") },
-  { name: "Execution Risk Index",           status: "Active",            href: catalogPath("execution_risk_index", "/decision-instruments/execution-risk-index/run") },
-  { name: "Governance Drift Detector",      status: "Planned" },
-  { name: "Team Alignment Gap Map",         status: "Planned" },
-  { name: "Operator Decision Pack",         status: "Planned" },
-  { name: "Board Brief Builder",            status: "Planned" },
+  { name: "Decision Signal",                   status: "Open entry",    href: "/decision-instruments/signal" },
+  { name: "Decision Exposure Instrument",      status: "Active",        href: catalogPath("decision_exposure_instrument", "/decision-instruments/decision-exposure-instrument/start") },
+  { name: "Mandate Clarity Framework",         status: "Active",        href: catalogPath("mandate_clarity_framework", "/decision-instruments/mandate-clarity-framework/start") },
+  { name: "Execution Risk Index",              status: "Active",        href: catalogPath("execution_risk_index", "/decision-instruments/execution-risk-index/run") },
+  { name: "Escalation Readiness Scorecard",    status: "Active",        href: catalogPath("escalation_readiness_scorecard", "/decision-instruments/escalation-readiness-scorecard/run") },
+  { name: "Structural Failure Diagnostic",     status: "Active",        href: catalogPath("structural_failure_diagnostic_canvas", "/decision-instruments/structural-failure-diagnostic-canvas/run") },
+  { name: "Team Alignment Gap Map",            status: "Active",        href: catalogPath("team_alignment_gap_map", "/decision-instruments/team-alignment-gap-map/run") },
+  { name: "Governance Drift Detector",         status: "Active",        href: catalogPath("governance_drift_detector", "/decision-instruments/governance-drift-detector/run") },
+  { name: "Strategic Priority Stack Builder",  status: "Active",        href: catalogPath("strategic_priority_stack_builder", "/decision-instruments/strategic-priority-stack-builder/run") },
+  { name: "Intervention Path Selector",        status: "Active",        href: catalogPath("intervention_path_selector", "/decision-instruments/intervention-path-selector/start") },
+  { name: "Board Brief Builder",               status: "Active",        href: catalogPath("board_brief_builder", "/decision-instruments/board-brief-builder/run") },
+  { name: "Operator Decision Pack",            status: "Active",        href: catalogPath("operator_decision_pack", "/decision-instruments/operator-decision-pack/start") },
+  { name: "View all instruments",              status: "Active",        href: "/decision-instruments" },
 ];
 
 const purposeAlignmentItems: InstrumentItem[] = [
@@ -317,7 +322,12 @@ const knowledgeItems: InstrumentItem[] = [
   { name: "Published Briefs",  status: "Sample",           href: "/briefs" },
   { name: "Decision Centre",   status: "Selective access",  href: "/decision-centre" },
   { name: "Pricing",           status: "Sample",            href: "/pricing" },
-  { name: "Frameworks",        status: "Planned" },
+  { name: "Frameworks",        status: "Active",            href: "/decision-instruments" },
+];
+
+const gmiItems: InstrumentItem[] = [
+  { name: "Global Market Intelligence Report — Q1 2026", status: "Active", href: catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026") },
+  { name: "Market Intelligence Archive",                  status: "Active", href: "/intelligence/market" },
 ];
 
 // ─── Components ───────────────────────────────────────────────────────────────
@@ -599,6 +609,7 @@ function SectionNav() {
     { href: "#paid-corridor",   label: "Paid corridor" },
     { href: "#market-activation", label: "Market Activation" },
     { href: "#enterprise",      label: "Enterprise" },
+    { href: "#intelligence",    label: "Market Intelligence" },
     { href: "#instruments",     label: "Instruments" },
     { href: "#purpose",         label: "Purpose Alignment" },
     { href: "#knowledge",       label: "Knowledge" },
@@ -997,8 +1008,19 @@ export default function ProductsPage() {
           </div>
         </div>
 
+        <div id="intelligence">
+          <CollapsibleSection title="Global Market Intelligence" intro="Quarterly market intelligence built on prior-call review, not prediction theatre.">
+            <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
+              <p className="text-[13px] leading-relaxed text-white/[0.45]">
+                Each quarterly report reviews material calls from the previous quarter before issuing the next. Built for operators who need disciplined market judgement.
+              </p>
+            </div>
+            <InstrumentList items={gmiItems} />
+          </CollapsibleSection>
+        </div>
+
         <div id="instruments">
-          <CollapsibleSection title="Specialised Decision Instruments" intro="Structured instruments for specific decision weaknesses.">
+          <CollapsibleSection title="Specialised Decision Instruments" intro="All instruments are live and governed. Each writes to Decision Centre memory.">
             <InstrumentList items={instrumentItems} />
           </CollapsibleSection>
         </div>

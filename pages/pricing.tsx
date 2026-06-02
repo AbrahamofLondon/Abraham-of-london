@@ -44,6 +44,16 @@ const FREE_ENTRY_PRODUCTS: CatalogProduct[] = [
   CATALOG.fast_diagnostic,
 ].filter((p): p is CatalogProduct => Boolean(p));
 
+/** Market activation — first paid proof products */
+const MARKET_ACTIVATION_PRODUCTS: CatalogProduct[] = [
+  CATALOG.boardroom_brief,
+].filter((p): p is CatalogProduct => Boolean(p?.active));
+
+/** Global Market Intelligence — quarterly intelligence line */
+const INTELLIGENCE_PRODUCTS: CatalogProduct[] = [
+  CATALOG.gmi_q1_2026,
+].filter((p): p is CatalogProduct => Boolean(p?.active));
+
 /** Active paid one-time products (excluding bundles marked inactive) */
 const ONE_TIME_PRODUCTS: CatalogProduct[] = [
   CATALOG.personal_decision_audit,
@@ -667,6 +677,50 @@ export default function PricingPage() {
               </div>
             </div>
           </section>
+
+          <GoldDivider />
+
+          {/* ══════════════════════════════════════════════════════════════ */}
+          {/* BOARDROOM BRIEF — FIRST PAID PROOF PRODUCT                   */}
+          {/* ══════════════════════════════════════════════════════════════ */}
+          {MARKET_ACTIVATION_PRODUCTS.length > 0 && (
+            <section style={{ marginBottom: "48px" }}>
+              <SectionLabel>Market activation — first paid step</SectionLabel>
+              <h2 style={{ ...serif, fontSize: "22px", color: "rgba(255,255,255,0.80)", marginBottom: "6px" }}>
+                Boardroom Brief
+              </h2>
+              <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.32)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
+                Generate a boardroom-readiness brief from one serious decision intake. The first recommended paid step before the deeper corridor.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.04)" }}>
+                {MARKET_ACTIVATION_PRODUCTS.map((p) => (
+                  <ProductCard key={p.code} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <GoldDivider />
+
+          {/* ══════════════════════════════════════════════════════════════ */}
+          {/* GLOBAL MARKET INTELLIGENCE — QUARTERLY INTELLIGENCE LINE     */}
+          {/* ══════════════════════════════════════════════════════════════ */}
+          {INTELLIGENCE_PRODUCTS.length > 0 && (
+            <section style={{ marginBottom: "48px" }}>
+              <SectionLabel>Market intelligence</SectionLabel>
+              <h2 style={{ ...serif, fontSize: "22px", color: "rgba(255,255,255,0.80)", marginBottom: "6px" }}>
+                Global Market Intelligence
+              </h2>
+              <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.32)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
+                Quarterly market intelligence built on prior-call review, not prediction theatre. Each report verifies material calls from the previous quarter before issuing the next.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.04)" }}>
+                {INTELLIGENCE_PRODUCTS.map((p) => (
+                  <ProductCard key={p.code} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
 
           <GoldDivider />
 
