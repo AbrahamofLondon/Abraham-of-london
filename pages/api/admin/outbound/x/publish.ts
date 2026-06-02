@@ -24,7 +24,16 @@ import {
   buildCustomXAsset,
   adaptFacebookTextToTweet,
 } from "@/lib/outbound/x-content-resolver";
-import { getOutboundXAssetBySlug } from "@/lib/outbound/x-outbound-adapter";
+import {
+  getOutboundXAssetBySlug,
+  getOutboundXPostAndAssetBySlug,
+} from "@/lib/outbound/x-outbound-adapter";
+import {
+  isDuplicatePublish,
+  claimPublishSlot,
+  completePublishSlot,
+  createLedgerEntry,
+} from "@/lib/outbound/core/outbound-publish-ledger";
 import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
 import { publishTweetToX } from "@/lib/outbound/x-publishing-client";
 import { recordXPublishingAuditSafe } from "@/lib/outbound/x-publishing-audit";
@@ -138,6 +147,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── Resolve asset ─────────────────────────────────────────────────────────
   let asset = null;
+  // sourcePost is set for outbound-x draft assets so we can use their
+  // idempotency key and scheduledFor in the publish ledger.
+  let sourcePost: import("@/lib/outbound/outbound-content-loader").OutboundPost | null = null;
 
   if (body.facebookText) {
     // Sync mode: adapt Facebook post text to tweet format
@@ -161,8 +173,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       link: body.customLink?.trim() || null,
     });
   } else if (body.slug) {
-    // Try blog-series resolver first, then outbound draft adapter.
-    asset = getXAssetBySlug(body.slug) ?? getOutboundXAssetBySlug(body.slug);
+    // Try outbound draft adapter first (preserves sourcePost for ledger use).
+    const outboundMatch = getOutboundXPostAndAssetBySlug(body.slug);
+    if (outboundMatch) {
+      asset = outboundMatch.asset;
+      sourcePost = outboundMatch.post;
+    } else {
+      asset = getXAssetBySlug(body.slug);
+    }
     if (!asset) {
       return res.status(404).json({
         ok: false,
@@ -176,6 +194,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       error: "Missing required field: slug, facebookText, or assetType: custom.",
       requestId: id,
     });
+  }
+
+  // ── Idempotency check (outbound draft posts only) ──────────────────────────
+  // Blog-series and custom assets don't carry a stable outboundItemId, so
+  // idempotency is only enforced for content/outbound/x/* posts.
+  if (sourcePost && !dryRun) {
+    const existingPublish = await isDuplicatePublish(
+      "x",
+      sourcePost.id,
+      sourcePost.scheduledFor,
+    );
+    if (existingPublish) {
+      await createAttempt({
+        assetType: asset.assetType,
+        assetSlug: asset.slug,
+        assetTitle: asset.title,
+        status: "blocked",
+        requestId: id,
+        dryRun: false,
+        actorId,
+        actorEmailHash,
+        errorCode: "X_DUPLICATE_PUBLISH",
+        errorMessageSafe: `Post already published. Ledger ID: ${existingPublish.id}`,
+      });
+      return res.status(409).json({
+        ok: false,
+        error: "This post has already been published.",
+        errorCode: "X_DUPLICATE_PUBLISH",
+        ledgerId: existingPublish.id,
+        providerPostUrl: existingPublish.providerPostUrl ?? null,
+        requestId: id,
+      });
+    }
   }
 
   // ── Connection + gate ─────────────────────────────────────────────────────
@@ -229,6 +280,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       actorId,
       actorEmailHash,
     });
+    // Write a DRY_RUN entry to the outbound ledger for outbound draft posts.
+    if (sourcePost) {
+      await createLedgerEntry({
+        provider: "x",
+        outboundItemId: sourcePost.id,
+        campaign: sourcePost.campaign ?? null,
+        assetSlug: asset.slug,
+        sourcePath: sourcePost.sourcePath ?? null,
+        scheduledFor: sourcePost.scheduledFor ?? null,
+        actorId,
+        actorEmailHash,
+        status: "DRY_RUN",
+        source: "manual",
+      }).catch(() => null);
+    }
     await recordXPublishingAuditSafe({
       eventType: "X_PUBLISH_DRY_RUN",
       assetSlug: asset.slug,
@@ -288,6 +354,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     actorEmailHash,
   });
 
+  // For outbound draft posts: atomically claim the publish slot in the ledger.
+  // This is the race-condition-safe path that enforces idempotency via a unique
+  // constraint on (idempotencyKey). Blog-series and custom assets skip this path.
+  let ledgerEntryId: string | null = null;
+  if (sourcePost) {
+    const claim = await claimPublishSlot({
+      provider: "x",
+      outboundItemId: sourcePost.id,
+      campaign: sourcePost.campaign ?? null,
+      assetSlug: asset.slug,
+      sourcePath: sourcePost.sourcePath ?? null,
+      scheduledFor: sourcePost.scheduledFor ?? null,
+      actorId,
+      actorEmail: null,
+      actorEmailHash,
+      source: "manual",
+    }).catch(() => null);
+
+    if (claim && !claim.claimed) {
+      await prisma.xPublishAttempt.update({
+        where: { id: attempt.id },
+        data: {
+          status: "blocked",
+          errorCode: "X_DUPLICATE_PUBLISH",
+          errorMessageSafe: claim.reason ?? "Duplicate publish blocked by ledger.",
+          completedAt: new Date(),
+        },
+      });
+      return res.status(409).json({
+        ok: false,
+        error: claim.reason ?? "This post has already been published.",
+        errorCode: "X_DUPLICATE_PUBLISH",
+        requestId: id,
+      });
+    }
+    ledgerEntryId = claim?.entry?.id ?? null;
+  }
+
   const result = await publishTweetToX({ text: asset.text, dryRun: false });
 
   if (!result.ok) {
@@ -300,6 +404,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         completedAt: new Date(),
       },
     });
+    if (ledgerEntryId) {
+      await completePublishSlot(ledgerEntryId, "FAILED", {
+        errorCode: result.errorCode ?? "X_POST_FAILED",
+        safeMessage: result.safeMessage ?? "X publishing failed.",
+      }).catch(() => null);
+    }
     await recordXPublishingAuditSafe({
       eventType: "X_PUBLISH_FAILED",
       assetSlug: asset.slug,
@@ -327,6 +437,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       completedAt: new Date(),
     },
   });
+  if (ledgerEntryId) {
+    await completePublishSlot(ledgerEntryId, "PUBLISHED", {
+      providerPostId: result.tweetId ?? null,
+      providerPostUrl: result.tweetUrl ?? null,
+    }).catch(() => null);
+  }
   await recordXPublishingAuditSafe({
     eventType: "X_POST_PUBLISHED",
     assetSlug: asset.slug,

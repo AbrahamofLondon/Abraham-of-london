@@ -59,10 +59,21 @@ export function getOutboundDraftXAssets(): OutboundDraftXResult {
  * Returns null if the slug prefix doesn't match or the post is not found.
  */
 export function getOutboundXAssetBySlug(slug: string): XPublishedAsset | null {
+  return getOutboundXPostAndAssetBySlug(slug)?.asset ?? null;
+}
+
+/**
+ * Look up an outbound-x post AND its XPublishedAsset by console slug.
+ * Returns both so callers can use the OutboundPost's idempotencyKey and
+ * scheduledFor for the publish ledger — without a second disk read.
+ */
+export function getOutboundXPostAndAssetBySlug(
+  slug: string,
+): { post: OutboundPost; asset: XPublishedAsset } | null {
   const prefix = `${X_OUTBOUND_SLUG_PREFIX}/`;
   if (!slug.startsWith(prefix)) return null;
   const id = slug.slice(prefix.length);
   const { posts } = getXOutboundPosts();
   const post = posts.find((p) => p.id === id);
-  return post ? outboundPostToXAsset(post) : null;
+  return post ? { post, asset: outboundPostToXAsset(post) } : null;
 }
