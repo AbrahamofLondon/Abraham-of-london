@@ -72,6 +72,7 @@ type ConsoleViewModel = {
   assets: AssetViewModel[];
   attempts: AttemptSummary[];
   xConnected: boolean;  // true if X is connected and can publish
+  publishingEnabled: boolean;
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -93,7 +94,7 @@ export const getServerSideProps: GetServerSideProps<{
     Promise.resolve(getAllFacebookPublishableAssets()),
     getXConnectionStatus(),
   ]);
-  const xConnected = xStatus.canPublish;
+  const xConnected = xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true";
 
   const assets: AssetViewModel[] = rawAssets.map((asset: FacebookPublishedAsset) => {
     const gate = canPublishFacebookPost(asset, connection);
@@ -142,7 +143,13 @@ export const getServerSideProps: GetServerSideProps<{
 
   return {
     props: {
-      consoleState: { connection, assets, attempts, xConnected },
+      consoleState: {
+        connection,
+        assets,
+        attempts,
+        xConnected,
+        publishingEnabled: process.env.FACEBOOK_PUBLISHING_ENABLED === "true",
+      },
       flashError,
       flashConnected,
     },
@@ -159,7 +166,13 @@ function readinessTone(readiness: FacebookConnectionStatus["readiness"]): AdminB
   return "muted";
 }
 
-function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus }) {
+function ConnectionPanel({
+  connection,
+  publishingEnabled,
+}: {
+  connection: FacebookConnectionStatus;
+  publishingEnabled: boolean;
+}) {
   return (
     <section className="border border-white/10 bg-zinc-950/70 p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -185,8 +198,8 @@ function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus 
               tone={readinessTone(connection.readiness)}
             />
             <AdminStatusBadge
-              label={connection.canPublish ? "Can publish" : "Cannot publish"}
-              tone={connection.canPublish ? "success" : "danger"}
+              label={publishingEnabled && connection.canPublish ? "Can publish" : "Publishing blocked"}
+              tone={publishingEnabled && connection.canPublish ? "success" : "danger"}
             />
             {connection.oauthConfigured ? (
               <AdminStatusBadge label="OAuth configured" tone="success" />
@@ -199,6 +212,16 @@ function ConnectionPanel({ connection }: { connection: FacebookConnectionStatus 
             <div className="mt-4 flex items-start gap-2 border border-amber-400/20 bg-amber-400/5 p-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300/70" />
               <p className="text-sm text-amber-100/75">{connection.warning}</p>
+            </div>
+          )}
+
+          {!publishingEnabled && (
+            <div className="mt-4 flex items-start gap-2 border border-rose-400/20 bg-rose-400/5 p-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-300/70" />
+              <p className="text-sm text-rose-100/75">
+                This channel is not ready for publishing. Complete configuration before connection or publishing is available.
+                Live posting is blocked until <span className="font-mono">FACEBOOK_PUBLISHING_ENABLED=true</span> is set after OAuth, token storage, permissions, diagnostics, and publish gating are verified.
+              </p>
             </div>
           )}
 
@@ -326,10 +349,12 @@ function AssetCard({
   asset,
   connectionCanPublish,
   xConnected,
+  publishingEnabled,
 }: {
   asset: AssetViewModel;
   connectionCanPublish: boolean;
   xConnected: boolean;
+  publishingEnabled: boolean;
 }) {
   const [gateRun, setGateRun] = React.useState(false);
   const [finalApproved, setFinalApproved] = React.useState(false);
@@ -343,7 +368,7 @@ function AssetCard({
     xSync?: { ok: boolean; tweetUrl?: string | null } | null;
   } | null>(null);
 
-  const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish;
+  const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish && publishingEnabled;
 
   async function runDryRun() {
     setDryRunning(true);
@@ -448,6 +473,11 @@ function AssetCard({
       </div>
 
       {/* Blockers */}
+      {!publishingEnabled && (
+        <p className="mt-3 text-xs text-rose-200/65">
+          - Live Facebook publishing is blocked by configuration. Dry-run gate checks remain available.
+        </p>
+      )}
       {asset.blockers.length > 0 && (
         <div className="mt-3 space-y-1">
           {asset.blockers.map((b) => (
@@ -657,7 +687,10 @@ export default function FacebookOutboundAdminPage({
         )}
 
         {/* Section 1: Connection */}
-        <ConnectionPanel connection={connection} />
+        <ConnectionPanel
+          connection={connection}
+          publishingEnabled={consoleState.publishingEnabled}
+        />
 
         {/* Section 2: Permissions */}
         <PermissionsPanel connection={connection} />
@@ -701,6 +734,7 @@ export default function FacebookOutboundAdminPage({
                 asset={asset}
                 connectionCanPublish={connection.canPublish}
                 xConnected={consoleState.xConnected}
+                publishingEnabled={consoleState.publishingEnabled}
               />
             ))
           )}

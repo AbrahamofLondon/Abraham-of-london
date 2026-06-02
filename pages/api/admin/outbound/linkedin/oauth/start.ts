@@ -1,9 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { requireAdminApi } from "@/lib/access/server";
-import { isLinkedInAppProfileKey } from "@/lib/integrations/linkedin/linkedin-app-profile";
+import {
+  isLinkedInAppProfileKey,
+  LinkedInAppProfileError,
+} from "@/lib/integrations/linkedin/linkedin-app-profile";
 import {
   buildAuthorizationUrl,
+  getLinkedInOAuthSmokeDiagnostics,
   LINKEDIN_OAUTH_STATE_COOKIE,
 } from "@/lib/outbound/linkedin-oauth";
 
@@ -20,19 +24,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const guard = await requireAdminApi(req, res);
   if (!guard) return;
 
+  const requestedProfile =
+    typeof req.query.profile === "string" &&
+    isLinkedInAppProfileKey(req.query.profile)
+      ? req.query.profile
+      : undefined;
+
   try {
-    const requestedProfile =
-      typeof req.query.profile === "string" &&
-      isLinkedInAppProfileKey(req.query.profile)
-        ? req.query.profile
-        : undefined;
     const { url, state } = buildAuthorizationUrl(requestedProfile);
     res.setHeader("Set-Cookie", stateCookie(state));
     return res.redirect(302, url);
-  } catch {
-    return res.status(500).json({
+  } catch (error) {
+    const diagnostics = await getLinkedInOAuthSmokeDiagnostics().catch(() => null);
+    const message =
+      error instanceof LinkedInAppProfileError
+        ? error.message
+        : "LinkedIn OAuth start could not build an authorization URL.";
+    return res.status(400).json({
       ok: false,
-      error: "LinkedIn OAuth is not configured.",
+      error: message,
+      readiness: diagnostics?.readiness ?? "OAUTH_ERROR",
+      missingEnv: diagnostics?.missingEnv ?? [],
+      redirectUri: diagnostics?.redirectUri ?? "",
+      requestedScopes: diagnostics?.requestedScopes ?? [],
     });
   }
 }

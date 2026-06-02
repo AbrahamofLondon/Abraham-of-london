@@ -16,6 +16,8 @@ import {
   generatePKCEVerifier,
   derivePKCEChallenge,
   buildXAuthUrl,
+  getMissingXOutboundEnv,
+  getConfiguredXOAuthScopes,
 } from "@/lib/outbound/x-oauth";
 import { recordXPublishingAuditSafe } from "@/lib/outbound/x-publishing-audit";
 
@@ -27,14 +29,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const guard = await requireAdminApi(req, res);
   if (!guard) return;
 
-  const clientId = process.env.X_CLIENT_ID;
-  const redirectUri = process.env.X_REDIRECT_URI;
+  const missingEnv = getMissingXOutboundEnv();
+  const requestedScopes = getConfiguredXOAuthScopes();
+  const missingScopes = ["tweet.read", "tweet.write", "users.read", "offline.access"].filter(
+    (scope) => !requestedScopes.includes(scope),
+  );
 
-  if (!clientId || !redirectUri) {
-    return res.status(500).json({
+  if (missingEnv.length > 0 || missingScopes.length > 0) {
+    return res.status(400).json({
       ok: false,
-      error:
-        "X OAuth is not configured. Set X_CLIENT_ID and X_REDIRECT_URI in environment.",
+      error: "X OAuth is not configured for connection.",
+      readiness: "CONFIG_MISSING",
+      missingEnv,
+      requestedScopes,
+      missingScopes,
     });
   }
 

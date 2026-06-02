@@ -1372,6 +1372,16 @@ export async function proxy(req: NextRequest) {
 
     if (isAdmin && !pathname.includes("/login")) {
       if (!token) {
+        if (isApi) {
+          return jsonResponse(
+            {
+              ok: false,
+              error: "Administrative authentication required",
+              code: "ADMIN_AUTH_REQUIRED",
+            },
+            401,
+          );
+        }
         const url = new URL("/admin/login", req.url);
         url.searchParams.set("returnTo", safeReturnTo(req));
         return NextResponse.redirect(url, 307);

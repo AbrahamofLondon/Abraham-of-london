@@ -18,10 +18,20 @@ function redirectWithStatus(
   res: NextApiResponse,
   status: "success" | "denied" | "error",
   code?: string,
+  message?: string,
 ) {
   const params = new URLSearchParams({ connection: status });
   if (code) params.set("code", code);
+  if (message) params.set("message", safeOAuthMessage(message));
   return res.redirect(302, `${ADMIN_LINKEDIN_CONSOLE}?${params.toString()}`);
+}
+
+function safeOAuthMessage(value: string): string {
+  return value
+    .replace(/access_token=[^&\s]+/gi, "access_token=[redacted]")
+    .replace(/refresh_token=[^&\s]+/gi, "refresh_token=[redacted]")
+    .replace(/client_secret=[^&\s]+/gi, "client_secret=[redacted]")
+    .slice(0, 300);
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -32,8 +42,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const guard = await requireAdminApi(req, res);
   if (!guard) return;
 
-  const { code, state, error } = req.query;
-  if (error) return redirectWithStatus(res, "denied", "authorization_denied");
+  const { code, state, error, error_description } = req.query;
+  if (error) {
+    return redirectWithStatus(
+      res,
+      "denied",
+      typeof error === "string" ? error : "authorization_denied",
+      typeof error_description === "string" ? error_description : undefined,
+    );
+  }
   if (typeof code !== "string") return redirectWithStatus(res, "error", "missing_code");
   if (typeof state !== "string") return redirectWithStatus(res, "error", "missing_state");
 
@@ -52,7 +69,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     guard.session?.user?.id ?? null,
     statePayload.profileKey,
   );
-  if (!result.ok) return redirectWithStatus(res, "error", "token_exchange_failed");
+  if (!result.ok) {
+    return redirectWithStatus(res, "error", "token_exchange_failed", result.error);
+  }
 
   return redirectWithStatus(res, "success");
 }

@@ -246,6 +246,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // ── Live publish ──────────────────────────────────────────────────────────
+  if (process.env.FACEBOOK_PUBLISHING_ENABLED !== "true") {
+    await createAttempt({
+      assetType: asset.assetType,
+      assetSlug: asset.slug,
+      assetTitle: asset.title,
+      status: "blocked",
+      requestId: id,
+      dryRun: false,
+      actorId,
+      actorEmailHash,
+      errorCode: "FACEBOOK_PUBLISHING_DISABLED",
+      errorMessageSafe:
+        "Facebook publishing is blocked until FACEBOOK_PUBLISHING_ENABLED=true is configured.",
+    });
+
+    return res.status(423).json({
+      ok: false,
+      error: "Facebook publishing is not enabled for live posting.",
+      blockers: [
+        "This channel is not ready for publishing. Complete configuration before connection or publishing is available.",
+        "Set FACEBOOK_PUBLISHING_ENABLED=true only after OAuth, token storage, permissions, diagnostics, and final publish gating are verified.",
+      ],
+      requestId: id,
+    });
+  }
+
   const attempt = await createAttempt({
     assetType: asset.assetType,
     assetSlug: asset.slug,
@@ -319,7 +345,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let xSync: { ok: boolean; tweetUrl?: string | null } | null = null;
   if (syncToX) {
     const xStatus = await getXConnectionStatus();
-    if (xStatus.canPublish) {
+    if (xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true") {
       const tweetText = adaptFacebookTextToTweet(asset.text, asset.link);
       const xResult = await publishTweetToX({ text: tweetText, dryRun: false });
       xSync = { ok: xResult.ok, tweetUrl: xResult.tweetUrl };

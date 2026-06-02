@@ -22,5 +22,18 @@ export default async function handler(
 
   const status = await getXConnectionStatus();
 
-  return res.status(200).json({ ok: true, status });
+  return res.status(200).json({
+    ok: true,
+    provider: "x",
+    configured: status.oauthConfigured,
+    missingEnv: status.missingEnv,
+    requestedScopes: status.requestedScopes,
+    publishingEnabled: status.publishingEnabled,
+    readiness: status.readiness,
+    connected: status.connected,
+    tokenRecordExists: status.state !== "not_connected",
+    tokenExpired: status.state === "expired",
+    canPublish: status.canPublish,
+    status,
+  });
 }

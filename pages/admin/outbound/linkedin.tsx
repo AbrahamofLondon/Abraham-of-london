@@ -54,6 +54,12 @@ type ConsoleViewModel = {
   tokenLeakProbe: string;
 };
 
+type OAuthNotice = {
+  status: "success" | "denied" | "error";
+  code: string | null;
+  message: string | null;
+} | null;
+
 function readinessState(asset: ResolvedLinkedInOutbound, publishable: boolean): ConsolePost["readinessState"] {
   if (asset.isPosted || asset.item.status === "posted") return "posted";
   if (asset.item.draft === true || asset.item.status === "draft") return "draft";
@@ -104,6 +110,7 @@ export function buildLinkedInOutboundAdminViewModel(
 export const getServerSideProps: GetServerSideProps<{
   consoleState: ConsoleViewModel;
   isOwner: boolean;
+  oauthNotice: OAuthNotice;
 }> = async (ctx) => {
   const guard = await requireAdminPage(ctx);
   if (!guard.authorized) return guard.redirect as never;
@@ -141,6 +148,19 @@ export const getServerSideProps: GetServerSideProps<{
     props: {
       consoleState: buildLinkedInOutboundAdminViewModel(connection, assets, attempts),
       isOwner,
+      oauthNotice:
+        ctx.query.connection === "success" ||
+        ctx.query.connection === "denied" ||
+        ctx.query.connection === "error"
+          ? {
+              status: ctx.query.connection,
+              code: typeof ctx.query.code === "string" ? ctx.query.code : null,
+              message:
+                typeof ctx.query.message === "string"
+                  ? ctx.query.message
+                  : null,
+            }
+          : null,
     },
   };
 };
@@ -470,6 +490,7 @@ function PostCard({ post, targetLabel, isOwner }: { post: ConsolePost; targetLab
 export default function LinkedInOutboundAdminPage({
   consoleState,
   isOwner,
+  oauthNotice,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <AdminLayout title="LinkedIn Outbound">
@@ -487,6 +508,25 @@ export default function LinkedInOutboundAdminPage({
         </section>
 
         <ConnectionPanel connection={consoleState.connection} />
+
+        {oauthNotice ? (
+          <section
+            className={
+              oauthNotice.status === "success"
+                ? "border border-emerald-400/20 bg-emerald-400/5 p-4"
+                : "border border-rose-400/20 bg-rose-400/5 p-4"
+            }
+          >
+            <p className="text-sm text-white/75">
+              {oauthNotice.status === "success"
+                ? "LinkedIn OAuth callback completed successfully."
+                : `LinkedIn OAuth ${oauthNotice.status}: ${oauthNotice.code ?? "unknown_error"}`}
+            </p>
+            {oauthNotice.message ? (
+              <p className="mt-1 text-xs text-white/45">{oauthNotice.message}</p>
+            ) : null}
+          </section>
+        ) : null}
 
         <section className="space-y-4">
           <div>

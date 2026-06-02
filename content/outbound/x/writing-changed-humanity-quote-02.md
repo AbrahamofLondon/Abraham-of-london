@@ -9,7 +9,7 @@ sourcePath: content/source-material/the-minds-clay/Writing changed humanity.mdx
 campaign: writing-changed-humanity
 series: the-minds-clay
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 scheduledFor: "2026-06-19T10:00:00Z"
 link: null
 thread: false

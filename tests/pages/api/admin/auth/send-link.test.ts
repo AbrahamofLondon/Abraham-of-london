@@ -109,6 +109,7 @@ describe("POST /api/admin/auth/send-link", () => {
 
   it("uses normalised local returnTo when sending a configured magic link", async () => {
     vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    vi.stubEnv("RESEND_FROM_EMAIL", "Abraham of London <login@abrahamoflondon.org>");
     const req = makeReq({
       email: "admin@abrahamoflondon.org",
       returnTo: "%252Fadmin%252Foutbound%252Flinkedin",
@@ -126,6 +127,7 @@ describe("POST /api/admin/auth/send-link", () => {
       }),
     }));
     expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      from: "Abraham of London <login@abrahamoflondon.org>",
       text: expect.stringContaining("returnTo=%2Fadmin%2Foutbound%2Flinkedin"),
     }));
 
@@ -137,6 +139,83 @@ describe("POST /api/admin/auth/send-link", () => {
     expect(emailedToken).toBeTruthy();
     expect(storedToken).toBe(hashAdminMagicLinkToken(String(emailedToken)));
     expect(storedToken).not.toBe(emailedToken);
+  });
+
+  it("does not let the adaptive shield lock out an allowlisted admin email", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    mockApplyShield.mockResolvedValue({ blocked: true, delayMs: 0 });
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin/outbound/x",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(200);
+    expect(mockApplyShield).toHaveBeenCalledWith(req, "/api/admin/auth/send-link");
+    expect(res._body).not.toEqual({ ok: false, error: "REQUEST_THROTTLED" });
+    expect(mockVerificationCreate).toHaveBeenCalled();
+    expect(mockSendEmail).toHaveBeenCalled();
+  });
+
+  it("still rate-limits allowlisted admin magic-link requests", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    mockApplyShield.mockResolvedValue({ blocked: true, delayMs: 0 });
+    mockRateLimit.mockResolvedValueOnce({ allowed: false, retryAfterMs: 10_000 });
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin/outbound/x",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(429);
+    expect(res._headers["Retry-After"]).toBe("10");
+    expect(res._body).toEqual({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
+    expect(mockVerificationCreate).not.toHaveBeenCalled();
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("still applies the adaptive shield to non-admin login attempts", async () => {
+    mockApplyShield.mockResolvedValueOnce({ blocked: true, delayMs: 0 });
+    const req = makeReq({
+      email: "notanadmin@example.com",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(429);
+    expect(res._body).toEqual({ ok: false, error: "REQUEST_THROTTLED" });
+    expect(mockVerificationCreate).not.toHaveBeenCalled();
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("does not leak admin allowlist status in success responses", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    const adminReq = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const nonAdminReq = makeReq({
+      email: "notanadmin@example.com",
+      returnTo: "/admin",
+    });
+    const adminRes = makeRes();
+    const nonAdminRes = makeRes();
+
+    await handler(adminReq, adminRes);
+    await handler(nonAdminReq, nonAdminRes);
+
+    expect(adminRes._status).toBe(200);
+    expect(nonAdminRes._status).toBe(200);
+    expect(adminRes._body).toEqual(nonAdminRes._body);
+    const raw = JSON.stringify(adminRes._body);
+    expect(raw).not.toContain("admin@abrahamoflondon.org");
+    expect(raw).not.toContain("allowlisted");
   });
 
   it("returns JSON (not HTML) for a non-admin email — no enumeration", async () => {
@@ -168,7 +247,28 @@ describe("POST /api/admin/auth/send-link", () => {
     const body = res._body as Record<string, unknown>;
     expect(body.ok).toBe(false);
     expect(body.error).toBe("INVALID_EMAIL");
+    expect(mockApplyShield).not.toHaveBeenCalled();
     expect(mockVerificationCreate).not.toHaveBeenCalled();
+  });
+
+  it("returns JSON when configured email delivery fails", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-resend-key");
+    mockSendEmail.mockResolvedValueOnce({ ok: false, error: "Invalid sender" });
+    const req = makeReq({
+      email: "admin@abrahamoflondon.org",
+      returnTo: "/admin",
+    });
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res._status).toBe(500);
+    expect(res._body).toEqual({
+      ok: false,
+      error: "EMAIL_SEND_FAILED",
+      message: "Failed to send sign-in link. Please try again.",
+    });
+    expect(JSON.stringify(res._body)).not.toContain("Invalid sender");
   });
 
   it("returns DATABASE_URL_INVALID JSON when Prisma init fails with invalid URL", async () => {

@@ -82,6 +82,28 @@ export type LinkedInConnectionStatus = {
   message: string;
 };
 
+export type LinkedInOAuthSmokeReadiness =
+  | "READY_TO_CONNECT"
+  | "CONNECTED"
+  | "CONFIG_MISSING"
+  | "SCOPE_BLOCKED"
+  | "TOKEN_EXPIRED"
+  | "ORG_URN_MISSING"
+  | "OAUTH_ERROR";
+
+export type LinkedInOAuthSmokeDiagnostics = {
+  configured: boolean;
+  missingEnv: string[];
+  redirectUri: string;
+  authStartReachable: boolean;
+  callbackConfigured: boolean;
+  requestedScopes: string[];
+  organizationUrnConfigured: boolean;
+  tokenRecordExists: boolean;
+  tokenExpired: boolean | null;
+  readiness: LinkedInOAuthSmokeReadiness;
+};
+
 type LinkedInTokenResponse = {
   access_token?: string;
   expires_in?: number;
@@ -108,6 +130,69 @@ export function getConfiguredLinkedInOrganizationUrn(): string | null {
 
 function getOrganizationName(): string {
   return "Abraham of London";
+}
+
+function envValue(name: string): string {
+  return String(process.env[name] || "").trim();
+}
+
+function hasAnyEnv(names: string[]): boolean {
+  return names.some((name) => Boolean(envValue(name)));
+}
+
+function missingLinkedInEnv(): string[] {
+  const missing: string[] = [];
+  const requirements: Array<{ label: string; names: string[] }> = [
+    {
+      label: "LINKEDIN_LEGACY_CLIENT_ID or LINKEDIN_CLIENT_ID",
+      names: ["LINKEDIN_LEGACY_CLIENT_ID", "LINKEDIN_CLIENT_ID"],
+    },
+    {
+      label: "LINKEDIN_LEGACY_CLIENT_SECRET or LINKEDIN_CLIENT_SECRET",
+      names: ["LINKEDIN_LEGACY_CLIENT_SECRET", "LINKEDIN_CLIENT_SECRET"],
+    },
+    {
+      label: "LINKEDIN_LEGACY_REDIRECT_URI or LINKEDIN_REDIRECT_URI",
+      names: ["LINKEDIN_LEGACY_REDIRECT_URI", "LINKEDIN_REDIRECT_URI"],
+    },
+    {
+      label: "LINKEDIN_TOKEN_ENCRYPTION_KEY",
+      names: ["LINKEDIN_TOKEN_ENCRYPTION_KEY"],
+    },
+    {
+      label: "LINKEDIN_ORGANIZATION_URN",
+      names: ["LINKEDIN_ORGANIZATION_URN"],
+    },
+    {
+      label: "NEXTAUTH_URL or NEXT_PUBLIC_APP_URL",
+      names: ["NEXTAUTH_URL", "NEXT_PUBLIC_APP_URL"],
+    },
+  ];
+
+  for (const requirement of requirements) {
+    if (!hasAnyEnv(requirement.names)) missing.push(requirement.label);
+  }
+
+  return missing;
+}
+
+function callbackLooksConfigured(redirectUri: string): boolean {
+  if (!redirectUri) return false;
+  try {
+    const parsed = new URL(redirectUri);
+    if (parsed.pathname !== "/api/admin/outbound/linkedin/oauth/callback") {
+      return false;
+    }
+    if (process.env.NODE_ENV === "production" && parsed.protocol !== "https:") {
+      return false;
+    }
+    if (process.env.NODE_ENV === "production" && parsed.hostname === "localhost") {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function requiredScopeFor(ownerType: LinkedInPublishingOwnerType): string {
@@ -598,6 +683,78 @@ export async function getConnectionStatus(): Promise<LinkedInConnectionStatus> {
       message: "LinkedIn connection status could not be read.",
     };
   }
+}
+
+export async function getLinkedInOAuthSmokeDiagnostics(): Promise<LinkedInOAuthSmokeDiagnostics> {
+  const appDiagnostics = getLinkedInAppProfileDiagnostics();
+  const activeProfile = appDiagnostics.profiles[appDiagnostics.activeProfile];
+  const status = await getConnectionStatus();
+  const missingEnv = missingLinkedInEnv();
+  const redirectUri = (() => {
+    try {
+      return resolveLinkedInAppProfile(appDiagnostics.activeProfile).redirectUri;
+    } catch {
+      if (appDiagnostics.activeProfile === "legacy") {
+        return envValue("LINKEDIN_LEGACY_REDIRECT_URI") || envValue("LINKEDIN_REDIRECT_URI");
+      }
+      return envValue("LINKEDIN_COMMUNITY_REDIRECT_URI");
+    }
+  })();
+
+  let authStartReachable = false;
+  try {
+    buildAuthorizationUrl(appDiagnostics.activeProfile);
+    authStartReachable = true;
+  } catch {
+    authStartReachable = false;
+  }
+
+  const callbackConfigured = callbackLooksConfigured(redirectUri);
+  const organizationUrnConfigured = Boolean(getConfiguredLinkedInOrganizationUrn());
+  const criticalMissingEnv = missingEnv.filter(
+    (name) => name !== "LINKEDIN_ORGANIZATION_URN",
+  );
+  const tokenRecordExists =
+    status.status !== "not_connected" ||
+    Object.values(status.profiles).some((profile) => profile.status !== "not_connected");
+  const tokenExpired =
+    tokenRecordExists
+      ? status.status === "expired" ||
+        Boolean(status.expiresAt && new Date(status.expiresAt) < new Date())
+      : null;
+
+  let readiness: LinkedInOAuthSmokeReadiness = "READY_TO_CONNECT";
+  if (criticalMissingEnv.length > 0 || !appDiagnostics.activeProfileValid || !callbackConfigured) {
+    readiness = "CONFIG_MISSING";
+  } else if (!organizationUrnConfigured && getDefaultLinkedInOwnerType() === "organization") {
+    readiness = "ORG_URN_MISSING";
+  } else if (tokenExpired) {
+    readiness = "TOKEN_EXPIRED";
+  } else if (status.connected && status.selectedPublishingTarget.status === "ready") {
+    readiness = "CONNECTED";
+  } else if (tokenRecordExists && (
+    status.selectedPublishingTarget.status === "required_scope_missing" ||
+    status.profiles[appDiagnostics.activeProfile].missingRequiredScopes.length > 0
+  )) {
+    readiness = "SCOPE_BLOCKED";
+  } else if (status.selectedPublishingTarget.status === "organization_urn_missing") {
+    readiness = "ORG_URN_MISSING";
+  } else if (!authStartReachable) {
+    readiness = "OAUTH_ERROR";
+  }
+
+  return {
+    configured: missingEnv.length === 0 && appDiagnostics.activeProfileValid && callbackConfigured,
+    missingEnv,
+    redirectUri,
+    authStartReachable,
+    callbackConfigured,
+    requestedScopes: activeProfile.requiredScopes,
+    organizationUrnConfigured,
+    tokenRecordExists,
+    tokenExpired,
+    readiness,
+  };
 }
 
 export async function revokeLinkedInConnection(

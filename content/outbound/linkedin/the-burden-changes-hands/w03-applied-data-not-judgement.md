@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: what-the-tablet-cannot-tell-you
 sourcePath: content/blog/series/the-burden-changes-hands/what-the-tablet-cannot-tell-you.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 3
 sequence: 2
 scheduledFor: "2026-07-23T08:00:00Z"

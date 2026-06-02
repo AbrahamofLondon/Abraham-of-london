@@ -48,10 +48,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
-  // Anti-reconnaissance shield
+  const { email, returnTo } = req.body ?? {};
+  const normalized = normalizeAdminMagicLinkEmail(email);
+
+  if (!normalized || !normalized.includes("@")) {
+    return res.status(400).json({
+      ok: false,
+      error: "INVALID_EMAIL",
+      message: "Enter a valid administrative email.",
+    });
+  }
+
+  const isAdminEmail = isBootstrapAdminEmail(normalized);
   const shield = await applyShield(req, "/api/admin/auth/send-link");
-  if (shield.blocked) return res.status(429).json({ ok: false, error: "REQUEST_THROTTLED" });
-  if (shield.delayMs > 0) await new Promise((r) => setTimeout(r, shield.delayMs));
+
+  if (!isAdminEmail) {
+    if (shield.blocked) return res.status(429).json({ ok: false, error: "REQUEST_THROTTLED" });
+    if (shield.delayMs > 0) await new Promise((r) => setTimeout(r, shield.delayMs));
+  } else if (shield.blocked || shield.delayMs > 0 || shield.degradeResponse) {
+    console.warn("[admin-auth] Advisory shield verdict ignored for allowlisted admin magic-link request", {
+      blocked: shield.blocked,
+      delayMs: shield.delayMs,
+      degradeResponse: shield.degradeResponse,
+    });
+  }
 
   // Rate limit: strict — 5 requests per 60s per IP
   const clientIp = String(
@@ -70,19 +90,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(429).json({ ok: false, error: "RATE_LIMIT_EXCEEDED" });
   }
 
-  const { email, returnTo } = req.body ?? {};
-  const normalized = normalizeAdminMagicLinkEmail(email);
-
-  if (!normalized || !normalized.includes("@")) {
-    return res.status(400).json({
-      ok: false,
-      error: "INVALID_EMAIL",
-      message: "Enter a valid administrative email.",
-    });
-  }
-
   // Neutral response for non-admin emails (prevents enumeration)
-  if (!isBootstrapAdminEmail(normalized)) {
+  if (!isAdminEmail) {
     console.warn("[admin-auth] Non-admin email attempted login:", normalized);
     return res.status(200).json({
       ok: true,
@@ -168,7 +177,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `Sign in: ${signInUrl}`,
       "This link expires in 15 minutes.",
     ].join("\n"),
-    from: process.env.EMAIL_FROM || "Abraham of London <admin@abrahamoflondon.org>",
+    from:
+      process.env.RESEND_FROM_EMAIL ||
+      process.env.MAIL_FROM ||
+      process.env.EMAIL_FROM ||
+      "Abraham of London <info@abrahamoflondon.org>",
     meta: {
       source: "admin-auth:send-link",
     },

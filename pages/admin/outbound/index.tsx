@@ -39,6 +39,9 @@ import {
 import { getRecentLedgerEntries, getFailureSummary } from "@/lib/outbound/core/outbound-publish-ledger";
 import { getOutboundControlState } from "@/lib/outbound/core/outbound-control-state";
 import OutboundLedgerTable, { type LedgerEntry } from "@/components/admin/outbound/OutboundLedgerTable";
+import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
+import { getConnectionStatus, getLinkedInOAuthSmokeDiagnostics } from "@/lib/outbound/linkedin-oauth";
+import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,10 +65,22 @@ type ProviderCard = {
 
 type PageProps = {
   providers: ProviderCard[];
+  readinessMatrix: OutboundReadinessRow[];
   schedulerEnabled: boolean;
   schedulerPaused: boolean;
   pausedReason: string | null;
   recentLedger: LedgerEntry[];
+};
+
+type OutboundReadinessRow = {
+  channel: "LinkedIn" | "Facebook" | "X";
+  oauth: string;
+  tokenStorage: string;
+  permissionCheck: string;
+  publishGate: string;
+  publishLive: "Yes" | "No";
+  state: string;
+  blockers: string[];
 };
 
 // ─── Server-side ──────────────────────────────────────────────────────────────
@@ -74,7 +89,22 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const guard = await requireAdminPage(ctx);
   if (!guard.authorized) return guard.redirect as never;
 
-  const [liPosts, fbPosts, xPosts, liLedger, fbLedger, xLedger, liFail, fbFail, xFail, controlState] =
+  const [
+    liPosts,
+    fbPosts,
+    xPosts,
+    liLedger,
+    fbLedger,
+    xLedger,
+    liFail,
+    fbFail,
+    xFail,
+    controlState,
+    liStatus,
+    liSmoke,
+    fbStatus,
+    xStatus,
+  ] =
     await Promise.all([
       Promise.resolve(getOutboundPostsByProvider("linkedin")),
       Promise.resolve(getOutboundPostsByProvider("facebook")),
@@ -86,6 +116,10 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       getFailureSummary("facebook", 24).catch(() => null),
       getFailureSummary("x", 24).catch(() => null),
       getOutboundControlState().catch(() => ({ schedulerPaused: false, pausedReason: null, resumedAt: null, pausedAt: null, pausedById: null, pausedByEmail: null, updatedAt: new Date() })),
+      getConnectionStatus(),
+      getLinkedInOAuthSmokeDiagnostics(),
+      getFacebookConnectionStatus(),
+      getXConnectionStatus(),
     ]);
 
   function buildCard(
@@ -126,6 +160,76 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
         buildCard("facebook", "Facebook", "/admin/outbound/facebook", fbPosts, fbFail),
         buildCard("x", "X (Twitter)", "/admin/outbound/x", xPosts, xFail),
       ],
+      readinessMatrix: [
+        {
+          channel: "LinkedIn",
+          oauth: liStatus.connected ? "Connected" : liSmoke.configured ? "Ready to connect" : "Configuration required",
+          tokenStorage: liSmoke.tokenRecordExists ? (liSmoke.tokenExpired ? "Token expired" : "Token stored") : "Required",
+          permissionCheck:
+            liStatus.selectedPublishingTarget.status === "ready"
+              ? "Passed"
+              : liStatus.selectedPublishingTarget.status,
+          publishGate: "Required",
+          publishLive:
+            liStatus.connected &&
+            liStatus.selectedPublishingTarget.status === "ready" &&
+            liStatus.publishingEnabled
+              ? "Yes"
+              : "No",
+          state: liSmoke.readiness,
+          blockers: [
+            ...liSmoke.missingEnv,
+            ...(liStatus.selectedPublishingTarget.status !== "ready"
+              ? [liStatus.selectedPublishingTarget.status]
+              : []),
+            ...(liStatus.publishingEnabled ? [] : ["LINKEDIN_PUBLISHING_ENABLED is not true"]),
+          ],
+        },
+        {
+          channel: "Facebook",
+          oauth: fbStatus.oauthConfigured ? (fbStatus.connected ? "Connected" : "Ready to connect") : "Configuration required",
+          tokenStorage: fbStatus.connected ? "Token stored or env token present" : "Required",
+          permissionCheck:
+            fbStatus.missingPermissions.length === 0
+              ? "Passed"
+              : `Missing: ${fbStatus.missingPermissions.join(", ")}`,
+          publishGate: "Required",
+          publishLive:
+            fbStatus.canPublish && process.env.FACEBOOK_PUBLISHING_ENABLED === "true"
+              ? "Yes"
+              : "No",
+          state: fbStatus.readiness,
+          blockers: [
+            ...(fbStatus.oauthConfigured ? [] : ["Facebook OAuth configuration required"]),
+            ...fbStatus.missingPermissions,
+            ...(process.env.FACEBOOK_PUBLISHING_ENABLED === "true"
+              ? []
+              : ["FACEBOOK_PUBLISHING_ENABLED is not true"]),
+          ],
+        },
+        {
+          channel: "X",
+          oauth: xStatus.oauthConfigured ? (xStatus.connected ? "Connected" : "Ready to connect") : "Configuration required",
+          tokenStorage: xStatus.connected ? "Token stored" : "Required",
+          permissionCheck:
+            xStatus.missingScopes.length === 0
+              ? "Passed"
+              : `Missing: ${xStatus.missingScopes.join(", ")}`,
+          publishGate: "Required",
+          publishLive:
+            xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true"
+              ? "Yes"
+              : "No",
+          state: xStatus.readiness,
+          blockers: [
+            ...(xStatus.oauthConfigured ? [] : ["X OAuth configuration required"]),
+            ...xStatus.missingScopes,
+            ...(process.env.X_PUBLISHING_ENABLED === "true"
+              ? []
+              : ["X_PUBLISHING_ENABLED is not true"]),
+          ],
+        },
+      ],
       schedulerEnabled: process.env.OUTBOUND_SCHEDULER_ENABLED === "true",
       schedulerPaused: controlState.schedulerPaused || process.env.OUTBOUND_SCHEDULER_PAUSED === "true",
       pausedReason: controlState.pausedReason,
@@ -161,6 +265,92 @@ function failTone(count: number): AdminBadgeTone {
   if (count === 0) return "success";
   if (count < 3) return "warning";
   return "danger";
+}
+
+function liveTone(value: OutboundReadinessRow["publishLive"]): AdminBadgeTone {
+  return value === "Yes" ? "success" : "danger";
+}
+
+function stateTone(state: string): AdminBadgeTone {
+  if (state === "READY" || state === "CONNECTED") return "success";
+  if (state === "READY_TO_CONNECT") return "info";
+  if (state === "CONFIG_MISSING" || state === "ORG_URN_MISSING") return "warning";
+  return "danger";
+}
+
+function OutboundReadinessMatrix({ rows }: { rows: OutboundReadinessRow[] }) {
+  return (
+    <section className="border border-white/10 bg-zinc-950/50 p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="font-serif text-xl text-white">Outbound Readiness Matrix</h2>
+          <p className="mt-1 max-w-3xl text-sm text-white/45">
+            Code existence is not readiness. A channel is live only when OAuth, token storage,
+            permission checks, publish gating, and explicit publishing enablement all pass.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 overflow-x-auto">
+        <table className="min-w-full text-left text-xs">
+          <thead className="border-b border-white/10 text-white/35">
+            <tr>
+              <th className="py-3 pr-4 font-medium">Channel</th>
+              <th className="py-3 pr-4 font-medium">OAuth</th>
+              <th className="py-3 pr-4 font-medium">Token storage</th>
+              <th className="py-3 pr-4 font-medium">Permission check</th>
+              <th className="py-3 pr-4 font-medium">Publish gate</th>
+              <th className="py-3 pr-4 font-medium">Publish live</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {rows.map((row) => (
+              <tr key={row.channel} className="align-top">
+                <td className="py-3 pr-4">
+                  <div className="font-medium text-white">{row.channel}</div>
+                  <div className="mt-1">
+                    <AdminStatusBadge label={row.state} tone={stateTone(row.state)} />
+                  </div>
+                </td>
+                <td className="py-3 pr-4 text-white/65">{row.oauth}</td>
+                <td className="py-3 pr-4 text-white/65">{row.tokenStorage}</td>
+                <td className="py-3 pr-4 text-white/65">{row.permissionCheck}</td>
+                <td className="py-3 pr-4 text-white/65">{row.publishGate}</td>
+                <td className="py-3 pr-4">
+                  <AdminStatusBadge label={row.publishLive} tone={liveTone(row.publishLive)} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        {rows.map((row) => (
+          <div key={`${row.channel}-blockers`} className="border border-white/10 bg-black/20 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-medium text-white">{row.channel}</h3>
+              <AdminStatusBadge label={row.publishLive === "Yes" ? "Live" : "Blocked"} tone={liveTone(row.publishLive)} />
+            </div>
+            {row.publishLive === "No" && row.channel !== "LinkedIn" && (
+              <p className="mt-2 text-xs leading-5 text-amber-100/65">
+                This channel is not ready for publishing. Complete configuration before connection or publishing is available.
+              </p>
+            )}
+            {row.blockers.length > 0 ? (
+              <ul className="mt-2 space-y-1 text-[11px] leading-5 text-white/40">
+                {row.blockers.slice(0, 5).map((blocker) => (
+                  <li key={blocker}>{blocker}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-xs text-emerald-200/55">No current blockers reported.</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 // ─── Provider card ────────────────────────────────────────────────────────────
@@ -221,6 +411,7 @@ function ProviderCard({ card }: { card: ProviderCard }) {
 
 export default function OutboundIndexPage({
   providers,
+  readinessMatrix,
   schedulerEnabled,
   schedulerPaused,
   pausedReason,
@@ -296,6 +487,8 @@ export default function OutboundIndexPage({
             tone={totalFailed24h > 0 ? "danger" : "success"}
           />
         </div>
+
+        <OutboundReadinessMatrix rows={readinessMatrix} />
 
         {/* Provider cards */}
         <div className="space-y-4">

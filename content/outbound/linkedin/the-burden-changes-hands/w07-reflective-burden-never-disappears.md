@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: the-enduring-archive
 sourcePath: content/blog/series/the-burden-changes-hands/the-enduring-archive.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 7
 sequence: 3
 scheduledFor: "2026-08-22T08:00:00Z"

@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: the-author-who-left-the-room
 sourcePath: content/blog/series/the-burden-changes-hands/the-author-who-left-the-room.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 6
 sequence: 2
 scheduledFor: "2026-08-13T08:00:00Z"

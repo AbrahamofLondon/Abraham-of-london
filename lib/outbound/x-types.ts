@@ -16,6 +16,7 @@ export type XConnectionState =
 
 export type XPublishReadiness =
   | "READY"
+  | "READY_TO_CONNECT"
   | "NOT_CONNECTED"
   | "MISSING_SCOPE"
   | "TOKEN_INVALID"
@@ -33,6 +34,9 @@ export type XConnectionStatus = {
   lastPublishAt: string | null;
   readiness: XPublishReadiness;
   oauthConfigured: boolean;
+  publishingEnabled: boolean;
+  missingEnv: string[];
+  requestedScopes: string[];
 };
 
 export type XPublishGateResult = {
@@ -69,10 +73,10 @@ export const X_REQUIRED_SCOPES = [
 export type XRequiredScope = (typeof X_REQUIRED_SCOPES)[number];
 
 // X OAuth 2.0 PKCE endpoints
-export const X_AUTH_URL = "https://twitter.com/i/oauth2/authorize";
-export const X_TOKEN_URL = "https://api.twitter.com/2/oauth2/token";
-export const X_REVOKE_URL = "https://api.twitter.com/2/oauth2/revoke";
-export const X_API_BASE = "https://api.twitter.com/2";
+export const X_AUTH_URL = "https://x.com/i/oauth2/authorize";
+export const X_TOKEN_URL = "https://api.x.com/2/oauth2/token";
+export const X_REVOKE_URL = "https://api.x.com/2/oauth2/revoke";
+export const X_API_BASE = "https://api.x.com/2";
 
 // Character limits
 export const X_TWEET_MAX_CHARS = 280;

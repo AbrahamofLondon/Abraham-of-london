@@ -27,6 +27,12 @@ describe("admin email resolver", () => {
     } as unknown as NodeJS.ProcessEnv)).toBe(true);
   });
 
+  it("authorises ADMIN_EMAIL values used by deployment config", () => {
+    expect(isResolvedAdminEmail("primary@example.com", {
+      ADMIN_EMAIL: "primary@example.com",
+    } as unknown as NodeJS.ProcessEnv)).toBe(true);
+  });
+
   it("supports legacy ADMIN_ALLOWED_EMAILS values", () => {
     expect(isResolvedAdminEmail("allowed@example.com", {
       ADMIN_ALLOWED_EMAILS: "allowed@example.com",

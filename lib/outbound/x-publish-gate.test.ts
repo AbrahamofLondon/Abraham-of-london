@@ -18,6 +18,9 @@ const readyConnection: XConnectionStatus = {
   lastPublishAt: null,
   readiness: "READY",
   oauthConfigured: true,
+  publishingEnabled: true,
+  missingEnv: [],
+  requestedScopes: ["tweet.read", "tweet.write", "users.read", "offline.access"],
 };
 
 const notConnected: XConnectionStatus = {
@@ -29,8 +32,11 @@ const notConnected: XConnectionStatus = {
   missingScopes: ["tweet.read", "tweet.write", "users.read", "offline.access"],
   canPublish: false,
   lastPublishAt: null,
-  readiness: "NOT_CONNECTED",
+  readiness: "READY_TO_CONNECT",
   oauthConfigured: true,
+  publishingEnabled: true,
+  missingEnv: [],
+  requestedScopes: ["tweet.read", "tweet.write", "users.read", "offline.access"],
 };
 
 const missingScopeConnection: XConnectionStatus = {

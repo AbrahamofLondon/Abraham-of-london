@@ -50,12 +50,14 @@ function defaultFrom(type: SendEmailInput["type"]): string {
   if (type === "INNER_CIRCLE") {
     return (
       process.env.INNER_CIRCLE_FROM_EMAIL?.trim() ||
+      process.env.RESEND_FROM_EMAIL?.trim() ||
       process.env.MAIL_FROM?.trim() ||
       "Abraham of London <info@abrahamoflondon.org>"
     );
   }
 
   return (
+    process.env.RESEND_FROM_EMAIL?.trim() ||
     process.env.MAIL_FROM?.trim() ||
     process.env.EMAIL_FROM?.trim() ||
     "Abraham of London <info@abrahamoflondon.org>"

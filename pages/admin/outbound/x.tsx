@@ -74,6 +74,7 @@ type ConsoleViewModel = {
   assets: AssetViewModel[];
   attempts: AttemptSummary[];
   facebookConnected: boolean;
+  publishingEnabled: boolean;
 };
 
 // ─── getServerSideProps ───────────────────────────────────────────────────────
@@ -95,7 +96,7 @@ export const getServerSideProps: GetServerSideProps<{
     Promise.resolve(getAllXPublishableAssets()),
     getFacebookConnectionStatus(),
   ]);
-  const facebookConnected = fbStatus.canPublish;
+  const facebookConnected = fbStatus.canPublish && process.env.FACEBOOK_PUBLISHING_ENABLED === "true";
 
   const assets: AssetViewModel[] = rawAssets.map((asset: XPublishedAsset) => {
     const gate = canPublishXPost(asset, connection);
@@ -144,7 +145,13 @@ export const getServerSideProps: GetServerSideProps<{
 
   return {
     props: {
-      consoleState: { connection, assets, attempts, facebookConnected },
+      consoleState: {
+        connection,
+        assets,
+        attempts,
+        facebookConnected,
+        publishingEnabled: process.env.X_PUBLISHING_ENABLED === "true",
+      },
       flashError,
       flashConnected,
     },
@@ -155,13 +162,20 @@ export const getServerSideProps: GetServerSideProps<{
 
 function readinessTone(readiness: XConnectionStatus["readiness"]): AdminBadgeTone {
   if (readiness === "READY") return "success";
+  if (readiness === "READY_TO_CONNECT") return "info";
   if (readiness === "MISSING_SCOPE") return "danger";
   if (readiness === "TOKEN_INVALID") return "danger";
   if (readiness === "CONFIG_MISSING") return "warning";
   return "muted";
 }
 
-function ConnectionPanel({ connection }: { connection: XConnectionStatus }) {
+function ConnectionPanel({
+  connection,
+  publishingEnabled,
+}: {
+  connection: XConnectionStatus;
+  publishingEnabled: boolean;
+}) {
   return (
     <section className="border border-white/10 bg-zinc-950/70 p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -187,12 +201,27 @@ function ConnectionPanel({ connection }: { connection: XConnectionStatus }) {
               tone={readinessTone(connection.readiness)}
             />
             <AdminStatusBadge
-              label={connection.canPublish ? "Can tweet" : "Cannot tweet"}
-              tone={connection.canPublish ? "success" : "danger"}
+              label={publishingEnabled && connection.canPublish ? "Can tweet" : "Publishing blocked"}
+              tone={publishingEnabled && connection.canPublish ? "success" : "danger"}
             />
           </div>
 
+          {!publishingEnabled && (
+            <div className="mt-4 border border-rose-400/20 bg-rose-400/5 p-3">
+              <p className="text-sm text-rose-100/75">
+                This channel is not ready for publishing. Complete configuration before connection or publishing is available.
+                Live posting is blocked until <span className="font-mono">X_PUBLISHING_ENABLED=true</span> is set after OAuth, token storage, scopes, diagnostics, and publish gating are verified.
+              </p>
+            </div>
+          )}
+
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <AdminMetricCard
+              label="OAuth config"
+              value={connection.oauthConfigured ? "configured" : "missing"}
+              tone={connection.oauthConfigured ? "success" : "warning"}
+              variant="inner"
+            />
             <AdminMetricCard
               label="X account"
               value={connection.username ? `@${connection.username}` : "not connected"}
@@ -240,6 +269,17 @@ function ConnectionPanel({ connection }: { connection: XConnectionStatus }) {
             </div>
           )}
 
+          {!connection.oauthConfigured && connection.missingEnv.length > 0 && (
+            <div className="mt-4 border border-amber-400/20 bg-amber-400/5 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-amber-200/55">
+                Missing X configuration
+              </p>
+              <p className="mt-2 text-sm leading-6 text-amber-100/70">
+                {connection.missingEnv.join(", ")}
+              </p>
+            </div>
+          )}
+
           {/* API note */}
           <div className="mt-4 border border-white/10 bg-black/30 p-3">
             <p className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">
@@ -265,7 +305,8 @@ function ConnectionPanel({ connection }: { connection: XConnectionStatus }) {
           ) : (
             <div className="border border-white/10 bg-black/30 p-3">
               <p className="text-xs text-white/40">
-                X OAuth not configured. Set X_CLIENT_ID and X_REDIRECT_URI to enable.
+                X OAuth not configured. Set X_CLIENT_ID, X_CLIENT_SECRET, X_REDIRECT_URI,
+                X_OAUTH_SCOPES, X_PUBLISHING_ENABLED, and X_TOKEN_ENCRYPTION_KEY to enable connection.
               </p>
             </div>
           )}
@@ -315,10 +356,12 @@ function AssetCard({
   asset,
   connectionCanPublish,
   facebookConnected,
+  publishingEnabled,
 }: {
   asset: AssetViewModel;
   connectionCanPublish: boolean;
   facebookConnected: boolean;
+  publishingEnabled: boolean;
 }) {
   const [gateRun, setGateRun] = React.useState(false);
   const [finalApproved, setFinalApproved] = React.useState(false);
@@ -332,7 +375,7 @@ function AssetCard({
     facebookSync?: { ok: boolean; postUrl?: string | null } | null;
   } | null>(null);
 
-  const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish;
+  const canPublish = gateRun && finalApproved && asset.publishable && connectionCanPublish && publishingEnabled;
 
   async function runDryRun() {
     setDryRunning(true);
@@ -431,6 +474,11 @@ function AssetCard({
       </div>
 
       {/* Blockers & warnings */}
+      {!publishingEnabled && (
+        <p className="mt-3 text-xs text-rose-200/65">
+          - Live X publishing is blocked by configuration. Dry-run gate checks remain available.
+        </p>
+      )}
       {asset.blockers.length > 0 && (
         <div className="mt-3 space-y-1">
           {asset.blockers.map((b) => (
@@ -636,7 +684,10 @@ export default function XOutboundAdminPage({
         )}
 
         {/* Section 1: Connection */}
-        <ConnectionPanel connection={connection} />
+        <ConnectionPanel
+          connection={connection}
+          publishingEnabled={consoleState.publishingEnabled}
+        />
 
         {/* Section 2: Metrics */}
         <section className="grid gap-4 sm:grid-cols-3">
@@ -673,6 +724,7 @@ export default function XOutboundAdminPage({
                 asset={asset}
                 connectionCanPublish={connection.canPublish}
                 facebookConnected={facebookConnected}
+                publishingEnabled={consoleState.publishingEnabled}
               />
             ))
           )}

@@ -21,11 +21,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 const {
   mockRequireAdminApi,
   mockGetConnectionStatus,
+  mockGetLinkedInOAuthSmokeDiagnostics,
   mockGetLinkedInAppProfileDiagnostics,
   mockGetFailureSummary,
 } = vi.hoisted(() => ({
   mockRequireAdminApi: vi.fn(),
   mockGetConnectionStatus: vi.fn(),
+  mockGetLinkedInOAuthSmokeDiagnostics: vi.fn(),
   mockGetLinkedInAppProfileDiagnostics: vi.fn(),
   mockGetFailureSummary: vi.fn(),
 }));
@@ -36,6 +38,7 @@ vi.mock("@/lib/access/server", () => ({
 
 vi.mock("@/lib/outbound/linkedin-oauth", () => ({
   getConnectionStatus: mockGetConnectionStatus,
+  getLinkedInOAuthSmokeDiagnostics: mockGetLinkedInOAuthSmokeDiagnostics,
 }));
 
 vi.mock("@/lib/integrations/linkedin/linkedin-app-profile", () => ({
@@ -164,12 +167,29 @@ function makeFailureSummary(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
+function makeSmokeDiagnostics(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    configured: true,
+    missingEnv: [],
+    redirectUri: "http://localhost:3000/api/admin/outbound/linkedin/oauth/callback",
+    authStartReachable: true,
+    callbackConfigured: true,
+    requestedScopes: ["w_organization_social", "r_organization_social"],
+    organizationUrnConfigured: true,
+    tokenRecordExists: true,
+    tokenExpired: false,
+    readiness: "CONNECTED",
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockRequireAdminApi.mockResolvedValue({
     session: { user: { id: "admin-1", email: "admin@test.com" } },
   });
   mockGetConnectionStatus.mockResolvedValue(makeConnectionStatus());
+  mockGetLinkedInOAuthSmokeDiagnostics.mockResolvedValue(makeSmokeDiagnostics());
   mockGetLinkedInAppProfileDiagnostics.mockReturnValue(makeAppDiagnostics());
   mockGetFailureSummary.mockResolvedValue(makeFailureSummary());
 });
@@ -278,6 +298,42 @@ describe("GET /api/admin/outbound/linkedin/diagnostics", () => {
     expect(body.profiles).toBeDefined();
     expect(body.profiles.legacy).toBeDefined();
     expect(body.profiles.community).toBeDefined();
+  });
+
+  it("includes LinkedIn OAuth smoke diagnostics without secrets", async () => {
+    mockGetLinkedInOAuthSmokeDiagnostics.mockResolvedValue(makeSmokeDiagnostics({
+      configured: false,
+      missingEnv: ["LINKEDIN_LEGACY_CLIENT_SECRET or LINKEDIN_CLIENT_SECRET"],
+      tokenRecordExists: false,
+      tokenExpired: null,
+      readiness: "CONFIG_MISSING",
+    }));
+    const req = makeReq();
+    const res = makeRes();
+    await diagnosticsHandler(req, res);
+    const body = res._body as {
+      configured: boolean;
+      missingEnv: string[];
+      redirectUri: string;
+      authStartReachable: boolean;
+      callbackConfigured: boolean;
+      requestedScopes: string[];
+      organizationUrnConfigured: boolean;
+      tokenRecordExists: boolean;
+      tokenExpired: boolean | null;
+      smokeReadiness: string;
+    };
+    expect(body.configured).toBe(false);
+    expect(body.missingEnv).toContain("LINKEDIN_LEGACY_CLIENT_SECRET or LINKEDIN_CLIENT_SECRET");
+    expect(body.redirectUri).toContain("/api/admin/outbound/linkedin/oauth/callback");
+    expect(body.authStartReachable).toBe(true);
+    expect(body.callbackConfigured).toBe(true);
+    expect(body.requestedScopes).toContain("w_organization_social");
+    expect(body.organizationUrnConfigured).toBe(true);
+    expect(body.tokenRecordExists).toBe(false);
+    expect(body.tokenExpired).toBeNull();
+    expect(body.smokeReadiness).toBe("CONFIG_MISSING");
+    expect(JSON.stringify(body)).not.toMatch(/access_token|refresh_token|Bearer\s+|encrypted/i);
   });
 
   it("includes provider field", async () => {

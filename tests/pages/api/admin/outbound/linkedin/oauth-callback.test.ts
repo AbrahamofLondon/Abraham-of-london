@@ -99,4 +99,24 @@ describe("GET /api/admin/outbound/linkedin/oauth/callback", () => {
     expect(mockExchangeCodeForToken).not.toHaveBeenCalled();
     expect(res._redirect).toContain("code=state_mismatch");
   });
+
+  it("surfaces LinkedIn OAuth errors safely in the admin redirect", async () => {
+    const res = makeRes();
+    const req = {
+      ...makeReq(),
+      query: {
+        error: "invalid_scope",
+        error_description: "Scope w_organization_social is not approved. client_secret=do-not-leak",
+      },
+    } as unknown as NextApiRequest;
+
+    await handler(req, res);
+
+    expect(mockExchangeCodeForToken).not.toHaveBeenCalled();
+    expect(res._redirect).toContain("connection=denied");
+    expect(res._redirect).toContain("code=invalid_scope");
+    const redirect = new URL(String(res._redirect), "http://localhost:3000");
+    expect(redirect.searchParams.get("message")).toContain("Scope w_organization_social is not approved");
+    expect(redirect.searchParams.get("message")).not.toContain("do-not-leak");
+  });
 });

@@ -21,7 +21,10 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdminApi } from "@/lib/access/server";
-import { getConnectionStatus } from "@/lib/outbound/linkedin-oauth";
+import {
+  getConnectionStatus,
+  getLinkedInOAuthSmokeDiagnostics,
+} from "@/lib/outbound/linkedin-oauth";
 import { getLinkedInAppProfileDiagnostics } from "@/lib/integrations/linkedin/linkedin-app-profile";
 import { getFailureSummary } from "@/lib/outbound/core/outbound-publish-ledger";
 import type { OutboundReadiness } from "@/lib/outbound/core/outbound-provider-contract";
@@ -40,7 +43,16 @@ export default async function handler(
   try {
     const status = await getConnectionStatus();
     const appDiagnostics = getLinkedInAppProfileDiagnostics();
-    const failureSummary = await getFailureSummary("linkedin", 24);
+    const [failureSummary, smoke] = await Promise.all([
+      getFailureSummary("linkedin", 24).catch(() => ({
+        failureCount: 0,
+        lastFailure: null,
+        lastSuccess: null,
+        lastDryRun: null,
+        recentBlockedReasons: [],
+      })),
+      getLinkedInOAuthSmokeDiagnostics(),
+    ]);
 
     // ── Determine readiness ──────────────────────────────────────────────────
     let readiness: OutboundReadiness = "NOT_CONNECTED";
@@ -77,6 +89,16 @@ export default async function handler(
     return res.status(200).json({
       ok: true,
       provider: "linkedin",
+      configured: smoke.configured,
+      missingEnv: smoke.missingEnv,
+      redirectUri: smoke.redirectUri,
+      authStartReachable: smoke.authStartReachable,
+      callbackConfigured: smoke.callbackConfigured,
+      requestedScopes: smoke.requestedScopes,
+      organizationUrnConfigured: smoke.organizationUrnConfigured,
+      tokenRecordExists: smoke.tokenRecordExists,
+      tokenExpired: smoke.tokenExpired,
+      smokeReadiness: smoke.readiness,
       connected: status.connected,
       readiness,
       activeProfile: status.activeProfileKey,
@@ -98,8 +120,12 @@ export default async function handler(
       canPublishOrganisation: status.ownerType === "organization" && readiness === "READY",
 
       // Token lifecycle (safe — no token values)
+      expiresAt: status.expiresAt,
       tokenExpiresAt: status.expiresAt,
       tokenRefreshAvailable: false, // LinkedIn does not currently support refresh
+      lastPublishAt: failureSummary.lastSuccess
+        ? new Date(failureSummary.lastSuccess.createdAt).toISOString()
+        : null,
 
       // Publishing target
       publishingTarget: {

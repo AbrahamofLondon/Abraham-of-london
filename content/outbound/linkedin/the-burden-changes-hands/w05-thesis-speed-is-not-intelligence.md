@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: the-slow-intelligence
 sourcePath: content/blog/series/the-burden-changes-hands/the-slow-intelligence.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 5
 sequence: 1
 scheduledFor: "2026-08-04T08:00:00Z"

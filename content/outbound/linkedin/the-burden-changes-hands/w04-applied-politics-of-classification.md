@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: who-holds-the-stylus
 sourcePath: content/blog/series/the-burden-changes-hands/who-holds-the-stylus.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 4
 sequence: 2
 scheduledFor: "2026-07-30T08:00:00Z"

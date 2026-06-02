@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: the-accountant-in-uruk
 sourcePath: content/blog/series/the-burden-changes-hands/the-accountant-in-uruk.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 1
 sequence: 3
 scheduledFor: "2026-07-11T08:00:00Z"

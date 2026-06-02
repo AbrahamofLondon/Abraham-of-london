@@ -23,6 +23,8 @@ export function getHardcodedBootstrapAdminEmails(): readonly string[] {
 export function getResolvedAdminEmails(env: NodeJS.ProcessEnv = process.env): readonly string[] {
   return Array.from(new Set([
     ...HARDCODED_BOOTSTRAP_ADMIN_EMAILS,
+    ...splitEmailList(env.ADMIN_EMAIL),
+    ...splitEmailList(env.ADMIN_USER_EMAIL),
     ...splitEmailList(env.ADMIN_USER_EMAILS),
     ...splitEmailList(env.ADMIN_ALLOWED_EMAILS),
   ]));

@@ -8,7 +8,7 @@ sourceSeries: the-burden-changes-hands
 sourceMaterial: knowledge-can-wait-the-question-is-whether-it-should
 sourcePath: content/blog/series/the-burden-changes-hands/knowledge-can-wait-the-question-is-whether-it-should.mdx
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 seriesWeek: 2
 sequence: 1
 scheduledFor: "2026-07-14T08:00:00Z"

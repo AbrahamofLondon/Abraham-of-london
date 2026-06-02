@@ -26,7 +26,29 @@ import {
 export const X_OAUTH_STATE_COOKIE = "x_oauth_state";
 export const X_PKCE_VERIFIER_COOKIE = "x_pkce_verifier";
 
+export function getConfiguredXOAuthScopes(): string[] {
+  const configured = String(process.env.X_OAUTH_SCOPES || "").trim();
+  const scopes = configured ? configured.split(/\s+/g).filter(Boolean) : [...X_REQUIRED_SCOPES];
+  return Array.from(new Set(scopes));
+}
+
 export const X_OAUTH_SCOPES = X_REQUIRED_SCOPES.join(" ");
+
+function envValue(name: string): string {
+  return String(process.env[name] || "").trim();
+}
+
+export function getMissingXOutboundEnv(): string[] {
+  const required: Array<{ label: string; present: boolean }> = [
+    { label: "X_CLIENT_ID", present: Boolean(envValue("X_CLIENT_ID")) },
+    { label: "X_CLIENT_SECRET", present: Boolean(envValue("X_CLIENT_SECRET")) },
+    { label: "X_REDIRECT_URI", present: Boolean(envValue("X_REDIRECT_URI")) },
+    { label: "X_OAUTH_SCOPES", present: Boolean(envValue("X_OAUTH_SCOPES")) },
+    { label: "X_PUBLISHING_ENABLED", present: Boolean(envValue("X_PUBLISHING_ENABLED")) },
+    { label: "X_TOKEN_ENCRYPTION_KEY", present: Boolean(envValue("X_TOKEN_ENCRYPTION_KEY")) },
+  ];
+  return required.filter((item) => !item.present).map((item) => item.label);
+}
 
 // ─── PKCE helpers ─────────────────────────────────────────────────────────────
 
@@ -251,24 +273,28 @@ export async function fetchXUserInfo(
 // ─── Connection status ────────────────────────────────────────────────────────
 
 export async function getXConnectionStatus(): Promise<XConnectionStatus> {
-  const oauthConfigured = !!(
-    process.env.X_CLIENT_ID && process.env.X_REDIRECT_URI
-  );
-
+  const missingEnv = getMissingXOutboundEnv();
+  const requestedScopes = getConfiguredXOAuthScopes();
+  const oauthConfigured = missingEnv.length === 0;
+  const publishingEnabled = process.env.X_PUBLISHING_ENABLED === "true";
   const required = [...X_REQUIRED_SCOPES] as string[];
+  const missingConfiguredScopes = required.filter((scope) => !requestedScopes.includes(scope));
 
-  if (!oauthConfigured) {
+  if (!oauthConfigured || missingConfiguredScopes.length > 0) {
     return {
       connected: false,
       state: "not_connected",
       userId: null,
       username: null,
       scopes: [],
-      missingScopes: required,
+      missingScopes: missingConfiguredScopes.length > 0 ? missingConfiguredScopes : required,
       canPublish: false,
       lastPublishAt: null,
       readiness: "CONFIG_MISSING",
       oauthConfigured,
+      publishingEnabled,
+      missingEnv,
+      requestedScopes,
     };
   }
 
@@ -288,8 +314,11 @@ export async function getXConnectionStatus(): Promise<XConnectionStatus> {
         missingScopes: required,
         canPublish: false,
         lastPublishAt: null,
-        readiness: "NOT_CONNECTED",
+        readiness: "READY_TO_CONNECT",
         oauthConfigured,
+        publishingEnabled,
+        missingEnv,
+        requestedScopes,
       };
     }
 
@@ -307,6 +336,9 @@ export async function getXConnectionStatus(): Promise<XConnectionStatus> {
           lastPublishAt: null,
           readiness: "TOKEN_INVALID",
           oauthConfigured,
+          publishingEnabled,
+          missingEnv,
+          requestedScopes,
         };
       }
     }
@@ -336,6 +368,9 @@ export async function getXConnectionStatus(): Promise<XConnectionStatus> {
       lastPublishAt: lastAttempt?.completedAt?.toISOString() ?? null,
       readiness: canPublish ? "READY" : "MISSING_SCOPE",
       oauthConfigured,
+      publishingEnabled,
+      missingEnv,
+      requestedScopes,
     };
   } catch {
     return {
@@ -349,6 +384,9 @@ export async function getXConnectionStatus(): Promise<XConnectionStatus> {
       lastPublishAt: null,
       readiness: "API_ERROR",
       oauthConfigured,
+      publishingEnabled,
+      missingEnv,
+      requestedScopes,
     };
   }
 }
@@ -465,7 +503,7 @@ export function buildXAuthUrl(input: {
   url.searchParams.set("response_type", "code");
   url.searchParams.set("client_id", clientId);
   url.searchParams.set("redirect_uri", redirectUri);
-  url.searchParams.set("scope", X_OAUTH_SCOPES);
+  url.searchParams.set("scope", getConfiguredXOAuthScopes().join(" "));
   url.searchParams.set("state", input.state);
   url.searchParams.set("code_challenge", input.codeChallenge);
   url.searchParams.set("code_challenge_method", "S256");
