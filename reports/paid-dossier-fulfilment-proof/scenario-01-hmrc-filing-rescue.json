@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780334635689-yw7ys5",
-    "caseReference": "FULFIL-17803346",
+    "caseId": "fulfilment-1780393191197-8ms0em",
+    "caseReference": "FULFIL-17803931",
     "scenario": "HMRC/Company Accounts Filing Rescue with No Funds",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-06-01T17:23:55.734Z",
+        "timestamp": "2026-06-02T09:39:51.226Z",
         "actorId": "system",
         "notes": "Dossier generated for: HMRC/Company Accounts Filing Rescue with No Funds",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-06-01T17:23:55.734Z"
+    "generatedAt": "2026-06-02T09:39:51.226Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17803346",
-    "generatedAt": "2026-06-01T17:23:55.734Z",
+    "caseReference": "FULFIL-17803931",
+    "generatedAt": "2026-06-02T09:39:51.226Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {
