@@ -39,15 +39,14 @@ import {
 import { getRecentLedgerEntries, getFailureSummary } from "@/lib/outbound/core/outbound-publish-ledger";
 import { getOutboundControlState } from "@/lib/outbound/core/outbound-control-state";
 import OutboundLedgerTable, { type LedgerEntry } from "@/components/admin/outbound/OutboundLedgerTable";
-import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
-import { getConnectionStatus, getLinkedInOAuthSmokeDiagnostics } from "@/lib/outbound/linkedin-oauth";
-import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
-import { prisma } from "@/lib/prisma.server";
-import {
-  X_CREDIT_BLOCKED_NEXT_ACTION,
-  findLatestLiveXPublishAttempt,
-  isActiveXCreditBlockerAttempt,
-} from "@/lib/outbound/x-credit-blocker";
+/**
+ * PROVIDER READINESS MUST BE DERIVED FROM outbound-readiness-resolver.
+ * Do not duplicate provider state logic in this page.
+ * Do not import getXConnectionStatus, getConnectionStatus, getFacebookConnectionStatus,
+ * or x-credit-blocker directly here. Use resolveOutboundProviderReadiness() only.
+ */
+import { resolveOutboundProviderReadiness } from "@/lib/outbound/core/outbound-readiness-resolver";
+import type { ResolvedStatus } from "@/lib/outbound/core/outbound-readiness-resolver";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -114,10 +113,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     fbFail,
     xFail,
     controlState,
-    liStatus,
-    liSmoke,
-    fbStatus,
-    xStatus,
+    liReadiness,
+    fbReadiness,
+    xReadiness,
   ] =
     await Promise.all([
       Promise.resolve(getOutboundPostsByProvider("linkedin")),
@@ -130,34 +128,10 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       getFailureSummary("facebook", 24).catch(() => null),
       getFailureSummary("x", 24).catch(() => null),
       getOutboundControlState().catch(() => ({ schedulerPaused: false, pausedReason: null, resumedAt: null, pausedAt: null, pausedById: null, pausedByEmail: null, updatedAt: new Date() })),
-      getConnectionStatus(),
-      getLinkedInOAuthSmokeDiagnostics(),
-      getFacebookConnectionStatus(),
-      getXConnectionStatus(),
+      resolveOutboundProviderReadiness("linkedin"),
+      resolveOutboundProviderReadiness("facebook"),
+      resolveOutboundProviderReadiness("x"),
     ]);
-
-  // Detect active X credit blockers from the latest live publish attempt.
-  // This is a billing signal — OAuth + scopes are still valid.
-  const recentXAttempts = await prisma.xPublishAttempt
-    .findMany({
-      where: {
-        dryRun: false,
-        status: { in: ["failed", "succeeded", "blocked"] },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        errorCode: true,
-        status: true,
-        dryRun: true,
-        createdAt: true,
-      },
-    })
-    .catch(() => []);
-  const xHasRecentCreditBlocker = isActiveXCreditBlockerAttempt(
-    findLatestLiveXPublishAttempt(recentXAttempts),
-  );
-  const xHasCreditBlocker = xStatus.readiness === "CREDIT_BLOCKED" || xHasRecentCreditBlocker;
 
   function buildCard(
     provider: ProviderCard["provider"],
@@ -196,6 +170,37 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
     };
   }
 
+  function statusLabel(status: ResolvedStatus): string {
+    switch (status) {
+      case "DISABLED": return "Disabled";
+      case "CONFIG_REQUIRED": return "Configuration required";
+      case "OAUTH_REQUIRED": return "OAuth required";
+      case "TOKEN_EXPIRED": return "Token expired";
+      case "BUSINESS_VERIFICATION_FAILED": return "Business verification failed";
+      case "SCOPE_REQUIRED": return "Scope required";
+      case "CREDIT_BLOCKED": return "Credit blocked";
+      case "PUBLISH_BLOCKED": return "Publish blocked";
+      case "READY": return "Ready";
+    }
+  }
+
+  function oauthLabel(r: typeof liReadiness): string {
+    if (!r.oauthConfigured) return "Configuration required";
+    if (!r.tokenPresent) return "Ready to connect";
+    return "Connected";
+  }
+
+  function tokenLabel(r: typeof liReadiness): string {
+    if (!r.tokenPresent) return "Required";
+    if (r.tokenExpired) return "Token expired";
+    return "Token stored";
+  }
+
+  function permissionLabel(r: typeof liReadiness): string {
+    if (r.missingScopes.length === 0) return "Passed";
+    return `Missing: ${r.missingScopes.join(", ")}`;
+  }
+
   const allLedger = [...liLedger, ...fbLedger, ...xLedger]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 12);
@@ -210,99 +215,36 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       readinessMatrix: [
         {
           channel: "LinkedIn",
-          oauth: liStatus.connected ? "Connected" : liSmoke.configured ? "Ready to connect" : "Configuration required",
-          tokenStorage: liSmoke.tokenRecordExists ? (liSmoke.tokenExpired ? "Token expired" : "Token stored") : "Required",
-          permissionCheck:
-            liStatus.selectedPublishingTarget.status === "ready"
-              ? "Passed"
-              : liStatus.selectedPublishingTarget.status,
+          oauth: oauthLabel(liReadiness),
+          tokenStorage: tokenLabel(liReadiness),
+          permissionCheck: permissionLabel(liReadiness),
           publishGate: "Required",
-          publishLive:
-            liStatus.connected &&
-            liStatus.selectedPublishingTarget.status === "ready" &&
-            liStatus.publishingEnabled
-              ? "Yes"
-              : "No",
-          state: liSmoke.readiness,
-          blockers: [
-            ...liSmoke.missingEnv,
-            ...(liStatus.selectedPublishingTarget.status !== "ready"
-              ? [liStatus.selectedPublishingTarget.status]
-              : []),
-            ...(liStatus.publishingEnabled ? [] : ["LINKEDIN_PUBLISHING_ENABLED is not true"]),
-          ],
-          nextAction: !liStatus.connected
-            ? "Connect LinkedIn OAuth via /admin/outbound/linkedin"
-            : liStatus.selectedPublishingTarget.status !== "ready"
-            ? "Verify organisation URN and scope w_organization_social"
-            : !liStatus.publishingEnabled
-            ? "Set LINKEDIN_PUBLISHING_ENABLED=true after scope verified"
-            : "Run dry-run on a selected LinkedIn campaign post",
+          publishLive: liReadiness.canPublish && liReadiness.publishingEnabled ? "Yes" : "No",
+          state: liReadiness.status,
+          blockers: liReadiness.evidence,
+          nextAction: liReadiness.nextAction,
         },
         {
           channel: "Facebook",
-          oauth: fbStatus.oauthConfigured ? (fbStatus.connected ? "Connected" : "Ready to connect") : "Configuration required",
-          tokenStorage: fbStatus.connected ? "Token stored or env token present" : "Required",
-          permissionCheck:
-            fbStatus.missingPermissions.length === 0
-              ? "Passed"
-              : `Missing: ${fbStatus.missingPermissions.join(", ")}`,
+          oauth: oauthLabel(fbReadiness),
+          tokenStorage: tokenLabel(fbReadiness),
+          permissionCheck: permissionLabel(fbReadiness),
           publishGate: "Required",
-          publishLive:
-            fbStatus.canPublish && process.env.FACEBOOK_PUBLISHING_ENABLED === "true"
-              ? "Yes"
-              : "No",
-          state: fbStatus.readiness,
-          blockers: [
-            ...(fbStatus.oauthConfigured ? [] : ["Facebook OAuth configuration required"]),
-            ...fbStatus.missingPermissions,
-            ...(process.env.FACEBOOK_PUBLISHING_ENABLED === "true"
-              ? []
-              : ["FACEBOOK_PUBLISHING_ENABLED is not true"]),
-          ],
-          nextAction: !fbStatus.oauthConfigured
-            ? "Set FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_REDIRECT_URI"
-            : !fbStatus.connected
-            ? "Connect Facebook Page via OAuth at /admin/outbound/facebook"
-            : fbStatus.missingPermissions.length > 0
-            ? `Grant missing permissions: ${fbStatus.missingPermissions.join(", ")}`
-            : "Set FACEBOOK_PUBLISHING_ENABLED=true and run a dry-run",
+          publishLive: fbReadiness.canPublish && fbReadiness.publishingEnabled ? "Yes" : "No",
+          state: fbReadiness.status,
+          blockers: fbReadiness.evidence,
+          nextAction: fbReadiness.nextAction,
         },
         {
           channel: "X",
-          oauth: xStatus.oauthConfigured ? (xStatus.connected ? "Connected" : "Ready to connect") : "Configuration required",
-          tokenStorage: xStatus.connected ? "Token stored" : "Required",
-          permissionCheck:
-            xStatus.missingScopes.length === 0
-              ? "Passed"
-              : `Missing: ${xStatus.missingScopes.join(", ")}`,
+          oauth: oauthLabel(xReadiness),
+          tokenStorage: tokenLabel(xReadiness),
+          permissionCheck: permissionLabel(xReadiness),
           publishGate: "Required",
-          publishLive:
-            !xHasCreditBlocker && xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true"
-              ? "Yes"
-              : "No",
-          state: xHasCreditBlocker ? "CREDIT_BLOCKED" : xStatus.readiness,
-          blockers: [
-            ...(xHasCreditBlocker ? ["X API credits exhausted (HTTP 402). Live publish disabled."] : []),
-            ...(xStatus.oauthConfigured ? [] : ["X OAuth configuration required"]),
-            ...xStatus.missingScopes,
-            ...(process.env.X_PUBLISHING_ENABLED === "true"
-              ? []
-              : ["X_PUBLISHING_ENABLED is not true"]),
-          ],
-          nextAction: xHasCreditBlocker
-            ? X_CREDIT_BLOCKED_NEXT_ACTION
-            : !xStatus.oauthConfigured
-            ? "Set X_CLIENT_ID, X_CLIENT_SECRET, X_REDIRECT_URI, X_OAUTH_SCOPES"
-            : !xStatus.connected
-            ? "Connect X account via OAuth at /admin/outbound/x"
-            : xStatus.missingScopes.length > 0
-            ? `Missing scopes: ${xStatus.missingScopes.join(", ")}`
-            : !xStatus.canPublish
-            ? "Check X token scopes include tweet.write"
-            : process.env.X_PUBLISHING_ENABLED !== "true"
-            ? "Set X_PUBLISHING_ENABLED=true"
-            : "Ready — run dry-run on selected approved post",
+          publishLive: xReadiness.canPublish && xReadiness.publishingEnabled ? "Yes" : "No",
+          state: xReadiness.status,
+          blockers: xReadiness.evidence,
+          nextAction: xReadiness.nextAction,
         },
       ],
       schedulerEnabled: process.env.OUTBOUND_SCHEDULER_ENABLED === "true",
@@ -347,10 +289,12 @@ function liveTone(value: OutboundReadinessRow["publishLive"]): AdminBadgeTone {
 }
 
 function stateTone(state: string): AdminBadgeTone {
-  if (state === "READY" || state === "CONNECTED") return "success";
-  if (state === "READY_TO_CONNECT") return "info";
+  if (state === "READY") return "success";
   if (state === "CREDIT_BLOCKED") return "warning";
-  if (state === "CONFIG_MISSING" || state === "ORG_URN_MISSING") return "warning";
+  if (state === "CONFIG_REQUIRED" || state === "OAUTH_REQUIRED") return "warning";
+  if (state === "SCOPE_REQUIRED" || state === "BUSINESS_VERIFICATION_FAILED") return "danger";
+  if (state === "PUBLISH_BLOCKED") return "danger";
+  if (state === "DISABLED") return "muted";
   return "danger";
 }
 
