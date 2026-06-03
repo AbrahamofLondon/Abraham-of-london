@@ -307,6 +307,9 @@ function ConnectionPanel({ connection }: { connection: LinkedInConnectionStatus 
       <p className="mt-2 text-xs text-amber-100/55">
         LinkedIn member connection and Abraham of London Page publishing readiness are separate states. A valid member OAuth session does not prove Company Page publishing access until organisation scope and Page role are verified.
       </p>
+      <p className="mt-3 text-xs border-t border-white/10 pt-3 text-sky-200/70">
+        <strong>Organisation verification required:</strong> LinkedIn organisation publishing requires verified legal organisation identity. The current blocker is external verification — LinkedIn must approve the developer app for <code className="font-mono text-sky-100">w_organization_social</code> scope and verify organisation access to the Abraham of London LinkedIn Page. This is not a code issue.
+      </p>
     </section>
   );
 }
