@@ -9,7 +9,7 @@ sourcePath: content/source-material/the-minds-clay/Writing changed humanity.mdx
 campaign: writing-changed-humanity
 series: the-minds-clay
 status: ready
-approvalStatus: needs_review
+approvalStatus: approved
 scheduledFor: "2026-06-04T09:00:00Z"
 assetUrl: /editorials/series/the-minds-clay/writing-changed-humanity
 link: https://abrahamoflondon.com/editorials/series/the-minds-clay/writing-changed-humanity

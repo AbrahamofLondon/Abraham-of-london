@@ -11,6 +11,7 @@
 import { X_API_BASE } from "./x-types";
 import { resolveXAccessToken } from "./x-oauth";
 import type { XPublishClientResult } from "./x-types";
+import { X_CREDIT_BLOCKED_NEXT_ACTION } from "./x-credit-blocker";
 
 // ─── Error normalisation ──────────────────────────────────────────────────────
 
@@ -36,9 +37,9 @@ export function normaliseXPublishError(
     return {
       errorCode: "X_CREDIT_BLOCKED",
       safeMessage:
-        "X rejected this publish because the account has insufficient API credits. " +
+        `${X_CREDIT_BLOCKED_NEXT_ACTION} ` +
         "This is a billing/plan issue — not a content or token problem. " +
-        "Upgrade the X API plan or use manual reconciliation to record a manually posted tweet.",
+        "Use manual reconciliation to record a manually posted tweet.",
     };
   }
   if (status === 401) {

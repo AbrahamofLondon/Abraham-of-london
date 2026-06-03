@@ -43,6 +43,11 @@ import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
 import { getConnectionStatus, getLinkedInOAuthSmokeDiagnostics } from "@/lib/outbound/linkedin-oauth";
 import { getXConnectionStatus } from "@/lib/outbound/x-oauth";
 import { prisma } from "@/lib/prisma.server";
+import {
+  X_CREDIT_BLOCKED_NEXT_ACTION,
+  findLatestLiveXPublishAttempt,
+  isActiveXCreditBlockerAttempt,
+} from "@/lib/outbound/x-credit-blocker";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -131,18 +136,28 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
       getXConnectionStatus(),
     ]);
 
-  // Detect recent X_CREDIT_BLOCKED attempts (last 24 h) from xPublishAttempt.
+  // Detect active X credit blockers from the latest live publish attempt.
   // This is a billing signal — OAuth + scopes are still valid.
-  const xCreditBlockedAttempt = await prisma.xPublishAttempt
-    .findFirst({
+  const recentXAttempts = await prisma.xPublishAttempt
+    .findMany({
       where: {
-        errorCode: "X_CREDIT_BLOCKED",
-        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        dryRun: false,
+        status: { in: ["failed", "succeeded", "blocked"] },
       },
       orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        errorCode: true,
+        status: true,
+        dryRun: true,
+        createdAt: true,
+      },
     })
-    .catch(() => null);
-  const xHasCreditBlocker = !!xCreditBlockedAttempt;
+    .catch(() => []);
+  const xHasRecentCreditBlocker = isActiveXCreditBlockerAttempt(
+    findLatestLiveXPublishAttempt(recentXAttempts),
+  );
+  const xHasCreditBlocker = xStatus.readiness === "CREDIT_BLOCKED" || xHasRecentCreditBlocker;
 
   function buildCard(
     provider: ProviderCard["provider"],
@@ -263,7 +278,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
               : `Missing: ${xStatus.missingScopes.join(", ")}`,
           publishGate: "Required",
           publishLive:
-            xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true"
+            !xHasCreditBlocker && xStatus.canPublish && process.env.X_PUBLISHING_ENABLED === "true"
               ? "Yes"
               : "No",
           state: xHasCreditBlocker ? "CREDIT_BLOCKED" : xStatus.readiness,
@@ -276,7 +291,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
               : ["X_PUBLISHING_ENABLED is not true"]),
           ],
           nextAction: xHasCreditBlocker
-            ? "Add X API credits or verify billing at developer.x.com. Dry-run and manual reconciliation remain available."
+            ? X_CREDIT_BLOCKED_NEXT_ACTION
             : !xStatus.oauthConfigured
             ? "Set X_CLIENT_ID, X_CLIENT_SECRET, X_REDIRECT_URI, X_OAUTH_SCOPES"
             : !xStatus.connected

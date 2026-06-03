@@ -44,6 +44,12 @@ import { countTweetChars } from "@/lib/outbound/x-publish-gate";
 import { getFacebookConnectionStatus } from "@/lib/outbound/facebook-oauth";
 import type { XConnectionStatus, XPublishedAsset } from "@/lib/outbound/x-types";
 import { X_TWEET_MAX_CHARS } from "@/lib/outbound/x-types";
+import {
+  X_CREDIT_BLOCKED_NEXT_ACTION,
+  applyXCreditBlockerReadiness,
+  findLatestLiveXPublishAttempt,
+  isActiveXCreditBlockerAttempt,
+} from "@/lib/outbound/x-credit-blocker";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -252,13 +258,14 @@ export const getServerSideProps: GetServerSideProps<{
     attempts = [];
   }
 
-  const hasCreditBlocker = attempts.some((a) => a.errorCode === "X_CREDIT_BLOCKED");
+  const hasRecentCreditBlocker = isActiveXCreditBlockerAttempt(
+    findLatestLiveXPublishAttempt(attempts),
+  );
+  const hasCreditBlocker = connection.readiness === "CREDIT_BLOCKED" || hasRecentCreditBlocker;
 
   // Augment connection readiness to CREDIT_BLOCKED when detected.
   // OAuth + tweet.write remain valid — this is a billing issue only.
-  const augmentedConnection = hasCreditBlocker
-    ? { ...connection, readiness: "CREDIT_BLOCKED" as const }
-    : connection;
+  const augmentedConnection = applyXCreditBlockerReadiness(connection, hasCreditBlocker);
 
   return {
     props: {
@@ -652,7 +659,7 @@ function AssetCard({
           <p className="text-xs font-medium text-amber-200/80">Live publish blocked — X API credits exhausted</p>
           <p className="mt-1 text-xs text-amber-100/55">
             The X developer account has no remaining API credits (HTTP 402). This is a billing issue — content and token are fine.
-            Add credits at <span className="font-mono">developer.x.com</span>, or use <strong>Mark as manually posted</strong> below if you have already posted this via the X web interface.
+            {` ${X_CREDIT_BLOCKED_NEXT_ACTION}`} Use <strong>Mark as manually posted</strong> below if you have already posted this via the X web interface.
           </p>
           <p className="mt-1 text-[10px] text-amber-100/40">Dry-run and manual reconciliation remain available.</p>
         </div>
@@ -1283,7 +1290,7 @@ export default function XOutboundAdminPage({
                 <p className="mt-1 text-xs leading-5 text-amber-100/60">
                   A recent publish was rejected by X because the account has no remaining API credits.
                   This is a billing issue — content and OAuth token are fine.
-                  Upgrade the X Developer plan, or use <strong>Mark as manually posted</strong> on any
+                  {` ${X_CREDIT_BLOCKED_NEXT_ACTION}`} Use <strong>Mark as manually posted</strong> on any
                   item you have already posted via the X web interface.
                 </p>
               </div>
@@ -1437,11 +1444,12 @@ export default function XOutboundAdminPage({
               <AssetCard
                 key={asset.slug}
                 asset={asset}
-                connectionCanPublish={connection.canPublish}
-                facebookConnected={facebookConnected}
-                publishingEnabled={consoleState.publishingEnabled}
-              />
-            ))}
+                  connectionCanPublish={connection.canPublish}
+                  facebookConnected={facebookConnected}
+                  publishingEnabled={consoleState.publishingEnabled}
+                  creditBlocked={consoleState.creditBlocked}
+                />
+              ))}
           </section>
         )}
 

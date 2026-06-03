@@ -37,6 +37,10 @@ import {
 import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
 import { publishTweetToX } from "@/lib/outbound/x-publishing-client";
 import { recordXPublishingAuditSafe } from "@/lib/outbound/x-publishing-audit";
+import {
+  X_CREDIT_BLOCKED_ERROR_CODE,
+  X_CREDIT_BLOCKED_NEXT_ACTION,
+} from "@/lib/outbound/x-credit-blocker";
 
 // Optional sync: after a successful tweet, also post to Facebook
 import { publishLinkPostToFacebook } from "@/lib/outbound/facebook-publishing-client";
@@ -324,6 +328,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: "Dry run passed. Gate cleared. No tweet was posted.",
       gate: { blockers: gate.blockers, warnings: gate.warnings },
       preview: { text: asset.text, link: asset.link },
+      requestId: id,
+    });
+  }
+
+  if (connection.readiness === "CREDIT_BLOCKED") {
+    await createAttempt({
+      assetType: asset.assetType,
+      assetSlug: asset.slug,
+      assetTitle: asset.title,
+      status: "blocked",
+      requestId: id,
+      dryRun: false,
+      actorId,
+      actorEmailHash,
+      errorCode: X_CREDIT_BLOCKED_ERROR_CODE,
+      errorMessageSafe: X_CREDIT_BLOCKED_NEXT_ACTION,
+    });
+    await recordXPublishingAuditSafe({
+      eventType: "X_PUBLISH_BLOCKED",
+      assetSlug: asset.slug,
+      assetType: asset.assetType,
+      assetTitle: asset.title,
+      blockerCount: 1,
+      blockers: [X_CREDIT_BLOCKED_NEXT_ACTION],
+      dryRun: false,
+      requestId: id,
+      actorId,
+      actorEmailHash,
+    }).catch(() => null);
+
+    return res.status(402).json({
+      ok: false,
+      errorCode: X_CREDIT_BLOCKED_ERROR_CODE,
+      error: X_CREDIT_BLOCKED_NEXT_ACTION,
+      nextAction: X_CREDIT_BLOCKED_NEXT_ACTION,
       requestId: id,
     });
   }

@@ -41,6 +41,11 @@ import {
 } from "@/lib/outbound/x-outbound-adapter";
 import { canPublishXPost } from "@/lib/outbound/x-publish-gate";
 import type { XConnectionStatus } from "@/lib/outbound/x-types";
+import {
+  X_CREDIT_BLOCKED_NEXT_ACTION,
+  findLatestLiveXPublishAttempt,
+  isActiveXCreditBlockerAttempt,
+} from "@/lib/outbound/x-credit-blocker";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -322,10 +327,27 @@ describe("normaliseXPublishError — HTTP 402 maps to X_CREDIT_BLOCKED", () => {
   it("X_CREDIT_BLOCKED safe message mentions billing/credits, not content", async () => {
     const { normaliseXPublishError } = await import("@/lib/outbound/x-publishing-client");
     const result = normaliseXPublishError(402, {});
+    expect(result.safeMessage).toContain(X_CREDIT_BLOCKED_NEXT_ACTION);
     expect(result.safeMessage).toMatch(/credit/i);
     expect(result.safeMessage).toMatch(/billing|plan/i);
     // Should NOT imply the content is the problem
     expect(result.safeMessage).not.toMatch(/content.*fail/i);
+  });
+
+  it("latest live HTTP 402 attempt activates CREDIT_BLOCKED", () => {
+    const latest = findLatestLiveXPublishAttempt([
+      { errorCode: "X_CREDIT_BLOCKED", status: "failed", dryRun: false, createdAt: new Date() },
+      { errorCode: null, status: "dry_run", dryRun: true, createdAt: new Date(Date.now() + 1_000) },
+    ]);
+    expect(isActiveXCreditBlockerAttempt(latest)).toBe(true);
+  });
+
+  it("latest live success clears CREDIT_BLOCKED and allows retry", () => {
+    const latest = findLatestLiveXPublishAttempt([
+      { errorCode: null, status: "succeeded", dryRun: false, createdAt: new Date() },
+      { errorCode: "X_CREDIT_BLOCKED", status: "failed", dryRun: false, createdAt: new Date(Date.now() - 1_000) },
+    ]);
+    expect(isActiveXCreditBlockerAttempt(latest)).toBe(false);
   });
 
   it("status 400 still maps to X_PAYLOAD_INVALID (regression)", async () => {

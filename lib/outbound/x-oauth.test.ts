@@ -1,16 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockFindFirst } = vi.hoisted(() => ({
-  mockFindFirst: vi.fn(),
+const { mockConnectionFindFirst, mockAttemptFindFirst, mockAttemptFindMany } = vi.hoisted(() => ({
+  mockConnectionFindFirst: vi.fn(),
+  mockAttemptFindFirst: vi.fn(),
+  mockAttemptFindMany: vi.fn(),
 }));
+
+const mockFindFirst = mockConnectionFindFirst;
 
 vi.mock("@/lib/prisma.server", () => ({
   prisma: {
     xOAuthConnection: {
-      findFirst: mockFindFirst,
+      findFirst: mockConnectionFindFirst,
     },
     xPublishAttempt: {
-      findFirst: vi.fn(),
+      findFirst: mockAttemptFindFirst,
+      findMany: mockAttemptFindMany,
     },
   },
 }));
@@ -53,6 +58,8 @@ beforeEach(() => {
   process.env = { ...originalEnv };
   clearXEnv();
   mockFindFirst.mockResolvedValue(null);
+  mockAttemptFindFirst.mockResolvedValue(null);
+  mockAttemptFindMany.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -116,5 +123,63 @@ describe("X OAuth readiness", () => {
       "tweet.read tweet.write users.read offline.access",
     );
     expect(authUrl.searchParams.get("code_challenge_method")).toBe("S256");
+  });
+
+  it("returns CREDIT_BLOCKED when latest live attempt is X_CREDIT_BLOCKED", async () => {
+    configureXEnv();
+    mockConnectionFindFirst.mockResolvedValue({
+      id: "conn_1",
+      userId: "x_user_1",
+      username: "abrahamoflondon",
+      expiresAt: new Date(Date.now() + 3600_000),
+      encryptedRefreshToken: "encrypted_refresh",
+      scopesJson: JSON.stringify(["tweet.read", "tweet.write", "users.read", "offline.access"]),
+    });
+    mockAttemptFindMany.mockResolvedValue([
+      {
+        errorCode: "X_CREDIT_BLOCKED",
+        status: "failed",
+        dryRun: false,
+        createdAt: new Date(),
+      },
+    ]);
+
+    const status = await getXConnectionStatus();
+
+    expect(status.connected).toBe(true);
+    expect(status.canPublish).toBe(true);
+    expect(status.readiness).toBe("CREDIT_BLOCKED");
+  });
+
+  it("returns READY when latest live attempt is successful after a credit blocker", async () => {
+    configureXEnv();
+    mockConnectionFindFirst.mockResolvedValue({
+      id: "conn_1",
+      userId: "x_user_1",
+      username: "abrahamoflondon",
+      expiresAt: new Date(Date.now() + 3600_000),
+      encryptedRefreshToken: "encrypted_refresh",
+      scopesJson: JSON.stringify(["tweet.read", "tweet.write", "users.read", "offline.access"]),
+    });
+    mockAttemptFindMany.mockResolvedValue([
+      {
+        errorCode: null,
+        status: "succeeded",
+        dryRun: false,
+        createdAt: new Date(),
+      },
+      {
+        errorCode: "X_CREDIT_BLOCKED",
+        status: "failed",
+        dryRun: false,
+        createdAt: new Date(Date.now() - 10_000),
+      },
+    ]);
+
+    const status = await getXConnectionStatus();
+
+    expect(status.connected).toBe(true);
+    expect(status.canPublish).toBe(true);
+    expect(status.readiness).toBe("READY");
   });
 });

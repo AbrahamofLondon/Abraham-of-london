@@ -20,6 +20,11 @@ import {
   X_API_BASE,
   type XConnectionStatus,
 } from "./x-types";
+import {
+  applyXCreditBlockerReadiness,
+  findLatestLiveXPublishAttempt,
+  isActiveXCreditBlockerAttempt,
+} from "./x-credit-blocker";
 
 // ─── State + PKCE cookies ─────────────────────────────────────────────────────
 
@@ -349,15 +354,36 @@ export async function getXConnectionStatus(): Promise<XConnectionStatus> {
       missingScopes.length === 0 &&
       scopesGranted.includes("tweet.write");
 
-    const lastAttempt = await prisma.xPublishAttempt
+    const [lastAttempt, recentAttempts] = await Promise.all([
+      prisma.xPublishAttempt
       .findFirst({
         where: { status: "succeeded" },
         orderBy: { completedAt: "desc" },
         select: { completedAt: true },
       })
-      .catch(() => null);
+      .catch(() => null),
+      prisma.xPublishAttempt
+        .findMany({
+          where: {
+            dryRun: false,
+            status: { in: ["failed", "succeeded", "blocked"] },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: {
+            errorCode: true,
+            status: true,
+            dryRun: true,
+            createdAt: true,
+          },
+        })
+        .catch(() => []),
+    ]);
+    const creditBlocked = isActiveXCreditBlockerAttempt(
+      findLatestLiveXPublishAttempt(recentAttempts),
+    );
 
-    return {
+    return applyXCreditBlockerReadiness({
       connected: true,
       state: "oauth",
       userId: connection.userId,
@@ -371,7 +397,7 @@ export async function getXConnectionStatus(): Promise<XConnectionStatus> {
       publishingEnabled,
       missingEnv,
       requestedScopes,
-    };
+    }, creditBlocked);
   } catch {
     return {
       connected: false,
