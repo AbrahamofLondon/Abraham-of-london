@@ -40,6 +40,7 @@ function readinessBadgeTone(readiness: OutboundReadiness) {
     case "TOKEN_INVALID": return "danger" as const;
     case "CONFIG_MISSING": return "danger" as const;
     case "PUBLISHING_DISABLED": return "warning" as const;
+    case "CREDIT_BLOCKED": return "danger" as const;
     case "API_ERROR": return "danger" as const;
   }
 }
@@ -53,6 +54,7 @@ function readinessLabel(readiness: OutboundReadiness): string {
     case "TOKEN_INVALID": return "Token invalid";
     case "CONFIG_MISSING": return "Config missing";
     case "PUBLISHING_DISABLED": return "Disabled";
+    case "CREDIT_BLOCKED": return "Credit blocked";
     case "API_ERROR": return "API error";
   }
 }

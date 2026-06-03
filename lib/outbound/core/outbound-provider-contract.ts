@@ -37,6 +37,7 @@ export type OutboundReadiness =
   | "TOKEN_INVALID"      // token present but cannot be used (expired, revoked, decryption failure)
   | "CONFIG_MISSING"     // required env vars absent (e.g. no encryption key, no client ID)
   | "PUBLISHING_DISABLED"// publishing explicitly disabled in env config
+  | "CREDIT_BLOCKED"     // provider API returns HTTP 402/no credits (X/Twitter)
   | "API_ERROR";         // unexpected error from provider API during diagnostics
 
 // ─── Provider diagnostics ─────────────────────────────────────────────────────
