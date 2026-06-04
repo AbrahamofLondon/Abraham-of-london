@@ -18,3 +18,51 @@ private_storage/**
 output_tiktok*.mp4
 ABRAHAM_OF_LONDON_ENGINEERING_MANUAL.pdf
 ABRAHAM_OF_LONDON_INSTITUTIONAL_MANUAL.pdf
+
+# ─── Added: cost containment pass ────────────────────────────────────────────
+
+# Tax / accounting working files (never deploy)
+_ct600_working/**
+_ct600_workingalomarada-ct600-2023-2400_Source_Originals/**
+local-tax/**
+*.xlsx
+*.xls
+raw-bank-statements/**
+
+# Archive (pre-publication source files)
+_archive/**
+
+# Test suites (not runtime — 184 tracked files saved per build)
+tests/**
+__tests__/**
+_tests_/**
+jest.config.*
+vitest.config.*
+playwright.config.*
+
+# Documentation (not needed in deployment bundle — 493 files)
+docs/**
+"design migration"/**
+"old manual"/**
+
+# Audit reports (95 committed report files)
+reports/**
+
+# Screenshots
+screenshots/**
+
+# Local governance audit scripts (run locally, not on Vercel)
+scripts/audit/**
+scripts/apply-publication-metadata.ps1
+
+# Build logs and working files
+dev-server.log
+build-forensic-output.txt
+build-output.txt
+build-err.log
+
+# Misc root-level working artifacts
+triage_hold/**
+briefs-contamination.patch
+changed-*.txt
+bucket-*.txt
