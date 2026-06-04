@@ -6,13 +6,13 @@
  * Set in vercel.json: "ignoreCommand": "node scripts/vercel-ignore-build.mjs"
  *
  * Exit codes:
- *   0 → proceed with build (changed files affect runtime)
- *   1 → skip build (changed files are non-runtime only)
+ *   0 → ignore deployment / skip build
+ *   1 → continue deployment / build
  *
  * Vercel docs: https://vercel.com/docs/projects/overview#ignored-build-step
  */
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 
 const PREV = process.env.VERCEL_GIT_PREVIOUS_SHA || "";
 const CURR = process.env.VERCEL_GIT_COMMIT_SHA   || "";
@@ -25,8 +25,14 @@ function getChangedFiles() {
     console.log("[vercel-ignore] No previous SHA available. Building.");
     return null;
   }
+
+  if (!/^[0-9a-f]{7,40}$/i.test(PREV) || !/^[0-9a-f]{7,40}$/i.test(CURR)) {
+    console.log("[vercel-ignore] Invalid SHA input. Building conservatively.");
+    return null;
+  }
+
   try {
-    const out = execSync(`git diff --name-only ${PREV} ${CURR}`, {
+    const out = execFileSync("git", ["diff", "--name-only", PREV, CURR], {
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],
     });
@@ -129,7 +135,7 @@ const files = getChangedFiles();
 
 if (!files) {
   // Conservative: build
-  process.exit(0);
+  process.exit(1);
 }
 
 const runtimeFiles  = files.filter(isRuntimeFile);
@@ -150,12 +156,12 @@ if (runtimeFiles.length > 0) {
   console.log("[vercel-ignore] Runtime changes detected — building:");
   runtimeFiles.slice(0, 10).forEach((f) => console.log(`  ${f}`));
   if (runtimeFiles.length > 10) console.log(`  ... and ${runtimeFiles.length - 10} more`);
-  process.exit(0); // Build
+  process.exit(1); // Build
 }
 
 if (unknownFiles.length > 0) {
   // Unknown files: conservative — build
-  process.exit(0);
+  process.exit(1);
 }
 
 // Only skip files changed
@@ -163,4 +169,4 @@ console.log("[vercel-ignore] Only non-runtime files changed. Skipping build.");
 console.log("[vercel-ignore] Skipped files:");
 skipFiles.slice(0, 10).forEach((f) => console.log(`  ${f}`));
 if (skipFiles.length > 10) console.log(`  ... and ${skipFiles.length - 10} more`);
-process.exit(1); // Skip
+process.exit(0); // Skip
