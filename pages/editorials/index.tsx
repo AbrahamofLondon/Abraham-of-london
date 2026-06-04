@@ -6,16 +6,29 @@ import { Download } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { getPublicationCatalogue } from "@/lib/editorial/catalogue";
-import {
-  getEditorialSeriesCatalogue,
-  type EditorialSeries,
-} from "@/lib/editorial/series";
 import type { PublicationRecord } from "@/lib/editorial/types";
+
+// ─── Curated editorial series type ───────────────────────────────────────────
+// Hardcoded — does NOT depend on .contentlayer filesystem reads at ISR runtime.
+// The editorial series list is editorially curated, not user-generated.
+// Replacing the dynamic getEditorialSeriesCatalogue() call prevents the
+// series from disappearing during Vercel ISR revalidation when
+// .contentlayer/generated/ is unavailable outside the build step.
+
+type CuratedEditorialSeries = {
+  id: string;
+  slug: string;
+  title: string;
+  descriptor: string;
+  partCount: number;
+  /** Pre-resolved display label — no runtime classification required */
+  displayStatus: "Complete" | "In progress" | "Scheduled";
+};
 
 type Props = {
   items: PublicationRecord[];
   flagship: PublicationRecord | null;
-  series: EditorialSeries[];
+  // series prop intentionally removed — now served from CURATED_EDITORIAL_SERIES
 };
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -167,6 +180,40 @@ const BRIEF_SERIES_CARDS = [
   },
 ] as const;
 
+// ─── Curated Editorial Series ────────────────────────────────────────────────
+// Runtime-safe: hardcoded, no filesystem dependency.
+// Update here when a new series launches or a status changes.
+
+const CURATED_EDITORIAL_SERIES: CuratedEditorialSeries[] = [
+  {
+    id: "editorial-series-the-minds-clay",
+    slug: "the-minds-clay",
+    title: "The Mind's Clay",
+    descriptor:
+      "A nine-part editorial work on the cognitive technologies that have shaped human memory, attention, authorship, and judgment.",
+    partCount: 9,
+    displayStatus: "Complete",
+  },
+  {
+    id: "editorial-series-outsourcing-our-sense-of-meaning-and-belonging",
+    slug: "outsourcing-our-sense-of-meaning-and-belonging",
+    title: "Outsourcing Our Sense of Meaning and Belonging",
+    descriptor:
+      "A six-part special edition on attention, addiction, distance, solitude, oracles, and the cost of outsourcing what only presence can deliver.",
+    partCount: 6,
+    displayStatus: "In progress",
+  },
+  {
+    id: "editorial-series-the-minds-clay-2",
+    slug: "the-minds-clay-2",
+    title: "The Mind's Clay — Series 2",
+    descriptor:
+      "A seven-part editorial work on the cognitive technologies shaping human attention, belief, interface, authorship, memory, judgment, and the choice of what kind of mind to become.",
+    partCount: 7,
+    displayStatus: "Scheduled",
+  },
+] as const;
+
 // ─── Applied essay series ─────────────────────────────────────────────────────
 
 const APPLIED_SERIES = [
@@ -234,7 +281,7 @@ function AppliedSeriesCard({ item }: { item: AppliedSeriesEntry }) {
 
 // ─── Editorial series card (uniform — no lead overrides) ─────────────────────
 
-function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
+function EditorialSeriesCard({ item }: { item: CuratedEditorialSeries }) {
   return (
     <div
       className="border py-7 px-6 transition-colors duration-200"
@@ -246,7 +293,7 @@ function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
         </span>
         <span style={{ color: "var(--ds-border)" }}>·</span>
         <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-          {item.status === "PUBLISHED" ? "Complete" : item.partCount > 0 && item.parts.length === 0 ? "Scheduled" : "In progress"}
+          {item.displayStatus}
         </span>
       </div>
       <h2
@@ -277,7 +324,7 @@ function EditorialSeriesCard({ item }: { item: EditorialSeries }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
+const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
   const [activeCategory, setActiveCategory] = React.useState("");
 
   const categories = React.useMemo(() => {
@@ -690,20 +737,19 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
         </section>
 
         {/* ── 2. Editorial Series ─────────────────────────────────────── */}
-        {series.length > 0 ? (
-          <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
-            <div className="mx-auto max-w-6xl px-6 lg:px-10">
-              <div className="mb-6">
-                <SectionLabel>Editorial Series</SectionLabel>
-              </div>
-              <div className="space-y-4">
-                {series.map((item) => (
-                  <EditorialSeriesCard key={item.id} item={item} />
-                ))}
-              </div>
+        {/* Rendered from CURATED_EDITORIAL_SERIES — never disappears during ISR */}
+        <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+            <div className="mb-6">
+              <SectionLabel>Editorial Series</SectionLabel>
             </div>
-          </section>
-        ) : null}
+            <div className="space-y-4">
+              {CURATED_EDITORIAL_SERIES.map((item) => (
+                <EditorialSeriesCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* ── 3. Applied Essay Series ─────────────────────────────────── */}
         <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
@@ -776,7 +822,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
           </section>
         ) : null}
 
-        {series.length === 0 && filteredSupporting.length === 0 && !flagship ? (
+        {filteredSupporting.length === 0 && !flagship ? (
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             <div className="border px-6 py-16 text-center" style={{ borderColor: "var(--ds-border)" }}>
               <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
@@ -794,8 +840,8 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const items = getPublicationCatalogue();
   const flagship = items.find((item) => item.slug === "ultimate-purpose-of-man") || items[0] || null;
-  const series = getEditorialSeriesCatalogue();
-  return { props: { items, flagship, series }, revalidate: 1800 };
+  // series intentionally omitted — served from CURATED_EDITORIAL_SERIES constant
+  return { props: { items, flagship }, revalidate: 1800 };
 };
 
 export default EditorialLibrary;
