@@ -165,6 +165,62 @@ describe("Editorial Series Wrapper", () => {
     expect(result!.parts[0].mdxSlug).toBe("the-vessel-and-the-voice");
   });
 
+  it("scheduled editorial series resolves by archive directory slug", () => {
+    mockGetDocuments.mockReturnValue([
+      mockEditorialPart({
+        series: "The Mind's Clay — Series 2",
+        seriesTitle: "The Mind's Clay — Series 2",
+        seriesDescription: "A scheduled second series description",
+        seriesOrder: 1,
+        slug: "the-attention-landscape",
+        title: "The Attention Landscape",
+        date: "2027-03-02",
+        draft: true,
+        published: true,
+        seriesVisibility: "scheduled",
+        _raw: {
+          flattenedPath:
+            "editorial-series/the-minds-clay-2/the-attention-landscape",
+          sourceFileDir: "editorial-series/the-minds-clay-2",
+          sourceFilePath:
+            "editorial-series/the-minds-clay-2/the-attention-landscape.mdx",
+          sourceFileName: "the-attention-landscape.mdx",
+        },
+      }),
+      mockEditorialPart({
+        series: "The Mind's Clay — Series 2",
+        seriesTitle: "The Mind's Clay — Series 2",
+        seriesOrder: 2,
+        slug: "the-feed-and-the-truth",
+        title: "The Feed and the Truth",
+        date: "2027-03-09",
+        draft: true,
+        published: true,
+        _raw: {
+          flattenedPath:
+            "editorial-series/the-minds-clay-2/the-feed-and-the-truth",
+          sourceFileDir: "editorial-series/the-minds-clay-2",
+          sourceFilePath:
+            "editorial-series/the-minds-clay-2/the-feed-and-the-truth.mdx",
+          sourceFileName: "the-feed-and-the-truth.mdx",
+        },
+      }),
+    ]);
+
+    const result = getEditorialSeriesBySlug("the-minds-clay-2");
+
+    expect(result).toBeDefined();
+    expect(result!.slug).toBe("the-minds-clay-2");
+    expect(result!.title).toBe("The Mind's Clay — Series 2");
+    expect(result!.status).toBe("DRAFT");
+    expect(result!.parts).toHaveLength(0);
+    expect(result!.previewParts.map((part) => part.slug)).toEqual([
+      "the-attention-landscape",
+      "the-feed-and-the-truth",
+    ]);
+    expect(getEditorialSeriesPart(result!, "the-attention-landscape")).toBeNull();
+  });
+
   it("page-facing fields are backward compatible", () => {
     mockGetDocuments.mockReturnValue([
       mockEditorialPart({

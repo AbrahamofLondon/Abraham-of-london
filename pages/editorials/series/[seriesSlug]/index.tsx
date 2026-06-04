@@ -171,6 +171,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
     .sort((a, b) => a.order - b.order);
 
   const firstPart = publishedParts[0];
+  const totalPartCount = displayParts.length || series.partCount;
 
   return (
     <Layout
@@ -218,7 +219,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
                 className="font-mono uppercase tracking-[0.36em]"
                 style={{ fontSize: "7px", color: "var(--ds-accent)" }}
               >
-                {series.partCount}-Part Editorial Series
+                {totalPartCount}-Part Editorial Series
                 {series.status === "PUBLISHED" ? " · Complete" : publishedParts.length === 0 ? " · Scheduled" : " · In Progress"}
                 {totalMinutes > 0 ? ` · ${formatTotalTime(totalMinutes)} total` : ""}
               </span>
@@ -278,7 +279,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
                 className="font-mono uppercase tracking-[0.28em]"
                 style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
               >
-                {publishedParts.length} of {series.partCount} published
+                {publishedParts.length} of {totalPartCount} published
               </span>
             </div>
 

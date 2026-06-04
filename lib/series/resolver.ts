@@ -98,6 +98,31 @@ function normaliseSeriesSlug(raw: string): string {
     .replace(/^-|-$/g, "");
 }
 
+function getEditorialSeriesDirectorySlug(doc: any): string | null {
+  const sourceFileDir =
+    typeof doc?._raw?.sourceFileDir === "string"
+      ? doc._raw.sourceFileDir.trim()
+      : "";
+
+  if (!sourceFileDir) return null;
+
+  const parts: string[] = sourceFileDir.split(/[\\/]+/).filter(Boolean);
+  const editorialRootIndex = parts.findIndex((part) => part === "editorial-series");
+  const directorySlug =
+    editorialRootIndex >= 0 ? parts[editorialRootIndex + 1] : null;
+
+  return directorySlug ? normaliseSeriesSlug(directorySlug) : null;
+}
+
+function getSeriesSlug(doc: any, docKind: "blog" | "editorial"): string {
+  if (docKind === "editorial") {
+    const directorySlug = getEditorialSeriesDirectorySlug(doc);
+    if (directorySlug) return directorySlug;
+  }
+
+  return normaliseSeriesSlug(String(doc.series));
+}
+
 function docToSeriesPart(doc: any, now: Date = getToday()): SeriesPart {
   const classification = classifyPublication(doc, now);
   return {
@@ -154,7 +179,7 @@ export function resolveAllSeries(
 
   for (const doc of seriesDocs) {
     const rawSeries = String(doc.series);
-    const slug = normaliseSeriesSlug(rawSeries);
+    const slug = getSeriesSlug(doc, docKind);
     if (!groups.has(slug)) {
       groups.set(slug, { docs: [], rawSlug: rawSeries });
     }
@@ -264,8 +289,8 @@ function getEarliestPublishedDate(
   const slug = series.slug;
 
   const seriesDocs = allDocs.filter((doc: any) => {
-    const rawSeries = String(doc.series ?? "");
-    const docSlug = normaliseSeriesSlug(rawSeries);
+    if (!doc.series) return false;
+    const docSlug = getSeriesSlug(doc, docKind);
     return docSlug === slug && doc.draft !== true && doc.published !== false;
   });
 
