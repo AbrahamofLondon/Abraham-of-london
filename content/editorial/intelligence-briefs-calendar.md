@@ -1,9 +1,15 @@
+---
+title: Intelligence Briefs — Editorial Calendar
+type: editorial
+status: internal
+---
+
 # Intelligence Briefs — Editorial Calendar
 
-**Canonical series count:** 25 Institutional Alpha · 25 Sovereign Intelligence · 50 total  
-**Launch date:** 2026-06-11 (Thursday)  
-**Cadence:** S1 launch (8), then 2/week Thursdays through Week 8, then 1/week Thursdays  
-**Scheduling decision:** Manual — editor promotes `publicationStatus: scheduled` → `published` each week, or runs `pnpm exec node scripts/promote-scheduled-briefs.mjs`  
+**Canonical series count:** 25 Institutional Alpha · 25 Sovereign Intelligence · 50 total
+**Launch date:** 2026-06-11 (Thursday)
+**Cadence:** S1 launch (8), then 2/week Thursdays through Week 8, then 1/week Thursdays
+**Scheduling decision:** Manual — editor promotes `publicationStatus: scheduled` → `published` each week, or runs `pnpm exec node scripts/promote-scheduled-briefs.mjs`
 
 ---
 
@@ -69,8 +75,8 @@ pnpm exec node scripts/promote-scheduled-briefs.mjs --dry-run   # preview
 pnpm exec node scripts/promote-scheduled-briefs.mjs              # apply
 ```
 
-The script promotes any brief where `scheduledFor <= today` and `publicationStatus: scheduled`.  
-It does not touch `editorial-hold` briefs.  
+The script promotes any brief where `scheduledFor <= today` and `publicationStatus: scheduled`.
+It does not touch `editorial-hold` briefs.
 After running, editor rebuilds the registry: `pnpm exec node scripts/generate-briefs-registry.mjs` (requires contentlayer output).
 
 **Never automate registry promotion in CI without a dry-run review gate.**
