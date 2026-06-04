@@ -279,46 +279,84 @@ function AppliedSeriesCard({ item }: { item: AppliedSeriesEntry }) {
   );
 }
 
-// ─── Editorial series card (uniform — no lead overrides) ─────────────────────
+// ─── Editorial series card — deliberate, numbered, full weight ───────────────
 
-function EditorialSeriesCard({ item }: { item: CuratedEditorialSeries }) {
+const ROMAN = ["I", "II", "III", "IV", "V"] as const;
+
+function EditorialSeriesCard({ item, index }: { item: CuratedEditorialSeries; index: number }) {
+  const roman = ROMAN[index] ?? String(index + 1);
+  const statusColor =
+    item.displayStatus === "Complete"    ? `${GOLD}BB` :
+    item.displayStatus === "In progress" ? "rgba(124,184,232,0.80)" :
+    "rgba(255,255,255,0.28)";
+
   return (
-    <div
-      className="border py-7 px-6 transition-colors duration-200"
-      style={{ borderColor: "var(--ds-border)", backgroundColor: "transparent" }}
+    <Link
+      href={`/editorials/series/${item.slug}`}
+      className="group block transition-colors duration-200"
+      style={{ textDecoration: "none" }}
     >
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-          {item.partCount}-Part Series
-        </span>
-        <span style={{ color: "var(--ds-border)" }}>·</span>
-        <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "var(--ds-text-subtle)" }}>
-          {item.displayStatus}
-        </span>
-      </div>
-      <h2
-        className="font-serif italic mb-3"
-        style={{ fontWeight: 300, fontSize: "1.4rem", lineHeight: 1.05, color: "var(--ds-text)" }}
+      <div
+        className="border transition-colors duration-200"
+        style={{ borderColor: "rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.015)" }}
       >
-        {item.title}
-      </h2>
-      <p className="text-sm leading-[1.65rem] mb-5" style={{ color: "var(--ds-text-muted)", maxWidth: "56ch" }}>
-        {item.descriptor}
-      </p>
-      <div className="flex flex-wrap items-center gap-5">
-        <Link
-          href={`/editorials/series/${item.slug}`}
-          className="inline-flex items-center border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em] transition-colors duration-200"
-          style={{
-            borderColor: "var(--ds-accent-soft)",
-            color: "var(--ds-accent)",
-            backgroundColor: "var(--ds-accent-soft)",
-          }}
-        >
-          Enter the series
-        </Link>
+        {/* Top accent rule — thicker on hover */}
+        <div
+          className="h-px transition-all duration-300 group-hover:opacity-100"
+          style={{ background: `linear-gradient(to right, ${GOLD}40, transparent)`, opacity: 0.5 }}
+        />
+
+        <div className="flex gap-6 items-start px-7 py-8 md:py-9">
+          {/* Roman numeral — anchors the card */}
+          <div
+            className="shrink-0 select-none"
+            style={{
+              fontFamily: serif,
+              fontWeight: 300,
+              fontSize: "clamp(2rem, 3vw, 2.8rem)",
+              lineHeight: 1,
+              color: `${GOLD}30`,
+              letterSpacing: "-0.02em",
+              transition: "color 0.25s ease",
+              paddingTop: "0.15rem",
+            }}
+          >
+            {roman}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <span className="font-mono text-[7px] uppercase tracking-[0.3em]" style={{ color: "var(--ds-text-subtle)" }}>
+                {item.partCount}-Part Series
+              </span>
+              <span style={{ color: "rgba(255,255,255,0.08)" }}>·</span>
+              <span className="font-mono text-[7px] uppercase tracking-[0.3em]" style={{ color: statusColor }}>
+                {item.displayStatus}
+              </span>
+            </div>
+
+            <h2
+              className="font-serif italic mb-3 transition-colors duration-200 group-hover:text-white"
+              style={{ fontWeight: 300, fontSize: "clamp(1.4rem, 2.2vw, 1.9rem)", lineHeight: 1.05, color: "var(--ds-text)" }}
+            >
+              {item.title}
+            </h2>
+
+            <p className="text-sm leading-[1.7rem] mb-5" style={{ color: "var(--ds-text-muted)", maxWidth: "58ch" }}>
+              {item.descriptor}
+            </p>
+
+            <span
+              className="font-mono text-[7.5px] uppercase tracking-[0.28em] transition-colors duration-200"
+              style={{ color: "var(--ds-accent)" }}
+            >
+              Enter the series →
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -582,49 +620,66 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
           </div>
         </section>
 
-        {/* ── ESTATE HIERARCHY STRIP ───────────────────────────────────── */}
-        <section style={{
-          backgroundColor: BASE,
-          borderTop: `1px solid ${GOLD}15`,
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
-        }}>
+        {/* ── EDITORIAL NAVIGATION BAND ────────────────────────────────── */}
+        {/* Upgraded: functional anchor navigation, not decorative text */}
+        <nav
+          aria-label="Editorial sections"
+          style={{
+            backgroundColor: BASE,
+            borderTop: `1px solid ${GOLD}18`,
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            overflowX: "auto",
+          }}
+        >
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             <div style={{
               display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              flexWrap: "wrap",
-              padding: "0.85rem 0",
+              alignItems: "stretch",
+              gap: "0",
+              padding: "0",
               fontFamily: mono,
-              fontSize: "7.5px",
-              letterSpacing: "0.30em",
+              fontSize: "9px",
+              letterSpacing: "0.26em",
               textTransform: "uppercase",
+              whiteSpace: "nowrap",
             }}>
               {(
                 [
-                  { label: "Canon",                active: false },
-                  { label: "Flagship Editorial",   active: true  },
-                  { label: "Intelligence Briefs",  active: false },
-                  { label: "Editorial Series",     active: false },
-                  { label: "Applied Essay Series", active: false },
-                  { label: "Publication Record",   active: false },
+                  { label: "Canon",               href: "/vault/briefs",         external: true,  active: false },
+                  { label: "Intelligence Briefs",  href: "#intelligence-briefs",  external: false, active: false },
+                  { label: "Editorial Series",     href: "#editorial-series",     external: false, active: false },
+                  { label: "Applied Essays",        href: "#applied-essays",       external: false, active: false },
+                  { label: "Editorials Archive",   href: "#editorials-archive",   external: false, active: false },
                 ] as const
               ).map((node, i, arr) => (
                 <React.Fragment key={node.label}>
-                  <span style={{ color: node.active ? GOLD : "rgba(255,255,255,0.22)" }}>
+                  <a
+                    href={node.href}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "0.9rem 0",
+                      paddingRight: "1.75rem",
+                      paddingLeft: i === 0 ? "0" : "1.75rem",
+                      color: node.active ? GOLD : "rgba(255,255,255,0.30)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      borderRight: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.70)"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = node.active ? GOLD : "rgba(255,255,255,0.30)"; }}
+                  >
                     {node.label}
-                  </span>
-                  {i < arr.length - 1 && (
-                    <span style={{ color: "rgba(255,255,255,0.10)" }}>›</span>
-                  )}
+                  </a>
                 </React.Fragment>
               ))}
             </div>
           </div>
-        </section>
+        </nav>
 
         {/* ── INTELLIGENCE BRIEFS ─────────────────────────────────────── */}
         <section
+          id="intelligence-briefs"
           className="py-10 lg:py-14"
           style={{ borderBottom: "1px solid var(--ds-border)", backgroundColor: `${GOLD}04` }}
         >
@@ -738,21 +793,27 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
 
         {/* ── 2. Editorial Series ─────────────────────────────────────── */}
         {/* Rendered from CURATED_EDITORIAL_SERIES — never disappears during ISR */}
-        <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
+        <section id="editorial-series" className="py-12 lg:py-16" style={{ borderBottom: "1px solid var(--ds-border)" }}>
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
-            <div className="mb-6">
+            <div className="mb-3">
               <SectionLabel>Editorial Series</SectionLabel>
             </div>
+            <p
+              className="mb-8 font-serif italic"
+              style={{ fontWeight: 300, fontSize: "clamp(1rem, 1.4vw, 1.15rem)", lineHeight: 1.55, color: "rgba(255,255,255,0.38)", maxWidth: "62ch" }}
+            >
+              Extended works exploring the intellectual infrastructure of order, cognition, and institutional life.
+            </p>
             <div className="space-y-4">
-              {CURATED_EDITORIAL_SERIES.map((item) => (
-                <EditorialSeriesCard key={item.id} item={item} />
+              {CURATED_EDITORIAL_SERIES.map((item, i) => (
+                <EditorialSeriesCard key={item.id} item={item} index={i} />
               ))}
             </div>
           </div>
         </section>
 
         {/* ── 3. Applied Essay Series ─────────────────────────────────── */}
-        <section className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
+        <section id="applied-essays" className="py-10 lg:py-12" style={{ borderBottom: "1px solid var(--ds-border)" }}>
           <div className="mx-auto max-w-6xl px-6 lg:px-10">
             <div className="mb-2">
               <SectionLabel>Applied Essay Series</SectionLabel>
@@ -772,13 +833,19 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
           </div>
         </section>
 
-        {/* ── 4. Publication Record ───────────────────────────────────── */}
+        {/* ── 4. Editorials Archive ───────────────────────────────────── */}
         {filteredSupporting.length > 0 ? (
-          <section className="py-10 lg:py-12">
+          <section id="editorials-archive" className="py-10 lg:py-12">
             <div className="mx-auto max-w-6xl px-6 lg:px-10">
-              <div className="mb-6">
-                <SectionLabel>Publication Record</SectionLabel>
+              <div className="mb-2">
+                <SectionLabel>Editorials Archive</SectionLabel>
               </div>
+              <p
+                className="mb-6 text-sm leading-[1.65rem]"
+                style={{ color: "var(--ds-text-muted)", maxWidth: "56ch" }}
+              >
+                Every standalone editorial work published under the Abraham of London name, in sequence.
+              </p>
               {categories.length > 1 && (
                 <div className="mb-6 flex flex-wrap gap-x-8 gap-y-3">
                   <button
@@ -831,6 +898,77 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
             </div>
           </div>
         ) : null}
+
+        {/* ── FOOTER CTA STRIP ─────────────────────────────────────────── */}
+        {/* The three exits from the editorial universe */}
+        <section
+          style={{
+            borderTop: `1px solid ${GOLD}15`,
+            backgroundColor: VOID,
+          }}
+        >
+          <div className="mx-auto max-w-6xl px-6 lg:px-10 py-12 lg:py-14">
+            <div
+              className="mb-8 font-mono uppercase tracking-[0.34em] text-center"
+              style={{ fontSize: "7px", color: "rgba(255,255,255,0.22)" }}
+            >
+              Continue
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  label: "Foundational Canon",
+                  sublabel: "Doctrine",
+                  description: "The 12 pillar briefs defining the standards, worldview, and operating doctrine of Abraham of London.",
+                  href: "/vault/briefs",
+                  accent: GOLD,
+                },
+                {
+                  label: "Intelligence Briefs",
+                  sublabel: "Evidence Base",
+                  description: "50 public analytical briefs proving the diagnostic method across institutional and sovereign intelligence.",
+                  href: "/briefs",
+                  accent: "#7CB8E8",
+                },
+                {
+                  label: "Inner Circle",
+                  sublabel: "Application",
+                  description: "Where the Canon and Evidence Base are applied to real institutions, households, and leaders.",
+                  href: "/inner-circle",
+                  accent: "#9B8EC4",
+                },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="group block border transition-colors duration-200"
+                  style={{ borderColor: `${item.accent}18`, backgroundColor: `${item.accent}05`, textDecoration: "none" }}
+                >
+                  <div className="px-6 py-7">
+                    <div className="mb-3" style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: item.accent }}>
+                      {item.sublabel}
+                    </div>
+                    <h3
+                      className="font-serif italic mb-3 transition-colors duration-200 group-hover:text-white"
+                      style={{ fontWeight: 300, fontSize: "1.15rem", lineHeight: 1.1, color: "var(--ds-text)" }}
+                    >
+                      {item.label}
+                    </h3>
+                    <p className="text-[12px] leading-[1.55rem] mb-4" style={{ color: "var(--ds-text-muted)" }}>
+                      {item.description}
+                    </p>
+                    <span
+                      className="font-mono text-[7px] uppercase tracking-[0.26em] transition-colors duration-200"
+                      style={{ color: item.accent }}
+                    >
+                      Enter →
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
 
       </main>
     </Layout>

@@ -99,6 +99,45 @@ describe("Editorial Series — three series always present", () => {
   });
 });
 
+// ─── Redesign — navigation, renamed sections, footer CTA ─────────────────────
+
+describe("Editorials redesign — structural checks", () => {
+  it("navigation band has anchor links to sections", () => {
+    const content = readPage();
+    expect(content).toMatch(/#intelligence-briefs/);
+    expect(content).toMatch(/#editorial-series/);
+    expect(content).toMatch(/#applied-essays/);
+    expect(content).toMatch(/#editorials-archive/);
+  });
+
+  it("section ids are present on the section elements", () => {
+    const content = readPage();
+    expect(content).toMatch(/id="intelligence-briefs"/);
+    expect(content).toMatch(/id="editorial-series"/);
+    expect(content).toMatch(/id="applied-essays"/);
+    expect(content).toMatch(/id="editorials-archive"/);
+  });
+
+  it("Publication Record is renamed to Editorials Archive", () => {
+    const content = readPage();
+    expect(content).toMatch(/Editorials Archive/);
+    expect(content).not.toMatch(/SectionLabel.*Publication Record|Publication Record.*SectionLabel/);
+  });
+
+  it("editorial series cards are numbered with roman numerals", () => {
+    const content = readPage();
+    expect(content).toMatch(/ROMAN/);
+    expect(content).toMatch(/index.*CuratedEditorialSeries|CuratedEditorialSeries.*index/);
+  });
+
+  it("footer CTA strip has Canon / Intelligence Briefs / Inner Circle exits", () => {
+    const content = readPage();
+    expect(content).toMatch(/Foundational Canon/);
+    expect(content).toMatch(/\/vault\/briefs/);
+    expect(content).toMatch(/\/inner-circle/);
+  });
+});
+
 // ─── Applied Essay Series still present ───────────────────────────────────────
 
 describe("Applied Essay Series — not removed", () => {
