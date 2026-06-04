@@ -26,6 +26,13 @@
   NEXT_PUBLIC_APP_ENV = "staging"
   NEXT_DISABLE_SOURCEMAPS = "true"
 
+# Intelligence Briefs — route alias (singular /editorial → plural /editorials)
+[[redirects]]
+  from = "/editorial/intelligence-briefs"
+  to = "/editorials/intelligence-briefs"
+  status = 301
+  force = false
+
 [[redirects]]
   from = "/assets/downloads/*"
   to = "/404"

@@ -360,6 +360,13 @@ const nextConfig = {
    */
   async redirects() {
     return [
+      // ── Intelligence Briefs — editorial route alias ────────────────────────
+      {
+        source: "/editorial/intelligence-briefs",
+        destination: "/editorials/intelligence-briefs",
+        permanent: true,
+      },
+
       // ── Canonical redirects ────────────────────────────────────────────────
       {
         source: "/terms-of-service",

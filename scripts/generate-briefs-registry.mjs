@@ -41,12 +41,21 @@ function extractBriefMeta(raw) {
   const slug = parts[parts.length - 1];
   if (!slug) return null;
 
+  // Derive series from slug prefix when not explicit in frontmatter
+  const seriesRaw = safeString(raw.series);
+  const series = seriesRaw ||
+    (slug.startsWith("institutional-alpha") ? "institutional-alpha" :
+     slug.startsWith("sovereign-intelligence") ? "sovereign-intelligence" : "");
+
   return {
     slug,
     flattenedPath: fp,
+    series,
+    briefId: safeString(raw.briefId) || safeString(raw.institutionalId) || slug.toUpperCase(),
     title: safeString(raw.title) || "Untitled Brief",
     subtitle: safeString(raw.subtitle),
     description: safeString(raw.description),
+    summary: safeString(raw.summary) || safeString(raw.description),
     excerpt: safeString(raw.excerpt),
     date: safeString(raw.date),
     lastUpdated: safeString(raw.lastUpdated),
@@ -57,8 +66,20 @@ function extractBriefMeta(raw) {
     version: safeString(raw.version) || "1.0.0",
     classification: safeString(raw.classification) || "Unclassified",
     accessTierSafe: safeString(raw.accessTierSafe) || "public",
+    requiresAuthSafe: raw.requiresAuth === true || raw.requiresAuthSafe === true,
     publishedSafe: raw.publishedSafe !== false && raw.draft !== true,
-    requiresAuthSafe: raw.requiresAuthSafe === true,
+    // Publication release fields
+    publicationStatus: safeString(raw.publicationStatus) || "",
+    publishedAt:       safeString(raw.publishedAt),
+    scheduledFor:      safeString(raw.scheduledFor),
+    season:            safeString(raw.season),
+    sequence:          typeof raw.sequence === "number" ? raw.sequence : 0,
+    featured:          raw.featured === true || raw.featured === "true",
+    editorialCluster:  safeString(raw.editorialCluster),
+    primaryRoute:      safeString(raw.primaryRoute),
+    secondaryRoute:    safeString(raw.secondaryRoute),
+    relatedCanon:      safeString(raw.relatedCanon),
+    innerCircleBridge: safeString(raw.innerCircleBridge),
   };
 }
 

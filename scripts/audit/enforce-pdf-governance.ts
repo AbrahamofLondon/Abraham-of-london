@@ -159,6 +159,9 @@ const sourceFiles = ["app", "pages", "components", "lib"]
     // The canonical download handler must construct the binary asset path internally
     // (it IS the download handler — this is the correct place for this reference).
     "pages/downloads/[...slug].tsx",
+    // The download manifest is the SSOT for canonical PDF paths.
+    // It is a data-definition file, not a UI component with hardcoded links.
+    "lib/downloads/download-manifest.ts",
   ].includes(file))
   .filter((file) => !/(\.test|\.spec)\.[jt]sx?$/.test(file));
 
