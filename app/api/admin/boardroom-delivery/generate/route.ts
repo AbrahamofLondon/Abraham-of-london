@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: parsed.error.issues.map((i) => i.message).join("; ") }, { status: 400 });
     }
 
-    // For v1, use the qualifying spine fixture as the source
-    // In production, this would load a real IntelligenceSpine from the DB
-    const { QUALIFYING_SPINE } = await import("@/tests/research/fixtures/boardroom-mode");
+    // For v1, use the qualifying spine as the source.
+    // TODO: load the real IntelligenceSpine from the DB using parsed.data.spineId
+    const { QUALIFYING_SPINE } = await import("@/lib/boardroom/boardroom-dev-spine");
 
     const record = await BoardroomDossierService.generate({
       spine: QUALIFYING_SPINE,
