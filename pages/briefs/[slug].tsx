@@ -415,12 +415,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter(Boolean)
     .map((slug) => ({ params: { slug } }));
 
-  return { paths, fallback: "blocking" };
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const bareSlug = publicBriefBareSlug(params?.slug);
-  if (!bareSlug) return { notFound: true, revalidate: 60 };
+  if (!bareSlug) return { notFound: true };
 
   const { getAllBriefs, sanitizeData } = await import("@/lib/content/server");
   const rawDoc =
@@ -431,11 +431,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         publicBriefSlugForDoc(doc) === bareSlug,
     ) || null;
 
-  if (!rawDoc) return { notFound: true, revalidate: 60 };
+  if (!rawDoc) return { notFound: true };
 
   return {
     props: sanitizeData({ brief: toPublicBrief(rawDoc, bareSlug), bareSlug }),
-    revalidate: 1800,
   };
 };
 

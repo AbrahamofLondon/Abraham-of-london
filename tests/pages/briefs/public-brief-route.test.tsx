@@ -40,6 +40,7 @@ const publicBrief = {
   tags: ["frontier-resilience"],
   accessLevel: "public",
   status: "canonical",
+  publicationStatus: "published",
   published: true,
   draft: false,
   bodyCode: "<p>Public body</p>",

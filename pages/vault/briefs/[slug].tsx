@@ -134,31 +134,42 @@ function isBriefDoc(doc: any): boolean {
   const slug = safeString(doc?.slug).toLowerCase();
 
   return (
-    docKind === "brief" ||
-    type.includes("brief") ||
-    kind.includes("brief") ||
-    category.includes("brief") ||
-    series.includes("brief") ||
-    flattened.startsWith("briefs/") ||
-    flattened.startsWith("content/briefs/") ||
+    type === "vaultbrief" ||
+    docKind === "vaultbrief" ||
     flattened.startsWith("vault/briefs/") ||
-    sourceFilePath.startsWith("briefs/") ||
-    sourceFilePath.startsWith("content/briefs/") ||
     sourceFilePath.startsWith("vault/briefs/") ||
-    slug.startsWith("briefs/") ||
-    slug.startsWith("vault/briefs/")
+    slug.startsWith("vault/briefs/") ||
+    (category.includes("brief") && series.includes("canon")) ||
+    (kind.includes("brief") && flattened.startsWith("vault/"))
   );
 }
 
-async function getCombinedBriefs(): Promise<any[]> {
-  // Narrow: load only Brief docs (~83) instead of the full 316-doc corpus.
-  // The subsequent isBriefDoc filter is kept so only vault/briefs/* entries
-  // survive — the generic Brief collection contains both root briefs and
-  // vault briefs, and this page only wants the latter.
-  const { getAllBriefs } = await import("@/lib/content/server");
+function readGeneratedIndexJson(typeDir: string): any[] {
+  try {
+    const req = eval("require") as NodeRequire;
+    const fs = req("fs") as typeof import("fs");
+    const path = req("path") as typeof import("path");
+    const indexPath = path.join(
+      process.cwd(),
+      ".contentlayer",
+      "generated",
+      typeDir,
+      "_index.json",
+    );
+
+    if (!fs.existsSync(indexPath)) return [];
+
+    const parsed = JSON.parse(fs.readFileSync(indexPath, "utf8")) as unknown;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function getVaultBriefDocs(): any[] {
   const seen = new Set<string>();
 
-  return (getAllBriefs() || [])
+  return readGeneratedIndexJson("VaultBrief")
     .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
     .filter(isBriefDoc)
     .filter((doc: any) => {
@@ -171,6 +182,10 @@ async function getCombinedBriefs(): Promise<any[]> {
       seen.add(key);
       return true;
     });
+}
+
+async function getCombinedBriefs(): Promise<any[]> {
+  return getVaultBriefDocs();
 }
 
 function looksLikeLeakedModuleCode(code: string): boolean {
@@ -545,24 +560,15 @@ const BriefPage: NextPage<Props> = ({
 export const getStaticPaths: GetStaticPaths = async () => {
   const briefs = await getCombinedBriefs();
 
-  // Cap prebuild to the 5 most recent briefs (by date desc). Runtime slug
-  // resolution still works for older briefs via `fallback: "blocking"`.
-  const recent = [...briefs].sort(
-    (a: any, b: any) =>
-      new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime(),
-  );
-
-  const paths = (recent
+  const paths = briefs
     .map((doc: any) => {
       const bare = briefsBareSlug(doc?.slug || doc?._raw?.flattenedPath || "");
       if (!bare) return null;
       return { params: { slug: bare } };
     })
-    .filter(Boolean) as Array<{ params: { slug: string } }>).slice(0, 5);
+    .filter(Boolean) as Array<{ params: { slug: string } }>;
 
-  return { paths, fallback: "blocking" };
-
-
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
@@ -621,7 +627,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       bareSlug: bare,
       bodyEmpty,
     }),
-    revalidate: 1800,
   };
 
 
