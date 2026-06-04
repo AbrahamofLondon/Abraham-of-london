@@ -93,6 +93,80 @@ function EditorialRow({ item }: { item: PublicationRecord }) {
   );
 }
 
+// ─── Intelligence Briefs — launch set (published only, hardcoded) ─────────────
+
+const INTELLIGENCE_BRIEFS_LAUNCH = [
+  {
+    id: "IA-003",
+    series: "Institutional Alpha",
+    title: "The Hidden Cost of Flattering Data",
+    href: "/briefs/institutional-alpha-the-hidden-cost-of-flattering-data",
+  },
+  {
+    id: "IA-021",
+    series: "Institutional Alpha",
+    title: "Why Executive Summaries Mislead",
+    href: "/briefs/institutional-alpha-why-executive-summaries-mislead",
+  },
+  {
+    id: "IA-045",
+    series: "Institutional Alpha",
+    title: "Why Leaders Stop Hearing Reality",
+    href: "/briefs/institutional-alpha-why-leaders-stop-hearing-reality",
+  },
+  {
+    id: "IA-069",
+    series: "Institutional Alpha",
+    title: "When the Board Sees a Different Company",
+    href: "/briefs/institutional-alpha-when-the-board-sees-a-different-company",
+  },
+  {
+    id: "SI-002",
+    series: "Sovereign Intelligence",
+    title: "Dependence Disguised as Partnership",
+    href: "/briefs/sovereign-intelligence-dependence-disguised-as-partnership",
+  },
+  {
+    id: "SI-017",
+    series: "Sovereign Intelligence",
+    title: "Alignment Without Sovereignty",
+    href: "/briefs/sovereign-intelligence-alignment-without-sovereignty",
+  },
+  {
+    id: "SI-038",
+    series: "Sovereign Intelligence",
+    title: "The Vulnerability of Narrative Capture",
+    href: "/briefs/sovereign-intelligence-the-vulnerability-of-narrative-capture",
+  },
+  {
+    id: "SI-065",
+    series: "Sovereign Intelligence",
+    title: "Why Power Concentrates Around the Decisive",
+    href: "/briefs/sovereign-intelligence-why-power-concentrates-around-the-decisive",
+  },
+] as const;
+
+const BRIEF_SERIES_CARDS = [
+  {
+    slug: "institutional-alpha",
+    title: "Institutional Alpha",
+    count: 25,
+    accent: "#7CB8E8",
+    description:
+      "Intelligence failure, reporting decay, false confidence, and the discipline required to produce decision-grade insight inside operating institutions.",
+    href: "/briefs/institutional-alpha",
+  },
+  {
+    slug: "sovereign-intelligence",
+    title: "Sovereign Intelligence",
+    count: 25,
+    accent: "#9B8EC4",
+    description:
+      "Sovereignty, dependence, institutional autonomy, and the structural conditions that erode an institution's freedom to act.",
+    href: "/briefs/sovereign-intelligence",
+  },
+] as const;
+
 // ─── Applied essay series ─────────────────────────────────────────────────────
 
 const APPLIED_SERIES = [
@@ -481,11 +555,12 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
             }}>
               {(
                 [
-                  { label: "Canon",               active: false },
-                  { label: "Flagship Editorial",  active: true  },
-                  { label: "Editorial Series",    active: false },
+                  { label: "Canon",                active: false },
+                  { label: "Flagship Editorial",   active: true  },
+                  { label: "Intelligence Briefs",  active: false },
+                  { label: "Editorial Series",     active: false },
                   { label: "Applied Essay Series", active: false },
-                  { label: "Publication Record",  active: false },
+                  { label: "Publication Record",   active: false },
                 ] as const
               ).map((node, i, arr) => (
                 <React.Fragment key={node.label}>
@@ -498,6 +573,119 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship, series }) => {
                 </React.Fragment>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── INTELLIGENCE BRIEFS ─────────────────────────────────────── */}
+        <section
+          className="py-10 lg:py-14"
+          style={{ borderBottom: "1px solid var(--ds-border)", backgroundColor: `${GOLD}04` }}
+        >
+          <div className="mx-auto max-w-6xl px-6 lg:px-10">
+
+            {/* Header */}
+            <div className="mb-2">
+              <SectionLabel>Intelligence Briefs</SectionLabel>
+            </div>
+            <p
+              className="mb-1 font-serif italic"
+              style={{ fontWeight: 300, fontSize: "1.3rem", lineHeight: 1.15, color: "var(--ds-text)" }}
+            >
+              Public evidence base for Abraham of London's decision, governance, and sovereignty doctrine.
+            </p>
+            <p
+              className="mb-6 text-sm leading-[1.7rem]"
+              style={{ color: "var(--ds-text-muted)", maxWidth: "62ch" }}
+            >
+              The Canon defines the standard. The Intelligence Briefs show the failure patterns in
+              public life, institutions, leadership, reporting, and decision authority.
+            </p>
+
+            {/* Series cards */}
+            <div className="grid gap-4 sm:grid-cols-2 mb-8">
+              {BRIEF_SERIES_CARDS.map((s) => (
+                <Link
+                  key={s.slug}
+                  href={s.href}
+                  className="group block border py-5 px-5 transition-colors duration-200"
+                  style={{ borderColor: `${s.accent}22`, backgroundColor: `${s.accent}05` }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="font-mono text-[6.5px] uppercase tracking-[0.28em]" style={{ color: s.accent }}>
+                      {s.count}-Brief Series
+                    </span>
+                  </div>
+                  <h3
+                    className="font-serif italic mb-2 transition-colors duration-200 group-hover:text-white"
+                    style={{ fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.1, color: "var(--ds-text)" }}
+                  >
+                    {s.title}
+                  </h3>
+                  <p className="text-[12px] leading-[1.55rem] mb-3" style={{ color: "var(--ds-text-muted)", maxWidth: "48ch" }}>
+                    {s.description}
+                  </p>
+                  <div className="font-mono text-[6.5px] uppercase tracking-[0.26em]" style={{ color: s.accent }}>
+                    Explore series →
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Launch brief rows */}
+            <div className="mb-2">
+              <span
+                className="font-mono uppercase tracking-[0.28em]"
+                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+              >
+                Launch Collection · 8 briefs
+              </span>
+            </div>
+            <div className="mb-7">
+              {INTELLIGENCE_BRIEFS_LAUNCH.map((brief) => (
+                <Link
+                  key={brief.id}
+                  href={brief.href}
+                  className="group grid gap-2 border-b py-4 transition-colors duration-200 md:grid-cols-[5rem_9rem_1fr]"
+                  style={{ borderBottomColor: "var(--ds-border)" }}
+                >
+                  <div className="font-mono text-[7px] uppercase tracking-[0.26em]" style={{ color: "var(--ds-text-subtle)" }}>
+                    {brief.id}
+                  </div>
+                  <div className="font-mono text-[7px] uppercase tracking-[0.26em]" style={{ color: "var(--ds-accent)" }}>
+                    {brief.series}
+                  </div>
+                  <div
+                    className="font-serif italic transition-colors duration-200 group-hover:text-white"
+                    style={{ fontSize: "1rem", lineHeight: 1.2, color: "var(--ds-text)" }}
+                  >
+                    {brief.title}
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/editorials/intelligence-briefs"
+                className="inline-flex items-center border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em] transition-colors duration-200"
+                style={{
+                  borderColor: `${GOLD}50`,
+                  color: GOLD,
+                  backgroundColor: `${GOLD}10`,
+                }}
+              >
+                Read the Intelligence Briefs →
+              </Link>
+              <Link
+                href="/briefs"
+                className="inline-flex items-center border px-4 py-2 font-mono text-[7.5px] uppercase tracking-[0.28em] transition-colors duration-200"
+                style={{ borderColor: "var(--ds-border)", color: "var(--ds-text-subtle)" }}
+              >
+                View the Brief Library →
+              </Link>
+            </div>
+
           </div>
         </section>
 
