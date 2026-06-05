@@ -469,6 +469,15 @@ function BoardroomOrdersPanel() {
     dossier_generated: "text-purple-400",
     delivered: "text-green-400",
     follow_up_due: "text-orange-400",
+    failed: "text-red-400",
+    refunded: "text-pink-400",
+  };
+
+  const paymentStatusColors: Record<string, string> = {
+    paid: "text-green-400",
+    failed: "text-red-400",
+    refunded: "text-pink-400",
+    pending: "text-white/30",
   };
 
   return (
@@ -487,7 +496,7 @@ function BoardroomOrdersPanel() {
               <td className="px-3 py-3 font-mono text-[8px] text-white/40">{order.id.slice(0, 12)}</td>
               <td className="px-3 py-3 text-xs text-white/60">{order.email}</td>
               <td className="px-3 py-3">
-                <span className={`font-mono text-[7px] uppercase tracking-[0.12em] ${order.paymentStatus === "paid" ? "text-green-400" : "text-white/30"}`}>
+                <span className={`font-mono text-[7px] uppercase tracking-[0.12em] ${paymentStatusColors[order.paymentStatus] || "text-white/30"}`}>
                   {order.paymentStatus}
                 </span>
               </td>
@@ -503,7 +512,7 @@ function BoardroomOrdersPanel() {
               </td>
               <td className="px-3 py-3">
                 <div className="flex flex-wrap gap-1">
-                  {["in_review", "dossier_generated", "delivered", "follow_up_due"].map((status) => (
+                  {["in_review", "dossier_generated", "delivered", "follow_up_due", "failed", "refunded"].map((status) => (
                     <button
                       key={status}
                       onClick={() => handleDeliveryAction(order.id, status)}

@@ -205,6 +205,7 @@ export default function BoardroomBriefPage() {
   // ── Detect sample=true query parameter ────────────────────────────────────
 
   const router = useRouter()
+  const handoffId = typeof router.query.handoff === 'string' ? router.query.handoff : undefined
 
   React.useEffect(() => {
     if (router.isReady && router.query.sample === 'true') {
@@ -468,6 +469,7 @@ export default function BoardroomBriefPage() {
                   <CheckoutButton
                     productCode={BOARDROOM_BRIEF_PRODUCT.code}
                     originPath="/boardroom-brief"
+                    checkoutMetadata={{ handoffId }}
                     onCheckoutStart={() => trackLaunch("boardroom_to_checkout", "/boardroom-brief")}
                     style={{ padding: '12px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >

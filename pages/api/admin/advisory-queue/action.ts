@@ -1,9 +1,8 @@
 /* pages/api/admin/advisory-queue/action.ts — Phase 1: Advisory Queue Actions */
 /* Fixed: No prisma.$raw usage — conditional SQL via separate queries */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type Response = { ok: true } | { ok: false; error: string };
 
@@ -28,11 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
-  if (!session?.user?.email || session.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
-    return res.status(403).json({ ok: false, error: "ADMIN_REQUIRED" });
-  }
+  const session = await requireAdminServer(req, res, { routeKey: "admin-advisory-action" });
+  if (!session) return;
 
   const { qualificationId, action, note } = req.body || {};
   if (!qualificationId || !action) {
@@ -76,6 +72,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const newStatus = statusMap[action] || "OPEN";
     const newProduct = productMap[action];
+    const existing = await prisma.$queryRaw<Array<{
+      id: string;
+      status: string;
+      recommended_product: string;
+    }>>`
+      SELECT id, status, recommended_product
+      FROM inner_circle_advisory_qualifications
+      WHERE id = ${qualificationId}
+      LIMIT 1
+    `;
+
+    if (!existing[0]) {
+      return res.status(404).json({ ok: false, error: "QUALIFICATION_NOT_FOUND" });
+    }
 
     // Use separate queries instead of conditional SQL interpolation
     if (newProduct && note) {
@@ -123,6 +133,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         WHERE id = ${qualificationId}
       `;
     }
+
+    await prisma.accessAuditLog.create({
+      data: {
+        actorType: "ADMIN",
+        actorEmail: session.user?.email || null,
+        action: "advisory_queue.action",
+        targetType: "inner_circle_advisory_qualification",
+        targetKey: qualificationId,
+        success: true,
+        reason: action,
+        metadata: {
+          previousStatus: existing[0].status,
+          newStatus,
+          previousProduct: existing[0].recommended_product,
+          newProduct: newProduct ?? existing[0].recommended_product,
+          note: typeof note === "string" ? note.slice(0, 1000) : null,
+        },
+      },
+    }).catch(() => undefined);
 
     return res.status(200).json({ ok: true });
   } catch (error) {

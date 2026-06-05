@@ -1,8 +1,7 @@
 /* pages/api/admin/advisory-queue/boardroom-orders.ts — List Boardroom Brief orders */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type Response = {
   ok: boolean;
@@ -25,11 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
-  if (!session?.user?.email || session.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
-    return res.status(403).json({ ok: false, error: "ADMIN_REQUIRED" });
-  }
+  const session = await requireAdminServer(req, res, { routeKey: "admin-advisory-boardroom-orders" });
+  if (!session) return;
 
   try {
     const orders = await prisma.boardroomBriefOrder.findMany({

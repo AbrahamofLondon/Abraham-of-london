@@ -7,6 +7,7 @@ type Props = {
   children: React.ReactNode;
   email?: string;
   originPath?: string;
+  checkoutMetadata?: Record<string, string | null | undefined>;
   onCheckoutStart?: () => void;
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children" | "onClick">;
 
@@ -15,6 +16,7 @@ export default function CheckoutButton({
   children,
   email: emailProp,
   originPath,
+  checkoutMetadata,
   className,
   style,
   disabled,
@@ -53,6 +55,7 @@ export default function CheckoutButton({
           priceCode: productCode,
           email: resolvedEmail,
           originPath,
+          ...(checkoutMetadata || {}),
         }),
       });
 

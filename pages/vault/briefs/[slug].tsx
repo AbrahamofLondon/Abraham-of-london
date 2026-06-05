@@ -640,7 +640,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     })
     .filter(Boolean) as Array<{ params: { slug: string } }>;
 
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {

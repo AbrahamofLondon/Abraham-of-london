@@ -2,8 +2,7 @@
 /* Admin-only. Returns configured/reachable/backend status. Does not expose secrets. */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/options";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import { getRateLimitBackendStatus } from "@/lib/server/security/rate-limit-provider";
 
 type Response = {
@@ -15,27 +14,20 @@ type Response = {
   redisConfigured: boolean;
   redisDisabled: boolean;
   hasRedisUrl: boolean;
+  hasUpstashUrl: boolean;
+  hasUpstashToken: boolean;
   error?: string;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Response>) {
-  const session = await getServerSession(req, res, authOptions);
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
-  if (!session?.user?.email || session.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
-    return res.status(403).json({
-      ok: false,
-      backend: "unknown",
-      configured: false,
-      reachable: false,
-      redisConfigured: false,
-      redisDisabled: false,
-      hasRedisUrl: false,
-      error: "ADMIN_REQUIRED",
-    });
-  }
+  const session = await requireAdminServer(req, res, { routeKey: "admin-system-upstash-health" });
+  if (!session) return;
 
   try {
     const status = await getRateLimitBackendStatus();
+    const hasRedisUrl = Boolean(process.env.REDIS_URL?.trim());
+    const hasUpstashUrl = Boolean(process.env.UPSTASH_REDIS_REST_URL?.trim());
+    const hasUpstashToken = Boolean(process.env.UPSTASH_REDIS_REST_TOKEN?.trim());
 
     return res.status(200).json({
       ok: true,
@@ -43,9 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       configured: status.configured,
       reachable: status.reachable,
       fallbackReason: status.fallbackReason,
-      redisConfigured: Boolean(process.env.REDIS_URL?.trim() || process.env.UPSTASH_REDIS_REST_URL?.trim() || process.env.REDIS_HOST?.trim()),
+      redisConfigured: Boolean(hasRedisUrl || hasUpstashUrl || process.env.REDIS_HOST?.trim()),
       redisDisabled: process.env.REDIS_DISABLED === "true" || process.env.USE_REDIS === "false",
-      hasRedisUrl: Boolean(process.env.REDIS_URL?.trim()),
+      hasRedisUrl,
+      hasUpstashUrl,
+      hasUpstashToken,
     });
   } catch (error) {
     return res.status(500).json({
@@ -56,6 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       redisConfigured: false,
       redisDisabled: false,
       hasRedisUrl: false,
+      hasUpstashUrl: false,
+      hasUpstashToken: false,
       error: error instanceof Error ? error.message : "HEALTH_CHECK_FAILED",
     });
   }

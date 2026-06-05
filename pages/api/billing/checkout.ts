@@ -13,6 +13,7 @@ import { hubspotSync } from "@/lib/hubspot/sync";
 import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
 import { evaluateERAdmission } from "@/lib/diagnostics/executive-reporting/admission";
 import { trackServerLaunch } from "@/lib/analytics/server-launch-event";
+import { prisma } from "@/lib/prisma.server";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey
@@ -46,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
-  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId, caseRef } = req.body || {};
+  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId, caseRef, handoffId } = req.body || {};
   const rawCode = String(productCode || entitlementSlug || contentId || priceCode || "").trim();
 
   // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
@@ -106,9 +107,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── Paths ──
   const origin = typeof originPath === "string" && originPath.startsWith("/") ? originPath : "";
-  const successPath = product.successPath || origin || "/dashboard";
+  const successPath = code === "boardroom_brief" ? "/boardroom-brief/confirmation" : product.successPath || origin || "/dashboard";
   const cancelPath = origin || product.cancelPath || "/dashboard";
   const baseUrl = siteUrl(req);
+
+  let boardroomBridgeMetadata: Record<string, string> = {};
+  const safeHandoffId = typeof handoffId === "string" && /^bh_[a-f0-9]{32}$/i.test(handoffId.trim())
+    ? handoffId.trim()
+    : "";
+
+  if (code === "boardroom_brief" && safeHandoffId) {
+    try {
+      const handoff = await prisma.$queryRaw<Array<{
+        id: string;
+        user_id: string;
+        diagnostic_id: string | null;
+        risk_level: string | null;
+        recommended_route: string;
+        expires_at: Date;
+        used_at: Date | null;
+      }>>`
+        SELECT id, user_id, diagnostic_id, risk_level, recommended_route, expires_at, used_at
+        FROM boardroom_bridge_handoffs
+        WHERE id = ${safeHandoffId}
+        LIMIT 1
+      `;
+
+      const row = handoff[0];
+      if (row && row.recommended_route === "boardroom-brief" && !row.used_at && row.expires_at > new Date()) {
+        boardroomBridgeMetadata = {
+          source: "inner_circle",
+          handoffId: row.id,
+          userId: row.user_id,
+          ...(row.diagnostic_id ? { diagnosticId: row.diagnostic_id } : {}),
+          ...(row.risk_level ? { riskLevel: row.risk_level } : {}),
+        };
+      }
+    } catch (error) {
+      console.warn("[BILLING_CHECKOUT_HANDOFF_LOOKUP_FAILED]", error);
+    }
+  }
 
   // ── Metadata (attached to Stripe session, used by webhooks) ──
   const entitlementSlugs = resolveEntitlementSlugs(code);
@@ -118,6 +156,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     tier: product.tier,
     email: String(email).trim().toLowerCase(),
     originPath: origin,
+    ...boardroomBridgeMetadata,
     ...(typeof contractId === "string" && contractId.trim() ? { contractId: contractId.trim() } : {}),
     ...(typeof organisationId === "string" && organisationId.trim() ? { organisationId: organisationId.trim() } : {}),
     ...(typeof caseRef === "string" && caseRef.trim() ? { caseRef: caseRef.trim().slice(0, 120) } : {}),

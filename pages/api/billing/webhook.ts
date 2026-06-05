@@ -35,6 +35,32 @@ const stripeKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
 
+async function recordBoardroomOrderEvent(input: {
+  orderId: string;
+  actorEmail?: string | null;
+  eventType: string;
+  previousStatus?: string | null;
+  newStatus?: string | null;
+  note?: string | null;
+}) {
+  await prisma.accessAuditLog.create({
+    data: {
+      actorType: "SYSTEM",
+      actorEmail: input.actorEmail ?? null,
+      action: "boardroom_brief_order.event",
+      targetType: "boardroom_brief_order",
+      targetKey: input.orderId,
+      success: true,
+      reason: input.eventType,
+      metadata: {
+        previousStatus: input.previousStatus ?? null,
+        newStatus: input.newStatus ?? null,
+        note: input.note ?? null,
+      },
+    },
+  });
+}
+
 async function recordCheckoutCompletion(input: {
   sessionId: string;
   email: string;
@@ -68,6 +94,82 @@ async function recordCheckoutCompletion(input: {
   }
 }
 
+async function markBoardroomOrderBySession(input: {
+  stripeSessionId: string;
+  paymentStatus: "failed" | "refunded";
+  deliveryStatus: "failed" | "refunded";
+  eventType: string;
+  reason?: string | null;
+}) {
+  const order = await prisma.boardroomBriefOrder.findUnique({
+    where: { stripeSessionId: input.stripeSessionId },
+    select: { id: true, paymentStatus: true, deliveryStatus: true, metadata: true },
+  }).catch(() => null);
+
+  if (!order) return;
+
+  await prisma.boardroomBriefOrder.update({
+    where: { id: order.id },
+    data: {
+      paymentStatus: input.paymentStatus,
+      deliveryStatus: input.deliveryStatus,
+      metadata: {
+        ...((order.metadata as Record<string, unknown> | null) ?? {}),
+        lastPaymentEvent: input.eventType,
+        lastPaymentReason: input.reason ?? null,
+      },
+      updatedAt: new Date(),
+    },
+  });
+
+  await recordBoardroomOrderEvent({
+    orderId: order.id,
+    actorEmail: "stripe:webhook",
+    eventType: input.eventType,
+    previousStatus: `${order.paymentStatus}/${order.deliveryStatus}`,
+    newStatus: `${input.paymentStatus}/${input.deliveryStatus}`,
+    note: input.reason ?? null,
+  }).catch(() => undefined);
+}
+
+async function markBoardroomOrderByPaymentIntent(input: {
+  paymentIntentId: string;
+  paymentStatus: "failed" | "refunded";
+  deliveryStatus: "failed" | "refunded";
+  eventType: string;
+  reason?: string | null;
+}) {
+  const order = await prisma.boardroomBriefOrder.findFirst({
+    where: { stripePaymentIntentId: input.paymentIntentId },
+    select: { id: true, paymentStatus: true, deliveryStatus: true, metadata: true },
+  }).catch(() => null);
+
+  if (!order) return;
+
+  await prisma.boardroomBriefOrder.update({
+    where: { id: order.id },
+    data: {
+      paymentStatus: input.paymentStatus,
+      deliveryStatus: input.deliveryStatus,
+      metadata: {
+        ...((order.metadata as Record<string, unknown> | null) ?? {}),
+        lastPaymentEvent: input.eventType,
+        lastPaymentReason: input.reason ?? null,
+      },
+      updatedAt: new Date(),
+    },
+  });
+
+  await recordBoardroomOrderEvent({
+    orderId: order.id,
+    actorEmail: "stripe:webhook",
+    eventType: input.eventType,
+    previousStatus: `${order.paymentStatus}/${order.deliveryStatus}`,
+    newStatus: `${input.paymentStatus}/${input.deliveryStatus}`,
+    note: input.reason ?? null,
+  }).catch(() => undefined);
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe || !webhookSecret) return res.status(500).end();
@@ -84,11 +186,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // ── Idempotency hard lock ──────────────────────────────────────────────────
-  // Stripe may retry webhooks. The find-or-update entitlement pattern handles
-  // duplicate grants, but this table prevents the entire handler from
-  // re-executing under concurrency or retries. If the event ID exists, we
-  // return 200 immediately — Stripe treats this as acknowledged.
+  // ── Idempotency check ──────────────────────────────────────────────────────
+  // Record the event only after processing succeeds. If processing fails,
+  // Stripe can retry and the unique Boardroom/entitlement writes remain the
+  // state-level idempotency guard.
   try {
     const existing = await prisma.processedWebhookEvent.findUnique({
       where: { id: event.id },
@@ -97,17 +198,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (existing) {
       return res.json({ received: true, replay: true });
     }
-    // Insert BEFORE processing — if we crash mid-processing, Stripe retries
-    // and we re-process. If we insert AFTER, concurrent calls can race past
-    // the check. Insert-before + unique constraint = exactly-once semantics.
-    await prisma.processedWebhookEvent.create({ data: { id: event.id } });
   } catch (idempotencyError: any) {
-    // Unique constraint violation = another instance is already processing
-    if (idempotencyError?.code === "P2002") {
-      return res.json({ received: true, replay: true });
-    }
-    // Non-idempotency DB errors should not block webhook processing —
-    // fall through and let the entitlement authority's own idempotency handle it
     console.warn("[BILLING_WEBHOOK] Idempotency check failed, proceeding", idempotencyError);
   }
 
@@ -193,7 +284,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }).catch(() => null);
 
           if (!existingOrder) {
-            await prisma.boardroomBriefOrder.create({
+            const order = await prisma.boardroomBriefOrder.create({
               data: {
                 userId: session.metadata?.userId || email,
                 email,
@@ -213,6 +304,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 },
               },
             });
+            await recordBoardroomOrderEvent({
+              orderId: order.id,
+              actorEmail: "stripe:webhook",
+              eventType: "checkout.session.completed",
+              previousStatus: "none",
+              newStatus: "paid/paid",
+              note: "Stripe checkout completed.",
+            }).catch(() => undefined);
           } else {
             await prisma.boardroomBriefOrder.update({
               where: { id: existingOrder.id },
@@ -223,9 +322,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 updatedAt: new Date(),
               },
             });
+            await recordBoardroomOrderEvent({
+              orderId: existingOrder.id,
+              actorEmail: "stripe:webhook",
+              eventType: "checkout.session.completed.replay_update",
+              previousStatus: `${existingOrder.paymentStatus}/${existingOrder.deliveryStatus}`,
+              newStatus: "paid/in_review",
+              note: "Stripe checkout replay updated existing order.",
+            }).catch(() => undefined);
           }
         } catch (orderError) {
           console.error("[BILLING_WEBHOOK_BOARDROOM_ORDER_FAILED]", orderError);
+        }
+
+        if (session.metadata?.handoffId) {
+          try {
+            await prisma.$executeRaw`
+              UPDATE boardroom_bridge_handoffs
+              SET used_at = COALESCE(used_at, NOW())
+              WHERE id = ${session.metadata.handoffId}
+            `;
+          } catch (handoffError) {
+            console.warn("[BILLING_WEBHOOK_BOARDROOM_HANDOFF_MARK_FAILED]", handoffError);
+          }
         }
 
         // Update advisory queue
@@ -301,6 +420,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
+  if (event.type === "checkout.session.expired") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    await markBoardroomOrderBySession({
+      stripeSessionId: session.id,
+      paymentStatus: "failed",
+      deliveryStatus: "failed",
+      eventType: event.type,
+      reason: "Checkout session expired before payment completion.",
+    });
+  }
+
+  if (event.type === "checkout.session.async_payment_failed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    await markBoardroomOrderBySession({
+      stripeSessionId: session.id,
+      paymentStatus: "failed",
+      deliveryStatus: "failed",
+      eventType: event.type,
+      reason: "Async payment failed.",
+    });
+  }
+
+  if (event.type === "payment_intent.payment_failed") {
+    const intent = event.data.object as Stripe.PaymentIntent;
+    await markBoardroomOrderByPaymentIntent({
+      paymentIntentId: intent.id,
+      paymentStatus: "failed",
+      deliveryStatus: "failed",
+      eventType: event.type,
+      reason: intent.last_payment_error?.message || "Payment intent failed.",
+    });
+  }
+
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    const paymentIntentId =
+      typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
+    if (paymentIntentId) {
+      await markBoardroomOrderByPaymentIntent({
+        paymentIntentId,
+        paymentStatus: "refunded",
+        deliveryStatus: "refunded",
+        eventType: event.type,
+        reason: "Stripe charge refunded.",
+      });
+    }
+  }
+
   if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
     if (subscription.id) {
@@ -322,6 +489,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email: hsEmail,
         data: { amount: hsAmount },
       }).catch(() => {});
+    }
+  }
+
+  try {
+    await prisma.processedWebhookEvent.create({ data: { id: event.id } });
+  } catch (idempotencyError: any) {
+    if (idempotencyError?.code !== "P2002") {
+      console.warn("[BILLING_WEBHOOK] Failed to record processed event", idempotencyError);
     }
   }
 

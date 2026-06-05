@@ -1,8 +1,7 @@
 /* pages/api/admin/advisory-queue/export.ts — Phase 1: Advisory Queue CSV Export */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/options";
 import { prisma } from "@/lib/prisma";
+import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 
 type Response = { ok: true; csv: string } | { ok: false; error: string };
 
@@ -12,11 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
   }
 
-  const session = await getServerSession(req, res, authOptions);
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
-  if (!session?.user?.email || session.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
-    return res.status(403).json({ ok: false, error: "ADMIN_REQUIRED" });
-  }
+  const session = await requireAdminServer(req, res, { routeKey: "admin-advisory-export" });
+  if (!session) return;
 
   try {
     const qualifications = await prisma.$queryRaw<Array<{
