@@ -80,8 +80,29 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
     if (filter === "council") return localLeads.filter((l) => l.councilCandidate);
     if (filter === "open") return localLeads.filter((l) => l.qualificationStatus === "OPEN" || l.qualificationStatus === "COUNCIL_CANDIDATE");
     if (filter === "converted") return localLeads.filter((l) => l.qualificationStatus === "CONVERTED");
+    if (filter === "boardroom") return localLeads.filter((l) =>
+      ["BOARDROOM_RECOMMENDED", "BOARDROOM_CLICKED", "BOARDROOM_REQUESTED"].includes(l.qualificationStatus)
+    );
+    if (filter === "strategy") return localLeads.filter((l) =>
+      ["STRATEGY_RECOMMENDED", "STRATEGY_CLICKED"].includes(l.qualificationStatus)
+    );
+    if (filter === "council-requested") return localLeads.filter((l) => l.qualificationStatus === "COUNCIL_REQUESTED");
     return localLeads;
   }, [localLeads, filter]);
+
+  const actionStatusMap: Record<string, string> = {
+    dismiss: "DISMISSED",
+    contacted: "CONTACTED",
+    "boardroom-recommended": "BOARDROOM_RECOMMENDED",
+    "boardroom-clicked": "BOARDROOM_CLICKED",
+    "boardroom-requested": "BOARDROOM_REQUESTED",
+    "converted-boardroom": "CONVERTED",
+    "strategy-recommended": "STRATEGY_RECOMMENDED",
+    "strategy-clicked": "STRATEGY_CLICKED",
+    "converted-strategy": "CONVERTED",
+    "council-requested": "COUNCIL_REQUESTED",
+    "converted-retainer": "CONVERTED",
+  };
 
   const handleAction = async (qualificationId: string, action: string) => {
     setActionLoading(qualificationId);
@@ -96,7 +117,7 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
         setLocalLeads((prev) =>
           prev.map((l) =>
             l.qualificationId === qualificationId
-              ? { ...l, qualificationStatus: action === "dismiss" ? "DISMISSED" : action === "contacted" ? "CONTACTED" : action === "converted-boardroom" ? "CONVERTED" : l.qualificationStatus }
+              ? { ...l, qualificationStatus: actionStatusMap[action] || l.qualificationStatus }
               : l
           )
         );
@@ -185,6 +206,9 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
               { key: "high-critical", label: "High/Critical" },
               { key: "council", label: "Council Candidates" },
               { key: "open", label: "Open" },
+              { key: "boardroom", label: "Boardroom" },
+              { key: "strategy", label: "Strategy Room" },
+              { key: "council-requested", label: "Council Requested" },
               { key: "converted", label: "Converted" },
             ].map((f) => (
               <button
@@ -259,6 +283,12 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
                           lead.qualificationStatus === "DISMISSED" ? "text-white/20" :
                           lead.qualificationStatus === "CONTACTED" ? "text-blue-400" :
                           lead.qualificationStatus === "COUNCIL_CANDIDATE" ? "text-purple-400" :
+                          lead.qualificationStatus === "BOARDROOM_RECOMMENDED" ? "text-amber-400" :
+                          lead.qualificationStatus === "BOARDROOM_CLICKED" ? "text-yellow-400" :
+                          lead.qualificationStatus === "BOARDROOM_REQUESTED" ? "text-orange-400" :
+                          lead.qualificationStatus === "STRATEGY_RECOMMENDED" ? "text-emerald-400" :
+                          lead.qualificationStatus === "STRATEGY_CLICKED" ? "text-teal-400" :
+                          lead.qualificationStatus === "COUNCIL_REQUESTED" ? "text-violet-400" :
                           "text-amber-400"
                         }`}>
                           {lead.qualificationStatus.replace(/_/g, " ")}
@@ -276,6 +306,27 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
                                 Contact
                               </button>
                               <button
+                                onClick={() => handleAction(lead.qualificationId, "boardroom-recommended")}
+                                disabled={actionLoading === lead.qualificationId}
+                                className="border border-amber-500/20 bg-amber-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-40"
+                              >
+                                Rec. Boardroom
+                              </button>
+                              <button
+                                onClick={() => handleAction(lead.qualificationId, "boardroom-clicked")}
+                                disabled={actionLoading === lead.qualificationId}
+                                className="border border-yellow-500/20 bg-yellow-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-yellow-400 transition hover:bg-yellow-500/20 disabled:opacity-40"
+                              >
+                                Clicked Boardroom
+                              </button>
+                              <button
+                                onClick={() => handleAction(lead.qualificationId, "boardroom-requested")}
+                                disabled={actionLoading === lead.qualificationId}
+                                className="border border-orange-500/20 bg-orange-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-orange-400 transition hover:bg-orange-500/20 disabled:opacity-40"
+                              >
+                                Requested Boardroom
+                              </button>
+                              <button
                                 onClick={() => handleAction(lead.qualificationId, "converted-boardroom")}
                                 disabled={actionLoading === lead.qualificationId}
                                 className="border border-green-500/20 bg-green-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-green-400 transition hover:bg-green-500/20 disabled:opacity-40"
@@ -283,11 +334,25 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
                                 → Boardroom
                               </button>
                               <button
-                                onClick={() => handleAction(lead.qualificationId, "converted-strategy")}
+                                onClick={() => handleAction(lead.qualificationId, "strategy-recommended")}
                                 disabled={actionLoading === lead.qualificationId}
                                 className="border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-emerald-400 transition hover:bg-emerald-500/20 disabled:opacity-40"
                               >
+                                Rec. Strategy
+                              </button>
+                              <button
+                                onClick={() => handleAction(lead.qualificationId, "converted-strategy")}
+                                disabled={actionLoading === lead.qualificationId}
+                                className="border border-teal-500/20 bg-teal-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-teal-400 transition hover:bg-teal-500/20 disabled:opacity-40"
+                              >
                                 → Strategy
+                              </button>
+                              <button
+                                onClick={() => handleAction(lead.qualificationId, "council-requested")}
+                                disabled={actionLoading === lead.qualificationId}
+                                className="border border-violet-500/20 bg-violet-500/10 px-2 py-1 font-mono text-[7px] uppercase tracking-[0.12em] text-violet-400 transition hover:bg-violet-500/20 disabled:opacity-40"
+                              >
+                                Council Request
                               </button>
                               <button
                                 onClick={() => handleAction(lead.qualificationId, "converted-retainer")}
@@ -347,7 +412,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   }>>`
     SELECT id, user_id, status, risk_level, recommended_product, reason, metadata_json, created_at
     FROM inner_circle_advisory_qualifications
-    WHERE status IN ('OPEN', 'COUNCIL_CANDIDATE', 'CONTACTED', 'CONVERTED')
+    WHERE status IN ('OPEN', 'COUNCIL_CANDIDATE', 'CONTACTED', 'BOARDROOM_RECOMMENDED', 'BOARDROOM_CLICKED', 'BOARDROOM_REQUESTED', 'STRATEGY_RECOMMENDED', 'STRATEGY_CLICKED', 'COUNCIL_REQUESTED', 'CONVERTED')
     ORDER BY created_at DESC
     LIMIT 200
   `;

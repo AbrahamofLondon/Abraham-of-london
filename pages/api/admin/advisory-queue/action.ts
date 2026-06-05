@@ -9,8 +9,14 @@ type Response = { ok: true } | { ok: false; error: string };
 
 const ALLOWED_ACTIONS = [
   "contacted",
+  "boardroom-recommended",
+  "boardroom-clicked",
+  "boardroom-requested",
   "converted-boardroom",
+  "strategy-recommended",
+  "strategy-clicked",
   "converted-strategy",
+  "council-requested",
   "converted-retainer",
   "dismiss",
   "add-note",
@@ -40,8 +46,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const statusMap: Record<string, string> = {
       contacted: "CONTACTED",
+      "boardroom-recommended": "BOARDROOM_RECOMMENDED",
+      "boardroom-clicked": "BOARDROOM_CLICKED",
+      "boardroom-requested": "BOARDROOM_REQUESTED",
       "converted-boardroom": "CONVERTED",
+      "strategy-recommended": "STRATEGY_RECOMMENDED",
+      "strategy-clicked": "STRATEGY_CLICKED",
       "converted-strategy": "CONVERTED",
+      "council-requested": "COUNCIL_REQUESTED",
       "converted-retainer": "CONVERTED",
       dismiss: "DISMISSED",
       "add-note": "OPEN",
@@ -49,8 +61,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const productMap: Record<string, string | null> = {
       contacted: null,
+      "boardroom-recommended": "boardroom-brief",
+      "boardroom-clicked": "boardroom-brief",
+      "boardroom-requested": "boardroom-brief",
       "converted-boardroom": "boardroom-brief",
+      "strategy-recommended": "strategy-room",
+      "strategy-clicked": "strategy-room",
       "converted-strategy": "strategy-room",
+      "council-requested": "private-council",
       "converted-retainer": "retainer-oversight",
       dismiss: null,
       "add-note": null,

@@ -10,10 +10,12 @@ import {
   type ProductRoute,
 } from "@/lib/inner-circle/operating-layer";
 import type { InnerCircleProfileState } from "@/lib/inner-circle/operating-repository.server";
+import { getConversionBridge, buildSafeContextQuery, type ConversionBridge } from "@/lib/inner-circle/commercial-bridge";
 
 type Props = {
   profile: InnerCircleProfileState;
   recommendedRoute: ProductRoute;
+  conversionBridge: ConversionBridge;
 };
 
 const GOLD = "#C9A96E";
@@ -24,7 +26,7 @@ const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
 };
 
-export default function InnerCircleDashboard({ profile, recommendedRoute }: Props) {
+export default function InnerCircleDashboard({ profile, recommendedRoute, conversionBridge }: Props) {
   const activePath = readingPaths.find((path) => path.slug === profile.activePath) ?? readingPaths[0];
   const activeTool = companionTools.find((tool) => tool.slug === "rise-decay-scorecard");
   const plannedTools = companionTools.filter((tool) => tool.status !== "active");
@@ -75,6 +77,29 @@ export default function InnerCircleDashboard({ profile, recommendedRoute }: Prop
                 Inner Circle Operating Layer is in controlled release. Features, diagnostics, and routing logic are active but subject to review.
               </p>
             </div>
+
+            {/* Conversion bridge — shown when risk exceeds self-guided capacity */}
+            {conversionBridge.action !== "continue_inner_circle" ? (
+              <div className="mt-6 border px-5 py-4" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.06)" }}>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4" style={{ color: GOLD }} />
+                  <p className="font-mono text-[8px] uppercase tracking-[0.2em]" style={{ color: GOLD }}>
+                    Recommended Next Action
+                  </p>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-white/60">
+                  {conversionBridge.reason}
+                </p>
+                <Link
+                  href={conversionBridge.href}
+                  className="mt-4 inline-flex min-h-10 items-center gap-2 border px-5 py-2.5 text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                  style={{ ...mono, borderColor: `${GOLD}44`, color: "white", backgroundColor: `${GOLD}14` }}
+                >
+                  {conversionBridge.label}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -244,18 +269,28 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
     name: session.user?.name ?? null,
   });
 
+  const riskLevel = profile.latestResult?.riskLevel ?? "Low";
+  const isCouncilCandidate = profile.accessState === "Council Candidate";
+
   const recommendedRoute = profile.latestResult
-    ? profile.latestResult.riskLevel === "Critical"
+    ? riskLevel === "Critical"
       ? productRoute("strategy-room")
-      : profile.latestResult.riskLevel === "High"
+      : riskLevel === "High"
         ? productRoute("boardroom-brief")
         : productRoute("inner-circle")
     : productRoute("rise-decay-scorecard");
+
+  const conversionBridge = getConversionBridge(
+    riskLevel as any,
+    isCouncilCandidate,
+    profile.latestResult?.id,
+  );
 
   return {
     props: {
       profile,
       recommendedRoute,
+      conversionBridge,
     },
   };
 };
