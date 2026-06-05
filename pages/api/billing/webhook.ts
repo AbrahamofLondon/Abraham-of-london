@@ -184,6 +184,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           productCode: pc,
           route: catalogProduct?.successPath ?? "/boardroom-brief",
         });
+
+        // Create BoardroomBriefOrder record
+        try {
+          const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
+          const existingOrder = await prisma.boardroomBriefOrder.findUnique({
+            where: { stripeSessionId: session.id },
+          }).catch(() => null);
+
+          if (!existingOrder) {
+            await prisma.boardroomBriefOrder.create({
+              data: {
+                userId: session.metadata?.userId || email,
+                email,
+                diagnosticId: session.metadata?.diagnosticId || null,
+                handoffId: session.metadata?.handoffId || null,
+                stripeSessionId: session.id,
+                stripePaymentIntentId: paymentIntentId,
+                paymentStatus: "paid",
+                deliveryStatus: "paid",
+                source: session.metadata?.source || "direct",
+                riskLevel: session.metadata?.riskLevel || null,
+                score: session.metadata?.score ? parseInt(session.metadata.score) : null,
+                metadata: {
+                  customerName: session.customer_details?.name || null,
+                  customerEmail: email,
+                  originPath: session.metadata?.originPath || null,
+                },
+              },
+            });
+          } else {
+            await prisma.boardroomBriefOrder.update({
+              where: { id: existingOrder.id },
+              data: {
+                paymentStatus: "paid",
+                deliveryStatus: "in_review",
+                stripePaymentIntentId: paymentIntentId || existingOrder.stripePaymentIntentId,
+                updatedAt: new Date(),
+              },
+            });
+          }
+        } catch (orderError) {
+          console.error("[BILLING_WEBHOOK_BOARDROOM_ORDER_FAILED]", orderError);
+        }
+
+        // Update advisory queue
+        try {
+          const userId = session.metadata?.userId || "";
+          if (userId) {
+            await prisma.$executeRaw`
+              UPDATE inner_circle_advisory_qualifications
+              SET status = 'BOARDROOM_PAID', updated_at = NOW()
+              WHERE user_id = ${userId}
+                AND status IN ('BOARDROOM_CLICKED', 'BOARDROOM_REQUESTED')
+            `;
+          }
+        } catch (qualError) {
+          console.error("[BILLING_WEBHOOK_BOARDROOM_QUAL_UPDATE_FAILED]", qualError);
+        }
       } else if (pc === "global-market-intelligence-report-q1-2026" || pc === "gmi_q1_2026") {
         trackServerLaunch("gmi_full_report_purchase_completed", "/api/billing/webhook", {
           productCode: pc,

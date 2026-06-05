@@ -756,6 +756,50 @@ model InnerCircleEmailEventLog {
   @@map("inner_circle_email_event_logs")
 }
 
+/// Boardroom Brief Order — tracks payment, fulfilment, and delivery status
+/// for paid Boardroom Brief products originating from Inner Circle diagnostics.
+model BoardroomBriefOrder {
+  id                   String   @id @default(cuid())
+  userId               String   @map("user_id")
+  email                String
+  diagnosticId         String?  @map("diagnostic_id")
+  handoffId            String?  @map("handoff_id")
+  stripeSessionId      String   @unique @map("stripe_session_id")
+  stripePaymentIntentId String? @map("stripe_payment_intent_id")
+  paymentStatus        String   @default("pending") @map("payment_status") // pending | paid | failed | refunded
+  deliveryStatus       String   @default("requested") @map("delivery_status") // requested | paid | in_review | dossier_generated | delivered | follow_up_due
+  source               String   @default("inner_circle") @map("source") // inner_circle | direct | admin
+  riskLevel            String?  @map("risk_level")
+  score                Int?
+  metadata             Json?    @map("metadata_json")
+  deliveredAt          DateTime? @map("delivered_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([paymentStatus])
+  @@index([deliveryStatus])
+  @@index([stripeSessionId])
+  @@map("boardroom_brief_orders")
+}
+
+/// Boardroom Bridge Handoff — safe redirect record from Inner Circle to Boardroom Brief.
+/// Replaces truncated diag URL parameter with a server-side handoff record.
+model BoardroomBridgeHandoff {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  diagnosticId    String?  @map("diagnostic_id")
+  riskLevel       String?  @map("risk_level")
+  recommendedRoute String  @map("recommended_route")
+  expiresAt       DateTime @map("expires_at")
+  usedAt          DateTime? @map("used_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("boardroom_bridge_handoffs")
+}
+
 model CampaignParticipant {
   id              String    @id @default(cuid())
   campaignId      String

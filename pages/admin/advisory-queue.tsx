@@ -388,11 +388,144 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
               → View Analytics Dashboard
             </Link>
           </div>
+
+          {/* Boardroom Brief Orders */}
+          <div className="mt-10 border-t pt-8" style={{ borderTopColor: RULE }}>
+            <p style={{ ...mono, color: `${GOLD}AA`, fontSize: 8, letterSpacing: "0.28em", textTransform: "uppercase" }}>
+              Boardroom Brief Orders
+            </p>
+            <BoardroomOrdersPanel />
+          </div>
         </div>
       </main>
     </>
   );
 };
+
+/** Boardroom Brief Orders panel — shows paid orders with delivery status and admin actions */
+function BoardroomOrdersPanel() {
+  const [orders, setOrders] = React.useState<Array<{
+    id: string;
+    email: string;
+    paymentStatus: string;
+    deliveryStatus: string;
+    riskLevel: string | null;
+    score: number | null;
+    createdAt: string;
+    stripeSessionId: string;
+  }>>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [actionLoading, setActionLoading] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch("/api/admin/advisory-queue/boardroom-orders")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok) setOrders(data.orders);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleDeliveryAction = async (orderId: string, deliveryStatus: string) => {
+    setActionLoading(orderId);
+    try {
+      const res = await fetch("/api/admin/advisory-queue/boardroom-delivery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, deliveryStatus }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, deliveryStatus } : o))
+        );
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <p className="mt-4 font-mono text-[8px] uppercase tracking-[0.16em] text-white/20">
+        Loading orders...
+      </p>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <p className="mt-4 font-mono text-[8px] uppercase tracking-[0.16em] text-white/20">
+        No Boardroom Brief orders yet.
+      </p>
+    );
+  }
+
+  const deliveryStatusColors: Record<string, string> = {
+    requested: "text-white/30",
+    paid: "text-blue-400",
+    in_review: "text-yellow-400",
+    dossier_generated: "text-purple-400",
+    delivered: "text-green-400",
+    follow_up_due: "text-orange-400",
+  };
+
+  return (
+    <div className="mt-4 overflow-x-auto">
+      <table className="w-full text-left text-sm">
+        <thead>
+          <tr style={{ borderBottom: `1px solid ${RULE}` }}>
+            {["Order", "Email", "Payment", "Delivery", "Risk", "Score", "Date", "Actions"].map((h) => (
+              <th key={h} className="px-3 py-3 font-mono text-[7px] uppercase tracking-[0.2em] text-white/30">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.id} className="border-b transition hover:bg-white/[0.015]" style={{ borderBottomColor: RULE }}>
+              <td className="px-3 py-3 font-mono text-[8px] text-white/40">{order.id.slice(0, 12)}</td>
+              <td className="px-3 py-3 text-xs text-white/60">{order.email}</td>
+              <td className="px-3 py-3">
+                <span className={`font-mono text-[7px] uppercase tracking-[0.12em] ${order.paymentStatus === "paid" ? "text-green-400" : "text-white/30"}`}>
+                  {order.paymentStatus}
+                </span>
+              </td>
+              <td className="px-3 py-3">
+                <span className={`font-mono text-[7px] uppercase tracking-[0.12em] ${deliveryStatusColors[order.deliveryStatus] || "text-white/30"}`}>
+                  {order.deliveryStatus.replace(/_/g, " ")}
+                </span>
+              </td>
+              <td className="px-3 py-3 font-mono text-[9px] text-white/40">{order.riskLevel || "—"}</td>
+              <td className="px-3 py-3 font-mono text-[9px] text-white/40">{order.score ?? "—"}</td>
+              <td className="px-3 py-3 font-mono text-[8px] text-white/30">
+                {new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+              </td>
+              <td className="px-3 py-3">
+                <div className="flex flex-wrap gap-1">
+                  {["in_review", "dossier_generated", "delivered", "follow_up_due"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleDeliveryAction(order.id, status)}
+                      disabled={actionLoading === order.id || order.deliveryStatus === status}
+                      className={`border px-2 py-1 font-mono text-[6px] uppercase tracking-[0.12em] transition disabled:opacity-30 ${
+                        order.deliveryStatus === status
+                          ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                          : "border-white/10 text-white/30 hover:bg-white/5"
+                      }`}
+                    >
+                      {status.replace(/_/g, " ")}
+                    </button>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const auth = await requireAdminPage(ctx);
