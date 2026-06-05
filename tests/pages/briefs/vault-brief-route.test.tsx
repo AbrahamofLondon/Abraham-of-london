@@ -34,6 +34,7 @@ const PUBLISHED_INTELLIGENCE_SLUG =
   "institutional-alpha-the-hidden-cost-of-flattering-data";
 const FRONTIER_RESILIENCE_SLUG =
   "frontier-resilience-stress-reveals-the-real-culture";
+const CANON_VAULT_SLUG = "brief-001-modern-household";
 
 const ROOT = path.resolve(__dirname, "../../..");
 const BRIEFS_CONTENT = path.join(ROOT, "content", "briefs");
@@ -69,18 +70,72 @@ const CANON_VAULT_SLUGS = Array.from({ length: 12 }, (_, index) =>
 );
 
 describe("vault brief route scope", () => {
-  it("prebuilds every physical vault brief path without runtime fallback", async () => {
+  it("uses fallback blocking to allow on-demand generation", async () => {
+    const response = await getVaultStaticPaths({} as never);
+    expect(response).toMatchObject({ fallback: "blocking" });
+  });
+
+  it("prebuilds every physical vault brief path", async () => {
     const response = await getVaultStaticPaths({} as never);
     const slugs = pathSlugs("paths" in response ? response.paths : []);
     const vaultFileSlugs = mdxBareSlugs(VAULT_BRIEFS_CONTENT);
 
-    expect(response).toMatchObject({ fallback: false });
     expect(slugs).toHaveLength(vaultFileSlugs.length);
     expect(slugs).toEqual(vaultFileSlugs);
     expect(slugs).toContain("brief-001-modern-household");
     expect(slugs).toContain("brief-012-aesthetics-of-order");
     expect(slugs).toContain(FRONTIER_RESILIENCE_SLUG);
     expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
+  it("valid Frontier Resilience vault slug renders through /vault/briefs", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: FRONTIER_RESILIENCE_SLUG },
+      } as never),
+    ).resolves.toMatchObject({
+      props: {
+        bareSlug: FRONTIER_RESILIENCE_SLUG,
+        brief: { slug: FRONTIER_RESILIENCE_SLUG },
+      },
+    });
+  });
+
+  it("valid Canon vault slug renders through /vault/briefs", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: CANON_VAULT_SLUG },
+      } as never),
+    ).resolves.toMatchObject({
+      props: {
+        bareSlug: CANON_VAULT_SLUG,
+        brief: { slug: CANON_VAULT_SLUG },
+      },
+    });
+  });
+
+  it("published Intelligence Brief does not render through /vault/briefs", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: PUBLISHED_INTELLIGENCE_SLUG },
+      } as never),
+    ).resolves.toMatchObject({ notFound: true });
+  });
+
+  it("scheduled Intelligence Brief does not render through /vault/briefs", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: SCHEDULED_INTELLIGENCE_SLUG },
+      } as never),
+    ).resolves.toMatchObject({ notFound: true });
+  });
+
+  it("missing slug returns notFound (fail-closed)", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: "nonexistent-brief-slug" },
+      } as never),
+    ).resolves.toMatchObject({ notFound: true });
   });
 
   it("/vault/briefs index separates canon and Frontier Resilience groups", async () => {
@@ -143,19 +198,6 @@ describe("vault brief route scope", () => {
     }
   });
 
-  it("renders Frontier Resilience as a legitimate VaultBrief", async () => {
-    await expect(
-      getVaultStaticProps({
-        params: { slug: FRONTIER_RESILIENCE_SLUG },
-      } as never),
-    ).resolves.toMatchObject({
-      props: {
-        bareSlug: FRONTIER_RESILIENCE_SLUG,
-        brief: { slug: FRONTIER_RESILIENCE_SLUG },
-      },
-    });
-  });
-
   it("keeps the 12 canon/pillar vault briefs renderable", async () => {
     const response = await getVaultStaticPaths({} as never);
     const slugs = pathSlugs("paths" in response ? response.paths : []);
@@ -174,30 +216,42 @@ describe("vault brief route scope", () => {
     }
   });
 
-  it("returns notFound for intelligence briefs through the vault route", async () => {
-    await expect(
-      getVaultStaticProps({
-        params: { slug: PUBLISHED_INTELLIGENCE_SLUG },
-      } as never),
-    ).resolves.toMatchObject({ notFound: true });
+  it("/briefs uses fallback blocking and generates only the 8 published launch intelligence briefs", async () => {
+    const response = await getPublicStaticPaths({} as never);
+    const paths = "paths" in response ? response.paths : [];
+    const slugs = paths.map((entry: any) => entry.params.slug);
 
+    expect(response).toMatchObject({ fallback: "blocking" });
+    expect(slugs).toHaveLength(8);
+    expect(slugs).toContain(PUBLISHED_INTELLIGENCE_SLUG);
+    expect(slugs).not.toContain(FRONTIER_RESILIENCE_SLUG);
+    expect(slugs).not.toContain(SCHEDULED_INTELLIGENCE_SLUG);
+  });
+
+  it("scheduled Intelligence Brief does not render through /briefs", async () => {
     await expect(
-      getVaultStaticProps({
+      getPublicStaticProps({
         params: { slug: SCHEDULED_INTELLIGENCE_SLUG },
       } as never),
     ).resolves.toMatchObject({ notFound: true });
   });
 
-  it("/briefs generates only the 8 published launch intelligence briefs", async () => {
-    const response = await getPublicStaticPaths({} as never);
-    const paths = "paths" in response ? response.paths : [];
-    const slugs = paths.map((entry: any) => entry.params.slug);
+  it("editorial-hold brief does not render through /briefs", async () => {
+    // There are no editorial-hold briefs currently, but the gate should block them
+    // Test with a slug that would be blocked by isPublishedBrief
+    await expect(
+      getPublicStaticProps({
+        params: { slug: "sovereign-intelligence-control-without-ownership" },
+      } as never),
+    ).resolves.toMatchObject({ notFound: true });
+  });
 
-    expect(response).toMatchObject({ fallback: false });
-    expect(slugs).toHaveLength(8);
-    expect(slugs).toContain(PUBLISHED_INTELLIGENCE_SLUG);
-    expect(slugs).not.toContain(FRONTIER_RESILIENCE_SLUG);
-    expect(slugs).not.toContain(SCHEDULED_INTELLIGENCE_SLUG);
+  it("published launch Intelligence Brief renders through /briefs", async () => {
+    await expect(
+      getPublicStaticProps({
+        params: { slug: PUBLISHED_INTELLIGENCE_SLUG },
+      } as never),
+    ).resolves.not.toMatchObject({ notFound: true });
   });
 
   it("Frontier Resilience does not render through /briefs", async () => {
@@ -208,10 +262,10 @@ describe("vault brief route scope", () => {
     ).resolves.toMatchObject({ notFound: true });
   });
 
-  it("scheduled intelligence brief direct routes remain notFound", async () => {
+  it("missing slug returns notFound through /briefs (fail-closed)", async () => {
     await expect(
       getPublicStaticProps({
-        params: { slug: SCHEDULED_INTELLIGENCE_SLUG },
+        params: { slug: "nonexistent-brief-slug" },
       } as never),
     ).resolves.toMatchObject({ notFound: true });
   });
