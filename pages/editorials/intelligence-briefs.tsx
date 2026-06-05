@@ -135,12 +135,12 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
       <Head>
         <meta name="robots" content="index,follow" />
         <link rel="canonical" href="/editorial/intelligence-briefs" />
-        <meta property="og:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/intelligence-briefs-cover.svg" />
+        <meta property="og:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/intelligence-briefs-cover.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Abraham of London — Intelligence Briefs" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/intelligence-briefs-cover.svg" />
+        <meta name="twitter:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/intelligence-briefs-cover.webp" />
         <meta name="twitter:image:alt" content="Abraham of London — Intelligence Briefs" />
       </Head>
 

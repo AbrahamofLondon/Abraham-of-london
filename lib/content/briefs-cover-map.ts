@@ -4,27 +4,27 @@
 export const BRIEFS_COVER_MAP = {
   /** Intelligence Briefs — main index */
   intelligenceBriefs: {
-    path: "/assets/images/covers/briefs/intelligence-briefs-cover.svg",
+    path: "/assets/images/covers/briefs/intelligence-briefs-cover.webp",
     alt: "Abraham of London — Intelligence Briefs",
   },
   /** Institutional Alpha series */
   institutionalAlpha: {
-    path: "/assets/images/covers/briefs/institutional-alpha-cover.svg",
+    path: "/assets/images/covers/briefs/institutional-alpha-cover.webp",
     alt: "Abraham of London — Institutional Alpha",
   },
   /** Sovereign Intelligence series */
   sovereignIntelligence: {
-    path: "/assets/images/covers/briefs/sovereign-intelligence-cover.svg",
+    path: "/assets/images/covers/briefs/sovereign-intelligence-cover.webp",
     alt: "Abraham of London — Sovereign Intelligence",
   },
   /** Vault Briefs — main index */
   vaultBriefs: {
-    path: "/assets/images/covers/briefs/vault-briefs-cover.svg",
+    path: "/assets/images/covers/briefs/vault-briefs-cover.webp",
     alt: "Abraham of London — Vault Briefs",
   },
   /** Frontier Resilience sequence */
   frontierResilience: {
-    path: "/assets/images/covers/briefs/frontier-resilience-cover.svg",
+    path: "/assets/images/covers/briefs/frontier-resilience-cover.webp",
     alt: "Abraham of London — Frontier Resilience",
   },
 } as const;
