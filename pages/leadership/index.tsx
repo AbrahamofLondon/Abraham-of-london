@@ -466,7 +466,7 @@ const LeadershipPage: NextPage = () => {
                 href="/inner-circle?source=leadership"
                 className="group inline-flex items-center gap-3 border border-white/12 px-8 py-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white transition-all duration-500 hover:border-white/22 hover:bg-white/[0.04]"
               >
-                <span>Join Inner Circle</span>
+                <span>Request Inner Circle access</span>
                 <ArrowRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
               </Link>
             </div>

@@ -212,7 +212,7 @@ const InstitutionalAlphaPage: NextPage<InferGetStaticPropsType<typeof getStaticP
           {[
             { label: "All Intelligence Briefs", href: "/briefs", sub: "Evidence Base" },
             { label: "Sovereign Intelligence", href: "/briefs/sovereign-intelligence", sub: "Series II" },
-            { label: "Join Inner Circle", href: "/inner-circle", sub: "Application" },
+            { label: "Move to diagnosis", href: "/pressure", sub: "Application" },
           ].map(({ label, href, sub }) => (
             <Link key={href} href={href} className="border border-white/10 p-5 transition hover:bg-white/[0.02]">
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>

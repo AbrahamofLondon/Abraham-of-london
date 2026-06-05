@@ -91,7 +91,7 @@ const READING_PATH = [
   { step: "2", label: "Explore a series", sub: "Go deep on Institutional Alpha or Sovereign Intelligence.", href: null },
   { step: "3", label: "Read the Foundational Canon", sub: "The doctrine from which the briefs derive their standards.", href: "/vault/briefs" },
   { step: "4", label: "Run a Diagnostic", sub: "Apply the framework to your institution through Decision Infrastructure.", href: "/diagnostic" },
-  { step: "5", label: "Join the Inner Circle", sub: "Where the Canon and Evidence Base are applied to real cases.", href: "/inner-circle" },
+  { step: "5", label: "Move from reading to diagnosis", sub: "Apply the Canon and Evidence Base through the operating layer.", href: "/pressure" },
 ];
 
 // ─── Series ───────────────────────────────────────────────────────────────────
@@ -192,7 +192,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               <p className="mt-4 text-sm leading-7 text-white/55">
                 The briefs diagnose the pattern. The Inner Circle is where the pattern is applied to
                 specific institutions, families, and leaders — through private diagnostics, scorecards,
-                case interpretation, and implementation paths. Joining the Inner Circle does not give
+                case interpretation, and implementation paths. Inner Circle access does not give
                 you more essays. It gives you the framework applied to your situation.
               </p>
             </div>
@@ -341,18 +341,18 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               Diagnosis is public. Application is not.
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/55">
-              Public briefs identify the pattern. Inner Circle membership is where the framework is
-              applied — to your institution, household, or leadership situation — through private
+              Public briefs identify the pattern. The Inner Circle operating layer is where the framework is
+              applied to your institution, household, or leadership situation through private
               diagnostics, scorecards, case interpretation, implementation paths, and live briefings.
               The value is not in recognising the pattern. It is in knowing whether you carry it,
               and what to do about it.
             </p>
             <Link
-              href="/inner-circle"
+              href="/pressure"
               className="mt-6 inline-flex items-center gap-2 border px-5 py-2.5 transition hover:opacity-90"
               style={{ ...mono, borderColor: `${GOLD}40`, color: `${GOLD}DD` }}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Join Inner Circle</span>
+              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Move from reading to diagnosis</span>
               <span aria-hidden="true">→</span>
             </Link>
           </section>

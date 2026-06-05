@@ -43,16 +43,16 @@ const ResourceDownload: React.FC<ResourceDownloadProps> = ({
     return (
       <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border border-yellow-200 text-center">
         <LockIcon className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Subscriber Exclusive</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Controlled Access Resource</h3>
         <p className="text-gray-600 mb-6">
-          This resource is available exclusively to our subscribers. 
-          Join our community to access premium content.
+          This resource requires the appropriate access level.
+          Request access before using restricted tools or downloads.
         </p>
         <button 
           className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
-          onClick={() => window.location.href = '/subscribe'}
+          onClick={() => window.location.href = '/inner-circle'}
         >
-          Become a Subscriber
+          Request Access
         </button>
       </div>
     );

@@ -735,7 +735,7 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
               <div className="mb-8 border px-5 py-4" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.05)" }}>
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.42)" }}>
-                    Access requires Inner Circle membership.
+                    Access requires Inner Circle operating-layer access.
                   </p>
                   <Link
                     href="/inner-circle"

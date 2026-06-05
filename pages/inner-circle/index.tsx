@@ -147,7 +147,7 @@ const InnerCirclePage: NextPage = () => {
   return (
     <Layout 
       title="Identity Verification | Inner Circle" 
-      description="Authentication required for sovereign intelligence access."
+      description="Controlled access to the Inner Circle operating layer."
       // Hide sidebar on the login gate
       className="p-0 ds-surface-inner-circle"
     >
@@ -171,11 +171,11 @@ const InnerCirclePage: NextPage = () => {
             </motion.div>
 
             <h1 className="text-6xl md:text-8xl font-serif mb-8 italic tracking-tighter leading-none" style={{ color: "var(--ds-text)" }}>
-              The Inner <span className="font-light" style={{ color: "var(--ds-text-subtle)" }}>Circle.</span>
+              Inner Circle <span className="font-light" style={{ color: "var(--ds-text-subtle)" }}>Access.</span>
             </h1>
 
             <p className="mx-auto max-w-xl font-light text-lg italic leading-relaxed" style={{ color: "var(--ds-text-muted)" }}>
-              Entry to the Sovereign Intelligence Portfolio is restricted. Authorized stakeholders must authenticate via cryptographic key.
+              Controlled access for saved diagnostics, governed tools, review cadence, and interpretation. This is not a public subscription archive.
             </p>
           </header>
 
@@ -192,8 +192,8 @@ const InnerCirclePage: NextPage = () => {
                   <Mail size={24} strokeWidth={1} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-serif italic" style={{ color: "var(--ds-text)" }}>Clearance</h2>
-                  <p className="text-[9px] uppercase tracking-[0.4em] font-mono mt-1" style={{ color: "var(--ds-text-subtle)" }}>Formal Registration</p>
+                  <h2 className="text-2xl font-serif italic" style={{ color: "var(--ds-text)" }}>Access Request</h2>
+                  <p className="text-[9px] uppercase tracking-[0.4em] font-mono mt-1" style={{ color: "var(--ds-text-subtle)" }}>Controlled registration</p>
                 </div>
               </div>
 
@@ -354,7 +354,7 @@ const InnerCirclePage: NextPage = () => {
                 type="submit"
                 className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
                 style={{ color: "var(--ds-accent)" }}
-                aria-label="Subscribe"
+                aria-label="Request access"
               >
                 <Send size={18} />
               </button>
@@ -397,4 +397,3 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   return { props: {} };
 };
-

@@ -78,7 +78,7 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     theme: "default",
     layout: "stack",
     actions: [
-      { href: "/inner-circle", label: "Join The Inner Circle", sub: "Private invites + tools", badge: "featured", priority: 1 },
+      { href: "/inner-circle", label: "Request Inner Circle Access", sub: "Diagnosis + application", badge: "featured", priority: 1 },
     ],
   },
   mentorship: {
@@ -106,8 +106,8 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     layout: "featured-first",
     featured: {
       href: "/inner-circle",
-      label: "Join The Inner Circle",
-      sub: "Primary channel for essays, tools, and private invites",
+      label: "Enter the Operating Layer",
+      sub: "Diagnostics, tools, and private application",
       badge: "featured",
       priority: 0,
     },
@@ -132,8 +132,8 @@ export const CTA_PRESETS: Record<CTAKey, CTAPreset> = {
     layout: "stack",
     featured: {
       href: "/newsletter",
-      label: "Join The Inner Circle Today",
-      sub: "Clear thinking. Real stakes. Transformative impact.",
+      label: "Receive the Inner Circle Briefing",
+      sub: "Clear thinking. Real stakes. Diagnostic routes.",
       badge: "exclusive",
       priority: 0,
     },

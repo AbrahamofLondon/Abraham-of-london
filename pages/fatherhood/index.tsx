@@ -169,7 +169,7 @@ const FatherhoodPage: NextPage = () => {
               Household Charter
             </Link>
             <Link href="/inner-circle?source=fatherhood" className="rounded-xl border border-gold/60 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gold hover:bg-gold/10 transition-all">
-              Join Inner Circle
+              Request Inner Circle access
             </Link>
           </div>
         </div>

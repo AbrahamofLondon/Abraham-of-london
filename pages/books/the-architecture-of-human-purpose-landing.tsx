@@ -277,7 +277,7 @@ const PurposeLandingPage: NextPage<PurposeLandingProps> = ({ book }) => {
                     href="/inner-circle"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-white/5 px-6 py-3 text-[11px] font-mono uppercase tracking-[0.28em] text-white/85 hover:bg-white/10 hover:border-white/20 transition-all"
                   >
-                    Join Inner Circle <ArrowRight className="h-4 w-4" />
+                    Request Inner Circle access <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>

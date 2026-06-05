@@ -213,25 +213,27 @@ export default function PressurePage() {
 
                   <div className="border p-5" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.055)" }}>
                     <p className="text-sm leading-7 text-white/68">
-                      Save this decision and track it over time — create a free account.
+                      Recommended route: {result.route.reason}
                     </p>
                     <div className="mt-5 flex flex-wrap gap-3">
                       <Link
-                        href="/auth/signin?callbackUrl=/inner-circle/dashboard"
-                        className="inline-flex min-h-11 items-center gap-2 border px-5 py-3 text-[9px] uppercase tracking-[0.15em]"
-                        style={{ ...mono, borderColor: `${GOLD}55`, color: "white", backgroundColor: `${GOLD}18` }}
-                      >
-                        Create free account
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                      <Link
                         href={result.route.href}
                         className="inline-flex min-h-11 items-center gap-2 border px-5 py-3 text-[9px] uppercase tracking-[0.15em]"
-                        style={{ ...mono, borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.70)" }}
+                        style={{ ...mono, borderColor: `${GOLD}55`, color: "white", backgroundColor: `${GOLD}18` }}
                       >
                         {result.route.label}
                         <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
+                      {result.route.productKey !== "free-account" ? (
+                        <Link
+                          href="/auth/signin?callbackUrl=/inner-circle/dashboard"
+                          className="inline-flex min-h-11 items-center gap-2 px-4 py-3 text-[9px] uppercase tracking-[0.15em]"
+                          style={{ ...mono, color: "rgba(255,255,255,0.46)" }}
+                        >
+                          Save decision instead
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
                 </div>

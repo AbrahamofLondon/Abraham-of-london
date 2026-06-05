@@ -44,22 +44,22 @@ const FREE_ENTRY_PRODUCTS: CatalogProduct[] = [
   CATALOG.fast_diagnostic,
 ].filter((p): p is CatalogProduct => Boolean(p));
 
-/** Market activation — first paid proof products */
-const MARKET_ACTIVATION_PRODUCTS: CatalogProduct[] = [
-  CATALOG.boardroom_brief,
-].filter((p): p is CatalogProduct => Boolean(p?.active));
-
 /** Global Market Intelligence — quarterly intelligence line */
 const INTELLIGENCE_PRODUCTS: CatalogProduct[] = [
   CATALOG.gmi_q1_2026,
 ].filter((p): p is CatalogProduct => Boolean(p?.active));
 
-/** Active paid one-time products (excluding bundles marked inactive) */
-const ONE_TIME_PRODUCTS: CatalogProduct[] = [
-  CATALOG.personal_decision_audit,
-  CATALOG.executive_reporting,
+/** Primary paid decision support ladder */
+const PAID_DECISION_SUPPORT_PRODUCTS: CatalogProduct[] = [
+  CATALOG.boardroom_brief,
   CATALOG.strategy_room,
   CATALOG.strategy_room_extended,
+  CATALOG.executive_reporting,
+].filter((p): p is CatalogProduct => Boolean(p?.active));
+
+/** Specialist instruments — not headline offers */
+const SPECIALIST_INSTRUMENT_PRODUCTS: CatalogProduct[] = [
+  CATALOG.personal_decision_audit,
   CATALOG.decision_exposure_instrument,
   CATALOG.mandate_clarity_framework,
   CATALOG.intervention_path_selector,
@@ -160,6 +160,7 @@ function FreePill() {
 
 function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.ReactNode }) {
   const action = resolvePricingAction(product);
+  const isBoardBriefBuilder = product.code === "board_brief_builder";
   return (
     <div
       style={{
@@ -203,6 +204,19 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
           {product.shortDescription}
         </p>
       )}
+
+      {isBoardBriefBuilder ? (
+        <p
+          style={{
+            ...mono,
+            fontSize: "8px",
+            color: "rgba(201,169,110,0.72)",
+            lineHeight: 1.65,
+          }}
+        >
+          Distinction: Boardroom Brief is the outcome-led paid brief. Board Brief Builder is the self-serve instrument for preparing your own board-facing decision pack.
+        </p>
+      ) : null}
 
       {action.type === "request_access" && (
         <p
@@ -414,10 +428,7 @@ export default function PricingPage() {
                 maxWidth: "540px",
               }}
             >
-              A structured access model across three tiers: free entry governed instruments
-              available without account, paid instruments and sessions that
-              produce governed records, and retained oversight for ongoing
-              decision accountability.
+              A simpler buyer ladder: start with a free diagnostic, move to a Boardroom Brief when risk is high, use Strategy Room when the matter has become live and critical, then escalate into Executive Reporting or retained oversight when the evidence justifies it.
             </p>
           </header>
 
@@ -440,15 +451,13 @@ export default function PricingPage() {
                 maxWidth: "680px",
               }}
             >
-              Start free. Preserve continuity with Professional. Escalate to
-              Executive Reporting or Strategy Room when the record earns it.
-              Contract retained oversight when governance must continue across cycles.
+              Free Diagnostic → Boardroom Brief → Strategy Room → Executive Reporting → Retainer / Enterprise. Specialist Decision Instruments remain available, but they support the ladder rather than competing with it.
             </p>
             <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "14px" }}>
               {[
-                { label: "View provenance demo", href: "/provenance/demo" },
-                { label: "View Trust Center", href: "/trust" },
-                { label: "Explore Library", href: "/library" },
+                { label: "Run Pressure Signal", href: "/pressure" },
+                { label: "Boardroom Brief", href: "/boardroom-brief" },
+                { label: "Strategy Room", href: "/strategy-room" },
               ].map(({ label, href }) => (
                 <Link
                   key={href}
@@ -483,20 +492,20 @@ export default function PricingPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {[
                 {
-                  condition: "You have a decision to make and no prior record",
-                  answer: "Start with the Fast Diagnostic — free, no account required.",
+                  condition: "You have a decision, pressure, or governance concern",
+                  answer: "Start with the free Pressure Signal or Fast Diagnostic.",
                 },
                 {
-                  condition: "You want your governed cases preserved and searchable across sessions",
-                  answer: "Professional subscription keeps governed cases alive and unlocks Return Brief.",
+                  condition: "The result is High",
+                  answer: "Move first to Boardroom Brief. It converts the risk into a board-ready challenge brief.",
                 },
                 {
-                  condition: "Your case has developed enough evidence to warrant a boardroom-ready report",
-                  answer: "Executive Reporting turns a governed case into a structured intelligence brief.",
+                  condition: "The result is Critical",
+                  answer: "Move first to Strategy Room. This is the live-intervention path for severe decision risk.",
                 },
                 {
-                  condition: "Your situation is live, high-stakes, and requires intensive facilitated resolution",
-                  answer: "Strategy Room — earned intervention, not a default upsell.",
+                  condition: "You need reporting-grade interpretation",
+                  answer: "Executive Reporting turns accumulated evidence into a governed report layer.",
                 },
                 {
                   condition: "Your organisation needs sustained decision governance across cycles",
@@ -578,7 +587,7 @@ export default function PricingPage() {
           {/* TIER 1 — FREE ENTRY                                           */}
           {/* ══════════════════════════════════════════════════════════════ */}
           <section style={{ marginBottom: "48px" }}>
-            <SectionLabel>Tier 1 — Free entry</SectionLabel>
+            <SectionLabel>Start Here</SectionLabel>
             <h2
               style={{
                 ...serif,
@@ -587,7 +596,7 @@ export default function PricingPage() {
                 marginBottom: "6px",
               }}
             >
-              No account required
+              Free Diagnostic
             </h2>
             <p
               style={{
@@ -599,9 +608,7 @@ export default function PricingPage() {
                 maxWidth: "500px",
               }}
             >
-              Anonymous, session-based. No signup. The governed finding is produced
-              immediately. Create a free account to keep up to 3 active governed cases.
-              Existing records remain readable even when cases later move out of active governance.
+              Begin with a free signal before choosing a paid product. High risk should move toward Boardroom Brief; Critical risk should move toward Strategy Room.
             </p>
             <div
               style={{
@@ -614,6 +621,36 @@ export default function PricingPage() {
               {FREE_ENTRY_PRODUCTS.map((p) => (
                 <ProductCard key={p.code} product={p} />
               ))}
+              <div
+                style={{
+                  border: "none",
+                  background: "rgba(255,255,255,0.015)",
+                  padding: "20px 22px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+                  <p style={{ ...serif, fontSize: "16px", color: "rgba(255,255,255,0.82)", flex: 1 }}>
+                    Pressure Signal
+                  </p>
+                  <FreePill />
+                </div>
+                <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.38)", lineHeight: 1.65 }}>
+                  Public entry point for one decision, pressure, or governance concern. Returns Green, Amber, or Red and routes to the next correct product.
+                </p>
+                <Link
+                  href="/pressure"
+                  style={{
+                    ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                    color: `${GOLD}CC`, textDecoration: "none", marginTop: "4px", alignSelf: "flex-start",
+                    borderBottom: `1px solid ${GOLD}40`, paddingBottom: "1px",
+                  }}
+                >
+                  Run signal →
+                </Link>
+              </div>
               {/* Decision Delay Exposure and Provenance demo are free tools */}
               <div
                 style={{
@@ -681,38 +718,41 @@ export default function PricingPage() {
           <GoldDivider />
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* BOARDROOM BRIEF — FIRST PAID PROOF PRODUCT                   */}
+          {/* PAID DECISION SUPPORT — PRIMARY LADDER                       */}
           {/* ══════════════════════════════════════════════════════════════ */}
-          {MARKET_ACTIVATION_PRODUCTS.length > 0 && (
+          {PAID_DECISION_SUPPORT_PRODUCTS.length > 0 && (
             <section style={{ marginBottom: "48px" }}>
-              <SectionLabel>Market activation — first paid step</SectionLabel>
+              <SectionLabel>Paid Decision Support</SectionLabel>
               <h2 style={{ ...serif, fontSize: "22px", color: "rgba(255,255,255,0.80)", marginBottom: "6px" }}>
-                Boardroom Brief
+                Boardroom Brief, Strategy Room, Executive Reporting
               </h2>
               <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.48)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
-                Generate a boardroom-readiness brief from one serious decision intake. The first recommended paid step before the deeper corridor.
+                This is the public commercial spine. Boardroom Brief is the first paid conversion product. Strategy Room is for critical live intervention. Executive Reporting is the governed reporting layer once evidence warrants interpretation.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.04)" }}>
-                {MARKET_ACTIVATION_PRODUCTS.map((p) => (
+                {PAID_DECISION_SUPPORT_PRODUCTS.map((p) => (
                   <ProductCard key={p.code} product={p} />
                 ))}
               </div>
+              <p style={{ ...mono, fontSize: "8px", color: "rgba(201,169,110,0.68)", lineHeight: 1.7, marginTop: "14px" }}>
+                Boardroom Brief is not Board Brief Builder. Boardroom Brief is an outcome-led paid brief; Board Brief Builder is a specialist self-serve instrument listed below.
+              </p>
             </section>
           )}
 
           <GoldDivider />
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* GLOBAL MARKET INTELLIGENCE — QUARTERLY INTELLIGENCE LINE     */}
+          {/* REPORTING & GOVERNANCE                                       */}
           {/* ══════════════════════════════════════════════════════════════ */}
           {INTELLIGENCE_PRODUCTS.length > 0 && (
             <section style={{ marginBottom: "48px" }}>
-              <SectionLabel>Market intelligence</SectionLabel>
+              <SectionLabel>Reporting & Governance</SectionLabel>
               <h2 style={{ ...serif, fontSize: "22px", color: "rgba(255,255,255,0.80)", marginBottom: "6px" }}>
                 Global Market Intelligence
               </h2>
               <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.48)", lineHeight: 1.6, marginBottom: "24px", maxWidth: "500px" }}>
-                Quarterly market intelligence built on prior-call review, not prediction theatre. Each report verifies material calls from the previous quarter before issuing the next.
+                Quarterly market intelligence built on prior-call review, not prediction theatre. It supports the governance and reporting layer rather than competing with the decision-support ladder.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.04)" }}>
                 {INTELLIGENCE_PRODUCTS.map((p) => (
@@ -725,7 +765,7 @@ export default function PricingPage() {
           <GoldDivider />
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* TIER 1B — PROFESSIONAL SUBSCRIPTION                          */}
+          {/* PROFESSIONAL SUBSCRIPTION                                     */}
           {/* ══════════════════════════════════════════════════════════════ */}
           <section style={{ marginBottom: "48px" }}>
             <SectionLabel>Tier 1B — Professional subscription</SectionLabel>
@@ -925,7 +965,7 @@ export default function PricingPage() {
                   Additional collaborators
                 </p>
                 <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
-                  Additional collaborators: {CATALOG.additional_collaborator?.displayPrice ?? "£15/month"} each after included seats. Added through account billing support until automated seat billing is enabled.
+                  Additional collaborators: {CATALOG.additional_collaborator?.displayPrice ?? "priced through account billing"} each after included seats. Added through account billing support until automated seat billing is enabled.
                 </p>
               </div>
             </div>
@@ -934,10 +974,10 @@ export default function PricingPage() {
           <GoldDivider />
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* TIER 2A — PAID ONE-TIME: REPORTING & EXECUTION                */}
+          {/* TIER 2A — SPECIALIST INSTRUMENTS                              */}
           {/* ══════════════════════════════════════════════════════════════ */}
           <section style={{ marginBottom: "48px" }}>
-            <SectionLabel>Tier 2A — Reporting & execution</SectionLabel>
+            <SectionLabel>Specialist Instruments</SectionLabel>
             <h2
               style={{
                 ...serif,
@@ -946,7 +986,7 @@ export default function PricingPage() {
                 marginBottom: "6px",
               }}
             >
-              Governed sessions and reports
+              Self-serve instruments for specific conditions
             </h2>
             <p
               style={{
@@ -958,8 +998,7 @@ export default function PricingPage() {
                 maxWidth: "500px",
               }}
             >
-              One-time access fees. Access is granted immediately upon payment.
-              Each session produces a governed commitment record stored in your Decision Centre.
+              Use these when you already know the specific constraint you need to test. They are not equal headline offers; they support the main ladder.
             </p>
             <div
               style={{
@@ -969,8 +1008,7 @@ export default function PricingPage() {
                 background: "rgba(255,255,255,0.04)",
               }}
             >
-              {[CATALOG.executive_reporting, CATALOG.strategy_room, CATALOG.strategy_room_extended]
-                .filter((p): p is CatalogProduct => Boolean(p?.active))
+              {SPECIALIST_INSTRUMENT_PRODUCTS
                 .map((p) => (
                   <ProductCard key={p.code} product={p} />
                 ))}
@@ -978,10 +1016,8 @@ export default function PricingPage() {
           </section>
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* TIER 2B — DECISION INSTRUMENTS                                */}
-          {/* ══════════════════════════════════════════════════════════════ */}
           <section style={{ marginBottom: "48px" }}>
-            <SectionLabel>Tier 2B — Decision instruments</SectionLabel>
+            <SectionLabel>Specialist Instrument Note</SectionLabel>
             <h2
               style={{
                 ...serif,
@@ -990,7 +1026,7 @@ export default function PricingPage() {
                 marginBottom: "6px",
               }}
             >
-              Structured decision instruments
+              Why the instruments are separate
             </h2>
             <p
               style={{
@@ -1002,23 +1038,8 @@ export default function PricingPage() {
                 maxWidth: "500px",
               }}
             >
-              Self-serve. Each instrument runs in-browser, writes to Decision Centre,
-              and produces a governed PDF dossier on completion.
+              Decision Instruments are catalogue tools for specific use cases. They should not be presented as a replacement for Boardroom Brief, Strategy Room, Executive Reporting, or retained governance.
             </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: "1px",
-                background: "rgba(255,255,255,0.04)",
-              }}
-            >
-              {ONE_TIME_PRODUCTS
-                .filter((p) => !["executive_reporting", "strategy_room", "strategy_room_extended"].includes(p.code))
-                .map((p) => (
-                  <ProductCard key={p.code} product={p} />
-                ))}
-            </div>
           </section>
 
           {/* ══════════════════════════════════════════════════════════════ */}
@@ -1071,7 +1092,7 @@ export default function PricingPage() {
           {/* TIER 3 — RETAINED OVERSIGHT                                   */}
           {/* ══════════════════════════════════════════════════════════════ */}
           <section style={{ marginBottom: "48px" }}>
-            <SectionLabel>Tier 3 — Retained oversight</SectionLabel>
+            <SectionLabel>Enterprise / Retainer</SectionLabel>
             <h2
               style={{
                 ...serif,

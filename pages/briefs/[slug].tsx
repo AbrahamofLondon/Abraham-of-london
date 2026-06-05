@@ -407,12 +407,12 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
                 Foundational Canon
               </Link>
               <Link
-                href="/inner-circle"
+                href="/pressure"
                 style={{ color: `${GOLD}CC` }}
                 className="transition hover:opacity-80"
                 onClick={() => trackBriefToInnerCircleClick({ slug: bareSlug, series: brief.series, briefId: brief.briefId })}
               >
-                Join Inner Circle
+                Move from reading to diagnosis
               </Link>
             </div>
           </footer>

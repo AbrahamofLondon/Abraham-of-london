@@ -94,7 +94,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     { label: 'Access earned-tier content', icon: <PlusCircle className="w-4 h-4" /> },
     { label: 'Receive governed intelligence', icon: <TrendingUp className="w-4 h-4" /> },
     { label: 'Enter advanced instruments', icon: <FileText className="w-4 h-4" /> },
-    { label: 'Join the inner circle', icon: <ArrowRight className="w-4 h-4" /> }
+    { label: 'Request Inner Circle access', icon: <ArrowRight className="w-4 h-4" /> }
   ];
 
   const activeSuggestions = variant === 'upgrade' ? upgradeSuggestions : suggestions;

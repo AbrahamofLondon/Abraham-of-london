@@ -121,7 +121,7 @@ const INSTRUMENTS = [
     slug: "board-brief-builder",
     title: "Board Brief Builder",
     price: getProductDisplayPrice("board_brief_builder"),
-    outcome: "Produces a board-ready decision brief with structured objection handling.",
+    outcome: "Self-serve board-pack instrument. It is distinct from the outcome-led Boardroom Brief.",
     usedWhen: "A decision must go to the board.",
     time: "20 min",
     category: "Board & Execution Grade",
@@ -180,7 +180,7 @@ export default function DecisionInstrumentsPage() {
                 maxWidth: "36ch",
                 fontStyle: "italic",
               }}>
-                Make the decision before the market makes it for you.
+                Specialist instruments for specific decision constraints.
               </h1>
               <p style={{
                 ...serif,
@@ -190,7 +190,7 @@ export default function DecisionInstrumentsPage() {
                 color: "rgba(255,255,255,0.45)",
                 maxWidth: "56ch",
               }}>
-                Ten governed instruments that score exposure, classify authority, detect drift, rank priorities, and prepare board-ready briefs. Each writes to institutional memory.
+                These are self-serve instruments for known constraints: exposure, authority, drift, escalation, priority, and board preparation. They support the commercial ladder; they are not the headline route for every buyer.
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-4">
                 <a
@@ -212,10 +212,16 @@ export default function DecisionInstrumentsPage() {
                   <ArrowRight style={{ width: 10, height: 10 }} />
                 </a>
                 <Link
-                  href="/decision-instruments/signal"
+                  href="/pressure"
                   style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
                 >
-                  Free Decision Signal
+                  Start with Pressure Signal
+                </Link>
+                <Link
+                  href="/boardroom-brief"
+                  style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
+                >
+                  Boardroom Brief
                 </Link>
                 <Link
                   href="/decision-instruments/history"
@@ -233,9 +239,9 @@ export default function DecisionInstrumentsPage() {
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="grid gap-px md:grid-cols-3 border-y" style={{ borderColor: "rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.04)" }}>
               {[
-                { pre: "Not advice", post: "Structured decision instruments" },
-                { pre: "Not analysis", post: "Immediate use" },
-                { pre: "Not content", post: "Outputs that force action" },
+                { pre: "Not headline offer", post: "Specialist instrument" },
+                { pre: "Not Boardroom Brief", post: "Self-serve tool" },
+                { pre: "Not generic content", post: "Condition-specific output" },
               ].map((item) => (
                 <div key={item.pre} style={{ backgroundColor: VOID, padding: "0.85rem 1rem" }}>
                   <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
@@ -258,6 +264,9 @@ export default function DecisionInstrumentsPage() {
           <div className="mx-auto max-w-6xl px-6 lg:px-12 py-8">
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "1rem" }}>
               What this system names and acts on
+            </p>
+            <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", maxWidth: "62ch", marginBottom: "1rem" }}>
+              Start with the free Pressure Signal when the correct route is unclear. Use Boardroom Brief for an outcome-led paid brief. Use Board Brief Builder only when you specifically need a self-serve board-pack instrument.
             </p>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
               {[

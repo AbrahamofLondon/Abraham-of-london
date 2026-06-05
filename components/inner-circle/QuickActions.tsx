@@ -245,7 +245,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
           <div className="flex-1">
             <h4 className="font-medium text-gray-900 mb-1">Need Help?</h4>
             <p className="text-sm text-gray-600 mb-3">
-              Our support team is here to help you get the most out of your membership.
+              Our support team is here to help you get the most out of your access.
             </p>
             <div className="flex space-x-2">
               <button

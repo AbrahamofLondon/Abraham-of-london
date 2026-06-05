@@ -657,7 +657,7 @@ const PrintsIndexPage: NextPage<Props> = ({ prints, featuredCount, categories, p
               </div>
               <h3 className="text-2xl font-semibold text-white mb-4">Access Premium Prints</h3>
               <p className="mb-8 text-gray-300 max-w-2xl mx-auto">
-                Join the Inner Circle for exclusive high-resolution prints, early access to new collections, 
+                Request Inner Circle access for controlled print releases, early access to new collections,
                 and physical print options for your workspace or home.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

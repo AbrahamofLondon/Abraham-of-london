@@ -273,6 +273,9 @@ const AdvisoryQueuePage: NextPage<Props> = ({ leads, stats }) => {
                         <span className="font-mono text-[8px] uppercase tracking-[0.1em] text-amber-400/80">
                           {lead.recommendedProduct.replace(/-/g, " ")}
                         </span>
+                        <div className="mt-1 font-mono text-[6px] uppercase tracking-[0.12em] text-white/24">
+                          Primary: {lead.latestRiskLevel === "Critical" ? "Strategy Room" : lead.latestRiskLevel === "High" ? "Boardroom Brief" : "Inner Circle"}
+                        </div>
                       </td>
                       <td className="px-3 py-3 max-w-[200px] truncate text-xs text-white/40">
                         {lead.qualificationReason}

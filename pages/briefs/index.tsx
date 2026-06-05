@@ -288,11 +288,11 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                 <span aria-hidden="true">→</span>
               </Link>
               <Link
-                href="/inner-circle"
+                href="/pressure"
                 className="inline-flex items-center gap-2 border px-4 py-2 transition hover:opacity-90"
                 style={{ ...mono, borderColor: `${GOLD}40`, color: `${GOLD}DD` }}
               >
-                <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Join Inner Circle</span>
+                <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Begin with the Pressure Signal</span>
                 <span aria-hidden="true">→</span>
               </Link>
             </div>
@@ -415,11 +415,11 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               scorecards, application protocols, case interpretation, and live briefings.
             </p>
             <Link
-              href="/inner-circle"
+              href="/pressure"
               className="mt-6 inline-flex items-center gap-2 border px-5 py-2.5 transition hover:opacity-90"
               style={{ ...mono, borderColor: `${GOLD}40`, color: `${GOLD}DD` }}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Join Inner Circle</span>
+              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Move from reading to diagnosis</span>
               <span aria-hidden="true">→</span>
             </Link>
           </section>
