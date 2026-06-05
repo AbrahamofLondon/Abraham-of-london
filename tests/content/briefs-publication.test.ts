@@ -14,6 +14,7 @@ const BRIEFS_CONTENT = path.join(ROOT, "content", "briefs");
 const VAULT_BRIEFS_CONTENT = path.join(ROOT, "content", "vault", "briefs");
 const REGISTRY_PATH = path.join(ROOT, "public", "system", "briefs-registry.json");
 const ARCHIVE_PATH = path.join(ROOT, "_archive", "briefs-pre-publication-source");
+const INTELLIGENCE_BRIEFS_EDITORIAL_PAGE = path.join(ROOT, "pages", "editorials", "intelligence-briefs.tsx");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -33,6 +34,18 @@ function getAnalyticalBriefs() {
   return fs
     .readdirSync(BRIEFS_CONTENT)
     .filter((f) => f.match(/^(institutional-alpha|sovereign-intelligence)/) && f.endsWith(".mdx"));
+}
+
+function getVaultBriefs() {
+  return fs.readdirSync(VAULT_BRIEFS_CONTENT).filter((f) => f.endsWith(".mdx"));
+}
+
+function getVaultPillarBriefs() {
+  return getVaultBriefs().filter((f) => /^brief-\d{3}-/.test(f));
+}
+
+function getVaultFrontierResilienceBriefs() {
+  return getVaultBriefs().filter((f) => f.startsWith("frontier-resilience-"));
 }
 
 function getIABriefs() {
@@ -84,8 +97,17 @@ describe("Intelligence Briefs — content structure", () => {
   });
 
   it("content/vault/briefs has exactly 12 pillar briefs", () => {
-    const pillars = fs.readdirSync(VAULT_BRIEFS_CONTENT).filter((f) => f.endsWith(".mdx"));
+    const pillars = getVaultPillarBriefs();
     expect(pillars).toHaveLength(12);
+  });
+
+  it("content/vault/briefs includes Frontier Resilience as vault briefs", () => {
+    const frontierResilience = getVaultFrontierResilienceBriefs();
+
+    expect(frontierResilience).toHaveLength(26);
+    expect(frontierResilience).toContain(
+      "frontier-resilience-stress-reveals-the-real-culture.mdx",
+    );
   });
 
   it("no analytical brief file name contains 'contamination'", () => {
@@ -335,20 +357,18 @@ describe("Intelligence Briefs — route pages exist", () => {
 // ─── Editorial front door does not dump all 50 ───────────────────────────────
 
 describe("Editorial front door", () => {
+  function readIntelligenceBriefsEditorialPage(): string {
+    return fs.readFileSync(INTELLIGENCE_BRIEFS_EDITORIAL_PAGE, "utf-8");
+  }
+
   it("/editorials/intelligence-briefs does not contain a full registry import or all-brief query", () => {
-    const content = fs.readFileSync(
-      path.join(ROOT, "pages", "editorials", "intelligence-briefs.tsx"),
-      "utf-8"
-    );
+    const content = readIntelligenceBriefsEditorialPage();
     // The editorial page should be static (no getStaticProps querying all briefs)
     expect(content).not.toMatch(/getAllBriefs/);
   });
 
   it("/editorials/intelligence-briefs explicitly lists the 8 launch briefs", () => {
-    const content = fs.readFileSync(
-      path.join(ROOT, "pages", "editorials", "intelligence-briefs.tsx"),
-      "utf-8"
-    );
+    const content = readIntelligenceBriefsEditorialPage();
     expect(content).toMatch(/LAUNCH_SET/);
     // Should mention all 8 IDs
     for (const id of ["IA-003", "IA-021", "IA-045", "IA-069", "SI-002", "SI-017", "SI-038", "SI-065"]) {
@@ -356,11 +376,19 @@ describe("Editorial front door", () => {
     }
   });
 
-  it("/editorials/intelligence-briefs includes Inner Circle boundary language", () => {
-    const content = fs.readFileSync(
-      path.join(ROOT, "pages", "editorials", "intelligence-briefs.tsx"),
-      "utf-8"
+  it("/editorials/intelligence-briefs keeps Frontier Resilience out of the Intelligence Brief launch set", () => {
+    const content = readIntelligenceBriefsEditorialPage();
+    const launchSet = content.slice(
+      content.indexOf("const LAUNCH_SET"),
+      content.indexOf("// ─── Reading path"),
     );
+
+    expect(launchSet).not.toMatch(/Frontier Resilience/);
+    expect(content).toMatch(/Vault sequences such as Frontier\s+Resilience sit inside the Vault as structured framework material/);
+  });
+
+  it("/editorials/intelligence-briefs includes Inner Circle boundary language", () => {
+    const content = readIntelligenceBriefsEditorialPage();
     expect(content).toMatch(/diagnosis is public/i);
     expect(content).toMatch(/application is not/i);
   });

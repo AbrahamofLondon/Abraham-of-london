@@ -24,10 +24,13 @@ type BriefCard = {
   href: string;
   title: string;
   series: string;
+  group: "canon" | "frontier-resilience";
+  groupLabel: string;
   abstract: string;
   requiredTier: AccessTier;
   tierLabel: string;
   volume?: number | null;
+  sequenceCode?: string | null;
   readTime?: string | null;
   tags: string[];
   publishedAt?: string | null;
@@ -123,40 +126,23 @@ function normalizeBriefSlug(input: unknown): string {
   return parts[parts.length - 1] || "";
 }
 
-function isBriefDoc(doc: any): boolean {
+function isVaultBriefDoc(doc: any): boolean {
   if (!doc) return false;
 
   const docKind = safeString(doc?.docKind).toLowerCase();
   const type = safeString(doc?.type || doc?._type).toLowerCase();
-  const kind = safeString(doc?.kind).toLowerCase();
-  const category = safeString(doc?.category).toLowerCase();
-  const series = safeString(doc?.series).toLowerCase();
   const flattened = normalizePathLocal(doc?._raw?.flattenedPath);
   const sourceFilePath = normalizePathLocal(doc?._raw?.sourceFilePath);
   const slug = normalizePathLocal(doc?.slug);
-  const collectionSlug = normalizePathLocal(doc?.collectionSlug);
   const href = normalizePathLocal(doc?.href);
-  const collection = normalizePathLocal(doc?.collection);
 
   return (
-    docKind === "brief" ||
-    type.includes("brief") ||
-    kind.includes("brief") ||
-    category.includes("brief") ||
-    series.includes("brief") ||
-    collection === "briefs" ||
-    flattened.startsWith("briefs/") ||
-    flattened.startsWith("content/briefs/") ||
+    type === "vaultbrief" ||
+    docKind === "vaultbrief" ||
     flattened.startsWith("vault/briefs/") ||
-    sourceFilePath.startsWith("briefs/") ||
-    sourceFilePath.startsWith("content/briefs/") ||
     sourceFilePath.startsWith("vault/briefs/") ||
-    slug.startsWith("briefs/") ||
     slug.startsWith("vault/briefs/") ||
-    collectionSlug.startsWith("briefs/") ||
-    href.startsWith("briefs/") ||
     href.startsWith("vault/briefs/") ||
-    href.startsWith("/briefs/") ||
     href.startsWith("/vault/briefs/")
   );
 }
@@ -184,7 +170,7 @@ function getCombinedBriefs(docs: any[]): any[] {
 
   return (docs || [])
     .filter((doc: any) => doc && typeof doc === "object" && !doc?.draft)
-    .filter(isBriefDoc)
+    .filter(isVaultBriefDoc)
     .filter((doc: any) => {
       const key = getDocKey(doc);
       if (!key) return false;
@@ -206,8 +192,30 @@ function formatDate(value?: string | null) {
 }
 
 function briefCode(brief: BriefCard) {
+  if (brief.sequenceCode) return brief.sequenceCode;
   if (typeof brief.volume === "number") return `BRF-${String(brief.volume).padStart(2, "0")}`;
   return `BRF-${brief.slug.slice(0, 3).toUpperCase()}`;
+}
+
+function briefGroupForSlug(slug: string): BriefCard["group"] {
+  return slug.startsWith("frontier-resilience-") ? "frontier-resilience" : "canon";
+}
+
+function groupLabelForBrief(group: BriefCard["group"]): string {
+  return group === "frontier-resilience" ? "Frontier Resilience Sequence" : "Foundational Canon";
+}
+
+function sequenceCodeForBrief(doc: any, slug: string, group: BriefCard["group"]): string | null {
+  const explicit =
+    safeString(doc?.institutionalId).trim() ||
+    safeString(doc?.briefId).trim();
+  if (explicit) return explicit;
+
+  const canonMatch = slug.match(/^brief-(\d{3})-/);
+  if (canonMatch) return `CANON-${canonMatch[1]}`;
+
+  if (group === "frontier-resilience") return "FR";
+  return null;
 }
 
 function BriefRow({
@@ -218,14 +226,17 @@ function BriefRow({
   canOpen: boolean;
 }) {
   const restricted = brief.requiredTier !== "public";
+  const frontier = brief.group === "frontier-resilience";
+  const accent = frontier ? "#7CB8E8" : GOLD;
 
   return (
     <Link
       href={brief.href}
       className="group grid gap-3 border-b px-0 py-4 transition-colors duration-200 md:grid-cols-[5rem_7rem_1fr_6rem_5rem]"
       style={{
-        borderBottomColor: "rgba(255,255,255,0.048)",
+        borderBottomColor: frontier ? "rgba(124,184,232,0.12)" : "rgba(201,169,110,0.13)",
         opacity: canOpen ? 1 : 0.64,
+        backgroundColor: frontier ? "rgba(124,184,232,0.018)" : "transparent",
       }}
     >
       <div className="font-mono text-[7px] uppercase tracking-[0.24em]" style={{ color: "rgba(255,255,255,0.2)" }}>
@@ -239,7 +250,8 @@ function BriefRow({
 
       <div className="min-w-0">
         <div className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: GOLD }}>
-          {brief.series}
+          <span style={{ color: accent }}>{brief.groupLabel}</span>
+          {brief.series ? <span style={{ color: "rgba(255,255,255,0.22)" }}> · {brief.series}</span> : null}
         </div>
         <h2 className="mt-1 truncate font-serif text-[1.05rem] italic" style={{ color: canOpen ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.45)" }}>
           {brief.title}
@@ -257,6 +269,59 @@ function BriefRow({
         {brief.readTime || "5 min"}
       </div>
     </Link>
+  );
+}
+
+function BriefGroupSection({
+  id,
+  title,
+  label,
+  description,
+  items,
+  userTier,
+  accent,
+}: {
+  id: string;
+  title: string;
+  label: string;
+  description: string;
+  items: BriefCard[];
+  userTier: AccessTier;
+  accent: string;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <section id={id} className="scroll-mt-24">
+      <div className="mb-5 border-b pb-5" style={{ borderBottomColor: RULE }}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-mono text-[7px] uppercase tracking-[0.32em]" style={{ color: accent }}>
+              {label}
+            </p>
+            <h2 className="mt-2 font-serif italic text-2xl" style={{ color: "rgba(255,255,255,0.86)" }}>
+              {title}
+            </h2>
+          </div>
+          <span className="font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.24)" }}>
+            {items.length} briefs
+          </span>
+        </div>
+        <p className="mt-3 max-w-3xl text-sm leading-7" style={{ color: "rgba(255,255,255,0.42)" }}>
+          {description}
+        </p>
+      </div>
+
+      <div>
+        {items.map((brief) => (
+          <BriefRow
+            key={brief.slug}
+            brief={brief}
+            canOpen={hasAccess(userTier, brief.requiredTier)}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -279,6 +344,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       if (!slugBare) return null;
 
       const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
+      const group = briefGroupForSlug(slugBare);
 
       return {
         slug: slugBare,
@@ -289,6 +355,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
           safeString(doc?.category).trim() ||
           safeString(doc?.kind).trim() ||
           "Vault Briefs",
+        group,
+        groupLabel: groupLabelForBrief(group),
         abstract:
           safeString(doc?.abstract).trim() ||
           safeString(doc?.excerpt).trim() ||
@@ -298,6 +366,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         requiredTier,
         tierLabel: getTierLabel(requiredTier),
         volume: typeof doc?.volume === "number" ? doc.volume : null,
+        sequenceCode: sequenceCodeForBrief(doc, slugBare, group),
         readTime: safeString(doc?.readTime).trim() || "5 min read",
         tags: Array.isArray(doc?.tags) ? doc.tags.map(String) : [],
         publishedAt: doc?.date ? String(doc.date) : null,
@@ -325,7 +394,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
 const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
   const { data: session, status } = useSession();
-  const [series, setSeries] = React.useState<string>("All");
 
   const userTier = normalizeUserTier(
     (session?.user as any)?.tier ??
@@ -333,16 +401,15 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
       "public",
   );
 
-  const seriesOptions = React.useMemo(() => {
-    const values = new Set<string>(["All"]);
-    items.forEach((item) => values.add(item.series));
-    return Array.from(values);
-  }, [items]);
+  const canonItems = React.useMemo(
+    () => items.filter((item) => item.group === "canon"),
+    [items],
+  );
 
-  const filtered = React.useMemo(() => {
-    if (series === "All") return items;
-    return items.filter((item) => item.series === series);
-  }, [items, series]);
+  const frontierItems = React.useMemo(
+    () => items.filter((item) => item.group === "frontier-resilience"),
+    [items],
+  );
 
   const isAuthenticated = status === "authenticated";
 
@@ -378,34 +445,30 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
               Deployable briefing artifacts.
             </h1>
 
-            <p className="mt-5 font-mono text-[8px] uppercase tracking-[0.34em]" style={{ color: "rgba(255,255,255,0.28)" }}>
-              Restricted operating documents for active members.
+            <p className="mt-5 max-w-3xl text-sm leading-7" style={{ color: "rgba(255,255,255,0.46)" }}>
+              Vault Briefs are not the same as Intelligence Briefs. Intelligence Briefs diagnose public
+              institutional failure. Vault Briefs preserve the canon, frameworks, and resilience
+              sequences that apply the doctrine under pressure.
             </p>
 
             <div className="mt-6 h-px w-full" style={{ backgroundColor: RULE }} />
 
-            {seriesOptions.length > 1 ? (
-              <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
-                {seriesOptions.map((entry) => {
-                  const active = series === entry;
-                  return (
-                    <button
-                      key={entry}
-                      type="button"
-                      onClick={() => setSeries(entry)}
-                      className="font-mono text-[8px] uppercase tracking-[0.3em]"
-                      style={{
-                        color: active ? GOLD : "rgba(255,255,255,0.3)",
-                        textDecoration: active ? "underline" : "none",
-                        textUnderlineOffset: "0.35rem",
-                      }}
-                    >
-                      {entry}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
+            <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+              <a
+                href="#foundational-canon"
+                className="font-mono text-[8px] uppercase tracking-[0.3em]"
+                style={{ color: GOLD }}
+              >
+                Foundational Canon · {canonItems.length}
+              </a>
+              <a
+                href="#frontier-resilience"
+                className="font-mono text-[8px] uppercase tracking-[0.3em]"
+                style={{ color: "#7CB8E8" }}
+              >
+                Frontier Resilience Sequence · {frontierItems.length}
+              </a>
+            </div>
           </div>
         </section>
 
@@ -414,7 +477,8 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
             <div className="mb-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[7px] uppercase tracking-[0.28em]" style={{ color: "rgba(255,255,255,0.22)" }}>
               <span>{total} briefs indexed</span>
               <span>Tier: {userTier}</span>
-              <span>{filtered.length} visible in current series</span>
+              <span>{canonItems.length} canon</span>
+              <span>{frontierItems.length} frontier resilience</span>
             </div>
 
             {!isAuthenticated ? (
@@ -434,21 +498,32 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
               </div>
             ) : null}
 
-            {filtered.length === 0 ? (
+            {items.length === 0 ? (
               <div className="border px-6 py-16 text-center" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 <p className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.24)" }}>
                   No briefings resolved in registry
                 </p>
               </div>
             ) : (
-              <div>
-                {filtered.map((brief) => (
-                  <BriefRow
-                    key={brief.slug}
-                    brief={brief}
-                    canOpen={hasAccess(userTier, brief.requiredTier)}
-                  />
-                ))}
+              <div className="space-y-14">
+                <BriefGroupSection
+                  id="foundational-canon"
+                  title="Foundational Canon"
+                  label="Foundational Canon"
+                  description="The 12 pillar briefs set the doctrinal foundation: household, estate, oath, time, geography, and the primary forms of order."
+                  items={canonItems}
+                  userTier={userTier}
+                  accent={GOLD}
+                />
+                <BriefGroupSection
+                  id="frontier-resilience"
+                  title="Frontier Resilience Sequence"
+                  label="Frontier Resilience"
+                  description="A vault sequence on pressure, stress, leadership fatigue, decision latency, and the culture revealed when institutions operate under strain."
+                  items={frontierItems}
+                  userTier={userTier}
+                  accent="#7CB8E8"
+                />
               </div>
             )}
           </div>

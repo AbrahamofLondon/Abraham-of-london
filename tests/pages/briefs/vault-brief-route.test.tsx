@@ -1,3 +1,7 @@
+import fs from "fs";
+import path from "path";
+import type { ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next-auth/react", () => ({
@@ -8,10 +12,17 @@ vi.mock("next/dynamic", () => ({
   default: () => () => null,
 }));
 
+vi.mock("@/components/Layout", () => ({
+  default: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
+
 import {
   getStaticPaths as getVaultStaticPaths,
   getStaticProps as getVaultStaticProps,
 } from "@/pages/vault/briefs/[slug]";
+import VaultBriefsIndexPage, {
+  getStaticProps as getVaultIndexStaticProps,
+} from "@/pages/vault/briefs/index";
 import {
   getStaticPaths as getPublicStaticPaths,
   getStaticProps as getPublicStaticProps,
@@ -21,46 +32,124 @@ const SCHEDULED_INTELLIGENCE_SLUG =
   "institutional-alpha-false-confidence-from-aggregated-metrics";
 const PUBLISHED_INTELLIGENCE_SLUG =
   "institutional-alpha-the-hidden-cost-of-flattering-data";
+const FRONTIER_RESILIENCE_SLUG =
+  "frontier-resilience-stress-reveals-the-real-culture";
+
+const ROOT = path.resolve(__dirname, "../../..");
+const BRIEFS_CONTENT = path.join(ROOT, "content", "briefs");
+const VAULT_BRIEFS_CONTENT = path.join(ROOT, "content", "vault", "briefs");
+
+function mdxBareSlugs(dir: string): string[] {
+  return fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith(".mdx"))
+    .map((file) => file.replace(/\.mdx$/i, ""))
+    .sort();
+}
+
+function intelligenceBriefSlugs(): string[] {
+  return mdxBareSlugs(BRIEFS_CONTENT).filter(
+    (slug) =>
+      slug.startsWith("institutional-alpha-") ||
+      slug.startsWith("sovereign-intelligence-"),
+  );
+}
+
+function pathSlugs(paths: unknown): string[] {
+  return (Array.isArray(paths) ? paths : [])
+    .map((entry: any) =>
+      typeof entry === "string" ? entry.split("/").filter(Boolean).pop() : entry?.params?.slug,
+    )
+    .filter(Boolean)
+    .sort();
+}
+
+const CANON_VAULT_SLUGS = Array.from({ length: 12 }, (_, index) =>
+  `brief-${String(index + 1).padStart(3, "0")}`,
+);
 
 describe("vault brief route scope", () => {
-  it("prebuilds only the 12 vault/canon brief paths without runtime fallback", async () => {
+  it("prebuilds every physical vault brief path without runtime fallback", async () => {
     const response = await getVaultStaticPaths({} as never);
-    const paths = "paths" in response ? response.paths : [];
-    const slugs = paths.map((entry: any) => entry.params.slug).sort();
+    const slugs = pathSlugs("paths" in response ? response.paths : []);
+    const vaultFileSlugs = mdxBareSlugs(VAULT_BRIEFS_CONTENT);
 
     expect(response).toMatchObject({ fallback: false });
-    expect(slugs).toHaveLength(12);
+    expect(slugs).toHaveLength(vaultFileSlugs.length);
+    expect(slugs).toEqual(vaultFileSlugs);
     expect(slugs).toContain("brief-001-modern-household");
     expect(slugs).toContain("brief-012-aesthetics-of-order");
+    expect(slugs).toContain(FRONTIER_RESILIENCE_SLUG);
+    expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
+  it("/vault/briefs index separates canon and Frontier Resilience groups", async () => {
+    const response = await getVaultIndexStaticProps({} as never);
+    const props = "props" in response ? (response.props as any) : null;
+    const items = props?.items || [];
+    const canon = items.filter((item: any) => item.group === "canon");
+    const frontier = items.filter((item: any) => item.group === "frontier-resilience");
+    const html = renderToStaticMarkup(<VaultBriefsIndexPage {...props} />);
+
+    expect(props).toMatchObject({ total: 38 });
+    expect(canon).toHaveLength(12);
+    expect(frontier).toHaveLength(26);
+    expect(html).toContain("Foundational Canon");
+    expect(html).toContain("Frontier Resilience Sequence");
+    expect(html).toContain("Vault Briefs are not the same as Intelligence Briefs");
+    expect(html).toContain("frontier-resilience");
   });
 
   it("does not generate vault paths for content/briefs intelligence slugs", async () => {
     const response = await getVaultStaticPaths({} as never);
-    const paths = "paths" in response ? response.paths : [];
-    const slugs = paths.map((entry: any) => entry.params.slug);
+    const slugs = pathSlugs("paths" in response ? response.paths : []);
+    const leaked = intelligenceBriefSlugs().filter((slug) => slugs.includes(slug));
 
+    expect(leaked).toEqual([]);
     expect(slugs).not.toContain(PUBLISHED_INTELLIGENCE_SLUG);
     expect(slugs).not.toContain(SCHEDULED_INTELLIGENCE_SLUG);
     expect(slugs.some((slug: string) => slug.startsWith("institutional-alpha-"))).toBe(false);
     expect(slugs.some((slug: string) => slug.startsWith("sovereign-intelligence-"))).toBe(false);
   });
 
-  it("renders all 12 canon/vault briefs through /vault/briefs/[slug]", async () => {
+  it("generates clean bare slugs for every vault brief path", async () => {
     const response = await getVaultStaticPaths({} as never);
-    const paths = "paths" in response ? response.paths : [];
+    const slugs = pathSlugs("paths" in response ? response.paths : []);
 
-    for (const entry of paths as Array<{ params: { slug: string } }>) {
-      const props = await getVaultStaticProps({
-        params: { slug: entry.params.slug },
-      } as never);
+    for (const slug of slugs) {
+      expect(slug).not.toContain("/");
+      expect(slug).not.toMatch(/\.mdx$/);
+    }
+  });
 
-      expect(props).not.toMatchObject({ notFound: true });
-      expect(props).toMatchObject({
-        props: {
-          bareSlug: entry.params.slug,
-          brief: { slug: entry.params.slug },
-        },
-      });
+  it("renders Frontier Resilience as a legitimate VaultBrief", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: FRONTIER_RESILIENCE_SLUG },
+      } as never),
+    ).resolves.toMatchObject({
+      props: {
+        bareSlug: FRONTIER_RESILIENCE_SLUG,
+        brief: { slug: FRONTIER_RESILIENCE_SLUG },
+      },
+    });
+  });
+
+  it("keeps the 12 canon/pillar vault briefs renderable", async () => {
+    const response = await getVaultStaticPaths({} as never);
+    const slugs = pathSlugs("paths" in response ? response.paths : []);
+    const canonSlugs = slugs.filter((slug) =>
+      CANON_VAULT_SLUGS.some((prefix) => slug.startsWith(prefix)),
+    );
+
+    expect(canonSlugs).toHaveLength(12);
+
+    for (const slug of canonSlugs) {
+      await expect(
+        getVaultStaticProps({
+          params: { slug },
+        } as never),
+      ).resolves.not.toMatchObject({ notFound: true });
     }
   });
 
@@ -86,7 +175,16 @@ describe("vault brief route scope", () => {
     expect(response).toMatchObject({ fallback: false });
     expect(slugs).toHaveLength(8);
     expect(slugs).toContain(PUBLISHED_INTELLIGENCE_SLUG);
+    expect(slugs).not.toContain(FRONTIER_RESILIENCE_SLUG);
     expect(slugs).not.toContain(SCHEDULED_INTELLIGENCE_SLUG);
+  });
+
+  it("Frontier Resilience does not render through /briefs", async () => {
+    await expect(
+      getPublicStaticProps({
+        params: { slug: FRONTIER_RESILIENCE_SLUG },
+      } as never),
+    ).resolves.toMatchObject({ notFound: true });
   });
 
   it("scheduled intelligence brief direct routes remain notFound", async () => {

@@ -919,8 +919,8 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
                 {
                   label: "Foundational Canon",
                   sublabel: "Doctrine",
-                  description: "The 12 pillar briefs defining the standards, worldview, and operating doctrine of Abraham of London.",
-                  href: "/vault/briefs",
+                  description: "The 12 pillar briefs defining the standards and worldview. Frontier Resilience — Vault sequence on pressure, stress, and institutional culture.",
+                  href: "/vault/briefs#frontier-resilience",
                   accent: GOLD,
                 },
                 {

@@ -153,6 +153,10 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               of institutional failure, sovereign exposure, or decision-intelligence breakdown — drawn
               from the diagnostic framework used across Abraham of London engagements.
             </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/45">
+              Intelligence Briefs are the public evidence base. Vault sequences such as Frontier
+              Resilience sit inside the Vault as structured framework material.
+            </p>
           </header>
 
           {/* ── Editorial thesis ──────────────────────────────────── */}
@@ -307,7 +311,9 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/55">
               The 12 Pillar Briefs establish the doctrine, standards, and worldview that underwrite
               the diagnostic criteria in every Intelligence Brief. The evidence base gains full force
-              within the Canon's framework of order, sovereignty, and institutional health.
+              within the Canon's framework of order, sovereignty, and institutional health. Vault
+              sequences such as Frontier Resilience preserve structured application material rather
+              than public diagnostic evidence.
             </p>
             <Link
               href="/vault/briefs"
@@ -350,7 +356,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               { label: "Full Library", href: "/briefs", sub: "Intelligence Briefs" },
               { label: "Institutional Alpha", href: "/briefs/institutional-alpha", sub: "Series I · 25 briefs" },
               { label: "Sovereign Intelligence", href: "/briefs/sovereign-intelligence", sub: "Series II · 25 briefs" },
-              { label: "Foundational Canon", href: "/vault/briefs", sub: "12 pillar briefs" },
+              { label: "Foundational Canon", href: "/vault/briefs", sub: "12 pillars · vault sequences" },
             ].map(({ label, href, sub }) => (
               <Link key={href} href={href} className="border border-white/10 p-4 transition hover:bg-white/[0.02]">
                 <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
