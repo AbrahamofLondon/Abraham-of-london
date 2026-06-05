@@ -658,6 +658,13 @@ const BriefsIndexPage: NextPage<Props> = ({ items, total }) => {
           name="description"
           content="Restricted operating documents for active members."
         />
+        <meta property="og:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/vault-briefs-cover.svg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Abraham of London — Vault Briefs" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/vault-briefs-cover.svg" />
+        <meta name="twitter:image:alt" content="Abraham of London — Vault Briefs" />
       </Head>
 
       <main className="min-h-screen bg-[rgb(3,3,5)] text-white">

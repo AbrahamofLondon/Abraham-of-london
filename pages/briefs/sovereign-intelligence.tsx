@@ -103,6 +103,13 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
   >
     <Head>
       <meta name="robots" content="index,follow" />
+      <meta property="og:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/sovereign-intelligence-cover.svg" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content="Abraham of London — Sovereign Intelligence" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:image" content="https://www.abrahamoflondon.org/assets/images/covers/briefs/sovereign-intelligence-cover.svg" />
+      <meta name="twitter:image:alt" content="Abraham of London — Sovereign Intelligence" />
     </Head>
 
     <main className="min-h-screen px-6 py-24 text-white" style={{ backgroundColor: "rgb(3,3,5)" }}>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050505"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7CB8E8" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#7CB8E8" stop-opacity="0.5"/>
+      <stop offset="0.7" stop-color="#7CB8E8" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#7CB8E8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7CB8E8" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#7CB8E8" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#7CB8E8" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Signal wave abstraction -->
+  <path d="M0,400 Q100,380 200,395 T400,385 T600,405 T800,390 T1000,400 T1200,395" fill="none" stroke="url(#signal)" stroke-width="1.5"/>
+  <path d="M0,410 Q100,395 200,405 T400,398 T600,415 T800,405 T1000,410 T1200,405" fill="none" stroke="rgba(124,184,232,0.04)" stroke-width="1"/>
+  <!-- Blue accent rule -->
+  <rect x="80" y="240" width="4" height="150" fill="#7CB8E8" opacity="0.6"/>
+  <!-- Top rule line -->
+  <line x1="80" y1="230" x2="1120" y2="230" stroke="url(#line)" stroke-width="0.5"/>
+  <!-- Bottom rule line -->
+  <line x1="80" y1="420" x2="1120" y2="420" stroke="url(#line)" stroke-width="0.5"/>
+  <!-- Text hierarchy -->
+  <text font-family="'JetBrains Mono', 'Courier New', monospace" font-size="11" fill="#7CB8E8" opacity="0.7" letter-spacing="6" x="100" y="280">ABRAHAM OF LONDON</text>
+  <text font-family="'Cormorant Garamond', Georgia, serif" font-size="52" fill="#ffffff" opacity="0.92" x="100" y="340" font-style="italic">Institutional Alpha</text>
+  <text font-family="'JetBrains Mono', 'Courier New', monospace" font-size="12" fill="rgba(255,255,255,0.45)" letter-spacing="2" x="100" y="380">Signal decay, reporting truth, and the discipline of decision-grade intelligence</text>
+  <text font-family="'JetBrains Mono', 'Courier New', monospace" font-size="9" fill="rgba(255,255,255,0.25)" letter-spacing="3" x="100" y="405">Intelligence Briefs series</text>
+</svg>
