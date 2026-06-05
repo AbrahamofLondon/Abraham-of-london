@@ -30,6 +30,38 @@ function readFrontmatter(filePath: string): Record<string, string> {
   return fm;
 }
 
+function readFrontmatterBlock(filePath: string): string {
+  const content = fs.readFileSync(filePath, "utf-8");
+  const match = content.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+  return match?.[1] ?? "";
+}
+
+function readBody(filePath: string): string {
+  return fs.readFileSync(filePath, "utf-8").replace(/^---\r?\n[\s\S]+?\r?\n---\r?\n/, "");
+}
+
+function hasFrontmatterField(frontmatter: string, field: string): boolean {
+  return new RegExp(`^${field}:\\s*\\S`, "m").test(frontmatter);
+}
+
+function getFrontmatterFieldBlock(frontmatter: string, field: string): string {
+  const lines = frontmatter.split(/\r?\n/);
+  const start = lines.findIndex((line) => line.startsWith(`${field}:`));
+  if (start === -1) return "";
+
+  const block = [lines[start]];
+  for (const line of lines.slice(start + 1)) {
+    if (/^\w[\w-]*:/.test(line)) break;
+    block.push(line);
+  }
+
+  return block.join("\n");
+}
+
+function hasFrontmatterListItem(frontmatter: string, field: string): boolean {
+  return /^\s+-\s+\S/m.test(getFrontmatterFieldBlock(frontmatter, field));
+}
+
 function getAnalyticalBriefs() {
   return fs
     .readdirSync(BRIEFS_CONTENT)
@@ -108,6 +140,113 @@ describe("Intelligence Briefs — content structure", () => {
     expect(frontierResilience).toContain(
       "frontier-resilience-stress-reveals-the-real-culture.mdx",
     );
+  });
+
+  it("all vault briefs carry measurable dependency metadata", () => {
+    const allowedTools = [
+      "Rise-Decay Scorecard",
+      "Decision Rights Charter",
+      "Frontier Resilience Stress Test",
+      "Key-Person Risk Scorecard",
+      "Signal Discipline Standards",
+      "Cadence Health Checklist",
+      "Crisis Loop Interruption Protocol",
+      "Legacy Ledger Template",
+      "Inner Circle Council Charter",
+      "Covenantal Oath Template",
+    ];
+
+    for (const file of getVaultBriefs()) {
+      const frontmatter = readFrontmatterBlock(path.join(VAULT_BRIEFS_CONTENT, file));
+      const isFrontier = file.startsWith("frontier-resilience-");
+
+      for (const field of [
+        "primaryFracture",
+        "failureMode",
+        "nextBrief",
+        "relatedTool",
+        "implementationHorizon",
+        "innerCircleCompanion",
+      ]) {
+        expect(hasFrontmatterField(frontmatter, field), `${file} missing ${field}`).toBe(true);
+      }
+
+      for (const field of ["prerequisites", "relatedBriefs", "kpis"]) {
+        expect(hasFrontmatterListItem(frontmatter, field), `${file} missing ${field} list items`).toBe(true);
+      }
+
+      if (isFrontier) {
+        expect(hasFrontmatterField(frontmatter, "severityScore"), `${file} missing severityScore`).toBe(true);
+        expect(hasFrontmatterField(frontmatter, "resilienceTarget"), `${file} missing resilienceTarget`).toBe(true);
+        expect(frontmatter).not.toMatch(/^riseDecayScore:/m);
+      } else {
+        expect(hasFrontmatterField(frontmatter, "riseDecayScore"), `${file} missing riseDecayScore`).toBe(true);
+        expect(hasFrontmatterField(frontmatter, "riseDecayTarget"), `${file} missing riseDecayTarget`).toBe(true);
+        expect(frontmatter).not.toMatch(/^severityScore:/m);
+      }
+
+      const relatedTool = frontmatter.match(/^relatedTool:\s*["']?(.+?)["']?\s*$/m)?.[1];
+      expect(allowedTools, `${file} uses unregistered relatedTool`).toContain(relatedTool);
+    }
+  });
+
+  it("all vault briefs include concise public diagnostic modules", () => {
+    for (const file of getVaultBriefs()) {
+      const body = readBody(path.join(VAULT_BRIEFS_CONTENT, file));
+      const indicatorHeading = file.startsWith("frontier-resilience-")
+        ? /## Pressure Indicators/
+        : /## Rise-Decay Indicators/;
+
+      expect(body, `${file} missing failure module`).toMatch(/## What Failure Looks Like/);
+      expect(body, `${file} missing primary fracture module`).toMatch(/## Primary Fracture/);
+      expect(body, `${file} missing measurable indicators`).toMatch(indicatorHeading);
+      expect(body, `${file} missing implementation horizon`).toMatch(/## Implementation Horizon/);
+      expect(body, `${file} missing related briefs`).toMatch(/## Related Briefs/);
+      expect(body, `${file} missing Inner Circle boundary`).toMatch(/## Inner Circle Application/);
+    }
+  });
+
+  it("priority vault briefs include stronger application frames", () => {
+    const upgraded = [
+      "brief-012-aesthetics-of-order.mdx",
+      "brief-010-geometry-of-inner-circle.mdx",
+      "brief-002-economic-fortress.mdx",
+      "frontier-resilience-surviving-volatility-without-losing-governing-order.mdx",
+      "frontier-resilience-stress-reveals-the-real-culture.mdx",
+      "frontier-resilience-founder-endurance-is-not-a-plan.mdx",
+    ];
+
+    for (const file of upgraded) {
+      const body = fs.readFileSync(path.join(VAULT_BRIEFS_CONTENT, file), "utf-8");
+      const indicatorHeading = file.startsWith("frontier-resilience-")
+        ? /Pressure Indicators/
+        : /Rise-Decay Indicators/;
+
+      expect(body).toMatch(/What Failure Looks Like/);
+      expect(body).toMatch(/Primary Fracture/);
+      expect(body).toMatch(indicatorHeading);
+      expect(body).toMatch(/Implementation Horizon/);
+      expect(body).toMatch(/Related Briefs/);
+      expect(body).toMatch(/Inner Circle Application/);
+    }
+  });
+
+  it("Aesthetics of Order reads as governance-grade rather than lifestyle advice", () => {
+    const body = fs.readFileSync(
+      path.join(VAULT_BRIEFS_CONTENT, "brief-012-aesthetics-of-order.mdx"),
+      "utf-8",
+    );
+
+    for (const term of [
+      /governance/i,
+      /signal discipline/i,
+      /decision/i,
+      /institutional memory/i,
+      /environmental order/i,
+      /standard/i,
+    ]) {
+      expect(body).toMatch(term);
+    }
   });
 
   it("no analytical brief file name contains 'contamination'", () => {

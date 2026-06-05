@@ -97,6 +97,27 @@ describe("vault brief route scope", () => {
     expect(html).toContain("Foundational Canon");
     expect(html).toContain("Frontier Resilience Sequence");
     expect(html).toContain("Vault Briefs are not the same as Intelligence Briefs");
+    expect(html).toContain("Vault Dependency Map");
+    expect(html).toContain("Recommended Reading Paths");
+    expect(html).toContain("Household Order");
+    expect(html).toContain("Founder/Operator Resilience");
+    expect(html).toContain("Governance Under Pressure");
+    expect(html).toContain("Crisis and Recovery");
+    expect(html).toContain("Legacy and Inner Circle");
+    expect(html).toContain("Rise-Decay Scorecard");
+    expect(html).toContain("Decision Rights Charter");
+    expect(html).toContain("Frontier Resilience Stress Test");
+    expect(html).toContain("Key-Person Risk Scorecard");
+    expect(html).toContain("Signal Discipline Standards");
+    expect(html).toContain("Cadence Health Checklist");
+    expect(html).toContain("Crisis Loop Interruption Protocol");
+    expect(html).toContain("Legacy Ledger Template");
+    expect(html).toContain("Inner Circle Council Charter");
+    expect(html).toContain("Covenantal Oath Template");
+    expect(html).toContain("Instruments remain inside application");
+    expect(html).toContain(
+      "The public Vault defines standards and exposes failure patterns. Inner Circle companions provide the instruments for diagnosis, sequencing, and repair.",
+    );
     expect(html).toContain("frontier-resilience");
   });
 

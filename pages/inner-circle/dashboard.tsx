@@ -1,293 +1,261 @@
-/* pages/inner-circle/dashboard.tsx — Member Dashboard (Enterprise-Grade) */
-
 import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Link from "next/link";
-import { Lock, ShieldCheck } from "lucide-react";
-
-
+import { ArrowRight, Gauge, Lock, ShieldCheck } from "lucide-react";
 import Layout from "@/components/Layout";
-import ErrorBoundary from "@/components/error/ErrorBoundary";
 import WorkspaceNav from "@/components/inner-circle/WorkspaceNav";
-import { useRouter } from "next/router";
+import {
+  companionTools,
+  readingPaths,
+  type ProductRoute,
+} from "@/lib/inner-circle/operating-layer";
+import type { InnerCircleProfileState } from "@/lib/inner-circle/operating-repository.server";
 
-interface DashboardProps {
-  access: {
-    hasAccess: boolean;
-    userId?: string | null;
-    tier: string;
-    email?: string | null;
-  };
-  initialData: {
-    diagnostics: any[];
-    briefs: any[];
-    user: {
-      name: string;
-      tier: string;
-      lastLogin: string;
-    };
-  };
-  error?: string;
-}
+type Props = {
+  profile: InnerCircleProfileState;
+  recommendedRoute: ProductRoute;
+};
 
-export default function InnerCircleDashboard({ access, initialData, error }: DashboardProps) {
-  const router = useRouter();
+const GOLD = "#C9A96E";
+const FRONTIER = "#7CB8E8";
+const RULE = "rgba(255,255,255,0.08)";
 
-  if (error) {
-    return (
-      <Layout title="Vault Error | Abraham of London">
-        <div>
-          <div>
-            <ShieldCheck />
-            <h1>Vault Sync Error</h1>
-            <p>{error}</p>
-            <button onClick={() => router.reload()}>
-              Retry Protocol Connection
-            </button>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+};
+
+export default function InnerCircleDashboard({ profile, recommendedRoute }: Props) {
+  const activePath = readingPaths.find((path) => path.slug === profile.activePath) ?? readingPaths[0];
+  const activeTool = companionTools.find((tool) => tool.slug === "rise-decay-scorecard");
+  const plannedTools = companionTools.filter((tool) => tool.status !== "active");
 
   return (
-    <ErrorBoundary>
-      <Layout
-        title="Member Dashboard | Abraham of London"
-       
-      >
-        <div className="min-h-screen bg-[rgb(3,3,5)] text-white">
-          <WorkspaceNav />
-          <div className="mx-auto max-w-5xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20">
-            <header className="max-w-3xl">
-              <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/38">
-                INNER CIRCLE · CHAMBER MODE
+    <Layout
+      title="Inner Circle Dashboard | Abraham of London"
+      description="Diagnostic operating layer for Inner Circle members."
+      fullWidth
+    >
+      <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
+        <WorkspaceNav />
+        <section className="border-b px-6 pb-10 pt-20" style={{ borderBottomColor: RULE }}>
+          <div className="mx-auto max-w-6xl">
+            <p style={{ ...mono, color: `${GOLD}AA`, fontSize: 8, letterSpacing: "0.28em", textTransform: "uppercase" }}>
+              Inner Circle Operating Layer
+            </p>
+            <div className="mt-5 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+              <div>
+                <h1 className="max-w-3xl font-serif text-[clamp(2rem,4vw,3.2rem)] font-light italic leading-none text-white/90">
+                  Diagnosis, instruments, cadence, interpretation.
+                </h1>
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-white/48">
+                  This is not a paid reading archive. Public doctrine stays public. The Inner Circle applies the framework through saved diagnostics, governed tools, monthly review cadence, and product routing when risk exceeds self-guided review.
+                </p>
+              </div>
+              <div className="border p-5" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.045)" }}>
+                <p style={{ ...mono, color: "rgba(255,255,255,0.38)", fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase" }}>
+                  Account state
+                </p>
+                <div className="mt-4 grid gap-3 text-sm text-white/64">
+                  <Metric label="Access" value={profile.accessState} />
+                  <Metric label="Tier" value={profile.membershipTier} />
+                  <Metric label="Path" value={activePath.label} />
+                </div>
+              </div>
+            </div>
+
+            {/* Beta status banner */}
+            <div className="mt-6 border px-4 py-3" style={{ borderColor: "rgba(124,184,232,0.25)", backgroundColor: "rgba(124,184,232,0.06)" }}>
+              <div className="flex items-center gap-3">
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "#7CB8E8" }} />
+                <p className="font-mono text-[8px] uppercase tracking-[0.2em]" style={{ color: "#7CB8E8" }}>
+                  Controlled Release
+                </p>
+              </div>
+              <p className="mt-2 text-xs leading-6" style={{ color: "rgba(255,255,255,0.55)" }}>
+                Inner Circle Operating Layer is in controlled release. Features, diagnostics, and routing logic are active but subject to review.
               </p>
-              <h1 className="mt-5 font-serif text-[clamp(2rem,4vw,3rem)] font-light italic leading-[0.95] text-white/92">
-                The workspace.
-              </h1>
-              <p className="mt-4 font-mono text-[7.5px] uppercase tracking-[0.12em] text-white/48">
-                Active session · {initialData.user.name} · {access.tier}
-              </p>
-            </header>
-
-            <div className="mt-12 space-y-12">
-              <section>
-                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
-                  Diagnostic Records
-                </h2>
-                <div className="mt-4 border-t border-white/8">
-                  {initialData.diagnostics.length > 0 ? (
-                    initialData.diagnostics.map((item, i) => (
-                      <Link
-                        key={item.diagnosticRef || i}
-                        href={item.href}
-                        className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
-                      >
-                        <span>
-                          {item.title || item.date} · {item.reportStatus}
-                        </span>
-                        <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
-                          → View
-                        </span>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="border-b border-white/6 py-3 text-sm text-white/32">
-                      No diagnostic records available.
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              <section>
-                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
-                  Restricted Manuscripts
-                </h2>
-                <div className="mt-4 border-t border-white/8">
-                  {initialData.briefs.length > 0 ? (
-                    initialData.briefs.map((item, i) => (
-                      <Link
-                        key={i}
-                        href={item.href}
-                        className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
-                      >
-                        <span className="flex items-center gap-2">
-                          {item.restricted ? <Lock size={14} className="text-white/34" /> : null}
-                          {item.title} · {item.accessTier}
-                        </span>
-                        <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
-                          → Read
-                        </span>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="border-b border-white/6 py-3 text-sm text-white/32">
-                      No manuscripts available at your access tier.
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              <section>
-                <h2 className="font-mono text-[7.5px] uppercase tracking-[0.28em] text-white/38">
-                  Quick Actions
-                </h2>
-                <div className="mt-4 border-t border-white/8">
-                  <Link
-                    href="/purpose-alignment"
-                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
-                  >
-                    <span>New diagnostic</span>
-                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
-                      → Open
-                    </span>
-                  </Link>
-                  <Link
-                    href="/strategy-room"
-                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
-                  >
-                    <span>Strategy Room</span>
-                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
-                      → Open
-                    </span>
-                  </Link>
-                  <Link
-                    href="/inner-circle/account"
-                    className="flex items-center justify-between border-b border-white/6 py-3 text-sm text-white/72 transition-colors hover:text-white"
-                  >
-                    <span>Account settings</span>
-                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/38">
-                      → Manage
-                    </span>
-                  </Link>
-                </div>
-              </section>
             </div>
           </div>
-        </div>
-      </Layout>
-    </ErrorBoundary>
+        </section>
+
+        <section className="px-6 py-10">
+          <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1fr_0.9fr]">
+            <Panel title="Current Path" eyebrow="MVP path">
+              <h2 className="font-serif text-2xl italic text-white/88">{activePath.label}</h2>
+              <p className="mt-3 text-sm leading-7 text-white/48">
+                Founder Under Pressure is the only active path. The remaining paths are registered but held back until completion and upgrade behaviour proves demand.
+              </p>
+              <div className="mt-5 grid gap-2">
+                {"briefs" in activePath
+                  ? activePath.briefs.map((href) => (
+                      <Link key={href} href={href} className="flex items-center justify-between border-b py-2 text-sm text-white/62 transition hover:text-white" style={{ borderBottomColor: RULE }}>
+                        <span>{href.split("/").pop()?.replace(/-/g, " ")}</span>
+                        <ArrowRight className="h-3.5 w-3.5 text-white/30" />
+                      </Link>
+                    ))
+                  : null}
+              </div>
+            </Panel>
+
+            <Panel title="Recommended Diagnostic" eyebrow="Next action">
+              {profile.latestResult ? (
+                <div>
+                  <div className="flex items-center gap-3">
+                    <Gauge className="h-5 w-5" style={{ color: GOLD }} />
+                    <span className="font-mono text-xl uppercase tracking-[0.12em]" style={{ color: GOLD }}>
+                      {profile.latestResult.riskLevel}
+                    </span>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-white/58">
+                    Latest Rise-Decay score: {profile.latestResult.score}. {profile.latestResult.recommendedNextAction}
+                  </p>
+                  <LinkButton href={recommendedRoute.href} label={recommendedRoute.label} />
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm leading-7 text-white/58">
+                    Complete the Rise-Decay Scorecard first. It identifies structural drift, maps the weakest domains, and routes high-risk cases into the correct product path.
+                  </p>
+                  <LinkButton href="/inner-circle/tools/rise-decay-scorecard" label="Start Rise-Decay Scorecard" />
+                </div>
+              )}
+            </Panel>
+
+            <Panel title="Available Tool" eyebrow="Server-gated">
+              <div className="flex items-start gap-4">
+                <ShieldCheck className="mt-1 h-5 w-5" style={{ color: GOLD }} />
+                <div>
+                  <h2 className="font-serif text-2xl italic text-white/88">{activeTool?.title}</h2>
+                  <p className="mt-3 text-sm leading-7 text-white/50">
+                    {activeTool?.purpose} Free registered users may complete this one diagnostic. Paid access is not launched until completion and upgrade intent are measurable.
+                  </p>
+                  <LinkButton href="/inner-circle/tools/rise-decay-scorecard" label="Open tool" />
+                </div>
+              </div>
+            </Panel>
+
+            <Panel title="Monthly Briefing" eyebrow="Archive v0">
+              <p className="text-sm leading-7 text-white/52">
+                This month: audit founder dependency before it becomes institutional design. The briefing links the active path, scorecard, and first governance repair action.
+              </p>
+              <LinkButton href="/inner-circle/briefings" label="Open briefing archive" />
+            </Panel>
+
+            <Panel title="30-Day Action Sequence" eyebrow="Fillable worksheet">
+              <div className="space-y-3">
+                {profile.worksheet.map((item) => (
+                  <div key={item.id} className="border p-4" style={{ borderColor: RULE, backgroundColor: "rgba(255,255,255,0.014)" }}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm text-white/74">{item.task}</p>
+                      <span style={{ ...mono, color: item.status === "completed" ? "#6EE7B7" : "rgba(255,255,255,0.34)", fontSize: 8, letterSpacing: "0.16em", textTransform: "uppercase" }}>
+                        {item.status.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                    {item.response ? <p className="mt-2 text-xs leading-6 text-white/42">{item.response}</p> : null}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs leading-6 text-white/38">
+                Worksheet editing is available inside each tool step and is saved server-side.
+              </p>
+            </Panel>
+
+            <Panel title="Planned Companion Assets" eyebrow="Restricted, not public worksheets">
+              <div className="grid gap-2">
+                {plannedTools.map((tool) => (
+                  <div key={tool.slug} className="flex items-center justify-between border-b py-2" style={{ borderBottomColor: RULE }}>
+                    <span className="flex items-center gap-2 text-sm text-white/58">
+                      <Lock className="h-3.5 w-3.5 text-white/28" />
+                      {tool.title}
+                    </span>
+                    <span style={{ ...mono, color: "rgba(255,255,255,0.30)", fontSize: 7, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                      {tool.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </div>
+        </section>
+      </main>
+    </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // Server-only modules loaded dynamically (Wave 4 boundary enforcement).
-  const [
-    { prisma },
-    { readAccessCookie },
-    { getSessionContext, tierAtLeast },
-  ] = await Promise.all([
-    import("@/lib/prisma"),
-    import("@/lib/server/auth/cookies"),
-    import("@/lib/server/auth/tokenStore.postgres"),
+function Panel({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
+  return (
+    <section className="border p-5 md:p-6" style={{ borderColor: RULE, backgroundColor: "rgba(255,255,255,0.012)" }}>
+      <p style={{ ...mono, color: `${FRONTIER}AA`, fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase" }}>
+        {eyebrow}
+      </p>
+      <h2 className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/36">{title}</h2>
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b pb-2" style={{ borderBottomColor: RULE }}>
+      <span style={{ ...mono, color: "rgba(255,255,255,0.34)", fontSize: 8, letterSpacing: "0.16em", textTransform: "uppercase" }}>
+        {label}
+      </span>
+      <span className="text-sm text-white/72">{value}</span>
+    </div>
+  );
+}
+
+function LinkButton({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="mt-5 inline-flex min-h-11 items-center gap-2 border px-5 py-3 text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+      style={{ ...mono, borderColor: `${GOLD}44`, color: "white", backgroundColor: `${GOLD}14` }}
+    >
+      {label}
+      <ArrowRight className="h-3.5 w-3.5" />
+    </Link>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const [{ getServerSession }, { authOptions }, { ensureOperatingProfile }, { productRoute }] = await Promise.all([
+    import("next-auth/next"),
+    import("@/lib/auth/options"),
+    import("@/lib/inner-circle/operating-repository.server"),
+    import("@/lib/inner-circle/operating-layer"),
   ]);
 
-  try {
-    // AL token cookie presence is enforced by middleware.ts (Tier 2).
-    // By the time this handler runs, the cookie is guaranteed to exist.
-    const sessionId = readAccessCookie(context.req as any) || "";
+  const session = await getServerSession(context.req, context.res, authOptions);
+  const userId = session?.user?.id;
 
-    const ctx = await getSessionContext(sessionId);
-
-    if (!ctx.ok || !ctx.valid) {
-      return { redirect: { destination: "/inner-circle", permanent: false } };
-    }
-
-    const required = "inner-circle";
-    if (!tierAtLeast(ctx.tier, required)) {
-      return { redirect: { destination: "/inner-circle/locked", permanent: false } };
-    }
-
-    const userEmail = ctx.email || null;
-
-    // ✅ PROPER GRANT-BASED DIAGNOSTIC FETCH
-    let diagnostics: any[] = [];
-
-    if (userEmail) {
-      // Step 1: Get grants for this user
-      const grants = await prisma.diagnosticArtifactAccessGrant.findMany({
-        where: { granteeEmail: userEmail },
-        select: { artifactId: true, createdAt: true },
-        orderBy: { createdAt: "desc" },
-      });
-
-      if (grants.length > 0) {
-        const artifactIds = grants.map(g => g.artifactId);
-        
-        // Step 2: Fetch artifacts from grants
-        const artifacts = await prisma.diagnosticArtifact.findMany({
-          where: { id: { in: artifactIds } },
-          orderBy: { createdAt: "desc" },
-          take: 12,
-        });
-
-        diagnostics = artifacts.map((artifact) => ({
-          diagnosticRef: artifact.diagnosticRef,
-          title: artifact.fileName || "Diagnostic Report",
-          kind: "diagnostic",
-          excerpt: "Structured diagnostic report.",
-          href: `/inner-circle/reports/${encodeURIComponent(artifact.diagnosticRef)}`,
-          date: artifact.createdAt
-            ? new Date(artifact.createdAt).toLocaleDateString("en-GB", {
-                month: "short",
-                year: "numeric",
-              })
-            : "2026",
-          readTime: artifact.version ? `v${artifact.version}` : "draft",
-          reportStatus: artifact.isRevoked ? "pending" : "generated",
-        }));
-      }
-    }
-
-    // ✅ CONTENT QUERY ALIGNED TO SCHEMA (uses summary, not excerpt)
-    // Per-kind helper — avoids bundling `contentlayer/generated`.
-    const { getAllBriefs } = await import("@/lib/content/server");
-    const allBriefs = (getAllBriefs() || []) as any[];
-    const briefs = allBriefs
-      .filter((b) => (b as any).status === "published" || process.env.NODE_ENV === "development")
-      .filter((b) => {
-        const tier = String((b as any).accessTier ?? "public").toLowerCase();
-        if (tier === "public") return true;
-        return tierAtLeast(ctx.tier, "inner-circle");
-      })
-      .sort((a, b) => new Date(String((b as any).date ?? "")).getTime() - new Date(String((a as any).date ?? "")).getTime())
-      .map((b) => {
-        const ab = b as any;
-        return {
-          title: String(ab.title ?? ""),
-          accessTier: String(ab.accessTier ?? "inner-circle"),
-          href: `/inner-circle/briefs/${ab._raw?.flattenedPath ?? ""}`,
-          restricted: String(ab.accessTier ?? "inner-circle").toLowerCase() !== "public",
-        };
-      });
-
+  if (!userId) {
     return {
-      props: {
-        access: {
-          hasAccess: true,
-          userId: ctx.memberId || null,
-          tier: ctx.tier || "public",
-          email: userEmail,
-        },
-        initialData: {
-          diagnostics: diagnostics,
-          briefs,
-          user: {
-            name: ctx.name || "Member",
-            tier: ctx.tier || "public",
-            lastLogin: ctx.expiresAt || new Date().toISOString(),
-          },
-        },
+      redirect: {
+        destination: "/auth/signin?callbackUrl=/inner-circle/dashboard",
+        permanent: false,
       },
     };
-  } catch (err) {
-    console.error("[VAULT_FATAL]:", err);
-    return { props: { error: "Institutional Vault connectivity lost. Systems re-aligning." } };
   }
 
+  const profile = await ensureOperatingProfile({
+    userId,
+    email: session.user?.email ?? null,
+    name: session.user?.name ?? null,
+  });
+
+  const recommendedRoute = profile.latestResult
+    ? profile.latestResult.riskLevel === "Critical"
+      ? productRoute("strategy-room")
+      : profile.latestResult.riskLevel === "High"
+        ? productRoute("boardroom-brief")
+        : productRoute("inner-circle")
+    : productRoute("rise-decay-scorecard");
+
+  return {
+    props: {
+      profile,
+      recommendedRoute,
+    },
+  };
 };
-
-
-
-

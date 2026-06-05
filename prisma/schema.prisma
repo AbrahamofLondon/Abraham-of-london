@@ -591,6 +591,171 @@ model AccessInvite {
   @@map("access_invites")
 }
 
+// ============================================================================
+// INNER CIRCLE OPERATING LAYER — diagnostic memory and commercial routing
+// ============================================================================
+
+model InnerCircleProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique @map("user_id")
+  email          String?
+  name           String?
+  accessState         String   @default("Reader") @map("access_state")
+  membershipTier      String   @default("free") @map("membership_tier")
+  activePath          String   @default("founder-under-pressure") @map("active_path")
+  subscriptionStatus  String   @default("free_trial") @map("subscription_status")
+  trialEndsAt         DateTime? @map("trial_ends_at")
+  stripeCustomerId    String?  @map("stripe_customer_id")
+  subscriptionProductCode String? @map("subscription_product_code")
+  subscriptionStartedAt DateTime? @map("subscription_started_at")
+  subscriptionCancelledAt DateTime? @map("subscription_cancelled_at")
+  metadata            Json?    @map("metadata_json")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([accessState])
+  @@index([membershipTier])
+  @@index([subscriptionStatus])
+  @@index([activePath])
+  @@map("inner_circle_profiles")
+}
+
+model InnerCircleDiagnosticResult {
+  id                    String   @id @default(cuid())
+  userId                String   @map("user_id")
+  toolSlug              String   @map("tool_slug")
+  pathSlug              String   @map("path_slug")
+  answers               Json     @map("answers_json")
+  score                 Int
+  riskLevel             String   @map("risk_level")
+  weakestDomains        Json     @map("weakest_domains_json")
+  recommendedNextAction String   @map("recommended_next_action")
+  recommendedProduct    String   @map("recommended_product")
+  lifecycleStatus       String   @default("completed") @map("lifecycle_status")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([toolSlug])
+  @@index([riskLevel])
+  @@index([recommendedProduct])
+  @@index([createdAt])
+  @@map("inner_circle_diagnostic_results")
+}
+
+model InnerCircleToolAccess {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  toolSlug     String    @map("tool_slug")
+  accessStatus String    @default("granted") @map("access_status")
+  accessReason String?   @map("access_reason")
+  startsAt     DateTime? @map("starts_at")
+  expiresAt    DateTime? @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, toolSlug])
+  @@index([accessStatus])
+  @@map("inner_circle_tool_access")
+}
+
+model InnerCircleReadingPathProgress {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  pathSlug    String    @map("path_slug")
+  status      String    @default("active")
+  currentStep Int       @default(0) @map("current_step")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, pathSlug])
+  @@index([status])
+  @@map("inner_circle_reading_path_progress")
+}
+
+model InnerCircleWorksheetAction {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  pathSlug        String    @map("path_slug")
+  taskKey         String    @map("task_key")
+  task            String
+  response        String?
+  deadline        DateTime?
+  status          String    @default("not_started")
+  note            String?
+  nextReviewDate  DateTime? @map("next_review_date")
+  sortOrder       Int       @default(0) @map("sort_order")
+  completedAt     DateTime? @map("completed_at")
+  reminderSentAt  DateTime? @map("reminder_sent_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, pathSlug, taskKey])
+  @@index([status])
+  @@index([nextReviewDate])
+  @@index([deadline])
+  @@map("inner_circle_worksheet_actions")
+}
+
+model InnerCircleAdvisoryQualification {
+  id                 String    @id @default(cuid())
+  userId             String    @map("user_id")
+  triggerResultId    String?   @map("trigger_result_id")
+  status             String    @default("OPEN")
+  riskLevel          String    @map("risk_level")
+  recommendedProduct String    @map("recommended_product")
+  reason             String
+  metadata           Json?     @map("metadata_json")
+  adminOverride      Boolean   @default(false) @map("admin_override")
+  reviewedBy         String?   @map("reviewed_by")
+  reviewedAt         DateTime? @map("reviewed_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@index([riskLevel])
+  @@index([recommendedProduct])
+  @@map("inner_circle_advisory_qualifications")
+}
+
+model PressureSignalEvent {
+  id                 String   @id @default(cuid())
+  userId             String?  @map("user_id")
+  inputHash          String   @map("input_hash")
+  pressureLevel      String   @map("pressure_level")
+  recommendedProduct String   @map("recommended_product")
+  safeMetrics        Json     @map("safe_metrics_json")
+  result             Json     @map("result_json")
+  ipHash             String?  @map("ip_hash")
+  userAgent          String?  @map("user_agent")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([pressureLevel])
+  @@index([recommendedProduct])
+  @@index([createdAt])
+  @@map("pressure_signal_events")
+}
+
+model InnerCircleEmailEventLog {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  email     String
+  event     String   @map("trigger_event")
+  status    String   @default("sent")
+  error     String?
+  sentAt    DateTime @default(now()) @map("sent_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([event])
+  @@index([status])
+  @@index([sentAt])
+  @@map("inner_circle_email_event_logs")
+}
+
 model CampaignParticipant {
   id              String    @id @default(cuid())
   campaignId      String

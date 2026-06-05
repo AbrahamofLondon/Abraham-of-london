@@ -4,9 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 
 const NAV_LINKS = [
-  { href: "/inner-circle/dashboard", label: "Vault" },
-  { href: "/inner-circle/briefs", label: "Briefs" },
-  { href: "/diagnostics", label: "Diagnostics" },
+  { href: "/inner-circle/dashboard", label: "Dashboard" },
+  { href: "/inner-circle/tools/rise-decay-scorecard", label: "Scorecard" },
+  { href: "/inner-circle/briefings", label: "Briefings" },
+  { href: "/vault/briefs", label: "Vault" },
+  { href: "/pressure", label: "Pressure" },
   { href: "/strategy-room", label: "Strategy Room" },
   { href: "/inner-circle/account", label: "Account" },
 ];
