@@ -90,14 +90,41 @@ export default function InnerCircleDashboard({ profile, recommendedRoute, conver
                 <p className="mt-3 text-sm leading-7 text-white/60">
                   {conversionBridge.reason}
                 </p>
-                <Link
-                  href={conversionBridge.href}
-                  className="mt-4 inline-flex min-h-10 items-center gap-2 border px-5 py-2.5 text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
-                  style={{ ...mono, borderColor: `${GOLD}44`, color: "white", backgroundColor: `${GOLD}14` }}
-                >
-                  {conversionBridge.label}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
+                {conversionBridge.action === "start_boardroom_brief" && conversionBridge.prefillContext?.diagnosticId ? (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/inner-circle/boardroom-bridge", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ diagnosticId: conversionBridge.prefillContext?.diagnosticId }),
+                        });
+                        const data = await res.json();
+                        if (data.ok && data.redirectUrl) {
+                          window.location.href = data.redirectUrl;
+                        } else {
+                          window.location.href = "/boardroom-brief";
+                        }
+                      } catch {
+                        window.location.href = "/boardroom-brief";
+                      }
+                    }}
+                    className="mt-4 inline-flex min-h-10 items-center gap-2 border px-5 py-2.5 text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                    style={{ ...mono, borderColor: `${GOLD}44`, color: "white", backgroundColor: `${GOLD}14`, cursor: "pointer" }}
+                  >
+                    {conversionBridge.label}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                ) : (
+                  <Link
+                    href={conversionBridge.href}
+                    className="mt-4 inline-flex min-h-10 items-center gap-2 border px-5 py-2.5 text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                    style={{ ...mono, borderColor: `${GOLD}44`, color: "white", backgroundColor: `${GOLD}14` }}
+                  >
+                    {conversionBridge.label}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
               </div>
             ) : null}
           </div>

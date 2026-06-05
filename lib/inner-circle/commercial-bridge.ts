@@ -63,7 +63,7 @@ export function getConversionBridge(
       return {
         action: "start_boardroom_brief",
         label: "Start Boardroom Brief",
-        href: "/boardroom-brief",
+        href: diagnosticId ? `/api/inner-circle/boardroom-bridge` : "/boardroom-brief",
         reason: "Your score indicates board-level exposure. A Boardroom Brief is recommended to convert the risk into a board-ready challenge dossier.",
         prefillContext: diagnosticId ? {
           diagnosticId,

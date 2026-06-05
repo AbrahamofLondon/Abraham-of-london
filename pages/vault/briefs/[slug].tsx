@@ -447,6 +447,25 @@ const BriefPage: NextPage<Props> = ({
           name="robots"
           content={required === "public" ? "index, follow" : "noindex, nofollow"}
         />
+        {/* P3 — OG cover image mapping */}
+        {(() => {
+          const coverMap: Record<string, string> = {
+            "frontier-resilience": "frontier-resilience-cover.webp",
+            "brief": "vault-briefs-cover.webp",
+          };
+          const prefix = bareSlug.startsWith("frontier-resilience-") ? "frontier-resilience" : bareSlug.startsWith("brief-") ? "brief" : null;
+          const coverFile = prefix ? coverMap[prefix] : null;
+          const coverUrl = coverFile ? `https://www.abrahamoflondon.org/assets/images/covers/briefs/${coverFile}` : null;
+          return coverUrl ? (
+            <>
+              <meta property="og:image" content={coverUrl} />
+              <meta property="og:image:width" content="1200" />
+              <meta property="og:image:height" content="630" />
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:image" content={coverUrl} />
+            </>
+          ) : null;
+        })()}
       </Head>
 
       <ReaderFrame surface="vault">
@@ -532,6 +551,59 @@ const BriefPage: NextPage<Props> = ({
             </div>
           </div>
         ) : null}
+
+        {/* P1 — Canon-to-diagnostic CTA: Rise-Decay Scorecard */}
+        {bareSlug.startsWith("brief-") ? (
+          <div className="mx-auto mt-12 max-w-5xl border-t border-white/5 px-6 pt-12">
+            <div className="border px-5 py-4" style={{ borderColor: "rgba(201,169,110,0.22)", backgroundColor: "rgba(201,169,110,0.06)" }}>
+              <p className="font-mono text-[8px] uppercase tracking-[0.2em]" style={{ color: "#C9A96E" }}>
+                Measure Your Institution Against This Standard
+              </p>
+              <p className="mt-2 text-sm leading-7 text-white/50">
+                The Rise-Decay Scorecard measures structural drift across authority, capital, culture, and recovery readiness against the Canon standard.
+              </p>
+              <Link
+                href="/inner-circle/tools/rise-decay-scorecard"
+                className="mt-4 inline-flex min-h-10 items-center gap-2 border px-5 py-2.5 text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", borderColor: "rgba(201,169,110,0.27)", color: "white", backgroundColor: "rgba(201,169,110,0.08)" }}
+              >
+                Start Rise-Decay Scorecard →
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
+        {/* P2 — Related and Next Brief navigation */}
+        <div className="mx-auto mt-12 max-w-5xl border-t border-white/5 px-6 pt-12">
+          <div className="grid gap-4 md:grid-cols-2">
+            {brief?.nextBrief ? (
+              <Link
+                href={`/vault/briefs/${briefsBareSlug(brief.nextBrief)}`}
+                className="border p-5 transition-colors hover:bg-white/[0.02]"
+                style={{ borderColor: "rgba(255,255,255,0.08)" }}
+              >
+                <p className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/30">Next Brief</p>
+                <p className="mt-2 font-serif text-lg italic text-white/70">{brief.nextBriefTitle || briefsBareSlug(brief.nextBrief).replace(/-/g, " ")}</p>
+              </Link>
+            ) : null}
+            {brief?.relatedBriefs && brief.relatedBriefs.length > 0 ? (
+              <div className="border p-5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                <p className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/30">Related Briefs</p>
+                <div className="mt-2 space-y-2">
+                  {brief.relatedBriefs.slice(0, 3).map((rb: string) => (
+                    <Link
+                      key={rb}
+                      href={`/vault/briefs/${briefsBareSlug(rb)}`}
+                      className="block font-serif text-base italic text-white/60 transition hover:text-white/80"
+                    >
+                      {briefsBareSlug(rb).replace(/-/g, " ")}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
 
         <div className="mx-auto mt-24 flex max-w-5xl flex-col gap-12 border-t border-white/5 px-6 pb-24 pt-12 text-white/44 md:flex-row">
           <div className="flex-1">

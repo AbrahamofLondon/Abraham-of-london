@@ -238,6 +238,25 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
       <Head>
         <link rel="canonical" href={canonicalUrl} />
         <meta name="robots" content="index,follow" />
+        {/* P3 — OG cover image mapping */}
+        {(() => {
+          const coverMap: Record<string, string> = {
+            "institutional-alpha": "institutional-alpha-cover.webp",
+            "sovereign-intelligence": "sovereign-intelligence-cover.webp",
+          };
+          const prefix = bareSlug.startsWith("institutional-alpha") ? "institutional-alpha" : bareSlug.startsWith("sovereign-intelligence") ? "sovereign-intelligence" : null;
+          const coverFile = prefix ? coverMap[prefix] : "intelligence-briefs-cover.webp";
+          const coverUrl = `https://www.abrahamoflondon.org/assets/images/covers/briefs/${coverFile}`;
+          return (
+            <>
+              <meta property="og:image" content={coverUrl} />
+              <meta property="og:image:width" content="1200" />
+              <meta property="og:image:height" content="630" />
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:image" content={coverUrl} />
+            </>
+          );
+        })()}
       </Head>
 
       <main className="min-h-screen bg-black px-6 pb-24 pt-24 text-white">
