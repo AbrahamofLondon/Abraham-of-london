@@ -322,6 +322,21 @@ export const GMI_Q2_FALSIFICATION_RULES: readonly GmiFalsificationRuleRecord[] =
     lastReviewedAt: null,
     publicExplanation: "The public posture is monitoring; the rule states what would downgrade the concern.",
   },
+  {
+    id: "GMI-Q2-FALSE-004",
+    editionId: "GMI-Q2-2026",
+    thesisId: "supply-chain-optionality-premium",
+    thesisStatement: "Operational resilience is now a capital markets variable. Lean-optimised supply chains carry a structural risk premium that was not present before Q1 2026.",
+    falsificationCondition: "Equity markets stop differentiating by supply chain resilience posture. No observable valuation premium for firms with documented optionality investments.",
+    observableIndicator: "No consistent valuation spread between firms with disclosed supply-chain optionality and those without, across a full earnings cycle.",
+    thresholdType: "qualitative",
+    thresholdValue: "No observable optionality premium across Q2-Q3 2026 earnings cycles.",
+    currentStatus: "monitoring",
+    evidenceSourceRows: ["GMI-Q2-SRC-004", "GMI-Q2-SRC-007", "GMI-Q1-2026-CALL-003"],
+    nextReviewDue: "2026-09-30",
+    lastReviewedAt: null,
+    publicExplanation: "The optionality premium thesis is partially confirmed in Q2 but requires Q3 evidence across a full earnings cycle to confirm whether the premium is structural or episodic.",
+  },
 ] as const;
 
 function scoreDistribution(calls: readonly PublicGmiCallLedgerEntry[]): Record<GmiRubricScore, number> {
