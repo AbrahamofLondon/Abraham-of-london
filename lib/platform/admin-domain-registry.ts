@@ -91,7 +91,11 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   // ── Decision Intelligence ───────────────────────────────────────────────
   { route: "/admin/decision-intelligence", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/intelligence", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/intelligence/gmi-control-plane", domain: "intelligence", requiredRole: "ADMIN", productSurface: "gmi", canonicalRecord: "GmiRelease", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/intelligence/gmi-release-console", domain: "intelligence", requiredRole: "ADMIN", productSurface: "gmi", canonicalRecord: "GmiRelease", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/intelligence/gmi-call-review", domain: "intelligence", requiredRole: "ADMIN", productSurface: "gmi", canonicalRecord: "GmiRelease", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/intelligence/gmi-falsification", domain: "intelligence", requiredRole: "ADMIN", productSurface: "gmi", canonicalRecord: "GmiRelease", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/intelligence/gmi-red-team", domain: "intelligence", requiredRole: "ADMIN", productSurface: "gmi", canonicalRecord: "GmiRelease", riskLevel: "MEDIUM", emitsAudit: true },
   { route: "/admin/intelligence/gmi-signal-monitor", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/intelligence/gmi-event-log", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
   { route: "/admin/decision/efficacy", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },

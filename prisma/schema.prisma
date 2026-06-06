@@ -739,6 +739,162 @@ model PressureSignalEvent {
   @@map("pressure_signal_events")
 }
 
+// ============================================================================
+// GLOBAL MARKET INTELLIGENCE — persistent public call ledger and red team queue
+// ============================================================================
+
+model GmiCallLedgerEntry {
+  id                            String   @id @default(cuid())
+  callId                        String   @unique @map("call_id")
+  editionId                     String   @map("edition_id")
+  editionSlug                   String   @map("edition_slug")
+  callStatement                 String   @map("call_statement")
+  category                      String
+  region                        String?
+  assetClass                    String?  @map("asset_class")
+  theme                         String?
+  originalConfidenceBand        String   @map("original_confidence_band")
+  currentStatus                 String   @default("PENDING_REVIEW") @map("current_status")
+  currentScore                  Int?     @map("current_score")
+  reviewWindowStart             DateTime? @map("review_window_start")
+  reviewWindowEnd               DateTime? @map("review_window_end")
+  evidenceSummary               String   @default("") @map("evidence_summary")
+  evidenceSourceRows            Json     @default("[]") @map("evidence_source_rows_json")
+  justification                 String   @default("")
+  carryForwardJustification     String?  @map("carry_forward_justification")
+  lastReviewedAt                DateTime? @map("last_reviewed_at")
+  nextReviewDue                 DateTime? @map("next_review_due")
+  methodologyVersion            String   @map("methodology_version")
+  rubricVersion                 String   @map("rubric_version")
+  immutableOriginalCallSnapshot Json?    @map("immutable_original_call_snapshot_json")
+  reviewedBy                    String?  @map("reviewed_by")
+  sourceAppendixRefs            Json?    @map("source_appendix_refs_json")
+  createdAt                     DateTime @default(now()) @map("created_at")
+  updatedAt                     DateTime @updatedAt @map("updated_at")
+
+  statusHistory GmiCallLedgerStatusHistory[]
+
+  @@index([editionId])
+  @@index([editionSlug])
+  @@index([currentStatus])
+  @@index([currentScore])
+  @@index([nextReviewDue])
+  @@map("gmi_call_ledger_entries")
+}
+
+model GmiCallLedgerStatusHistory {
+  id                  String   @id @default(cuid())
+  ledgerEntryId       String   @map("ledger_entry_id")
+  callId              String   @map("call_id")
+  previousStatus      String?  @map("previous_status")
+  newStatus           String   @map("new_status")
+  previousScore       Int?     @map("previous_score")
+  newScore            Int?     @map("new_score")
+  evidenceSummary     String   @default("") @map("evidence_summary")
+  evidenceSourceRows  Json     @default("[]") @map("evidence_source_rows_json")
+  justification       String   @default("")
+  actor               String?  @map("actor")
+  requestId           String?  @map("request_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  ledgerEntry GmiCallLedgerEntry @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
+
+  @@index([ledgerEntryId])
+  @@index([callId])
+  @@index([createdAt])
+  @@map("gmi_call_ledger_status_history")
+}
+
+model GmiRedTeamSubmission {
+  id             String    @id @default(cuid())
+  editionId      String?   @map("edition_id")
+  callId         String?   @map("call_id")
+  submitterName  String    @map("submitter_name")
+  submitterEmail String    @map("submitter_email")
+  organisation   String?
+  counterArgument String   @map("counter_argument")
+  evidence       String
+  sourceLinks    Json      @default("[]") @map("source_links_json")
+  status         String    @default("pending")
+  adminNotes     String?   @map("admin_notes")
+  publicResponse String?   @map("public_response")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  reviewedAt     DateTime? @map("reviewed_at")
+  reviewedBy     String?   @map("reviewed_by")
+
+  @@index([editionId])
+  @@index([callId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("gmi_red_team_submissions")
+}
+
+model GmiFalsificationRule {
+  id                      String    @id @default(cuid())
+  editionId               String    @map("edition_id")
+  thesisId                String    @map("thesis_id")
+  thesisStatement         String    @map("thesis_statement")
+  falsificationCondition  String    @map("falsification_condition")
+  observableIndicator     String    @map("observable_indicator")
+  thresholdType           String    @map("threshold_type")
+  thresholdValue          String    @map("threshold_value")
+  currentStatus           String    @default("monitoring") @map("current_status")
+  evidenceSourceRows      Json      @default("[]") @map("evidence_source_rows_json")
+  nextReviewDue           DateTime? @map("next_review_due")
+  lastReviewedAt          DateTime? @map("last_reviewed_at")
+  publicExplanation       String?   @map("public_explanation")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  @@unique([editionId, thesisId])
+  @@index([editionId])
+  @@index([thesisId])
+  @@index([currentStatus])
+  @@index([nextReviewDue])
+  @@map("gmi_falsification_rules")
+}
+
+model GmiPostMortem {
+  id                    String    @id @default(cuid())
+  editionId             String    @unique @map("edition_id")
+  quarter               String
+  whatWeGotRight        Json      @default("[]") @map("what_we_got_right_json")
+  whatWeGotWrong        Json      @default("[]") @map("what_we_got_wrong_json")
+  whatWasTooEarly       Json      @default("[]") @map("what_was_too_early_json")
+  whatWeUnderweighted   Json      @default("[]") @map("what_we_underweighted_json")
+  whatChangedOurView    Json      @default("[]") @map("what_changed_our_view_json")
+  lessonsForNextQuarter Json      @default("[]") @map("lessons_for_next_quarter_json")
+  linkedCalls           Json      @default("[]") @map("linked_calls_json")
+  publishedAt           DateTime? @map("published_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@index([editionId])
+  @@index([publishedAt])
+  @@map("gmi_post_mortems")
+}
+
+model GmiEditionGovernanceState {
+  id                         String    @id @default(cuid())
+  editionId                  String    @unique @map("edition_id")
+  publicationStatus          String    @default("draft") @map("publication_status")
+  operatorConsequenceIndex   Json      @default("{}") @map("operator_consequence_index_json")
+  decisionsToMakeIn30Days    Json      @default("[]") @map("decisions_to_make_in_30_days_json")
+  decisionsToPrepareIn90Days Json      @default("[]") @map("decisions_to_prepare_in_90_days_json")
+  decisionsToDefer           Json      @default("[]") @map("decisions_to_defer_json")
+  boardPulsePublishedAt      DateTime? @map("board_pulse_published_at")
+  operatorBriefPublishedAt   DateTime? @map("operator_brief_published_at")
+  boardPackGeneratedAt       DateTime? @map("board_pack_generated_at")
+  fullEditionGated           Boolean   @default(true) @map("full_edition_gated")
+  architectEditionGated      Boolean   @default(true) @map("architect_edition_gated")
+  createdAt                  DateTime  @default(now()) @map("created_at")
+  updatedAt                  DateTime  @updatedAt @map("updated_at")
+
+  @@index([editionId])
+  @@index([publicationStatus])
+  @@map("gmi_edition_governance_state")
+}
+
 model InnerCircleEmailEventLog {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")

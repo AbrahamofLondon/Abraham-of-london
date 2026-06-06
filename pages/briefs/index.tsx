@@ -12,6 +12,7 @@ import {
   requiredTierFromDoc,
 } from "@/lib/access/tier-policy";
 import { trackBriefSeriesViewed } from "@/lib/analytics/briefs-analytics";
+import { getPublicBriefHref } from "@/lib/content/brief-routes";
 
 type BriefListItem = {
   title: string;
@@ -103,13 +104,14 @@ function seriesFromDoc(doc: any, slug: string): string | null {
 
 function toBriefListItem(doc: any): BriefListItem | null {
   const slug = publicBriefSlugForDoc(doc);
-  if (!slug) return null;
+  const href = getPublicBriefHref(slug);
+  if (!slug || !href) return null;
   return {
     title: safeString(doc?.title) || "Untitled Brief",
     subtitle: safeString(doc?.subtitle) || null,
     description: safeString(doc?.description || doc?.summary || doc?.excerpt) || null,
     date: safeString(doc?.date) || null,
-    href: `/briefs/${slug}`,
+    href,
     series: seriesFromDoc(doc, slug),
     briefId: safeString(doc?.briefId || doc?.institutionalId) || null,
     category: safeString(doc?.category) || null,

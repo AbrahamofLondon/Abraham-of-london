@@ -30,24 +30,24 @@ vi.mock("@/lib/mdx/static-mdx-runtime", () => ({
 import PublicBriefPage, { getStaticPaths, getStaticProps } from "@/pages/briefs/[slug]";
 
 const publicBrief = {
-  title: "Frontier Resilience 067 — Beyond Survival Mode",
-  subtitle: "How institutions move from perpetual triage back into governed action",
-  description: "A strategic brief on the transition out of survival mode.",
-  summary: "A strategic brief on the transition out of survival mode.",
+  title: "Institutional Alpha — The Hidden Cost of Flattering Data",
+  subtitle: "Why optimistic metrics decay into governance risk",
+  description: "A strategic brief on reporting integrity.",
+  summary: "A strategic brief on reporting integrity.",
   date: "2026-02-12",
   readTime: "8 min",
   category: "governance",
-  tags: ["frontier-resilience"],
+  tags: ["institutional-alpha"],
   accessLevel: "public",
   status: "canonical",
   publicationStatus: "published",
   published: true,
   draft: false,
   bodyCode: "<p>Public body</p>",
-  slug: "/briefs/frontier-resilience-beyond-survival-mode",
+  slug: "/briefs/institutional-alpha-the-hidden-cost-of-flattering-data",
   _raw: {
-    flattenedPath: "briefs/frontier-resilience-beyond-survival-mode",
-    sourceFilePath: "briefs/frontier-resilience-beyond-survival-mode.mdx",
+    flattenedPath: "briefs/institutional-alpha-the-hidden-cost-of-flattering-data",
+    sourceFilePath: "briefs/institutional-alpha-the-hidden-cost-of-flattering-data.mdx",
   },
 };
 
@@ -60,12 +60,12 @@ describe("public brief route", () => {
     mocks.getAllBriefs.mockReturnValue([publicBrief]);
 
     const response = await getStaticProps({
-      params: { slug: "frontier-resilience-beyond-survival-mode" },
+      params: { slug: "institutional-alpha-the-hidden-cost-of-flattering-data" },
     } as never);
     const props = "props" in response ? response.props : null;
     const html = renderToStaticMarkup(<PublicBriefPage {...(props as any)} />);
 
-    expect(html).toContain("Frontier Resilience 067");
+    expect(html).toContain("Institutional Alpha");
     expect(html).toContain("Public brief");
     expect(html).toContain("Public body");
   });
@@ -74,7 +74,7 @@ describe("public brief route", () => {
     mocks.getAllBriefs.mockReturnValue([publicBrief]);
 
     await expect(getStaticPaths({} as never)).resolves.toMatchObject({
-      paths: [{ params: { slug: "frontier-resilience-beyond-survival-mode" } }],
+      paths: [{ params: { slug: "institutional-alpha-the-hidden-cost-of-flattering-data" } }],
     });
   });
 
@@ -103,7 +103,7 @@ describe("public brief route", () => {
     ]);
 
     const response = await getStaticProps({
-      params: { slug: "frontier-resilience-beyond-survival-mode" },
+      params: { slug: "institutional-alpha-the-hidden-cost-of-flattering-data" },
     } as never);
 
     expect(response).toMatchObject({ notFound: true });

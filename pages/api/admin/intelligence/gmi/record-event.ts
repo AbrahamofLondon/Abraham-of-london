@@ -27,6 +27,10 @@ const bodySchema = z.discriminatedUnion("action", [
     callId: z.string().min(1).max(64),
     outcomeStatus: z.enum(CALL_OUTCOME_STATUSES),
     score: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.null()]),
+    evidenceSources: z.array(z.string().min(1).max(300)).max(10).optional(),
+    outcomeEvidence: z.string().min(1).max(3000).optional(),
+    tooEarlyJustification: z.string().min(1).max(3000).optional(),
+    nextReviewDue: z.string().min(8).max(40).optional(),
   }),
   z.object({
     action: z.literal("CALL_CARRY_FORWARD"),
@@ -77,17 +81,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (action === "CALL_REVIEW") {
-      const { recordGmiCallReview } = await import("@/lib/intelligence/gmi-publication-service");
-      const result = await recordGmiCallReview({
+      const { reviewGmiCallAndPersist } = await import("@/lib/intelligence/gmi-persistent-ledger");
+      const result = await reviewGmiCallAndPersist({
         reportId: body.reportId,
         callId: body.callId,
         outcomeStatus: body.outcomeStatus,
         score: body.score,
+        evidenceSummary: body.outcomeEvidence,
+        evidenceSourceRows: body.evidenceSources,
+        carryForwardJustification: body.tooEarlyJustification,
+        nextReviewDue: body.nextReviewDue ?? null,
         actor: "ADMIN",
         requestId,
       });
       return res.status(result.ok ? 200 : 422).json({
         ok: result.ok,
+        ...(result.ok && { entry: result.entry }),
+        ...(!result.ok && { issues: result.issues }),
         ...(!result.ok && { warning: result.warning }),
       });
     }

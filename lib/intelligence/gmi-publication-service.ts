@@ -18,6 +18,7 @@ import {
   getCallsForReport,
   type MarketCallOutcomeStatus,
 } from "./market-intelligence-call-ledger";
+import { buildGmiControlPlane } from "./gmi-control-plane";
 
 export type QualityGateRunResult = GmiReleaseEventRecordResult & {
   releaseReady: boolean;
@@ -49,35 +50,41 @@ export async function runGmiQualityGateAndRecord(
   requestId?: string,
 ): Promise<QualityGateRunResult> {
   const state = resolveGmiReleaseState(reportId);
+  const controlPlane = buildGmiControlPlane(reportId);
+  const controlPlaneBlocked = controlPlane.publicationReadiness.finalVerdict === "BLOCKED";
+  const blockers = [
+    ...state.blockers,
+    ...controlPlane.publicationReadiness.blockerReasons,
+  ];
   const event = buildQualityGateRunEvent({
     reportId,
     actor,
     requestId,
     qualityGate: {
       overallScore: state.qualityGate.overallScore,
-      releaseReady: state.qualityGate.releaseReady,
+      releaseReady: state.qualityGate.releaseReady && !controlPlaneBlocked,
       criticalFailures: state.qualityGate.criticalFailures,
-      blockers: state.blockers,
+      blockers,
     },
   });
 
   const result = await recordGmiReleaseEventSafe(event);
 
   // If the gate is blocked, also record the blocked event
-  if (!state.releaseReady && state.blockers.length > 0) {
+  if ((!state.releaseReady || controlPlaneBlocked) && blockers.length > 0) {
     const blockedEvent = buildReleaseBlockedEvent({
       reportId,
       actor,
       requestId,
-      blockers: state.blockers,
+      blockers,
     });
     await recordGmiReleaseEventSafe(blockedEvent);
   }
 
   return {
     ...result,
-    releaseReady: state.releaseReady,
-    blockers: state.blockers,
+    releaseReady: state.releaseReady && !controlPlaneBlocked,
+    blockers,
     overallScore: state.qualityGate.overallScore,
   };
 }
@@ -135,19 +142,25 @@ export async function proposeGmiLifecycleTransition(
   requestId?: string,
 ): Promise<GmiReleaseEventRecordResult> {
   const state = resolveGmiReleaseState(reportId);
+  const controlPlane = buildGmiControlPlane(reportId);
+  const controlPlaneBlocked = controlPlane.publicationReadiness.finalVerdict === "BLOCKED";
+  const blockers = [
+    ...state.blockers,
+    ...controlPlane.publicationReadiness.blockerReasons,
+  ];
 
-  if (!state.releaseReady) {
+  if (!state.releaseReady || controlPlaneBlocked) {
     const blockedEvent = buildReleaseBlockedEvent({
       reportId,
       actor,
       requestId,
-      blockers: state.blockers,
-      primaryReason: state.blockers[0],
+      blockers,
+      primaryReason: blockers[0],
     });
     await recordGmiReleaseEventSafe(blockedEvent);
     return {
       ok: false,
-      warning: `Transition blocked: ${state.blockers[0] ?? "Release conditions not satisfied"}. Blocked event recorded.`,
+      warning: `Transition blocked: ${blockers[0] ?? "Release conditions not satisfied"}. Blocked event recorded.`,
     };
   }
 

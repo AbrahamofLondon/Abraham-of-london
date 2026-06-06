@@ -9,12 +9,19 @@ export type GmiSourceRowStatus =
   | "CARRIED_FORWARD";
 
 export type GmiSourceConfidence = "HIGH" | "MEDIUM" | "LOW" | "MONITORING";
+export type GmiSourceConfidenceBasis =
+  | "observed"
+  | "institutionally_sourced"
+  | "modelled_estimate"
+  | "scenario_assumption"
+  | "operator_judgement";
 
 export type GmiSourceAppendixRow = {
   id: string;
   reportId: string;
   claim: string;
   evidenceClass: MarketEvidenceClass;
+  confidenceBasis?: GmiSourceConfidenceBasis;
   sourceOrBasis: string;
   observationWindow: string;
   confidence: GmiSourceConfidence;

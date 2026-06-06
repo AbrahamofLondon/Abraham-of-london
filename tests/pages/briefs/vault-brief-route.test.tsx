@@ -27,6 +27,10 @@ import {
   getStaticPaths as getPublicStaticPaths,
   getStaticProps as getPublicStaticProps,
 } from "@/pages/briefs/[slug]";
+import {
+  getPublicBriefHref,
+  getVaultBriefHref,
+} from "@/lib/content/brief-routes";
 
 const SCHEDULED_INTELLIGENCE_SLUG =
   "institutional-alpha-false-confidence-from-aggregated-metrics";
@@ -34,6 +38,8 @@ const PUBLISHED_INTELLIGENCE_SLUG =
   "institutional-alpha-the-hidden-cost-of-flattering-data";
 const FRONTIER_RESILIENCE_SLUG =
   "frontier-resilience-stress-reveals-the-real-culture";
+const FRONTIER_RESILIENCE_CANONICAL_ALIAS_TARGET =
+  "frontier-resilience-surviving-volatility-without-losing-governing-order";
 const CANON_VAULT_SLUG = "brief-001-modern-household";
 
 const ROOT = path.resolve(__dirname, "../../..");
@@ -101,6 +107,35 @@ describe("vault brief route scope", () => {
     });
   });
 
+  it("legacy Frontier Resilience numeric slug redirects to canonical vault slug", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: "frontier-resilience-01" },
+      } as never),
+    ).resolves.toMatchObject({
+      redirect: {
+        destination: `/vault/briefs/${FRONTIER_RESILIENCE_CANONICAL_ALIAS_TARGET}`,
+        permanent: true,
+      },
+    });
+  });
+
+  it("canonical Frontier Resilience alias target renders through /vault/briefs", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: FRONTIER_RESILIENCE_CANONICAL_ALIAS_TARGET },
+      } as never),
+    ).resolves.toMatchObject({
+      props: {
+        bareSlug: FRONTIER_RESILIENCE_CANONICAL_ALIAS_TARGET,
+        brief: {
+          slug: FRONTIER_RESILIENCE_CANONICAL_ALIAS_TARGET,
+          coverImage: "/assets/images/covers/briefs/frontier-resilience-cover.webp",
+        },
+      },
+    });
+  });
+
   it("valid Canon vault slug renders through /vault/briefs", async () => {
     await expect(
       getVaultStaticProps({
@@ -109,7 +144,10 @@ describe("vault brief route scope", () => {
     ).resolves.toMatchObject({
       props: {
         bareSlug: CANON_VAULT_SLUG,
-        brief: { slug: CANON_VAULT_SLUG },
+        brief: {
+          slug: CANON_VAULT_SLUG,
+          coverImage: "/assets/images/covers/briefs/vault-briefs-cover.webp",
+        },
       },
     });
   });
@@ -174,6 +212,33 @@ describe("vault brief route scope", () => {
       "The public Vault defines standards and exposes failure patterns. Inner Circle companions provide the instruments for diagnosis, sequencing, and repair.",
     );
     expect(html).toContain("frontier-resilience");
+  });
+
+  it("every /vault/briefs index item links to a detail route, not the index", async () => {
+    const response = await getVaultIndexStaticProps({} as never);
+    const props = "props" in response ? (response.props as any) : null;
+
+    for (const item of props?.items || []) {
+      expect(item.href).toMatch(/^\/vault\/briefs\/[^/]+$/);
+      expect(item.href).not.toBe("/vault/briefs");
+    }
+  });
+
+  it("brief route helpers never use index routes as item fallback", () => {
+    expect(getVaultBriefHref("frontier-resilience-01")).toBe(
+      `/vault/briefs/${FRONTIER_RESILIENCE_CANONICAL_ALIAS_TARGET}`,
+    );
+    expect(getVaultBriefHref("")).toBeNull();
+    expect(getPublicBriefHref("")).toBeNull();
+    expect(getPublicBriefHref(PUBLISHED_INTELLIGENCE_SLUG)).toBe(`/briefs/${PUBLISHED_INTELLIGENCE_SLUG}`);
+  });
+
+  it("proxy leaves /vault/briefs public so document-level gates can decide access", () => {
+    const proxySource = fs.readFileSync(path.join(ROOT, "proxy.ts"), "utf-8");
+
+    expect(proxySource).toContain("\"/vault/briefs\"");
+    expect(proxySource).toContain("\"/vault\"");
+    expect(proxySource).toContain("vaultBriefAliasRedirect");
   });
 
   it("does not generate vault paths for content/briefs intelligence slugs", async () => {
@@ -247,11 +312,40 @@ describe("vault brief route scope", () => {
   });
 
   it("published launch Intelligence Brief renders through /briefs", async () => {
-    await expect(
-      getPublicStaticProps({
+    const response = await getPublicStaticProps(
+      {
         params: { slug: PUBLISHED_INTELLIGENCE_SLUG },
+      } as never,
+    );
+
+    expect(response).not.toMatchObject({ notFound: true });
+    expect(response).toMatchObject({
+      props: {
+        bareSlug: PUBLISHED_INTELLIGENCE_SLUG,
+      },
+    });
+  });
+
+  it("published Institutional Alpha detail uses the Institutional Alpha cover", async () => {
+    const response = await getPublicStaticProps(
+      {
+        params: { slug: PUBLISHED_INTELLIGENCE_SLUG },
+      } as never,
+    );
+    const pageSource = fs.readFileSync(path.join(ROOT, "pages", "briefs", "[slug].tsx"), "utf-8");
+
+    expect(response).not.toMatchObject({ notFound: true });
+    expect(pageSource).toContain("absoluteBriefCoverForPublicSlug");
+    expect(pageSource).toContain("briefCoverAltForPublicSlug");
+    expect(pageSource).not.toContain("/assets/images/social/og-image.jpg");
+  });
+
+  it("scheduled Intelligence Brief via /vault/briefs remains notFound even with blocking fallback", async () => {
+    await expect(
+      getVaultStaticProps({
+        params: { slug: SCHEDULED_INTELLIGENCE_SLUG },
       } as never),
-    ).resolves.not.toMatchObject({ notFound: true });
+    ).resolves.toMatchObject({ notFound: true });
   });
 
   it("Frontier Resilience does not render through /briefs", async () => {

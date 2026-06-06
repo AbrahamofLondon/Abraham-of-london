@@ -18,6 +18,13 @@ import {
   trackBriefToCanonClick,
   trackBriefToInnerCircleClick,
 } from "@/lib/analytics/briefs-analytics";
+import {
+  absoluteBriefCoverForPublicSlug,
+  briefCoverAltForPublicSlug,
+  getPublicBriefSlug,
+  isPublicBriefSource,
+  publicBriefSlugForDoc,
+} from "@/lib/content/brief-routes";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -115,34 +122,8 @@ function safeString(value: unknown): string {
   return String(value);
 }
 
-function normalizePathish(input: unknown): string {
-  return safeString(input)
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .replace(/\/+$/, "")
-    .replace(/\/{2,}/g, "/")
-    .replace(/\.(md|mdx)$/i, "");
-}
-
 function publicBriefBareSlug(input: unknown): string {
-  const normalized = normalizePathish(input)
-    .replace(/^content\//i, "")
-    .replace(/^briefs\//i, "");
-  if (!normalized || normalized.includes("..")) return "";
-  const parts = normalized.split("/").filter(Boolean);
-  return parts[parts.length - 1] || "";
-}
-
-function isPublicBriefSource(doc: any): boolean {
-  const flattened = normalizePathish(doc?._raw?.flattenedPath).toLowerCase();
-  const source    = normalizePathish(doc?._raw?.sourceFilePath).toLowerCase();
-  return (
-    flattened.startsWith("briefs/") ||
-    source.startsWith("briefs/") ||
-    flattened.startsWith("content/briefs/") ||
-    source.startsWith("content/briefs/")
-  );
+  return getPublicBriefSlug(input);
 }
 
 function isRenderablePublicBrief(doc: any): boolean {
@@ -151,18 +132,6 @@ function isRenderablePublicBrief(doc: any): boolean {
   if (safeString(doc?.status).trim().toLowerCase() !== "canonical") return false;
   const requiredTier = normalizeRequiredTier(requiredTierFromDoc(doc));
   return requiredTier === "public";
-}
-
-function publicBriefSlugForDoc(doc: any): string {
-  return (
-    publicBriefBareSlug(doc?.urlSlug) ||
-    publicBriefBareSlug(doc?.slugSafe) ||
-    publicBriefBareSlug(doc?.slugComputed) ||
-    publicBriefBareSlug(doc?.slug) ||
-    publicBriefBareSlug(doc?._raw?.flattenedPath) ||
-    publicBriefBareSlug(doc?._raw?.sourceFilePath) ||
-    ""
-  );
 }
 
 function seriesFromDoc(doc: any, slug: string): string | null {
@@ -216,6 +185,8 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
     : null;
 
   const seriesInfo = brief.series ? seriesConfig[brief.series] : null;
+  const coverUrl = absoluteBriefCoverForPublicSlug(bareSlug);
+  const coverAlt = briefCoverAltForPublicSlug(bareSlug);
 
   React.useEffect(() => {
     trackBriefViewed({
@@ -238,25 +209,13 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
       <Head>
         <link rel="canonical" href={canonicalUrl} />
         <meta name="robots" content="index,follow" />
-        {/* P3 — OG cover image mapping */}
-        {(() => {
-          const coverMap: Record<string, string> = {
-            "institutional-alpha": "institutional-alpha-cover.webp",
-            "sovereign-intelligence": "sovereign-intelligence-cover.webp",
-          };
-          const prefix = bareSlug.startsWith("institutional-alpha") ? "institutional-alpha" : bareSlug.startsWith("sovereign-intelligence") ? "sovereign-intelligence" : null;
-          const coverFile = prefix ? coverMap[prefix] : "intelligence-briefs-cover.webp";
-          const coverUrl = `https://www.abrahamoflondon.org/assets/images/covers/briefs/${coverFile}`;
-          return (
-            <>
-              <meta property="og:image" content={coverUrl} />
-              <meta property="og:image:width" content="1200" />
-              <meta property="og:image:height" content="630" />
-              <meta name="twitter:card" content="summary_large_image" />
-              <meta name="twitter:image" content={coverUrl} />
-            </>
-          );
-        })()}
+        <meta property="og:image" content={coverUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={coverAlt} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={coverUrl} />
+        <meta name="twitter:image:alt" content={coverAlt} />
       </Head>
 
       <main className="min-h-screen bg-black px-6 pb-24 pt-24 text-white">

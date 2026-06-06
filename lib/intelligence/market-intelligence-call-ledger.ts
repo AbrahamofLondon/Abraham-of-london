@@ -32,12 +32,24 @@ export type MarketCallRecord = {
   callType: MarketCallType;
   statement: string;
   originalConfidence: "HIGH" | "MEDIUM" | "LOW" | "MONITORING";
+  assetClass?: string;
+  region?: string;
+  theme?: string;
+  scenarioLink?: string;
   expectedReviewWindow: string;
   outcomeStatus?: MarketCallOutcomeStatus;
   score?: 0 | 1 | 2 | 3 | 4 | 5 | null;
+  evidenceSources?: string[];
+  lastReviewedAt?: string;
+  nextReviewDue?: string;
   outcomeSummary?: string;
   learning?: string;
   futureWeightingChange?: string;
+  versionHistory?: Array<{
+    version: string;
+    changedAt: string;
+    note: string;
+  }>;
 };
 
 export type CallReviewSummary = {
@@ -187,8 +199,8 @@ export function getCallScoreLabel(
     case 5:    return "Confirmed strongly";
     case 4:    return "Directionally confirmed";
     case 3:    return "Partially confirmed";
-    case 2:    return "Weakly supported";
-    case 1:    return "Not confirmed";
+    case 2:    return "Too early to assess";
+    case 1:    return "Weakly supported";
     case 0:    return "Disconfirmed";
     default:   return "Not yet assessable";
   }

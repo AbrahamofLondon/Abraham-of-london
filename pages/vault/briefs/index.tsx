@@ -18,6 +18,7 @@ import {
   requiredTierFromDoc,
   getTierLabel,
 } from "@/lib/access/tier-policy";
+import { getVaultBriefHref } from "@/lib/content/brief-routes";
 
 type BriefCard = {
   slug: string;
@@ -259,7 +260,7 @@ function getDocKey(doc: any): string {
 function buildBriefHref(doc: any, slugBare: string): string {
   const explicitHref = safeString(doc?.href).trim();
   if (explicitHref.startsWith("/vault/briefs/")) return explicitHref;
-  return `/vault/briefs/${slugBare}`;
+  return getVaultBriefHref(slugBare) || "/vault/briefs";
 }
 
 function getCombinedBriefs(docs: any[]): any[] {

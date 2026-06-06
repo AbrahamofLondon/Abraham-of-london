@@ -15,6 +15,7 @@ import {
   coerceCanonicalSectionsEnvelope,
   type CanonicalSectionsEnvelope,
 } from "@/lib/decision/canonical-sections";
+import { resolveVaultBriefSlugAlias } from "@/lib/content/brief-slug-aliases";
 
 /* -------------------------------------------------------------------------- */
 /* CONSTANTS & CONFIGURATION                                                  */
@@ -203,6 +204,18 @@ function guardedPdfDownloadResponse(req: NextRequest, pathname: string): NextRes
   return NextResponse.redirect(url, 307);
 }
 
+function vaultBriefAliasRedirect(req: NextRequest, pathname: string): NextResponse | null {
+  const match = pathname.match(/^\/vault\/briefs\/([^/]+)$/);
+  if (!match?.[1]) return null;
+
+  const canonicalSlug = resolveVaultBriefSlugAlias(match[1]);
+  if (!canonicalSlug) return null;
+
+  const url = req.nextUrl.clone();
+  url.pathname = `/vault/briefs/${canonicalSlug}`;
+  return NextResponse.redirect(url, 308);
+}
+
 const TRACKABLE_PATHS = [
   "/pdf-dashboard",
   "/admin/reporting",
@@ -247,6 +260,11 @@ const AUTH_PUBLIC_PREFIXES = [
   "/diagnostics",
   "/blog",
   "/canon",
+  // Vault brief pages are document-gated in the page itself. Keeping this
+  // prefix public lets public Canon/Frontier briefs render and lets aliases
+  // canonicalise before tier gating; non-brief Vault routes remain Tier 2.
+  "/vault/briefs",
+  "/intelligence",
   "/shorts",
   "/events",
   "/media",
@@ -1163,6 +1181,13 @@ export async function proxy(req: NextRequest) {
     setSecurityHeaders(guardedPdf, req);
     guardedPdf.headers.set("X-PDF-Access", "download-surface-required");
     return guardedPdf;
+  }
+
+  const vaultAliasRedirect = vaultBriefAliasRedirect(req, pathname);
+  if (vaultAliasRedirect) {
+    setSecurityHeaders(vaultAliasRedirect, req);
+    vaultAliasRedirect.headers.set("X-Brief-Alias-Redirect", "true");
+    return vaultAliasRedirect;
   }
 
   const isApi = pathname.startsWith("/api/");

@@ -26,6 +26,11 @@ const cards = [
     href: "/intelligence/market",
   },
   {
+    title: "GMI",
+    body: "Verifiable macro intelligence: calls, evidence posture, falsification thresholds, and operator decisions.",
+    href: "/intelligence/gmi",
+  },
+  {
     title: "Reports",
     body: "Structured reports: intelligence products tied to identity, access, and governed use.",
     href: "/intelligence/reports",

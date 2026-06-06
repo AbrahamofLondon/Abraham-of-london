@@ -24,10 +24,19 @@ import Quote from "@/components/mdx/Quote";
 import DataTable from "@/components/mdx/DataTable";
 import { BriefSummaryCard } from "@/components/mdx/BriefSummaryCard";
 
-import { resolveDocCoverImage } from "@/lib/content/client-utils";
 import { normalizeSlug as normalizeContentSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
+import {
+  absoluteBriefCoverForVaultSlug,
+  briefCoverAltForVaultSlug,
+  briefCoverPathForVaultSlug,
+  getVaultBriefHref,
+  getVaultBriefSlug,
+  isVaultBriefSource,
+  resolveVaultAliasRedirect,
+  vaultBriefSlugForDoc,
+} from "@/lib/content/brief-routes";
 
 import type { TierDirective } from "@/lib/resources/tier-metadata";
 import type { AccessTier } from "@/lib/access/tier-policy";
@@ -41,6 +50,7 @@ import {
 type BriefRecommendation = {
   slug: string;
   title: string;
+  href: string;
 };
 
 type Props = {
@@ -50,8 +60,6 @@ type Props = {
   bareSlug: string;
   bodyEmpty?: boolean;
 };
-
-const DEFAULT_COVER = "/assets/images/canon/canon-resources.jpg";
 
 function safeString(v: unknown): string {
   if (typeof v === "string") return v;
@@ -81,67 +89,11 @@ function stripPrefixOnce(source: string, prefix: string): string {
 }
 
 function briefsBareSlug(input: unknown): string {
-  let s = cleanPathish(
-    normalizeContentSlug(safeString(input))
-      .replace(/\.(md|mdx)$/i, "")
-      .replace(/^content\//i, "")
-      .replace(/^vault\//i, "")
-      .replace(/^briefs\//i, ""),
-  );
-
-  if (!s || s.includes("..")) return "";
-
-  let changed = true;
-  while (changed) {
-    changed = false;
-
-    const nextA = stripPrefixOnce(s, "content");
-    if (nextA !== s) {
-      s = nextA;
-      changed = true;
-    }
-
-    const nextB = stripPrefixOnce(s, "vault");
-    if (nextB !== s) {
-      s = nextB;
-      changed = true;
-    }
-
-    const nextC = stripPrefixOnce(s, "briefs");
-    if (nextC !== s) {
-      s = nextC;
-      changed = true;
-    }
-  }
-
-  s = cleanPathish(s);
-  if (!s || s.includes("..")) return "";
-
-  const parts = s.split("/").filter(Boolean);
-  return parts[parts.length - 1] || "";
+  return getVaultBriefSlug(normalizeContentSlug(safeString(input)));
 }
 
 function isBriefDoc(doc: any): boolean {
-  if (!doc) return false;
-
-  const docKind = safeString(doc?.docKind).toLowerCase();
-  const type = safeString(doc?.type || doc?._type).toLowerCase();
-  const kind = safeString(doc?.kind).toLowerCase();
-  const category = safeString(doc?.category).toLowerCase();
-  const series = safeString(doc?.series).toLowerCase();
-  const flattened = safeString(doc?._raw?.flattenedPath).toLowerCase();
-  const sourceFilePath = safeString(doc?._raw?.sourceFilePath).toLowerCase();
-  const slug = safeString(doc?.slug).toLowerCase();
-
-  return (
-    type === "vaultbrief" ||
-    docKind === "vaultbrief" ||
-    flattened.startsWith("vault/briefs/") ||
-    sourceFilePath.startsWith("vault/briefs/") ||
-    slug.startsWith("vault/briefs/") ||
-    (category.includes("brief") && series.includes("canon")) ||
-    (kind.includes("brief") && flattened.startsWith("vault/"))
-  );
+  return isVaultBriefSource(doc);
 }
 
 function readGeneratedIndexJson(typeDir: string): any[] {
@@ -271,7 +223,9 @@ const BriefPage: NextPage<Props> = ({
     safeString(brief?.summary) ||
     safeString(brief?.abstract) ||
     safeString(brief?.excerpt);
-  const coverImage = resolveDocCoverImage(brief, { contentType: 'BRIEF' });
+  const coverImage = safeString(brief?.coverImage) || briefCoverPathForVaultSlug(bareSlug);
+  const coverUrl = absoluteBriefCoverForVaultSlug(bareSlug);
+  const coverAlt = briefCoverAltForVaultSlug(bareSlug);
 
   const required = normalizeRequiredTier(requiredTier);
   const needsAuth = required !== "public";
@@ -447,25 +401,13 @@ const BriefPage: NextPage<Props> = ({
           name="robots"
           content={required === "public" ? "index, follow" : "noindex, nofollow"}
         />
-        {/* P3 — OG cover image mapping */}
-        {(() => {
-          const coverMap: Record<string, string> = {
-            "frontier-resilience": "frontier-resilience-cover.webp",
-            "brief": "vault-briefs-cover.webp",
-          };
-          const prefix = bareSlug.startsWith("frontier-resilience-") ? "frontier-resilience" : bareSlug.startsWith("brief-") ? "brief" : null;
-          const coverFile = prefix ? coverMap[prefix] : null;
-          const coverUrl = coverFile ? `https://www.abrahamoflondon.org/assets/images/covers/briefs/${coverFile}` : null;
-          return coverUrl ? (
-            <>
-              <meta property="og:image" content={coverUrl} />
-              <meta property="og:image:width" content="1200" />
-              <meta property="og:image:height" content="630" />
-              <meta name="twitter:card" content="summary_large_image" />
-              <meta name="twitter:image" content={coverUrl} />
-            </>
-          ) : null;
-        })()}
+        <meta property="og:image" content={coverUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={coverAlt} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={coverUrl} />
+        <meta name="twitter:image:alt" content={coverAlt} />
       </Head>
 
       <ReaderFrame surface="vault">
@@ -537,7 +479,7 @@ const BriefPage: NextPage<Props> = ({
               {recommendations.map((item) => (
                 <Link
                   key={item.slug}
-                  href={`/vault/briefs/${briefsBareSlug(item.slug)}`}
+                  href={item.href}
                   className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-colors hover:bg-white/[0.04]"
                 >
                   <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500/70">
@@ -576,29 +518,36 @@ const BriefPage: NextPage<Props> = ({
         {/* P2 — Related and Next Brief navigation */}
         <div className="mx-auto mt-12 max-w-5xl border-t border-white/5 px-6 pt-12">
           <div className="grid gap-4 md:grid-cols-2">
-            {brief?.nextBrief ? (
+            {(() => {
+              const href = getVaultBriefHref(brief?.nextBrief);
+              return href ? (
               <Link
-                href={`/vault/briefs/${briefsBareSlug(brief.nextBrief)}`}
+                href={href}
                 className="border p-5 transition-colors hover:bg-white/[0.02]"
                 style={{ borderColor: "rgba(255,255,255,0.08)" }}
               >
                 <p className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/30">Next Brief</p>
                 <p className="mt-2 font-serif text-lg italic text-white/70">{brief.nextBriefTitle || briefsBareSlug(brief.nextBrief).replace(/-/g, " ")}</p>
               </Link>
-            ) : null}
+              ) : null;
+            })()}
             {brief?.relatedBriefs && brief.relatedBriefs.length > 0 ? (
               <div className="border p-5" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                 <p className="font-mono text-[7px] uppercase tracking-[0.2em] text-white/30">Related Briefs</p>
                 <div className="mt-2 space-y-2">
-                  {brief.relatedBriefs.slice(0, 3).map((rb: string) => (
-                    <Link
-                      key={rb}
-                      href={`/vault/briefs/${briefsBareSlug(rb)}`}
-                      className="block font-serif text-base italic text-white/60 transition hover:text-white/80"
-                    >
-                      {briefsBareSlug(rb).replace(/-/g, " ")}
-                    </Link>
-                  ))}
+                  {brief.relatedBriefs.slice(0, 3).map((rb: string) => {
+                    const href = getVaultBriefHref(rb);
+                    if (!href) return null;
+                    return (
+                      <Link
+                        key={rb}
+                        href={href}
+                        className="block font-serif text-base italic text-white/60 transition hover:text-white/80"
+                      >
+                        {briefsBareSlug(rb).replace(/-/g, " ")}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
@@ -634,7 +583,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   const paths = briefs
     .map((doc: any) => {
-      const bare = briefsBareSlug(doc?.slug || doc?._raw?.flattenedPath || "");
+      const bare = vaultBriefSlugForDoc(doc);
       if (!bare) return null;
       return { params: { slug: bare } };
     })
@@ -644,16 +593,28 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const bare = briefsBareSlug(params?.slug);
-  if (!bare) return { notFound: true };
+  const requestedBare = briefsBareSlug(params?.slug);
+  if (!requestedBare) return { notFound: true };
+
+  const aliasResolution = resolveVaultAliasRedirect(requestedBare);
+  if (aliasResolution.shouldRedirect) {
+    return {
+      redirect: {
+        destination: getVaultBriefHref(aliasResolution.canonicalSlug) || "/vault/briefs",
+        permanent: true,
+      },
+    };
+  }
+
+  const bare = aliasResolution.canonicalSlug;
 
   const { sanitizeData } = await import("@/lib/content/server");
   const docs = await getCombinedBriefs();
 
   const rawDoc =
     docs.find((doc: any) => {
-      const flattened = briefsBareSlug(doc?._raw?.flattenedPath || "");
-      const slug = briefsBareSlug(doc?.slug || "");
+      const flattened = vaultBriefSlugForDoc(doc);
+      const slug = vaultBriefSlugForDoc({ slug: doc?.slug });
       return flattened === bare || slug === bare;
     }) || null;
 
@@ -670,14 +631,21 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const recommendations: BriefRecommendation[] = docs
     .filter((doc: any) => {
-      const docBare = briefsBareSlug(doc?.slug || doc?._raw?.flattenedPath || "");
+      const docBare = vaultBriefSlugForDoc(doc);
       return docBare && docBare !== bare;
     })
     .slice(0, 3)
-    .map((doc: any) => ({
-      slug: briefsBareSlug(doc?.slug || doc?._raw?.flattenedPath || ""),
+    .map((doc: any) => {
+      const slug = vaultBriefSlugForDoc(doc);
+      const href = getVaultBriefHref(slug);
+      if (!slug || !href) return null;
+      return {
+      slug,
+      href,
       title: safeString(doc?.title) || "Untitled Brief",
-    }));
+      };
+    })
+    .filter((item): item is BriefRecommendation => item !== null);
 
   // Strip body (raw MDX source + compiled code) before serialising into page
   // props. Locked briefs set bodyCode="" above; rawDoc.body would still leak
@@ -688,7 +656,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     ...safeRawDoc,
     slug: bare,
     bodyCode,
-    coverImage: resolveDocCoverImage(rawDoc),
+    coverImage: briefCoverPathForVaultSlug(bare),
   };
 
   return {

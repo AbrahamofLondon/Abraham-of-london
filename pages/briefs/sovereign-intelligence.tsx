@@ -12,6 +12,7 @@ import {
   normalizeRequiredTier,
   requiredTierFromDoc,
 } from "@/lib/access/tier-policy";
+import { getPublicBriefHref } from "@/lib/content/brief-routes";
 
 type BriefItem = {
   title: string;
@@ -72,17 +73,19 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     })
     .map((doc: any) => {
       const sl = slugForDoc(doc);
+      const href = getPublicBriefHref(sl);
+      if (!href) return null;
       return {
         title: safeString(doc?.title) || "Untitled Brief",
         subtitle: safeString(doc?.subtitle) || null,
         description: safeString(doc?.description || doc?.summary || doc?.excerpt) || null,
         date: safeString(doc?.date) || null,
-        href: `/briefs/${sl}`,
+        href,
         briefId: safeString(doc?.briefId || doc?.institutionalId) || null,
         category: safeString(doc?.category) || null,
       };
     })
-    .filter((b: BriefItem) => b.href !== "/briefs/")
+    .filter((b: BriefItem | null): b is BriefItem => b !== null && b.href !== "/briefs/")
     .sort((a: BriefItem, b: BriefItem) => {
       if (!a.date && !b.date) return a.title.localeCompare(b.title);
       if (!a.date) return 1;
