@@ -8,10 +8,17 @@ import Head from "next/head";
 import Link from "next/link";
 
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
-import { resolveGmiReleaseState, type GmiReleaseState, type GmiBlocker } from "@/lib/intelligence/gmi-release-authority";
+import {
+  resolveGmiReleaseState,
+  getLatestSnapshot,
+  type GmiReleaseState,
+  type GmiBlocker,
+  type GmiReleaseSnapshot,
+} from "@/lib/intelligence/gmi-release-authority";
 
 type Props = {
   state: GmiReleaseState;
+  latestSnapshot: GmiReleaseSnapshot | null;
   editionId: string;
 };
 
@@ -23,14 +30,22 @@ function statusColor(status: string) {
   const map: Record<string, string> = {
     READY_FOR_PUBLICATION: "text-green-400 bg-green-500/10 border-green-500/20",
     BLOCKED: "text-red-400 bg-red-500/10 border-red-500/20",
-    NEEDS_CALL_REVIEW: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
-    NEEDS_SOURCE_REVIEW: "text-orange-400 bg-orange-500/10 border-orange-500/20",
-    NEEDS_FALSIFICATION_REVIEW: "text-purple-400 bg-purple-500/10 border-purple-500/20",
-    NEEDS_BOARD_REVIEW: "text-blue-400 bg-blue-500/10 border-blue-500/20",
     DRAFT: "text-white/40 bg-white/5 border-white/10",
     PUBLISHED: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   };
   return map[status] || "text-white/40 bg-white/5 border-white/10";
+}
+
+function nextActionColor(action: string | null) {
+  const map: Record<string, string> = {
+    NEEDS_CALL_REVIEW: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
+    NEEDS_SOURCE_REVIEW: "text-orange-400 bg-orange-500/10 border-orange-500/20",
+    NEEDS_FALSIFICATION_REVIEW: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+    NEEDS_BOARD_REVIEW: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    NEEDS_PUBLIC_TRUST_REVIEW: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+    READY_FOR_PUBLICATION: "text-green-400 bg-green-500/10 border-green-500/20",
+  };
+  return map[action || ""] || "text-white/40 bg-white/5 border-white/10";
 }
 
 function severityColor(severity: string) {
@@ -58,11 +73,12 @@ function categoryIcon(category: string) {
   return map[category] || "🔴";
 }
 
-const PublicationReadinessPage: NextPage<Props> = ({ state, editionId }) => {
+const PublicationReadinessPage: NextPage<Props> = ({ state, latestSnapshot, editionId }) => {
   const [publishing, setPublishing] = React.useState(false);
+  const [snapshotting, setSnapshotting] = React.useState(false);
   const [publishResult, setPublishResult] = React.useState<string | null>(null);
   const criticalBlockers = state.blockers.filter((b) => b.blocksPublication);
-  const isReady = state.status === "READY_FOR_PUBLICATION";
+  const isReady = state.canPublish;
 
   const handlePublish = async () => {
     setPublishing(true);
@@ -71,18 +87,39 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, editionId }) => {
       const res = await fetch("/api/admin/intelligence/gmi/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ editionId, confirmReleaseSnapshotId: `snapshot_${Date.now()}` }),
+        body: JSON.stringify({ editionId }),
       });
       const data = await res.json();
       if (data.ok) {
         setPublishResult(`Published successfully. Snapshot: ${data.snapshotId}`);
       } else {
-        setPublishResult(`Failed: ${data.error || "Unknown error"}`);
+        setPublishResult(`Blocked: ${data.error}. ${data.blockers?.length || 0} blocker(s) remain. Snapshot: ${data.snapshotId || "none"}`);
       }
     } catch (err: any) {
       setPublishResult(`Error: ${err.message}`);
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleCreateSnapshot = async () => {
+    setSnapshotting(true);
+    try {
+      const res = await fetch("/api/admin/intelligence/gmi/snapshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ editionId }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setPublishResult(`Blocked snapshot created: ${data.snapshotId}`);
+      } else {
+        setPublishResult(`Snapshot failed: ${data.error}`);
+      }
+    } catch (err: any) {
+      setPublishResult(`Error: ${err.message}`);
+    } finally {
+      setSnapshotting(false);
     }
   };
 
@@ -118,34 +155,66 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, editionId }) => {
                 <p style={{ ...mono, color: "rgba(255,255,255,0.34)", fontSize: 7, letterSpacing: "0.16em", textTransform: "uppercase" }}>
                   Release Verdict
                 </p>
-                <div className="mt-2 flex items-center gap-3">
-                  <span className={`inline-block border px-3 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${statusColor(state.status)}`}>
-                    {state.status.replace(/_/g, " ")}
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <span className={`inline-block border px-3 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${statusColor(state.releaseStatus)}`}>
+                    {state.releaseStatus.replace(/_/g, " ")}
                   </span>
+                  {state.primaryNextAction && state.primaryNextAction !== "READY_FOR_PUBLICATION" ? (
+                    <span className={`inline-block border px-3 py-1 font-mono text-[8px] uppercase tracking-[0.12em] ${nextActionColor(state.primaryNextAction)}`}>
+                      Next: {state.primaryNextAction.replace(/_/g, " ")}
+                    </span>
+                  ) : null}
                   <span className="font-mono text-[8px] text-white/30">
                     {state.blockers.length} blocker(s) · {state.warnings.length} warning(s)
                   </span>
+                  <span className={`font-mono text-[8px] ${state.canPublish ? "text-green-400" : "text-red-400"}`}>
+                    {state.canPublish ? "Can publish" : "Cannot publish"}
+                  </span>
                 </div>
+                {state.blockerCategories.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {state.blockerCategories.map((cat) => (
+                      <span key={cat} className="font-mono text-[7px] uppercase tracking-[0.12em] text-white/30 border border-white/10 px-2 py-0.5">
+                        {categoryIcon(cat)} {cat.replace(/_/g, " ")}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="text-right font-mono text-[7px] text-white/20">
                 Generated: {new Date(state.generatedAt).toLocaleString()}
               </div>
             </div>
 
+            {/* Sequential Unblocking Plan */}
             {state.requiredActions.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-4 border-t pt-4" style={{ borderTopColor: RULE }}>
                 <p style={{ ...mono, color: "rgba(255,255,255,0.34)", fontSize: 7, letterSpacing: "0.16em", textTransform: "uppercase" }}>
-                  Required Actions
+                  Sequential Unblocking Plan
                 </p>
-                <ul className="mt-2 space-y-1">
+                <ol className="mt-2 space-y-1.5">
                   {state.requiredActions.map((action, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-white/60">
-                      <span className="text-amber-400">→</span> {action}
+                    <li key={i} className="flex items-start gap-2 text-sm text-white/60">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[9px] font-mono"
+                        style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.4)" }}>
+                        {i + 1}
+                      </span>
+                      {action}
                     </li>
                   ))}
-                </ul>
+                </ol>
               </div>
             )}
+
+            {/* Latest Snapshot */}
+            {latestSnapshot ? (
+              <div className="mt-4 border-t pt-3" style={{ borderTopColor: RULE }}>
+                <p className="font-mono text-[7px] text-white/20">
+                  Latest snapshot: {latestSnapshot.id.slice(0, 16)}... ({latestSnapshot.releaseStatus})
+                  · {new Date(latestSnapshot.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           {/* Critical Blockers */}
@@ -218,10 +287,12 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, editionId }) => {
                     {publishing ? "Publishing..." : "Publish Q2"}
                   </button>
                   <button
-                    className="border px-6 py-3 font-mono text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
-                    style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)" }}
+                    onClick={handleCreateSnapshot}
+                    disabled={snapshotting}
+                    className="border px-6 py-3 font-mono text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5 disabled:opacity-40"
+                    style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)", cursor: snapshotting ? "not-allowed" : "pointer" }}
                   >
-                    Generate Release Snapshot
+                    {snapshotting ? "Creating..." : "Generate Release Snapshot"}
                   </button>
                   <button
                     className="border px-6 py-3 font-mono text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
@@ -231,10 +302,23 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, editionId }) => {
                   </button>
                 </>
               ) : (
-                <div className="border border-red-500/20 bg-red-500/10 px-5 py-3">
-                  <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-red-400">
-                    Publication blocked — {criticalBlockers.length} critical blocker(s) must be resolved first
-                  </p>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="border border-red-500/20 bg-red-500/10 px-5 py-3">
+                    <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-red-400">
+                      Publication blocked — {criticalBlockers.length} critical blocker(s) must be resolved first
+                    </p>
+                    <p className="mt-1 font-mono text-[7px] text-white/30">
+                      Blocked categories: {state.blockerCategories.join(", ")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCreateSnapshot}
+                    disabled={snapshotting}
+                    className="border px-4 py-2 font-mono text-[8px] uppercase tracking-[0.14em] transition hover:bg-white/5 disabled:opacity-40"
+                    style={{ borderColor: RULE, cursor: snapshotting ? "not-allowed" : "pointer" }}
+                  >
+                    {snapshotting ? "Creating..." : "Create Blocked Snapshot"}
+                  </button>
                 </div>
               )}
             </div>
@@ -388,10 +472,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const editionId = (ctx.query?.edition as string) || "GMI-Q2-2026";
   const state = resolveGmiReleaseState(editionId);
+  const latestSnapshot = await getLatestSnapshot(editionId);
 
   return {
     props: {
       state: JSON.parse(JSON.stringify(state)),
+      latestSnapshot: latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot)) : null,
       editionId,
     },
   };

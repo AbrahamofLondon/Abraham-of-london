@@ -1,4 +1,6 @@
-/* pages/api/admin/intelligence/gmi/publish.ts — PHASE 3: Atomic Publication Flow */
+/* pages/api/admin/intelligence/gmi/publish.ts — PHASE 3+8: Atomic Publication Flow */
+/* Strategic rule: returns 409 with blocked snapshot if not publishable. */
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/options";
@@ -10,8 +12,9 @@ type Response = {
   ok: boolean;
   snapshotId?: string;
   status?: string;
+  canPublish?: boolean;
   error?: string;
-  blockers?: Array<{ message: string }>;
+  blockers?: Array<{ message: string; category: string }>;
 };
 
 const ROUTES_TO_REVALIDATE = [
@@ -45,19 +48,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   // 1. Resolve release state
   const publishable = assertGmiEditionPublishable(editionId);
+
   if (!publishable.ok) {
+    // Persist blocked snapshot — failed publish attempts are audit records
+    const blockedSnapshot = buildGmiReleaseSnapshot(editionId, {
+      createdBy: session.user.email,
+      persist: true,
+    });
+
     return res.status(409).json({
       ok: false,
       error: "EDITION_NOT_PUBLISHABLE",
-      blockers: publishable.blockers.map((b) => ({ message: b.message })),
+      canPublish: false,
+      snapshotId: blockedSnapshot.id,
+      blockers: publishable.blockers.map((b) => ({ message: b.message, category: b.category })),
     });
   }
 
   try {
-    // 2. Create release snapshot
-    const snapshot = buildGmiReleaseSnapshot(editionId, session.user.email);
+    // 2. Create and persist final release snapshot
+    const snapshot = buildGmiReleaseSnapshot(editionId, {
+      createdBy: session.user.email,
+      publishedBy: session.user.email,
+      persist: true,
+    });
 
-    // 3. Mark edition published (via lifecycle record — use raw SQL for type safety)
+    // 3. Mark edition published via lifecycle record
     const { prisma } = await import("@/lib/prisma");
     const record = getMarketIntelligenceRecord(editionId);
     if (record?.id) {
@@ -68,7 +84,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       `;
     }
 
-    // 4. Emit governance event (non-blocking)
+    // 4. Update governance state
+    await prisma.$executeRaw`
+      UPDATE gmi_edition_governance_state
+      SET publication_status = 'published', updated_at = NOW()
+      WHERE edition_id = ${editionId}
+    `;
+
+    // 5. Emit governance event
     console.log("[GMI_PUBLISH]", {
       action: "GMI_EDITION_PUBLISHED",
       editionId,
@@ -78,12 +101,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       rubricVersion: snapshot.rubricVersion,
     });
 
-    // 5. Revalidate public routes
+    // 6. Revalidate public routes
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
+      const secret = process.env.REVALIDATION_SECRET || "";
       for (const route of ROUTES_TO_REVALIDATE) {
-        await fetch(`${siteUrl}/api/revalidate?secret=${process.env.REVALIDATION_SECRET || ""}&path=${route}`)
-          .catch(() => {});
+        await fetch(`${siteUrl}/api/revalidate?secret=${secret}&path=${route}`).catch(() => {});
       }
     } catch {
       // Non-blocking
@@ -93,6 +116,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       ok: true,
       snapshotId: snapshot.id,
       status: "PUBLISHED",
+      canPublish: true,
     });
   } catch (error) {
     console.error("[gmi-publish]", error);

@@ -895,6 +895,35 @@ model GmiEditionGovernanceState {
   @@map("gmi_edition_governance_state")
 }
 
+/// GMI Release Snapshot — proves what the system believed at release check time.
+/// Created before every publish attempt (blocked or successful).
+/// Hashes are deterministic SHA-256 of canonical JSON.
+model GmiReleaseSnapshot {
+  id                    String   @id @default(cuid())
+  editionId             String   @map("edition_id")
+  editionSlug           String   @map("edition_slug")
+  releaseStatus         String   @map("release_status")
+  primaryNextAction     String?  @map("primary_next_action")
+  methodologyVersion    String   @map("methodology_version")
+  rubricVersion         String   @map("rubric_version")
+  callLedgerHash        String   @map("call_ledger_hash")
+  sourceAppendixHash    String   @map("source_appendix_hash")
+  falsificationHash     String   @map("falsification_hash")
+  boardPulseHash        String   @map("board_pulse_hash")
+  performanceMetricsJson Json   @map("performance_metrics_json")
+  blockersJson          Json     @map("blockers_json")
+  warningsJson          Json     @map("warnings_json")
+  blockerCategoriesJson Json     @map("blocker_categories_json")
+  createdBy             String?  @map("created_by")
+  publishedBy           String?  @map("published_by")
+  publishedAt           DateTime? @map("published_at")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@index([editionId])
+  @@index([createdAt])
+  @@map("gmi_release_snapshots")
+}
+
 model InnerCircleEmailEventLog {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")

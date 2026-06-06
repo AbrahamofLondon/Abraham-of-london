@@ -1,5 +1,6 @@
-/* lib/intelligence/gmi-release-authority.ts — PHASE 1: Canonical GMI Release State */
+/* lib/intelligence/gmi-release-authority.ts — PHASE 1+2: Canonical GMI Release State + Snapshot Persistence */
 /* Single source of truth for GMI edition publishability. All admin surfaces read from here. */
+/* Strategic rule: releaseStatus=BLOCKED while any publication-blocking issue remains. */
 
 import { buildGmiControlPlane, type GmiControlPlaneVerdict } from "./gmi-control-plane";
 import { getPublicGmiCallLedger, type PublicGmiCallLedgerEntry } from "./gmi-instrument";
@@ -13,12 +14,17 @@ import { getCallsPendingReview, getCallsForReport } from "./market-intelligence-
 export type GmiReleaseStatus =
   | "DRAFT"
   | "BLOCKED"
+  | "READY_FOR_PUBLICATION"
+  | "PUBLISHED";
+
+export type GmiPrimaryNextAction =
   | "NEEDS_CALL_REVIEW"
   | "NEEDS_SOURCE_REVIEW"
   | "NEEDS_FALSIFICATION_REVIEW"
   | "NEEDS_BOARD_REVIEW"
+  | "NEEDS_PUBLIC_TRUST_REVIEW"
   | "READY_FOR_PUBLICATION"
-  | "PUBLISHED";
+  | null;
 
 export type BlockerSeverity = "critical" | "high" | "medium" | "low";
 export type BlockerCategory =
@@ -30,7 +36,8 @@ export type BlockerCategory =
   | "RED_TEAM"
   | "PDF_EXPORT"
   | "COMMERCIAL_ROUTING"
-  | "METADATA";
+  | "METADATA"
+  | "POST_MORTEM";
 
 export type GmiBlocker = {
   id: string;
@@ -66,9 +73,15 @@ export type GmiReleaseMetrics = {
 export type GmiReleaseState = {
   editionId: string;
   editionSlug: string;
-  status: GmiReleaseStatus;
+  releaseStatus: GmiReleaseStatus;
+  primaryNextAction: GmiPrimaryNextAction;
+  canPublish: boolean;
   blockers: GmiBlocker[];
   warnings: GmiBlocker[];
+  blockerCategories: BlockerCategory[];
+  criticalBlockerCount: number;
+  highBlockerCount: number;
+  nextBlockingCategory: BlockerCategory | null;
   requiredActions: string[];
   metrics: GmiReleaseMetrics;
   generatedAt: string;
@@ -77,7 +90,9 @@ export type GmiReleaseState = {
 export type GmiReleaseSnapshot = {
   id: string;
   editionId: string;
+  editionSlug: string;
   releaseStatus: GmiReleaseStatus;
+  primaryNextAction: GmiPrimaryNextAction;
   methodologyVersion: string;
   rubricVersion: string;
   callLedgerHash: string;
@@ -87,6 +102,8 @@ export type GmiReleaseSnapshot = {
   performanceMetricsJson: Record<string, unknown>;
   blockersJson: GmiBlocker[];
   warningsJson: GmiBlocker[];
+  blockerCategoriesJson: BlockerCategory[];
+  createdBy: string | null;
   publishedBy: string | null;
   publishedAt: string | null;
   createdAt: string;
@@ -108,11 +125,38 @@ function now(): string {
   return new Date().toISOString();
 }
 
+const CATEGORY_PRIORITY: BlockerCategory[] = [
+  "CALL_REVIEW",
+  "SOURCE_APPENDIX",
+  "FALSIFICATION",
+  "BOARD_PULSE",
+  "PERFORMANCE",
+  "RED_TEAM",
+  "PDF_EXPORT",
+  "COMMERCIAL_ROUTING",
+  "METADATA",
+  "POST_MORTEM",
+];
+
+const CATEGORY_TO_NEXT_ACTION: Record<BlockerCategory, GmiPrimaryNextAction> = {
+  CALL_REVIEW: "NEEDS_CALL_REVIEW",
+  SOURCE_APPENDIX: "NEEDS_SOURCE_REVIEW",
+  FALSIFICATION: "NEEDS_FALSIFICATION_REVIEW",
+  BOARD_PULSE: "NEEDS_BOARD_REVIEW",
+  PERFORMANCE: "NEEDS_PUBLIC_TRUST_REVIEW",
+  RED_TEAM: "NEEDS_PUBLIC_TRUST_REVIEW",
+  PDF_EXPORT: "NEEDS_BOARD_REVIEW",
+  COMMERCIAL_ROUTING: "NEEDS_PUBLIC_TRUST_REVIEW",
+  METADATA: "NEEDS_PUBLIC_TRUST_REVIEW",
+  POST_MORTEM: "NEEDS_PUBLIC_TRUST_REVIEW",
+};
+
 // ─── Release State Resolver ──────────────────────────────────────────────────
 
 export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
   const plane = buildGmiControlPlane(editionId);
   const pr = plane.publicationReadiness;
+  const lifecycle = getMarketIntelligenceRecord(editionId);
   const calls = getPublicGmiCallLedger().filter((c) => c.editionId === editionId || c.editionId === "GMI-Q1-2026");
   const q1Calls = calls.filter((c) => c.editionId === "GMI-Q1-2026");
   const sourceRows = getSourceRowsForReport(editionId);
@@ -125,9 +169,8 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
   const warnings: GmiBlocker[] = [];
   const requiredActions: string[] = [];
 
-  // Call Review Gate
+  // ── Call Review Gate ─────────────────────────────────────────────────────
   const unscoredCalls = q1Calls.filter((c) => c.currentScore === null);
-  const carriedForwardCalls = q1Calls.filter((c) => c.currentScore === 2);
   const callsWithoutEvidence = q1Calls.filter((c) =>
     c.currentScore !== null && c.currentScore !== 2 && c.evidenceSources.length === 0
   );
@@ -144,7 +187,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
       actionLabel: "Score pending calls",
       blocksPublication: true,
     });
-    requiredActions.push(`Score ${unscoredCalls.length} pending call(s)`);
+    requiredActions.push(`Score ${unscoredCalls.length} pending call(s) at /admin/intelligence/gmi/batch-score`);
   }
 
   if (callsWithoutEvidence.length > 0) {
@@ -162,7 +205,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
     requiredActions.push(`Add evidence sources to ${callsWithoutEvidence.length} call(s)`);
   }
 
-  // Source Appendix Gate
+  // ── Source Appendix Gate ─────────────────────────────────────────────────
   if (releaseBlockingRows.length > 0) {
     const methodNoteMissing = releaseBlockingRows.filter((r) => r.status === "METHOD_NOTE_REQUIRED");
     blockers.push({
@@ -176,7 +219,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
       actionLabel: "Resolve source blockers",
       blocksPublication: true,
     });
-    requiredActions.push(`Resolve ${releaseBlockingRows.length} release-blocking source row(s)`);
+    requiredActions.push(`Resolve ${releaseBlockingRows.length} release-blocking source row(s) at /admin/intelligence/gmi/source-workbench`);
 
     if (methodNoteMissing.length > 0) {
       warnings.push({
@@ -193,7 +236,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
     }
   }
 
-  // Falsification Gate
+  // ── Falsification Gate ───────────────────────────────────────────────────
   if (missingFalsificationThresholds > 0) {
     blockers.push({
       id: `BLOCKER-FALSIFICATION-${editionId}`,
@@ -206,7 +249,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
       actionLabel: "Add falsification rules",
       blocksPublication: true,
     });
-    requiredActions.push(`Add falsification thresholds for ${missingFalsificationThresholds} high-conviction thesis(es)`);
+    requiredActions.push(`Add falsification thresholds for ${missingFalsificationThresholds} high-conviction thesis(es) at /admin/intelligence/gmi/falsification`);
   }
 
   const incompleteRules = falsificationRules.filter((r) => !r.thresholdValue.trim() || !r.observableIndicator.trim());
@@ -224,7 +267,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
     });
   }
 
-  // Board Pulse Gate
+  // ── Board Pulse Gate ─────────────────────────────────────────────────────
   const boardPulseComplete = plane.boardConsequenceIntegrity.operatorConsequenceIndexComplete;
   if (!boardPulseComplete) {
     blockers.push({
@@ -241,7 +284,7 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
     requiredActions.push("Complete Board Pulse Operator Consequence Index");
   }
 
-  // Board Pack PDF Gate
+  // ── Board Pack PDF Gate ──────────────────────────────────────────────────
   const boardPackAvailable = plane.publicTrustSurface.boardPulseLive;
   if (!boardPackAvailable) {
     warnings.push({
@@ -257,47 +300,75 @@ export function resolveGmiReleaseState(editionId: string): GmiReleaseState {
     });
   }
 
-  // Commercial Routing Gate
-  if (!plane.commercialRouting.boardroomBriefRouteAvailable) {
-    warnings.push({
-      id: `WARN-COMMERCIAL-BOARDROOM-${editionId}`,
-      severity: "medium",
-      category: "COMMERCIAL_ROUTING",
-      message: "Boardroom Brief commercial route is not available.",
-      affectedEntityId: null,
-      affectedEntityLabel: "Boardroom Brief route",
-      actionHref: "/boardroom-brief",
-      actionLabel: "Verify Boardroom Brief route",
-      blocksPublication: false,
-    });
+  // ── Post-Mortem Gate ─────────────────────────────────────────────────────
+  // Future editions cannot publish unless previous edition has post-mortem
+  if (editionId === "GMI-Q3-2026") {
+    const q2Published = String(lifecycle?.lifecycleState ?? "") === "PUBLISHED";
+    if (!q2Published) {
+      blockers.push({
+        id: `BLOCKER-POST-MORTEM-${editionId}`,
+        severity: "critical",
+        category: "POST_MORTEM",
+        message: "Previous edition (Q2) has not been published. Q3 cannot publish until Q2 post-mortem exists.",
+        affectedEntityId: null,
+        affectedEntityLabel: "Q2 post-mortem required",
+        actionHref: "/intelligence/gmi/post-mortem",
+        actionLabel: "Complete Q2 post-mortem",
+        blocksPublication: true,
+      });
+    }
   }
 
-  // Determine status
+  // ── Determine Status ─────────────────────────────────────────────────────
   const criticalBlockers = blockers.filter((b) => b.blocksPublication);
-  let status: GmiReleaseStatus;
+  const blockerCategories = [...new Set(blockers.map((b) => b.category))] as BlockerCategory[];
 
-  if (String(pr.publicationStatus) === "PUBLISHED") {
-    status = "PUBLISHED";
-  } else if (criticalBlockers.length === 0) {
-    status = "READY_FOR_PUBLICATION";
-  } else if (blockers.some((b) => b.category === "CALL_REVIEW" && b.blocksPublication)) {
-    status = "NEEDS_CALL_REVIEW";
-  } else if (blockers.some((b) => b.category === "SOURCE_APPENDIX" && b.blocksPublication)) {
-    status = "NEEDS_SOURCE_REVIEW";
-  } else if (blockers.some((b) => b.category === "FALSIFICATION" && b.blocksPublication)) {
-    status = "NEEDS_FALSIFICATION_REVIEW";
-  } else if (blockers.some((b) => b.category === "BOARD_PULSE" && b.blocksPublication)) {
-    status = "NEEDS_BOARD_REVIEW";
+  // Strategic rule: releaseStatus=BLOCKED while any publication-blocking issue remains
+  const isPublished = String(lifecycle?.lifecycleState ?? pr.publicationStatus) === "PUBLISHED";
+  let releaseStatus: GmiReleaseStatus;
+  if (isPublished) {
+    releaseStatus = "PUBLISHED";
+  } else if (criticalBlockers.length > 0) {
+    releaseStatus = "BLOCKED";
   } else {
-    status = "BLOCKED";
+    releaseStatus = "READY_FOR_PUBLICATION";
+  }
+
+  // Determine primaryNextAction — what the editor should do first
+  let primaryNextAction: GmiPrimaryNextAction = null;
+  if (releaseStatus === "READY_FOR_PUBLICATION") {
+    primaryNextAction = "READY_FOR_PUBLICATION";
+  } else if (criticalBlockers.length > 0) {
+    // Find the highest-priority blocking category
+    for (const cat of CATEGORY_PRIORITY) {
+      if (blockers.some((b) => b.category === cat && b.blocksPublication)) {
+        primaryNextAction = CATEGORY_TO_NEXT_ACTION[cat];
+        break;
+      }
+    }
+  }
+
+  // Determine next blocking category
+  let nextBlockingCategory: BlockerCategory | null = null;
+  for (const cat of CATEGORY_PRIORITY) {
+    if (blockers.some((b) => b.category === cat && b.blocksPublication)) {
+      nextBlockingCategory = cat;
+      break;
+    }
   }
 
   return {
     editionId,
-    editionSlug: editionId.toLowerCase().replace(/-/g, "-"),
-    status,
+    editionSlug: editionId.toLowerCase().replace(/_/g, "-"),
+    releaseStatus,
+    primaryNextAction,
+    canPublish: releaseStatus === "READY_FOR_PUBLICATION",
     blockers,
     warnings,
+    blockerCategories,
+    criticalBlockerCount: criticalBlockers.length,
+    highBlockerCount: blockers.filter((b) => b.severity === "high" && b.blocksPublication).length,
+    nextBlockingCategory,
     requiredActions: [...new Set(requiredActions)],
     metrics: {
       totalCalls: plane.callLedgerIntegrity.totalCalls,
@@ -327,24 +398,30 @@ export function getGmiReleaseBlockers(editionId: string): GmiBlocker[] {
 
 export function assertGmiEditionPublishable(editionId: string): { ok: true } | { ok: false; blockers: GmiBlocker[] } {
   const state = resolveGmiReleaseState(editionId);
-  const criticalBlockers = state.blockers.filter((b) => b.blocksPublication);
-  if (criticalBlockers.length > 0) {
-    return { ok: false, blockers: criticalBlockers };
+  if (!state.canPublish) {
+    return { ok: false, blockers: state.blockers.filter((b) => b.blocksPublication) };
   }
   return { ok: true };
 }
 
-export function buildGmiReleaseSnapshot(editionId: string, publishedBy?: string): GmiReleaseSnapshot {
+// ─── Release Snapshot ────────────────────────────────────────────────────────
+
+export function buildGmiReleaseSnapshot(
+  editionId: string,
+  options?: { createdBy?: string; publishedBy?: string; persist?: boolean },
+): GmiReleaseSnapshot {
   const state = resolveGmiReleaseState(editionId);
   const plane = buildGmiControlPlane(editionId);
   const calls = getPublicGmiCallLedger().filter((c) => c.editionId === editionId || c.editionId === "GMI-Q1-2026");
   const sourceRows = getSourceRowsForReport(editionId);
   const falsificationRules = buildGmiFalsificationRegister(editionId);
 
-  return {
+  const snapshot: GmiReleaseSnapshot = {
     id: id("gmirs"),
     editionId,
-    releaseStatus: state.status,
+    editionSlug: state.editionSlug,
+    releaseStatus: state.releaseStatus,
+    primaryNextAction: state.primaryNextAction,
     methodologyVersion: plane.performance.methodologyVersion,
     rubricVersion: plane.performance.rubricVersion,
     callLedgerHash: hashJson(calls.map((c) => ({
@@ -378,8 +455,103 @@ export function buildGmiReleaseSnapshot(editionId: string, publishedBy?: string)
     },
     blockersJson: state.blockers,
     warningsJson: state.warnings,
-    publishedBy: publishedBy ?? null,
-    publishedAt: state.status === "PUBLISHED" ? now() : null,
+    blockerCategoriesJson: state.blockerCategories,
+    createdBy: options?.createdBy ?? null,
+    publishedBy: options?.publishedBy ?? null,
+    publishedAt: state.releaseStatus === "PUBLISHED" ? now() : null,
     createdAt: now(),
   };
+
+  // Persist to database if requested
+  if (options?.persist) {
+    persistSnapshot(snapshot).catch(() => {});
+  }
+
+  return snapshot;
+}
+
+async function persistSnapshot(snapshot: GmiReleaseSnapshot): Promise<void> {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.$executeRaw`
+      INSERT INTO gmi_release_snapshots (
+        id, edition_id, edition_slug, release_status, primary_next_action,
+        methodology_version, rubric_version,
+        call_ledger_hash, source_appendix_hash, falsification_hash, board_pulse_hash,
+        performance_metrics_json, blockers_json, warnings_json, blocker_categories_json,
+        created_by, published_by, published_at, created_at
+      ) VALUES (
+        ${snapshot.id}, ${snapshot.editionId}, ${snapshot.editionSlug}, ${snapshot.releaseStatus},
+        ${snapshot.primaryNextAction},
+        ${snapshot.methodologyVersion}, ${snapshot.rubricVersion},
+        ${snapshot.callLedgerHash}, ${snapshot.sourceAppendixHash},
+        ${snapshot.falsificationHash}, ${snapshot.boardPulseHash},
+        ${JSON.stringify(snapshot.performanceMetricsJson)}::jsonb,
+        ${JSON.stringify(snapshot.blockersJson)}::jsonb,
+        ${JSON.stringify(snapshot.warningsJson)}::jsonb,
+        ${JSON.stringify(snapshot.blockerCategoriesJson)}::jsonb,
+        ${snapshot.createdBy}, ${snapshot.publishedBy}, ${snapshot.publishedAt}::timestamptz, NOW()
+      )
+    `;
+  } catch (error) {
+    console.error("[GMI_SNAPSHOT_PERSIST]", error);
+  }
+}
+
+export async function getLatestSnapshot(editionId: string): Promise<GmiReleaseSnapshot | null> {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const rows = await prisma.$queryRaw<Array<{
+      id: string;
+      edition_id: string;
+      edition_slug: string;
+      release_status: string;
+      primary_next_action: string | null;
+      methodology_version: string;
+      rubric_version: string;
+      call_ledger_hash: string;
+      source_appendix_hash: string;
+      falsification_hash: string;
+      board_pulse_hash: string;
+      performance_metrics_json: any;
+      blockers_json: any;
+      warnings_json: any;
+      blocker_categories_json: any;
+      created_by: string | null;
+      published_by: string | null;
+      published_at: Date | null;
+      created_at: Date;
+    }>>`
+      SELECT * FROM gmi_release_snapshots
+      WHERE edition_id = ${editionId}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    if (!rows[0]) return null;
+    const r = rows[0];
+    return {
+      id: r.id,
+      editionId: r.edition_id,
+      editionSlug: r.edition_slug,
+      releaseStatus: r.release_status as GmiReleaseStatus,
+      primaryNextAction: r.primary_next_action as GmiPrimaryNextAction,
+      methodologyVersion: r.methodology_version,
+      rubricVersion: r.rubric_version,
+      callLedgerHash: r.call_ledger_hash,
+      sourceAppendixHash: r.source_appendix_hash,
+      falsificationHash: r.falsification_hash,
+      boardPulseHash: r.board_pulse_hash,
+      performanceMetricsJson: r.performance_metrics_json,
+      blockersJson: r.blockers_json as GmiBlocker[],
+      warningsJson: r.warnings_json as GmiBlocker[],
+      blockerCategoriesJson: r.blocker_categories_json as BlockerCategory[],
+      createdBy: r.created_by,
+      publishedBy: r.published_by,
+      publishedAt: r.published_at?.toISOString() ?? null,
+      createdAt: r.created_at.toISOString(),
+    };
+  } catch {
+    return null;
+  }
 }

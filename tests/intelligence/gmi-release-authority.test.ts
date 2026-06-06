@@ -1,4 +1,4 @@
-/* tests/intelligence/gmi-release-authority.test.ts — PHASE 11: Release Authority Tests */
+/* tests/intelligence/gmi-release-authority.test.ts — PHASE 10: Release Authority Tests */
 import { describe, expect, it } from "vitest";
 import {
   resolveGmiReleaseState,
@@ -7,23 +7,27 @@ import {
 } from "@/lib/intelligence/gmi-release-authority";
 
 describe("GMI release authority", () => {
-  it("Q2 is BLOCKED or NEEDS_CALL_REVIEW when calls are unscored", () => {
+  it("releaseStatus is BLOCKED while any blocking issue remains", () => {
     const state = resolveGmiReleaseState("GMI-Q2-2026");
-    expect(["BLOCKED", "NEEDS_CALL_REVIEW"]).toContain(state.status);
-    expect(state.blockers.some((b) => b.category === "CALL_REVIEW" && b.blocksPublication)).toBe(true);
+    expect(state.releaseStatus).toBe("BLOCKED");
   });
 
-  it("Q2 is BLOCKED when release-blocking source rows are open", () => {
+  it("primaryNextAction can be NEEDS_CALL_REVIEW while status is BLOCKED", () => {
     const state = resolveGmiReleaseState("GMI-Q2-2026");
-    const sourceBlockers = state.blockers.filter((b) => b.category === "SOURCE_APPENDIX" && b.blocksPublication);
-    expect(sourceBlockers.length).toBeGreaterThanOrEqual(0);
+    expect(state.releaseStatus).toBe("BLOCKED");
+    expect(state.primaryNextAction).toBe("NEEDS_CALL_REVIEW");
   });
 
-  it("Q2 is BLOCKED when high-conviction falsification threshold is missing", () => {
+  it("blockerCategories includes CALL_REVIEW, SOURCE_APPENDIX, FALSIFICATION", () => {
     const state = resolveGmiReleaseState("GMI-Q2-2026");
-    const falsificationBlockers = state.blockers.filter((b) => b.category === "FALSIFICATION" && b.blocksPublication);
-    // May or may not have falsification blockers depending on current state
-    expect(state.blockers.length).toBeGreaterThan(0);
+    expect(state.blockerCategories).toContain("CALL_REVIEW");
+    expect(state.blockerCategories).toContain("SOURCE_APPENDIX");
+    expect(state.blockerCategories).toContain("FALSIFICATION");
+  });
+
+  it("canPublish is false until all blocker categories clear", () => {
+    const state = resolveGmiReleaseState("GMI-Q2-2026");
+    expect(state.canPublish).toBe(false);
   });
 
   it("assertGmiEditionPublishable returns not ok for Q2", () => {
@@ -34,14 +38,18 @@ describe("GMI release authority", () => {
     }
   });
 
-  it("buildGmiReleaseSnapshot creates a snapshot with hashes", () => {
+  it("buildGmiReleaseSnapshot creates a snapshot with all required fields", () => {
     const snapshot = buildGmiReleaseSnapshot("GMI-Q2-2026");
     expect(snapshot.editionId).toBe("GMI-Q2-2026");
+    expect(snapshot.releaseStatus).toBe("BLOCKED");
+    expect(snapshot.primaryNextAction).toBe("NEEDS_CALL_REVIEW");
     expect(snapshot.callLedgerHash).toBeTruthy();
     expect(snapshot.sourceAppendixHash).toBeTruthy();
     expect(snapshot.falsificationHash).toBeTruthy();
     expect(snapshot.boardPulseHash).toBeTruthy();
-    expect(snapshot.blockersJson.length).toBeGreaterThan(0);
+    expect(snapshot.blockerCategoriesJson).toContain("CALL_REVIEW");
+    expect(snapshot.blockerCategoriesJson).toContain("SOURCE_APPENDIX");
+    expect(snapshot.blockerCategoriesJson).toContain("FALSIFICATION");
     expect(snapshot.methodologyVersion).toBeTruthy();
     expect(snapshot.rubricVersion).toBeTruthy();
   });
@@ -58,9 +66,7 @@ describe("GMI release authority", () => {
 
   it("release state has required actions when blocked", () => {
     const state = resolveGmiReleaseState("GMI-Q2-2026");
-    if (state.blockers.length > 0) {
-      expect(state.requiredActions.length).toBeGreaterThan(0);
-    }
+    expect(state.requiredActions.length).toBeGreaterThan(0);
   });
 
   it("blockers have all required fields", () => {
@@ -72,5 +78,11 @@ describe("GMI release authority", () => {
       expect(blocker.message).toBeTruthy();
       expect(typeof blocker.blocksPublication).toBe("boolean");
     }
+  });
+
+  it("criticalBlockerCount reflects only publication-blocking blockers", () => {
+    const state = resolveGmiReleaseState("GMI-Q2-2026");
+    const actualCritical = state.blockers.filter((b) => b.blocksPublication).length;
+    expect(state.criticalBlockerCount).toBe(actualCritical);
   });
 });
