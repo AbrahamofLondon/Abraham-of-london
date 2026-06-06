@@ -289,8 +289,8 @@ export const GMI_Q2_FALSIFICATION_RULES: readonly GmiFalsificationRuleRecord[] =
     currentStatus: "monitoring",
     evidenceSourceRows: ["GMI-Q2-SRC-004", "GMI-Q2-SRC-007", "GMI-Q2-SRC-013"],
     nextReviewDue: "2026-09-30",
-    lastReviewedAt: null,
-    publicExplanation: "The thesis remains monitored because Q2 evidence has not matured into a scored public review.",
+    lastReviewedAt: "2026-06-05",
+    publicExplanation: "The fragmentation pricing thesis was directionally confirmed in Q2 review (CALL-001 scored 4). The falsification condition remains active: if markets stop differentiating by resilience posture, the thesis would need revision. Next review: Q3 2026.",
   },
   {
     id: "GMI-Q2-FALSE-002",
@@ -304,7 +304,7 @@ export const GMI_Q2_FALSIFICATION_RULES: readonly GmiFalsificationRuleRecord[] =
     currentStatus: "monitoring",
     evidenceSourceRows: ["GMI-Q2-SRC-004"],
     nextReviewDue: "2026-09-30",
-    lastReviewedAt: null,
+    lastReviewedAt: "2026-06-05",
     publicExplanation: "This remains a major falsification test for Q2/Q3 because policy relief must be implemented, not announced.",
   },
   {
@@ -319,7 +319,7 @@ export const GMI_Q2_FALSIFICATION_RULES: readonly GmiFalsificationRuleRecord[] =
     currentStatus: "intact",
     evidenceSourceRows: ["GMI-Q2-SRC-006", "GMI-Q1-2026-CALL-005"],
     nextReviewDue: "2026-09-30",
-    lastReviewedAt: null,
+    lastReviewedAt: "2026-06-05",
     publicExplanation: "The public posture is monitoring; the rule states what would downgrade the concern.",
   },
   {
@@ -334,7 +334,7 @@ export const GMI_Q2_FALSIFICATION_RULES: readonly GmiFalsificationRuleRecord[] =
     currentStatus: "monitoring",
     evidenceSourceRows: ["GMI-Q2-SRC-004", "GMI-Q2-SRC-007", "GMI-Q1-2026-CALL-003"],
     nextReviewDue: "2026-09-30",
-    lastReviewedAt: null,
+    lastReviewedAt: "2026-06-05",
     publicExplanation: "The optionality premium thesis is partially confirmed in Q2 but requires Q3 evidence across a full earnings cycle to confirm whether the premium is structural or episodic.",
   },
 ] as const;
