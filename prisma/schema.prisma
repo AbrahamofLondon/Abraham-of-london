@@ -924,6 +924,60 @@ model GmiReleaseSnapshot {
   @@map("gmi_release_snapshots")
 }
 
+/// GMI Source Appendix Row — persisted source evidence for edition claims.
+/// Each row supports one or more calls/theses with citation metadata.
+model GmiSourceAppendixRow {
+  id                String   @id @default(cuid())
+  editionId         String   @map("edition_id")
+  sourceRowId       String   @unique @map("source_row_id")
+  claim             String
+  evidenceClass     String   @map("evidence_class")
+  confidenceBasis   String?  @map("confidence_basis")
+  sourceTitle       String?  @map("source_title")
+  sourceUrl         String?  @map("source_url")
+  publisher         String?  @map("publisher")
+  publicationDate   String?  @map("publication_date")
+  accessDate        String?  @map("access_date")
+  observationWindow String   @map("observation_window")
+  confidence        String   @map("confidence")
+  reportSection     String   @map("report_section")
+  status            String   @default("SOURCE_PENDING") @map("status")
+  releaseBlocker    Boolean  @default(false) @map("release_blocker")
+  methodNote        String?  @map("method_note")
+  adminJustification String? @map("admin_justification")
+  sourceVisibility  String   @default("public") @map("source_visibility")
+  linkedCallIds     Json     @default("[]") @map("linked_call_ids_json")
+  linkedThesisIds   Json     @default("[]") @map("linked_thesis_ids_json")
+  importedFrom      String?  @map("imported_from")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([editionId])
+  @@index([sourceRowId])
+  @@index([status])
+  @@index([releaseBlocker])
+  @@map("gmi_source_appendix_rows")
+}
+
+/// GMI Amendment — post-publication correction record.
+/// Ensures publication state is preserved while allowing later corrections.
+model GmiAmendment {
+  id          String   @id @default(cuid())
+  editionId   String   @map("edition_id")
+  entityType  String   @map("entity_type") // call | source | falsification | board_consequence
+  entityId    String   @map("entity_id")
+  previousValue Json   @map("previous_value_json")
+  newValue    Json     @map("new_value_json")
+  reason      String
+  approvedBy  String   @map("approved_by")
+  publicNote  String?  @map("public_note")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([editionId])
+  @@index([entityType, entityId])
+  @@map("gmi_amendments")
+}
+
 model InnerCircleEmailEventLog {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
@@ -2237,7 +2291,7 @@ model InnerCircleKey {
 model MfaSetup {
   id            String            @id @default(cuid())
   enabled       Boolean           @default(false)
-  methods       String?           @default("[\"totp\"]")
+  methods       String?           @default("totp")
   totpSecret    String?
   totpVerified  Boolean           @default(false)
   backupCodes   String?           @default("[]")
