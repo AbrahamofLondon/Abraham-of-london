@@ -11,6 +11,10 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma.server";
+import {
+  assertDeliveryAuthorised,
+  markArtifactDelivered,
+} from "@/lib/artifacts/artifact-authority";
 import { qualifiesForBoardroom, generateBoardroomDossier } from "@/lib/constitution/boardroom-mode";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
 import type { BoardroomDossier as BoardroomDossierType } from "@/lib/constitution/boardroom-mode";
@@ -147,6 +151,20 @@ export const BoardroomDossierService = {
    * Grant access to a client and mark as delivered.
    */
   async grantAccess(input: GrantAccessInput): Promise<DossierDeliveryRecord> {
+    const existing = await prisma.boardroomDossier.findUnique({
+      where: { id: input.dossierId },
+      select: { orderId: true, isSample: true, sourceType: true },
+    });
+
+    if (!existing?.orderId) {
+      throw new Error("DELIVERY_BLOCKED: Boardroom dossier is not linked to a paid BoardroomBriefOrder.");
+    }
+    if (existing.isSample || existing.sourceType === "MANUAL_SYNTHETIC_SAMPLE") {
+      throw new Error("DELIVERY_BLOCKED: Sample or synthetic dossiers cannot be delivered.");
+    }
+
+    const artifact = await assertDeliveryAuthorised("BRIEF_ORDER", existing.orderId);
+
     const record = await prisma.boardroomDossier.update({
       where: { id: input.dossierId },
       data: {
@@ -156,6 +174,8 @@ export const BoardroomDossierService = {
         accessGrantedAt: new Date(),
       },
     });
+
+    await markArtifactDelivered(artifact.artifactId);
 
     await routeGovernanceEvent({
       eventType: "BOARDROOM_DOSSIER_DELIVERED",

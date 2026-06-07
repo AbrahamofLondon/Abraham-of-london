@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-napoleon-02
 provider: x
@@ -20,8 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-David's coronation canvas is 10 metres wide.
-
-Napoleon reviewed the sketches. He made corrections. He added his mother — who was not there. He changed how the Pope appeared — from passive witness to active blessing.
-
-The final painting shows the coronation Napoleon needed, not the coronation that occurred.
+David's coronation canvas is 10 metres wide. Napoleon reviewed the sketches. He made corrections. He added his mother — who was not there. He changed how the Pope appeared — from passive witness to active blessing.

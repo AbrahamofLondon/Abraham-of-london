@@ -393,7 +393,7 @@ Address the primary identified risk: Operational ownership is disputed — each 
   "caseReference": "PROOF-OPERATIONAL_FAILURE_UNCLEAR_OWNER-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-06-02T09:39:53.394Z"
+  "generatedAt": "2026-06-07T16:01:49.418Z"
 }
 ```
 

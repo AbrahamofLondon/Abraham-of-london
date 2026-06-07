@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-algorithm-07
 provider: x
@@ -20,10 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-Every institution has a distributed handprint problem.
-
-Decisions that no one person made but everyone contributed to. Outcomes that everyone can gesture toward but no one owns.
-
-The question is not who made the decision.
-
-The question is what the system was designed to optimise for — and whether that is what you would have chosen if you had been asked directly.
+Every institution has a distributed handprint problem. Decisions that no one person made but everyone contributed to. Outcomes that everyone can gesture toward but no one owns. The question is not who made the decision.

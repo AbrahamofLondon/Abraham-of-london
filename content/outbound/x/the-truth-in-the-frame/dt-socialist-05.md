@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-socialist-05
 provider: x
@@ -20,8 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-The contemporary version of this has no gun.
-
-The commission that cannot be refused looks like: the ESG report that must show progress. The earnings call that must show confidence. The internal update that must show alignment.
-
-No gun. The same structure. The same choice.
+The contemporary version of this has no gun. The commission that cannot be refused looks like: the ESG report that must show progress. The earnings call that must show confidence. The internal update that must show alignment. No gun. The same structure.

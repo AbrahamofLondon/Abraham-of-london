@@ -3,28 +3,23 @@
 // Supports ?metrics=true to return aggregate commercial metrics.
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma.server";
+import {
+  listBriefOrders,
+  listAllBriefOrders,
+} from "@/lib/research/brief-order-repository";
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const status = url.searchParams.get("status");
-    const tier = url.searchParams.get("tier");
+    const status = url.searchParams.get("status") ?? undefined;
+    const tier = url.searchParams.get("tier") ?? undefined;
     const includeMetrics = url.searchParams.get("metrics") === "true";
 
-    const where: Record<string, unknown> = {};
-    if (status && status !== "all") where.status = status;
-    if (tier && tier !== "all") where.tier = tier;
-
-    const orders = await prisma.decisionBriefOrder.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
+    const orders = await listBriefOrders({ status, tier });
 
     let metrics = null;
     if (includeMetrics) {
-      const allOrders = await prisma.decisionBriefOrder.findMany();
+      const allOrders = await listAllBriefOrders();
       const paidOrders = allOrders.filter(o => o.status !== "pending" && o.status !== "cancelled");
       const revenueByTier: Record<string, number> = {};
       const ordersByStatus: Record<string, number> = {};

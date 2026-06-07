@@ -60,7 +60,7 @@ export default function HomepageHero() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           {/* Primary CTA */}
           <Link
-            href="/decision-pressure"
+            href="/pressure"
             className="group inline-flex min-h-[52px] items-center gap-3 border px-8 py-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               borderColor: `${HOMEPAGE_GOLD}60`,

@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-launch-01
 provider: x
@@ -19,10 +20,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-There is a handprint on a cave wall in France that is 36,000 years old.
-
-The person who pressed it is long dead. Their name is gone. Their language is gone. Their songs are gone.
-
-The handprint survived.
-
-I am writing a 9-part series about what that means — from the cave wall to the deepfake.
+There is a handprint on a cave wall in France that is 36,000 years old. The person who pressed it is long dead. Their name is gone. Their language is gone. Their songs are gone. The handprint survived.

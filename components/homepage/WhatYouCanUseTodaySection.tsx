@@ -7,7 +7,7 @@ const ESTATE_PILLARS = [
     status: "Free entry",
     label: "Decision Pressure Signal",
     summary: "Paste one decision. Receive a pressure band, missing evidence, and next admissible move.",
-    href: "/decision-pressure",
+    href: "/pressure",
     accent: "rgba(110,231,183,0.80)",
     primary: false,
   },

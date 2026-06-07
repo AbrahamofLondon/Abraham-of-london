@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-algorithm-06
 provider: x
@@ -20,8 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-The spreadsheet that modelled the engagement reduction from fixing the algorithm is the stele of the 21st century.
-
-Carved in a specific meeting, by specific people, preserved in a corporate document management system.
-
-The conquered — the people whose information environment was shaped by the decision — left no spreadsheet.
+The spreadsheet that modelled the engagement reduction from fixing the algorithm is the stele of the 21st century. Carved in a specific meeting, by specific people, preserved in a corporate document management system.

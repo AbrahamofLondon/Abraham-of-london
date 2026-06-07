@@ -58,6 +58,11 @@ vi.mock("@/lib/outbound/linkedin-content-resolver", () => ({
   getResolvedLinkedInOutboundBySlug: mockGetResolvedLinkedInOutboundBySlug,
 }));
 
+// Allow all mutation origin checks to pass in tests
+vi.mock("@/lib/api/admin-mutation-guard", () => ({
+  verifyAdminMutationOrigin: vi.fn().mockReturnValue({ ok: true }),
+}));
+
 vi.mock("@/lib/outbound/linkedin-publishing-client", () => ({
   publishTextPostToLinkedIn: mockPublishTextPostToLinkedIn,
 }));
@@ -130,7 +135,7 @@ const activeConnection = {
   organisationId: "115850136",
   scopes: ["openid", "profile", "w_member_social", "w_organization_social"],
   publishingEnabled: true,
-  expiresAt: "2026-06-01T00:00:00.000Z",
+  expiresAt: "2027-06-01T00:00:00.000Z",
   displayName: "Abraham",
   selectedPublishingTarget: {
     ownerType: "organization",

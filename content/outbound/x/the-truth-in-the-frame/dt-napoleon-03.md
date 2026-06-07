@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-napoleon-03
 provider: x
@@ -20,10 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-The painting looks exactly like a historical document.
-
-That is the operation.
-
-Realism is not a style. It is a weapon. When an image looks precisely like evidence, the audience stops asking whether it is evidence.
-
-Napoleon understood this before anyone had a word for it.
+The painting looks exactly like a historical document. That is the operation. Realism is not a style. It is a weapon. When an image looks precisely like evidence, the audience stops asking whether it is evidence.

@@ -38,7 +38,7 @@ export default function StartHereStrip() {
         <div className="grid gap-3 md:grid-cols-3">
           {/* Card 1: Free pressure signal */}
           <Link
-            href="/decision-pressure"
+            href="/pressure"
             className="group flex flex-col justify-between border p-6 transition-all duration-150 hover:border-white/[0.12] hover:bg-white/[0.02]"
             style={{
               borderColor: "rgba(255,255,255,0.08)",

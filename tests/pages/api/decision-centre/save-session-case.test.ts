@@ -9,6 +9,23 @@ vi.mock("@/lib/diagnostics/journey-store", () => ({
   persistDiagnosticStage: vi.fn(),
 }));
 
+// Mock terms-acceptance and professional-trial to avoid DB calls in tests
+vi.mock("@/lib/server/terms-acceptance", () => ({
+  needsAcceptance: vi.fn().mockResolvedValue(false),
+}));
+
+vi.mock("@/lib/product/professional-trial", () => ({
+  hasProfessionalAccess: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock("@/lib/prisma.server", () => ({
+  prisma: {
+    diagnosticJourney: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+  },
+}));
+
 vi.mock("@/lib/diagnostics/evidence-graph", () => ({
   extractCanonicalDecisionObject: vi.fn(() => ({
     sourceStage: "purpose_alignment",

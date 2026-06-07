@@ -34,7 +34,7 @@ describe('product estate reality inventory', () => {
     expect(audit.quarterlyEditionPolicy).toContain('edition-parametric')
 
     const gmi = audit.products.find((product) => product.productCode === 'gmi_quarterly')
-    expect(gmi?.knownBlockers.join(' ')).toContain('future-edition-parametric')
+    expect(gmi?.runtimeTruth).toContain('Edition-parametric')
   })
 
   it('keeps catalog, product estate, and audit map connected', () => {

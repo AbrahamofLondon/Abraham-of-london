@@ -3,19 +3,17 @@
 // Founder review is required before delivery.
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma.server";
+import { findBriefOrder } from "@/lib/research/brief-order-repository";
 import { analyzeDecisionFailureMap } from "@/lib/decision/decision-failure-map";
 
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
 
-    const order = await prisma.decisionBriefOrder.findUnique({
-      where: { id },
-    });
+    const order = await findBriefOrder(id);
 
     if (!order) {
       return NextResponse.json({ ok: false, error: "ORDER_NOT_FOUND" }, { status: 404 });

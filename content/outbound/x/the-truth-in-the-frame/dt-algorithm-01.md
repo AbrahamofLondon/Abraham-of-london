@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-algorithm-01
 provider: x
@@ -22,10 +23,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-In 2020, Facebook's internal researchers found that the algorithm was systematically amplifying content they classified as dangerous.
-
-They presented the findings to leadership.
-
-The algorithm was not changed.
-
-This is the most important story about power and records in the 21st century, and it has nothing to do with technology.
+In 2020, Facebook's internal researchers found that the algorithm was systematically amplifying content they classified as dangerous. They presented the findings to leadership. The algorithm was not changed.

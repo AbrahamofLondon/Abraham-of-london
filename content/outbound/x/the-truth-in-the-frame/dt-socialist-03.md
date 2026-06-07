@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-socialist-03
 provider: x
@@ -20,8 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-Most people, given that choice, chose survival.
-
-That is not a moral failure. It is a human one.
-
-The painting that results is not a lie told with pleasure. It is a truth suppressed with grief. The distinction matters for understanding how propaganda actually works.
+Most people, given that choice, chose survival. That is not a moral failure. It is a human one. The painting that results is not a lie told with pleasure. It is a truth suppressed with grief.

@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-qc-w02
 provider: x
@@ -18,10 +19,4 @@ themes:
 designBrief: "Stone texture background, dark grey. Quote in serif, white. Faint relief carving texture behind text — suggests stone inscription without being literal. Abraham of London wordmark bottom right."
 ---
 
-The oldest surviving record of a battle was carved by the winner.
-
-The losers left no record.
-
-This is not a footnote. This is how history works.
-
-The king pressed his handprint into history and called it stone. The conquered pressed nothing. That is why we know one name and not the other.
+The oldest surviving record of a battle was carved by the winner. The losers left no record. This is not a footnote. This is how history works. The king pressed his handprint into history and called it stone. The conquered pressed nothing.

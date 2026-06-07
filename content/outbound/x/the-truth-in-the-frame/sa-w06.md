@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-sa-w06
 provider: x
@@ -14,10 +15,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-Nick Ut photographed the Napalm Girl on June 8, 1972.
-
-He then drove the children to hospital before filing the photograph.
-
-He broke protocol. He was not supposed to stop and help.
-
-The photograph that changed public opinion about the Vietnam War was taken by a man who almost did not take it because he was too busy being a person.
+Nick Ut photographed the Napalm Girl on June 8, 1972. He then drove the children to hospital before filing the photograph. He broke protocol. He was not supposed to stop and help.

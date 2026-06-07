@@ -96,10 +96,8 @@ describe('assertCheckoutAuthorised', () => {
     expect(() => assertCheckoutAuthorised('strategy_room')).not.toThrow()
   })
 
-  it('throws for decision_instruments (grade 6, controlled_access)', () => {
-    expect(() => assertCheckoutAuthorised('decision_instruments')).toThrow(
-      /checkout requires grade/i,
-    )
+  it('does not throw for decision_instruments (grade 9, public_active)', () => {
+    expect(() => assertCheckoutAuthorised('decision_instruments')).not.toThrow()
   })
 
   it('throws for decision_pressure_signal (grade 6)', () => {
@@ -143,7 +141,8 @@ describe('getProductsRequiringWaitlist', () => {
   it('returns products with controlled_access exposure', () => {
     const waitlist = getProductsRequiringWaitlist()
     expect(waitlist).toContain('decision_pressure_signal')
-    expect(waitlist).toContain('decision_instruments')
+    // decision_instruments is now grade 9 — no longer requires waitlist
+    expect(waitlist).not.toContain('decision_instruments')
     // strategy_room (grade 8) should NOT be in waitlist
     expect(waitlist).not.toContain('strategy_room')
   })
@@ -227,8 +226,9 @@ describe('getProductsBelowThreshold', () => {
     const below = getProductsBelowThreshold(8)
     const codes = below.map((p) => p.productCode)
     expect(codes).toContain('decision_pressure_signal')
-    expect(codes).toContain('decision_instruments')
-    // boardroom_brief is grade 8 while paid smoke is pending, so it is not below 8.
+    // decision_instruments is now grade 9 — no longer below 8
+    expect(codes).not.toContain('decision_instruments')
+    // boardroom_brief is grade 8 while paid smoke is pending — not below 8
     expect(codes).not.toContain('boardroom_brief')
     // strategy_room (grade 8) should NOT be included (below 8, not ≤ 8)
     expect(codes).not.toContain('strategy_room')

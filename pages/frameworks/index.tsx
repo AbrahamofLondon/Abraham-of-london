@@ -5,8 +5,8 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
 import { getAllPlaybooks, getAllResources } from "@/lib/content/server";
-import { INSTRUMENT_REGISTRY, type InstrumentSlug } from "@/lib/instruments/governed-instrument-contract";
 import { getProductDisplayPrice } from "@/lib/commercial/catalog";
+import { INSTRUMENT_REGISTRY, getInstrumentPrice, type InstrumentSlug } from "@/lib/instruments/governed-instrument-contract";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -34,7 +34,7 @@ function InstrumentCard({ slug }: { slug: InstrumentSlug }) {
     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem" }}>
       <div className="flex items-baseline justify-between gap-3">
         <Link href={`/decision-instruments/${slug}`} className="text-sm text-white/80 hover:underline underline-offset-4">{meta.title}</Link>
-        <span style={{ ...mono, fontSize: "11px", color: GOLD }}>{meta.price}</span>
+        <span style={{ ...mono, fontSize: "11px", color: GOLD }}>{getInstrumentPrice(slug)}</span>
       </div>
       <p className="mt-1.5 text-xs text-white/40">{meta.whatItTests}</p>
       <div className="mt-2 flex flex-wrap gap-2">
@@ -132,7 +132,7 @@ const INSTRUMENT_ORDER: InstrumentSlug[] = [
   "governance-drift-detector",
   "strategic-priority-stack-builder",
   "intervention-path-selector",
-  "board-brief-template",
+  "board-brief-builder",
 ];
 
 const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({

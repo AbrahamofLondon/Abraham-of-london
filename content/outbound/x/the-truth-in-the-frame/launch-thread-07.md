@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-launch-07
 provider: x
@@ -18,10 +19,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-The era of visual evidence is over.
-
-The era of personal trust has returned.
-
-That is not nothing. It is the oldest verification mechanism in human history — the question the cave community asked of the person who pressed the handprint.
-
-The synthetic image reveals that it was always what we were relying on.
+The era of visual evidence is over. The era of personal trust has returned. That is not nothing. It is the oldest verification mechanism in human history — the question the cave community asked of the person who pressed the handprint.

@@ -2,7 +2,7 @@
 // Updates the status of a Decision Brief Order.
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma.server";
+import { updateBriefOrderStatus } from "@/lib/research/brief-order-repository";
 
 export async function PATCH(
   request: Request,
@@ -22,16 +22,12 @@ export async function PATCH(
       return NextResponse.json({ ok: false, error: "INVALID_STATUS" }, { status: 400 });
     }
 
-    const updateData: Record<string, unknown> = { status };
-
+    const extra: Record<string, unknown> = {};
     if (status === "delivered") {
-      updateData.deliveredAt = new Date();
+      extra.deliveredAt = new Date();
     }
 
-    const order = await prisma.decisionBriefOrder.update({
-      where: { id },
-      data: updateData,
-    });
+    const order = await updateBriefOrderStatus(id, status, extra);
 
     return NextResponse.json({ ok: true, order });
   } catch (error) {

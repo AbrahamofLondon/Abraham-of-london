@@ -1,0 +1,161 @@
+
+// ============================================================================
+// OPERATION 10/10 — ARTIFACT AUTHORITY LAYER
+// ============================================================================
+
+model ProductArtifact {
+  id                    String    @id @default(cuid())
+  artifactId            String    @unique
+  productCode           String
+  sourceEntityType      String
+  sourceEntityId        String
+  userId                String?
+  userEmail             String?
+  organisationId        String?
+  version               Int       @default(1)
+  status                String    @default("GENERATING")
+  inputSnapshotHash     String?
+  artifactHash          String?
+  evidenceRefs          Json      @default("[]")
+  falsificationRefs     Json      @default("[]")
+  outcomeHypothesisId   String?
+  deliveryStatus        String    @default("PENDING")
+  deliveredAt           DateTime?
+  publicSafeSummary     String?
+  privateNotes          String?
+  generatedBy           String?
+  downloadUrl           String?
+  manifestId            String?
+  parentArtifactId      String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  supersededAt          DateTime?
+
+  amendments            ProductArtifactAmendment[]
+
+  @@index([artifactId])
+  @@index([productCode])
+  @@index([sourceEntityType, sourceEntityId])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([organisationId])
+  @@index([status])
+  @@index([deliveryStatus])
+  @@index([createdAt])
+  @@map("product_artifacts")
+}
+
+model ProductArtifactAmendment {
+  id                String   @id @default(cuid())
+  artifactId        String
+  amendedById       String
+  reason            String
+  amendedBy         String?
+  createdAt         DateTime @default(now())
+
+  artifact          ProductArtifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
+  @@index([artifactId])
+  @@index([createdAt])
+  @@map("product_artifact_amendments")
+}
+
+// ============================================================================
+// OUTCOME HYPOTHESIS
+// ============================================================================
+
+model OutcomeHypothesis {
+  id                      String    @id @default(cuid())
+  hypothesisId            String    @unique
+  productCode             String
+  sourceRunId             String?
+  productArtifactId       String?
+  userId                  String?
+  userEmail               String?
+  predictedDecisionMove   String
+  expectedObservableChange String
+  observationWindowDays   Int       @default(90)
+  reviewDate              DateTime
+  successIndicators       Json      @default("[]")
+  failureIndicators       Json      @default("[]")
+  ownerRole               String?
+  returnBriefDueAt        DateTime?
+  status                  String    @default("OPEN")
+  outcomeRecordId         String?
+  exemptionReason         String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@index([hypothesisId])
+  @@index([productCode])
+  @@index([sourceRunId])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([status])
+  @@index([reviewDate])
+  @@map("outcome_hypotheses")
+}
+
+// ============================================================================
+// FALSIFICATION ENTRY
+// ============================================================================
+
+model FalsificationEntry {
+  id                          String    @id @default(cuid())
+  productCode                 String
+  artifactId                  String?
+  sourceEntityType            String?
+  sourceEntityId              String?
+  claimOrRecommendation       String
+  confidenceLevel             String
+  whatWouldChangeThisView     String
+  observableIndicator         String
+  threshold                   String?
+  reviewDate                  DateTime?
+  evidenceCurrentlyMissing    String?
+  strongestCounterargument    String?
+  responseToCounterargument   String?
+  status                      String    @default("MONITORING")
+  overturnedAt                DateTime?
+  confirmedAt                 DateTime?
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  @@index([productCode])
+  @@index([artifactId])
+  @@index([status])
+  @@index([reviewDate])
+  @@map("falsification_entries")
+}
+
+// ============================================================================
+// PATTERN OBSERVATION
+// ============================================================================
+
+model PatternObservation {
+  id                   String    @id @default(cuid())
+  userId               String?
+  userEmail            String?
+  organisationId       String?
+  patternType          String
+  patternLabel         String
+  patternDetail        String?
+  observationCount     Int       @default(1)
+  sourceRunIds         Json      @default("[]")
+  recommendedAction    String?
+  riskOfRepeat         String?
+  surfaceIn            Json      @default("[]")
+  acknowledgedAt       DateTime?
+  dismissedAt          DateTime?
+  status               String    @default("ACTIVE")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([organisationId])
+  @@index([patternType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pattern_observations")
+}

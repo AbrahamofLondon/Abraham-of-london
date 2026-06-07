@@ -26,8 +26,8 @@ describe('paid product authority coverage', () => {
     const instruments = audit.products.find((item) => item.productCode === 'decision_instruments')
 
     expect(boardroom?.knownBlockers.join(' ')).toContain('paid BoardroomBriefOrder')
-    expect(instruments?.knownBlockers.join(' ')).toContain('price/catalog truth is duplicated')
-    expect(instruments?.knownBlockers.join(' ')).toContain('browser smoke')
+    // Decision Instruments is now 10/10 — no known blockers remain
+    expect(instruments?.knownBlockers.length ?? 0).toBe(0)
   })
 
   it('active paid products expose admin visibility or an explicit exception', () => {

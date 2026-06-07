@@ -1,7 +1,13 @@
 /**
  * Instrument Pack Contract — defines pack composition and completion tracking.
+ *
+ * Prices: Do NOT hardcode prices here. Prices are resolved at access time
+ * via getPackDisplayPrice(packId) from instrument-catalog-bridge.ts.
+ *
+ * Pack compositions must match catalog.ts `includes` arrays for catalog-linked packs.
  */
 
+import { getPackDisplayPrice } from "@/lib/decision-instruments/instrument-catalog-bridge";
 import type { InstrumentSlug } from "./governed-instrument-contract";
 
 export type PackId =
@@ -13,7 +19,8 @@ export type PackId =
 export type InstrumentPack = {
   id: PackId;
   displayName: string;
-  price: string;
+  /** Catalog product code — used to resolve price. Null for packs not yet in catalog. */
+  catalogCode: string | null;
   description: string;
   includedInstruments: InstrumentSlug[];
   buyerQuestion: string;
@@ -24,7 +31,7 @@ export const INSTRUMENT_PACKS: Record<PackId, InstrumentPack> = {
   operator_essentials: {
     id: "operator_essentials",
     displayName: "Operator Essentials",
-    price: "£129",
+    catalogCode: "operator_essentials_pack",
     description: "What is broken, and how exposed are we?",
     includedInstruments: [
       "decision-exposure-instrument",
@@ -37,7 +44,7 @@ export const INSTRUMENT_PACKS: Record<PackId, InstrumentPack> = {
   command_pack: {
     id: "command_pack",
     displayName: "Command Pack",
-    price: "£249",
+    catalogCode: "command_pack",
     description: "What is broken, who should fix it, and where is alignment failing?",
     includedInstruments: [
       "decision-exposure-instrument",
@@ -53,7 +60,7 @@ export const INSTRUMENT_PACKS: Record<PackId, InstrumentPack> = {
   governance_suite: {
     id: "governance_suite",
     displayName: "Governance Suite",
-    price: "£495",
+    catalogCode: "governance_suite",
     description: "How do we govern this decision estate?",
     includedInstruments: [
       "decision-exposure-instrument",
@@ -65,7 +72,7 @@ export const INSTRUMENT_PACKS: Record<PackId, InstrumentPack> = {
       "governance-drift-detector",
       "strategic-priority-stack-builder",
       "intervention-path-selector",
-      "board-brief-template",
+      "board-brief-builder",
     ],
     buyerQuestion: "How do we govern this decision estate?",
     dossierTitle: "Governance Suite Dossier",
@@ -73,7 +80,8 @@ export const INSTRUMENT_PACKS: Record<PackId, InstrumentPack> = {
   executive_intelligence: {
     id: "executive_intelligence",
     displayName: "Executive Intelligence",
-    price: "£995",
+    // Not yet in catalog.ts — held here pending Stripe product creation and pricing confirmation
+    catalogCode: null,
     description: "Full institutional decision intelligence with executive reporting and corridor entry.",
     includedInstruments: [
       "decision-exposure-instrument",
@@ -85,12 +93,20 @@ export const INSTRUMENT_PACKS: Record<PackId, InstrumentPack> = {
       "governance-drift-detector",
       "strategic-priority-stack-builder",
       "intervention-path-selector",
-      "board-brief-template",
+      "board-brief-builder",
     ],
     buyerQuestion: "Give me the full picture before this becomes expensive.",
     dossierTitle: "Executive Intelligence Dossier",
   },
 };
+
+/**
+ * Get the display price for a pack from the catalog.
+ * Use this in all UI rendering — do not hardcode pack prices.
+ */
+export function getPackPrice(packId: PackId): string {
+  return getPackDisplayPrice(packId);
+}
 
 export type PackCompletionStatus = {
   packId: PackId;

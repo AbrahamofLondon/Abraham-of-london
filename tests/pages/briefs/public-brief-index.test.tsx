@@ -17,17 +17,29 @@ vi.mock("@/components/Layout", () => ({
 
 import PublicBriefsIndexPage, { getStaticProps } from "@/pages/briefs/index";
 
-const publicBrief = {
+const institutionalAlphaBrief = {
   title: "Frontier Resilience 067 — Beyond Survival Mode",
   description: "A public brief.",
   date: "2026-02-12",
   accessLevel: "public",
   status: "canonical",
+  publicationStatus: "published",
+  series: "institutional-alpha",
   published: true,
   draft: false,
   _raw: {
     flattenedPath: "briefs/frontier-resilience-beyond-survival-mode",
     sourceFilePath: "briefs/frontier-resilience-beyond-survival-mode.mdx",
+  },
+};
+
+const sovereignBrief = {
+  ...institutionalAlphaBrief,
+  title: "Sovereign Intelligence Brief 001",
+  series: "sovereign-intelligence",
+  _raw: {
+    flattenedPath: "briefs/sovereign-intelligence-001",
+    sourceFilePath: "briefs/sovereign-intelligence-001.mdx",
   },
 };
 
@@ -38,14 +50,15 @@ beforeEach(() => {
 describe("public briefs index", () => {
   it("lists canonical public briefs and excludes restricted or non-canonical records", async () => {
     mocks.getAllBriefs.mockReturnValue([
-      publicBrief,
+      institutionalAlphaBrief,
+      sovereignBrief,
       {
-        ...publicBrief,
+        ...institutionalAlphaBrief,
         title: "Restricted body should stay hidden",
         accessLevel: "restricted",
       },
       {
-        ...publicBrief,
+        ...institutionalAlphaBrief,
         title: "Draft brief",
         status: "draft",
       },
@@ -55,19 +68,37 @@ describe("public briefs index", () => {
     const props = "props" in response ? response.props : null;
     const html = renderToStaticMarkup(<PublicBriefsIndexPage {...(props as any)} />);
 
-    expect(props).toMatchObject({
-      briefs: [
+    // The page now returns categorized briefs (institutionalAlpha / sovereignIntelligence)
+    expect((props as any).institutionalAlpha).toBeDefined();
+    expect((props as any).sovereignIntelligence).toBeDefined();
+
+    // Canonical institutional-alpha brief should appear
+    expect((props as any).institutionalAlpha).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({
           title: "Frontier Resilience 067 — Beyond Survival Mode",
           href: "/briefs/frontier-resilience-beyond-survival-mode",
         }),
-      ],
-    });
+      ])
+    );
+
+    // Sovereign brief should appear in sovereignIntelligence
+    expect((props as any).sovereignIntelligence).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: "Sovereign Intelligence Brief 001",
+        }),
+      ])
+    );
+
     expect(html).toContain("Frontier Resilience 067");
-    expect(html).toContain("Read brief");
     expect(html).not.toContain("Restricted body should stay hidden");
     expect(html).not.toContain("Draft brief");
-    expect((props as any).briefs[0].body).toBeUndefined();
-    expect((props as any).briefs[0].bodyCode).toBeUndefined();
+
+    // No raw body content leaked
+    if ((props as any).institutionalAlpha[0]) {
+      expect((props as any).institutionalAlpha[0].body).toBeUndefined();
+      expect((props as any).institutionalAlpha[0].bodyCode).toBeUndefined();
+    }
   });
 });

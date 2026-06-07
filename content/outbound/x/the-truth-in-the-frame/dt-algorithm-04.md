@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-algorithm-04
 provider: x
@@ -20,8 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-This is not a failure of accountability.
-
-It is accountability designed out of the system.
-
-When responsibility is distributed across a corporate structure in precisely this way, the question "who decided this?" has no useful answer. That is a feature, not a bug.
+This is not a failure of accountability. It is accountability designed out of the system. When responsibility is distributed across a corporate structure in precisely this way, the question "who decided this?" has no useful answer.

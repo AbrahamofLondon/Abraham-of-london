@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780393191612-dznjh2",
-    "caseReference": "FULFIL-17803931",
+    "caseId": "fulfilment-1780848110993-mfuunj",
+    "caseReference": "FULFIL-17808481",
     "scenario": "Executive Reputational Exposure",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-06-02T09:39:51.613Z",
+        "timestamp": "2026-06-07T16:01:50.994Z",
         "actorId": "system",
         "notes": "Dossier generated for: Executive Reputational Exposure",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-06-02T09:39:51.613Z"
+    "generatedAt": "2026-06-07T16:01:50.994Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17803931",
-    "generatedAt": "2026-06-02T09:39:51.613Z",
+    "caseReference": "FULFIL-17808481",
+    "generatedAt": "2026-06-07T16:01:50.994Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

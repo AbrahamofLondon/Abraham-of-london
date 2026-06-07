@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-napoleon-04
 provider: x
@@ -20,8 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-Goya painted The Third of May 1808 after the French occupation of Spain.
-
-He painted the executions. The terror in the faces. The mechanical posture of the soldiers. The man in the white shirt with his arms open.
-
-Goya did not have a commission. He had eyes.
+Goya painted The Third of May 1808 after the French occupation of Spain. He painted the executions. The terror in the faces. The mechanical posture of the soldiers. The man in the white shirt with his arms open. Goya did not have a commission.

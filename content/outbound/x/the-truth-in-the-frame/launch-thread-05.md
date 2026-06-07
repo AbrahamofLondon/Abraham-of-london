@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-launch-05
 provider: x
@@ -18,10 +19,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-In 2020, Facebook's own research showed the algorithm was amplifying dangerous content.
-
-The decision was made not to change it.
-
-This is not a technology story.
-
-It is the same choice Napoleon made: what to show, what to hide, and which metric to optimise.
+In 2020, Facebook's own research showed the algorithm was amplifying dangerous content. The decision was made not to change it. This is not a technology story.

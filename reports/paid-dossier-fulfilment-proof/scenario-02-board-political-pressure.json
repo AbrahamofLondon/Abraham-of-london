@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780393191243-m04z5g",
-    "caseReference": "FULFIL-17803931",
+    "caseId": "fulfilment-1780848110882-zjhs97",
+    "caseReference": "FULFIL-17808481",
     "scenario": "Board Decision Under Political Pressure",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-06-02T09:39:51.247Z",
+        "timestamp": "2026-06-07T16:01:50.886Z",
         "actorId": "system",
         "notes": "Dossier generated for: Board Decision Under Political Pressure",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-06-02T09:39:51.247Z"
+    "generatedAt": "2026-06-07T16:01:50.886Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17803931",
-    "generatedAt": "2026-06-02T09:39:51.247Z",
+    "caseReference": "FULFIL-17808481",
+    "generatedAt": "2026-06-07T16:01:50.886Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

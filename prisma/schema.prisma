@@ -1098,6 +1098,7 @@ model BoardroomBriefOrder {
   email                String
   diagnosticId         String?  @map("diagnostic_id")
   handoffId            String?  @map("handoff_id")
+  spineId              String?  @map("spine_id")              // FK to IntelligenceSpine.spineId (resolved at delivery time)
   stripeSessionId      String   @unique @map("stripe_session_id")
   stripePaymentIntentId String? @map("stripe_payment_intent_id")
   paymentStatus        String   @default("pending") @map("payment_status") // pending | paid | failed | refunded
@@ -1110,10 +1111,13 @@ model BoardroomBriefOrder {
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
+  spine                IntelligenceSpine? @relation("SpineOrders", fields: [spineId], references: [spineId])
+
   @@index([userId])
   @@index([paymentStatus])
   @@index([deliveryStatus])
   @@index([stripeSessionId])
+  @@index([spineId])
   @@map("boardroom_brief_orders")
 }
 
@@ -5185,4 +5189,485 @@ model OversightReviewCycle {
   @@index([periodStart])
   @@index([clientHealthStatus])
   @@map("oversight_review_cycles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTELLIGENCE SPINE
+//
+// The canonical evidence spine that underpins Boardroom Brief and paid advisory
+// products. Replaces the buildSpineFromOrder() placeholder pattern.
+// A spine is created from a qualifying diagnostic run, ER run, or bridge run
+// and linked to the orders that consumed it.
+//
+// Rule: no Boardroom Brief may be generated without a resolvable IntelligenceSpine.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model IntelligenceSpine {
+  id                  String    @id @default(cuid())
+  spineId             String    @unique                        // stable external ID (e.g. "SPINE-{cuid}")
+  sourceType          String                                   // DIAGNOSTIC_RUN | ER_BOARDROOM_BRIDGE_RUN | EXECUTIVE_REPORT | MANUAL
+  diagnosticId        String?                                  // FK to originating diagnostic (if sourceType=DIAGNOSTIC_RUN)
+  erRunId             String?                                  // FK to ER run (if sourceType=ER_BOARDROOM_BRIDGE_RUN)
+  executiveReportId   String?                                  // FK to executive report
+  organisationId      String?                                  // FK to Organisation if enterprise-sourced
+  userId              String?                                  // user who created/owns this spine
+  userEmail           String?
+  decisionSubject     String                                   // what decision/situation this spine covers
+  decisionContext     Json?                                    // structured context object
+  evidenceNodes       Json      @default("[]")                 // array of EvidenceNode records
+  authorityLevel      String    @default("CANDIDATE")          // CANDIDATE | QUALIFYING | VERIFIED | RETIRED
+  isSample            Boolean   @default(false)                // true = cannot be used for paid production delivery
+  qualifyingChecks    Json?                                    // record of which authority checks passed
+  inputSnapshotHash   String?                                  // SHA-256 of evidence nodes at qualifying time
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  retiredAt           DateTime?
+
+  // Boardroom briefs generated from this spine
+  boardroomOrders     BoardroomBriefOrder[]  @relation("SpineOrders")
+
+  @@index([spineId])
+  @@index([sourceType])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([organisationId])
+  @@index([authorityLevel])
+  @@index([isSample])
+  @@index([createdAt])
+  @@map("intelligence_spines")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION OUTCOME RECORD (Return Brief 2.0)
+//
+// Captures what happened after a decision was made. Linked to the originating
+// case/run/order. Submitted via Return Brief request when decision deadline passes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DecisionOutcomeRecord {
+  id                  String    @id @default(cuid())
+  // Source linkage — at least one must be populated
+  decisionInstrumentRunId  String?                            // FK to DecisionInstrumentRun
+  boardroomDossierId       String?                            // FK to BoardroomDossier
+  decisionObjectId         String?                            // FK to DiagnosticDecisionObject
+  strategySessionId        String?                            // FK to StrategySession (if applicable)
+  // Identity
+  submittedByEmail    String?
+  submittedByUserId   String?
+  // Outcome classification
+  outcomeClass        String                                  // SUCCESS | MITIGATED | PARTIAL | FAILURE | DEFERRED | UNKNOWN
+  outcomeDetail       String?                                 // free-text: what happened
+  ownerCorrect        Boolean?                                // was the original owner/decision-maker correct?
+  evidenceMissing     Boolean   @default(false)               // was critical evidence missing at decision time?
+  evidenceMissingNote String?
+  whatChanged         String?                                 // what changed after the decision was made
+  carryForward        String?                                 // what should be carried into the next cycle
+  // Timing
+  decisionDeadline    DateTime?                               // the deadline that triggered this Return Brief
+  outcomeDate         DateTime?                               // when the outcome was observed
+  // Memory feedback
+  memorySummary       String?                                 // AI-generated memory note for future similar decisions
+  // Audit
+  reviewedByAdmin     Boolean   @default(false)
+  reviewedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([decisionInstrumentRunId])
+  @@index([boardroomDossierId])
+  @@index([decisionObjectId])
+  @@index([outcomeClass])
+  @@index([submittedByEmail])
+  @@index([createdAt])
+  @@map("decision_outcome_records")
+}
+
+model ReturnBriefRequest {
+  id                  String    @id @default(cuid())
+  requestKey          String    @unique
+  outcomeHypothesisId String?
+  productCode         String
+  sourceEntityType    String
+  sourceEntityId      String
+  userEmail           String?
+  userId              String?
+  dueAt               DateTime
+  status              String    @default("PENDING") // PENDING | SENT | SUBMITTED | EXPIRED | CANCELLED
+  sentAt              DateTime?
+  submittedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  responses           ReturnBriefResponse[]
+
+  @@index([outcomeHypothesisId])
+  @@index([productCode])
+  @@index([sourceEntityType, sourceEntityId])
+  @@index([userEmail])
+  @@index([status])
+  @@index([dueAt])
+  @@map("return_brief_requests")
+}
+
+model ReturnBriefResponse {
+  id                      String   @id @default(cuid())
+  requestId               String?
+  decisionOutcomeRecordId String?
+  submittedByEmail        String?
+  outcomeClass            String
+  responsePayload         Json     @default("{}")
+  evidenceRefs            Json     @default("[]")
+  createdAt               DateTime @default(now())
+
+  request                 ReturnBriefRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  @@index([requestId])
+  @@index([decisionOutcomeRecordId])
+  @@index([submittedByEmail])
+  @@index([outcomeClass])
+  @@index([createdAt])
+  @@map("return_brief_responses")
+}
+
+model OutcomePatternObservation {
+  id                      String   @id @default(cuid())
+  decisionOutcomeRecordId String?
+  userEmail               String?
+  patternObservationId    String?
+  patternType             String
+  riskOfRepeat            String?
+  observationSummary      String
+  sourceRunIds            Json     @default("[]")
+  createdAt               DateTime @default(now())
+
+  @@index([decisionOutcomeRecordId])
+  @@index([userEmail])
+  @@index([patternObservationId])
+  @@index([patternType])
+  @@index([riskOfRepeat])
+  @@index([createdAt])
+  @@map("outcome_pattern_observations")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RETAINER READINESS EVALUATION
+//
+// Records the result of a retainer readiness evaluation for a given
+// organisation or case cluster. Admin-reviewed before Retainer Oversight
+// is offered.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RetainerReadinessEvaluation {
+  id                      String    @id @default(cuid())
+  organisationId          String?
+  userEmail               String?
+  // Readiness dimensions (0–1 score or boolean)
+  durableMemoryPresent    Boolean   @default(false)
+  recurringDecisionPattern Boolean  @default(false)
+  outcomeHistoryPresent   Boolean   @default(false)
+  repeatedHighRisk        Boolean   @default(false)
+  evidenceQualityScore    Float     @default(0)           // 0–1
+  organisationSignalScore Float     @default(0)           // 0–1
+  // Overall
+  overallReadinessScore   Float     @default(0)           // 0–1
+  readinessClass          String    @default("NOT_READY") // NOT_READY | CANDIDATE | REVIEW_READY | APPROVED
+  evaluatorNotes          String?
+  adminApprovalRequired   Boolean   @default(true)
+  adminApprovedAt         DateTime?
+  adminApprovedBy         String?
+  // Evidence basis
+  evidenceSourceIds       Json      @default("[]")        // array of run/dossier/diagnostic IDs
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@index([organisationId])
+  @@index([userEmail])
+  @@index([readinessClass])
+  @@index([createdAt])
+  @@map("retainer_readiness_evaluations")
+}
+
+// ============================================================================
+// OPERATION 10/10 — ARTIFACT AUTHORITY, OUTCOME HYPOTHESIS, FALSIFICATION
+// ============================================================================
+
+model ProductArtifact {
+  id                    String    @id @default(cuid())
+  artifactId            String    @unique
+  productCode           String
+  sourceEntityType      String
+  sourceEntityId        String
+  userId                String?
+  userEmail             String?
+  organisationId        String?
+  version               Int       @default(1)
+  status                String    @default("GENERATING")
+  inputSnapshotHash     String?
+  artifactHash          String?
+  evidenceRefs          Json      @default("[]")
+  falsificationRefs     Json      @default("[]")
+  outcomeHypothesisId   String?
+  deliveryStatus        String    @default("PENDING")
+  deliveredAt           DateTime?
+  publicSafeSummary     String?
+  privateNotes          String?
+  generatedBy           String?
+  downloadUrl           String?
+  manifestId            String?
+  parentArtifactId      String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  supersededAt          DateTime?
+
+  amendments            ProductArtifactAmendment[]
+
+  @@index([artifactId])
+  @@index([productCode])
+  @@index([sourceEntityType, sourceEntityId])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([organisationId])
+  @@index([status])
+  @@index([deliveryStatus])
+  @@index([createdAt])
+  @@map("product_artifacts")
+}
+
+model ProductArtifactAmendment {
+  id                String   @id @default(cuid())
+  artifactId        String
+  amendedById       String
+  reason            String
+  amendedBy         String?
+  createdAt         DateTime @default(now())
+
+  artifact          ProductArtifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
+  @@index([artifactId])
+  @@index([createdAt])
+  @@map("product_artifact_amendments")
+}
+
+model OutcomeHypothesis {
+  id                       String    @id @default(cuid())
+  hypothesisId             String    @unique
+  productCode              String
+  sourceRunId              String?
+  productArtifactId        String?
+  userId                   String?
+  userEmail                String?
+  predictedDecisionMove    String
+  expectedObservableChange String
+  observationWindowDays    Int       @default(90)
+  reviewDate               DateTime
+  successIndicators        Json      @default("[]")
+  failureIndicators        Json      @default("[]")
+  ownerRole                String?
+  returnBriefDueAt         DateTime?
+  status                   String    @default("OPEN")
+  outcomeRecordId          String?
+  exemptionReason          String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  @@index([hypothesisId])
+  @@index([productCode])
+  @@index([sourceRunId])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([status])
+  @@index([reviewDate])
+  @@map("outcome_hypotheses")
+}
+
+model FalsificationEntry {
+  id                        String    @id @default(cuid())
+  productCode               String
+  artifactId                String?
+  sourceEntityType          String?
+  sourceEntityId            String?
+  claimOrRecommendation     String
+  confidenceLevel           String
+  whatWouldChangeThisView   String
+  observableIndicator       String
+  threshold                 String?
+  reviewDate                DateTime?
+  evidenceCurrentlyMissing  String?
+  strongestCounterargument  String?
+  responseToCounterargument String?
+  status                    String    @default("MONITORING")
+  overturnedAt              DateTime?
+  confirmedAt               DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@index([productCode])
+  @@index([artifactId])
+  @@index([status])
+  @@index([reviewDate])
+  @@map("falsification_entries")
+}
+
+model PatternObservation {
+  id               String    @id @default(cuid())
+  userId           String?
+  userEmail        String?
+  organisationId   String?
+  patternType      String
+  patternLabel     String
+  patternDetail    String?
+  observationCount Int       @default(1)
+  sourceRunIds     Json      @default("[]")
+  recommendedAction String?
+  riskOfRepeat     String?
+  surfaceIn        Json      @default("[]")
+  acknowledgedAt   DateTime?
+  dismissedAt      DateTime?
+  status           String    @default("ACTIVE")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([organisationId])
+  @@index([patternType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pattern_observations")
+}
+
+// ============================================================================
+// OPERATION 10/10 — CASE STUDY AND INTERNAL DECISION REGISTRY FOUNDATION
+// ============================================================================
+
+model CaseStudy {
+  id                    String   @id @default(cuid())
+  slug                  String?  @unique
+  title                 String
+  status                String   @default("DRAFT") // DRAFT | REVIEW | APPROVED | PUBLISHED | REJECTED | REVOKED
+  publicationAllowed    Boolean  @default(false)
+  anonymised            Boolean  @default(true)
+  anonymisationNotes    String?
+  sector                String?
+  companySizeBand       String?
+  region                String?
+  sourceOutcomeRecordId String?
+  returnBriefId         String?
+  adminVerifiedRecordId String?
+  verificationStatus    String   @default("UNVERIFIED") // UNVERIFIED | VERIFIED | DISPUTED
+  consentStatus         String   @default("PENDING") // PENDING | GRANTED | REVOKED | NOT_REQUIRED
+  narrative             Json     @default("{}")
+  publicPayload         Json?
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  publishedAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  evidence              CaseStudyEvidence[]
+  consents              CaseStudyConsent[]
+  outcomes              CaseStudyOutcome[]
+
+  @@index([status])
+  @@index([publicationAllowed])
+  @@index([verificationStatus])
+  @@index([consentStatus])
+  @@index([sourceOutcomeRecordId])
+  @@index([returnBriefId])
+  @@index([sector])
+  @@index([companySizeBand])
+  @@map("case_studies")
+}
+
+model CaseStudyEvidence {
+  id                 String   @id @default(cuid())
+  caseStudyId        String
+  sourceType         String
+  sourceId           String
+  evidenceHash       String?
+  verificationStatus String   @default("PENDING") // PENDING | VERIFIED | REJECTED
+  notes              String?
+  createdAt          DateTime @default(now())
+
+  caseStudy          CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+
+  @@index([caseStudyId])
+  @@index([sourceType, sourceId])
+  @@index([verificationStatus])
+  @@map("case_study_evidence")
+}
+
+model CaseStudyConsent {
+  id                String    @id @default(cuid())
+  caseStudyId       String
+  consentStatus     String    @default("PENDING") // PENDING | GRANTED | REVOKED
+  grantedByEmail    String?
+  scope             String    @default("ANONYMISED_PUBLICATION")
+  anonymisedAllowed Boolean   @default(true)
+  publicUseAllowed  Boolean   @default(false)
+  grantedAt         DateTime?
+  revokedAt         DateTime?
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  caseStudy         CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+
+  @@index([caseStudyId])
+  @@index([consentStatus])
+  @@index([grantedByEmail])
+  @@map("case_study_consents")
+}
+
+model CaseStudyOutcome {
+  id                      String   @id @default(cuid())
+  caseStudyId             String
+  decisionOutcomeRecordId String?
+  outcomeClass            String
+  outcomeSummary          String
+  verifiedBy              String?
+  verifiedAt              DateTime?
+  createdAt               DateTime @default(now())
+
+  caseStudy               CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+
+  @@index([caseStudyId])
+  @@index([decisionOutcomeRecordId])
+  @@index([outcomeClass])
+  @@map("case_study_outcomes")
+}
+
+model PublicDecisionRegistryEntry {
+  id                          String   @id @default(cuid())
+  sourceOutcomeRecordId       String?
+  sourceArtifactId            String?
+  productCode                 String
+  optInStatus                 String   @default("NOT_OPTED_IN") // NOT_OPTED_IN | OPTED_IN | WITHDRAWN
+  anonymisationStatus         String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  adminReviewStatus           String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  userEmailHash               String?
+  sectorTaxonomy              String?
+  companySizeBand             String?
+  regionTaxonomy              String?
+  outcomeClass                String?
+  costOfDelayMethodology      String?
+  costOfDelayBand             String?
+  aggregationBucket           String?
+  minimumAggregationThreshold Int      @default(5)
+  currentAggregationCount     Int      @default(0)
+  publishable                 Boolean  @default(false)
+  reviewedBy                  String?
+  reviewedAt                  DateTime?
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@index([productCode])
+  @@index([optInStatus])
+  @@index([anonymisationStatus])
+  @@index([adminReviewStatus])
+  @@index([sectorTaxonomy])
+  @@index([companySizeBand])
+  @@index([aggregationBucket])
+  @@index([publishable])
+  @@map("public_decision_registry_entries")
 }

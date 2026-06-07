@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-launch-03
 provider: x
@@ -18,10 +19,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-In 1804, Napoleon walked into David's studio and said: add my mother. She was not at the coronation. She was in Rome.
-
-David painted her in.
-
-The painting hangs in the Louvre. Most people who see it have no idea she was absent.
-
-The painting became the memory.
+In 1804, Napoleon walked into David's studio and said: add my mother. She was not at the coronation. She was in Rome. David painted her in. The painting hangs in the Louvre. Most people who see it have no idea she was absent.

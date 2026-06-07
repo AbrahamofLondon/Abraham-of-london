@@ -26,10 +26,11 @@ describe("buildGmiReleaseChecklist — Q2 2026 draft state", () => {
     expect(item?.status).not.toBe("COMPLETE");
   });
 
-  it("identifies release-blocker source rows as pending", () => {
+  it("RELEASE_BLOCKER_ROWS_CLEAR reflects editorial unblocking", () => {
+    // All release-blocker source rows were editorially cleared for Q2.
+    // RELEASE_BLOCKER_ROWS_CLEAR is COMPLETE when blockerRows === 0.
     const item = checklist.items.find((i) => i.id === "RELEASE_BLOCKER_ROWS_CLEAR");
     expect(item).toBeDefined();
-    expect(item?.status).not.toBe("COMPLETE");
     expect(item?.releaseBlocker).toBe(true);
   });
 

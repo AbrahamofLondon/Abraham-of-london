@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 
+import { getProductAmountGbp, getProductDisplayPrice } from "@/lib/commercial/catalog";
+
 export type DecisionAssetCategory =
   | "worksheet"
   | "framework"
@@ -40,18 +42,38 @@ export type PremiumDecisionAsset = {
   slug: string;
   title: string;
   category: DecisionAssetCategory;
-  priceGbp: number;
+  /**
+   * Catalog product code — single source of truth for price.
+   * Use getAssetPriceGbp(asset) / getAssetDisplayPrice(asset) instead of
+   * hardcoding a priceGbp number.
+   */
+  catalogCode: string;
   executiveReportingSection: string;
   upsellPath: string;
   instrument: DecisionInstrumentSection;
 };
+
+/**
+ * Get the GBP price for an asset from catalog.ts (single source of truth).
+ * Never read a hardcoded price — always use this.
+ */
+export function getAssetPriceGbp(asset: PremiumDecisionAsset): number {
+  return getProductAmountGbp(asset.catalogCode);
+}
+
+/**
+ * Get the display price string for an asset (e.g. "£29").
+ */
+export function getAssetDisplayPrice(asset: PremiumDecisionAsset): string {
+  return getProductDisplayPrice(asset.catalogCode);
+}
 
 export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
   {
     slug: "decision-exposure-calculator",
     title: "Decision Exposure Instrument",
     category: "worksheet",
-    priceGbp: 29,
+    catalogCode: "decision_exposure_instrument",
     executiveReportingSection: "Financial Exposure",
     upsellPath: "If this exposure is material or disputed, proceed to Executive Reporting.",
     instrument: {
@@ -87,7 +109,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "mandate-clarity-framework",
     title: "Mandate Clarity Framework",
     category: "framework",
-    priceGbp: 49,
+    catalogCode: "mandate_clarity_framework",
     executiveReportingSection: "Constitutional Posture",
     upsellPath: "If authority conflict remains after mapping, proceed to Executive Reporting.",
     instrument: {
@@ -123,7 +145,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "structural-failure-diagnostic-canvas",
     title: "Structural Failure Diagnostic Canvas",
     category: "worksheet",
-    priceGbp: 19,
+    catalogCode: "structural_failure_diagnostic_canvas",
     executiveReportingSection: "Failure Modes",
     upsellPath: "If cascade effects cross domains, proceed to Executive Reporting.",
     instrument: {
@@ -158,7 +180,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "team-alignment-gap-map",
     title: "Team Alignment Gap Map",
     category: "worksheet",
-    priceGbp: 29,
+    catalogCode: "team_alignment_gap_map",
     executiveReportingSection: "Team Reality",
     upsellPath: "If leadership and team reality diverge materially, proceed to Executive Reporting.",
     instrument: {
@@ -193,7 +215,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "escalation-readiness-scorecard",
     title: "Escalation Readiness Scorecard",
     category: "worksheet",
-    priceGbp: 19,
+    catalogCode: "escalation_readiness_scorecard",
     executiveReportingSection: "Escalation Confidence",
     upsellPath: "If escalation risk is high and evidence is contested, proceed to Executive Reporting.",
     instrument: {
@@ -229,7 +251,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "governance-drift-detector",
     title: "Governance Drift Detector",
     category: "framework",
-    priceGbp: 49,
+    catalogCode: "governance_drift_detector",
     executiveReportingSection: "Governance Integrity",
     upsellPath: "If governance is DRIFTING or BROKEN, proceed to Executive Reporting.",
     instrument: {
@@ -264,7 +286,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "strategic-priority-stack-builder",
     title: "Strategic Priority Stack Builder",
     category: "framework",
-    priceGbp: 49,
+    catalogCode: "strategic_priority_stack_builder",
     executiveReportingSection: "Priority Stack",
     upsellPath: "If the cut line is politically resisted, proceed to Executive Reporting.",
     instrument: {
@@ -299,7 +321,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "execution-risk-index",
     title: "Execution Risk Index",
     category: "framework",
-    priceGbp: 29,
+    catalogCode: "execution_risk_index",
     executiveReportingSection: "Trajectory Outlook",
     upsellPath: "If execution risk is HIGH, proceed to Executive Reporting before commitment.",
     instrument: {
@@ -335,7 +357,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "intervention-path-selector",
     title: "Intervention Path Selector",
     category: "toolkit",
-    priceGbp: 79,
+    catalogCode: "intervention_path_selector",
     executiveReportingSection: "Governed Recommendations",
     upsellPath: "If the intervention path is disputed, proceed to Executive Reporting.",
     instrument: {
@@ -371,7 +393,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     slug: "board-brief-template-structured",
     title: "Board Brief Template (Structured)",
     category: "toolkit",
-    priceGbp: 129,
+    catalogCode: "board_brief_builder",
     executiveReportingSection: "Boardroom Export",
     upsellPath: "If source findings are incomplete, proceed to Executive Reporting before briefing the board.",
     instrument: {

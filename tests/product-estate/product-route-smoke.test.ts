@@ -50,8 +50,9 @@ describe('product estate static route smoke', () => {
   it('known route correction points are explicit', () => {
     const pressure = audit.products.find((product) => product.productCode === 'decision_pressure_signal')
     expect(pressure?.route).toBe('/pressure')
+    // /decision-pressure now redirects to /pressure — legacy route preserved as redirect
     expect(pressure?.alternateRoutes).toContain('/decision-pressure')
-    expect(pressure?.classification).toBe('DUPLICATES_OR_COMPETES_WITH_ANOTHER_PRODUCT')
+    expect(pressure?.classification).toBe('VERIFIED_ACTIVE')
   })
 
   it('admin command centre route exists', () => {

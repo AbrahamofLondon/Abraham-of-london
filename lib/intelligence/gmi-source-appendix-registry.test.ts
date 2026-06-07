@@ -34,8 +34,10 @@ describe("GMI source appendix registry", () => {
     expect(getPendingSourceRows("GMI-Q2-2026").length).toBeGreaterThan(0);
   });
 
-  it("marks source-pending blocker rows as release blockers", () => {
-    expect(getReleaseBlockerRows("GMI-Q2-2026").length).toBeGreaterThan(0);
-    expect(hasPendingReleaseBlockerRows("GMI-Q2-2026")).toBe(true);
+  it("source blockers cleared after editorial unblocking — no pending release-blocker rows", () => {
+    // All release-blocker rows were editorially resolved for Q2 release readiness.
+    // SOURCE_PENDING rows (e.g. AI productivity) are not marked as release blockers.
+    expect(getReleaseBlockerRows("GMI-Q2-2026").length).toBe(0);
+    expect(hasPendingReleaseBlockerRows("GMI-Q2-2026")).toBe(false);
   });
 });

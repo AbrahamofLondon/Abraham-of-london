@@ -1191,6 +1191,54 @@ export async function POST(
       institutionalCaseSummary = buildPublicSummary(ic);
     } catch { /* best-effort — corridor creation must not block ER result */ }
 
+    // ── ARTIFACT AUTHORITY — register paid runtime artifact ──
+    try {
+      const { createPaidRuntimeArtifact } = await import("@/lib/artifacts/paid-product-runtime");
+      await createPaidRuntimeArtifact({
+        productCode: "executive_reporting",
+        sourceEntityType: "ER_RUN",
+        sourceEntityId: run.id,
+        userId: subjectId ?? null,
+        userEmail: email,
+        inputSnapshot: {
+          runKey: run.runKey,
+          route,
+          generatedAt,
+          evidencePosture,
+        },
+        evidenceRefs: [
+          { sourceId: run.id, sourceType: "ExecutiveReportingRun", label: "Executive Reporting run" },
+        ],
+        artifactContent: JSON.stringify({
+          runKey: run.runKey,
+          generatedAt,
+          route,
+          boardroomQualified: boardroomQualification.qualified,
+        }),
+        downloadUrl: `/api/executive-reporting/export/pdf?runId=${run.id}`,
+        publicSafeSummary: `Executive Report ${run.runKey}. Route: ${route}. Boardroom qualified: ${boardroomQualification.qualified}.`,
+        generatedBy: "executive-reporting-runtime",
+        falsification: [
+          {
+            claimOrRecommendation: "Executive Report findings require outcome verification.",
+            confidenceLevel: "HIGH",
+            whatWouldChangeThisView: "A Return Brief or subsequent diagnostic shows the primary exposure, owner, or recommended intervention was incorrect.",
+            observableIndicator: "Outcome class contradicts the report's primary finding or recommended intervention.",
+            threshold: "Material contradiction affecting the core finding or recommended next move.",
+            strongestCounterargument: "The report is based on the evidence available at the time of generation and may miss context not provided.",
+            responseToCounterargument: "The Outcome Hypothesis and Return Brief provide the structured review cycle for correction.",
+          },
+        ],
+        outcomeHypothesis: {
+          predictedDecisionMove: "Report findings inform a governance decision or policy position within the board cycle.",
+          expectedObservableChange: "Report referenced in board materials or governance log within the review window.",
+        },
+      });
+    } catch {
+      // Non-fatal — report is already generated and persisted
+      console.error(`[executive-reporting] Failed to register artifact for run ${run.id}`);
+    }
+
     return NextResponse.json({
       ok: true,
       runKey: run.runKey,

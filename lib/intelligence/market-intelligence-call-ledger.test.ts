@@ -141,12 +141,12 @@ describe("getCallScoreLabel", () => {
     expect(getCallScoreLabel(3)).toBe("Partially confirmed");
   });
 
-  it("returns 'Weakly supported' for score 2", () => {
-    expect(getCallScoreLabel(2)).toBe("Weakly supported");
+  it("returns 'Too early to assess' for score 2", () => {
+    expect(getCallScoreLabel(2)).toBe("Too early to assess");
   });
 
-  it("returns 'Not confirmed' for score 1", () => {
-    expect(getCallScoreLabel(1)).toBe("Not confirmed");
+  it("returns 'Weakly supported' for score 1", () => {
+    expect(getCallScoreLabel(1)).toBe("Weakly supported");
   });
 
   it("returns 'Disconfirmed' for score 0", () => {
@@ -175,22 +175,52 @@ describe("getCallScoreLabel", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("summariseCallReview", () => {
-  it("counts all Q1 calls as pending when none have outcomes", () => {
-    const calls = getCallsForReport("GMI-Q1-2026");
-    const summary = summariseCallReview(calls);
-    expect(summary.totalCalls).toBe(8);
+  it("counts all calls as pending when none have outcomes (synthetic data)", () => {
+    // Use synthetic unreviewed calls — real Q1 calls now have review data.
+    const syntheticCalls: MarketCallRecord[] = Array.from({ length: 5 }, (_, i) => ({
+      id: `SYNTH-00${i + 1}`,
+      reportId: "GMI-Q1-2026",
+      callType: "PREDICTION",
+      statement: `Synthetic call ${i + 1}.`,
+      originalConfidence: "MEDIUM" as const,
+      expectedReviewWindow: "Q2 2026",
+      // No outcomeStatus — unreviewed
+    }));
+    const summary = summariseCallReview(syntheticCalls);
+    expect(summary.totalCalls).toBe(5);
     expect(summary.reviewed).toBe(0);
-    expect(summary.pending).toBe(8);
+    expect(summary.pending).toBe(5);
   });
 
-  it("returns null averageScore when no calls have scores", () => {
-    const calls = getCallsForReport("GMI-Q1-2026");
-    const summary = summariseCallReview(calls);
+  it("returns null averageScore when no calls have scores (synthetic data)", () => {
+    const syntheticCalls: MarketCallRecord[] = [
+      {
+        id: "SYNTH-001",
+        reportId: "GMI-Q1-2026",
+        callType: "WATCH_SIGNAL",
+        statement: "A watch signal with no outcome.",
+        originalConfidence: "MONITORING" as const,
+        expectedReviewWindow: "Q2 2026",
+        // No score
+      },
+    ];
+    const summary = summariseCallReview(syntheticCalls);
     expect(summary.averageScore).toBeNull();
   });
 
-  it("confirmed count is 0 before any reviews", () => {
-    const summary = summariseCallReview(getCallsForReport("GMI-Q1-2026"));
+  it("confirmed count is 0 when no calls have confirmed outcomes (synthetic data)", () => {
+    const syntheticCalls: MarketCallRecord[] = [
+      {
+        id: "SYNTH-001",
+        reportId: "GMI-Q1-2026",
+        callType: "STRUCTURAL_THESIS",
+        statement: "A structural thesis with no outcome.",
+        originalConfidence: "HIGH" as const,
+        expectedReviewWindow: "Q2 2026",
+        outcomeStatus: "TOO_EARLY_TO_ASSESS",
+      },
+    ];
+    const summary = summariseCallReview(syntheticCalls);
     expect(summary.confirmed).toBe(0);
   });
 
@@ -249,9 +279,20 @@ describe("summariseCallReview", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("getMarketLearningSignals", () => {
-  it("returns no learning signals from unreviewed Q1 calls", () => {
-    const calls = getCallsForReport("GMI-Q1-2026");
-    const signals = getMarketLearningSignals(calls);
+  it("returns no learning signals from synthetic unreviewed calls", () => {
+    // Real Q1 calls now have review data — use synthetic unreviewed calls.
+    const syntheticCalls: MarketCallRecord[] = [
+      {
+        id: "SYNTH-001",
+        reportId: "GMI-Q1-2026",
+        callType: "PREDICTION",
+        statement: "A call with no outcome.",
+        originalConfidence: "HIGH" as const,
+        expectedReviewWindow: "Q2 2026",
+        // No outcomeStatus, no learning
+      },
+    ];
+    const signals = getMarketLearningSignals(syntheticCalls);
     expect(signals).toHaveLength(0);
   });
 
@@ -285,9 +326,22 @@ describe("getMarketLearningSignals", () => {
     expect(signals[0]).toContain("Inflation transmission");
   });
 
-  it("does not surface learning from pending or too-early calls", () => {
-    const calls = MARKET_CALL_LEDGER;
-    const signals = getMarketLearningSignals(calls);
+  it("does not surface learning from pending or too-early calls (synthetic data)", () => {
+    // Use synthetic TOO_EARLY calls — MARKET_CALL_LEDGER now has reviewed calls with learning.
+    const tooEarlyCalls: MarketCallRecord[] = [
+      {
+        id: "SYNTH-TOO-EARLY-001",
+        reportId: "GMI-Q1-2026",
+        callType: "STRUCTURAL_THESIS",
+        statement: "A thesis under Q2 review.",
+        originalConfidence: "HIGH" as const,
+        expectedReviewWindow: "Q2 2026",
+        outcomeStatus: "TOO_EARLY_TO_ASSESS",
+        score: 2,
+        learning: "This learning should not surface yet — status is TOO_EARLY_TO_ASSESS.",
+      },
+    ];
+    const signals = getMarketLearningSignals(tooEarlyCalls);
     expect(signals).toHaveLength(0);
   });
 });

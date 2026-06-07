@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/config";
 import { generateCaseStudyDraft } from "@/lib/evidence/case-study-generator";
 import { checkCaseStudyEligibility } from "@/lib/evidence/case-study-generator";
+import { prisma } from "@/lib/prisma.server";
 import type { CaseStudyGenerationInput } from "@/lib/evidence/case-study-types";
 
 /**
@@ -88,8 +89,66 @@ export async function POST(req: Request) {
     );
   }
 
+  const caseStudy = await prisma.caseStudy.create({
+    data: {
+      title: result.draft.title,
+      status: "DRAFT",
+      publicationAllowed: false,
+      anonymised: true,
+      anonymisationNotes: result.draft.confidentialityNotes,
+      sector: body.anonymisedSector ?? null,
+      companySizeBand: body.anonymisedOrganisationSize ?? null,
+      region: body.anonymisedRegion ?? null,
+      adminVerifiedRecordId: body.outcomeId,
+      verificationStatus: "VERIFIED",
+      consentStatus: "PENDING",
+      narrative: {
+        classification: result.draft.classification,
+        situation: result.draft.situation,
+        contradiction: result.draft.contradiction,
+        decision: result.draft.decision,
+        intervention: result.draft.intervention,
+        outcome: result.draft.outcome,
+        implication: result.draft.recommendedPublicStatus,
+        integritySeal: result.draft.integritySeal,
+      },
+      evidence: {
+        create: [
+          {
+            sourceType: "OutcomeVerificationRecord",
+            sourceId: body.outcomeId,
+            verificationStatus: "VERIFIED",
+            notes: result.draft.verificationBasis,
+          },
+        ],
+      },
+      outcomes: {
+        create: [
+          {
+            outcomeClass: result.draft.recommendedPublicStatus,
+            outcomeSummary: result.draft.outcome,
+            verifiedBy: session.user.email,
+            verifiedAt: new Date(),
+          },
+        ],
+      },
+      consents: {
+        create: [
+          {
+            consentStatus: "PENDING",
+            anonymisedAllowed: true,
+            publicUseAllowed: false,
+            notes: "Case study generated as internal draft. Publication requires explicit consent or approved anonymised-publication basis.",
+          },
+        ],
+      },
+    },
+    select: { id: true, status: true, publicationAllowed: true },
+  });
+
   return NextResponse.json({
     ok: true,
+    caseStudy,
     draft: result.draft,
   });
 }

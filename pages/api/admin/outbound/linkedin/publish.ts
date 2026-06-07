@@ -19,7 +19,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { requireAdminApi, requireTierApi } from "@/lib/access/server";
 import { verifyAdminMutationOrigin } from "@/lib/api/admin-mutation-guard";
-import { prisma } from "@/lib/prisma.server";
 import { getConnectionStatus } from "@/lib/outbound/linkedin-oauth";
 import { getResolvedLinkedInOutboundBySlug } from "@/lib/outbound/linkedin-content-resolver";
 import { canPublishLinkedInOutbound } from "@/lib/outbound/linkedin-publish-gate";

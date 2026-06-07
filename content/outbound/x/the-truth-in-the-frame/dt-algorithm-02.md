@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-algorithm-02
 provider: x
@@ -20,10 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-Every other case in this series had a hand on the chisel.
-
-Napoleon corrected David's canvas personally.
-The empire commissioned Winterhalter directly.
-The state printed the posters by decree.
-
-Facebook 2020 is different. No one person made the decision that produced the outcome.
+Every other case in this series had a hand on the chisel. Napoleon corrected David's canvas personally. The empire commissioned Winterhalter directly. The state printed the posters by decree. Facebook 2020 is different.

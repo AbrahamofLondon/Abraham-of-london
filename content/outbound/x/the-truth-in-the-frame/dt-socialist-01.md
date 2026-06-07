@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-socialist-01
 provider: x
@@ -22,10 +23,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-In 1934, the Soviet state mandated an aesthetic doctrine for all art.
-
-The doctrine: portray the Communist future as though it had already arrived.
-
-Workers: heroic. Harvests: abundant. Leaders: wise. Failures: invisible.
-
-Artists who deviated were not critiqued. They were arrested.
+In 1934, the Soviet state mandated an aesthetic doctrine for all art. The doctrine: portray the Communist future as though it had already arrived. Workers: heroic. Harvests: abundant. Leaders: wise. Failures: invisible.

@@ -22,6 +22,15 @@ const {
 
 vi.mock("server-only", () => ({}));
 
+vi.mock("@/lib/intelligence/gmi-control-plane", () => ({
+  buildGmiControlPlane: vi.fn().mockReturnValue({
+    publicationReadiness: {
+      finalVerdict: "CLEAR",
+      blockerReasons: [],
+    },
+  }),
+}));
+
 vi.mock("@/lib/intelligence/gmi-release-event-recorder", () => ({
   recordGmiReleaseEventSafe: mockRecordGmiReleaseEventSafe,
 }));
@@ -35,6 +44,7 @@ vi.mock("@/lib/intelligence/market-intelligence-call-ledger", () => ({
   getCallsPendingReview: vi.fn().mockReturnValue([]),
   summariseCallReview: vi.fn().mockReturnValue({ totalCalls: 0, reviewed: 0, pending: 0, averageScore: null, confirmed: 0, partiallyConfirmed: 0, notConfirmed: 0, tooEarly: 0 }),
   GMI_Q1_2026_CALLS: [],
+  MARKET_CALL_LEDGER: [],
 }));
 
 // ── imports ───────────────────────────────────────────────────────────────────

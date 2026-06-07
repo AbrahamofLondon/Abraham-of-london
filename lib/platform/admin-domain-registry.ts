@@ -66,6 +66,8 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/intelligence-foundry/data-poisoning", domain: "foundry", requiredRole: "OWNER", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/intelligence-foundry/health", domain: "foundry", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
   { route: "/admin/intelligence-foundry/trash-day", domain: "foundry", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: true },
+  { route: "/admin/intelligence-foundry/brief-orders", domain: "foundry", requiredRole: "ADMIN", canonicalRecord: "DecisionBriefOrder", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/intelligence-foundry/qa-bench", domain: "foundry", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
   { route: "/admin/intelligence-foundry/red-team/content", domain: "foundry", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/intelligence-foundry/red-team/security", domain: "foundry", requiredRole: "OWNER", riskLevel: "CRITICAL", emitsAudit: true },
   { route: "/admin/intelligence-foundry/outbound", domain: "foundry", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },

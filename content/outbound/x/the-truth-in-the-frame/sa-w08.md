@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-sa-w08
 provider: x
@@ -14,10 +15,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-Arthur Conan Doyle — the creator of the most rational detective in English literature — was convinced that photographs of fairies made from cardboard were genuine.
-
-He examined them carefully. He consulted experts.
-
-He believed what he needed to believe, and the photographs gave him permission.
-
-The technology was scissors. The mechanism was human.
+Arthur Conan Doyle — the creator of the most rational detective in English literature — was convinced that photographs of fairies made from cardboard were genuine. He examined them carefully. He consulted experts.

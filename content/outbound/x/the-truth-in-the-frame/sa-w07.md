@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-sa-w07
 provider: x
@@ -14,12 +15,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-The king controlled the record by controlling the chisel.
-
-The empire controlled it by controlling the camera.
-
-The state controlled it by controlling the printing press.
-
-The platform controls it by controlling the ranking algorithm.
-
-The instrument changes. The operation does not.
+The king controlled the record by controlling the chisel. The empire controlled it by controlling the camera. The state controlled it by controlling the printing press. The platform controls it by controlling the ranking algorithm. The instrument changes.

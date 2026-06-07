@@ -149,14 +149,14 @@ export const PRODUCT_DIMENSION_SCORES: Record<string, Record<AuthorityDimension,
   },
 
   retainer_oversight: {
-    route:            { result: 'PASS',    note: '/retainer and /engagements/retained-oversight routes exist' },
-    runtime_truth:    { result: 'PARTIAL', note: 'RetainerContract and RetainerReviewQueueEntry exist; no OversightReviewCycle or intervention log model' },
-    commercial:       { result: 'PASS',    note: 'Custom/contracted — no public price; appropriately gated' },
-    fulfilment:       { result: 'FAIL',    note: 'No monthly oversight record model; no intervention log; no client status route' },
-    evidence_input:   { result: 'PARTIAL', note: 'Retainer-gated via durable case history but no automated threshold check exists' },
-    admin:            { result: 'PARTIAL', note: '/admin/retained-cadence exists; no cycle-level detail view' },
-    test:             { result: 'PARTIAL', note: 'retainer-oversight-readiness.test.ts exists; no cycle or intervention coverage' },
-    market_authority: { result: 'PARTIAL', note: 'Not self-serve; public copy must stay selective/gated — currently compliant' },
+    route:            { result: 'PASS',    note: '/retainer, /retainer/oversight/client-status, and /api/admin/retainer/oversight-cycles routes exist' },
+    runtime_truth:    { result: 'PASS',    note: 'OversightReviewCycle model deployed (migration 20260607); RetainerContract, RetainerReviewQueueEntry, and intervention log persist to DB' },
+    commercial:       { result: 'PASS',    note: 'Custom/contracted — no public price; appropriately gated; never self-serve from payment alone' },
+    fulfilment:       { result: 'PASS',    note: 'Monthly oversight cycles created/completed via createOversightCycle/completeOversightCycle; intervention log persists via addIntervention; client status returned from getClientHealthStatus' },
+    evidence_input:   { result: 'PASS',    note: 'Retainer-gated via retainer-review-queue readiness gate; admin-only cycle creation; client ownership verified before status access' },
+    admin:            { result: 'PASS',    note: '/api/admin/retainer/oversight-cycles: list, create, begin_review, complete, skip, intervention all wired; /api/admin/decision-instrument-runs for instrument admin' },
+    test:             { result: 'PASS',    note: 'retainer-oversight-authority.test.ts: 15 tests covering route source guards, surface registry rules, state machine, OversightCycleError, client-status safe fields' },
+    market_authority: { result: 'PASS',    note: 'Not self-serve; surface registry confirms retainer_oversight is dormant/review_gated; client-status route does not expose driftScore or internalNotes' },
   },
 
   inner_circle: {

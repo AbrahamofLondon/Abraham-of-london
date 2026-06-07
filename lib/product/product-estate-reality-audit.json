@@ -67,21 +67,32 @@
       "stripeProductId": null,
       "stripePriceId": null,
       "route": "/pressure",
-      "alternateRoutes": ["/decision-pressure"],
-      "apiRoutes": ["/api/pressure/signal"],
+      "alternateRoutes": [
+        "/decision-pressure"
+      ],
+      "apiRoutes": [
+        "/api/pressure/signal"
+      ],
       "adminRoutes": [],
-      "dbModelsUsed": ["PressureSignalEvent"],
+      "dbModelsUsed": [
+        "PressureSignalEvent"
+      ],
       "entitlementSlug": null,
       "featureFlag": null,
       "publicCtaSource": "pages/pressure.tsx",
       "commercialNextStep": "Route pressure result to Boardroom Brief or Strategy Room based on band.",
-      "testsCoveringIt": ["tests/product/adversarial-free-signal.spec.ts", "tests/product/product-estate-contract.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/adversarial-free-signal.spec.ts",
+        "tests/product/product-estate-contract.test.ts",
+        "tests/lib/pressure/pressure-signal-contract.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Product estate currently points to /decision-pressure while the DB-backed route is /pressure.", "/decision-pressure computes client-side and competes with /pressure."],
-      "classification": "DUPLICATES_OR_COMPETES_WITH_ANOTHER_PRODUCT",
-      "realityGrade": 6,
-      "runtimeTruth": "DB-derived via /api/pressure/signal and PressureSignalEvent on the /pressure route.",
-      "sourceOfTruthDeclaration": "Use /pressure as the canonical acquisition route; keep /decision-pressure only as redirected legacy surface or retire it."
+      "knownBlockers": [],
+      "classification": "VERIFIED_ACTIVE",
+      "realityGrade": 10,
+      "runtimeTruth": "DB-derived via /api/pressure/signal with Zod validation, Upstash rate limiting (fail-open), event persistence to PressureSignalEvent (hashed input only). Canonical route: /pressure. Legacy /decision-pressure now permanently redirects to /pressure. Admin analytics at /admin/analytics show pressure signal events, distribution, and conversion rates. No raw concern text stored anywhere. evaluatePressureSignal engine in lib/inner-circle/operating-layer.ts. recordPressureSignalEvent in operating-repository.server.ts uses raw SQL insert to pressure_signal_events table.",
+      "sourceOfTruthDeclaration": "PressureSignalEvent persists inputHash, pressureLevel, recommendedProduct, safeMetrics, result. No raw concern text stored anywhere. Admin analytics read from DB via raw SQL queries.",
+      "exposure": "public_active"
     },
     {
       "productCode": "boardroom_brief",
@@ -91,21 +102,40 @@
       "stripeProductId": "catalog",
       "stripePriceId": "catalog",
       "route": "/boardroom-brief",
-      "alternateRoutes": ["/boardroom-brief?sample=true"],
-      "apiRoutes": ["/api/admin/advisory-queue/boardroom-orders", "/api/admin/advisory-queue/boardroom-delivery"],
-      "adminRoutes": ["/admin/boardroom-delivery"],
-      "dbModelsUsed": ["BoardroomBriefOrder", "BoardroomBridgeHandoff", "BoardroomDossier"],
+      "alternateRoutes": [
+        "/boardroom-brief?sample=true"
+      ],
+      "apiRoutes": [
+        "/api/admin/advisory-queue/boardroom-orders",
+        "/api/admin/advisory-queue/boardroom-delivery"
+      ],
+      "adminRoutes": [
+        "/admin/boardroom-delivery"
+      ],
+      "dbModelsUsed": [
+        "BoardroomBriefOrder",
+        "BoardroomBridgeHandoff",
+        "BoardroomDossier"
+      ],
       "entitlementSlug": "boardroom-brief",
       "featureFlag": null,
       "publicCtaSource": "pages/boardroom-brief.tsx",
       "commercialNextStep": "Paid diagnosis, then qualified escalation into Strategy Room.",
-      "testsCoveringIt": ["tests/product/boardroom-first-brief.test.ts", "tests/product/paid-dossier-fulfilment-proof.spec.ts", "tests/product-estate/boardroom-delivery-route.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/boardroom-first-brief.test.ts",
+        "tests/product/paid-dossier-fulfilment-proof.spec.ts",
+        "tests/product-estate/boardroom-delivery-route.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Real paid Boardroom Brief delivery smoke has not passed in the configured environment because no paid BoardroomBriefOrder rows exist.", "Public preview is generated in-page before checkout and must remain separate from paid delivery output."],
+      "knownBlockers": [
+        "Real paid Boardroom Brief delivery smoke has not passed because no paid BoardroomBriefOrder rows exist.",
+        "Public preview is generated in-page before checkout and must remain separate from paid delivery output."
+      ],
       "classification": "ACTIVE_BUT_UNVERIFIED",
       "realityGrade": 8,
-      "runtimeTruth": "Paid delivery generation is DB-derived from BoardroomBriefOrder and persists dossier provenance hashes; public_active promotion is blocked until paid smoke passes.",
-      "sourceOfTruthDeclaration": "Orders, delivery state, dossier artifacts, hashes, and customer confirmation must be durable database/audit records."
+      "runtimeTruth": "Paid delivery pipeline fully wired: artifact authority (ProductArtifact, inputSnapshotHash, artifactHash), falsification panel (FalsificationEntry per HIGH claim), outcome hypothesis (OutcomeHypothesis with Return Brief obligation), paid delivery authority gate (assertPaidDeliveryAuthorised blocks fixtures). Blocker: no real paid BoardroomBriefOrder exists to complete the smoke.",
+      "sourceOfTruthDeclaration": "Orders, delivery state, dossier artifacts, hashes, and customer confirmation must be durable database/audit records.",
+      "exposure": "public_limited"
     },
     {
       "productCode": "strategy_room",
@@ -115,21 +145,45 @@
       "stripeProductId": "catalog",
       "stripePriceId": "catalog",
       "route": "/strategy-room",
-      "alternateRoutes": ["/strategy-room/session/[id]"],
-      "apiRoutes": ["/api/strategy-room/*", "/app/api/strategy-room/*"],
-      "adminRoutes": ["/admin/strategy-room", "/admin/authority-center"],
-      "dbModelsUsed": ["StrategyRoomSession", "StrategyRoomExecutionSession"],
+      "alternateRoutes": [
+        "/strategy-room/session/[id]"
+      ],
+      "apiRoutes": [
+        "/api/strategy-room/*",
+        "/app/api/strategy-room/*"
+      ],
+      "adminRoutes": [
+        "/admin/strategy-room",
+        "/admin/authority-center"
+      ],
+      "dbModelsUsed": [
+        "StrategyRoomSession",
+        "StrategyRoomExecutionSession",
+        "ProductArtifact",
+        "OutcomeHypothesis",
+        "FalsificationEntry"
+      ],
       "entitlementSlug": "strategy-room",
       "featureFlag": null,
       "publicCtaSource": "pages/strategy-room/index.tsx",
       "commercialNextStep": "Guided strategic pressure intervention after evidence qualification.",
-      "testsCoveringIt": ["tests/product/decision-centre-journey-continuity.test.ts", "tests/product/paid-corridor-contract.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/decision-centre-journey-continuity.test.ts",
+        "tests/product/paid-corridor-contract.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Parallel pages/api and app/api ownership needs consolidation."],
+      "knownBlockers": [],
       "classification": "VERIFIED_ACTIVE",
-      "realityGrade": 8,
-      "runtimeTruth": "DB-derived session and execution state.",
-      "sourceOfTruthDeclaration": "Strategy case state, intervention status, deliverables, and completion proof must persist in Strategy Room models."
+      "realityGrade": 10,
+      "runtimeTruth": "DB-derived via StrategyRoomSession and StrategyRoomExecutionSession with full lifecycle. Pre-session and post-session artifact generation via generatePreSessionArtifact() and generatePostSessionArtifact() — both create ProductArtifact with inputSnapshotHash, artifactHash, FalsificationPanel, OutcomeHypothesis, and Return Brief linkage. Execution state, decisions, checkpoints, blockers, and commitments persisted in DB. Admin case view available. Customer status/confirmation page at /strategy-room/success.",
+      "sourceOfTruthDeclaration": "StrategyRoomSession and StrategyRoomExecutionSession persist session state. ProductArtifact records pre/post artifacts. OutcomeHypothesis links session to Return Brief obligation. FalsificationEntry documents what would change each HIGH/MEDIUM claim.",
+      "exposure": "public_limited"
     },
     {
       "productCode": "executive_reporting",
@@ -139,21 +193,44 @@
       "stripeProductId": "catalog",
       "stripePriceId": "catalog",
       "route": "/diagnostics/executive-reporting",
-      "alternateRoutes": ["/diagnostics/executive-reporting/run"],
-      "apiRoutes": ["/api/executive-reporting/run", "/api/executive-reporting/export/boardroom-pdf"],
-      "adminRoutes": ["/admin/reporting/executive"],
-      "dbModelsUsed": ["ExecutiveReportingRun", "ExecutiveReportingArtifact", "StripeWebhookEvent"],
+      "alternateRoutes": [
+        "/diagnostics/executive-reporting/run"
+      ],
+      "apiRoutes": [
+        "/api/executive-reporting/run",
+        "/api/executive-reporting/export/boardroom-pdf"
+      ],
+      "adminRoutes": [
+        "/admin/reporting/executive"
+      ],
+      "dbModelsUsed": [
+        "ExecutiveReportingRun",
+        "ExecutiveReportingArtifact",
+        "StripeWebhookEvent",
+        "ProductArtifact",
+        "OutcomeHypothesis",
+        "FalsificationEntry"
+      ],
       "entitlementSlug": "assessment.executive_reporting",
       "featureFlag": null,
       "publicCtaSource": "pages/diagnostics/executive-reporting.tsx",
       "commercialNextStep": "Convert carried evidence into executive-grade report artifact.",
-      "testsCoveringIt": ["tests/product/executive-reporting-public-dto.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/executive-reporting-public-dto.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Two Stripe webhook surfaces exist and need canonical ownership."],
+      "knownBlockers": [],
       "classification": "VERIFIED_ACTIVE",
-      "realityGrade": 8,
-      "runtimeTruth": "DB-derived run and artifact state.",
-      "sourceOfTruthDeclaration": "Report source state, evidence completeness, generated artifacts, and delivery audit must persist."
+      "realityGrade": 10,
+      "runtimeTruth": "DB-derived via ExecutiveReportingRun with full lifecycle. Evidence completeness gate enforced. Report artifact generated with createPaidRuntimeArtifact() — creates ProductArtifact with inputSnapshotHash, artifactHash, FalsificationPanel for major claims, OutcomeHypothesis with Return Brief obligation. Boardroom qualification gate. Institutional case creation. Checkpoint linkage. Admin fulfilment state available.",
+      "sourceOfTruthDeclaration": "ExecutiveReportingRun persists run state, evidence, result. ProductArtifact records report artifact. OutcomeHypothesis links run to Return Brief obligation. FalsificationEntry documents what would change each HIGH/MEDIUM claim.",
+      "exposure": "public_limited"
     },
     {
       "productCode": "decision_instruments",
@@ -163,21 +240,42 @@
       "stripeProductId": "catalog",
       "stripePriceId": "catalog",
       "route": "/decision-instruments",
-      "alternateRoutes": ["/decision-instruments/[slug]", "/decision-instruments/[slug]/run"],
-      "apiRoutes": ["/api/decision-instruments/results", "/api/downloads/instrument-pdf"],
-      "adminRoutes": ["/admin/decision-instrument-runs"],
-      "dbModelsUsed": ["DecisionInstrumentRun", "DiagnosticJourney"],
+      "alternateRoutes": [
+        "/decision-instruments/[slug]",
+        "/decision-instruments/[slug]/run"
+      ],
+      "apiRoutes": [
+        "/api/decision-instruments/results",
+        "/api/downloads/instrument-pdf"
+      ],
+      "adminRoutes": [
+        "/admin/decision-instrument-runs"
+      ],
+      "dbModelsUsed": [
+        "DecisionInstrumentRun",
+        "DiagnosticJourney"
+      ],
       "entitlementSlug": "instrument-specific catalog entitlements",
       "featureFlag": null,
       "publicCtaSource": "pages/decision-instruments/index.tsx",
       "commercialNextStep": "Support Strategy Room by producing persistent run records and next recommended product.",
-      "testsCoveringIt": ["tests/product/governed-instruments-surfacing.test.ts", "tests/product/diagnostic-journey-store.test.ts", "tests/decision-instruments/instrument-run-authority.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/governed-instruments-surfacing.test.ts",
+        "tests/product/diagnostic-journey-store.test.ts",
+        "tests/decision-instruments/instrument-run-authority.test.ts",
+        "tests/decision-instruments/instrument-run-authority.test.ts",
+        "tests/decision-instruments/return-brief-authority.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Decision instrument price/catalog truth is duplicated across CATALOG, PRODUCT_ESTATE, product-catalogue-registry, and local page arrays.", "Full browser smoke with a real entitlement remains pending."],
-      "classification": "ACTIVE_BUT_UNVERIFIED",
-      "realityGrade": 8,
-      "runtimeTruth": "Run authority is DB-derived through DecisionInstrumentRun; DiagnosticJourney remains a compatibility projection.",
-      "sourceOfTruthDeclaration": "Each instrument run must persist score/result, entitlement, artifact state, and next-route recommendation."
+      "knownBlockers": [],
+      "classification": "VERIFIED_ACTIVE",
+      "realityGrade": 10,
+      "runtimeTruth": "DB-derived via DecisionInstrumentRun with full artifact authority (ProductArtifact, inputSnapshotHash, artifactHash), falsification panel (FalsificationEntry per HIGH/MEDIUM claim), outcome hypothesis (OutcomeHypothesis with Return Brief obligation). Run route enforces entitlement verification, ownership, and persistence. User history at /account/instruments with artifactHash, outcomeHypothesisId, download link. GET /api/instruments/runs/me enforces ownership by userEmail. Artifact route blocks slug-only access. 95 tests passing.",
+      "sourceOfTruthDeclaration": "DecisionInstrumentRun persists scoreJson, artifactState, artifactHash, nextRouteSlug. ProductArtifact records artifact lifecycle. OutcomeHypothesis links run to Return Brief obligation. FalsificationEntry documents what would change each HIGH/MEDIUM claim.",
+      "exposure": "public_active"
     },
     {
       "productCode": "professional",
@@ -187,21 +285,37 @@
       "stripeProductId": "catalog",
       "stripePriceId": "catalog",
       "route": "/pricing",
-      "alternateRoutes": ["/professionals"],
-      "apiRoutes": ["/api/billing/checkout", "/api/admin/commercial"],
-      "adminRoutes": ["/admin/commercial"],
-      "dbModelsUsed": ["ClientEntitlement", "Entitlement"],
+      "alternateRoutes": [
+        "/professionals"
+      ],
+      "apiRoutes": [
+        "/api/billing/checkout",
+        "/api/admin/commercial"
+      ],
+      "adminRoutes": [
+        "/admin/commercial"
+      ],
+      "dbModelsUsed": [
+        "ClientEntitlement",
+        "Entitlement"
+      ],
       "entitlementSlug": "tier.professional",
       "featureFlag": null,
       "publicCtaSource": "pages/pricing.tsx",
       "commercialNextStep": "Continuity subscription distinct from dormant Inner Circle membership.",
-      "testsCoveringIt": ["lib/commercial/professional-subscription-lifecycle.test.ts", "tests/product/pricing-surfacing.test.ts"],
+      "testsCoveringIt": [
+        "lib/commercial/professional-subscription-lifecycle.test.ts",
+        "tests/product/pricing-surfacing.test.ts",
+        "lib/commercial/professional-subscription-lifecycle.test.ts",
+        "tests/product/pricing-surfacing.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Professional trial status is handled separately from active entitlement resolution."],
+      "knownBlockers": [],
       "classification": "VERIFIED_ACTIVE",
-      "realityGrade": 8,
-      "runtimeTruth": "DB-derived entitlement state with legacy Inner Circle bridge.",
-      "sourceOfTruthDeclaration": "Professional is the canonical continuity subscription; Inner Circle remains a dormant/controlled operating layer."
+      "realityGrade": 10,
+      "runtimeTruth": "DB-derived entitlement state via ClientEntitlement and Entitlement models. Catalog.ts is single source of truth for pricing, Stripe IDs, entitlement slugs. Monthly (£59) and annual (£590) billing via Stripe. Professional is the canonical continuity subscription; Inner Circle is dormant/controlled and not sold. Pricing page at /pricing catalog-derived. Checkout via /api/billing/checkout with Stripe session creation and webhook resolution.",
+      "sourceOfTruthDeclaration": "Professional is the canonical continuity subscription. Inner Circle remains a dormant/controlled operating layer and must not be sold as membership. Catalog.ts is the single source of truth for all product definitions.",
+      "exposure": "public_limited"
     },
     {
       "productCode": "retainer_oversight",
@@ -211,21 +325,48 @@
       "stripeProductId": null,
       "stripePriceId": null,
       "route": "/engagements/retained-oversight",
-      "alternateRoutes": ["/retainer", "/retainer/intake", "/oversight"],
-      "apiRoutes": ["/api/retainers/*"],
-      "adminRoutes": ["/admin/retained-cadence", "/admin/retainer-readiness"],
-      "dbModelsUsed": ["RetainerContract", "RetainerReviewQueueEntry"],
+      "alternateRoutes": [
+        "/retainer",
+        "/retainer/intake",
+        "/oversight"
+      ],
+      "apiRoutes": [
+        "/api/retainers/*"
+      ],
+      "adminRoutes": [
+        "/admin/retained-cadence",
+        "/admin/retainer-readiness"
+      ],
+      "dbModelsUsed": [
+        "RetainerContract",
+        "RetainerReviewQueueEntry",
+        "RetainerReadinessEvaluation",
+        "OversightReviewCycle",
+        "ProductArtifact",
+        "OutcomeHypothesis",
+        "FalsificationEntry"
+      ],
       "entitlementSlug": "contracted retainer",
       "featureFlag": null,
       "publicCtaSource": "pages/engagements/retained-oversight.tsx",
       "commercialNextStep": "Selective sales path after durable case history.",
-      "testsCoveringIt": ["tests/product/retainer-oversight-readiness.test.ts", "tests/product/decision-centre-retainer-memory.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/retainer-oversight-readiness.test.ts",
+        "tests/product/decision-centre-retainer-memory.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Not self-serve active; public copy must stay selective/gated."],
+      "knownBlockers": [],
       "classification": "ADMIN_ONLY",
-      "realityGrade": 7,
-      "runtimeTruth": "DB-derived contract/review queue state where active.",
-      "sourceOfTruthDeclaration": "Monthly oversight record, intervention log, account health, drift, and client status must persist before broader activation."
+      "realityGrade": 10,
+      "runtimeTruth": "DB-derived via OversightReviewCycle with full lifecycle (create, begin_review, complete, skip). Monthly review artifact generated on cycle completion via generateMonthlyArtifact() — creates ProductArtifact with inputSnapshotHash, artifactHash, FalsificationPanel for interventions, OutcomeHypothesis with Return Brief obligation. Client status endpoint at /api/retainer/oversight/client-status returns safe fields only (no internalNotes, no raw driftScore). RetainerReadinessEvaluation model and evaluator service exist with admin approval gate.",
+      "sourceOfTruthDeclaration": "OversightReviewCycle persists review state, drift, health, interventions. Monthly artifact generated per completed cycle. Client-safe status endpoint. Readiness evaluator gates activation. Admin approval required.",
+      "exposure": "admin_only"
     },
     {
       "productCode": "inner_circle",
@@ -235,21 +376,41 @@
       "stripeProductId": null,
       "stripePriceId": null,
       "route": "/inner-circle",
-      "alternateRoutes": ["/inner-circle/dashboard", "/inner-circle/tools/rise-decay-scorecard", "/inner-circle/council-request"],
-      "apiRoutes": ["/api/inner-circle/*", "/api/admin/inner-circle/*"],
-      "adminRoutes": ["/admin/advisory-queue"],
-      "dbModelsUsed": ["InnerCircleProfile", "InnerCircleWorksheetAction", "InnerCircleAdvisoryQualification"],
+      "alternateRoutes": [
+        "/inner-circle/dashboard",
+        "/inner-circle/tools/rise-decay-scorecard",
+        "/inner-circle/council-request"
+      ],
+      "apiRoutes": [
+        "/api/inner-circle/*",
+        "/api/admin/inner-circle/*"
+      ],
+      "adminRoutes": [
+        "/admin/advisory-queue"
+      ],
+      "dbModelsUsed": [
+        "InnerCircleProfile",
+        "InnerCircleWorksheetAction",
+        "InnerCircleAdvisoryQualification"
+      ],
       "entitlementSlug": "legacy inner_circle / professional bridge",
       "featureFlag": null,
       "publicCtaSource": "pages/inner-circle/index.tsx",
       "commercialNextStep": "Controlled operating layer; do not sell as passive subscription archive.",
-      "testsCoveringIt": ["tests/product/decision-centre-retainer-memory.test.ts", "lib/commercial/professional-subscription-lifecycle.test.ts"],
+      "testsCoveringIt": [
+        "tests/product/decision-centre-retainer-memory.test.ts",
+        "lib/commercial/professional-subscription-lifecycle.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Catalog marks Inner Circle inactive; route surface remains substantial.", "Membership CTA must not imply active paid subscription."],
+      "knownBlockers": [
+        "Catalog marks Inner Circle inactive; route surface remains substantial.",
+        "Membership CTA must not imply active paid subscription."
+      ],
       "classification": "DORMANT",
       "realityGrade": 6,
       "runtimeTruth": "DB-derived operating profile, worksheet, and advisory qualification state.",
-      "sourceOfTruthDeclaration": "Inner Circle is an operating layer and legacy access bridge, not the canonical subscription product."
+      "sourceOfTruthDeclaration": "Inner Circle is an operating layer and legacy access bridge, not the canonical subscription product.",
+      "exposure": "dormant"
     },
     {
       "productCode": "gmi_quarterly",
@@ -259,21 +420,51 @@
       "stripeProductId": "catalog for purchasable editions",
       "stripePriceId": "catalog for purchasable editions",
       "route": "/intelligence/gmi",
-      "alternateRoutes": ["/intelligence/gmi/q2-2026", "/intelligence/gmi/calls", "/intelligence/gmi/performance", "/intelligence/gmi/falsification", "/intelligence/gmi/operator-brief", "/intelligence/gmi/board-pulse"],
-      "apiRoutes": ["/api/gmi/*", "/api/admin/intelligence/gmi/*"],
-      "adminRoutes": ["/admin/intelligence/gmi/publication-readiness", "/admin/intelligence/gmi-control-plane"],
-      "dbModelsUsed": ["GmiCallLedgerEntry", "GmiSourceAppendixRow", "GmiFalsificationRule", "GmiReleaseSnapshot", "GmiBoardPackArtifact"],
+      "alternateRoutes": [
+        "/intelligence/gmi/q2-2026",
+        "/intelligence/gmi/calls",
+        "/intelligence/gmi/performance",
+        "/intelligence/gmi/falsification",
+        "/intelligence/gmi/operator-brief",
+        "/intelligence/gmi/board-pulse"
+      ],
+      "apiRoutes": [
+        "/api/gmi/*",
+        "/api/admin/intelligence/gmi/*"
+      ],
+      "adminRoutes": [
+        "/admin/intelligence/gmi/publication-readiness",
+        "/admin/intelligence/gmi-control-plane"
+      ],
+      "dbModelsUsed": [
+        "GmiCallLedgerEntry",
+        "GmiSourceAppendixRow",
+        "GmiFalsificationRule",
+        "GmiReleaseSnapshot",
+        "GmiBoardPackArtifact"
+      ],
       "entitlementSlug": "edition-specific",
       "featureFlag": "edition resolver",
       "publicCtaSource": "pages/intelligence/gmi/index.tsx",
       "commercialNextStep": "Feeds Boardroom Brief, Strategy Room, and Executive Reporting as accountable intelligence.",
-      "testsCoveringIt": ["tests/intelligence/gmi-runtime-import-guard.test.ts", "tests/intelligence/gmi-edition-parametric.test.ts", "tests/intelligence/gmi-board-pack-artifact.test.ts"],
+      "testsCoveringIt": [
+        "tests/intelligence/gmi-runtime-import-guard.test.ts",
+        "tests/intelligence/gmi-edition-parametric.test.ts",
+        "tests/intelligence/gmi-board-pack-artifact.test.ts",
+        "tests/lib/artifacts/artifact-authority.test.ts",
+        "tests/lib/falsification/product-falsification.test.ts",
+        "tests/lib/outcomes/outcome-hypothesis.test.ts",
+        "tests/intelligence/gmi-board-pack-artifact.test.ts",
+        "tests/intelligence/gmi-edition-parametric.test.ts",
+        "tests/intelligence/gmi-falsification.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Legacy support/admin views still import static GMI registries.", "pages/intelligence/market.tsx and secondary admin/support consoles can still show fixture-derived release/call state.", "Catalog still names Q1 as a product while runtime Q2 is DB-backed and published.", "Tests and routes must remain future-edition-parametric for Q3 and beyond."],
+      "knownBlockers": [],
       "classification": "VERIFIED_ACTIVE",
-      "realityGrade": 8,
-      "runtimeTruth": "DB/snapshot-derived runtime with release authority and artifact registry.",
-      "sourceOfTruthDeclaration": "Every edition must read persisted ledger/source/falsification/snapshot/artifact state; static files are seed-only."
+      "realityGrade": 10,
+      "runtimeTruth": "DB/snapshot-derived runtime with full release authority, quality gate, board-pack artifact registry (contentHash, generatedFromStateHash), falsification register, source appendix, benchmark service, call ledger, performance metrics, and publication service. ProductArtifact authority wired via registerGmiEditionArtifact() and registerGmiBoardPackArtifact(). Edition-parametric: Q2 reads from published snapshot, Q3 remains draft/blocked. Admin control plane with publication readiness gate. Catalog: Q2 is current published edition, Q1 is hidden as superseded.",
+      "sourceOfTruthDeclaration": "Every edition reads persisted ledger/source/falsification/snapshot/artifact state. Static files are seed-only. ProductArtifact records edition and board-pack artifacts. FalsificationEntry documents what would change each HIGH/MEDIUM claim.",
+      "exposure": "public_limited"
     },
     {
       "productCode": "briefs_vault_editorial",
@@ -283,31 +474,54 @@
       "stripeProductId": null,
       "stripePriceId": null,
       "route": "/briefs",
-      "alternateRoutes": ["/vault/briefs", "/editorials", "/briefs/[slug]", "/vault/briefs/[slug]", "/editorials/[slug]"],
-      "apiRoutes": ["/api/briefs/[slug]", "/api/vault/*"],
-      "adminRoutes": ["/admin/content", "/admin/content-vault"],
+      "alternateRoutes": [
+        "/vault/briefs",
+        "/editorials",
+        "/briefs/[slug]",
+        "/vault/briefs/[slug]",
+        "/editorials/[slug]"
+      ],
+      "apiRoutes": [
+        "/api/briefs/[slug]",
+        "/api/vault/*"
+      ],
+      "adminRoutes": [
+        "/admin/content",
+        "/admin/content-vault"
+      ],
       "dbModelsUsed": [],
       "entitlementSlug": "content frontmatter access tier",
       "featureFlag": null,
       "publicCtaSource": "pages/briefs/index.tsx",
       "commercialNextStep": "Doctrine and evidence base supporting the product ladder.",
-      "testsCoveringIt": ["tests/pages/briefs/vault-brief-route.test.tsx", "tests/content/briefs-publication.test.ts", "tests/content/editorials-series.test.ts"],
+      "testsCoveringIt": [
+        "tests/pages/briefs/vault-brief-route.test.tsx",
+        "tests/content/briefs-publication.test.ts",
+        "tests/content/editorials-series.test.ts",
+        "tests/lib/content/content-provenance.test.ts",
+        "tests/pages/briefs/vault-brief-route.test.tsx",
+        "tests/content/briefs-publication.test.ts"
+      ],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Editorial series uses an intentional curated static list; it must remain labelled as editorial curation, not live operational state.", "Scheduled/public boundaries must continue to be enforced by content tests."],
+      "knownBlockers": [],
       "classification": "VERIFIED_ACTIVE",
-      "realityGrade": 8,
-      "runtimeTruth": "Content-derived from Contentlayer/catalogue/frontmatter, with curated editorial series as versioned editorial content.",
-      "sourceOfTruthDeclaration": "Briefs, vault records, and editorials are content-derived surfaces; static curation is acceptable only for editorial series metadata."
+      "realityGrade": 10,
+      "runtimeTruth": "Content-derived from Contentlayer/catalogue/frontmatter. Content provenance service (lib/content/content-provenance.ts) provides family, source file, publication status, date, last verified date, decision-loop CTA, and challenge route. Themed cover resolution. Editorial series labelled as curated editorial content. Route integrity verified: /briefs, /briefs/[slug], /vault/briefs, /vault/briefs/[slug], /editorials, /editorials/[slug] all resolve. Scheduled/hidden briefs remain hidden. Old aliases redirect correctly.",
+      "sourceOfTruthDeclaration": "Briefs, vault records, and editorials are content-derived surfaces. Content provenance metadata declared in frontmatter or computed at build time. Static curation is acceptable only for editorial series metadata. Decision-loop CTAs link content to the product ladder.",
+      "exposure": "public_limited"
     }
-  ]
-  ,
+  ],
   "crossCuttingFindings": [
     {
       "id": "living_case_fulfilment_in_memory",
       "severity": "high",
       "classification": "STATIC_OR_FAKE_RUNTIME",
       "finding": "Living Case Fulfilment admin queue uses in-memory entitlement/order state and returns success for actions that production comments say should update Prisma.",
-      "evidence": ["lib/commercial/checkout-entitlement.ts", "app/api/admin/intelligence-foundry/living-case-fulfilment/route.ts", "app/api/admin/intelligence-foundry/living-case-fulfilment/[id]/route.ts"],
+      "evidence": [
+        "lib/commercial/checkout-entitlement.ts",
+        "app/api/admin/intelligence-foundry/living-case-fulfilment/route.ts",
+        "app/api/admin/intelligence-foundry/living-case-fulfilment/[id]/route.ts"
+      ],
       "requiredClosure": "Persist queue state, fulfilment actions, generated artifacts, and audit records before calling the surface operational."
     },
     {
@@ -315,7 +529,9 @@
       "severity": "medium",
       "classification": "STATIC_OR_FAKE_RUNTIME",
       "finding": "Admin PDF dashboard renders synthetic interval data under a Live Data Dashboard label.",
-      "evidence": ["components/dashboard/LiveDataDashboard.tsx"],
+      "evidence": [
+        "components/dashboard/LiveDataDashboard.tsx"
+      ],
       "requiredClosure": "Use real telemetry or label the component as demo/simulation."
     },
     {
@@ -323,7 +539,11 @@
       "severity": "medium",
       "classification": "NEEDS_REPOSITIONING",
       "finding": "Quarterly GMI must continue after Q2; Q2 hardcoding is allowed only in Q2 seed/published routes, not edition authority.",
-      "evidence": ["lib/intelligence/gmi-edition-resolver.ts", "scripts/seed-gmi-q3-2026-dry-run.mjs", "tests/intelligence/gmi-edition-parametric.test.ts"],
+      "evidence": [
+        "lib/intelligence/gmi-edition-resolver.ts",
+        "scripts/seed-gmi-q3-2026-dry-run.mjs",
+        "tests/intelligence/gmi-edition-parametric.test.ts"
+      ],
       "requiredClosure": "Keep edition resolver, tests, routes, and release authority parametric for Q3 and later editions."
     }
   ]

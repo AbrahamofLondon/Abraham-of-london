@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-algorithm-03
 provider: x
@@ -20,12 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-The algorithm was built by engineers optimising for engagement.
-
-The target was set by product managers answering to growth metrics.
-
-The decision not to change it was made by executives answering to the board.
-
-The board answered to shareholders who wanted the engagement metrics.
-
-No single hand. Every hand.
+The algorithm was built by engineers optimising for engagement. The target was set by product managers answering to growth metrics. The decision not to change it was made by executives answering to the board.

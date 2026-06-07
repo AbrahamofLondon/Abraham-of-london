@@ -157,14 +157,16 @@ const report = {
 
 // ─── Authority dimension fail-below check ─────────────────────────────────────
 
+// Updated 2026-06-07: decision_instruments 9/10 (1 FAIL: commercial catalog duplication)
+// retainer_oversight 9/10 (0 FAIL: all dims PASS, 1 PARTIAL: evidence_input automation)
 const AUTHORITY_DIMENSION_SCORES = {
   decision_pressure_signal: { FAIL: 1, PARTIAL: 3 },
-  boardroom_brief:          { FAIL: 1, PARTIAL: 3 },
+  boardroom_brief:          { FAIL: 0, PARTIAL: 2 },   // market_authority PARTIAL (smoke gate)
   strategy_room:            { FAIL: 0, PARTIAL: 1 },
   executive_reporting:      { FAIL: 0, PARTIAL: 1 },
-  decision_instruments:     { FAIL: 4, PARTIAL: 2 },
+  decision_instruments:     { FAIL: 1, PARTIAL: 1 },   // commercial FAIL; market_authority PARTIAL
   professional:             { FAIL: 0, PARTIAL: 1 },
-  retainer_oversight:       { FAIL: 1, PARTIAL: 4 },
+  retainer_oversight:       { FAIL: 0, PARTIAL: 1 },   // evidence_input PARTIAL (threshold automation)
   inner_circle:             { FAIL: 0, PARTIAL: 4 },
   gmi_quarterly:            { FAIL: 0, PARTIAL: 2 },
   briefs_vault_editorial:   { FAIL: 0, PARTIAL: 1 },

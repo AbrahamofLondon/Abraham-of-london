@@ -17,6 +17,7 @@ import {
   hashArtifact,
   BoardroomDeliveryAuthorityError,
 } from "@/lib/boardroom/boardroom-brief-authority";
+import { createPaidRuntimeArtifact } from "@/lib/artifacts/paid-product-runtime";
 import { classifyCondition, createCaseObject } from "@/lib/decision/case-object";
 import { forecastDefaultPath } from "@/lib/decision/default-path-forecast";
 import type { IntelligenceSpine } from "@/lib/decision/intelligence-spine";
@@ -86,13 +87,15 @@ export async function POST(request: NextRequest) {
   // ── Step 2: Determine sourceType from order context ──────────────────────────
   // Prefer ER_BOARDROOM_BRIDGE_RUN when a handoff exists, DIAGNOSTIC_RUN when a diagnostic exists,
   // and EXECUTIVE_REPORT as the baseline for paid orders without either.
-  const sourceType = order.handoffId
+  const sourceType = order.spineId
+    ? "EXECUTIVE_REPORT"
+    : order.handoffId
     ? "ER_BOARDROOM_BRIDGE_RUN"
     : order.diagnosticId
     ? "DIAGNOSTIC_RUN"
     : "EXECUTIVE_REPORT";
 
-  const spineId = order.handoffId ?? order.diagnosticId ?? order.id;
+  const spineId = order.spineId ?? order.handoffId ?? order.diagnosticId ?? order.id;
 
   // ── Step 3: Authority gate — NO FIXTURE DATA MAY PASS THIS POINT ────────────
   let inputSnapshotHash: string | null = null;
@@ -148,8 +151,8 @@ export async function POST(request: NextRequest) {
       artifactHash: null, // computed below after generation
     });
 
-    // Compute artifactHash from the generated dossier record and back-fill it
-    const artifactHash = hashArtifact({
+    // Compute artifactHash from the generated dossier record and back-fill it.
+    const artifactPayload = {
       id: record.id,
       title: record.title,
       sections: record.sections,
@@ -157,16 +160,80 @@ export async function POST(request: NextRequest) {
       sourceType: record.sourceType,
       orderId: record.orderId,
       generatedAt: record.createdAt,
-    });
+    };
+    const artifactHash = hashArtifact(artifactPayload);
 
     await prisma.boardroomDossier.update({
       where: { id: record.id },
       data: { artifactHash },
     });
 
+    const runtime = await createPaidRuntimeArtifact({
+      productCode: "boardroom_brief",
+      sourceEntityType: "BRIEF_ORDER",
+      sourceEntityId: order.id,
+      userId: order.userId,
+      userEmail: order.email,
+      inputSnapshot: {
+        orderId: order.id,
+        email: order.email,
+        sourceType,
+        handoffId: order.handoffId ?? null,
+        diagnosticId: order.diagnosticId ?? null,
+        paymentStatus: order.paymentStatus,
+      },
+      evidenceRefs: [
+        {
+          sourceId: spineId,
+          sourceType,
+          label: "Verified Boardroom Brief paid delivery spine",
+        },
+        {
+          sourceId: record.id,
+          sourceType: "BoardroomDossier",
+          label: "Persisted Boardroom Dossier record",
+        },
+      ],
+      artifactContent: JSON.stringify(artifactPayload),
+      downloadUrl: `/boardroom/dossier/${record.id}`,
+      publicSafeSummary: "Boardroom Brief dossier generated from a paid order.",
+      generatedBy: auth.email ?? "admin",
+      falsification: [
+        {
+          claimOrRecommendation:
+            "The Boardroom Brief identifies the primary decision exposure and the next admissible move.",
+          confidenceLevel: "HIGH",
+          whatWouldChangeThisView:
+            "The client provides evidence that the actual blocker, owner, or decision constraint differs from the paid order and dossier spine.",
+          observableIndicator:
+            "Client confirmation, board feedback, or Return Brief outcome contradicts the dossier's primary exposure.",
+          threshold:
+            "Material contradiction affecting owner, exposure, or recommended next move.",
+          strongestCounterargument:
+            "The order metadata may be incomplete relative to the full board context.",
+          responseToCounterargument:
+            "The dossier is explicitly tied to the paid order spine and must be amended if the Return Brief or client evidence overturns it.",
+        },
+      ],
+      outcomeHypothesis: {
+        predictedDecisionMove:
+          "Client uses the Boardroom Brief to take or document a position on the primary exposure.",
+        expectedObservableChange:
+          "A board, executive, or owner-level decision is recorded within the review window.",
+      },
+    });
+
     return NextResponse.json({
       ok: true,
       dossier: { ...record, artifactHash },
+      artifact: {
+        artifactId: runtime.artifact.artifactId,
+        inputSnapshotHash: runtime.artifact.inputSnapshotHash,
+        artifactHash: runtime.artifact.artifactHash,
+        deliveryStatus: runtime.artifact.deliveryStatus,
+        outcomeHypothesisId: runtime.outcomeHypothesis.hypothesisId,
+        falsificationEntryIds: runtime.falsificationEntries.map((entry) => entry.id),
+      },
       provenance: {
         orderId: order.id,
         sourceType,
@@ -190,7 +257,7 @@ export async function POST(request: NextRequest) {
  * This is not a fixture — it is constructed from real DB-sourced order data.
  * When the IntelligenceSpine DB table is available, replace with a prisma lookup.
  */
-function buildSpineFromOrder(
+export function buildSpineFromOrder(
   order: {
     id: string;
     email: string;

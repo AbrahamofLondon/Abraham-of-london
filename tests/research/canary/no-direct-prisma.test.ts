@@ -33,6 +33,7 @@ const APPROVED_PRISMA_CONSUMERS = new Set([
   path.join(PROJECT_ROOT, "lib", "research", "research-run-repository.ts"),
   path.join(PROJECT_ROOT, "lib", "research", "finding-repository.ts"),
   path.join(PROJECT_ROOT, "lib", "research", "action-brief-exporter.ts"),
+  path.join(PROJECT_ROOT, "lib", "research", "brief-order-repository.ts"),
 ]);
 
 const FOUNDRY_ROUTE_DIR = path.join(PROJECT_ROOT, "app", "api", "admin", "intelligence-foundry");

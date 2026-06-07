@@ -1,4 +1,5 @@
 ---
+
 type: XOutbound
 id: ttif-x-dt-napoleon-05
 provider: x
@@ -20,11 +21,4 @@ themes:
   - the-truth-in-the-frame
 ---
 
-David and Goya asked the same technical question: how do I show what happened?
-
-They asked different ethical questions.
-
-David: what does the patron need this to look like?
-Goya: what did I see?
-
-Both produced technically accomplished paintings. Only one produced a record.
+David and Goya asked the same technical question: how do I show what happened? They asked different ethical questions. David: what does the patron need this to look like? Goya: what did I see? Both produced technically accomplished paintings.
