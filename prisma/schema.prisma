@@ -914,6 +914,7 @@ model GmiReleaseSnapshot {
   blockersJson          Json     @map("blockers_json")
   warningsJson          Json     @map("warnings_json")
   blockerCategoriesJson Json     @map("blocker_categories_json")
+  stateJson             Json?    @map("state_json")
   createdBy             String?  @map("created_by")
   publishedBy           String?  @map("published_by")
   publishedAt           DateTime? @map("published_at")
@@ -922,6 +923,31 @@ model GmiReleaseSnapshot {
   @@index([editionId])
   @@index([createdAt])
   @@map("gmi_release_snapshots")
+}
+
+model GmiBoardPackArtifact {
+  id                     String   @id @default(cuid())
+  editionId              String   @map("edition_id")
+  snapshotId             String?  @map("snapshot_id")
+  artifactType           String   @map("artifact_type")
+  fileName               String   @map("file_name")
+  storagePath            String?  @map("storage_path")
+  publicUrl              String?  @map("public_url")
+  contentHash            String   @map("content_hash")
+  generatedFromStateHash String   @map("generated_from_state_hash")
+  generatedAt            DateTime @map("generated_at")
+  generatedBy            String?  @map("generated_by")
+  status                 String   @default("generated")
+  errorMessage           String?  @map("error_message")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  @@index([editionId])
+  @@index([snapshotId])
+  @@index([artifactType])
+  @@index([status])
+  @@index([generatedAt])
+  @@map("gmi_board_pack_artifacts")
 }
 
 /// GMI Source Appendix Row — persisted source evidence for edition claims.
@@ -976,6 +1002,75 @@ model GmiAmendment {
   @@index([editionId])
   @@index([entityType, entityId])
   @@map("gmi_amendments")
+}
+
+// ============================================================================
+// GMI FUTURE-CAPABILITY FOUNDATION — Benchmark, Scenario, Alert
+// ============================================================================
+
+/// GMI Competitive Benchmark Entry — links external consensus/benchmark to a call or edition.
+/// Public benchmark claims are gated on at least one real row existing (see canShowBenchmarkClaims).
+model GmiBenchmarkEntry {
+  id                 String   @id @default(cuid())
+  editionId          String   @map("edition_id")
+  callId             String?  @map("call_id")
+  benchmarkType      String   @map("benchmark_type")
+  providerName       String   @map("provider_name")
+  benchmarkStatement String   @map("benchmark_statement")
+  benchmarkValue     String?  @map("benchmark_value")
+  actualValue        String?  @map("actual_value")
+  gmiValue           String?  @map("gmi_value")
+  evaluationWindow   String   @map("evaluation_window")
+  resultSummary      String?  @map("result_summary")
+  sourceReference    String   @map("source_reference")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@index([editionId])
+  @@index([callId])
+  @@map("gmi_benchmark_entries")
+}
+
+/// GMI Scenario Model — structured scenario with variables, assumptions, and decision implications.
+/// Requires methodNote if probabilistic language is used. Explorer UI is feature-flagged off.
+model GmiScenarioModel {
+  id                       String   @id @default(cuid())
+  editionId                String   @map("edition_id")
+  scenarioId               String   @map("scenario_id")
+  title                    String
+  description              String
+  variablesJson            String   @map("variables_json")
+  assumptionsJson          String   @map("assumptions_json")
+  decisionImplicationsJson String   @map("decision_implications_json")
+  falsificationRuleIds     String   @map("falsification_rule_ids")
+  methodNote               String?  @map("method_note")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  @@unique([editionId, scenarioId])
+  @@index([editionId])
+  @@map("gmi_scenario_models")
+}
+
+/// GMI Alert Rule — defines conditions and delivery modes for future alerting.
+/// Only dashboard_only delivery is active. email_future and webhook_future are disabled.
+model GmiAlertRule {
+  id                        String    @id @default(cuid())
+  editionId                 String    @map("edition_id")
+  linkedCallId              String?   @map("linked_call_id")
+  linkedFalsificationRuleId String?   @map("linked_falsification_rule_id")
+  alertType                 String    @map("alert_type")
+  triggerCondition          String    @map("trigger_condition")
+  severity                  String    @default("medium")
+  status                    String    @default("draft")
+  deliveryMode              String    @default("dashboard_only") @map("delivery_mode")
+  lastEvaluatedAt           DateTime? @map("last_evaluated_at")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
+
+  @@index([editionId])
+  @@index([linkedCallId])
+  @@map("gmi_alert_rules")
 }
 
 model InnerCircleEmailEventLog {
@@ -5014,4 +5109,76 @@ model RetainerReviewQueueEntry {
   @@index([orgId])
   @@index([status])
   @@index([readinessStatus])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION INSTRUMENT RUN
+// Authority model for governed instrument execution and delivery.
+// Each paid instrument run must persist result, entitlement, artifact state,
+// and next-route recommendation. No run should continue if persistence fails.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DecisionInstrumentRun {
+  id                  String    @id @default(cuid())
+  instrumentSlug      String                                  // e.g. "decision-exposure-instrument"
+  userId              String?                                 // null for anonymous (should be blocked by entitlement gate)
+  userEmail           String?
+  entitlementSlug     String                                  // catalog entitlement slug verified before run
+  entitlementVerified Boolean   @default(false)               // true once entitlement check passed
+  inputSnapshotHash   String?                                 // SHA-256 of input JSON at run start
+  status              String    @default("STARTED")           // STARTED | COMPLETED | FAILED | ABANDONED
+  scoreJson           Json?                                   // final scored result
+  artifactState       String    @default("NONE")              // NONE | GENERATING | READY | ERROR
+  artifactUrl         String?                                 // URL to generated PDF artifact
+  artifactHash        String?                                 // SHA-256 of artifact content
+  nextRouteSlug       String?                                 // recommended next product route
+  runDurationMs       Int?                                    // how long the run took
+  errorMessage        String?                                 // set if status=FAILED
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  completedAt         DateTime?
+
+  @@index([instrumentSlug])
+  @@index([userId])
+  @@index([userEmail])
+  @@index([status])
+  @@index([entitlementSlug])
+  @@index([createdAt])
+  @@map("decision_instrument_runs")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OVERSIGHT REVIEW CYCLE
+// Monthly/periodic oversight record for Retainer Oversight product.
+// Each cycle persists review state, interventions, drift, and client status.
+// Required before Retainer Oversight can move to public_active exposure.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model OversightReviewCycle {
+  id                  String    @id @default(cuid())
+  contractId          String                                  // links to RetainerContract
+  cycleNumber         Int                                     // sequential cycle number within contract
+  periodStart         DateTime
+  periodEnd           DateTime
+  status              String    @default("OPEN")              // OPEN | UNDER_REVIEW | COMPLETED | SKIPPED
+  reviewedBy          String?                                 // reviewer email/name
+  reviewedAt          DateTime?
+  driftScore          Float?                                  // governance drift score 0–1
+  driftCategory       String?                                 // NONE | LOW | MODERATE | HIGH | CRITICAL
+  clientHealthStatus  String    @default("UNKNOWN")           // HEALTHY | WATCH | DETERIORATING | CRITICAL | UNKNOWN
+  interventionCount   Int       @default(0)
+  interventionLog     Json      @default("[]")                // array of InterventionLogEntry
+  outcomeSummary      String?
+  clientNotes         String?
+  internalNotes       String?
+  nextCycleDate       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@unique([contractId, cycleNumber])
+  @@index([contractId])
+  @@index([status])
+  @@index([periodStart])
+  @@index([clientHealthStatus])
+  @@map("oversight_review_cycles")
 }
