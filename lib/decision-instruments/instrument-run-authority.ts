@@ -16,6 +16,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { resolveCanonicalEntitlement } from '@/lib/commercial/entitlement-authority'
 import crypto from 'node:crypto'
 
 // ─── Known instrument slugs ───────────────────────────────────────────────────
@@ -42,10 +43,11 @@ export const INSTRUMENT_ENTITLEMENTS: Record<string, string> = {
 
 export interface InstrumentRunStartInput {
   instrumentSlug: string
-  userId?: string
-  userEmail?: string
+  userId?: string | null
+  userEmail?: string | null
   entitlementSlug: string
   inputObject?: unknown
+  tier?: string | null
 }
 
 export interface InstrumentRunRecord {
@@ -81,6 +83,10 @@ export class InstrumentRunPersistenceError extends Error {
 export function hashRunInput(input: unknown): string {
   const json = JSON.stringify(input)
   return crypto.createHash('sha256').update(json).digest('hex')
+}
+
+export function entitlementSlugForInstrument(instrumentSlug: string): string | null {
+  return INSTRUMENT_ENTITLEMENTS[instrumentSlug] ?? null
 }
 
 // ─── Entitlement verification ─────────────────────────────────────────────────
@@ -143,6 +149,20 @@ export async function startInstrumentRun(
   input: InstrumentRunStartInput,
 ): Promise<InstrumentRunRecord> {
   verifyInstrumentEntitlement(input)
+
+  const entitlement = await resolveCanonicalEntitlement({
+    userId: input.userId ?? null,
+    email: input.userEmail ?? null,
+    slug: input.entitlementSlug,
+    tier: input.tier ?? null,
+  })
+
+  if (!entitlement.granted || !entitlement.verified) {
+    throw new InstrumentEntitlementError(
+      input.instrumentSlug,
+      `no verified active entitlement found for "${input.entitlementSlug}"`,
+    )
+  }
 
   const inputSnapshotHash = input.inputObject != null ? hashRunInput(input.inputObject) : null
 
@@ -235,6 +255,19 @@ export async function recordArtifact(
       artifactState: 'READY',
       artifactUrl: artifact.artifactUrl,
       artifactHash: artifact.artifactHash,
+    },
+  })
+}
+
+/**
+ * Mark artifact generation as failed.
+ */
+export async function failArtifactGeneration(runId: string, errorMessage: string): Promise<void> {
+  await prisma.decisionInstrumentRun.update({
+    where: { id: runId },
+    data: {
+      artifactState: 'ERROR',
+      errorMessage,
     },
   })
 }

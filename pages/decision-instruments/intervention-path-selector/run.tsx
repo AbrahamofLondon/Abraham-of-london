@@ -16,7 +16,7 @@ const InterventionPathRun: NextPage = () => {
     try {
       const res = await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "intervention-path-selector", version: r.version, result: r }) });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -24,7 +24,7 @@ const InterventionPathRun: NextPage = () => {
   const nextHref = resultKey ? `${nextDest}?instrumentResultId=${encodeURIComponent(resultKey)}` : nextDest;
 
   return (
-    <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=intervention-path-selector" nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter governed execution" : "Analyse institutional consequence"} nextStepHref={nextHref}
+    <InstrumentShell title="Intervention Path Selector" slug="intervention-path-selector" completed={!!result} pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=intervention-path-selector&runId=${encodeURIComponent(resultKey)}` : undefined} nextStepLabel={result?.recommendedPath === "ESCALATE" ? "Enter governed execution" : "Analyse institutional consequence"} nextStepHref={nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("intervention-path-selector", null, result.executionBlocked ? "BLOCKED" : result.recommendedPath, result.rationale[0] ?? result.recommendedPath) : undefined}
       valueReceipt={result ? [
         { label: "Recommended path", value: result.recommendedPath.replace(/_/g, " ").toLowerCase() },

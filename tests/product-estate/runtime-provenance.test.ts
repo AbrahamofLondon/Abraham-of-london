@@ -7,7 +7,7 @@ describe('runtime provenance audit', () => {
     const staticRisks = audit.crossCuttingFindings.filter((finding) => finding.classification === 'STATIC_OR_FAKE_RUNTIME')
     const ids = staticRisks.map((finding) => finding.id)
 
-    expect(ids).toContain('boardroom_fixture_dossier_generation')
+    expect(ids).not.toContain('boardroom_fixture_dossier_generation')
     expect(ids).toContain('living_case_fulfilment_in_memory')
     expect(ids).toContain('fake_live_dashboard')
   })

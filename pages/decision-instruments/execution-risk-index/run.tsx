@@ -22,7 +22,7 @@ const ExecutionRiskRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "execution-risk-index", version: r.version, scores: r.dimensionScores, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -35,7 +35,7 @@ const ExecutionRiskRun: NextPage = () => {
       title="Execution Risk Index"
       slug="execution-risk-index"
       completed={!!result}
-      pdfHref="/api/downloads/instrument-pdf?slug=execution-risk-index"
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=execution-risk-index&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel={result?.riskBand === "CRITICAL" ? "Enter Strategy Room" : "Analyse institutional consequence"}
       nextStepHref={result?.riskBand === "CRITICAL" ? "/strategy-room" : nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("execution-risk-index", result.riskIndex, result.riskBand, result.recommendation) : undefined}

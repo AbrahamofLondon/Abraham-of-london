@@ -155,7 +155,7 @@ export const DIRECTORY_CLEAN_THRESHOLD = EXPOSURE_THRESHOLDS.PUBLIC_LIMITED_MIN
  */
 export const CURRENT_ESTATE_GRADES: Record<string, number> = {
   decision_pressure_signal: 6,
-  boardroom_brief: 7,
+  boardroom_brief: 8,
   strategy_room: 8,
   executive_reporting: 8,
   decision_instruments: 6,

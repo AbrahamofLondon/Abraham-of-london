@@ -16,14 +16,14 @@ const MandateClarityRun: NextPage = () => {
     try {
       const res = await fetch("/api/decision-instruments/results", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instrumentSlug: "mandate-clarity-framework", version: r.version, scores: r.blockScores, result: r }) });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
   const nextHref = resultKey ? `/diagnostics/constitutional-diagnostic?instrumentResultId=${encodeURIComponent(resultKey)}` : "/diagnostics/constitutional-diagnostic";
 
   return (
-    <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref="/api/downloads/instrument-pdf?slug=mandate-clarity-framework" nextStepLabel="Test the organisational structure" nextStepHref={nextHref}
+    <InstrumentShell title="Mandate Clarity Framework" slug="mandate-clarity-framework" completed={!!result} pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=mandate-clarity-framework&runId=${encodeURIComponent(resultKey)}` : undefined} nextStepLabel="Test the organisational structure" nextStepHref={nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("mandate-clarity-framework", result.clarityScore, result.authorityType, result.recommendation) : undefined}
       valueReceipt={result ? [
         { label: "Authority type", value: `${result.authorityType} — ${result.clarityScore}/100` },

@@ -22,7 +22,7 @@ const EscalationReadinessRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "escalation-readiness-scorecard", version: r.version, scores: r.dimensionScores, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -35,7 +35,7 @@ const EscalationReadinessRun: NextPage = () => {
       title="Escalation Readiness Scorecard"
       slug="escalation-readiness-scorecard"
       completed={!!result}
-      pdfHref="/api/downloads/instrument-pdf?slug=escalation-readiness-scorecard"
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=escalation-readiness-scorecard&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel={result?.recommendedEscalation === "STRATEGY_ROOM" ? "Enter Strategy Room" : "Analyse institutional consequence"}
       nextStepHref={result?.recommendedEscalation === "STRATEGY_ROOM" ? "/strategy-room" : nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("escalation-readiness-scorecard", result.readinessScore, result.readinessBand, result.recommendation) : undefined}

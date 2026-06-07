@@ -135,7 +135,6 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
-    pdfHref: "/api/downloads/instrument-pdf?slug=decision-exposure-instrument",
   },
   "mandate-clarity-framework": {
     slug: "mandate-clarity-framework",
@@ -197,7 +196,6 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Executive Reporting · ${getProductDisplayPrice("executive_reporting")}`,
       href: "/diagnostics/executive-reporting",
     },
-    pdfHref: "/api/downloads/instrument-pdf?slug=mandate-clarity-framework",
   },
   "intervention-path-selector": {
     slug: "intervention-path-selector",
@@ -259,7 +257,6 @@ const INSTRUMENT_DATA: Record<string, InstrumentData> = {
       cta: `Strategy Room · ${getProductDisplayPrice("strategy_room")}`,
       href: "/strategy-room",
     },
-    pdfHref: "/api/downloads/instrument-pdf?slug=intervention-path-selector",
   },
 
   // ═══ TIER 1A — NEW INSTRUMENTS ═══════════════════════════════════════════
@@ -1081,17 +1078,12 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
                   Run decision instrument
                   <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
-                {instrument.pdfHref && (
-                  <a
-                    href={instrument.pdfHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 mt-2"
-                    style={{ padding: "8px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}
-                  >
-                    Download PDF worksheet
-                  </a>
-                )}
+                <div
+                  className="flex items-center gap-2 mt-2"
+                  style={{ padding: "8px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}
+                >
+                  PDF dossier unlocks after saved run
+                </div>
               </div>
             </div>
           ) : (

@@ -99,12 +99,12 @@
       "featureFlag": null,
       "publicCtaSource": "pages/boardroom-brief.tsx",
       "commercialNextStep": "Paid diagnosis, then qualified escalation into Strategy Room.",
-      "testsCoveringIt": ["tests/product/boardroom-first-brief.test.ts", "tests/product/paid-dossier-fulfilment-proof.spec.ts"],
+      "testsCoveringIt": ["tests/product/boardroom-first-brief.test.ts", "tests/product/paid-dossier-fulfilment-proof.spec.ts", "tests/product-estate/boardroom-delivery-route.test.ts"],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["Public preview is generated in-page before checkout.", "Admin boardroom delivery generation imports lib/boardroom/boardroom-dev-spine.ts and can persist BoardroomDossier rows from fixture state.", "Paid deliverable preview and durable delivery artifact need clearer separation."],
+      "knownBlockers": ["Real paid Boardroom Brief delivery smoke has not passed in the configured environment because no paid BoardroomBriefOrder rows exist.", "Public preview is generated in-page before checkout and must remain separate from paid delivery output."],
       "classification": "ACTIVE_BUT_UNVERIFIED",
-      "realityGrade": 7,
-      "runtimeTruth": "Mixed persisted order/dossier state and generated preview state.",
+      "realityGrade": 8,
+      "runtimeTruth": "Paid delivery generation is DB-derived from BoardroomBriefOrder and persists dossier provenance hashes; public_active promotion is blocked until paid smoke passes.",
       "sourceOfTruthDeclaration": "Orders, delivery state, dossier artifacts, hashes, and customer confirmation must be durable database/audit records."
     },
     {
@@ -165,18 +165,18 @@
       "route": "/decision-instruments",
       "alternateRoutes": ["/decision-instruments/[slug]", "/decision-instruments/[slug]/run"],
       "apiRoutes": ["/api/decision-instruments/results", "/api/downloads/instrument-pdf"],
-      "adminRoutes": [],
-      "dbModelsUsed": ["DiagnosticJourney"],
+      "adminRoutes": ["/admin/decision-instrument-runs"],
+      "dbModelsUsed": ["DecisionInstrumentRun", "DiagnosticJourney"],
       "entitlementSlug": "instrument-specific catalog entitlements",
       "featureFlag": null,
       "publicCtaSource": "pages/decision-instruments/index.tsx",
       "commercialNextStep": "Support Strategy Room by producing persistent run records and next recommended product.",
-      "testsCoveringIt": ["tests/product/governed-instruments-surfacing.test.ts", "tests/product/diagnostic-journey-store.test.ts"],
+      "testsCoveringIt": ["tests/product/governed-instruments-surfacing.test.ts", "tests/product/diagnostic-journey-store.test.ts", "tests/decision-instruments/instrument-run-authority.test.ts"],
       "productionSmokeStatus": "NEEDS_MANUAL_CHECK",
-      "knownBlockers": ["No dedicated instrument run authority model.", "Instrument PDF route states no entitlement check.", "Some start pages say purchase is confirmed without entitlement verification.", "Some runs persist without user identity or fall back to weak Date.now identifiers.", "Some runs continue when persistence fails.", "Decision instrument price/catalog truth is duplicated across CATALOG, PRODUCT_ESTATE, product-catalogue-registry, and local page arrays."],
+      "knownBlockers": ["Decision instrument price/catalog truth is duplicated across CATALOG, PRODUCT_ESTATE, product-catalogue-registry, and local page arrays.", "Full browser smoke with a real entitlement remains pending."],
       "classification": "ACTIVE_BUT_UNVERIFIED",
-      "realityGrade": 6,
-      "runtimeTruth": "Partly DB-derived through DiagnosticJourney; delivery authority incomplete.",
+      "realityGrade": 8,
+      "runtimeTruth": "Run authority is DB-derived through DecisionInstrumentRun; DiagnosticJourney remains a compatibility projection.",
       "sourceOfTruthDeclaration": "Each instrument run must persist score/result, entitlement, artifact state, and next-route recommendation."
     },
     {
@@ -302,14 +302,6 @@
   ]
   ,
   "crossCuttingFindings": [
-    {
-      "id": "boardroom_fixture_dossier_generation",
-      "severity": "high",
-      "classification": "STATIC_OR_FAKE_RUNTIME",
-      "finding": "Boardroom delivery generation can persist a durable BoardroomDossier from the production-stub QUALIFYING_SPINE fixture.",
-      "evidence": ["app/api/admin/boardroom-delivery/generate/route.ts", "lib/boardroom/boardroom-dev-spine.ts", "lib/boardroom/boardroom-dossier-service.ts"],
-      "requiredClosure": "Generate boardroom delivery artifacts only from persisted order/input state and record artifact hashes/audit events."
-    },
     {
       "id": "living_case_fulfilment_in_memory",
       "severity": "high",

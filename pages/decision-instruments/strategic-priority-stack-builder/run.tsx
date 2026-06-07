@@ -22,7 +22,7 @@ const PriorityStackRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "strategic-priority-stack-builder", version: r.version, scores: { stack: r.stack.map((s) => ({ label: s.label, score: s.compositeScore })) }, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -35,7 +35,7 @@ const PriorityStackRun: NextPage = () => {
       title="Strategic Priority Stack Builder"
       slug="strategic-priority-stack-builder"
       completed={!!result}
-      pdfHref="/api/downloads/instrument-pdf?slug=strategic-priority-stack-builder"
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=strategic-priority-stack-builder&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("strategic-priority-stack-builder", null, result.resourcePressureBand, result.recommendation) : undefined}

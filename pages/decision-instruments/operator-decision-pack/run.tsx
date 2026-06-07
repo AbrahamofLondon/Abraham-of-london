@@ -37,7 +37,7 @@ const OperatorPackRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "operator-decision-pack", version: "1.0", result: { exposure, mandate, intervention: r, generatedAt: new Date().toISOString() } }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -64,7 +64,7 @@ const OperatorPackRun: NextPage = () => {
     : undefined;
 
   return (
-    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref} valueReceipt={packReceipt} signalAuthority={packSignalAuthority}>
+    <InstrumentShell title="Operator Decision Pack" slug="operator-decision-pack" completed={complete} pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=operator-decision-pack&runId=${encodeURIComponent(resultKey)}` : undefined} nextStepLabel="Enter Strategy Room" nextStepHref={nextHref} valueReceipt={packReceipt} signalAuthority={packSignalAuthority}>
       {/* Progress */}
       <div className="flex gap-1 mb-6">
         {(["exposure", "mandate", "intervention", "dossier"] as Stage[]).map((s, i) => (

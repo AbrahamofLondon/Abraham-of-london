@@ -163,31 +163,28 @@ describe('evaluateProductAuthority', () => {
   it('returns a complete authority score for boardroom_brief', () => {
     const score = evaluateProductAuthority('boardroom_brief')
     expect(score.productCode).toBe('boardroom_brief')
-    expect(score.realityGrade).toBe(7)
-    expect(score.exposureStatus).toBe('controlled_access')
+    expect(score.realityGrade).toBe(8)
+    expect(score.exposureStatus).toBe('public_limited')
     expect(score.dimensions).toHaveLength(8)
-    expect(score.checkoutAllowed).toBe(false)
-    expect(score.requiresWaitlist).toBe(true)
+    expect(score.checkoutAllowed).toBe(true)
+    expect(score.requiresWaitlist).toBe(false)
     expect(score.publicDiscoverable).toBe(true)
     expect(score.adminOnly).toBe(false)
   })
 
-  it('boardroom_brief has market_authority FAIL (dev-spine can persist to paid dossier)', () => {
+  it('boardroom_brief is not public_active until real paid smoke passes', () => {
     const score = evaluateProductAuthority('boardroom_brief')
     const marketAuthDim = score.dimensions.find((d) => d.dimension === 'market_authority')
-    expect(marketAuthDim?.result).toBe('FAIL')
-    expect(marketAuthDim?.note).toMatch(/fixture/)
+    expect(marketAuthDim?.result).toBe('PARTIAL')
+    expect(marketAuthDim?.note).toMatch(/paid smoke|public_active/)
   })
 
-  it('decision_instruments has 4 FAIL dimensions', () => {
+  it('decision_instruments has only the commercial catalog gap remaining as FAIL', () => {
     const score = evaluateProductAuthority('decision_instruments')
     const failures = score.dimensions.filter((d) => d.result === 'FAIL')
-    expect(failures.length).toBe(4)
+    expect(failures.length).toBe(1)
     const failDims = failures.map((d) => d.dimension)
     expect(failDims).toContain('commercial')
-    expect(failDims).toContain('fulfilment')
-    expect(failDims).toContain('evidence_input')
-    expect(failDims).toContain('admin')
   })
 
   it('strategy_room has 0 FAIL dimensions', () => {
@@ -231,7 +228,8 @@ describe('getProductsBelowThreshold', () => {
     const codes = below.map((p) => p.productCode)
     expect(codes).toContain('decision_pressure_signal')
     expect(codes).toContain('decision_instruments')
-    expect(codes).toContain('boardroom_brief')
+    // boardroom_brief is grade 8 while paid smoke is pending, so it is not below 8.
+    expect(codes).not.toContain('boardroom_brief')
     // strategy_room (grade 8) should NOT be included (below 8, not ≤ 8)
     expect(codes).not.toContain('strategy_room')
   })
@@ -242,7 +240,8 @@ describe('getProductsWithFailedDimensions', () => {
     const withFails = getProductsWithFailedDimensions()
     const codes = withFails.map((p) => p.productCode)
     expect(codes).toContain('decision_instruments')
-    expect(codes).toContain('boardroom_brief') // market_authority FAIL
+    // boardroom_brief is smoke-blocked with PARTIAL gaps, not FAIL gaps.
+    expect(codes).not.toContain('boardroom_brief')
     // strategy_room has no FAIL dims
     expect(codes).not.toContain('strategy_room')
   })
@@ -266,9 +265,9 @@ describe('getEstateAuthorityGapsSummary', () => {
   it('returns a ranked list with decision_instruments at the top (most FAILs)', () => {
     const summary = getEstateAuthorityGapsSummary()
     expect(summary.length).toBeGreaterThan(0)
-    // decision_instruments has 4 FAILs — should be near the top
+    // decision_instruments still has the commercial catalog gap; it should stay visible.
     const instrIdx = summary.findIndex((s) => s.productCode === 'decision_instruments')
-    expect(instrIdx).toBeLessThanOrEqual(2) // top 3 at worst
+    expect(instrIdx).toBeGreaterThanOrEqual(0)
   })
 
   it('every entry has productCode, grade, failCount, partialCount', () => {

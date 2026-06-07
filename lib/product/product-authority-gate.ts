@@ -95,13 +95,13 @@ export const PRODUCT_DIMENSION_SCORES: Record<string, Record<AuthorityDimension,
 
   boardroom_brief: {
     route:            { result: 'PASS',    note: '/boardroom-brief is canonical; sample route is a query param variant, not a conflict' },
-    runtime_truth:    { result: 'PARTIAL', note: 'Admin delivery imports boardroom-dev-spine.ts fixture — fixture state can persist into paid BoardroomDossier rows' },
+    runtime_truth:    { result: 'PASS',    note: 'Admin delivery route now loads real BoardroomBriefOrder from DB; QUALIFYING_SPINE import removed; assertPaidDeliveryAuthorised() enforces fixture ban' },
     commercial:       { result: 'PASS',    note: '£99 price consistent in catalog, estate, and checkout CTA' },
-    fulfilment:       { result: 'PARTIAL', note: 'BoardroomDossier model exists; no artifact hash or delivery state machine enforced' },
-    evidence_input:   { result: 'PARTIAL', note: 'No input snapshot hash; paid delivery does not assert fixture-free input' },
+    fulfilment:       { result: 'PARTIAL', note: 'BoardroomDossier persists inputSnapshotHash + artifactHash; real paid delivery smoke has not passed in the configured environment' },
+    evidence_input:   { result: 'PASS',    note: 'inputSnapshotHash computed and persisted before generation; assertPaidDeliveryAuthorised() rejects all fixture/sample/synthetic input' },
     admin:            { result: 'PASS',    note: '/admin/boardroom-delivery exists with order queue and delivery controls' },
-    test:             { result: 'PARTIAL', note: 'boardroom-first-brief.test.ts exists; no test asserting dev-spine is rejected in paid path' },
-    market_authority: { result: 'FAIL',    note: 'Paid delivery can produce a BoardroomDossier from fixture data (boardroom-dev-spine.ts QUALIFYING_SPINE)' },
+    test:             { result: 'PARTIAL', note: 'boardroom-delivery-route.test.ts covers fixture rejection, sourceType enforcement, state machine, and hash stability; real paid smoke still requires a paid BoardroomBriefOrder' },
+    market_authority: { result: 'PARTIAL', note: 'Paid delivery route requires paymentStatus=paid + real orderId and bans fixture input; promote to public_active only after real paid smoke passes' },
   },
 
   strategy_room: {
@@ -128,13 +128,13 @@ export const PRODUCT_DIMENSION_SCORES: Record<string, Record<AuthorityDimension,
 
   decision_instruments: {
     route:            { result: 'PASS',    note: '/decision-instruments/[slug] is canonical' },
-    runtime_truth:    { result: 'PARTIAL', note: 'DiagnosticJourney used but no dedicated InstrumentRun authority model exists' },
+    runtime_truth:    { result: 'PASS',    note: 'DecisionInstrumentRun is the run authority model; DiagnosticJourney is retained as legacy compatibility output only' },
     commercial:       { result: 'FAIL',    note: 'Price/catalog truth duplicated across CATALOG, PRODUCT_ESTATE, product-catalogue-registry, and local page arrays' },
-    fulfilment:       { result: 'FAIL',    note: 'No InstrumentRun model; runs may not persist score/result/artifact state with user identity' },
-    evidence_input:   { result: 'FAIL',    note: 'Instrument PDF route has no entitlement check; purchase confirmed without verification' },
-    admin:            { result: 'FAIL',    note: 'No admin view of instrument runs or delivery status' },
-    test:             { result: 'PARTIAL', note: 'governed-instruments-surfacing.test.ts exists; no run persistence or entitlement coverage' },
-    market_authority: { result: 'PARTIAL', note: 'Instruments produce scored results; some runs use Date.now() identifiers' },
+    fulfilment:       { result: 'PASS',    note: '/api/decision-instruments/results starts and completes DecisionInstrumentRun records with score/result/artifact state' },
+    evidence_input:   { result: 'PASS',    note: 'startInstrumentRun() verifies instrument entitlement before execution; PDF downloads require runId + entitlement match' },
+    admin:            { result: 'PASS',    note: '/admin/decision-instrument-runs lists run status, entitlement, scores, and artifact state' },
+    test:             { result: 'PARTIAL', note: 'instrument-run-authority.test.ts and route source guards cover authority wiring; full browser entitlement smoke remains pending' },
+    market_authority: { result: 'PASS',    note: 'Runs use persisted DecisionInstrumentRun IDs; Date.now() fallback removed from the production result route' },
   },
 
   professional: {

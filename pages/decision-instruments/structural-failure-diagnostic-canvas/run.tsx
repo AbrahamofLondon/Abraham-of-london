@@ -22,7 +22,7 @@ const StructuralFailureRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "structural-failure-diagnostic-canvas", version: r.version, scores: r.dimensionScores, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -35,7 +35,7 @@ const StructuralFailureRun: NextPage = () => {
       title="Structural Failure Diagnostic Canvas"
       slug="structural-failure-diagnostic-canvas"
       completed={!!result}
-      pdfHref="/api/downloads/instrument-pdf?slug=structural-failure-diagnostic-canvas"
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=structural-failure-diagnostic-canvas&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel="Select intervention path"
       nextStepHref={nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("structural-failure-diagnostic-canvas", result.healthScore, result.failurePattern, result.recommendation) : undefined}

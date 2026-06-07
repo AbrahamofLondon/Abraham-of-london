@@ -10,28 +10,28 @@ const BoardBriefRun: NextPage = () => {
   const [result, setResult] = React.useState<BoardBriefResult | null>(null);
   const [resultKey, setResultKey] = React.useState<string | null>(null);
 
-  React.useEffect(() => { track("instrument_started", { instrumentSlug: "board-brief-template" }); }, []);
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "board-brief-builder" }); }, []);
 
   async function handleComplete(r: BoardBriefResult) {
     setResult(r);
-    track("instrument_result_saved", { instrumentSlug: "board-brief-template", decisionState: r.briefReadiness });
+    track("instrument_result_saved", { instrumentSlug: "board-brief-builder", decisionState: r.briefReadiness });
     try {
       const res = await fetch("/api/decision-instruments/results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instrumentSlug: "board-brief-template", version: r.version, scores: { readiness: r.readinessScore, posture: r.decisionPosture }, result: r }),
+        body: JSON.stringify({ instrumentSlug: "board-brief-builder", version: r.version, scores: { readiness: r.readinessScore, posture: r.decisionPosture }, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
   return (
     <InstrumentShell
       title="Board Brief Builder"
-      slug="board-brief-template"
+      slug="board-brief-builder"
       completed={!!result}
-      pdfHref={resultKey ? `/api/pdf/decision-instrument-dossier?slug=board-brief-template&resultKey=${resultKey}` : undefined}
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=board-brief-builder&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel="View boardroom archive"
       nextStepHref="/boardroom"
       signalAuthority={result ? buildInstrumentSignalAuthority("board-brief-builder", result.readinessScore, result.briefReadiness, result.boardroomReadinessSignal) : undefined}

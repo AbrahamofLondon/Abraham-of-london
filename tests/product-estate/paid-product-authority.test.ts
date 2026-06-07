@@ -25,16 +25,16 @@ describe('paid product authority coverage', () => {
     const boardroom = audit.products.find((item) => item.productCode === 'boardroom_brief')
     const instruments = audit.products.find((item) => item.productCode === 'decision_instruments')
 
-    expect(boardroom?.knownBlockers.join(' ')).toContain('fixture state')
-    expect(instruments?.knownBlockers.join(' ')).toContain('No dedicated instrument run authority model')
-    expect(instruments?.knownBlockers.join(' ')).toContain('no entitlement check')
+    expect(boardroom?.knownBlockers.join(' ')).toContain('paid BoardroomBriefOrder')
+    expect(instruments?.knownBlockers.join(' ')).toContain('price/catalog truth is duplicated')
+    expect(instruments?.knownBlockers.join(' ')).toContain('browser smoke')
   })
 
   it('active paid products expose admin visibility or an explicit exception', () => {
     for (const code of paidProductCodes) {
       const product = audit.products.find((item) => item.productCode === code)
       const hasAdminSurface = Boolean(product?.adminRoutes.length)
-      const hasKnownException = code === 'decision_instruments' && product?.knownBlockers.join(' ').includes('No dedicated instrument run authority model')
+      const hasKnownException = false
 
       expect(hasAdminSurface || hasKnownException, `${code}: missing admin visibility`).toBe(true)
     }

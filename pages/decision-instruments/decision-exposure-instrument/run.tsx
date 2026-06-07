@@ -22,7 +22,7 @@ const DecisionExposureRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "decision-exposure-instrument", version: r.version, scores: r.dimensionScores, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -35,7 +35,7 @@ const DecisionExposureRun: NextPage = () => {
       title="Decision Exposure Instrument"
       slug="decision-exposure-instrument"
       completed={!!result}
-      pdfHref="/api/downloads/instrument-pdf?slug=decision-exposure-instrument"
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=decision-exposure-instrument&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel="Analyse institutional consequence"
       nextStepHref={nextHref}
       signalAuthority={result ? buildInstrumentSignalAuthority("decision-exposure-instrument", result.exposureScore, result.exposureBand, result.recommendation) : undefined}

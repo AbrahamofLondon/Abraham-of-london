@@ -22,7 +22,7 @@ const GovernanceDriftRun: NextPage = () => {
         body: JSON.stringify({ instrumentSlug: "governance-drift-detector", version: r.version, scores: r.dimensionScores, result: r }),
       });
       const data = await res.json();
-      if (data.journeyKey) setResultKey(data.journeyKey);
+      if (data.runId) setResultKey(data.runId);
     } catch (err) { console.error("[instrument] Result persist failed:", err); }
   }
 
@@ -31,7 +31,7 @@ const GovernanceDriftRun: NextPage = () => {
       title="Governance Drift Detector"
       slug="governance-drift-detector"
       completed={!!result}
-      pdfHref="/api/downloads/instrument-pdf?slug=governance-drift-detector"
+      pdfHref={resultKey ? `/api/downloads/instrument-pdf?slug=governance-drift-detector&runId=${encodeURIComponent(resultKey)}` : undefined}
       nextStepLabel={result?.driftBand === "CRITICAL" ? "Review retained oversight" : "View oversight command"}
       nextStepHref={result?.driftBand === "CRITICAL" ? "/engagements/retained-oversight" : "/oversight"}
       signalAuthority={result ? buildInstrumentSignalAuthority("governance-drift-detector", result.driftScore, result.driftBand, result.recommendation) : undefined}

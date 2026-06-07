@@ -35,6 +35,12 @@ export type DossierDeliveryRecord = {
   accessRevokedAt?: string;
   lastViewedAt?: string;
   viewCount: number;
+  // Provenance
+  sourceType: string;
+  isSample: boolean;
+  orderId?: string;
+  inputSnapshotHash?: string;
+  artifactHash?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -44,6 +50,12 @@ export type GenerateDossierInput = {
   generatedBy: string;
   clientEmail?: string;
   clientName?: string;
+  // Provenance — required for paid delivery; set by assertPaidDeliveryAuthorised()
+  sourceType?: string;
+  isSample?: boolean;
+  orderId?: string;
+  inputSnapshotHash?: string | null;
+  artifactHash?: string | null;
 };
 
 export type GrantAccessInput = {
@@ -79,6 +91,11 @@ export const BoardroomDossierService = {
         generatedById: input.generatedBy,
         clientEmail: input.clientEmail ?? null,
         clientName: input.clientName ?? null,
+        sourceType: input.sourceType ?? "MANUAL_SYNTHETIC_SAMPLE",
+        isSample: input.isSample ?? false,
+        orderId: input.orderId ?? null,
+        inputSnapshotHash: input.inputSnapshotHash ?? null,
+        artifactHash: input.artifactHash ?? null,
       },
     });
 
@@ -263,6 +280,11 @@ export const BoardroomDossierService = {
       accessRevokedAt: record.accessRevokedAt?.toISOString(),
       lastViewedAt: record.lastViewedAt?.toISOString(),
       viewCount: record.viewCount ?? 0,
+      sourceType: record.sourceType ?? "MANUAL_SYNTHETIC_SAMPLE",
+      isSample: record.isSample ?? false,
+      orderId: record.orderId ?? undefined,
+      inputSnapshotHash: record.inputSnapshotHash ?? undefined,
+      artifactHash: record.artifactHash ?? undefined,
       createdAt: record.createdAt.toISOString(),
       updatedAt: record.updatedAt.toISOString(),
     };
