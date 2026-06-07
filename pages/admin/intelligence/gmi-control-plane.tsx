@@ -6,9 +6,22 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminMetricCard } from "@/components/admin/AdminMetricCard";
 import { AdminStatusBadge } from "@/components/admin/AdminStatusBadge";
 import { requireAdminPage } from "@/lib/access/server";
-import { buildGmiControlPlane } from "@/lib/intelligence/gmi-control-plane";
+import { resolveGmiReleaseState } from "@/lib/intelligence/gmi-release-authority";
 
-type ControlPlane = ReturnType<typeof buildGmiControlPlane>;
+type MetricRecord = Record<string, string | number | boolean>;
+
+type ControlPlane = {
+  publicationReadiness: {
+    editionId: string;
+    publicationStatus: string;
+    callsPendingReviewCount: number;
+    releaseBlockingSourcesOpen: number;
+    falsificationThresholdsMissing: number;
+    finalVerdict: "READY" | "BLOCKED";
+    blockerReasons: string[];
+  };
+  sections: Array<[string, MetricRecord]>;
+};
 
 type Props = {
   controlPlane: ControlPlane;
@@ -18,7 +31,63 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const guard = await requireAdminPage<Props>(ctx);
   if (!guard.authorized) return guard.redirect as never;
 
-  return { props: { controlPlane: buildGmiControlPlane("GMI-Q2-2026") } };
+  const state = await resolveGmiReleaseState("GMI-Q2-2026");
+  return {
+    props: {
+      controlPlane: {
+        publicationReadiness: {
+          editionId: state.editionId,
+          publicationStatus: state.releaseStatus,
+          callsPendingReviewCount: state.metrics.unscoredCalls,
+          releaseBlockingSourcesOpen: state.metrics.releaseBlockingSourcesOpen,
+          falsificationThresholdsMissing: state.metrics.falsificationRulesMissing,
+          finalVerdict: state.canPublish ? "READY" : "BLOCKED",
+          blockerReasons: state.blockers.filter((blocker) => blocker.blocksPublication).map((blocker) => blocker.message),
+        },
+        sections: [
+          ["Call Ledger Integrity", {
+            totalCalls: state.metrics.totalCalls,
+            scoredCalls: state.metrics.reviewedCalls,
+            unscoredCalls: state.metrics.unscoredCalls,
+            carriedForwardCalls: state.metrics.carriedForwardCalls,
+            disconfirmedCalls: state.metrics.disconfirmedCalls,
+            lastLedgerMutationAt: state.metrics.lastLedgerMutationAt ?? "none",
+          }],
+          ["Source Appendix Integrity", {
+            releaseBlockingSourcesOpen: state.metrics.releaseBlockingSourcesOpen,
+            sourceMethodNotesMissing: state.metrics.sourceMethodNotesMissing,
+            sourceProvenance: state.provenance.sources.sourceType,
+            sourceRows: state.provenance.sources.recordCount,
+          }],
+          ["Falsification Integrity", {
+            activeTheses: state.provenance.falsificationRules.recordCount,
+            highConvictionTheses: state.metrics.highConvictionTheses,
+            falsificationThresholdsMissing: state.metrics.falsificationRulesMissing,
+            falsificationProvenance: state.provenance.falsificationRules.sourceType,
+          }],
+          ["Board Consequence Integrity", {
+            boardPulseComplete: state.metrics.boardPulseComplete,
+            boardPackPdfAvailable: state.metrics.boardPackPdfAvailable,
+            operatorBriefPublic: state.metrics.operatorBriefPublic,
+            boardProvenance: state.provenance.boardPulse.sourceType,
+          }],
+          ["Public Trust Surface", {
+            performancePageLive: state.metrics.performancePageLive,
+            redTeamIntakeLive: state.metrics.redTeamIntakeLive,
+            dataDerived: state.provenance.isDataDerived,
+            latestReleaseCheckAt: state.metrics.lastReleaseCheckAt,
+          }],
+          ["Release Snapshot / Provenance", {
+            callLedgerSource: state.provenance.calls.sourceType,
+            sourceAppendixSource: state.provenance.sources.sourceType,
+            falsificationSource: state.provenance.falsificationRules.sourceType,
+            boardPulseSource: state.provenance.boardPulse.sourceType,
+            performanceSource: state.provenance.performance.sourceType,
+          }],
+        ],
+      },
+    },
+  };
 };
 
 function metricEntries(record: Record<string, string | number | boolean>) {
@@ -78,18 +147,11 @@ export default function GmiControlPlanePage({
           </section>
         ) : null}
 
-        {[
-          ["Call Ledger Integrity", controlPlane.callLedgerIntegrity],
-          ["Source Appendix Integrity", controlPlane.sourceAppendixIntegrity],
-          ["Falsification Integrity", controlPlane.falsificationIntegrity],
-          ["Board Consequence Integrity", controlPlane.boardConsequenceIntegrity],
-          ["Public Trust Surface", controlPlane.publicTrustSurface],
-          ["Commercial Routing", controlPlane.commercialRouting],
-        ].map(([title, record]) => (
+        {controlPlane.sections.map(([title, record]) => (
           <section key={String(title)} className="border border-white/10 bg-zinc-950/70 p-6">
             <h2 className="font-serif text-xl text-white">{String(title)}</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {metricEntries(record as Record<string, string | number | boolean>).map((item) => (
+              {metricEntries(record).map((item) => (
                 <AdminMetricCard key={item.label} label={item.label} value={item.value} variant="inner" />
               ))}
             </div>

@@ -7,8 +7,8 @@ import Head from "next/head";
 import Link from "next/link";
 
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
-import { getPublicGmiCallLedger, type PublicGmiCallLedgerEntry } from "@/lib/intelligence/gmi-instrument";
-import { getCallsForReport } from "@/lib/intelligence/market-intelligence-call-ledger";
+import { getGmiCallLedger, toPublicCallLedgerEntry } from "@/lib/intelligence/gmi-data-service.server";
+import type { PublicGmiCallLedgerEntry } from "@/lib/intelligence/gmi-instrument";
 
 type Props = {
   calls: PublicGmiCallLedgerEntry[];
@@ -251,7 +251,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   if (!auth.ok) return { redirect: { ...auth.redirect, permanent: false } };
 
   const editionId = (ctx.query?.edition as string) || "GMI-Q2-2026";
-  const calls = getPublicGmiCallLedger();
+  const callsResult = await getGmiCallLedger(editionId);
+  const calls = callsResult.data.map(toPublicCallLedgerEntry);
 
   return {
     props: {

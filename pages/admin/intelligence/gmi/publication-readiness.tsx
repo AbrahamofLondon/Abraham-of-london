@@ -15,10 +15,15 @@ import {
   type GmiBlocker,
   type GmiReleaseSnapshot,
 } from "@/lib/intelligence/gmi-release-authority";
+import {
+  validateGmiBoardPackArtifact,
+  type GmiBoardPackArtifactValidation,
+} from "@/lib/intelligence/gmi-board-pack-artifact-service.server";
 
 type Props = {
   state: GmiReleaseState;
   latestSnapshot: GmiReleaseSnapshot | null;
+  boardPackArtifact: GmiBoardPackArtifactValidation;
   editionId: string;
 };
 
@@ -73,9 +78,10 @@ function categoryIcon(category: string) {
   return map[category] || "🔴";
 }
 
-const PublicationReadinessPage: NextPage<Props> = ({ state, latestSnapshot, editionId }) => {
+const PublicationReadinessPage: NextPage<Props> = ({ state, latestSnapshot, boardPackArtifact, editionId }) => {
   const [publishing, setPublishing] = React.useState(false);
   const [snapshotting, setSnapshotting] = React.useState(false);
+  const [generatingBoardPack, setGeneratingBoardPack] = React.useState(false);
   const [publishResult, setPublishResult] = React.useState<string | null>(null);
   const criticalBlockers = state.blockers.filter((b) => b.blocksPublication);
   const isReady = state.canPublish;
@@ -120,6 +126,28 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, latestSnapshot, edit
       setPublishResult(`Error: ${err.message}`);
     } finally {
       setSnapshotting(false);
+    }
+  };
+
+  const handleGenerateBoardPack = async () => {
+    setGeneratingBoardPack(true);
+    setPublishResult(null);
+    try {
+      const res = await fetch("/api/admin/intelligence/gmi/generate-board-pack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ editionId, artifactType: "board_pack_pdf" }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setPublishResult(`Board pack generated: ${data.artifact.id} (${data.artifact.contentHash.slice(0, 12)})`);
+      } else {
+        setPublishResult(`Board pack failed: ${data.error}`);
+      }
+    } catch (err: any) {
+      setPublishResult(`Error: ${err.message}`);
+    } finally {
+      setGeneratingBoardPack(false);
     }
   };
 
@@ -273,6 +301,55 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, latestSnapshot, edit
             </div>
           </div>
 
+          <div className="mt-8 border p-5" style={{ borderColor: state.blockerCategories.includes("PDF_EXPORT") ? "rgba(248,113,113,0.25)" : "rgba(110,231,183,0.22)", backgroundColor: "rgba(255,255,255,0.012)" }}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p style={{ ...mono, color: state.blockerCategories.includes("PDF_EXPORT") ? "#F87171" : "#6EE7B7", fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase" }}>
+                  Board Pack Artifact
+                </p>
+                <p className="mt-2 text-sm text-white/65">
+                  {boardPackArtifact.ok ? "Latest artifact is valid for current release state." : `Blocked: ${boardPackArtifact.reason ?? "NO_ARTIFACT"}`}
+                </p>
+                {boardPackArtifact.artifact ? (
+                  <div className="mt-3 grid gap-2 text-[8px] text-white/35 md:grid-cols-2" style={mono}>
+                    <p>Status: {boardPackArtifact.artifact.status}</p>
+                    <p>Generated: {new Date(boardPackArtifact.artifact.generatedAt).toLocaleString()}</p>
+                    <p>Content: {boardPackArtifact.artifact.contentHash.slice(0, 16)}</p>
+                    <p>State: {boardPackArtifact.artifact.generatedFromStateHash.slice(0, 16)}</p>
+                    <p>Artifact: {boardPackArtifact.artifact.id}</p>
+                    <p>File: {boardPackArtifact.artifact.fileName}</p>
+                  </div>
+                ) : (
+                  <p className="mt-3 font-mono text-[8px] text-white/30">No board-pack artifact recorded.</p>
+                )}
+                {!boardPackArtifact.ok && boardPackArtifact.artifact ? (
+                  <p className="mt-3 font-mono text-[8px] text-amber-300/70">
+                    Regenerate after state change. Current state hash: {boardPackArtifact.currentStateHash.slice(0, 16)}
+                  </p>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {boardPackArtifact.artifact?.publicUrl ? (
+                  <Link
+                    href={boardPackArtifact.artifact.publicUrl}
+                    className="border px-3 py-1.5 font-mono text-[7px] uppercase tracking-[0.14em] transition hover:bg-white/5"
+                    style={{ borderColor: RULE }}
+                  >
+                    Check PDF
+                  </Link>
+                ) : null}
+                <button
+                  onClick={handleGenerateBoardPack}
+                  disabled={generatingBoardPack}
+                  className="border px-4 py-2 font-mono text-[8px] uppercase tracking-[0.14em] transition hover:bg-white/5 disabled:opacity-40"
+                  style={{ borderColor: `${GOLD}44`, color: "white", backgroundColor: `${GOLD}14`, cursor: generatingBoardPack ? "not-allowed" : "pointer" }}
+                >
+                  {generatingBoardPack ? "Generating..." : "Generate Board Pack PDF"}
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Publish Action */}
           <div className="mt-8 border-t pt-6" style={{ borderTopColor: RULE }}>
             <div className="flex flex-wrap items-center gap-4">
@@ -295,10 +372,12 @@ const PublicationReadinessPage: NextPage<Props> = ({ state, latestSnapshot, edit
                     {snapshotting ? "Creating..." : "Generate Release Snapshot"}
                   </button>
                   <button
-                    className="border px-6 py-3 font-mono text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
-                    style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)" }}
+                    onClick={handleGenerateBoardPack}
+                    disabled={generatingBoardPack}
+                    className="border px-6 py-3 font-mono text-[9px] uppercase tracking-[0.15em] transition hover:-translate-y-0.5 disabled:opacity-40"
+                    style={{ borderColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)", cursor: generatingBoardPack ? "not-allowed" : "pointer" }}
                   >
-                    Generate Board Pack PDF
+                    {generatingBoardPack ? "Generating..." : "Generate Board Pack PDF"}
                   </button>
                 </>
               ) : (
@@ -471,13 +550,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   if (!auth.ok) return { redirect: { ...auth.redirect, permanent: false } };
 
   const editionId = (ctx.query?.edition as string) || "GMI-Q2-2026";
-  const state = resolveGmiReleaseState(editionId);
+  const state = await resolveGmiReleaseState(editionId);
   const latestSnapshot = await getLatestSnapshot(editionId);
+  const boardPackArtifact = await validateGmiBoardPackArtifact(editionId);
 
   return {
     props: {
       state: JSON.parse(JSON.stringify(state)),
       latestSnapshot: latestSnapshot ? JSON.parse(JSON.stringify(latestSnapshot)) : null,
+      boardPackArtifact: JSON.parse(JSON.stringify(boardPackArtifact)),
       editionId,
     },
   };

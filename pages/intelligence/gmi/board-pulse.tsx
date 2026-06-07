@@ -1,17 +1,84 @@
 import * as React from "react";
 import Link from "next/link";
-import type { NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
-import { buildGmiBoardPulse } from "@/lib/intelligence/gmi-control-plane";
+import {
+  getGmiBoardPulseData,
+  getGmiFalsificationRules,
+  getGmiPerformanceMetrics,
+  getGmiSourceAppendix,
+  type GmiDataProvenance,
+  type GmiPerformanceMetricsData,
+} from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-const pulse = buildGmiBoardPulse("GMI-Q2-2026");
+type Props = {
+  pulse: {
+    editionId: string;
+    currentThesis: string;
+    operatorConsequenceIndex: any[];
+    watchSignals: any[];
+    boardDecisions: any[];
+    decisionsToPrepareIn90Days: any[];
+    decisionsToDefer: any[];
+    topFalsificationRisk: any | null;
+    whatWouldChangeTheView: string;
+    performanceSnapshot: Pick<GmiPerformanceMetricsData, "totalCallsIssued" | "reviewedCallPercentage" | "confirmedCount" | "pendingCarryForwardCount" | "weakDisconfirmedCount">;
+    lastUpdatedTimestamp: string;
+    ctas: Array<{ label: string; href: string }>;
+  };
+  provenance: GmiDataProvenance;
+};
 
-const GmiBoardPulsePage: NextPage = () => {
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const [board, sources, falsification, performance] = await Promise.all([
+    getGmiBoardPulseData("GMI-Q2-2026"),
+    getGmiSourceAppendix("GMI-Q2-2026"),
+    getGmiFalsificationRules("GMI-Q2-2026"),
+    getGmiPerformanceMetrics("GMI-Q2-2026"),
+  ]);
+  const topRule = falsification.data[0] ?? null;
+  return {
+    props: {
+      pulse: {
+        editionId: "GMI-Q2-2026",
+        currentThesis: sources.data[0]?.claim ?? "Persisted GMI board pulse state is not yet populated.",
+        operatorConsequenceIndex: board.data?.operatorConsequenceIndex ?? [],
+        watchSignals: sources.data.slice(0, 3).map((row) => ({
+          signal: row.claim,
+          triggerThreshold: row.methodNote ?? row.observationWindow,
+        })),
+        boardDecisions: board.data?.decisionsToMakeIn30Days ?? [],
+        decisionsToPrepareIn90Days: board.data?.decisionsToPrepareIn90Days ?? [],
+        decisionsToDefer: board.data?.decisionsToDefer ?? [],
+        topFalsificationRisk: topRule,
+        whatWouldChangeTheView: topRule?.falsificationCondition ?? "No persisted falsification rule available.",
+        performanceSnapshot: {
+          totalCallsIssued: performance.data.totalCallsIssued,
+          reviewedCallPercentage: performance.data.reviewedCallPercentage,
+          confirmedCount: performance.data.confirmedCount,
+          pendingCarryForwardCount: performance.data.pendingCarryForwardCount,
+          weakDisconfirmedCount: performance.data.weakDisconfirmedCount,
+        },
+        lastUpdatedTimestamp: board.provenance.lastUpdatedAt ?? performance.data.lastLedgerUpdateTimestamp ?? "not available",
+        ctas: [
+          { label: "Read Operator Brief", href: "/intelligence/gmi/operator-brief" },
+          { label: "View Call Ledger", href: "/intelligence/gmi/calls" },
+          { label: "Get Boardroom Brief", href: "/boardroom-brief" },
+          { label: "Enter Strategy Room", href: "/strategy-room" },
+        ],
+      },
+      provenance: board.provenance,
+    },
+    revalidate: 1800,
+  };
+};
+
+const GmiBoardPulsePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ pulse, provenance }) => {
   return (
     <Layout
       title="GMI Board Pulse | Abraham of London"
@@ -32,14 +99,17 @@ const GmiBoardPulsePage: NextPage = () => {
             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-white/38" style={mono}>
               Last updated {pulse.lastUpdatedTimestamp}
             </p>
+            <p className="mt-3 text-xs leading-5 text-white/35">
+              Data source: {provenance.sourceName} ({provenance.sourceType}). Production safe: {provenance.isProductionSafe ? "yes" : "no"}.
+            </p>
           </header>
 
           <section className="grid gap-3 md:grid-cols-6">
             {pulse.operatorConsequenceIndex.map((item) => (
               <article key={item.dimension} className="border border-white/10 bg-white/[0.015] p-4">
-                <p className="text-[8px] uppercase tracking-[0.14em] text-white/34" style={mono}>{item.dimension}</p>
+                <p className="text-[8px] uppercase tracking-[0.14em] text-white/34" style={mono}>{item.dimension ?? item.label ?? "consequence"}</p>
                 <p className="mt-3 text-3xl font-light text-[#E6C98C]">{item.score}</p>
-                <p className="mt-2 text-xs leading-5 text-white/45">{item.decisionImplication}</p>
+                <p className="mt-2 text-xs leading-5 text-white/45">{item.decisionImplication ?? item.rationale}</p>
               </article>
             ))}
           </section>
@@ -58,7 +128,7 @@ const GmiBoardPulsePage: NextPage = () => {
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {pulse.boardDecisions.map((decision) => (
                   <div key={decision.decision} className="border border-white/8 bg-black/20 p-3">
-                    <p className="text-sm leading-6 text-white/65">{decision.decision}</p>
+                    <p className="text-sm leading-6 text-white/65">{decision.decision ?? String(decision)}</p>
                     <p className="mt-2 text-xs leading-5 text-white/38">{decision.suggestedOwner} · {decision.route}</p>
                   </div>
                 ))}

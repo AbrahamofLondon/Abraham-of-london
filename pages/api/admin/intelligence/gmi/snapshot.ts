@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/options";
-import { buildGmiReleaseSnapshot } from "@/lib/intelligence/gmi-release-authority";
+import { createAndPersistGmiReleaseSnapshot } from "@/lib/intelligence/gmi-release-authority";
 
 type Response = {
   ok: boolean;
@@ -29,9 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    const snapshot = buildGmiReleaseSnapshot(editionId, {
+    const snapshot = await createAndPersistGmiReleaseSnapshot(editionId, {
       createdBy: session.user.email,
-      persist: true,
     });
 
     return res.status(200).json({

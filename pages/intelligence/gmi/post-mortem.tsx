@@ -1,16 +1,29 @@
 import * as React from "react";
 import Link from "next/link";
-import type { NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
-import { buildGmiPerformanceCentre } from "@/lib/intelligence/gmi-control-plane";
+import { getGmiPerformanceMetrics, type GmiPerformanceMetricsData } from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
-const performance = buildGmiPerformanceCentre();
 
-const GmiPostMortemPage: NextPage = () => {
+type Props = {
+  performance: GmiPerformanceMetricsData;
+};
+
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const performance = await getGmiPerformanceMetrics("GMI-Q2-2026");
+  return {
+    props: {
+      performance: performance.data,
+    },
+    revalidate: 1800,
+  };
+};
+
+const GmiPostMortemPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ performance }) => {
   return (
     <Layout
       title="GMI Quarterly Post-Mortem | Abraham of London"

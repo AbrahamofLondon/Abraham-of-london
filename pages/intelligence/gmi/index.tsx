@@ -1,29 +1,49 @@
 /* pages/intelligence/gmi/index.tsx — GMI Home: Falsification-First Positioning */
 import * as React from "react";
 import Link from "next/link";
-import type { NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import Head from "next/head";
 
 import Layout from "@/components/Layout";
-import { GMI_METHODOLOGY } from "@/lib/intelligence/gmi-methodology";
-import { buildGmiOperatorDashboard, GMI_ESTATE_INTEGRATION_MAP } from "@/lib/intelligence/gmi-instrument";
-import { buildGmiFalsificationRegister } from "@/lib/intelligence/gmi-control-plane";
-import { getPublicGmiCallLedger } from "@/lib/intelligence/gmi-instrument";
+import { GMI_ESTATE_INTEGRATION_MAP } from "@/lib/intelligence/gmi-instrument";
+import {
+  getGmiCallLedger,
+  getGmiFalsificationRules,
+  getGmiPerformanceMetrics,
+  type GmiFalsificationRuleData,
+  type GmiPerformanceMetricsData,
+} from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const BLUE = "#7CB8E8";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-const dashboard = buildGmiOperatorDashboard("GMI-Q2-2026");
-const falsificationRules = buildGmiFalsificationRegister("GMI-Q2-2026");
-const calls = getPublicGmiCallLedger();
-const scoredCalls = calls.filter((c) => c.currentScore !== null);
-const avgScore = scoredCalls.length > 0
-  ? (scoredCalls.reduce((s, c) => s + (c.currentScore ?? 0), 0) / scoredCalls.length).toFixed(1)
-  : "—";
+type Props = {
+  falsificationRules: GmiFalsificationRuleData[];
+  performance: GmiPerformanceMetricsData;
+};
 
-const GmiHomePage: NextPage = () => {
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const [calls, falsification, performance] = await Promise.all([
+    getGmiCallLedger("GMI-Q2-2026"),
+    getGmiFalsificationRules("GMI-Q2-2026"),
+    getGmiPerformanceMetrics("GMI-Q2-2026"),
+  ]);
+  return {
+    props: {
+      falsificationRules: falsification.data,
+      performance: {
+        ...performance.data,
+        totalCallsIssued: calls.data.length,
+      },
+    },
+    revalidate: 1800,
+  };
+};
+
+const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ falsificationRules, performance }) => {
+  const avgScore = performance.averageScore === null ? "-" : performance.averageScore.toFixed(1);
   return (
     <Layout
       title="Global Market Intelligence | Abraham of London"
@@ -91,8 +111,8 @@ const GmiHomePage: NextPage = () => {
           {/* Metrics */}
           <div className="grid gap-4 md:grid-cols-4">
             {[
-              { label: "Calls registered", value: calls.length },
-              { label: "Scored", value: scoredCalls.length },
+              { label: "Calls registered", value: performance.totalCallsIssued },
+              { label: "Scored", value: performance.totalCallsReviewed },
               { label: "Average score", value: avgScore },
               { label: "Falsification rules", value: falsificationRules.length },
             ].map((m) => (

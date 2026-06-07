@@ -1,3 +1,9 @@
+// SEED ONLY / LEGACY COMPATIBILITY.
+// NOT RUNTIME SOURCE OF TRUTH. DO NOT IMPORT IN PUBLIC/API/ADMIN GMI RUNTIME.
+// Public and admin GMI operational state must read persisted database rows via
+// lib/intelligence/gmi-data-service.server.ts. These records are retained as
+// bootstrap seed inputs and historical test fixtures only.
+
 import type { MarketEvidenceClass } from "./market-intelligence-evidence-standard";
 
 export type GmiSourceRowStatus =

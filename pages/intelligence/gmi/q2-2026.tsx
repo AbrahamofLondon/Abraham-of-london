@@ -3,18 +3,112 @@ import Link from "next/link";
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
-import { buildGmiOperatorDashboard, type GmiOperatorDashboard } from "@/lib/intelligence/gmi-instrument";
+import {
+  getGmiBoardPulseData,
+  getGmiFalsificationRules,
+  getGmiPerformanceMetrics,
+  getGmiProvenanceState,
+  getGmiReleaseSnapshots,
+  getGmiSourceAppendix,
+} from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 type Props = {
-  dashboard: GmiOperatorDashboard;
+  dashboard: {
+    editionId: string;
+    boardPackHref: string;
+    callLedgerHref: string;
+    redTeamHref: string;
+    watchSignals: Array<{
+      signal: string;
+      evidencePosture: string;
+      currentStatus: string;
+      triggerThreshold: string;
+      actionIfTriggered: string;
+    }>;
+    boardDecisions: Array<{
+      decision: string;
+      timingCondition: string;
+      riskIfDelayed: string;
+      ownerFunction: string;
+      route: string;
+    }>;
+    scenarioProbabilities: Array<{ label: string; probability: number | string; methodNote: string }>;
+    falsificationThresholds: Array<{ threshold: string; observableSignal: string; reviewTiming: string }>;
+    provenance: Awaited<ReturnType<typeof getGmiProvenanceState>>["data"];
+    latestSnapshotId: string | null;
+    publicationState: string;
+    methodologyVersion: string;
+    rubricVersion: string;
+  };
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  return { props: { dashboard: buildGmiOperatorDashboard("GMI-Q2-2026") }, revalidate: 1800 };
+  const editionId = "GMI-Q2-2026";
+  const [board, sources, falsification, performance, provenance, snapshots] = await Promise.all([
+    getGmiBoardPulseData(editionId),
+    getGmiSourceAppendix(editionId),
+    getGmiFalsificationRules(editionId),
+    getGmiPerformanceMetrics(editionId),
+    getGmiProvenanceState(editionId),
+    getGmiReleaseSnapshots(editionId),
+  ]);
+  const publishedSnapshot = snapshots.data.find((snapshot) => snapshot.releaseStatus === "PUBLISHED" && snapshot.publishedAt);
+  const snapshotState = publishedSnapshot?.stateJson as any;
+  const sourceRows = Array.isArray(snapshotState?.sources) && snapshotState.sources.length > 0
+    ? snapshotState.sources
+    : sources.data;
+  const falsificationRows = Array.isArray(snapshotState?.falsificationRules) && snapshotState.falsificationRules.length > 0
+    ? snapshotState.falsificationRules
+    : falsification.data;
+  const boardState = snapshotState?.boardPulse ?? board.data;
+  const performanceState = snapshotState?.performance ?? performance.data;
+  const decisions = boardState?.decisionsToMakeIn30Days ?? [];
+  return {
+    props: {
+      dashboard: {
+        editionId,
+        boardPackHref: `/api/gmi/board-pack?edition=${editionId}&format=pdf`,
+        callLedgerHref: "/intelligence/gmi/calls",
+        redTeamHref: "/intelligence/gmi/red-team",
+        watchSignals: sourceRows.slice(0, 3).map((source: any) => ({
+          signal: source.claim,
+          evidencePosture: source.confidence,
+          currentStatus: source.status,
+          triggerThreshold: source.methodNote ?? source.observationWindow,
+          actionIfTriggered: source.adminJustification ?? "Review through Board Pulse cadence.",
+        })),
+        boardDecisions: decisions.map((decision: any) => ({
+          decision: String(decision.decision ?? decision),
+          timingCondition: String(decision.whyNow ?? "30-day decision window"),
+          riskIfDelayed: String(decision.riskIfDelayed ?? "Delay compounds decision exposure."),
+          ownerFunction: String(decision.suggestedOwner ?? "Board / Executive"),
+          route: String(decision.route ?? "prepare"),
+        })),
+        scenarioProbabilities: sourceRows
+          .filter((source: any) => source.evidenceClass === "SCENARIO_ASSUMPTION")
+          .map((source: any) => ({
+            label: source.claim,
+            probability: "labelled assumption",
+            methodNote: source.methodNote ?? source.confidenceBasis ?? "Scenario assumption requires public method note.",
+          })),
+        falsificationThresholds: falsificationRows.map((rule: any) => ({
+          threshold: rule.thresholdValue,
+          observableSignal: rule.observableIndicator,
+          reviewTiming: rule.nextReviewDue ?? "Not scheduled",
+        })),
+        provenance: provenance.data,
+        latestSnapshotId: publishedSnapshot?.id ?? snapshots.data[0]?.id ?? null,
+        publicationState: publishedSnapshot ? "published snapshot" : board.data?.publicationStatus ?? "draft",
+        methodologyVersion: performanceState.methodologyVersion,
+        rubricVersion: performanceState.rubricVersion,
+      },
+    },
+    revalidate: 1800,
+  };
 };
 
 const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ dashboard }) => {
@@ -36,8 +130,16 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
               The decision message in ten seconds.
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
-              This is the static operator interface generated from edition data. It states watch signals, board decisions, scenario assumptions, falsification thresholds, and the prior-call review posture before the full report is read.
+              Editorial framing is separated from persisted operational state. Watch signals, board decisions, falsification thresholds, and performance posture below are derived from the GMI database or clearly labelled scenario methodology.
             </p>
+            <p className="mt-3 text-xs leading-5 text-white/35">
+              Data source: persisted GMI ledger/source appendix/falsification register. Publication state: {dashboard.publicationState}. Snapshot: {dashboard.latestSnapshotId ?? "current draft"}. Methodology {dashboard.methodologyVersion}. Rubric {dashboard.rubricVersion}.
+            </p>
+            {!dashboard.provenance.isDataDerived ? (
+              <p className="mt-3 text-sm leading-6 text-amber-200/70">
+                Provenance warning: this edition is not production-publishable until all operational state is backed by persisted DB records.
+              </p>
+            ) : null}
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href={dashboard.boardPackHref} className="border border-[#C9A96E]/35 bg-[#C9A96E]/10 px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#E6C98C]" style={mono}>
                 Download board pack shell
@@ -118,4 +220,3 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
 };
 
 export default GmiQ2OperatorDashboardPage;
-

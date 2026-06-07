@@ -7,12 +7,23 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
-import { buildGmiControlPlane, buildGmiFalsificationRegister } from "@/lib/intelligence/gmi-control-plane";
-import { getPublicGmiCallLedger } from "@/lib/intelligence/gmi-instrument";
+import {
+  getGmiCallLedger,
+  getGmiFalsificationRules,
+  type GmiFalsificationRuleData,
+} from "@/lib/intelligence/gmi-data-service.server";
+import { resolveGmiReleaseState } from "@/lib/intelligence/gmi-release-authority";
 
 type Props = {
-  rules: ReturnType<typeof buildGmiFalsificationRegister>;
-  integrity: ReturnType<typeof buildGmiControlPlane>["falsificationIntegrity"];
+  rules: GmiFalsificationRuleData[];
+  integrity: {
+    activeTheses: number;
+    thesesWithFalsificationThresholds: number;
+    thesesMissingObservableTrigger: number;
+    thresholdsDueForReview: number;
+    falsificationTriggersCurrentlyBreached: number;
+    adminActionRequired: boolean;
+  };
   highConvictionCalls: Array<{ callId: string; thesis: string; hasRule: boolean }>;
   missingThresholdCount: number;
 };
@@ -154,23 +165,36 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const auth = await requireAdminPage(ctx);
   if (!auth.ok) return { redirect: { ...auth.redirect, permanent: false } };
 
-  const controlPlane = buildGmiControlPlane("GMI-Q2-2026");
-  const rules = buildGmiFalsificationRegister("GMI-Q2-2026");
-  const calls = getPublicGmiCallLedger();
-  const q1Calls = calls.filter((c) => c.editionId === "GMI-Q1-2026" && c.confidenceBand === "HIGH");
+  const editionId = (ctx.query?.edition as string) || "GMI-Q2-2026";
+  const [releaseState, rulesResult, callsResult] = await Promise.all([
+    resolveGmiReleaseState(editionId),
+    getGmiFalsificationRules(editionId),
+    getGmiCallLedger(editionId),
+  ]);
+  const rules = rulesResult.data;
+  const q1Calls = callsResult.data.filter((c) => c.editionId === "GMI-Q1-2026" && c.confidenceBand === "HIGH");
 
   const highConvictionCalls = q1Calls.map((call) => ({
     callId: call.callId,
-    thesis: call.thesis,
+    thesis: call.callStatement,
     hasRule: rules.some((r) => r.evidenceSourceRows.includes(call.callId)),
   }));
 
   const missingThresholdCount = highConvictionCalls.filter((c) => !c.hasRule).length;
+  const now = Date.now();
+  const integrity = {
+    activeTheses: rules.length,
+    thesesWithFalsificationThresholds: rules.filter((rule) => rule.thresholdValue.trim()).length,
+    thesesMissingObservableTrigger: rules.filter((rule) => !rule.observableIndicator.trim()).length,
+    thresholdsDueForReview: rules.filter((rule) => rule.nextReviewDue && new Date(rule.nextReviewDue).getTime() <= now).length,
+    falsificationTriggersCurrentlyBreached: rules.filter((rule) => rule.currentStatus === "breached").length,
+    adminActionRequired: releaseState.blockers.some((blocker) => blocker.category === "FALSIFICATION" && blocker.blocksPublication),
+  };
 
   return {
     props: {
       rules: JSON.parse(JSON.stringify(rules)),
-      integrity: controlPlane.falsificationIntegrity,
+      integrity,
       highConvictionCalls: JSON.parse(JSON.stringify(highConvictionCalls)),
       missingThresholdCount,
     },

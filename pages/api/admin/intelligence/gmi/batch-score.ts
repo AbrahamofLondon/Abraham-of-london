@@ -1,5 +1,6 @@
 /* pages/api/admin/intelligence/gmi/batch-score.ts — P0: Batch Call Scoring API */
 import type { NextApiRequest, NextApiResponse } from "next";
+import crypto from "node:crypto";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/options";
 
@@ -84,34 +85,61 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     let savedCount = 0;
 
     for (const update of validUpdates) {
-      // Update the ledger entry
+      const previousRows = await prisma.$queryRaw<Array<{ id: string; currentStatus: string | null; currentScore: number | null }>>`
+        SELECT "id", "current_status" AS "currentStatus", "current_score" AS "currentScore"
+        FROM "gmi_call_ledger_entries"
+        WHERE "call_id" = ${update.callId}
+        LIMIT 1
+      `;
+      const previous = previousRows[0];
+      if (!previous) {
+        validationErrors.push(`${update.callId}: Persisted call ledger row not found`);
+        if (mode !== "valid") break;
+        continue;
+      }
+
       await prisma.$executeRaw`
-        UPDATE gmi_call_ledger_entries
+        UPDATE "gmi_call_ledger_entries"
         SET
-          current_score = ${update.score},
-          current_status = ${update.status || "REVIEWED"},
-          evidence_summary = ${update.evidenceSummary || ""},
-          justification = ${update.justification || ""},
-          carry_forward_justification = ${update.carryForwardJustification},
-          next_review_due = ${update.nextReviewDue ? new Date(update.nextReviewDue) : null}::timestamptz,
-          last_reviewed_at = NOW(),
-          updated_at = NOW()
-        WHERE call_id = ${update.callId}
+          "current_score" = ${update.score},
+          "current_status" = ${update.status || "REVIEWED"},
+          "evidence_summary" = ${update.evidenceSummary || ""},
+          "justification" = ${update.justification || ""},
+          "carry_forward_justification" = ${update.carryForwardJustification},
+          "next_review_due" = ${update.nextReviewDue ? new Date(update.nextReviewDue) : null},
+          "last_reviewed_at" = NOW(),
+          "updated_at" = NOW()
+        WHERE "call_id" = ${update.callId}
       `;
 
-      // Write status history
       await prisma.$executeRaw`
-        INSERT INTO gmi_call_ledger_status_history (
-          id, ledger_entry_id, previous_status, new_status, changed_by, change_reason, created_at
+        INSERT INTO "gmi_call_ledger_status_history" (
+          "id",
+          "ledger_entry_id",
+          "call_id",
+          "previous_status",
+          "new_status",
+          "previous_score",
+          "new_score",
+          "evidence_summary",
+          "evidence_source_rows_json",
+          "justification",
+          "actor",
+          "request_id"
         )
         VALUES (
-          gen_random_uuid()::text,
-          (SELECT id FROM gmi_call_ledger_entries WHERE call_id = ${update.callId} LIMIT 1),
-          (SELECT current_status FROM gmi_call_ledger_entries WHERE call_id = ${update.callId} LIMIT 1),
+          ${`gmih_${crypto.randomUUID().replace(/-/g, "")}`},
+          ${previous.id},
+          ${update.callId},
+          ${previous.currentStatus},
           ${update.status || "REVIEWED"},
-          ${session.user.email},
+          ${previous.currentScore},
+          ${update.score},
+          ${update.evidenceSummary || ""},
+          ${JSON.stringify([])}::jsonb,
           ${`Scored ${update.score}: ${update.justification || update.evidenceSummary || ""}`},
-          NOW()
+          ${session.user.email},
+          ${req.headers["x-request-id"] ? String(req.headers["x-request-id"]) : null}
         )
       `;
 

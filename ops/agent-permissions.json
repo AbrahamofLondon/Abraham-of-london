@@ -1,0 +1,173 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "effective": "2026-06-07",
+    "project": "abraham-of-london",
+    "purpose": "Machine-readable agent permission matrix. Referenced by preflight script and agent briefs.",
+    "classification_values": [
+      "allowed",
+      "allowed_with_confirmation",
+      "manual_only",
+      "never_allowed",
+      "requires_secret_access",
+      "requires_browser_session"
+    ]
+  },
+
+  "git": {
+    "git.status": "allowed",
+    "git.diff": "allowed",
+    "git.log": "allowed",
+    "git.add.targeted": "allowed",
+    "git.add.all": "allowed_with_confirmation",
+    "git.commit": "allowed_with_confirmation",
+    "git.push.main": "allowed_with_confirmation",
+    "git.push.dry_run.main": "allowed",
+    "git.push.force": "never_allowed",
+    "git.reset.hard": "manual_only",
+    "git.rebase.interactive": "manual_only",
+    "git.branch.delete.protected": "never_allowed",
+    "git.tag.release": "allowed_with_confirmation"
+  },
+
+  "execution_readiness": {
+    "tool.path.check": "allowed",
+    "tool.path.powershell": "allowed",
+    "tool.path.pwsh": "allowed",
+    "tool.path.git": "allowed",
+    "tool.path.node": "allowed",
+    "tool.path.pnpm": "allowed",
+    "tool.path.prisma.via_pnpm_exec": "allowed",
+    "tool.path.gh.official_cli_check": "allowed",
+    "tool.path.winget": "allowed",
+    "tool.install.github_cli": "allowed_with_confirmation",
+    "agent.readiness.script": "allowed"
+  },
+
+  "prisma": {
+    "prisma.validate": "allowed",
+    "prisma.generate": "allowed",
+    "prisma.migrate.status": "allowed",
+    "prisma.migrate.dev": "allowed_with_confirmation",
+    "prisma.migrate.deploy": "allowed_with_confirmation",
+    "prisma.migrate.reset": "never_allowed",
+    "prisma.db.push": "allowed_with_confirmation",
+    "prisma.db.pull": "allowed_with_confirmation",
+    "prisma.db.seed": "allowed_with_confirmation",
+    "prisma.studio": "manual_only"
+  },
+
+  "pnpm": {
+    "pnpm.install": "allowed",
+    "pnpm.run.build": "allowed",
+    "pnpm.run.test": "allowed",
+    "pnpm.run.test.gmi": "allowed",
+    "pnpm.run.dev": "allowed",
+    "pnpm.run.seed.production": "allowed_with_confirmation",
+    "pnpm.run.lint": "allowed",
+    "pnpm.run.typecheck": "allowed",
+    "pnpm.publish": "manual_only",
+    "pnpm.add.package": "allowed_with_confirmation"
+  },
+
+  "vercel": {
+    "vercel.deploy.preview": "allowed",
+    "vercel.deploy.production": "allowed_with_confirmation",
+    "vercel.env.list": "allowed",
+    "vercel.env.add": "requires_browser_session",
+    "vercel.env.delete": "requires_browser_session",
+    "vercel.domain.add": "requires_browser_session",
+    "vercel.project.settings": "requires_browser_session",
+    "vercel.preview.deployments.disable": "manual_only",
+    "vercel.billing.update": "manual_only",
+    "vercel.team.invite": "manual_only"
+  },
+
+  "stripe": {
+    "stripe.webhook.create": "manual_only",
+    "stripe.webhook.delete": "manual_only",
+    "stripe.webhook.list": "requires_secret_access",
+    "stripe.product.create": "allowed_with_confirmation",
+    "stripe.price.create": "allowed_with_confirmation",
+    "stripe.payment.refund": "manual_only",
+    "stripe.payout.manual": "manual_only",
+    "stripe.billing.portal.configure": "requires_browser_session",
+    "stripe.dashboard.access": "requires_browser_session",
+    "stripe.api.key.read": "requires_secret_access",
+    "stripe.api.key.rotate": "manual_only"
+  },
+
+  "database": {
+    "db.query.read": "allowed",
+    "db.query.write.safe": "allowed_with_confirmation",
+    "db.query.write.bulk": "allowed_with_confirmation",
+    "db.schema.alter": "allowed_with_confirmation",
+    "db.seed.dry_run": "allowed",
+    "db.seed.dev": "allowed_with_confirmation",
+    "db.seed.production": "allowed_with_confirmation",
+    "db.drop.table": "never_allowed",
+    "db.truncate": "never_allowed",
+    "db.backup": "allowed",
+    "db.credentials.print": "never_allowed",
+    "db.connection.string.print": "never_allowed"
+  },
+
+  "environment": {
+    "env.read.public": "allowed",
+    "env.read.non_secret": "allowed",
+    "env.secret.read": "requires_secret_access",
+    "env.secret.print": "never_allowed",
+    "env.secret.log": "never_allowed",
+    "env.secret.write.local": "allowed_with_confirmation",
+    "env.secret.write.production": "manual_only",
+    "env.rotate.key": "manual_only"
+  },
+
+  "http": {
+    "public.http.smoke": "allowed",
+    "public.api.get": "allowed",
+    "admin.route.get": "allowed_with_confirmation",
+    "admin.route.post": "allowed_with_confirmation",
+    "external.paid.api": "manual_only",
+    "oauth.provider.call": "requires_browser_session"
+  },
+
+  "files": {
+    "file.read": "allowed",
+    "file.write.src": "allowed",
+    "file.write.config": "allowed_with_confirmation",
+    "file.write.env": "allowed_with_confirmation",
+    "file.delete.src": "allowed_with_confirmation",
+    "file.delete.critical": "manual_only",
+    "file.chmod": "allowed_with_confirmation"
+  },
+
+  "shell": {
+    "shell.bash.read_only": "allowed",
+    "shell.bash.write_files": "allowed",
+    "shell.bash.install_packages": "allowed_with_confirmation",
+    "shell.bash.service_restart": "allowed_with_confirmation",
+    "shell.powershell.execution_policy_change": "manual_only",
+    "shell.kill_process.node": "never_allowed",
+    "shell.kill_process.build": "never_allowed"
+  },
+
+  "auth": {
+    "github.auth.session": "requires_browser_session",
+    "github.auth.status": "allowed",
+    "github.auth.status.failure_when_git_push_works": "allowed",
+    "github.oauth.app.approve": "manual_only",
+    "github.protected.branch.bypass": "never_allowed",
+    "vercel.auth.session": "requires_browser_session",
+    "neon.dashboard.access": "requires_browser_session",
+    "stripe.auth.session": "requires_browser_session"
+  },
+
+  "payments": {
+    "payment.charge.execute": "never_allowed",
+    "payment.refund.execute": "manual_only",
+    "payment.payout.execute": "manual_only",
+    "payment.subscription.cancel": "manual_only",
+    "payment.price.update": "allowed_with_confirmation"
+  }
+}

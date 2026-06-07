@@ -35,14 +35,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   const validationErrors: string[] = [];
-  let savedCount = 0;
+  const validUpdates: SourceUpdate[] = [];
+  const { prisma } = await import("@/lib/prisma");
 
   for (const update of updates) {
     const { sourceRowId, status, methodNote, adminJustification } = update;
+    const rows = await prisma.$queryRaw<Array<{ evidenceClass: string; existingMethodNote: string | null }>>`
+      SELECT "evidence_class" AS "evidenceClass", "method_note" AS "existingMethodNote"
+      FROM "gmi_source_appendix_rows"
+      WHERE "id" = ${sourceRowId}
+      LIMIT 1
+    `;
+    const row = rows[0];
+    if (!row) {
+      validationErrors.push(`${sourceRowId}: Persisted source row not found`);
+      continue;
+    }
 
-    // modelled_estimate requires methodNote
-    if (status === "VERIFIED" && !methodNote?.trim()) {
-      validationErrors.push(`${sourceRowId}: Modelled estimate requires method note`);
+    const methodNoteValue = methodNote?.trim() || row.existingMethodNote || "";
+    if (
+      status === "VERIFIED" &&
+      (row.evidenceClass === "MODELLED_ESTIMATE" || row.evidenceClass === "SCENARIO_ASSUMPTION") &&
+      !methodNoteValue
+    ) {
+      validationErrors.push(`${sourceRowId}: ${row.evidenceClass} requires method note`);
       continue;
     }
 
@@ -52,21 +68,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       continue;
     }
 
-    savedCount++;
+    validUpdates.push(update);
   }
 
   try {
-    const { prisma } = await import("@/lib/prisma");
-
-    for (const update of updates) {
+    for (const update of validUpdates) {
       await prisma.$executeRaw`
-        UPDATE gmi_source_appendix_rows
+        UPDATE "gmi_source_appendix_rows"
         SET
-          status = ${update.status},
-          method_note = ${update.methodNote || null},
-          admin_justification = ${update.adminJustification || null},
-          updated_at = NOW()
-        WHERE id = ${update.sourceRowId}
+          "status" = ${update.status},
+          "method_note" = COALESCE(${update.methodNote || null}, "method_note"),
+          "admin_justification" = COALESCE(${update.adminJustification || null}, "admin_justification"),
+          "updated_at" = NOW()
+        WHERE "id" = ${update.sourceRowId}
       `;
     }
 
@@ -74,13 +88,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       action: "GMI_SOURCE_ROW_UPDATED",
       editionId,
       actor: session.user.email,
-      savedCount,
+      savedCount: validUpdates.length,
       errors: validationErrors,
     });
 
     return res.status(200).json({
       ok: true,
-      savedCount,
+      savedCount: validUpdates.length,
       errors: validationErrors.length > 0 ? validationErrors : undefined,
     });
   } catch (error) {

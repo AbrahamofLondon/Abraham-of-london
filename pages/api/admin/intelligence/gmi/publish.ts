@@ -4,13 +4,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/options";
-import { assertGmiEditionPublishable, buildGmiReleaseSnapshot } from "@/lib/intelligence/gmi-release-authority";
-import { buildGmiControlPlane } from "@/lib/intelligence/gmi-control-plane";
-import { getMarketIntelligenceRecord } from "@/lib/intelligence/market-intelligence-lifecycle";
+import { createGmiBoardPackArtifact, releaseSnapshotStateHash } from "@/lib/intelligence/gmi-board-pack-artifact-service.server";
+import { assertGmiEditionPublishable, createAndPersistGmiReleaseSnapshot, getLatestSnapshot } from "@/lib/intelligence/gmi-release-authority";
 
 type Response = {
   ok: boolean;
   snapshotId?: string;
+  artifactId?: string;
   status?: string;
   canPublish?: boolean;
   error?: string;
@@ -47,13 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   // 1. Resolve release state
-  const publishable = assertGmiEditionPublishable(editionId);
+  const publishable = await assertGmiEditionPublishable(editionId);
 
   if (!publishable.ok) {
     // Persist blocked snapshot — failed publish attempts are audit records
-    const blockedSnapshot = buildGmiReleaseSnapshot(editionId, {
+    const blockedSnapshot = await createAndPersistGmiReleaseSnapshot(editionId, {
       createdBy: session.user.email,
-      persist: true,
     });
 
     return res.status(409).json({
@@ -67,41 +66,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     // 2. Create and persist final release snapshot
-    const snapshot = buildGmiReleaseSnapshot(editionId, {
+    const snapshot = await createAndPersistGmiReleaseSnapshot(editionId, {
       createdBy: session.user.email,
       publishedBy: session.user.email,
-      persist: true,
+    });
+    const persistedSnapshot = await getLatestSnapshot(editionId);
+    if (!persistedSnapshot || persistedSnapshot.id !== snapshot.id) {
+      return res.status(500).json({ ok: false, error: "PERSISTED_SNAPSHOT_UNAVAILABLE" });
+    }
+    const artifact = await createGmiBoardPackArtifact({
+      editionId,
+      snapshotId: snapshot.id,
+      artifactType: "board_pack_pdf",
+      generatedBy: session.user.email,
+      generatedFromStateHash: releaseSnapshotStateHash(persistedSnapshot),
     });
 
-    // 3. Mark edition published via lifecycle record
+    // 3. Mark edition published via persisted governance state.
     const { prisma } = await import("@/lib/prisma");
-    const record = getMarketIntelligenceRecord(editionId);
-    if (record?.id) {
-      await prisma.$executeRaw`
-        UPDATE market_intelligence_records
-        SET lifecycle_state = 'PUBLISHED', updated_at = NOW()
-        WHERE id = ${record.id}
-      `;
-    }
-
-    // 4. Update governance state
     await prisma.$executeRaw`
-      UPDATE gmi_edition_governance_state
-      SET publication_status = 'published', updated_at = NOW()
-      WHERE edition_id = ${editionId}
+      UPDATE "gmi_edition_governance_state"
+      SET
+        "publication_status" = 'published',
+        "board_pack_generated_at" = ${new Date(artifact.generatedAt)},
+        "board_pulse_published_at" = COALESCE("board_pulse_published_at", NOW()),
+        "operator_brief_published_at" = COALESCE("operator_brief_published_at", NOW()),
+        "updated_at" = NOW()
+      WHERE "edition_id" = ${editionId}
     `;
 
-    // 5. Emit governance event
+    // 4. Emit governance event
     console.log("[GMI_PUBLISH]", {
       action: "GMI_EDITION_PUBLISHED",
       editionId,
       actor: session.user.email,
       snapshotId: snapshot.id,
+      artifactId: artifact.id,
       methodologyVersion: snapshot.methodologyVersion,
       rubricVersion: snapshot.rubricVersion,
     });
 
-    // 6. Revalidate public routes
+    // 5. Revalidate public routes
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.abrahamoflondon.org";
       const secret = process.env.REVALIDATION_SECRET || "";
@@ -115,6 +120,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(200).json({
       ok: true,
       snapshotId: snapshot.id,
+      artifactId: artifact.id,
       status: "PUBLISHED",
       canPublish: true,
     });

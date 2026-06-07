@@ -4,25 +4,40 @@ import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
 import {
-  buildGmiPerformanceCentre,
-  type GmiPerformanceCentre,
-} from "@/lib/intelligence/gmi-control-plane";
-import { getPersistedPublicGmiCallLedger } from "@/lib/intelligence/gmi-persistent-ledger";
+  getGmiPerformanceMetrics,
+  getGmiReleaseSnapshots,
+  type GmiDataProvenance,
+  type GmiPerformanceMetricsData,
+} from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 type Props = {
-  performance: GmiPerformanceCentre;
+  performance: GmiPerformanceMetricsData;
+  provenance: GmiDataProvenance;
+  latestSnapshotId: string | null;
+  latestSnapshotAt: string | null;
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const calls = await getPersistedPublicGmiCallLedger();
-  return { props: { performance: buildGmiPerformanceCentre(calls) }, revalidate: 1800 };
+  const [performance, snapshots] = await Promise.all([
+    getGmiPerformanceMetrics("GMI-Q2-2026"),
+    getGmiReleaseSnapshots("GMI-Q2-2026"),
+  ]);
+  return {
+    props: {
+      performance: performance.data,
+      provenance: performance.provenance,
+      latestSnapshotId: snapshots.data[0]?.id ?? null,
+      latestSnapshotAt: snapshots.data[0]?.createdAt ?? null,
+    },
+    revalidate: 1800,
+  };
 };
 
-const GmiPerformancePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ performance }) => {
+const GmiPerformancePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ performance, provenance, latestSnapshotId, latestSnapshotAt }) => {
   return (
     <Layout
       title="GMI Performance Centre | Abraham of London"
@@ -43,6 +58,12 @@ const GmiPerformancePage: NextPage<InferGetStaticPropsType<typeof getStaticProps
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
               Score 2 is separated from confirmation. Disconfirmed and weakly supported calls remain visible and count in the distribution.
             </p>
+            <p className="mt-3 text-xs leading-5 text-white/35">
+              Data source: {provenance.sourceName} ({provenance.sourceType}). Ledger update {performance.lastLedgerUpdateTimestamp ?? "not available"}. Snapshot {latestSnapshotId ?? "none"} {latestSnapshotAt ? `created ${latestSnapshotAt}` : ""}.
+            </p>
+            {performance.totalCallsReviewed === 0 ? (
+              <p className="mt-3 text-sm leading-6 text-amber-200/70">No reviewed calls yet.</p>
+            ) : null}
           </header>
 
           <section className="grid gap-4 md:grid-cols-4">
@@ -96,7 +117,7 @@ const GmiPerformancePage: NextPage<InferGetStaticPropsType<typeof getStaticProps
                 {performance.disconfirmedCalls.length === 0 ? (
                   <p className="text-sm text-white/45">No disconfirmed calls currently recorded.</p>
                 ) : performance.disconfirmedCalls.map((call) => (
-                  <p key={call.callId} className="text-sm leading-6 text-white/58">{call.callId}: {call.thesis}</p>
+                  <p key={call.callId} className="text-sm leading-6 text-white/58">{call.callId}: {call.callStatement}</p>
                 ))}
               </div>
             </article>
@@ -104,7 +125,7 @@ const GmiPerformancePage: NextPage<InferGetStaticPropsType<typeof getStaticProps
               <h2 className="font-serif text-xl text-white">Carried Forward</h2>
               <div className="mt-4 space-y-3">
                 {performance.carriedForwardCalls.map((call) => (
-                  <p key={call.callId} className="text-sm leading-6 text-white/58">{call.callId}: next review {call.nextReviewDue ?? call.reviewWindow}</p>
+                  <p key={call.callId} className="text-sm leading-6 text-white/58">{call.callId}: next review {call.nextReviewDue ?? "not set"}</p>
                 ))}
               </div>
             </article>
@@ -112,7 +133,7 @@ const GmiPerformancePage: NextPage<InferGetStaticPropsType<typeof getStaticProps
 
           <footer className="flex flex-wrap items-center justify-between gap-4 border border-white/10 bg-black/25 p-5">
             <p className="text-xs leading-5 text-white/42">
-              Methodology {performance.methodologyVersion}. Rubric {performance.rubricVersion}. Last updated {performance.lastUpdatedTimestamp}.
+              Methodology {performance.methodologyVersion}. Rubric {performance.rubricVersion}. Average score includes scored calls only; score 2 is shown separately as carried-forward/pending.
             </p>
             <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.16em]" style={mono}>
               <Link className="text-[#E6C98C]" href="/intelligence/gmi/calls">Call ledger</Link>

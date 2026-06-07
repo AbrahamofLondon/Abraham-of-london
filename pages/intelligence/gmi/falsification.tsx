@@ -1,16 +1,34 @@
 import * as React from "react";
-import type { NextPage } from "next";
+import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
-import { buildGmiFalsificationRegister } from "@/lib/intelligence/gmi-control-plane";
+import {
+  getGmiFalsificationRules,
+  type GmiDataProvenance,
+  type GmiFalsificationRuleData,
+} from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
-const rules = buildGmiFalsificationRegister("GMI-Q2-2026");
+type Props = {
+  rules: GmiFalsificationRuleData[];
+  provenance: GmiDataProvenance;
+};
 
-const GmiFalsificationPage: NextPage = () => {
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const result = await getGmiFalsificationRules("GMI-Q2-2026");
+  return {
+    props: {
+      rules: result.data,
+      provenance: result.provenance,
+    },
+    revalidate: 1800,
+  };
+};
+
+const GmiFalsificationPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ rules, provenance }) => {
   return (
     <Layout
       title="GMI Falsification Register | Abraham of London"
@@ -30,6 +48,9 @@ const GmiFalsificationPage: NextPage = () => {
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
               These rules are not decorative caveats. They are the public threshold for changing the view.
+            </p>
+            <p className="mt-3 text-xs leading-5 text-white/35">
+              Data source: {provenance.sourceName} ({provenance.sourceType}). Last updated {provenance.lastUpdatedAt ?? "not available"}.
             </p>
           </header>
 

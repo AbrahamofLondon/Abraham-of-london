@@ -7,10 +7,10 @@ import Head from "next/head";
 import Link from "next/link";
 
 import { requireAdminPage } from "@/lib/auth/require-admin-page";
-import { getSourceRowsForReport, type GmiSourceAppendixRow } from "@/lib/intelligence/gmi-source-appendix-registry";
+import { getGmiSourceAppendix, type GmiSourceAppendixData } from "@/lib/intelligence/gmi-data-service.server";
 
 type Props = {
-  sourceRows: GmiSourceAppendixRow[];
+  sourceRows: GmiSourceAppendixData[];
   editionId: string;
 };
 
@@ -120,7 +120,7 @@ const SourceWorkbenchPage: NextPage<Props> = ({ sourceRows, editionId }) => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <p className="font-mono text-[8px] uppercase tracking-[0.2em]" style={{ color: GOLD }}>
-                          {row.id}
+                          {row.sourceRowId}
                         </p>
                         {isBlocker && (
                           <span className="border border-red-500/20 bg-red-500/10 px-1.5 py-0.5 font-mono text-[6px] uppercase tracking-[0.12em] text-red-400">
@@ -131,7 +131,7 @@ const SourceWorkbenchPage: NextPage<Props> = ({ sourceRows, editionId }) => {
                       </div>
                       <p className="mt-1 text-sm text-white/80">{row.claim}</p>
                       <p className="mt-0.5 font-mono text-[7px] text-white/30">
-                        Source: {row.sourceOrBasis} · Confidence: {row.confidence} · Section: {row.reportSection}
+                        Source: {row.sourceTitle ?? row.sourceUrl ?? "Source metadata pending"} · Confidence: {row.confidence} · Section: {row.reportSection}
                       </p>
                     </div>
                     <div className="w-36">
@@ -205,11 +205,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   if (!auth.ok) return { redirect: { ...auth.redirect, permanent: false } };
 
   const editionId = (ctx.query?.edition as string) || "GMI-Q2-2026";
-  const sourceRows = getSourceRowsForReport(editionId);
+  const sourceRows = await getGmiSourceAppendix(editionId);
 
   return {
     props: {
-      sourceRows: JSON.parse(JSON.stringify(sourceRows)),
+      sourceRows: JSON.parse(JSON.stringify(sourceRows.data)),
       editionId,
     },
   };

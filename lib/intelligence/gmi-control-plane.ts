@@ -1,3 +1,10 @@
+// SEED ONLY / LEGACY COMPATIBILITY.
+// NOT RUNTIME SOURCE OF TRUTH. DO NOT IMPORT IN PUBLIC/API/ADMIN GMI RUNTIME.
+// Public and admin GMI operational state must read persisted database rows via
+// lib/intelligence/gmi-data-service.server.ts and gmi-release-authority.ts.
+// Static board/falsification constants below are retained for bootstrap seed
+// inputs and older unit contracts only.
+
 import { GMI_METHODOLOGY, type GmiRubricScore } from "./gmi-methodology";
 import {
   buildGmiOperatorDashboard,

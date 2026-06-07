@@ -2,22 +2,33 @@ import * as React from "react";
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 
 import Layout from "@/components/Layout";
-import type { PublicGmiCallLedgerEntry } from "@/lib/intelligence/gmi-instrument";
-import { getPersistedPublicGmiCallLedger } from "@/lib/intelligence/gmi-persistent-ledger";
+import {
+  getGmiCallLedger,
+  toPublicCallLedgerEntry,
+  type GmiDataProvenance,
+} from "@/lib/intelligence/gmi-data-service.server";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
 type Props = {
-  calls: PublicGmiCallLedgerEntry[];
+  calls: ReturnType<typeof toPublicCallLedgerEntry>[];
+  provenance: GmiDataProvenance;
 };
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  return { props: { calls: await getPersistedPublicGmiCallLedger() }, revalidate: 1800 };
+  const result = await getGmiCallLedger("GMI-Q2-2026");
+  return {
+    props: {
+      calls: result.data.map(toPublicCallLedgerEntry),
+      provenance: result.provenance,
+    },
+    revalidate: 1800,
+  };
 };
 
-const GmiCallsPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ calls }) => {
+const GmiCallsPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ calls, provenance }) => {
   return (
     <Layout
       title="GMI Call Ledger | Abraham of London"
@@ -37,6 +48,9 @@ const GmiCallsPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
               This ledger exposes the call record, review window, evidence posture, score where available, and version history. It excludes private notes and unpublished client context.
+            </p>
+            <p className="mt-3 text-xs leading-5 text-white/35">
+              Data source: {provenance.sourceName} ({provenance.sourceType}). Last updated {provenance.lastUpdatedAt ?? "not available"}. Production safe: {provenance.isProductionSafe ? "yes" : "no"}.
             </p>
           </header>
 
