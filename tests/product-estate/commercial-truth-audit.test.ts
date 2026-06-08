@@ -276,19 +276,19 @@ describe("P7.12 — GMI Q1 2026 Stripe product ID configured", () => {
   });
 });
 
-// ─── P7.13: Team Assessment and Enterprise Assessment commercial mode is explicit ─
+// ─── P7.13: Team Assessment and Enterprise Assessment are free_controlled ────────
 
-describe("P7.13 — Team/Enterprise Assessment classified as manual_billing", () => {
-  it("team_assessment is manual_billing not evidence_gated", () => {
+describe("P7.13 — Team/Enterprise Assessment classified as free_controlled", () => {
+  it("team_assessment is free_controlled", () => {
     const ta = CATALOG["team_assessment"];
     if (!ta) return;
-    expect(ta.commercialStatus).toBe("manual_billing");
+    expect(ta.commercialStatus).toBe("free_controlled");
   });
 
-  it("enterprise_assessment is manual_billing not evidence_gated", () => {
+  it("enterprise_assessment is free_controlled", () => {
     const ea = CATALOG["enterprise_assessment"];
     if (!ea) return;
-    expect(ea.commercialStatus).toBe("manual_billing");
+    expect(ea.commercialStatus).toBe("free_controlled");
   });
 
   it("team_assessment has no requiresCheckout", () => {
@@ -303,16 +303,44 @@ describe("P7.13 — Team/Enterprise Assessment classified as manual_billing", ()
     expect(ea.requiresCheckout).toBeFalsy();
   });
 
-  it("team_assessment resolver routes to /contact (manual_billing enquiry)", () => {
-    const link = resolveProductAccessLink("team_assessment");
-    expect(link.href).toBe("/contact");
-    expect(link.accessMode).toBe("manual_billing");
+  it("team_assessment has no Stripe IDs", () => {
+    const ta = CATALOG["team_assessment"];
+    if (!ta) return;
+    expect(ta.stripeProductId).toBeNull();
+    expect(ta.stripePriceId).toBeNull();
   });
 
-  it("enterprise_assessment resolver routes to /contact (manual_billing enquiry)", () => {
+  it("enterprise_assessment has no Stripe IDs", () => {
+    const ea = CATALOG["enterprise_assessment"];
+    if (!ea) return;
+    expect(ea.stripeProductId).toBeNull();
+    expect(ea.stripePriceId).toBeNull();
+  });
+
+  it("team_assessment resolver routes to /diagnostics/team-assessment (free_public)", () => {
+    const link = resolveProductAccessLink("team_assessment");
+    expect(link.href).toBe("/diagnostics/team-assessment");
+    expect(link.accessMode).toBe("free_public");
+  });
+
+  it("enterprise_assessment resolver routes to /diagnostics/enterprise-assessment (free_public)", () => {
     const link = resolveProductAccessLink("enterprise_assessment");
-    expect(link.href).toBe("/contact");
-    expect(link.accessMode).toBe("manual_billing");
+    expect(link.href).toBe("/diagnostics/enterprise-assessment");
+    expect(link.accessMode).toBe("free_public");
+  });
+
+  it("team_assessment displayPrice is Free, not By enquiry or paid label", () => {
+    const ta = CATALOG["team_assessment"];
+    if (!ta) return;
+    expect(ta.displayPrice).not.toMatch(/enquiry|paid/i);
+    expect(ta.displayPrice).toBe("Free");
+  });
+
+  it("enterprise_assessment displayPrice is Free, not By enquiry or paid label", () => {
+    const ea = CATALOG["enterprise_assessment"];
+    if (!ea) return;
+    expect(ea.displayPrice).not.toMatch(/enquiry|paid/i);
+    expect(ea.displayPrice).toBe("Free");
   });
 });
 

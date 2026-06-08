@@ -1,37 +1,37 @@
 # Team Assessment & Enterprise Assessment — Commercial Access Decision Record
 
-**Date:** 2026-06-08
-**Status:** DECIDED
-**Decision by:** Commercial Truth Audit — P1 (48-Surface Zero-Fail Closure Pass)
+**Date:** 2026-06-08  
+**Status:** REVISED — 2026-06-08 (adoption-first revision)  
+**Decision by:** Commercial Truth Audit — Team/Enterprise Access Revision Pass
 
 ---
 
-## Background
+## Decision: Both are `free_controlled` (revised from `manual_billing`)
 
-Team Assessment and Enterprise Assessment appeared in the product surface registry with `[FAIL] commercial: paid/free status unclear` and no Stripe references. In a prior audit pass, they were assigned `commercialStatus: "evidence_gated"` — but this was an agent assumption, not a deliberate strategic decision.
+### Strategic rationale
 
-This record makes the strategic decision explicit.
+The immediate market priority is adoption, qualifying data, external validation, and efficacy proof. These assessments should reduce friction and generate evidence, not act as early payment gates.
+
+Reclassifying both from `manual_billing` to `free_controlled` removes the enquiry barrier entirely. Access is open. The tool generates the evidence. Paid routes (Executive Reporting, Strategy Room, Retainer Review) are the correct conversion points — not the assessment intake.
 
 ---
-
-## Decision: Both are `manual_billing` (Option C)
 
 ### Team Assessment
 
 | Field | Value |
 |---|---|
-| `commercialStatus` | `manual_billing` |
+| `commercialStatus` | `free_controlled` |
 | `requiresCheckout` | `false` |
+| `displayPrice` | `"Free"` |
 | Stripe IDs required | No |
-| CTA label | "Request Team Assessment" |
+| CTA label | `"Start Team Assessment"` |
 | Route | `/diagnostics/team-assessment` |
-| Access mode | `manual_billing` → routes to `/contact` |
+| Access mode | `free_public` |
+| Purpose | Collect team alignment evidence |
 
-**Rationale:** Team Assessment is an early corridor stage — it IS the evidence-gathering activity. It does not require prior evidence to START; it generates the evidence. Classification as `evidence_gated` was incorrect. No Stripe checkout is available or appropriate. Access is by enquiry only. The route `/diagnostics/team-assessment` exists and explains what the assessment produces.
+**Next paid routes:** Executive Reporting → Strategy Room → Enterprise Assessment
 
-**What the user receives:** A structured divergence reading across respondents — decision framing, ownership, evidence position, and readiness. Not a digital product with a payment path.
-
-**Next admissible move:** Team Assessment → Enterprise Assessment → Executive Reporting.
+**What the user receives:** A structured divergence reading across respondents — decision framing, ownership, evidence position, and readiness.
 
 ---
 
@@ -39,54 +39,54 @@ This record makes the strategic decision explicit.
 
 | Field | Value |
 |---|---|
-| `commercialStatus` | `manual_billing` |
+| `commercialStatus` | `free_controlled` |
 | `requiresCheckout` | `false` |
+| `displayPrice` | `"Free"` |
 | Stripe IDs required | No |
-| CTA label | "Request Enterprise Assessment" |
+| CTA label | `"Start Enterprise Assessment"` |
 | Route | `/diagnostics/enterprise-assessment` |
-| Access mode | `manual_billing` → routes to `/contact` |
+| Access mode | `free_public` |
+| Purpose | Qualify organisational readiness, authority gaps, dependencies, and oversight potential |
 
-**Rationale:** Enterprise Assessment is an enterprise-pathway corridor stage. It has API routes (`/api/diagnostics/enterprise`, `/api/enterprise/campaigns/[id]`) and admin visibility (`/admin/enterprise-foundation`, `/admin/enterprise-pipeline`). It does not have a Stripe checkout path. Access is by enterprise enquiry only. It is not a free public tool — it is a structured enterprise scan run by or with Abraham of London operators.
+**Next paid routes:** Executive Reporting → Strategy Room → Retainer Review
 
-**What the user receives:** A structural organisational reading — authority, evidence, dependency, and escalation exposure. Produces an enterprise scan record that gates access to Executive Reporting.
-
-**Next admissible move:** Enterprise Assessment → Executive Reporting → Strategy Room.
+**What the user receives:** A structural organisational reading — authority, evidence, dependency, and escalation exposure.
 
 ---
 
 ## What was ruled out
 
-### Option A — `evidence_gated`
+### `evidence_gated`
 
-Rejected. `evidence_gated` means the user needs a prior case/diagnostic record before they can access this stage. Team Assessment and Enterprise Assessment are the first stages — there is no "prior record" prerequisite. They are the prerequisite for later stages, not a gated outcome of earlier stages.
+Rejected. These are the first corridor stages — there is no prior record prerequisite. They generate the evidence; they cannot require it.
 
-### Option B — `paid_checkout`
+### `paid_checkout`
 
-Rejected. Neither product has Stripe product IDs or price IDs. Neither has an entitlement model, a checkout success route, or a payment-to-access fulfillment path. Adding checkout would require Stripe product creation, entitlement wiring, and fulfilment logic — none of which exist. If a future owner decides to make these self-serve paid products, that requires:
+Rejected. No Stripe product IDs or price IDs exist. No checkout flow, entitlement model, or fulfilment path. If a future decision is made to gate these behind payment, requires:
 
 1. Creating Stripe products and prices
 2. Adding `stripeProductId` and `stripePriceId` to the catalog
-3. Building a checkout flow (success/cancel routes)
-4. Adding entitlement grant on payment
-5. Adding admin visibility of purchased assessment state
-6. Adding tests covering the payment path
+3. Building checkout flow (success/cancel routes)
+4. Entitlement grant on payment
+5. Admin visibility of purchased assessment state
+6. Tests covering the payment path
 
-Until those steps are done, `paid_checkout` is false and misleading.
+### `manual_billing` (prior decision — now revised)
 
-### Option D — `free_public`
+Was assigned 2026-06-08. Revised same day. Rationale: `manual_billing` implies an operator review step before access is granted ("By enquiry"). The strategic goal at this stage is adoption and evidence collection — not a manual gating step that adds friction before any assessment data exists.
 
-Rejected. These are not free tools. They are operator-led engagements with structured output. Labelling them free would misrepresent the commercial relationship.
+**Do not display:** "By enquiry", "Paid £0", or any price-implying label for these products.
 
 ---
 
 ## UI implications
 
-- Label: `"By enquiry"` on product directory
-- Status badge: `"By enquiry"` (amber)
-- CTA: `"Request Team Assessment"` / `"Request Enterprise Assessment"`
+- Label: `"Free controlled assessment"` / `"Free organisational assessment"`
+- Status badge: `"Free"` (no amber, no paid styling)
+- CTA: `"Start Team Assessment"` / `"Start Enterprise Assessment"`
 - No checkout button
-- No price shown beyond `"By enquiry"`
-- Routes to `/contact` via the resolver
+- No Stripe flow
+- Routes directly to `/diagnostics/team-assessment` and `/diagnostics/enterprise-assessment`
 
 ---
 
@@ -100,19 +100,26 @@ To move either assessment to `paid_checkout` in future:
 4. Build checkout + entitlement flow
 5. Update this record with the date and owner
 
+To move either assessment to `manual_billing` in future (operator review gate):
+
+1. Update `commercialStatus: "manual_billing"` in catalog
+2. Update `displayPrice: "By enquiry"`
+3. Update CTA copy to `"Request..."` pattern
+4. Update this record with the date, owner, and rationale for reintroducing the friction
+
 ---
 
 ## Boardroom Mode — supplemental decision (P3)
 
-**Decision:** Option A — Add to catalog as `evidence_gated`.
+**Decision:** Option A — Add to catalog as `evidence_gated`. (Unchanged.)
 
 | Field | Value |
 |---|---|
 | `commercialStatus` | `evidence_gated` |
 | `requiresCheckout` | `false` |
 | Stripe IDs required | No |
-| CTA label | "View Boardroom Mode" |
+| CTA label | `"View Boardroom Mode"` |
 | Route | `/boardroom-mode` |
 | Prerequisite | Executive Reporting or governed case record |
 
-**Rationale:** Boardroom Mode is a distinct corridor stage (Stage 4) that requires a prior governed record. Adding it to the catalog as `evidence_gated` makes the commercial intent explicit, closes the `NEEDS_DECISION` gap in the prior audit, and allows the resolver and audit to handle it correctly. It is not a self-serve paid product — access opens when a qualifying governed record is confirmed.
+**Rationale:** Boardroom Mode is Stage 4 and does require a prior governed record. `evidence_gated` is correct and unchanged.

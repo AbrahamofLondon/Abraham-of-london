@@ -326,9 +326,8 @@ export const PRODUCT_SURFACE_REGISTRY: ProductSurface[] = [
     targetScore: 9,
     currentScore: 6,
     primaryCTA: 'Start Team Assessment',
-    nextAdmissibleMove: 'Clarify paid/free status; add respondent session persistence model; add comparison logic; add next route to Enterprise Assessment or Executive Reporting',
+    nextAdmissibleMove: 'Add respondent session persistence model; add comparison logic; add next route to Enterprise Assessment or Executive Reporting',
     authorityGaps: [
-      '[FAIL] commercial: paid/free status unclear — no catalog product code with price; no Stripe reference',
       '[FAIL] fulfilment: no team response persistence model; results may be ephemeral',
       '[FAIL] admin: no admin view of team assessment results or aggregate respondent state',
       '[PARTIAL] evidence_input: no divergence detection logic confirmed in production path',
@@ -360,11 +359,10 @@ export const PRODUCT_SURFACE_REGISTRY: ProductSurface[] = [
     primaryCTA: 'Run organisational scan',
     nextAdmissibleMove: 'Confirm organisation scan persistence model; add exposure scoring output artifact; add next route to Executive Reporting / Boardroom Mode / Strategy Room',
     authorityGaps: [
-      '[FAIL] commercial: no Stripe price reference; paid via enterprise pathway not wired to catalog',
       '[FAIL] fulfilment: no output artifact persisted; scan result state unclear',
       '[PARTIAL] admin: admin pipeline exists but no scan-level result detail view',
       '[PARTIAL] evidence_input: authority/evidence/scenario stress logic not confirmed in production path',
-      '[PARTIAL] commercial: next route to Executive Reporting not surfaced after scan result',
+      '[PARTIAL] commercial: next route to Executive Reporting / Strategy Room / Retainer Review not surfaced after scan result',
     ],
   },
 

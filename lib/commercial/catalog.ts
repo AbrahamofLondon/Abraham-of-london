@@ -772,9 +772,10 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   // ═══ CORRIDOR STAGE IDENTITIES ══════════════════════════════════════════════
   // Team Assessment and Enterprise Assessment are named corridor stages.
-  // Neither has a self-serve Stripe checkout path. Access is by enquiry (manual_billing):
-  // no prior evidence record is required to start — these are the evidence-gathering stages.
-  // Pricing is by enquiry until Stripe product + price IDs are created and inserted here.
+  // Free controlled assessments — no payment required, no Stripe, no enquiry gate.
+  // Primary purpose: adoption, qualifying data, external validation, and efficacy proof.
+  // These are evidence-generating stages, not payment collection points.
+  // Access is open (free_controlled). Next paid routes are Executive Reporting / Strategy Room.
   // Decision record: docs/product-estate/team-enterprise-assessment-access-decision.md
 
   team_assessment: {
@@ -783,16 +784,16 @@ export const CATALOG: Record<string, CatalogProduct> = {
     marketName: "Team Assessment",
     publicLabel: "Team Assessment",
     amount: 0,
-    displayPrice: "By enquiry",
+    displayPrice: "Free",
     stripeProductId: null,
     stripePriceId: null,
     entitlementSlug: "team-assessment",
     tier: "corridor-stage",
     category: "decision_tools",
-    accessType: "one_time",
+    accessType: "free",
     duration: "lifetime",
     active: true,
-    commercialStatus: "manual_billing",
+    commercialStatus: "free_controlled",
     requiresCheckout: false,
     requiresContract: false,
     successPath: "/diagnostics/team-assessment",
@@ -801,11 +802,11 @@ export const CATALOG: Record<string, CatalogProduct> = {
     includes: [],
     shortDescription: "Tests whether respondents are describing the same decision, owner, blocker, and evidence position.",
     userPromise: "Exposes divergence in decision framing, ownership, evidence, and readiness across respondents.",
-    pricingNote: "By enquiry — no prior record required. Routes to enquiry intake. No self-serve checkout.",
-    primaryCta: "Request Team Assessment",
+    pricingNote: "Free controlled assessment — no payment required. Collect team alignment evidence. Next: Executive Reporting or Strategy Room.",
+    primaryCta: "Start Team Assessment",
     upgradePath: ["enterprise_assessment", "executive_reporting"],
     hiddenFromPricing: true,
-    hiddenReason: "manual_billing_corridor_stage",
+    hiddenReason: "free_controlled_corridor_stage",
   },
 
   enterprise_assessment: {
@@ -814,16 +815,16 @@ export const CATALOG: Record<string, CatalogProduct> = {
     marketName: "Enterprise Assessment",
     publicLabel: "Enterprise Assessment",
     amount: 0,
-    displayPrice: "By enquiry",
+    displayPrice: "Free",
     stripeProductId: null,
     stripePriceId: null,
     entitlementSlug: "enterprise-assessment",
     tier: "corridor-stage",
     category: "decision_tools",
-    accessType: "one_time",
+    accessType: "free",
     duration: "lifetime",
     active: true,
-    commercialStatus: "manual_billing",
+    commercialStatus: "free_controlled",
     requiresCheckout: false,
     requiresContract: false,
     successPath: "/diagnostics/enterprise-assessment",
@@ -832,11 +833,11 @@ export const CATALOG: Record<string, CatalogProduct> = {
     includes: [],
     shortDescription: "Tests organisational dependencies, exposure, authority, evidence, and scenario stress.",
     userPromise: "Produces a structural organisational reading: authority, evidence, dependency, and escalation exposure.",
-    pricingNote: "By enquiry — enterprise pathway, no self-serve checkout. Routes to enquiry intake.",
-    primaryCta: "Request Enterprise Assessment",
+    pricingNote: "Free organisational assessment — qualifies readiness, authority gaps, dependencies, and oversight potential. Next: Executive Reporting, Strategy Room, or Retainer Review.",
+    primaryCta: "Start Enterprise Assessment",
     upgradePath: ["executive_reporting", "strategy_room"],
     hiddenFromPricing: true,
-    hiddenReason: "manual_billing_corridor_stage",
+    hiddenReason: "free_controlled_corridor_stage",
   },
 
   // Boardroom Mode — evidence-gated, corridor stage 4
@@ -1318,7 +1319,7 @@ export const PRICING_FAMILIES: Record<string, PricingFamily> = {
   retainer_core: "enterprise_retainer",
   retainer_operational: "enterprise_retainer",
   retainer_institutional: "enterprise_retainer",
-  // Manual-billing corridor stages — not publicly priced; by enquiry only
+  // Free controlled corridor stages — no price; evidence-generating
   team_assessment: "inactive_archive",
   enterprise_assessment: "inactive_archive",
   // Evidence-gated corridor stage — not publicly priced; gated on prior governed record
