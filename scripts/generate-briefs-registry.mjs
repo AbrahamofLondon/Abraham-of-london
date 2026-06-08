@@ -118,13 +118,50 @@ function main() {
     }
   }
 
-  // Deduplicate by flattenedPath
-  const seen = new Set();
-  const unique = allBriefs.filter((b) => {
-    if (seen.has(b.flattenedPath)) return false;
-    seen.add(b.flattenedPath);
-    return true;
-  });
+  // ── Deduplicate by slug ────────────────────────────────────────────────────
+  //
+  // Both the canonical Brief collection (briefs/<slug>) and the VaultBrief
+  // collection (vault/briefs/<slug>) are indexed by contentlayer.  When a brief
+  // appears in both, the flattenedPath values differ so a simple Set(flattenedPath)
+  // dedup passes both entries through — producing duplicate slugs in the registry.
+  //
+  // Resolution rule:
+  //   1. Prefer the canonical public Brief path (flattenedPath starts with "briefs/")
+  //      over any vault mirror (flattenedPath starts with "vault/").
+  //   2. When both are vault paths, keep the first one encountered.
+  //   3. Final output is sorted by slug for determinism.
+
+  /** @param {string} fp */
+  function isVaultPath(fp) {
+    return fp.startsWith("vault/");
+  }
+
+  /** @type {Map<string, typeof allBriefs[0]>} */
+  const slugMap = new Map();
+  for (const b of allBriefs) {
+    const existing = slugMap.get(b.slug);
+    if (!existing) {
+      slugMap.set(b.slug, b);
+    } else {
+      // Both present — prefer the non-vault (canonical) entry
+      if (isVaultPath(existing.flattenedPath) && !isVaultPath(b.flattenedPath)) {
+        slugMap.set(b.slug, b); // replace vault entry with canonical entry
+      }
+      // else: existing is already canonical (or both vault) — keep existing
+    }
+  }
+
+  const duplicatesRemoved = allBriefs.length - slugMap.size;
+  if (duplicatesRemoved > 0) {
+    console.log(
+      `[generate-briefs-registry] Removed ${duplicatesRemoved} duplicate slug mirror${duplicatesRemoved === 1 ? "" : "s"} (vault entries superseded by canonical Brief entries)`,
+    );
+  }
+
+  // Sort by slug for deterministic output
+  const unique = [...slugMap.values()].sort((a, b) =>
+    a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0,
+  );
 
   if (loadedCollections === 0) {
     throw new Error(

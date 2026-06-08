@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780936955730-xp4c0m",
-    "caseReference": "FULFIL-17809369",
+    "caseId": "fulfilment-1780939241669-4a9w8p",
+    "caseReference": "FULFIL-17809392",
     "scenario": "Legal/Admin/Family Deadline",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-06-08T16:42:35.732Z",
+        "timestamp": "2026-06-08T17:20:41.671Z",
         "actorId": "system",
         "notes": "Dossier generated for: Legal/Admin/Family Deadline",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-06-08T16:42:35.732Z"
+    "generatedAt": "2026-06-08T17:20:41.671Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17809369",
-    "generatedAt": "2026-06-08T16:42:35.732Z",
+    "caseReference": "FULFIL-17809392",
+    "generatedAt": "2026-06-08T17:20:41.671Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

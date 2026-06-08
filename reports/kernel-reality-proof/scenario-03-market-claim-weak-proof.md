@@ -389,7 +389,7 @@ Address the primary identified risk: Claim is being made but evidence to support
   "caseReference": "PROOF-MARKET_CLAIM_STRONG_COPY_WEAK_PROOF-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-06-08T16:42:36.174Z"
+  "generatedAt": "2026-06-08T17:20:45.702Z"
 }
 ```
 
