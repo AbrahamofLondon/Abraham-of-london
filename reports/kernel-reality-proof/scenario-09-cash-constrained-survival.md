@@ -407,7 +407,7 @@ Address the primary identified risk: Cash runway is critically short but require
   "caseReference": "PROOF-CASH_CONSTRAINED_SURVIVAL-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-06-07T16:01:49.436Z"
+  "generatedAt": "2026-06-08T11:01:17.001Z"
 }
 ```
 

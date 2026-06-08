@@ -10,7 +10,17 @@
  *
  * Do not hardcode product names, prices, entitlement slugs, or Stripe price IDs
  * in UI surfaces.
+ *
+ * GMI editions are generated dynamically from:
+ *   lib/commercial/gmi/gmi-edition-registry.ts  ← one entry per quarter (only file to touch)
+ *   lib/commercial/gmi/gmi-edition-factory.ts   ← factory + fail-closed validation
  */
+
+import {
+  buildGmiEditionProducts,
+  getGmiPricingFamilyEntries,
+} from "./gmi/gmi-edition-factory";
+import { GMI_EDITION_REGISTRY } from "./gmi/gmi-edition-registry";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -32,13 +42,15 @@ export type ProductCategory =
   | "governed_playbook";
 
 export type CommercialStatus =
-  | "free_controlled"
-  | "paid"
-  | "contracted"
-  | "manual_billing"
-  | "inactive"
-  | "retired"
-  | "internal_only";
+  | "free_controlled"   // free_public — no payment required
+  | "paid"              // paid_checkout — requires Stripe product + price + checkout
+  | "contracted"        // contracted — enterprise/retainer, enquiry only, no public checkout
+  | "manual_billing"    // manual_billing — no Stripe checkout; enquiry/intake route required
+  | "evidence_gated"    // evidence_gated — requires prior case/evidence/diagnostic record
+  | "dormant"           // dormant — not sold; no CTA; admin record only
+  | "inactive"          // inactive — deactivated product; no public activation
+  | "retired"           // retired — decommissioned; no surface
+  | "internal_only";    // admin_only — no public activation; admin route only
 
 export type PricingFamily =
   | "free_entry"
@@ -96,6 +108,10 @@ export type CatalogProduct = {
 // ─────────────────────────────────────���───────────────────────────────────────
 // Catalog — Canonical Products
 // ──────────────���────────────────────────────��─────────────────────────────────
+
+// Build GMI edition products at module load time.
+// Throws immediately if the registry is invalid (fail-closed).
+const _GMI_PRODUCTS = buildGmiEditionProducts(GMI_EDITION_REGISTRY);
 
 export const CATALOG: Record<string, CatalogProduct> = {
 
@@ -749,56 +765,116 @@ export const CATALOG: Record<string, CatalogProduct> = {
     includes: [],
   },
 
-  // ═══ C. INTELLIGENCE LAYER ���════════════════════════���═════════════════════
+  // ═══ C. INTELLIGENCE LAYER — GMI editions (generated from registry) ══════
+  // Do not add GMI editions here manually.
+  // Edit lib/commercial/gmi/gmi-edition-registry.ts to add a new quarter.
+  ..._GMI_PRODUCTS,
 
-  gmi_q1_2026: {
-    code: "gmi_q1_2026",
-    displayName: "Global Market Intelligence Report \u2014 Q1 2026",
-    amount: 5900,
-    displayPrice: "\u00a359",
-    stripeProductId: null,
-    stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
-    entitlementSlug: "global-market-intelligence-report-q1-2026",
-    tier: "premium-report",
-    category: "intelligence",
-    accessType: "one_time",
-    duration: "lifetime",
-    active: true,
-    commercialStatus: "paid",
-    requiresCheckout: true,
-    hiddenFromPricing: true,
-    hiddenReason: "superseded_by_q2",
-    shortDescription: "Q1 2026 market intelligence \u2014 superseded by Q2 2026 edition. Available for historical reference.",
-    pricingNote: "Coverage period: Q1 2026. Superseded by Q2 2026 edition. Updated 8 April 2026.",
-    successPath: "/artifacts/global-market-intelligence-report-q1-2026",
-    cancelPath: "/artifacts/global-market-intelligence-report-q1-2026",
-    cookieName: null,
-    includes: [],
-  },
+  // ═══ CORRIDOR STAGE IDENTITIES ══════════════════════════════════════════════
+  // Team Assessment and Enterprise Assessment are named corridor stages.
+  // Neither has a self-serve Stripe checkout path. Access is by enquiry (manual_billing):
+  // no prior evidence record is required to start — these are the evidence-gathering stages.
+  // Pricing is by enquiry until Stripe product + price IDs are created and inserted here.
+  // Decision record: docs/product-estate/team-enterprise-assessment-access-decision.md
 
-  gmi_q2_2026: {
-    code: "gmi_q2_2026",
-    displayName: "Global Market Intelligence Report \u2014 Q2 2026",
-    amount: 5900,
-    displayPrice: "\u00a359",
+  team_assessment: {
+    code: "team_assessment",
+    displayName: "Team Assessment",
+    marketName: "Team Assessment",
+    publicLabel: "Team Assessment",
+    amount: 0,
+    displayPrice: "By enquiry",
     stripeProductId: null,
     stripePriceId: null,
-    entitlementSlug: "global-market-intelligence-report-q2-2026",
-    tier: "premium-report",
-    category: "intelligence",
+    entitlementSlug: "team-assessment",
+    tier: "corridor-stage",
+    category: "decision_tools",
     accessType: "one_time",
     duration: "lifetime",
     active: true,
     commercialStatus: "manual_billing",
-    requiresCheckout: true,
-    hiddenFromPricing: false,
-    shortDescription: "Q2 2026 market intelligence \u2014 current published edition. Accountable market intelligence for the current decision window.",
-    pricingNote: "Coverage period: Q2 2026. Current decision window: Q2 2026. Published June 2026.",
-    successPath: "/artifacts/global-market-intelligence-report-q2-2026",
-    cancelPath: "/artifacts/global-market-intelligence-report-q2-2026",
+    requiresCheckout: false,
+    requiresContract: false,
+    successPath: "/diagnostics/team-assessment",
+    cancelPath: "/products",
     cookieName: null,
     includes: [],
-  },  // ═══ D. REPORTING LAYER ══════���═══════════════════════════════════════════
+    shortDescription: "Tests whether respondents are describing the same decision, owner, blocker, and evidence position.",
+    userPromise: "Exposes divergence in decision framing, ownership, evidence, and readiness across respondents.",
+    pricingNote: "By enquiry — no prior record required. Routes to enquiry intake. No self-serve checkout.",
+    primaryCta: "Request Team Assessment",
+    upgradePath: ["enterprise_assessment", "executive_reporting"],
+    hiddenFromPricing: true,
+    hiddenReason: "manual_billing_corridor_stage",
+  },
+
+  enterprise_assessment: {
+    code: "enterprise_assessment",
+    displayName: "Enterprise Assessment",
+    marketName: "Enterprise Assessment",
+    publicLabel: "Enterprise Assessment",
+    amount: 0,
+    displayPrice: "By enquiry",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "enterprise-assessment",
+    tier: "corridor-stage",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    active: true,
+    commercialStatus: "manual_billing",
+    requiresCheckout: false,
+    requiresContract: false,
+    successPath: "/diagnostics/enterprise-assessment",
+    cancelPath: "/products",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Tests organisational dependencies, exposure, authority, evidence, and scenario stress.",
+    userPromise: "Produces a structural organisational reading: authority, evidence, dependency, and escalation exposure.",
+    pricingNote: "By enquiry — enterprise pathway, no self-serve checkout. Routes to enquiry intake.",
+    primaryCta: "Request Enterprise Assessment",
+    upgradePath: ["executive_reporting", "strategy_room"],
+    hiddenFromPricing: true,
+    hiddenReason: "manual_billing_corridor_stage",
+  },
+
+  // Boardroom Mode — evidence-gated, corridor stage 4
+  // Added to catalog per P3 decision: Option A (evidence_gated, surface-and-catalog).
+  // No Stripe IDs. Requires prior Executive Reporting or governed case record.
+  // Decision record: docs/product-estate/team-enterprise-assessment-access-decision.md
+  boardroom_mode: {
+    code: "boardroom_mode",
+    displayName: "Boardroom Mode",
+    marketName: "Boardroom Mode",
+    publicLabel: "Boardroom Mode",
+    amount: 0,
+    displayPrice: "Evidence-gated",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "boardroom-mode",
+    tier: "corridor-stage",
+    category: "decision_tools",
+    accessType: "one_time",
+    duration: "lifetime",
+    active: true,
+    commercialStatus: "evidence_gated",
+    requiresCheckout: false,
+    requiresContract: false,
+    successPath: "/boardroom-mode",
+    cancelPath: "/products",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Adversarial boardroom challenge for a built executive judgement. Requires prior Executive Reporting or governed case record.",
+    userPromise: "Tests whether the executive judgement survives contrary evidence, hidden dependencies, and objections a board will raise.",
+    pricingNote: "Evidence-gated — no self-serve checkout. Access opens when qualifying governed record is confirmed.",
+    primaryCta: "View Boardroom Mode",
+    upgradePath: [],
+    hiddenFromPricing: true,
+    hiddenReason: "evidence_gated_corridor_stage",
+  },
+
+  // ═══ D. REPORTING LAYER ══════───═══════════════════════════════════════════
 
   executive_reporting: {
     code: "executive_reporting",
@@ -1206,6 +1282,8 @@ export function getProductByEntitlementSlug(slug: string): CatalogProduct | null
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const PRICING_FAMILIES: Record<string, PricingFamily> = {
+  // Intelligence reports — all GMI editions (generated from registry)
+  ...getGmiPricingFamilyEntries(GMI_EDITION_REGISTRY),
   // Free entry
   fast_diagnostic: "free_entry",
   boardroom_brief: "governed_instruments",
@@ -1235,13 +1313,16 @@ export const PRICING_FAMILIES: Record<string, PricingFamily> = {
   // Strategy Room
   strategy_room: "strategy_room",
   strategy_room_extended: "strategy_room",
-  // Intelligence reports
-  gmi_q1_2026: "intelligence_reports",
   // Enterprise retainer
   enterprise: "enterprise_retainer",
   retainer_core: "enterprise_retainer",
   retainer_operational: "enterprise_retainer",
   retainer_institutional: "enterprise_retainer",
+  // Manual-billing corridor stages — not publicly priced; by enquiry only
+  team_assessment: "inactive_archive",
+  enterprise_assessment: "inactive_archive",
+  // Evidence-gated corridor stage — not publicly priced; gated on prior governed record
+  boardroom_mode: "inactive_archive",
   // Inactive archive — products not publicly priced
   operator_essentials_pack: "inactive_archive",
   command_pack: "inactive_archive",

@@ -54,6 +54,7 @@ type ProductStatus =
   | "Open entry"
   | "Active"
   | "Paid"
+  | "By enquiry"
   | "Organisational"
   | "Evidence-gated"
   | "Review-gated"
@@ -110,6 +111,7 @@ const statusStyles: Record<ProductStatus, { color: string; border: string; backg
   "Open entry":        { color: "rgba(110,231,183,0.92)", border: "rgba(110,231,183,0.22)", background: "rgba(110,231,183,0.06)" },
   "Active":            { color: `${GOLD}E6`,               border: `${GOLD}35`,              background: `${GOLD}10` },
   "Paid":              { color: `${GOLD}CC`,               border: `${GOLD}30`,              background: `${GOLD}0D` },
+  "By enquiry":        { color: "rgba(251,191,36,0.84)",  border: "rgba(251,191,36,0.22)",  background: "rgba(251,191,36,0.06)" },
   "Organisational":    { color: "rgba(147,197,253,0.90)", border: "rgba(147,197,253,0.22)", background: "rgba(147,197,253,0.06)" },
   "Evidence-gated":    { color: "rgba(216,180,254,0.90)", border: "rgba(216,180,254,0.22)", background: "rgba(216,180,254,0.06)" },
   "Review-gated":      { color: "rgba(148,163,184,0.90)", border: "rgba(148,163,184,0.22)", background: "rgba(148,163,184,0.06)" },
@@ -183,21 +185,21 @@ const corridorStages: CorridorStageData[] = [
     id: "team-assessment",
     number: "01",
     name: "Team Assessment",
-    status: "Active",
-    price: "Paid",
+    status: "By enquiry",
+    price: "By enquiry",
     purpose: "Tests whether respondents are describing the same decision, owner, blocker, and evidence position.",
     href: "/diagnostics/team-assessment",
-    cta: "Start Team Assessment",
+    cta: "View Team Assessment",
   },
   {
     id: "enterprise-assessment",
     number: "02",
     name: "Enterprise Assessment",
-    status: "Active",
-    price: "Paid",
+    status: "By enquiry",
+    price: "By enquiry",
     purpose: "Tests organisational dependencies, exposure, authority, evidence, and scenario stress.",
     href: "/enterprise",
-    cta: "Run organisational scan",
+    cta: "View Enterprise pathway",
   },
   {
     id: "executive-reporting",
@@ -331,7 +333,8 @@ const knowledgeItems: InstrumentItem[] = [
 ];
 
 const gmiItems: InstrumentItem[] = [
-  { name: "Global Market Intelligence Report — Q1 2026", status: "Active", href: catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026") },
+  { name: "Global Market Intelligence Report — Q2 2026", status: "Active", href: catalogPath("gmi_q2_2026", "/artifacts/global-market-intelligence-report-q2-2026") },
+  { name: "Global Market Intelligence Report — Q1 2026 (archive)", status: "Sample", href: catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026") },
   { name: "Market Intelligence Archive",                  status: "Active", href: "/intelligence/market" },
 ];
 
@@ -454,7 +457,11 @@ function StickyActionBar() {
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-full"}`}
-      style={{ backgroundColor: "rgba(3,3,5,0.96)", borderTop: `1px solid ${GOLD}22` }}
+      style={{
+        backgroundColor: "rgba(3,3,5,0.96)",
+        borderTop: `1px solid ${GOLD}22`,
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-3 lg:px-12">
         <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
@@ -1143,8 +1150,8 @@ export default function ProductsPage() {
               <PrimaryBtn href="/artifacts/global-market-outlook-q1-2026-public" onClick={() => trackLaunch("products_to_gmi_outlook", "/products")}>
                 View intelligence line
               </PrimaryBtn>
-              <GhostBtn href={catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026")} onClick={() => trackLaunch("gmi_outlook_to_full_report", "/products")}>
-                View latest report
+              <GhostBtn href={catalogPath("gmi_q2_2026", "/artifacts/global-market-intelligence-report-q2-2026")} onClick={() => trackLaunch("gmi_outlook_to_full_report", "/products")}>
+                View latest report — Q2 2026
               </GhostBtn>
             </div>
             <div className="mt-6">
