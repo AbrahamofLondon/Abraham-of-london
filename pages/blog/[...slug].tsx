@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
-import DirectorateOversight from "@/components/content/DirectorateOversight";
+import ClassicBlogReader from "@/components/blog/ClassicBlogReader";
 import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { normalizeSlug, joinHref } from "@/lib/content/shared";
@@ -100,7 +100,10 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({
 
   const title = doc?.title || "Untitled Essay";
   const excerpt = doc?.excerpt || doc?.description || "";
-  const cover = resolveDocCoverImage(doc, { contentType: "BLOG" });
+  // Pass null when no cover is set in frontmatter so ClassicBlogReader suppresses
+  // the cover section — avoids forcing the default fallback image into the layout.
+  const rawCover = doc?.coverImage || doc?.featuredImage || doc?.heroImage || doc?.thumbnail || null;
+  const cover = rawCover ? resolveDocCoverImage(doc, { contentType: "BLOG" }) : null;
   const canonicalUrl = joinHref("blog", bareSlug);
 
   const required = normalizeRequiredTier(requiredTier);
@@ -198,8 +201,7 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({
         />
       </Head>
 
-      <DirectorateOversight
-        kind="essay"
+      <ClassicBlogReader
         title={title}
         excerpt={excerpt}
         category={doc?.category || "Essay"}

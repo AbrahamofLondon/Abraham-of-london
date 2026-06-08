@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import ArticleCoverImage from "@/components/content/ArticleCoverImage";
 import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   getBlogSeriesCatalogue,
@@ -155,6 +156,16 @@ const BlogSeriesPartReader: NextPage<Props> = ({
             <h1>{part.title}</h1>
             <p>{author}</p>
           </header>
+
+          {/* Cover image — rendered only when present; does not force a fallback */}
+          {ogImage ? (
+            <ArticleCoverImage
+              src={ogImage}
+              title={part.title}
+              priority
+              className="mb-10"
+            />
+          ) : null}
 
           {/* Body */}
           <div className="burden-reader-body">

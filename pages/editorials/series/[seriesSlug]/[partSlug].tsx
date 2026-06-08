@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import ArticleCoverImage from "@/components/content/ArticleCoverImage";
 import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   formatEditorialSeriesPartNumber,
@@ -22,6 +23,7 @@ type Props = {
   staticHtml: string;
   author: string;
   description: string;
+  coverImage: string | null;
   previous: EditorialSeriesPart | null;
   next: EditorialSeriesPart | null;
 };
@@ -129,6 +131,7 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
   staticHtml,
   author,
   description,
+  coverImage,
   previous,
   next,
 }) => {
@@ -158,6 +161,17 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
             <h1>{part.title}</h1>
             <p>{author}</p>
           </header>
+
+          {/* Cover image — rendered only when present; does not force a fallback */}
+          {coverImage ? (
+            <ArticleCoverImage
+              src={coverImage}
+              title={part.title}
+              priority
+              aspect="3/2"
+              className="mb-10"
+            />
+          ) : null}
 
           <div className="mind-clay-reader-body">
             <StaticMDXRenderer html={staticHtml} />
@@ -506,6 +520,11 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const { html: staticHtml } = renderDocBodyToStaticHtml(doc);
   const { previous, next } = getEditorialSeriesPartNeighbors(series, part.order);
 
+  const rawCoverImage =
+    (doc as any)?.coverImage ||
+    (doc as any)?.ogImage ||
+    null;
+
   return {
     props: {
       series,
@@ -513,6 +532,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       staticHtml,
       author: String(doc.author || "Abraham of London"),
       description: String(doc.description || doc.excerpt || part.excerpt),
+      coverImage: rawCoverImage ? String(rawCoverImage) : null,
       previous,
       next,
     },

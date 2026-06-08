@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react";
 
 import Layout from "@/components/Layout";
 import AccessGate from "@/components/AccessGate";
+import ArticleCoverImage from "@/components/content/ArticleCoverImage";
 import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import {
   getPublicationBySlug,
@@ -260,6 +261,20 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
             </div>
           </div>
         </section>
+
+        {/* ── COVER IMAGE — restrained editorial scale, only when present ── */}
+        {item.coverImage ? (
+          <section style={{ backgroundColor: VOID }}>
+            <div className="mx-auto max-w-3xl px-6 pb-0 pt-10 lg:px-12">
+              <ArticleCoverImage
+                src={item.coverImage}
+                title={item.title}
+                priority
+                aspect="3/2"
+              />
+            </div>
+          </section>
+        ) : null}
 
         {/* ── READING FRAME ─────────────────────────────────────────────── */}
         <section style={{ backgroundColor: BASE, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
