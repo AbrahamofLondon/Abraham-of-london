@@ -103,6 +103,7 @@ const KNOWN_ROUTES = new Set<string>([
   "/continuity",
   "/oversight",
   "/my-instruments",
+  "/benchmark-context",
 ]);
 
 // ─── Access mode derivation from catalog ─────────────────────────────────────

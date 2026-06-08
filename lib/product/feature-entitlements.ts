@@ -38,6 +38,18 @@ export type FeatureSlug =
 
 // ─── Feature definition ───────────────────────────────────────────────────────
 
+export type FeatureCapabilityType =
+  | "diagnostic"     // runs a diagnostic / assessment
+  | "reporting"      // produces a governed report
+  | "execution"      // facilitated decision execution
+  | "intelligence"   // market / intelligence layer
+  | "benchmark"      // benchmark comparison capability
+  | "outcome_loop"   // closes the outcome / return loop
+  | "continuity"     // maintains case continuity over time
+  | "governance"     // governance instrument or framework
+  | "oversight"      // retainer / oversight engagement
+  | "free_tool";     // free public instrument
+
 export type FeatureDefinition = {
   slug: FeatureSlug;
   displayName: string;
@@ -47,9 +59,15 @@ export type FeatureDefinition = {
   requiredEntitlementSlugs: string[];
   /** Catalog product code that grants this feature (primary) */
   primaryProductCode: string | null;
-  /** Where to go to unlock (checkout or contact page) */
+  /** Catalog code of the product that owns/contains this feature */
+  ownerProduct: string | null;
+  /** Capability classification */
+  capabilityType: FeatureCapabilityType;
+  /** Where to go to upgrade/unlock this feature. Must NOT be bare /pricing for feature-specific CTAs. */
   upgradeHref: string;
   upgradeLabel: string;
+  /** Where the feature actually lives when the user is entitled. May differ from upgradeHref. */
+  semanticAccessRoute: string;
 };
 
 // ─── Feature map ──────────────────────────────────────────────────────────────
@@ -62,8 +80,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "free",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
+    ownerProduct: null,
+    capabilityType: "diagnostic",
     upgradeHref: "/diagnostics/fast",
     upgradeLabel: "Run the Fast Diagnostic",
+    semanticAccessRoute: "/diagnostics/fast",
   },
 
   decision_delay_exposure: {
@@ -73,8 +94,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "free",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
+    ownerProduct: null,
+    capabilityType: "free_tool",
     upgradeHref: "/tools/decision-delay-exposure",
     upgradeLabel: "Run the instrument",
+    semanticAccessRoute: "/tools/decision-delay-exposure",
   },
 
   provenance_demo: {
@@ -84,8 +108,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "free",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
+    ownerProduct: null,
+    capabilityType: "governance",
     upgradeHref: "/provenance/demo",
     upgradeLabel: "View the demo",
+    semanticAccessRoute: "/provenance/demo",
   },
 
   decision_centre: {
@@ -95,8 +122,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "free",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
+    ownerProduct: null,
+    capabilityType: "continuity",
     upgradeHref: "/decision-centre",
     upgradeLabel: "Open Decision Centre",
+    semanticAccessRoute: "/decision-centre",
   },
 
   executive_reporting: {
@@ -110,9 +140,12 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.executive_reporting!.entitlementSlug,
     ],
     primaryProductCode: "executive_reporting",
+    ownerProduct: "executive_reporting",
+    capabilityType: "reporting",
     upgradeHref: "/diagnostics/executive-reporting",
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     upgradeLabel: `Access Executive Reporting — ${CATALOG.executive_reporting!.displayPrice}`,
+    semanticAccessRoute: "/diagnostics/executive-reporting",
   },
 
   strategy_room: {
@@ -128,9 +161,12 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.strategy_room_extended!.entitlementSlug,
     ],
     primaryProductCode: "strategy_room",
+    ownerProduct: "strategy_room",
+    capabilityType: "execution",
     upgradeHref: "/strategy-room",
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     upgradeLabel: `Enter Strategy Room — ${CATALOG.strategy_room!.displayPrice}`,
+    semanticAccessRoute: "/strategy-room",
   },
 
   strategy_room_extended: {
@@ -144,9 +180,12 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.strategy_room_extended!.entitlementSlug,
     ],
     primaryProductCode: "strategy_room_extended",
+    ownerProduct: "strategy_room_extended",
+    capabilityType: "execution",
     upgradeHref: "/strategy-room",
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     upgradeLabel: `Extended access — ${CATALOG.strategy_room_extended!.displayPrice}`,
+    semanticAccessRoute: "/strategy-room",
   },
 
   governed_case_detail: {
@@ -157,8 +196,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "free",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
+    ownerProduct: null,
+    capabilityType: "continuity",
     upgradeHref: "/decision-centre",
     upgradeLabel: "View in Decision Centre",
+    semanticAccessRoute: "/decision-centre",
   },
 
   return_brief: {
@@ -172,8 +214,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.professional!.entitlementSlug,
     ],
     primaryProductCode: "professional",
-    upgradeHref: "/pricing",
+    ownerProduct: "professional",
+    capabilityType: "outcome_loop",
+    upgradeHref: "/professionals",
     upgradeLabel: "Upgrade to Professional",
+    semanticAccessRoute: "/return-brief",
   },
 
   benchmark_context_basic: {
@@ -184,8 +229,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "free",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
-    upgradeHref: "/decision-centre",
-    upgradeLabel: "Contribute your outcome",
+    ownerProduct: null,
+    capabilityType: "benchmark",
+    upgradeHref: "/benchmark-context",
+    upgradeLabel: "Understand Benchmark Context",
+    semanticAccessRoute: "/decision-centre",
   },
 
   benchmark_context_advanced: {
@@ -199,8 +247,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.professional!.entitlementSlug,
     ],
     primaryProductCode: "professional",
-    upgradeHref: "/pricing",
-    upgradeLabel: "Upgrade to Professional",
+    ownerProduct: "professional",
+    capabilityType: "benchmark",
+    upgradeHref: "/benchmark-context",
+    upgradeLabel: "Upgrade to Professional for advanced benchmarks",
+    semanticAccessRoute: "/decision-centre",
   },
 
   retainer_oversight: {
@@ -218,8 +269,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.retainer_institutional!.entitlementSlug,
     ],
     primaryProductCode: "retainer_core",
+    ownerProduct: "retainer_core",
+    capabilityType: "oversight",
     upgradeHref: "/oversight",
     upgradeLabel: "Enquire about retained oversight",
+    semanticAccessRoute: "/oversight",
   },
 
   counsel_review: {
@@ -230,8 +284,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "contracted",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
+    ownerProduct: null,
+    capabilityType: "governance",
     upgradeHref: "/counsel",
     upgradeLabel: "Request counsel review",
+    semanticAccessRoute: "/counsel",
   },
 
   boardroom: {
@@ -242,8 +299,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     accessLevel: "contracted",
     requiredEntitlementSlugs: [],
     primaryProductCode: null,
-    upgradeHref: "/strategy-room",
-    upgradeLabel: "Enquire about boardroom access",
+    ownerProduct: "boardroom_mode",
+    capabilityType: "governance",
+    upgradeHref: "/boardroom-mode",
+    upgradeLabel: "Understand Boardroom Mode",
+    semanticAccessRoute: "/boardroom-mode",
   },
 
   professional_tier: {
@@ -257,8 +317,11 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
       CATALOG.professional!.entitlementSlug,
     ],
     primaryProductCode: "professional",
-    upgradeHref: "/pricing",
-    upgradeLabel: "Upgrade to Professional",
+    ownerProduct: "professional",
+    capabilityType: "continuity",
+    upgradeHref: "/professionals",
+    upgradeLabel: "Start Professional",
+    semanticAccessRoute: "/professional",
   },
 };
 

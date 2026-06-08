@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 
 import Layout from "@/components/Layout";
+import CheckoutButton from "@/components/commercial/CheckoutButton";
+import { CATALOG } from "@/lib/commercial/catalog";
 
 const GOLD = "#C9A96E";
 const VOID = "rgb(3 3 5)";
@@ -179,7 +181,19 @@ function SecondaryLink({
   );
 }
 
+const SUBSCRIPTION_INCLUDES = [
+  { title: "Unlimited active governed cases", detail: "Keep every active case running without expiry." },
+  { title: "Return Brief generation", detail: "Structured re-engagement documents for governed cases that need continuity." },
+  { title: "Advanced Benchmark Context", detail: "Multi-dimensional comparison across anonymized opted-in cohorts." },
+  { title: "Client-safe evidence export", detail: "Export a client-safe version of the governed record — chain-of-custody intact." },
+  { title: "Client-safe case sharing", detail: "Share governed cases with reviewers or auditors via a protected view." },
+  { title: "Organisation workspace", detail: "Invite members and collaborate on governed cases." },
+];
+
 export default function ProfessionalsLandingPage() {
+  const professional = CATALOG.professional;
+  const annualProduct = CATALOG.professional_annual;
+
   return (
     <Layout
       title="Professional Access | Abraham of London"
@@ -424,6 +438,78 @@ export default function ProfessionalsLandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Professional subscription tier */}
+        {professional && (
+          <section className="border-t border-white/[0.06] px-6 py-14 lg:px-12 lg:py-16" id="subscription">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-10">
+                <Eyebrow>Professional subscription</Eyebrow>
+                <h2
+                  className="mt-5 max-w-[44rem]"
+                  style={{
+                    ...serif,
+                    color: "rgba(255,255,255,0.90)",
+                    fontSize: "clamp(1.9rem, 5vw, 3rem)",
+                    lineHeight: 1,
+                    fontStyle: "italic",
+                  }}
+                >
+                  The continuity layer for governed cases.
+                </h2>
+                <p className="mt-4 max-w-[68ch] text-[14px] leading-[1.85] text-white/[0.52]">
+                  Professional unlocks unlimited active governed cases, Return Brief generation, advanced benchmark context, and client-safe evidence export.
+                  It is not required to create a case or run a diagnostic — only when governed cases need to continue actively beyond their initial cycle.
+                </p>
+              </div>
+
+              <div className="mb-10 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                {SUBSCRIPTION_INCLUDES.map((item) => (
+                  <div key={item.title} className="border border-white/[0.07] bg-white/[0.015] p-4">
+                    <p style={{ ...mono, fontSize: "8.5px", letterSpacing: "0.14em", color: `${GOLD}CC` }}>{item.title}</p>
+                    <p className="mt-2 text-[12px] leading-[1.7] text-white/[0.45]">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2 lg:max-w-[620px]">
+                {/* Monthly */}
+                <div className="border p-5" style={{ borderColor: `${GOLD}28`, background: `${GOLD}06` }}>
+                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>Monthly</p>
+                  <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.88)", marginBottom: "4px" }}>{professional.displayPrice}</p>
+                  <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.28)", marginBottom: "16px" }}>cancel anytime · 7-day trial available</p>
+                  <CheckoutButton
+                    productCode="professional"
+                    label="Start Professional"
+                    stripePriceId={professional.stripePriceId ?? ""}
+                    stripeProductId={professional.stripeProductId ?? ""}
+                  />
+                  <Link
+                    href="/decision-centre"
+                    style={{ ...mono, display: "block", marginTop: "10px", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", textDecoration: "none" }}
+                  >
+                    Already subscribed → Decision Centre
+                  </Link>
+                </div>
+
+                {/* Annual */}
+                {annualProduct && (
+                  <div className="border border-white/[0.08] bg-white/[0.015] p-5">
+                    <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "8px" }}>Annual</p>
+                    <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.72)", marginBottom: "4px" }}>{annualProduct.displayPrice}</p>
+                    <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>billed annually · ~2 months free</p>
+                    <CheckoutButton
+                      productCode="professional_annual"
+                      label="Start Professional (annual)"
+                      stripePriceId={annualProduct.stripePriceId ?? ""}
+                      stripeProductId={annualProduct.stripeProductId ?? ""}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </Layout>
   );

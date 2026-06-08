@@ -1114,7 +1114,7 @@ export const PRODUCT_SURFACE_REGISTRY: ProductSurface[] = [
     displayName: 'Professional Subscription',
     family: 'continuity_and_subscription',
     surfaceType: 'product',
-    route: '/pricing',
+    route: '/professionals',
     apiRoutes: ['/api/billing/checkout', '/api/admin/commercial'],
     adminRoutes: ['/admin/commercial'],
     catalogProductCode: 'professional',
