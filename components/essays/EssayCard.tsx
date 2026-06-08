@@ -114,8 +114,14 @@ export default function EssayCard({
         <SmartCover
           src={post.coverImage}
           alt={post.title}
-          aspect={(post.coverAspect as any) || "landscape"}
-          fit={(post.coverFit as any) || "cover"}
+          aspect="landscape"
+          fit={
+            // Portrait/book covers must use contain inside the landscape slot
+            // so the full image is visible and the card height stays consistent.
+            post.coverAspect === "book" || post.coverAspect === "portrait" || post.coverAspect === "square"
+              ? "contain"
+              : (post.coverFit as any) || "cover"
+          }
           position={post.coverPosition || "center"}
           priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
