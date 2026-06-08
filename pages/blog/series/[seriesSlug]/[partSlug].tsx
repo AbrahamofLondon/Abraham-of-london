@@ -163,6 +163,9 @@ const BlogSeriesPartReader: NextPage<Props> = ({
               src={ogImage}
               title={part.title}
               priority
+              maxWidth="840px"
+              maxHeight="460px"
+              objectFit="cover"
               className="mb-10"
             />
           ) : null}

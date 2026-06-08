@@ -8,9 +8,9 @@
 //   3. Title (serif, large)
 //   4. Excerpt / dek
 //   5. Compact one-line meta (read time · access · imprint)
-//   6. Cover image — restrained width, after header, before body
-//   7. Essay body (readable column width)
-//   8. TOC sidebar (compact, secondary, sticky)
+//   6. Cover image — aspect-aware sizing, after header, before body
+//   7. Essay body (readable column, max ~720px)
+//   8. TOC sidebar (compact, secondary, sticky, xl+ only)
 //   9. Post-body slot (NextStepCTA etc.)
 
 import * as React from "react";
@@ -58,7 +58,7 @@ export type ClassicBlogReaderProps = {
   date?: string | null;
   tags?: string[];
   readTime?: string | number | null;
-  /** Resolved cover URL. Pass null/undefined to suppress the cover. */
+  /** Resolved cover URL. Pass null/undefined to suppress the cover section entirely. */
   cover?: string | null;
   coverAspect?: CoverAspect | null;
   coverFit?: CoverFit | null;
@@ -94,13 +94,30 @@ function normalizeReadTime(value?: string | number | null): string | null {
   return String(value);
 }
 
-function resolveAspect(aspect?: CoverAspect | null): string {
+type AspectInfo = {
+  ratio: string;       // CSS aspect-ratio value e.g. "3 / 4"
+  isPortrait: boolean; // true for book / square
+  maxWidth: string;    // CSS max-width for the cover container
+  maxHeight: string;   // CSS max-height for the cover container
+  fit: "cover" | "contain";
+};
+
+function resolveAspectInfo(aspect?: CoverAspect | null): AspectInfo {
   switch ((aspect || "auto").toLowerCase()) {
-    case "wide":   return "16 / 9";
-    case "book":   return "3 / 4";
-    case "square": return "1 / 1";
-    case "standard": return "4 / 3";
-    default:       return "3 / 2";
+    case "book":
+      // Portrait 3:4 — smaller, object-contain so the image isn't cropped
+      return { ratio: "3 / 4", isPortrait: true, maxWidth: "420px", maxHeight: "520px", fit: "contain" };
+    case "square":
+      return { ratio: "1 / 1", isPortrait: true, maxWidth: "480px", maxHeight: "480px", fit: "contain" };
+    case "standard":
+      // 4:3 — moderate landscape
+      return { ratio: "4 / 3", isPortrait: false, maxWidth: "760px", maxHeight: "460px", fit: "cover" };
+    case "wide":
+      // 16:9 — full cinematic landscape
+      return { ratio: "16 / 9", isPortrait: false, maxWidth: "820px", maxHeight: "460px", fit: "cover" };
+    default:
+      // 3:2 default — moderate landscape
+      return { ratio: "3 / 2", isPortrait: false, maxWidth: "760px", maxHeight: "460px", fit: "cover" };
   }
 }
 
@@ -113,42 +130,46 @@ function resolvePosition(pos?: CoverPosition | null): string {
   return allowed.has(n) ? n : "center";
 }
 
-// ─── Cover renderer ───────────────────────────────────────────────────────────
+// ─── Aspect-aware cover renderer ─────────────────────────────────────────────
 
 function BlogCoverImage({
   src,
   alt,
-  aspect,
+  aspectInfo,
   position,
 }: {
   src: string;
   alt: string;
-  aspect: string;
+  aspectInfo: AspectInfo;
   position: string;
 }) {
+  const { ratio, maxWidth, maxHeight, fit } = aspectInfo;
+
   return (
-    <div className="mx-auto w-full max-w-[860px]">
+    <div
+      className="mx-auto w-full"
+      style={{ maxWidth }}
+    >
       <div
-        className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-[0_20px_80px_-40px_rgba(0,0,0,0.9)]"
-        style={{ aspectRatio: aspect }}
+        className="relative overflow-hidden rounded-xl border border-white/10 bg-black/40"
+        style={{ aspectRatio: ratio, maxHeight }}
       >
         <Image
           src={src}
           alt={alt}
           fill
           priority
-          className="object-cover"
-          style={{ objectPosition: position }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 860px"
+          style={{ objectFit: fit, objectPosition: position }}
+          sizes={`(max-width: 768px) 100vw, ${maxWidth}`}
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.36))",
-          }}
-        />
+        {/* Subtle gradient veil — only for landscape/cover images */}
+        {!aspectInfo.isPortrait && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.28))" }}
+          />
+        )}
       </div>
     </div>
   );
@@ -180,7 +201,7 @@ export default function ClassicBlogReader({
   const resolvedReadTime = normalizeReadTime(readTime);
   const formattedDate = formatDate(date);
   const hasCover = !!cover;
-  const heroAspect = resolveAspect(coverAspect);
+  const aspectInfo = resolveAspectInfo(coverAspect);
   const heroPosition = resolvePosition(coverPosition);
 
   const cleanCode = React.useMemo(() => {
@@ -241,7 +262,7 @@ export default function ClassicBlogReader({
             </div>
           </div>
 
-          {/* Category · date · tag pill */}
+          {/* Category · date · tag */}
           <div className="mt-8 inline-flex flex-wrap items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.30em] text-white/30">
             {category && <span className="text-amber-200/60">{category}</span>}
             {formattedDate && (
@@ -281,70 +302,84 @@ export default function ClassicBlogReader({
         </div>
       </div>
 
-      {/* ── 2. Cover image — after header, before body ─────────────────── */}
+      {/* ── 2. Cover image — aspect-aware, after header, before body ──── */}
       {hasCover && cover && (
-        <div className="border-b border-white/[0.06] bg-[#0a0a0d] px-6 py-8 lg:px-10">
+        <div className="border-b border-white/[0.06] bg-[#0a0a0d] px-6 py-6 lg:px-10">
           <BlogCoverImage
             src={cover}
             alt={title}
-            aspect={heroAspect}
+            aspectInfo={aspectInfo}
             position={heroPosition}
           />
         </div>
       )}
 
       {/* ── 3. Essay body + sidebar ────────────────────────────────────── */}
-      <div className="mx-auto max-w-5xl px-6 py-12 lg:px-10">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+      {/*
+          Grid: max-w-[1240px] outer container.
+          xl+: two fixed columns — ~720px body + 240px sidebar — with 88px gap.
+          Below xl: single-column, sidebar hidden (moves out of flow).
+          This keeps the body at a comfortable reading width regardless of screen.
+      */}
+      <div className="mx-auto max-w-[1240px] px-6 py-12 lg:px-10">
+        <div
+          className="grid grid-cols-1 gap-y-10 xl:gap-x-[88px]"
+          style={{
+            gridTemplateColumns: "minmax(0, 1fr)",
+          }}
+        >
+          {/* We use an inner wrapper so the body column stays at ~720px max */}
+          <div className="xl:grid xl:grid-cols-[minmax(0,720px)_240px] xl:gap-x-[88px]">
 
-          {/* Body column */}
-          <div className="order-2 lg:col-span-8 lg:order-1">
-            {unlockError ? (
-              <div className="mb-8 flex gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-400">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                {unlockError}
-              </div>
-            ) : loading ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
-              </div>
-            ) : hasValidContent ? (
-              <div className="classic-blog-body">
-                <ClientOnlyMDXRenderer
-                  code={cleanCode}
-                  debug={process.env.NODE_ENV === "development"}
-                />
-              </div>
-            ) : (
-              <div className="py-20 text-center font-mono text-xs uppercase tracking-widest text-white/30">
-                {emptyLabel}
-              </div>
-            )}
-
-            {childrenBottom ? (
-              <div className="mt-12 border-t border-white/[0.07] pt-10">
-                {childrenBottom}
-              </div>
-            ) : null}
-
-            <div className="mt-10 font-mono text-[8px] uppercase tracking-widest text-white/18">
-              {imprint}
-            </div>
-          </div>
-
-          {/* Sidebar TOC — compact, secondary */}
-          {hasValidContent && !loading && !unlockError && (
-            <aside className="order-1 lg:col-span-4 lg:order-2">
-              <div className="h-fit lg:sticky lg:top-24">
-                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.015] p-4">
-                  <div className="mb-3 font-mono text-[8.5px] uppercase tracking-[0.34em] text-amber-200/50">
-                    On This Page
-                  </div>
-                  <SafeTableOfContents delayMs={600} />
+            {/* Body column */}
+            <div>
+              {unlockError ? (
+                <div className="mb-8 flex gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-400">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  {unlockError}
                 </div>
+              ) : loading ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+                </div>
+              ) : hasValidContent ? (
+                <div className="classic-blog-body">
+                  <ClientOnlyMDXRenderer
+                    code={cleanCode}
+                    debug={process.env.NODE_ENV === "development"}
+                  />
+                </div>
+              ) : (
+                <div className="py-20 text-center font-mono text-xs uppercase tracking-widest text-white/30">
+                  {emptyLabel}
+                </div>
+              )}
+
+              {childrenBottom ? (
+                <div className="mt-12 border-t border-white/[0.07] pt-10">
+                  {childrenBottom}
+                </div>
+              ) : null}
+
+              <div className="mt-10 font-mono text-[8px] uppercase tracking-widest text-white/18">
+                {imprint}
               </div>
-            </aside>
-          )}
+            </div>
+
+            {/* Sidebar TOC — compact, secondary, hidden below xl */}
+            {hasValidContent && !loading && !unlockError ? (
+              <aside className="hidden xl:block">
+                <div className="h-fit xl:sticky xl:top-24">
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.012] p-4">
+                    <div className="mb-3 font-mono text-[8px] uppercase tracking-[0.34em] text-white/28">
+                      On This Page
+                    </div>
+                    <SafeTableOfContents delayMs={600} />
+                  </div>
+                </div>
+              </aside>
+            ) : null}
+          </div>
         </div>
       </div>
 

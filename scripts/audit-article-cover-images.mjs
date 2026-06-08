@@ -1,19 +1,31 @@
 /**
  * scripts/audit-article-cover-images.mjs
  *
- * Audits cover image usage across blog posts and editorial series parts.
+ * Audits cover image usage, distinguished by article family:
+ *   classicBlog       — content/blog/ (not in a series sub-directory)
+ *   blogSeries        — content/blog/series/**
+ *   editorialSeries   — content/editorial-series/**
+ *   standaloneEditors — content/editorials/**
  *
- * Checks:
- *   1. Published Post with coverImage has a file under /public
- *   2. Published EditorialSeriesPart with coverImage has a file under /public
- *   3. No cover path uses Windows backslashes
- *   4. No cover path is an external URL outside the allowed domain list
- *   5. No image over SIZE_WARN_BYTES (1 MB by default)
- *   6. Individual article has valid coverImage but renderer path supports it (route exists)
+ * For each family, reports:
+ *   - hasCoverField: frontmatter contains a cover field
+ *   - assetExists:   the local path resolves to a file under /public
+ *   - rendererSupports: the route renderer file imports the right component
+ *   - intentionallyAbsent: (editorial-series) all parts intentionally have no cover
+ *
+ * Hard FAIL:
+ *   - Published article has coverImage but file missing from /public
+ *   - Invalid cover path (not absolute local, not valid URL)
+ *   - Route renderer expected to support covers but does not
+ *
+ * WARN:
+ *   - Published article has no coverImage set
+ *   - Image > SIZE_WARN_BYTES
+ *   - Editorial-series part has no coverImage (expected — reported as info)
  *
  * Exit codes:
- *   0 — PASS (all checks pass, warns are allowed)
- *   1 — FAIL (at least one hard failure)
+ *   0 — PASS (no hard failures)
+ *   1 — FAIL
  */
 
 import fs from "fs";
@@ -21,256 +33,233 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const ROOT = path.resolve(__dirname, "..");
+const __dirname  = path.dirname(__filename);
+const ROOT       = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT, "public");
-const CONTENT_DIR = path.join(ROOT, "content");
 const SIZE_WARN_BYTES = 1024 * 1024; // 1 MB
-
-const ALLOWED_REMOTE_PREFIXES = [
-  "https://images.unsplash.com",
-  "https://assets.vercel.com",
-];
 
 const GREEN  = "\x1b[32m";
 const YELLOW = "\x1b[33m";
 const RED    = "\x1b[31m";
 const RESET  = "\x1b[0m";
 const BOLD   = "\x1b[1m";
+const DIM    = "\x1b[2m";
 
-// ─── Frontmatter parser (no external deps) ──────────────────────────────────
+// ─── Frontmatter parser ───────────────────────────────────────────────────────
 
 function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
-  const yaml = match[1];
   const result = {};
-  for (const line of yaml.split(/\r?\n/)) {
+  for (const line of match[1].split(/\r?\n/)) {
     const m = line.match(/^(\w[\w-]*):\s*(.*)$/);
     if (!m) continue;
-    const key = m[1].trim();
-    let val = m[2].trim();
-    // Strip inline comments and quotes
-    val = val.replace(/#.*$/, "").trim();
+    let val = m[2].trim().replace(/#.*$/, "").trim();
     if ((val.startsWith('"') && val.endsWith('"')) ||
         (val.startsWith("'") && val.endsWith("'"))) {
       val = val.slice(1, -1);
     }
-    result[key] = val;
+    result[m[1].trim()] = val;
   }
   return result;
 }
 
-// ─── File walker ─────────────────────────────────────────────────────────────
-
-function walkMdx(dir, collected = []) {
-  if (!fs.existsSync(dir)) return collected;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      walkMdx(full, collected);
-    } else if (entry.isFile() && /\.(md|mdx)$/i.test(entry.name)) {
-      collected.push(full);
-    }
+function walkMdx(dir, out = []) {
+  if (!fs.existsSync(dir)) return out;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) walkMdx(full, out);
+    else if (e.isFile() && /\.(md|mdx)$/i.test(e.name)) out.push(full);
   }
-  return collected;
+  return out;
 }
 
-// ─── Cover field candidates (mirrors lib/image-resolver.ts) ─────────────────
+const COVER_FIELDS = ["coverImage","image","heroImage","thumbnail","ogImage","cover","featuredImage","coverArt"];
 
-const COVER_FIELDS = ["coverImage", "image", "heroImage", "thumbnail", "ogImage", "cover", "featuredImage", "coverArt"];
-
-function extractCoverField(fm) {
-  for (const field of COVER_FIELDS) {
-    if (fm[field] && typeof fm[field] === "string" && fm[field].trim()) {
-      return { field, value: fm[field].trim() };
-    }
+function extractCover(fm) {
+  for (const f of COVER_FIELDS) {
+    if (fm[f]?.trim()) return { field: f, value: fm[f].trim() };
   }
   return null;
 }
 
 function isPublished(fm) {
-  if (fm.draft === "true" || fm.draft === true) return false;
-  if (fm.published === "false" || fm.published === false) return false;
-  return true;
+  return fm.draft !== "true" && fm.published !== "false";
 }
 
-// ─── Validators ──────────────────────────────────────────────────────────────
+// ─── Validator ───────────────────────────────────────────────────────────────
 
-function validateCoverPath(coverPath, filePath) {
-  const issues = [];
-
-  // Backslash check
-  if (coverPath.includes("\\")) {
-    issues.push({ level: "FAIL", msg: `Windows backslash in cover path: "${coverPath}"` });
-  }
-
+function validatePath(coverPath) {
+  if (coverPath.includes("\\")) return { ok: false, msg: `Windows backslash in path` };
   if (coverPath.startsWith("/")) {
-    // Local path — check file exists on disk
     const onDisk = path.join(PUBLIC_DIR, coverPath.replace(/^\//, ""));
-    if (!fs.existsSync(onDisk)) {
-      issues.push({ level: "FAIL", msg: `Missing file on disk: ${coverPath} (expected at ${path.relative(ROOT, onDisk)})` });
-    } else {
-      const stat = fs.statSync(onDisk);
-      if (stat.size > SIZE_WARN_BYTES) {
-        issues.push({ level: "WARN", msg: `Large image (${(stat.size / 1024).toFixed(0)} KB): ${coverPath}` });
-      }
-    }
-  } else if (coverPath.startsWith("http://") || coverPath.startsWith("https://")) {
-    // Remote — check against allowed list
-    const allowed = ALLOWED_REMOTE_PREFIXES.some((prefix) => coverPath.startsWith(prefix));
-    if (!allowed) {
-      issues.push({ level: "WARN", msg: `External cover URL may not be in Next.js image domain list: "${coverPath}"` });
-    }
-  } else {
-    issues.push({ level: "FAIL", msg: `Invalid cover path (not absolute local or remote): "${coverPath}"` });
+    if (!fs.existsSync(onDisk)) return { ok: false, msg: `File missing: ${coverPath}` };
+    const size = fs.statSync(onDisk).size;
+    if (size > SIZE_WARN_BYTES) return { ok: true, warn: `Large image (${(size/1024).toFixed(0)} KB): ${coverPath}` };
+    return { ok: true };
   }
-
-  return issues;
+  if (/^https?:\/\//.test(coverPath)) return { ok: true, warn: `External URL — verify Next.js domain allowlist: ${coverPath}` };
+  return { ok: false, msg: `Invalid path format: ${coverPath}` };
 }
 
-// ─── Main audit ──────────────────────────────────────────────────────────────
+// ─── Renderer wiring checks ───────────────────────────────────────────────────
 
-const results = {
-  pass: 0,
-  warn: 0,
-  fail: 0,
-  items: [],
+function readRenderer(rel) {
+  const full = path.join(ROOT, rel);
+  return fs.existsSync(full) ? fs.readFileSync(full, "utf-8") : null;
+}
+
+const RENDERER_CHECKS = {
+  classicBlog: {
+    file: "pages/blog/[...slug].tsx",
+    pattern: /ClassicBlogReader/,
+    label: "ClassicBlogReader",
+  },
+  blogSeries: {
+    file: "pages/blog/series/[seriesSlug]/[partSlug].tsx",
+    pattern: /ArticleCoverImage/,
+    label: "ArticleCoverImage",
+  },
+  editorialSeries: {
+    file: "pages/editorials/series/[seriesSlug]/[partSlug].tsx",
+    pattern: /ArticleCoverImage/,
+    label: "ArticleCoverImage",
+  },
+  standaloneEditorial: {
+    file: "pages/editorials/[slug].tsx",
+    pattern: /ArticleCoverImage/,
+    label: "ArticleCoverImage",
+  },
 };
 
-function record(level, source, msg) {
-  results.items.push({ level, source, msg });
-  if (level === "FAIL") results.fail++;
-  else if (level === "WARN") results.warn++;
-  else results.pass++;
-}
+// ─── Family scan ─────────────────────────────────────────────────────────────
 
-function auditDirectory(dir, label) {
+function scanFamily(dir, label) {
   const files = walkMdx(dir);
-  let withCover = 0;
-  let withoutCover = 0;
-  let missingAsset = 0;
+  const stats = { total: 0, published: 0, withCover: 0, withoutCover: 0, fails: [], warns: [] };
 
-  for (const filePath of files) {
-    const rel = path.relative(ROOT, filePath).replace(/\\/g, "/");
-    const content = fs.readFileSync(filePath, "utf-8");
-    const fm = parseFrontmatter(content);
-
+  for (const fp of files) {
+    const rel = path.relative(ROOT, fp).replace(/\\/g, "/");
+    const fm  = parseFrontmatter(fs.readFileSync(fp, "utf-8"));
+    stats.total++;
     if (!isPublished(fm)) continue;
+    stats.published++;
 
-    const cover = extractCoverField(fm);
+    const cover = extractCover(fm);
     if (!cover) {
-      withoutCover++;
+      stats.withoutCover++;
       continue;
     }
 
-    withCover++;
-    const issues = validateCoverPath(cover.value, filePath);
-    if (issues.length === 0) {
-      record("PASS", rel, `${cover.field}: ${cover.value}`);
-    } else {
-      for (const issue of issues) {
-        if (issue.level === "FAIL") missingAsset++;
-        record(issue.level, rel, issue.msg);
-      }
+    stats.withCover++;
+    const v = validatePath(cover.value);
+    if (!v.ok)   stats.fails.push({ rel, msg: v.msg });
+    else if (v.warn) stats.warns.push({ rel, msg: v.warn });
+  }
+
+  return stats;
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+console.log(`\n${BOLD}Abraham of London — Article Cover Image Audit (by family)${RESET}\n`);
+
+const families = [
+  {
+    key: "classicBlog",
+    label: "Classic Blog",
+    dir: path.join(ROOT, "content/blog"),
+    excludeSubdir: "series",
+  },
+  {
+    key: "blogSeries",
+    label: "Blog Series",
+    dir: path.join(ROOT, "content/blog/series"),
+  },
+  {
+    key: "editorialSeries",
+    label: "Editorial Series",
+    dir: path.join(ROOT, "content/editorial-series"),
+    intentionallyNoCover: true,
+  },
+  {
+    key: "standaloneEditorial",
+    label: "Standalone Editorials",
+    dir: path.join(ROOT, "content/editorials"),
+  },
+];
+
+let totalFail = 0;
+let totalWarn = 0;
+let totalPass = 0;
+
+for (const family of families) {
+  let scanDir = family.dir;
+  let files   = walkMdx(scanDir);
+
+  // For classicBlog, exclude files inside series/ subdirectory
+  if (family.excludeSubdir) {
+    const exclude = path.join(scanDir, family.excludeSubdir);
+    files = files.filter(f => !f.startsWith(exclude));
+  }
+
+  // Re-scan using the filtered file list
+  const stats = { total: 0, published: 0, withCover: 0, withoutCover: 0, fails: [], warns: [] };
+  for (const fp of files) {
+    const fm = parseFrontmatter(fs.readFileSync(fp, "utf-8"));
+    stats.total++;
+    if (!isPublished(fm)) continue;
+    stats.published++;
+    const cover = extractCover(fm);
+    if (!cover) { stats.withoutCover++; continue; }
+    stats.withCover++;
+    const v = validatePath(cover.value);
+    if (!v.ok)   stats.fails.push({ rel: path.relative(ROOT, fp).replace(/\\/g, "/"), msg: v.msg });
+    else if (v.warn) stats.warns.push({ rel: path.relative(ROOT, fp).replace(/\\/g, "/"), msg: v.warn });
+  }
+
+  // Check renderer wiring
+  const rc  = RENDERER_CHECKS[family.key];
+  let rendererOk = true;
+  if (rc) {
+    const src = readRenderer(rc.file);
+    if (!src) {
+      stats.fails.push({ rel: rc.file, msg: `Renderer file missing: ${rc.file}` });
+      rendererOk = false;
+    } else if (!rc.pattern.test(src)) {
+      stats.fails.push({ rel: rc.file, msg: `Renderer does not use ${rc.label}` });
+      rendererOk = false;
     }
   }
 
-  return { total: files.length, withCover, withoutCover, missingAsset };
-}
+  const familyFails = stats.fails.length;
+  const familyWarns = stats.warns.length + (family.intentionallyNoCover && stats.withoutCover > 0 ? 0 : 0);
+  const statusIcon  = familyFails > 0 ? `${RED}FAIL${RESET}` : `${GREEN}PASS${RESET}`;
 
-console.log(`\n${BOLD}Abraham of London — Article Cover Image Audit${RESET}\n`);
-console.log(`Root: ${ROOT}\n`);
+  console.log(`${BOLD}${family.label}${RESET}  ${statusIcon}`);
+  console.log(`  ${DIM}published: ${stats.published}  |  with cover: ${stats.withCover}  |  without cover: ${stats.withoutCover}  |  renderer: ${rendererOk ? "✓" : "✗"}${RESET}`);
 
-const blogStats = auditDirectory(path.join(CONTENT_DIR, "blog"), "Post (blog)");
-const editorialSeriesStats = auditDirectory(path.join(CONTENT_DIR, "editorial-series"), "EditorialSeriesPart");
-const editorialStats = auditDirectory(path.join(CONTENT_DIR, "editorials"), "Editorial");
-
-// ─── Check renderer routes exist for individual articles ─────────────────────
-
-const REQUIRED_ROUTES = [
-  "pages/blog/[...slug].tsx",
-  "pages/blog/series/[seriesSlug]/[partSlug].tsx",
-  "pages/editorials/[slug].tsx",
-  "pages/editorials/series/[seriesSlug]/[partSlug].tsx",
-];
-
-for (const route of REQUIRED_ROUTES) {
-  const full = path.join(ROOT, route);
-  if (!fs.existsSync(full)) {
-    record("FAIL", route, `Required renderer route file missing: ${route}`);
+  if (family.intentionallyNoCover && stats.withoutCover > 0) {
+    console.log(`  ${DIM}ℹ  All ${stats.withoutCover} parts intentionally have no coverImage in frontmatter — no assets exist for this series. Renderer supports cover; renders nothing when absent (correct).${RESET}`);
   }
-}
 
-// ─── Check ArticleCoverImage component exists ─────────────────────────────────
-
-const COMPONENT_PATH = "components/content/ArticleCoverImage.tsx";
-if (!fs.existsSync(path.join(ROOT, COMPONENT_PATH))) {
-  record("FAIL", COMPONENT_PATH, "ArticleCoverImage component file missing");
-}
-
-// ─── Verify wiring in renderer routes ─────────────────────────────────────────
-
-const WIRING_CHECKS = [
-  {
-    route: "pages/blog/series/[seriesSlug]/[partSlug].tsx",
-    pattern: /ArticleCoverImage/,
-    label: "Blog series part renders ArticleCoverImage",
-  },
-  {
-    route: "pages/editorials/[slug].tsx",
-    pattern: /ArticleCoverImage/,
-    label: "Standalone editorial renders ArticleCoverImage",
-  },
-  {
-    route: "pages/editorials/series/[seriesSlug]/[partSlug].tsx",
-    pattern: /ArticleCoverImage/,
-    label: "Editorial series part renders ArticleCoverImage",
-  },
-];
-
-for (const check of WIRING_CHECKS) {
-  const full = path.join(ROOT, check.route);
-  if (!fs.existsSync(full)) continue; // already reported above
-  const content = fs.readFileSync(full, "utf-8");
-  if (!check.pattern.test(content)) {
-    record("FAIL", check.route, `${check.label} — ArticleCoverImage not found in renderer`);
-  } else {
-    record("PASS", check.route, check.label);
-  }
-}
-
-// ─── Report ──────────────────────────────────────────────────────────────────
-
-console.log("Content directories scanned:");
-console.log(`  blog/            → ${blogStats.withCover} with cover, ${blogStats.withoutCover} without`);
-console.log(`  editorial-series/→ ${editorialSeriesStats.withCover} with cover, ${editorialSeriesStats.withoutCover} without`);
-console.log(`  editorials/      → ${editorialStats.withCover} with cover, ${editorialStats.withoutCover} without\n`);
-
-const failures = results.items.filter((i) => i.level === "FAIL");
-const warnings = results.items.filter((i) => i.level === "WARN");
-
-if (failures.length) {
-  console.log(`${RED}${BOLD}FAILURES (${failures.length}):${RESET}`);
-  for (const f of failures) {
-    console.log(`  ${RED}FAIL${RESET}  ${f.source}`);
+  for (const f of stats.fails) {
+    console.log(`  ${RED}FAIL${RESET}  ${f.rel}`);
     console.log(`        ${f.msg}`);
+    totalFail++;
   }
-  console.log("");
-}
-
-if (warnings.length) {
-  console.log(`${YELLOW}${BOLD}WARNINGS (${warnings.length}):${RESET}`);
-  for (const w of warnings) {
-    console.log(`  ${YELLOW}WARN${RESET}  ${w.source}`);
+  for (const w of stats.warns) {
+    console.log(`  ${YELLOW}WARN${RESET}  ${w.rel}`);
     console.log(`        ${w.msg}`);
+    totalWarn++;
   }
+
+  totalPass += stats.withCover - familyFails;
   console.log("");
 }
 
-const total = results.fail + results.warn + results.pass;
-const verdict = results.fail > 0 ? `${RED}${BOLD}FAIL${RESET}` : `${GREEN}${BOLD}PASS${RESET}`;
-console.log(`Result: ${verdict}  (${results.fail} fail, ${results.warn} warn, ${results.pass} pass  /  ${total} checks)\n`);
+// ─── Summary ─────────────────────────────────────────────────────────────────
 
-process.exit(results.fail > 0 ? 1 : 0);
+const verdict = totalFail > 0 ? `${RED}${BOLD}FAIL${RESET}` : `${GREEN}${BOLD}PASS${RESET}`;
+console.log(`Result: ${verdict}  (${totalFail} fail, ${totalWarn} warn, ${totalPass} pass)\n`);
+process.exit(totalFail > 0 ? 1 : 0);

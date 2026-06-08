@@ -169,6 +169,9 @@ const EditorialSeriesPartReader: NextPage<Props> = ({
               title={part.title}
               priority
               aspect="3/2"
+              maxWidth="800px"
+              maxHeight="480px"
+              objectFit="cover"
               className="mb-10"
             />
           ) : null}

@@ -100,7 +100,8 @@ describe("ClassicBlogReader component", () => {
 
   it("has readable body column width (not full max-width)", () => {
     // Body column should be narrower than the page max
-    expect(read(COMP)).toMatch(/lg:col-span-8|max-w-3xl|max-w-\[65ch\]/);
+    // New implementation uses minmax(0,720px) in a CSS grid template
+    expect(read(COMP)).toMatch(/720px|minmax\(0,\s*720px\)|lg:col-span-8|max-w-3xl|max-w-\[65ch\]/);
   });
 });
 

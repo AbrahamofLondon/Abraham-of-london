@@ -1,6 +1,11 @@
 // components/content/ArticleCoverImage.tsx
 // Restrained article-level cover renderer for individual post and editorial pages.
 // Returns null when no src — never renders a broken image or empty space.
+//
+// Sizing props:
+//   maxWidth  — CSS value, e.g. "840px" (default "720px")
+//   maxHeight — CSS value, e.g. "460px" (optional, no constraint by default)
+//   objectFit — "cover" | "contain" (default "cover")
 
 import * as React from "react";
 import Image from "next/image";
@@ -14,6 +19,12 @@ export type ArticleCoverImageProps = {
   priority?: boolean;
   caption?: string;
   aspect?: ArticleCoverAspect;
+  /** CSS max-width value — overrides the default 720px */
+  maxWidth?: string;
+  /** CSS max-height value — optional constraint */
+  maxHeight?: string;
+  /** object-fit for the image — default "cover" */
+  objectFit?: "cover" | "contain";
   className?: string;
 };
 
@@ -24,6 +35,9 @@ export default function ArticleCoverImage({
   priority = false,
   caption,
   aspect = "16/9",
+  maxWidth = "720px",
+  maxHeight,
+  objectFit = "cover",
   className,
 }: ArticleCoverImageProps) {
   if (!src) return null;
@@ -31,19 +45,26 @@ export default function ArticleCoverImage({
   const resolvedAlt = alt || (title ? `Cover image for ${title}` : "Article cover image");
   const paddingTop = aspect === "3/2" ? "66.67%" : "56.25%";
 
+  // Compute hint for sizes attr from maxWidth
+  const sizesHint = maxWidth.endsWith("px") ? maxWidth : "720px";
+  const sizesAttr = `(max-width: 768px) 100vw, (max-width: 1200px) 80vw, ${sizesHint}`;
+
   return (
-    <figure className={`w-full${className ? ` ${className}` : ""}`}>
+    <figure
+      className={`w-full${className ? ` ${className}` : ""}`}
+      style={{ maxWidth, marginLeft: "auto", marginRight: "auto" }}
+    >
       <div
         className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30"
-        style={{ paddingTop }}
+        style={{ paddingTop, maxHeight }}
       >
         <Image
           src={src}
           alt={resolvedAlt}
           fill
           priority={priority}
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 720px"
+          style={{ objectFit }}
+          sizes={sizesAttr}
         />
       </div>
       {caption ? (
