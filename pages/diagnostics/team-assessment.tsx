@@ -78,6 +78,7 @@ import NextLayerUnlockedPanel from "@/components/living/NextLayerUnlockedPanel";
 import DecisionAdvantageSummary from "@/components/living/DecisionAdvantageSummary";
 import GovernedActionPanel from "@/components/living/GovernedActionPanel";
 import HumanReviewPrompt from "@/components/living/HumanReviewPrompt";
+import BenchmarkTeamAlignmentPanel from "@/components/product/BenchmarkTeamAlignmentPanel";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
 import DualAxisPromptCard from "@/components/diagnostics/DualAxisPromptCard";
 import GovernanceEvidenceBridge, {
@@ -1597,6 +1598,14 @@ export default function TeamAssessmentPage() {
                     <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px", textAlign: "center" }}>
                       Next earned action is determined by the assessment result. Save to Decision Centre to preserve this record.
                     </p>
+                  </div>
+
+                  {/* ── Team Benchmark Alignment Panel ────────────────────── */}
+                  <div className="mx-auto max-w-2xl mb-6 px-6">
+                    <BenchmarkTeamAlignmentPanel
+                      tier="free"
+                      teamDivergenceScore={overallLeader - overallReality}
+                    />
                   </div>
 
                   {/* ── Detailed bespoke result (secondary) ───────────────── */}

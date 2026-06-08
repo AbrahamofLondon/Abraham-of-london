@@ -150,3 +150,56 @@
 | X posts over 280 chars | 40 | 0 |
 | No-direct-prisma violations | 3 | 0 |
 | Admin nav unregistered routes | 2 | 0 |
+
+---
+
+## Active Flake Register
+
+Flaky tests that pass in isolation but timeout during full parallel suite runs.
+Must be resolved or re-registered before each sprint close.
+
+---
+
+### Flake BF-001 — decision-centre-retainer-memory · public POST route timeout
+
+| Field | Value |
+|-------|-------|
+| **Test file** | `tests/product/decision-centre-retainer-memory.test.ts` |
+| **Test case** | `auth boundary: unauthenticated requests > public POST route module exports a POST handler` |
+| **Failure mode** | `Error: Test timed out in 10000ms` in full parallel suite run; passes reliably in isolation (1.5s) |
+| **Passes in isolation** | Yes — `npx vitest run tests/product/decision-centre-retainer-memory.test.ts` passes 33/33 |
+| **Root cause** | Dynamic `import()` inside test during high-concurrency parallel run; DB connection pool exhaustion or module init latency causes import to exceed default 10 s timeout |
+| **Owner** | Product estate |
+| **Remediation** | Add `{ timeout: 30000 }` to the test, or hoist the dynamic `import()` to top-level `beforeAll` to avoid cold-module-load under concurrency |
+| **Expiry** | 2026-07-08 — must be fixed or re-registered by this date |
+| **First observed** | 2026-06-08 (Benchmark Context Productisation pass) |
+
+### Flake BF-002 — decision-centre-retainer-memory · admin PATCH route timeout (same file)
+
+| Field | Value |
+|-------|-------|
+| **Test file** | `tests/product/decision-centre-retainer-memory.test.ts` |
+| **Test case** | Second timeout failure within same file during same parallel run (different test case) |
+| **Failure mode** | `Error: Test timed out in 10000ms` in full parallel suite; passes in isolation |
+| **Passes in isolation** | Yes |
+| **Root cause** | Same as BF-001 — parallel DB/module contention in full suite run |
+| **Owner** | Product estate |
+| **Remediation** | Same as BF-001 — increase timeout or hoist imports; both flakes will be resolved together |
+| **Expiry** | 2026-07-08 |
+| **First observed** | 2026-06-08 (Benchmark Context Productisation pass) |
+
+### Flake BF-003 — decision-centre-retainer-memory · third timeout (same file)
+
+| Field | Value |
+|-------|-------|
+| **Test file** | `tests/product/decision-centre-retainer-memory.test.ts` |
+| **Test case** | Third timeout in same file during same parallel run |
+| **Failure mode** | `Error: Test timed out in 10000ms`; passes in isolation |
+| **Passes in isolation** | Yes |
+| **Root cause** | Same as BF-001/BF-002 |
+| **Owner** | Product estate |
+| **Remediation** | Same as BF-001 — a single fix to the test file resolves all three |
+| **Expiry** | 2026-07-08 |
+| **First observed** | 2026-06-08 (Benchmark Context Productisation pass) |
+
+**Note:** All three flakes (BF-001, BF-002, BF-003) are in the same test file and share the same root cause. A single remediation resolves all three. The test file passes 33/33 when run in isolation.

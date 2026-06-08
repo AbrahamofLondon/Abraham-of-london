@@ -27,6 +27,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { resolveIdentity } from "@/lib/auth/resolve-identity";
 import { prisma } from "@/lib/prisma";
 import { applyRateLimit } from "@/lib/server/apply-rate-limit";
+import { writeOutcomeContributionFact } from "@/lib/benchmarks/benchmark-fact-writers";
 import type {
   OutcomeContributionRequest,
   OutcomeContributionResponse,
@@ -178,6 +179,31 @@ export default async function handler(
         metadata: anonymised as unknown as Prisma.InputJsonValue,
       },
     });
+
+    // Write anonymised BenchmarkFact — fire and forget, never blocks response
+    {
+      let overallPct: number | null = null;
+      const sectionScores: Array<{ sectionId: string; pct: number }> = [];
+      if (latestStage?.payload && typeof latestStage.payload === "object" && !Array.isArray(latestStage.payload)) {
+        const p = latestStage.payload as Record<string, unknown>;
+        if (typeof p.pct === "number") overallPct = p.pct;
+        if (Array.isArray(p.sectionScores)) {
+          for (const s of p.sectionScores) {
+            if (s && typeof s === "object" && typeof s.sectionId === "string" && typeof s.pct === "number") {
+              sectionScores.push({ sectionId: s.sectionId, pct: s.pct });
+            }
+          }
+        }
+      }
+      writeOutcomeContributionFact({
+        contributionId,
+        assessmentKind: journey.diagnosticType,
+        overallPct,
+        assessmentBand,
+        sectionScores,
+        outcomeState,
+      }).catch(() => {});
+    }
 
     // Mark the case as having contributed an outcome (for deduplication)
     // Store contributionId so user can retract later

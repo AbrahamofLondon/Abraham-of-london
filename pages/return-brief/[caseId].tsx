@@ -23,6 +23,7 @@ import Layout from "@/components/Layout";
 import type { ReturnBriefApiResponse } from "@/pages/api/cases/return-brief";
 import type { ReturnBriefV1 } from "@/lib/product/return-brief-contract";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
+import BenchmarkMovementSignal from "@/components/product/BenchmarkMovementSignal";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -455,6 +456,18 @@ const ReturnBriefPage: NextPage = () => {
             >
               Run new assessment
             </Link>
+          </div>
+
+          {/* ── Benchmark Movement Signal — professional, two-snapshot gate ── */}
+          {/* Shows upgrade prompt until pool threshold is met and user is on professional tier. */}
+          <div style={{ marginTop: "24px" }}>
+            <BenchmarkMovementSignal
+              tier="free"
+              originalImprovementRate={null}
+              currentImprovementRate={null}
+              originalN={0}
+              currentN={0}
+            />
           </div>
 
           {/* Feedback widget */}

@@ -17,6 +17,8 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 
 import {
   PRODUCT_KNOWLEDGE_GRAPH,
@@ -329,5 +331,67 @@ describe("P8.11 — Semantic destination audit passes cleanly", () => {
       expect.fail(`${fails.length} FAIL(s) in semantic destination audit:\n${messages}`);
     }
     expect(fails).toHaveLength(0);
+  });
+});
+
+// ─── P8.12 — Graph node null safety: surface.route null → undefined ───────────
+// Regression tests for the P0 fix: surface nodes must not emit null routes.
+
+describe("P8.12 — Graph node null safety: no null canonicalRoute or accessRoute", () => {
+  const allNodes = Object.values(PRODUCT_KNOWLEDGE_GRAPH);
+
+  it("no graph node has canonicalRoute = null", () => {
+    const nullRoutes = allNodes.filter(n => n.canonicalRoute === null);
+    if (nullRoutes.length > 0) {
+      throw new Error(`Nodes with null canonicalRoute: ${nullRoutes.map(n => n.code).join(", ")}`);
+    }
+    expect(nullRoutes).toHaveLength(0);
+  });
+
+  it("no graph node has accessRoute = null", () => {
+    const nullRoutes = allNodes.filter(n => n.accessRoute === null);
+    if (nullRoutes.length > 0) {
+      throw new Error(`Nodes with null accessRoute: ${nullRoutes.map(n => n.code).join(", ")}`);
+    }
+    expect(nullRoutes).toHaveLength(0);
+  });
+
+  it("surface nodes with null route produce undefined, not null, in canonicalRoute", () => {
+    const surfaceNodes = allNodes.filter(n => n.kind === "surface");
+    for (const node of surfaceNodes) {
+      // canonicalRoute must be string | undefined — never null
+      expect(node.canonicalRoute).not.toBeNull();
+      expect(node.accessRoute).not.toBeNull();
+    }
+  });
+});
+
+// ─── P8.13 — CheckoutButton usage: no invalid props ──────────────────────────
+// Regression test for the P1 fix: professionals.tsx must not pass label=,
+// stripePriceId=, or stripeProductId= to CheckoutButton.
+
+describe("P8.13 — CheckoutButton usage in professionals.tsx", () => {
+  const profPath = join(process.cwd(), "pages/professionals.tsx");
+
+  it("pages/professionals.tsx exists", () => {
+    expect(existsSync(profPath)).toBe(true);
+  });
+
+  it("CheckoutButton has no label= prop", () => {
+    if (!existsSync(profPath)) return;
+    const src = readFileSync(profPath, "utf8");
+    expect(/CheckoutButton[^>]*\blabel=/.test(src)).toBe(false);
+  });
+
+  it("CheckoutButton has no direct stripePriceId= prop", () => {
+    if (!existsSync(profPath)) return;
+    const src = readFileSync(profPath, "utf8");
+    expect(/CheckoutButton[^>]*\bstripePriceId=/.test(src)).toBe(false);
+  });
+
+  it("CheckoutButton has no direct stripeProductId= prop", () => {
+    if (!existsSync(profPath)) return;
+    const src = readFileSync(profPath, "utf8");
+    expect(/CheckoutButton[^>]*\bstripeProductId=/.test(src)).toBe(false);
   });
 });

@@ -22,6 +22,7 @@ import { prisma } from "@/lib/prisma";
 import { composeReturnBriefV1 } from "@/lib/product/return-brief-composer";
 import type { ReturnBriefV1, ReturnBriefComposerSource } from "@/lib/product/return-brief-contract";
 import { applyRateLimit } from "@/lib/server/apply-rate-limit";
+import { writeReturnBriefFact } from "@/lib/benchmarks/benchmark-fact-writers";
 
 // ─── Response types ───────────────────────────────────────────────────────────
 
@@ -256,6 +257,25 @@ async function handlePost(
       generatedAt,
       brief,
     };
+
+    // Write anonymised BenchmarkFact — fire and forget, never blocks response
+    {
+      const existingDecisions =
+        journey.routeDecisions !== null &&
+        typeof journey.routeDecisions === "object" &&
+        !Array.isArray(journey.routeDecisions)
+          ? (journey.routeDecisions as Record<string, unknown>)
+          : {};
+      const hadPriorOutcome = existingDecisions.outcomeContributed === true;
+      const diagnosticType: string | null = null; // not available on journey query; enriched by fact writer if needed
+      writeReturnBriefFact({
+        caseId,
+        diagnosticType,
+        daysSinceCase: daysElapsed,
+        decisionObjectCount: journey.decisionObjects.length,
+        hadPriorOutcome,
+      }).catch(() => {});
+    }
 
     // Store the generated brief in routeDecisions JSON
     const existingRouteDecisions =

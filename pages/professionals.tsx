@@ -478,12 +478,9 @@ export default function ProfessionalsLandingPage() {
                   <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>Monthly</p>
                   <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.88)", marginBottom: "4px" }}>{professional.displayPrice}</p>
                   <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.28)", marginBottom: "16px" }}>cancel anytime · 7-day trial available</p>
-                  <CheckoutButton
-                    productCode="professional"
-                    label="Start Professional"
-                    stripePriceId={professional.stripePriceId ?? ""}
-                    stripeProductId={professional.stripeProductId ?? ""}
-                  />
+                  <CheckoutButton productCode="professional" originPath="/professionals">
+                    Start Professional
+                  </CheckoutButton>
                   <Link
                     href="/decision-centre"
                     style={{ ...mono, display: "block", marginTop: "10px", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", textDecoration: "none" }}
@@ -498,12 +495,9 @@ export default function ProfessionalsLandingPage() {
                     <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "8px" }}>Annual</p>
                     <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.72)", marginBottom: "4px" }}>{annualProduct.displayPrice}</p>
                     <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>billed annually · ~2 months free</p>
-                    <CheckoutButton
-                      productCode="professional_annual"
-                      label="Start Professional (annual)"
-                      stripePriceId={annualProduct.stripePriceId ?? ""}
-                      stripeProductId={annualProduct.stripeProductId ?? ""}
-                    />
+                    <CheckoutButton productCode="professional_annual" originPath="/professionals">
+                      Start Annual Professional
+                    </CheckoutButton>
                   </div>
                 )}
               </div>

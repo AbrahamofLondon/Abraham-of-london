@@ -251,7 +251,7 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     capabilityType: "benchmark",
     upgradeHref: "/benchmark-context",
     upgradeLabel: "Upgrade to Professional for advanced benchmarks",
-    semanticAccessRoute: "/decision-centre",
+    semanticAccessRoute: "/benchmark-context",
   },
 
   retainer_oversight: {
@@ -321,7 +321,7 @@ export const FEATURES: Record<FeatureSlug, FeatureDefinition> = {
     capabilityType: "continuity",
     upgradeHref: "/professionals",
     upgradeLabel: "Start Professional",
-    semanticAccessRoute: "/professional",
+    semanticAccessRoute: "/professionals",
   },
 };
 

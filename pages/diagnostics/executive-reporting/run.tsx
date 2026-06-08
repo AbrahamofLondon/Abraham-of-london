@@ -5,6 +5,8 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import BenchmarkNarrativeBlock from "@/components/product/BenchmarkNarrativeBlock";
+import { buildUnavailableBenchmarkNarrative } from "@/lib/benchmarks/benchmark-narrative";
 import CostOfDelaySection from "@/components/diagnostics/CostOfDelaySection";
 import { trackStageStart, trackStageComplete, trackDropoff } from "@/lib/analytics/funnel";
 import { track } from "@/lib/analytics/track";
@@ -1655,6 +1657,15 @@ function ResultSurface({
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(252,165,165,0.35)", fontStyle: "italic", marginBottom: "1.5rem" }}>
           If unresolved, this condition compounds.
         </p>
+
+        {/* ── Benchmark Narrative — pool-gated, professional ──────────── */}
+        {/* Renders pool-building state until minimumPoolSize = 50 is reached. */}
+        <div style={{ marginTop: "24px", marginBottom: "8px" }}>
+          <BenchmarkNarrativeBlock
+            narrative={buildUnavailableBenchmarkNarrative("Building benchmark pool for Executive Report")}
+            variant="full"
+          />
+        </div>
 
         {/* Run key */}
         <div className="mb-4 flex items-center gap-2">

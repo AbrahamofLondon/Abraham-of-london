@@ -194,18 +194,18 @@ function buildSurfaceNodes(): Record<string, ProductGraphNode> {
     }
 
     const status: ProductGraphNode["status"] =
-      surface.currentExposureStatus === "hidden" || surface.currentExposureStatus === "removed"
+      surface.currentExposureStatus === "hidden" ||
+      surface.currentExposureStatus === "dormant" ||
+      surface.currentExposureStatus === "retired"
         ? "dormant"
-        : surface.currentExposureStatus === "controlled_access"
-        ? "active"
         : "active";
 
     nodes[nodeCode] = {
       code: nodeCode,
       kind: "surface",
       name: surface.displayName,
-      canonicalRoute: surface.route,
-      accessRoute: surface.route,
+      canonicalRoute: surface.route ?? undefined,
+      accessRoute: surface.route ?? undefined,
       accessMode,
       catalogCode: surface.catalogProductCode ?? undefined,
       surfaceCode: sid,

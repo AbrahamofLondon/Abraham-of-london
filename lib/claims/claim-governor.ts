@@ -25,8 +25,39 @@ export type ClaimDecision = {
   required?: string;
 };
 
+/**
+ * BENCHMARK THRESHOLD GOVERNANCE
+ *
+ * Two thresholds govern benchmark logic. They are NOT interchangeable:
+ *
+ * BENCHMARK_INTERNAL_COHORT_MIN_N = 5
+ *   Internal-only. Used by benchmark-engine.ts when computing a cohort
+ *   position for a single governed session against a small internal cohort
+ *   (e.g. admin capability stack, paid corridor intelligence).
+ *   This threshold MUST NOT gate any user-facing benchmark output.
+ *   It is exploratory computation only.
+ *
+ * BENCHMARK_PUBLIC_CLAIM_MIN_N = 50
+ *   Public claim threshold. Every user-facing benchmark output — every
+ *   BenchmarkContextPanel, BenchmarkNarrativeBlock, BenchmarkStrip,
+ *   BenchmarkCaseBadge, BenchmarkTeamAlignmentPanel, BenchmarkMovementSignal —
+ *   must suppress output and show the "building" state below this number.
+ *   Defined authoritatively in lib/benchmarks/benchmark-context-authority.ts
+ *   as BENCHMARK_CAPABILITY.minimumPoolSize = 50.
+ *
+ * DO NOT use CLAIM_THRESHOLDS.benchmarkSampleSize (= BENCHMARK_INTERNAL_COHORT_MIN_N)
+ * for any public claim. If you are rendering benchmark output for a user,
+ * check BENCHMARK_CAPABILITY.minimumPoolSize = 50, not this value.
+ */
+export const BENCHMARK_INTERNAL_COHORT_MIN_N = 5;
+
+/** @deprecated Use BENCHMARK_INTERNAL_COHORT_MIN_N directly. This field
+ * is retained for backward compatibility with benchmark-engine.ts.
+ * Do NOT use for public claim gates — public threshold is 50. */
 export const CLAIM_THRESHOLDS = {
-  benchmarkSampleSize: 5,
+  /** Internal cohort minimum for exploratory per-session computation only.
+   *  NOT for public claims. Public threshold = 50 (BENCHMARK_CAPABILITY.minimumPoolSize). */
+  benchmarkSampleSize: BENCHMARK_INTERNAL_COHORT_MIN_N,
   predictiveLongitudinalDepth: 2,
   teamWideRespondents: 3,
   teamWideCompletionRate: 0.5,

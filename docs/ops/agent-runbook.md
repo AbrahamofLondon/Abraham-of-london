@@ -25,6 +25,8 @@ pnpm exec prisma validate
 pnpm exec prisma migrate status
 
 # 3. TypeScript — all errors, no suppression
+# Run synchronously. Do not background this step. Read the full output before proceeding.
+# next build runs stricter checks than tsc --noEmit alone — if in doubt, run next build locally.
 pnpm exec tsc --noEmit --pretty false 2>&1 | head -60
 
 # 4. GMI test suite (when GMI files are involved)
@@ -253,9 +255,57 @@ The following steps are **always MANUAL_ONLY**. Agents must not attempt them and
 
 ---
 
-## 8. Product Estate Audit Sequence
+## 8. Page Creation Pre-Check — Hard Standard
 
-Run this after product, route, catalog, admin, checkout, entitlement, brief, or GMI changes.
+**No agent may create a new page file until all seven checks below are complete.**
+
+The product estate is too large for page creation by intuition. If any check returns a match, extend the existing file — do not create a new one.
+
+### Required checks (run in order)
+
+```bash
+# 1. Pages Router — exact and partial matches
+ls pages/<route>.tsx pages/<route>/index.tsx 2>/dev/null
+find pages -name "*<keyword>*" 2>/dev/null
+
+# 2. App Router
+find app -name "page.tsx" | xargs grep -l "<keyword>" 2>/dev/null
+ls app/<route>/page.tsx 2>/dev/null
+
+# 3. Route registry (product-access-link-resolver.ts KNOWN_ROUTES)
+grep '"/<route>"' lib/product/product-access-link-resolver.ts
+
+# 4. Product surface registry
+grep "'<route>'\|\"<route>\"" lib/product/product-surface-registry.ts
+
+# 5. Feature entitlements
+grep '"/<route>"' lib/product/feature-entitlements.ts
+
+# 6. Navigation and layout
+grep '"/<route>"' components/Layout.tsx components/Navigation.tsx components/nav/*.tsx 2>/dev/null
+
+# 7. Full codebase href scan
+grep -r '"/<route>"' pages/ app/ components/ lib/ --include="*.tsx" --include="*.ts" | head -20
+```
+
+### Decision rule
+
+| Check result | Action |
+|---|---|
+| Route exists as a page file | Read the existing file. Extend it if the new content fits its purpose. |
+| Route exists in surface registry or KNOWN_ROUTES but no page file | Create the page. Register in KNOWN_ROUTES if not already present. |
+| No match anywhere | Create the page. Add to KNOWN_ROUTES and surface registry. |
+| Partial name match (e.g. `/professionals` when creating `/professional`) | **Stop. Read the matched file first.** Confirm the purposes are truly distinct before creating a second file. If in doubt, merge into the existing page. |
+
+### Why this rule exists
+
+In June 2026, `pages/professional.tsx` was created without checking that `pages/professionals.tsx` already existed. The new page was later deleted and its content merged into the existing file. The `professional_subscription` surface was also found pointing to `/pricing` — a routing loop that would have been caught by check 4. Both errors were preventable by running these checks first.
+
+---
+
+## 9. Product Estate Audit Sequence
+
+Run this after product, route, catalog, admin, checkout, entitlement, brief, or GMI changes. Always run after any page creation or route change.
 
 ```bash
 # Static estate inventory and reality grades

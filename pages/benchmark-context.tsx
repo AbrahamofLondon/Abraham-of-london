@@ -14,6 +14,8 @@
  *   - What users receive at each tier
  *   - Access boundary: Professional / GMI / Retainer
  *   - Below-threshold behaviour
+ *   - Product-specific integration points (where benchmark context appears)
+ *   - Metric registry — what each product surface contributes
  */
 
 import type { NextPage } from "next";
@@ -23,6 +25,7 @@ import * as React from "react";
 
 import Layout from "@/components/Layout";
 import { BENCHMARK_CAPABILITY, BENCHMARK_DIMENSIONS } from "@/lib/benchmarks/benchmark-context-authority";
+import { BENCHMARK_METRIC_REGISTRY } from "@/lib/benchmarks/benchmark-metric-registry";
 import { CATALOG } from "@/lib/commercial/catalog";
 
 const GOLD = "#C9A96E";
@@ -224,6 +227,119 @@ const BenchmarkContextPage: NextPage = () => {
             <p style={{ ...mono, fontSize: "7.5px", lineHeight: 1.8, color: "rgba(255,255,255,0.28)" }}>
               {BENCHMARK_CAPABILITY.disclaimer}
             </p>
+          </section>
+
+          {/* Where benchmark context appears — product integration map */}
+          <section style={{ marginBottom: "48px" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "20px" }}>
+              Where benchmark context appears
+            </p>
+            <p style={{ ...mono, fontSize: "9px", lineHeight: 1.8, color: "rgba(255,255,255,0.42)", marginBottom: "20px" }}>
+              Benchmark Context is an estate-wide capability. It appears automatically within governed products
+              when the relevant cohort has reached threshold.
+            </p>
+
+            {[
+              {
+                surface: "fast_diagnostic" as const,
+                route: "/diagnostics/fast",
+                label: "Fast Diagnostic",
+                tier: "free",
+                tierLabel: "Free",
+                tierColor: TIER_COLORS.free,
+                description: "Aggregate outcome rates (improvement, finding accuracy, recommendation usefulness) compared against all FAST_DIAGNOSTIC opted-in cases. Role-filtered comparison available.",
+              },
+              {
+                surface: "team_assessment" as const,
+                route: "/diagnostics/team-assessment",
+                label: "Team Assessment",
+                tier: "professional",
+                tierLabel: "Professional",
+                tierColor: TIER_COLORS.professional,
+                description: "Team divergence score benchmarked against opted-in team assessments. Organisation and industry comparisons included.",
+              },
+              {
+                surface: "decision_centre" as const,
+                route: "/decision-centre",
+                label: "Decision Centre",
+                tier: "free",
+                tierLabel: "Free (basic) / Professional (advanced)",
+                tierColor: TIER_COLORS.free,
+                description: "Benchmark badge on active case view. Professional tier unlocks multi-dimension comparison: organisation, industry, sector.",
+              },
+              {
+                surface: "executive_report" as const,
+                route: "/diagnostics/executive-reporting",
+                label: "Executive Reporting",
+                tier: "professional",
+                tierLabel: "Professional",
+                tierColor: TIER_COLORS.professional,
+                description: "Benchmark narrative block in the executive report — contextualises the case position within the cohort in structured prose for board-level review.",
+              },
+              {
+                surface: "return_brief" as const,
+                route: "/return-brief",
+                label: "Return Brief",
+                tier: "professional",
+                tierLabel: "Professional",
+                tierColor: TIER_COLORS.professional,
+                description: "Benchmark movement signal — shows how the cohort improvement rate has shifted since the original case was governed. Used as a re-engagement signal.",
+              },
+            ].map((item) => {
+              const profile = BENCHMARK_METRIC_REGISTRY[item.surface];
+              return (
+                <div
+                  key={item.surface}
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    background: "rgba(255,255,255,0.01)",
+                    padding: "16px 20px",
+                    marginBottom: "1px",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", gap: "12px", alignItems: "baseline" }}>
+                      <Link
+                        href={item.route}
+                        style={{ ...mono, fontSize: "9.5px", color: "rgba(255,255,255,0.72)", textDecoration: "none" }}
+                      >
+                        {item.label}
+                      </Link>
+                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.22)" }}>
+                        {profile.assessmentKind}
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        ...mono,
+                        fontSize: "7px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        padding: "2px 7px",
+                        border: `1px solid ${item.tierColor.border}`,
+                        background: item.tierColor.bg,
+                        color: item.tierColor.color,
+                      }}
+                    >
+                      {item.tierLabel}
+                    </span>
+                  </div>
+                  <p style={{ ...mono, fontSize: "8.5px", lineHeight: 1.7, color: "rgba(255,255,255,0.38)" }}>
+                    {item.description}
+                  </p>
+                  {profile.freeMetrics.length > 0 && (
+                    <p style={{ ...mono, fontSize: "7.5px", color: "rgba(110,231,183,0.55)", marginTop: "6px" }}>
+                      Free metrics: {profile.freeMetrics.join(", ")}
+                    </p>
+                  )}
+                  {profile.professionalMetrics.length > 0 && (
+                    <p style={{ ...mono, fontSize: "7.5px", color: `${GOLD}88`, marginTop: "3px" }}>
+                      Professional metrics: {profile.professionalMetrics.join(", ")}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </section>
 
           {/* Access CTAs */}

@@ -422,7 +422,7 @@ Address the primary identified risk: 2 claim(s) in the investor narrative would 
   "caseReference": "PROOF-INVESTOR_PITCH_UNSUPPORTED_TRACTION-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-06-08T13:45:12.293Z"
+  "generatedAt": "2026-06-08T16:42:36.216Z"
 }
 ```
 

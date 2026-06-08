@@ -84,12 +84,16 @@ describe("catalog integrity", () => {
       expect(CATALOG.additional_collaborator!.stripePriceId).toBeNull();
     });
 
-    it("keeps GMI Q1 active until the Q2 report supersedes it", () => {
-      expect(CATALOG.gmi_q1_2026!.active).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid");
-      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false);
-      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Current decision window: Q2 2026");
+    it("keeps GMI Q1 archived and hidden after Q2 supersedes it", () => {
+      // Q2 is now the current edition. Q1 is archived: still purchasable but hidden from pricing.
+      expect(CATALOG.gmi_q1_2026!.active).toBe(true);            // archived + Stripe IDs → active
+      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid"); // archived editions remain "paid"
+      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);  // has Stripe IDs
+      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(true); // superseded_by_q2
+      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Superseded by Q2 2026 edition");
+      // Q2 is now the visible current edition
+      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(false);
+      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Current decision window: Q2 2026");
     });
 
     it("keeps Boardroom Brief as the active first paid proof-of-value product", () => {

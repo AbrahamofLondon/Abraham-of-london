@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780926315181-yp9xea",
-    "caseReference": "FULFIL-17809263",
+    "caseId": "fulfilment-1780936955589-ns4i25",
+    "caseReference": "FULFIL-17809369",
     "scenario": "Product Launch Under Revenue Pressure",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-06-08T13:45:15.185Z",
+        "timestamp": "2026-06-08T16:42:35.593Z",
         "actorId": "system",
         "notes": "Dossier generated for: Product Launch Under Revenue Pressure",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-06-08T13:45:15.185Z"
+    "generatedAt": "2026-06-08T16:42:35.593Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17809263",
-    "generatedAt": "2026-06-08T13:45:15.185Z",
+    "caseReference": "FULFIL-17809369",
+    "generatedAt": "2026-06-08T16:42:35.593Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {

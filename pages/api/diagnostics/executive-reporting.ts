@@ -2,6 +2,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { handleDiagnosticSubmit } from "@/lib/diagnostics/api-submit";
+import { writeExecutiveReportFact } from "@/lib/benchmarks/benchmark-fact-writers";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   return handleDiagnosticSubmit(req, res, {
@@ -34,6 +35,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         operatorReviewRequired: severity === "critical" || severity === "high",
         dueDays: 14,
       });
+
+      // Write anonymised BenchmarkFact — fire and forget, never blocks response
+      writeExecutiveReportFact({
+        reference,
+        score,
+        severity,
+      }).catch(() => {});
     },
   });
 }

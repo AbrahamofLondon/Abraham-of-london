@@ -10,6 +10,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { writeDiagnosticSubmitFact } from "@/lib/benchmarks/benchmark-fact-writers";
 import { rateLimitCheck, getClientIp, createRateLimitHeaders } from "@/lib/server/rate-limit-unified";
 import { readAccessCookie } from "@/lib/server/auth/cookies";
 import {
@@ -623,6 +624,26 @@ export default async function handler(
     });
   } catch {
     // non-fatal — verification record must not block the diagnostic result
+  }
+
+  // Write anonymised BenchmarkFact — fire and forget, authenticated users only, never blocks response
+  if (actor.authenticated) {
+    const metadata = isObject(payload.metadata) ? payload.metadata : {};
+    writeDiagnosticSubmitFact({
+      diagnosticRef,
+      kind: payload.kind,
+      pct: payload.summary.pct,
+      severity: payload.summary.severity,
+      sectionScores: Array.isArray(payload.summary.sectionScores)
+        ? payload.summary.sectionScores.map((s) => ({ sectionId: s.sectionId, pct: s.pct }))
+        : [],
+      role: safeString(payload.respondent?.role) ||
+            safeString(isObject(metadata.respondentData) ? (metadata.respondentData as Record<string, unknown>).respondentRole : undefined) ||
+            null,
+      headcountBand: safeString(metadata.headcountBand) || null,
+      sector: safeString(metadata.sector) || null,
+      maturity: safeString(metadata.maturity) || null,
+    }).catch(() => {});
   }
 
   return res.status(200).json({

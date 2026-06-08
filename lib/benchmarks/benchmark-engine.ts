@@ -1,3 +1,14 @@
+/**
+ * lib/benchmarks/benchmark-engine.ts
+ *
+ * Internal benchmark computation engine.
+ *
+ * Threshold note:
+ *   CLAIM_THRESHOLDS.benchmarkSampleSize = 5 is used here for internal
+ *   per-session cohort computation only. This is NOT the public claim
+ *   threshold. Public display must enforce BENCHMARK_CAPABILITY.minimumPoolSize = 50.
+ *   See lib/claims/claim-governor.ts → BENCHMARK_INTERNAL_COHORT_MIN_N.
+ */
 import { CLAIM_THRESHOLDS } from "@/lib/claims/claim-governor";
 
 export type BenchmarkMetricFact = {

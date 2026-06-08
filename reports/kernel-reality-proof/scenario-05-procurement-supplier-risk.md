@@ -406,7 +406,7 @@ Address the primary identified risk: Supply interruption creates inability to me
   "caseReference": "PROOF-PROCUREMENT_SUPPLIER_RISK-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-06-08T13:45:12.193Z"
+  "generatedAt": "2026-06-08T16:42:36.203Z"
 }
 ```
 

@@ -10,9 +10,12 @@
  * - Always shows disclaimer (self-reported, not a guarantee).
  * - "Building" state shown when n < 50 — no fake data.
  * - Improvement rate shown as a percentage, not a raw outcome.
+ * - When tier = "free" and professionalDimensionsAvailable = true, shows upgrade signal.
+ * - role filter narrows the benchmark cohort to similar decision-maker roles.
  *
  * Usage:
  *   <BenchmarkContextPanel assessmentKind="FAST_DIAGNOSTIC" />
+ *   <BenchmarkContextPanel assessmentKind="FAST_DIAGNOSTIC" role="leader" tier="free" />
  *
  * Placement:
  * - AssessmentResultSurface (after result, before conversion panel)
@@ -20,6 +23,7 @@
  */
 
 import * as React from "react";
+import Link from "next/link";
 import type { BenchmarkContext } from "@/lib/product/outcome-contribution-contract";
 import type { BenchmarkContextApiResponse } from "@/pages/api/cases/benchmark-context";
 
@@ -37,6 +41,21 @@ const serif: React.CSSProperties = {
 export type BenchmarkContextPanelProps = {
   /** Optional: filter to a specific assessment kind */
   assessmentKind?: string | null;
+  /** Optional: filter benchmark cohort to similar decision-maker roles */
+  role?: string | null;
+  /**
+   * Access tier for the current user.
+   * "free" — show aggregate rates + upgrade signal for professional dimensions.
+   * "professional" — suppress upgrade signal.
+   * Defaults to "free".
+   */
+  tier?: "free" | "professional" | "retainer";
+  /**
+   * Whether advanced benchmark dimensions are available at the cohort level.
+   * When true and tier = "free", an upgrade signal is shown.
+   * Defaults to true (optimistic: show signal unless caller explicitly suppresses).
+   */
+  professionalDimensionsAvailable?: boolean;
   /** Pre-loaded context (skips fetch if provided) */
   preloaded?: BenchmarkContext | null;
 };
@@ -89,6 +108,9 @@ const TIME_LABELS: Record<string, string> = {
 
 export default function BenchmarkContextPanel({
   assessmentKind,
+  role,
+  tier = "free",
+  professionalDimensionsAvailable = true,
   preloaded,
 }: BenchmarkContextPanelProps) {
   const [ctx, setCtx] = React.useState<BenchmarkContext | null>(preloaded ?? null);
@@ -98,9 +120,11 @@ export default function BenchmarkContextPanel({
     if (preloaded) return;
 
     let cancelled = false;
-    const url = assessmentKind
-      ? `/api/cases/benchmark-context?assessmentKind=${encodeURIComponent(assessmentKind)}`
-      : "/api/cases/benchmark-context";
+    const params = new URLSearchParams();
+    if (assessmentKind) params.set("assessmentKind", assessmentKind);
+    if (role) params.set("role", role);
+    const query = params.toString();
+    const url = query ? `/api/cases/benchmark-context?${query}` : "/api/cases/benchmark-context";
 
     fetch(url)
       .then((r) => r.json())
@@ -248,6 +272,48 @@ export default function BenchmarkContextPanel({
       >
         {ctx.disclaimer}
       </p>
+
+      {/* Upgrade signal — free tier only, when professional dimensions are available */}
+      {tier === "free" && professionalDimensionsAvailable && (
+        <div
+          style={{
+            marginTop: "0.65rem",
+            paddingTop: "0.65rem",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+          }}
+        >
+          <p
+            style={{
+              ...mono,
+              fontSize: "6.5px",
+              letterSpacing: "0.10em",
+              color: "rgba(255,255,255,0.28)",
+              lineHeight: 1.6,
+            }}
+          >
+            Advanced benchmark context — role, industry, organisation, and sector comparisons — requires Professional.
+          </p>
+          <Link
+            href="/professionals"
+            style={{
+              ...mono,
+              fontSize: "6.5px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: `${GOLD}CC`,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Upgrade →
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

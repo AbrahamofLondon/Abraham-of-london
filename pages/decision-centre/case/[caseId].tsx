@@ -40,6 +40,7 @@ import ChainOfCustodyTimeline, {
   buildChainOfCustodyFromCase,
 } from "@/components/product/ChainOfCustodyTimeline";
 import DecisionOutcomeCapture from "@/components/product/DecisionOutcomeCapture";
+import BenchmarkCaseBadge from "@/components/product/BenchmarkCaseBadge";
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import OutcomeContributionPanel from "@/components/product/OutcomeContributionPanel";
 import ContextualUpgradePrompt from "@/components/product/ContextualUpgradePrompt";
@@ -846,6 +847,15 @@ const CaseDetailPage: NextPage = () => {
             <DecisionOutcomeCapture
               caseId={c.caseId}
               source="case_detail"
+            />
+          </div>
+
+          {/* ── BENCHMARK CONTEXT BADGE — pool-gated ─────────────────────── */}
+          <div style={{ marginTop: "16px" }}>
+            <BenchmarkCaseBadge
+              assessmentKind={c.sourceType ?? null}
+              tier="free"
+              showLearnLink
             />
           </div>
 
