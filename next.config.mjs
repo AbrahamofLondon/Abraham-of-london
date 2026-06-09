@@ -101,6 +101,10 @@ const nextConfig = {
   },
 
   experimental: {
+    // Limit page-data collection workers to 2 to avoid OOM on the 8 GB Vercel
+    // Standard build machine. Webpack gets ~4 GB; 2 workers × ~1 GB = ~2 GB;
+    // leaving ~2 GB for OS and heap residuals.
+    cpus: 2,
     optimizePackageImports: [
       "lucide-react",
       "@radix-ui/react-icons",
