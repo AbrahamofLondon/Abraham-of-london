@@ -87,6 +87,22 @@ function CompactEssayCard({ post, className }: { post: EssayCardItem; className?
 }
 
 // ---------------------------------------------------------------------------
+// Portrait-cover detection
+//
+// Returns true when the post's cover is a portrait or book image that should
+// NOT be forced into a landscape frame (which creates a large dark matte).
+// Landscape/wide/square covers continue to use the standard landscape slot.
+// ---------------------------------------------------------------------------
+
+export function isPortraitCover(post: Pick<EssayCardItem, "coverAspect" | "coverFit">): boolean {
+  const aspect = post.coverAspect;
+  if (aspect === "book" || aspect === "portrait") return true;
+  // Explicit portrait-ratio strings from frontmatter ("3/4", "4/5", "3:4", "4:5")
+  if (typeof aspect === "string" && /^[34][/:][45]$/.test(aspect)) return true;
+  return false;
+}
+
+// ---------------------------------------------------------------------------
 // Default variant (full card with cover)
 // ---------------------------------------------------------------------------
 
@@ -101,6 +117,9 @@ export default function EssayCard({
   }
 
   const hasSeries = !!(post.seriesLabel && post.seriesTitle);
+  // Portrait/book covers: use a compact centred portrait frame rather than
+  // a wide landscape matte that leaves empty dark space on either side.
+  const portraitCover = isPortraitCover(post);
 
   return (
     <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
@@ -114,14 +133,11 @@ export default function EssayCard({
         <SmartCover
           src={post.coverImage}
           alt={post.title}
-          aspect="landscape"
-          fit={
-            // Portrait/book covers must use contain inside the landscape slot
-            // so the full image is visible and the card height stays consistent.
-            post.coverAspect === "book" || post.coverAspect === "portrait" || post.coverAspect === "square"
-              ? "contain"
-              : (post.coverFit as any) || "cover"
-          }
+          // Portrait/book covers: 3/4 portrait frame, centred, max 300 px wide.
+          // Landscape covers: standard 16/10 landscape slot (full card width).
+          aspect={portraitCover ? "book" : "landscape"}
+          fit={portraitCover ? "cover" : ((post.coverFit as any) || "cover")}
+          className={portraitCover ? "max-w-[300px] mx-auto" : undefined}
           position={post.coverPosition || "center"}
           priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
