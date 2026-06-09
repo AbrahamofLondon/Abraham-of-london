@@ -89,24 +89,32 @@ describe("EssayCard — isPortraitCover helper", () => {
 describe("EssayCard default variant — portrait cover frame", () => {
   const CARD = "components/essays/EssayCard.tsx";
 
-  it("SmartCover aspect is conditional — not hardcoded to \"landscape\"", () => {
+  it("portrait branch is separate from landscape — if (portraitCover) guard exists", () => {
     const src = read(CARD);
-    // The aspect prop must be a conditional expression, not a static string
-    // Pattern: aspect={portraitCover ? "book" : "landscape"} or equivalent
-    expect(src).not.toMatch(/aspect=["']landscape["']/);
+    // The portrait path is a distinct branch, not a ternary mixing both into SmartCover.
+    // Pattern: if (portraitCover) { return ... }
+    expect(src).toMatch(/if\s*\(\s*portraitCover\s*\)/);
   });
 
-  it("portrait cover uses aspect=\"book\" (3/4 portrait frame)", () => {
-    expect(read(CARD)).toMatch(/["']book["']/);
+  it("portrait cover uses aspect=\"book\" or a fixed-width column (not full-card-width)", () => {
+    const src = read(CARD);
+    // Either aspect="book" OR the side-by-side column approach (w-[160px]/w-[220px]/w-[240px])
+    // Both prevent the full-width landscape matte.
+    expect(src).toMatch(/["']book["']|w-\[\d{3}px\]/);
   });
 
-  it("portrait cover has max-width constraint preventing full-card-width expansion", () => {
-    // max-w-[280px] through max-w-[340px] is acceptable per spec
-    expect(read(CARD)).toMatch(/max-w-\[2[89][0-9]px\]|max-w-\[3[0-3][0-9]px\]|max-w-\[300px\]/);
+  it("portrait cover prevents full-card-width expansion — fixed column or max-width", () => {
+    const src = read(CARD);
+    // Side-by-side layout: fixed-width left column (w-[Xpx]) constrains the cover width.
+    // Or legacy max-w approach. Either prevents the wide dark matte.
+    expect(src).toMatch(/w-\[\d{3}px\]|max-w-\[\d{3}px\]/);
   });
 
-  it("portrait cover frame is centred with mx-auto", () => {
-    expect(read(CARD)).toMatch(/mx-auto/);
+  it("portrait cover layout does not make the image fill a wide card container", () => {
+    const src = read(CARD);
+    // The portrait branch must NOT have SmartCover with landscape aspect
+    // as its only image approach — that's the broken state.
+    expect(src).not.toMatch(/portraitCover.*aspect=["']landscape["']/);
   });
 
   it("portrait cover uses fit=\"cover\" (fills frame, no letterboxing)", () => {
@@ -129,9 +137,9 @@ describe("EssayCard default variant — landscape cover frame", () => {
     expect(read(CARD)).toMatch(/["']landscape["']/);
   });
 
-  it("non-portrait posts fall back to landscape aspect", () => {
-    // The conditional must have a : "landscape" branch
-    expect(read(CARD)).toMatch(/:\s*["']landscape["']/);
+  it("non-portrait posts use landscape aspect in the landscape branch", () => {
+    // The landscape branch (after portrait early-return) uses aspect="landscape" directly.
+    expect(read(CARD)).toMatch(/aspect=["']landscape["']/);
   });
 });
 

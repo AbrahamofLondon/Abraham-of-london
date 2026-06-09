@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CardShell } from "@/components/primitives/CardShell";
 import { SmartCover } from "@/components/primitives/SmartCover";
+import Image from "next/image";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -117,10 +118,103 @@ export default function EssayCard({
   }
 
   const hasSeries = !!(post.seriesLabel && post.seriesTitle);
-  // Portrait/book covers: use a compact centred portrait frame rather than
-  // a wide landscape matte that leaves empty dark space on either side.
+  // Portrait/book covers: side-by-side layout (cover left, text right).
+  // This avoids the wide-landscape-matte problem where a centred portrait image
+  // sits in a full-width card with empty dark space on either side.
   const portraitCover = isPortraitCover(post);
 
+  // ── Portrait card: horizontal book-shelf layout ─────────────────────────────
+  if (portraitCover) {
+    return (
+      <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
+        <div
+          className="ds-panel rounded-lg overflow-hidden flex transition-all cursor-pointer hover:-translate-y-0.5 hover:shadow-[var(--ds-shadow-lg)]"
+          style={{
+            transitionDuration: "var(--ds-duration-base)",
+            transitionTimingFunction: "var(--ds-ease-standard)",
+          }}
+        >
+          {/* Left: portrait book cover — fixed-width, stretches to card height */}
+          <div
+            className="relative w-[160px] shrink-0 min-h-[240px] sm:w-[220px] sm:min-h-[280px]"
+            style={{ backgroundColor: "var(--ds-background-muted, #1a1a1e)" }}
+          >
+            <Image
+              src={post.coverImage || "/assets/images/writing-desk.webp"}
+              alt={post.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              style={{ objectPosition: post.coverPosition || "center" }}
+              sizes="(max-width: 640px) 160px, 220px"
+              priority={priority}
+            />
+          </div>
+
+          {/* Right: text content */}
+          <div className="flex flex-1 flex-col p-5 min-w-0 sm:p-6">
+            {/* Series badge */}
+            {hasSeries && (
+              <div className="mb-3 flex items-center gap-2">
+                <span
+                  className="rounded-full px-3 py-1 text-[9px] font-mono uppercase tracking-[0.3em]"
+                  style={{
+                    backgroundColor: "rgba(201,150,58,0.12)",
+                    color: "var(--ds-accent)",
+                    border: "1px solid rgba(201,150,58,0.25)",
+                  }}
+                >
+                  {post.seriesLabel}
+                  {post.partNumber != null && post.partOf != null
+                    ? ` · Part ${post.partNumber} of ${post.partOf}`
+                    : ""}
+                </span>
+              </div>
+            )}
+
+            {/* Meta */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono uppercase tracking-[0.32em]">
+              {post.date ? <span className="ds-accent">{post.date}</span> : null}
+              {post.readTime ? <span className="ds-text-subtle">{post.readTime}</span> : null}
+            </div>
+
+            {/* Title */}
+            <h2 className="mt-3 font-serif text-[1.2rem] leading-[1.05] tracking-[-0.02em] transition-colors sm:text-[1.4rem] ds-text">
+              {post.title}
+            </h2>
+
+            {/* Excerpt */}
+            {post.excerpt ? (
+              <p className="mt-3 line-clamp-3 text-sm leading-relaxed ds-text-muted flex-1">
+                {post.excerpt}
+              </p>
+            ) : (
+              <div className="flex-1" />
+            )}
+
+            {/* Footer: tags + CTA */}
+            <div className="mt-5 flex items-center justify-between gap-4 border-t pt-4 ds-border">
+              <div className="flex min-w-0 flex-wrap gap-2">
+                {(post.tags || []).slice(0, 2).map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border px-3 py-1 text-[9px] font-mono uppercase tracking-[0.22em] ds-border ds-panel-alt ds-text-muted"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.32em] ds-accent whitespace-nowrap">
+                Open
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  // ── Landscape card: standard stacked layout ─────────────────────────────────
   return (
     <Link href={post.url || "#"} className={["group block", className].filter(Boolean).join(" ")}>
       <CardShell
@@ -133,11 +227,8 @@ export default function EssayCard({
         <SmartCover
           src={post.coverImage}
           alt={post.title}
-          // Portrait/book covers: 3/4 portrait frame, centred, max 300 px wide.
-          // Landscape covers: standard 16/10 landscape slot (full card width).
-          aspect={portraitCover ? "book" : "landscape"}
-          fit={portraitCover ? "cover" : ((post.coverFit as any) || "cover")}
-          className={portraitCover ? "max-w-[300px] mx-auto" : undefined}
+          aspect="landscape"
+          fit={(post.coverFit as any) || "cover"}
           position={post.coverPosition || "center"}
           priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
