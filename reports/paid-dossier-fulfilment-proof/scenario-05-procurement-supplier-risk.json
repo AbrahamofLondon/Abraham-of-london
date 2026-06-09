@@ -1,7 +1,7 @@
 {
   "record": {
-    "caseId": "fulfilment-1780939241557-i5hqun",
-    "caseReference": "FULFIL-17809392",
+    "caseId": "fulfilment-1781010313593-8c8lf8",
+    "caseReference": "FULFIL-17810103",
     "scenario": "Procurement Supplier Risk",
     "status": "dossier_generated",
     "dossierTier": "full_dossier",
@@ -21,7 +21,7 @@
     "reviewEvents": [
       {
         "eventType": "FULFILMENT_GENERATED",
-        "timestamp": "2026-06-08T17:20:41.564Z",
+        "timestamp": "2026-06-09T13:05:13.605Z",
         "actorId": "system",
         "notes": "Dossier generated for: Procurement Supplier Risk",
         "payload": {
@@ -32,11 +32,11 @@
     ],
     "deliverable": true,
     "blockReasons": [],
-    "generatedAt": "2026-06-08T17:20:41.564Z"
+    "generatedAt": "2026-06-09T13:05:13.606Z"
   },
   "artefact": {
-    "caseReference": "FULFIL-17809392",
-    "generatedAt": "2026-06-08T17:20:41.564Z",
+    "caseReference": "FULFIL-17810103",
+    "generatedAt": "2026-06-09T13:05:13.606Z",
     "kernelVersion": "1.0.0",
     "contractVersion": "1.0.0",
     "classification": {
