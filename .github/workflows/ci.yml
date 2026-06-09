@@ -79,4 +79,9 @@ jobs:
       - name: Build (Netlify-safe)
         # TODO: replace with strict command once build is stable
         # Currently non-blocking to allow merge during recovery.
+        # NEXT_SKIP_TYPE_CHECK=1 mirrors Vercel: type errors are already caught
+        # by the dedicated Typecheck steps above; running tsc again inside
+        # next build doubles compile time and risks OOM on constrained runners.
+        env:
+          NEXT_SKIP_TYPE_CHECK: "1"
         run: pnpm run build:netlify:safe

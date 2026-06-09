@@ -58,4 +58,10 @@ jobs:
           find . -name "*.mdx" -not -path "./node_modules/*" -exec grep -l $'\x00' {} + 2>/dev/null | xargs -r echo "Error: Null byte detected in:" || true
 
       - name: Next.js Build (safe)
+        # NEXT_SKIP_TYPE_CHECK=1 mirrors Vercel: type errors are already caught
+        # by the TypeScript Check step above; running tsc again inside next build
+        # doubles compile time and risks OOM on constrained runners.
+        env:
+          NEXT_SKIP_TYPE_CHECK: "1"
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm build:netlify:safe
