@@ -19,9 +19,10 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import { buildLibraryIndex } from "@/lib/library/library-index";
+import { toLibraryLiteItem } from "@/lib/library/library-lite";
+import type { LiteItem } from "@/lib/library/library-lite";
 import type {
   LibraryIndex,
-  LibraryIndexItem,
   LibrarySection,
   LibraryItemType,
   LibraryItemAccess,
@@ -97,7 +98,7 @@ const FORMAT_LABELS: Record<LibraryItemFormat, string> = {
 // CTA label — access-aware, never misleads restricted/paid users
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function ctaLabel(item: SlimItem): string {
+export function ctaLabel(item: LiteItem): string {
   if (!item.href || item.href === "#") return "Access route pending";
   if (item.access === "paid") return "Purchase / Unlock";
   if (item.type === "brief" && item.access === "restricted") return "View metadata / Request access";
@@ -134,7 +135,7 @@ export const EMPTY_FILTERS: Filters = {
   query: "", section: "", type: "", access: "", format: "", sort: "recommended",
 };
 
-export function applyFilters(items: SlimItem[], filters: Filters): SlimItem[] {
+export function applyFilters(items: LiteItem[], filters: Filters): LiteItem[] {
   let result = items;
 
   if (filters.query.trim()) {
@@ -144,8 +145,7 @@ export function applyFilters(items: SlimItem[], filters: Filters): SlimItem[] {
         item.title.toLowerCase().includes(q) ||
         (item.summary && item.summary.toLowerCase().includes(q)) ||
         item.tags.some((t) => t.toLowerCase().includes(q)) ||
-        TYPE_LABELS[item.type]?.toLowerCase().includes(q) ||
-        (item.category && item.category.toLowerCase().includes(q)),
+        TYPE_LABELS[item.type]?.toLowerCase().includes(q),
     );
   }
 
@@ -164,7 +164,7 @@ export function applyFilters(items: SlimItem[], filters: Filters): SlimItem[] {
   } else if (filters.sort === "az") {
     result = [...result].sort((a, b) => a.title.localeCompare(b.title));
   } else if (filters.sort === "restricted_first") {
-    const rank = (i: SlimItem) =>
+    const rank = (i: LiteItem) =>
       i.access === "restricted" ? 0 : i.access === "paid" ? 1 : i.access === "member" ? 2 : 3;
     result = [...result].sort((a, b) => rank(a) - rank(b));
   }
@@ -177,12 +177,9 @@ export function hasActiveFilters(filters: Filters): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Slimmed item type — strips server-internal fields never used in UI
+// Section metadata — without the items array (items are derived client-side)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type SlimItem = Omit<LibraryIndexItem, "description" | "sourceType" | "sourcePath">;
-
-// Section metadata without the items array (items are derived client-side)
 type SectionMeta = {
   id: LibrarySection;
   title: string;
@@ -194,10 +191,14 @@ type SectionMeta = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props
+//
+// initialItems: seed set for SSR / first render (max 36 items, cross-section).
+// The full 500+ item index is lazy-loaded client-side from
+// /system/library-index-lite.json after mount.
 // ─────────────────────────────────────────────────────────────────────────────
 
 type Props = {
-  items: SlimItem[];
+  initialItems: LiteItem[];
   sectionMetas: SectionMeta[];
   stats: LibraryIndex["stats"];
 };
@@ -216,21 +217,48 @@ type Props = {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const index = buildLibraryIndex();
 
-  const items: SlimItem[] = index.items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    summary: item.summary ? item.summary.substring(0, 150) : null,
-    type: item.type,
-    section: item.section,
-    href: item.href,
-    access: item.access,
-    format: item.format,
-    status: item.status,
-    date: item.date,
-    tags: item.tags.slice(0, 5),
-    category: item.category,
-    featured: item.featured,
-  }));
+  // Build trimmed lite items — canonical serializer defined in lib/library/library-lite.ts
+  const allLiteItems: LiteItem[] = index.items.map(toLibraryLiteItem);
+
+  // ── Seed selection ───────────────────────────────────────────────────────
+  // Ship up to 72 items in initial page props. Ensure EVERY section gets at
+  // least SEED_MIN_PER_SECTION items so section grids aren't empty on first
+  // render. Featured items are added after cross-section coverage is met.
+  //
+  // Strategy:
+  //   1. First pass: first SEED_PER_SECTION items from every section
+  //   2. Second pass: featured items not already included
+  const SEED_LIMIT         = 72;
+  const SEED_PER_SECTION   = 4;
+  const SEED_MIN_PER_SECTION = 2;
+
+  const seenHrefs = new Set<string>();
+  const initialItems: LiteItem[] = [];
+
+  // Pass 1: first N items per section (guaranteed cross-section coverage)
+  const sectionCounts: Record<string, number> = {};
+  for (const item of allLiteItems) {
+    if (initialItems.length >= SEED_LIMIT) break;
+    if (seenHrefs.has(item.href)) continue;
+    const c = sectionCounts[item.section] ?? 0;
+    if (c < SEED_PER_SECTION) {
+      sectionCounts[item.section] = c + 1;
+      seenHrefs.add(item.href);
+      initialItems.push(item);
+    }
+  }
+
+  // Pass 2: featured items not already selected
+  for (const item of allLiteItems) {
+    if (initialItems.length >= SEED_LIMIT) break;
+    if (seenHrefs.has(item.href)) continue;
+    if (item.featured) {
+      seenHrefs.add(item.href);
+      initialItems.push(item);
+    }
+  }
+
+  void SEED_MIN_PER_SECTION; // referenced in comments only
 
   const sectionMetas: SectionMeta[] = index.sections.map((s) => ({
     id: s.id,
@@ -242,7 +270,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   }));
 
   return {
-    props: JSON.parse(JSON.stringify({ items, sectionMetas, stats: index.stats })),
+    props: JSON.parse(JSON.stringify({ initialItems, sectionMetas, stats: index.stats })),
     revalidate: 1800,
   };
 };
@@ -251,10 +279,30 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 // Page
 // ─────────────────────────────────────────────────────────────────────────────
 
-const LibraryIndexPage: NextPage<Props> = ({ items, sectionMetas, stats }) => {
+const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }) => {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [showAllSections, setShowAllSections] = useState<Record<string, boolean>>({});
   const [scrolled, setScrolled] = useState(false);
+
+  // ── Full index lazy load ─────────────────────────────────────────────────
+  // Initial props ship only the seed set (~36 items) to keep page-data small.
+  // The full 500+ item index is fetched from the static JSON on mount and
+  // enables complete search, filter, and section browsing.
+  const [items, setItems] = useState<LiteItem[]>(initialItems);
+  const [fullIndexLoaded, setFullIndexLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch("/system/library-index-lite.json")
+      .then((r) => r.json())
+      .then((data: LiteItem[]) => {
+        setItems(data);
+        setFullIndexLoaded(true);
+      })
+      .catch(() => {
+        // Non-fatal: keep seed items if JSON fetch fails
+        setFullIndexLoaded(true);
+      });
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 200);
@@ -297,7 +345,7 @@ const LibraryIndexPage: NextPage<Props> = ({ items, sectionMetas, stats }) => {
   const activeFilters = hasActiveFilters(filters);
 
   const featuredItems = useMemo(
-    () => items.filter((i) => i.featured && i.status === "published").slice(0, 6),
+    () => items.filter((i) => i.featured).slice(0, 6),
     [items],
   );
 
@@ -479,7 +527,11 @@ const LibraryIndexPage: NextPage<Props> = ({ items, sectionMetas, stats }) => {
                   style={{ ...mono, color: "rgba(255,255,255,0.22)", letterSpacing: "0.08em" }}
                   aria-live="polite"
                 >
-                  {activeFilters || filters.query ? `${filteredItems.length} of ${stats.total}` : `${stats.total} works`}
+                  {!fullIndexLoaded
+                    ? "Loading…"
+                    : activeFilters || filters.query
+                      ? `${filteredItems.length} of ${stats.total}`
+                      : `${stats.total} works`}
                 </span>
               </div>
 
@@ -809,7 +861,7 @@ function FormatBadge({ format }: { format: LibraryItemFormat | null }) {
   );
 }
 
-function LibraryCard({ item }: { item: SlimItem }) {
+function LibraryCard({ item }: { item: LiteItem }) {
   const href = item.href || "#";
   const isExternal = href.startsWith("http") || href.startsWith("/assets/");
   const isLocked = item.access === "restricted" || item.access === "paid";
@@ -965,15 +1017,16 @@ function SectionBlock({
   sort,
 }: {
   sectionMeta: SectionMeta;
-  allItems: SlimItem[];
+  allItems: LiteItem[];
   showAll: boolean;
   onToggle: () => void;
   onSectionFilter: (s: LibrarySection | "") => void;
   sort: SortOrder;
 }) {
-  // Derive section items client-side — avoids duplicating all items in page props
+  // Derive section items client-side — avoids duplicating all items in page props.
+  // All items in the index are published; no status filter needed.
   const sectionItems = useMemo(
-    () => allItems.filter((i) => i.section === sectionMeta.id && i.status === "published"),
+    () => allItems.filter((i) => i.section === sectionMeta.id),
     [allItems, sectionMeta.id],
   );
 

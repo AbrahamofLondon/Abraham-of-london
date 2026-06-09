@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm contentlayer2 build && node scripts/pre-build.mjs && tsx scripts/build-pdf-registry-json.ts && cross-env NODE_OPTIONS='--max-old-space-size=6144' next build --webpack && node scripts/clean-standalone.mjs",
+  "buildCommand": "pnpm contentlayer2 build && node scripts/pre-build.mjs && tsx scripts/build-pdf-registry-json.ts && tsx scripts/generate-library-index-lite.ts && cross-env NODE_OPTIONS='--max-old-space-size=6144' next build --webpack && node scripts/clean-standalone.mjs",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "ignoreCommand": "node scripts/vercel-ignore-build.mjs",
   "env": {
