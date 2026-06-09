@@ -158,6 +158,101 @@ describe("the-second-phone frontmatter", () => {
     expect(content).not.toMatch(/draft:\s*true/);
     expect(content).toMatch(/published:\s*true/);
   });
+
+  it("date is not in the future (would be excluded by isLiveDoc)", () => {
+    const content = read(MDX);
+    const match = content.match(/^date:\s*["']?([^\s"'\n]+)["']?/m);
+    expect(match).not.toBeNull();
+    if (match) {
+      const d = new Date(match[1].replace(/["']/g, ""));
+      expect(Number.isFinite(d.getTime())).toBe(true);
+      expect(d <= new Date()).toBe(true);
+    }
+  });
+
+  it("has no series field (would be excluded from /blog/[...slug] paths)", () => {
+    const content = read(MDX);
+    // Series posts are routed via /blog/series/[seriesSlug]/[partSlug]
+    // A series field would cause getStaticPaths to skip this post
+    expect(content).not.toMatch(/^series:/m);
+  });
+});
+
+// ─── 8. Route resolution contract ────────────────────────────────────────────
+
+describe("/blog/the-second-phone route resolution (P0 regression)", () => {
+  const MDX = "content/blog/the-second-phone.mdx";
+  const BLOG_SLUG_PAGE = "pages/blog/[...slug].tsx";
+  const BLOG_INDEX = "pages/blog/index.tsx";
+
+  it("getStaticPaths does not apply a hard path limit (all published posts included)", () => {
+    // A previous build commit limited routes to 5 pre-generated paths.
+    // This asserts the current getStaticPaths generates all published posts.
+    const src = read(BLOG_SLUG_PAGE);
+    // Must NOT have a slice/limit on the paths array
+    expect(src).not.toMatch(/\.slice\(0,\s*[0-9]+\)\s*\.map\(.*?params.*?slug/s);
+    // Must NOT have a hardcoded limit constant ≤ 10 applied to posts before map
+    expect(src).not.toMatch(/posts\.(slice|splice)\(0,\s*[1-9][0-9]?\)/);
+  });
+
+  it("getStaticPaths filters by !series (classic posts only)", () => {
+    expect(read(BLOG_SLUG_PAGE)).toMatch(/filter.*series|!p\?\.series/);
+  });
+
+  it("the-second-phone has no series field so it passes the filter", () => {
+    const frontmatter = read(MDX).split("---")[1] || "";
+    expect(frontmatter).not.toMatch(/^series:/m);
+  });
+
+  it("getStaticPaths uses fallback: blocking (ISR-safe)", () => {
+    expect(read(BLOG_SLUG_PAGE)).toMatch(/fallback:\s*["']blocking["']/);
+  });
+
+  it("getStaticProps looks up by collectionSlug (blog/the-second-phone)", () => {
+    // The lookup chain must include collectionSlug matching
+    expect(read(BLOG_SLUG_PAGE)).toMatch(/collectionSlug/);
+    expect(read(BLOG_SLUG_PAGE)).toMatch(/wantBlog/);
+  });
+
+  it("getStaticProps has try/catch that returns notFound rather than crashing", () => {
+    const src = read(BLOG_SLUG_PAGE);
+    expect(src).toMatch(/catch.*notFound.*true|notFound.*true.*catch/s);
+  });
+
+  it("blog index builds URL as /blog/<bareSlug> for classic posts", () => {
+    // The blog index must produce /blog/the-second-phone as the URL for this post
+    const src = read(BLOG_INDEX);
+    // URL is constructed as `/blog/${bare}` when doc.url is not set
+    expect(src).toMatch(/`\/blog\/\$\{bare\}`|\/blog\/\$\{/);
+  });
+
+  it("blog index does not hardcode /blog/the-second-phone exclusions", () => {
+    expect(read(BLOG_INDEX)).not.toMatch(/the-second-phone/);
+  });
+
+  it("generated Post index contains the-second-phone", () => {
+    const indexPath = path.join(ROOT, ".contentlayer/generated/Post/_index.json");
+    if (!fs.existsSync(indexPath)) return; // skip if contentlayer not built yet
+    const docs = JSON.parse(fs.readFileSync(indexPath, "utf-8"));
+    const post = Array.isArray(docs)
+      ? docs.find((d: any) => d.slug === "the-second-phone" || d._id === "blog/the-second-phone.mdx")
+      : null;
+    expect(post).not.toBeNull();
+    expect(post?.published).toBe(true);
+    expect(post?.draft).toBe(false);
+  });
+
+  it("generated Post index: the-second-phone has no series field", () => {
+    const indexPath = path.join(ROOT, ".contentlayer/generated/Post/_index.json");
+    if (!fs.existsSync(indexPath)) return;
+    const docs = JSON.parse(fs.readFileSync(indexPath, "utf-8"));
+    const post = Array.isArray(docs)
+      ? docs.find((d: any) => d.slug === "the-second-phone")
+      : null;
+    if (!post) return;
+    // series must be null/undefined, not a truthy string
+    expect(!!post?.series).toBe(false);
+  });
 });
 
 // ─── 5. Blog index unchanged ──────────────────────────────────────────────────

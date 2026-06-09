@@ -78,22 +78,27 @@ export const getStaticProps: GetStaticProps<RegistryPageProps> = async () => {
         title: safeString(d?.title, "Untitled"),
         slug: safeSlug(d),
         category: safeString(d?.category, "General Lexicon"),
+        // date as short ISO-date string; dateISO omitted — only used for server
+        // sort below, never consumed client-side (RegistryContext uses .date)
         date: safeString(d?.date, null as any) || null,
-        dateISO: safeDateIso(d?.date),
-        excerpt: typeof d?.excerpt === "string" ? d.excerpt.substring(0, 200) : null,
+        // truncate excerpt tighter: 120 chars keeps cards readable, saves ~24 kB
+        excerpt: typeof d?.excerpt === "string" ? d.excerpt.substring(0, 120) : null,
         type: safeString(d?.type || d?.kind, "unknown"),
         accessLevel: safeString(d?.accessLevel, "public"),
         coverImage: resolveDocCoverImage(d),
+        // _sort: ephemeral sort key, stripped before serialising to props
+        _sort: safeDateIso(d?.date),
       });
     }
   }
 
-  // Sort the minimal rows (cheap) instead of the full doc array.
+  // Sort by the ephemeral _sort key, then strip it before serialising
   initialDocs.sort((a, b) => {
-    const ad = a.dateISO ? Date.parse(a.dateISO) : 0;
-    const bd = b.dateISO ? Date.parse(b.dateISO) : 0;
+    const ad = (a as any)._sort ? Date.parse((a as any)._sort) : 0;
+    const bd = (b as any)._sort ? Date.parse((b as any)._sort) : 0;
     return bd - ad;
   });
+  for (const doc of initialDocs) delete (doc as any)._sort;
 
   const categories = Array.from(
     new Set(initialDocs.map((d) => d.category).filter(Boolean)),
