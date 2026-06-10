@@ -665,7 +665,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
               <StatPill label="Dossier generated" count={fulfilmentData.generatedDossiers} />
               <StatPill label="Approved" count={fulfilmentData.approvedDossiers} />
               <StatPill label="Delivered" count={fulfilmentData.deliveredDossiers} />
-              <StatPill label="Overdue (>48 h)" count={fulfilmentData.overdueDeliveries} alert />
+              <StatPill label="Overdue (>2 biz days)" count={fulfilmentData.overdueDeliveries} alert />
             </div>
             <p className={`text-[10px] font-mono mt-3 ${textSecondaryClass}`}>
               From database at {new Date(fulfilmentData.generatedAt).toLocaleTimeString()}

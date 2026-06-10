@@ -409,7 +409,7 @@ Address the primary identified risk: Obligation to meet deadline exists but reso
   "caseReference": "PROOF-LEGAL_ADMIN_FAMILY_DEADLINE-DOSSIER",
   "kernelVersion": "1.0.0",
   "ontologyVersion": "1.0.0",
-  "generatedAt": "2026-06-09T13:05:14.059Z"
+  "generatedAt": "2026-06-10T21:25:25.169Z"
 }
 ```
 
