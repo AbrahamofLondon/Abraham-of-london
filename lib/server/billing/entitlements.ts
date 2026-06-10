@@ -9,6 +9,7 @@ export const PRODUCT_CODES = {
   // Original catalog
   EXECUTIVE_REPORT_SAMPLE:              "executive-report-sample",
   EXECUTIVE_REPORT_FULL:                "executive-report-full",
+  BOARDROOM_BRIEF:                      "boardroom-brief",
   BOARDROOM_PDF:                        "boardroom-pdf",
   INTERVENTION_EXPORTS:                 "intervention-exports",
   STRATEGY_ROOM_PRIVATE_ARTEFACTS:      "strategy-room-private-artefacts",
