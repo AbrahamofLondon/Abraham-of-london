@@ -3,16 +3,17 @@
 # Vercel is the full Next.js runtime for SSR, admin, API, payments, and delivery.
 
 [build]
-  publish = "public"
-  command = "echo 'Netlify proxy mode: no Next.js build - dynamic runtime is Vercel'"
+  publish = ".next"
+  command = "pnpm contentlayer2 build && node scripts/pre-build.mjs && tsx scripts/build-pdf-registry-json.ts && tsx scripts/generate-library-index-lite.ts && cross-env NODE_OPTIONS='--max-old-space-size=4096' next build --webpack && node scripts/clean-standalone.mjs"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
   CI = "true"
   NETLIFY_USE_PNPM = "true"
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
-  PNPM_FLAGS = "--frozen-lockfile"
+  PNPM_FLAGS = "--no-frozen-lockfile"
   PNPM_VERSION = "10.33.0"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_SKIP_TYPE_CHECK = "1"
   # RECAPTCHA_TIMEOUT_MS value is a plain number (e.g. 5000) that naturally
   # appears as a literal throughout the codebase — not a real secret leak.
   # DB_PASSWORD appears only in docker-compose.yml (dev-only).
@@ -1367,35 +1368,5 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ── Catch-all: proxy ALL Next.js requests to Vercel ─────────────────────────
-# This MUST be the last [[redirects]] rule in this file.
-# Netlify matches redirects top-to-bottom; all specific 301 rules above fire
-# first. Anything not matched by a specific rule falls through to this proxy.
-#
-# STATUS 200 = transparent proxy. The visitor sees abrahamoflondon.org while
-# Vercel renders every response. No client-side redirect occurs.
-#
-# ⚠️  BEFORE GOING LIVE — two required Vercel dashboard actions:
-#
-#  1. PROMOTE TO PRODUCTION: Vercel Dashboard → Project → Deployments →
-#     promote the current preview to "production". That activates the stable
-#     public production alias below (without the per-deployment hash).
-#     Current preview URL (changes every push — do NOT use this in production):
-#       aol-check-visual-1o8z3qoil-abrahamoflondons-projects.vercel.app
-#     Public stable production alias (active after promotion):
-#       aol-check-visual.vercel.app  ← used below
-#
-#  2. DISABLE DEPLOYMENT PROTECTION for production: Vercel → Project →
-#     Settings → Deployment Protection → set to "Only preview deployments"
-#     (or disable entirely). If left on, Netlify's proxy will serve a Vercel
-#     SSO challenge page instead of your app.
-#     Alternative: use a Protection Bypass Automation secret — add the header:
-#       headers = {x-vercel-protection-bypass = "YOUR_BYPASS_SECRET"}
-#
-# NOTE: Files in public/ (favicon, OG images, robots.txt, sitemap.xml) are
-# served directly by Netlify CDN and never hit this proxy rule.
-[[redirects]]
-  from = "/*"
-  to = "https://aol-check-visual.vercel.app/:splat"
-  status = 200
-  force = true
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
