@@ -5,7 +5,7 @@
 
 [build]
   publish = ".next"
-  command = "pnpm contentlayer2 build && node scripts/pre-build.mjs && tsx scripts/build-pdf-registry-json.ts && tsx scripts/generate-library-index-lite.ts && cross-env NODE_OPTIONS='--max-old-space-size=4096' next build --webpack && node scripts/clean-standalone.mjs"
+  command = "node scripts/validate-netlify-env.mjs && pnpm contentlayer2 build && node scripts/pre-build.mjs && tsx scripts/build-pdf-registry-json.ts && tsx scripts/generate-library-index-lite.ts && cross-env NODE_OPTIONS='--max-old-space-size=4096' next build --webpack && node scripts/clean-standalone.mjs"
 
 [build.environment]
   NODE_VERSION = "20.20.0"
