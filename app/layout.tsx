@@ -3,14 +3,10 @@ import * as React from "react";
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import AppShell from "@/components/AppShell";
-
-const RAW_URL = (process.env.NEXT_PUBLIC_SITE_URL || "")
-  .replace(/^["']|["']$/g, "")  // Strip accidental quotes from Vercel env values
-  .trim();
-const BASE_URL = (RAW_URL || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Abraham of London",
     template: "%s | Abraham of London",
@@ -22,7 +18,7 @@ export const metadata: Metadata = {
     description:
       "Institutional strategy, governance discipline, and operator doctrine for serious builders.",
     images: ["/assets/images/social/og-image.jpg"],
-    url: BASE_URL,
+    url: getSiteUrl(),
     siteName: "Abraham of London",
     type: "website",
   },

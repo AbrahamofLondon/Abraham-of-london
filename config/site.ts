@@ -80,15 +80,11 @@ export interface SiteConfig {
   };
 }
 
-// Constants
-const ORIGIN =
-  (
-    process.env.NEXTAUTH_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    ""
-  ).replace(/\/$/, "") ||
-  "https://www.abrahamoflondon.org";
+// Constants — single source of truth for the canonical origin.
+// getSiteUrl() validates each env var with new URL(), skips malformed
+// values, and falls back to the hardcoded production origin.
+import { getSiteUrl } from "@/lib/site-url";
+const ORIGIN = getSiteUrl();
 
 // Main site configuration
 export const siteConfig: SiteConfig = {

@@ -27,7 +27,8 @@ import type { ContactInfo, SEOConfig, SiteConfig as LegacySiteConfig, SocialLink
 /* -------------------------------------------------------------------------- */
 /* Canonical public site URL                                                   */
 /* -------------------------------------------------------------------------- */
-export const PUBLIC_SITE_URL = (canonical.url || "https://www.abrahamoflondon.org").replace(/\/+$/, "");
+import { getSiteUrl } from "@/lib/site-url";
+export const PUBLIC_SITE_URL = getSiteUrl();
 
 /* -------------------------------------------------------------------------- */
 /* Brand (legacy shape)                                                        */
