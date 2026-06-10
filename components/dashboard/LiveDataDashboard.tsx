@@ -83,8 +83,8 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
     <div className={`p-6 rounded-xl border shadow-lg ${surfaceClass}`}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Live Data Dashboard</h2>
-        <span className="px-3 py-1 bg-emerald-500/15 text-emerald-300 text-sm font-medium rounded-full border border-emerald-500/20">
-          Live
+        <span className="px-3 py-1 bg-amber-500/15 text-amber-300 text-sm font-medium rounded-full border border-amber-500/20">
+          DEMO — synthetic data
         </span>
       </div>
 
@@ -98,10 +98,10 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">{item.title}</h3>
-              <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="h-2 w-2 rounded-full bg-amber-400/60" />
             </div>
             <p className={`text-sm ${theme === "dark" ? "text-zinc-400" : "text-zinc-600"}`}>
-              Updated: {new Date(item.updatedAt).toLocaleTimeString()}
+              Snapshot: {new Date(item.updatedAt).toLocaleTimeString()}
             </p>
           </button>
         ))}
@@ -109,7 +109,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
 
       <div className="mt-6 pt-6 border-t border-white/10">
         <p className={`text-sm ${theme === "dark" ? "text-zinc-400" : "text-zinc-500"}`}>
-          Real-time data updates every {Math.round(refreshMs / 1000)} seconds
+          DEMO — no live feed connected. Signals are synthetic placeholders pending real data source.
         </p>
       </div>
     </div>
