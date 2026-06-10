@@ -1,7 +1,7 @@
 // components/dashboard/LiveDataDashboard.tsx
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -15,19 +15,24 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import {
+  computeDashboardStatus,
+  type DashboardStatus,
+} from "@/lib/dashboard/dashboard-status";
+import type { BoardroomFunnelData } from "@/pages/api/dashboard/boardroom-funnel";
+import type { FulfilmentStateData } from "@/pages/api/dashboard/fulfilment-state";
+import type { RetainerHealthData } from "@/pages/api/dashboard/retainer-health";
 
-// ------------------------------------------------------------------
-// Types
-// ------------------------------------------------------------------
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 interface DashboardMetrics {
   totalPressureSignals: number;
   pressureSignalsToday: number;
   pressureSignalsThisWeek: number;
-  conversionRateFreeToPaid: number; // 0-100
+  conversionRateFreeToPaid: number; // 0–100
   activeBoardroomBriefs: number;
   monthlyRecurringRevenue: number; // GBP
-  averageDecisionOutcomeScore: number; // 0-5
+  averageDecisionOutcomeScore: number; // 0–5
 }
 
 interface PressureTrendPoint {
@@ -50,199 +55,397 @@ interface RecentActivity {
 
 interface LiveDataDashboardProps {
   theme?: "light" | "dark";
-  refreshMs?: number; // polling interval (ms)
-  useMockData?: boolean; // for development only – never in production
+  refreshMs?: number;
+  useMockData?: boolean; // design preview only — never in production
   onPDFSelect?: (pdfId: string) => void; // kept for compatibility
 }
 
-// Production guard: never allow mock data outside development.
-// This prevents accidental deployment with useMockData={true}.
-const IS_PRODUCTION = typeof process !== "undefined" && process.env.NODE_ENV === "production";
-const DEFAULT_USE_MOCK_DATA = IS_PRODUCTION ? false : false; // always false in production
+// ── Constants ──────────────────────────────────────────────────────────────────
 
-// ------------------------------------------------------------------
-// Colour palette (institutional, gold-accented)
-// ------------------------------------------------------------------
+const TOTAL_ENDPOINTS = 7;
+
+// Production guard: mock data must never be active in production.
+const IS_PRODUCTION = typeof process !== "undefined" && process.env.NODE_ENV === "production";
+const DEFAULT_USE_MOCK_DATA = IS_PRODUCTION ? false : false;
+
 const COLORS = {
+  gold: "#C5A059",
   success: "#10b981",
   partial: "#f59e0b",
   failure: "#ef4444",
-  gold: "#C5A059",
-  goldLight: "#e9c77e",
-  backgroundDark: "#0D0D0D",
-  surfaceDark: "#141414",
-  borderDark: "#262626",
-  textPrimary: "#E5E5E5",
+  border: "#262626",
   textSecondary: "#A3A3A3",
 };
 
 const OUTCOME_COLORS = [COLORS.success, COLORS.partial, COLORS.failure];
 
-// ------------------------------------------------------------------
-// Mock data generators (only for development)
-// ------------------------------------------------------------------
+// ── Mock data (design preview only — deliberately small and clearly fictional) ─
+// Rules: no real-looking revenue figures, no specific-looking signal counts,
+// no fake traction. These values are intentionally minimal.
+
 function generateMockMetrics(): DashboardMetrics {
   return {
-    totalPressureSignals: 1247,
-    pressureSignalsToday: 42,
-    pressureSignalsThisWeek: 289,
-    conversionRateFreeToPaid: 8.4,
-    activeBoardroomBriefs: 23,
-    monthlyRecurringRevenue: 4850,
-    averageDecisionOutcomeScore: 3.2,
+    totalPressureSignals: 7,
+    pressureSignalsToday: 1,
+    pressureSignalsThisWeek: 4,
+    conversionRateFreeToPaid: 0,
+    activeBoardroomBriefs: 0,
+    monthlyRecurringRevenue: 0,
+    averageDecisionOutcomeScore: 0,
   };
 }
 
 function generateMockTrend(): PressureTrendPoint[] {
-  const days = ["2026-06-04", "2026-06-05", "2026-06-06", "2026-06-07", "2026-06-08", "2026-06-09", "2026-06-10"];
-  return days.map((date) => ({ date, count: Math.floor(Math.random() * 80) + 20 }));
+  return [
+    { date: "day -6", count: 0 },
+    { date: "day -5", count: 1 },
+    { date: "day -4", count: 0 },
+    { date: "day -3", count: 2 },
+    { date: "day -2", count: 1 },
+    { date: "day -1", count: 2 },
+    { date: "today", count: 1 },
+  ];
 }
 
 function generateMockOutcomes(): OutcomeDistribution[] {
   return [
-    { name: "Success", value: 42 },
-    { name: "Partial", value: 28 },
-    { name: "Failure", value: 12 },
+    { name: "Success", value: 0 },
+    { name: "Partial", value: 0 },
+    { name: "Failure", value: 0 },
   ];
 }
 
 function generateMockActivity(): RecentActivity[] {
-  const now = new Date();
-  const activities: RecentActivity[] = [
+  return [
     {
-      id: "act1",
+      id: "mock-1",
       type: "pressure_signal",
-      title: "Decision: whether to delay the Q3 product launch",
-      timestamp: new Date(now.getTime() - 2 * 60 * 1000).toISOString(),
-      userRole: "CEO, SaaS",
-    },
-    {
-      id: "act2",
-      type: "boardroom_brief_order",
-      title: "Boardroom Brief purchased – expansion into EU markets",
-      timestamp: new Date(now.getTime() - 25 * 60 * 1000).toISOString(),
-      userRole: "COO, manufacturing",
-    },
-    {
-      id: "act3",
-      type: "return_brief_submitted",
-      title: "Return Brief: previous supply chain decision – outcome SUCCESS",
-      timestamp: new Date(now.getTime() - 90 * 60 * 1000).toISOString(),
+      title: "[DEMO] Pressure signal — preview data only",
+      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
     },
   ];
-  return activities;
 }
 
-// ------------------------------------------------------------------
-// Main Component
-// ------------------------------------------------------------------
+function generateMockFunnel(): BoardroomFunnelData {
+  return {
+    pressureSignalStarts: 7,
+    checkoutAttempts: 0,
+    completedPayments: 0,
+    deliveredDossiers: 0,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function generateMockFulfilment(): FulfilmentStateData {
+  return {
+    paidOrders: 0,
+    generatedDossiers: 0,
+    approvedDossiers: 0,
+    deliveredDossiers: 0,
+    overdueDeliveries: 0,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function generateMockRetainer(): RetainerHealthData {
+  return {
+    activeContracts: 0,
+    openReviewCycles: 0,
+    overdueReviewCycles: 0,
+    completedReviewCycles: 0,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    minimumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatRelativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hr ago`;
+  return `${Math.floor(hr / 24)} days ago`;
+}
+
+// ── Status badge config ────────────────────────────────────────────────────────
+
+const STATUS_CONFIG: Record<
+  DashboardStatus,
+  { dot: string; label: string; text: string }
+> = {
+  LIVE:        { dot: "bg-emerald-500 animate-pulse", label: "LIVE",        text: "text-emerald-400" },
+  NO_DATA_YET: { dot: "bg-amber-400",                 label: "NO DATA YET", text: "text-amber-400" },
+  DEGRADED:    { dot: "bg-amber-500",                 label: "DEGRADED",    text: "text-amber-500" },
+  DEMO:        { dot: "bg-purple-400",                label: "DEMO",        text: "text-purple-400" },
+  ERROR:       { dot: "bg-red-500",                   label: "ERROR",       text: "text-red-400" },
+};
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: DashboardStatus }) {
+  const cfg = STATUS_CONFIG[status];
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
+      <span className={`text-xs font-mono tracking-widest ${cfg.text}`}>{cfg.label}</span>
+    </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center py-10 border border-dashed border-[#262626] rounded-lg">
+      <p className="text-xs font-mono text-[#A3A3A3] text-center max-w-[48ch] px-6 leading-relaxed">
+        {message}
+      </p>
+    </div>
+  );
+}
+
+interface MetricCardProps {
+  title: string;
+  value: string;
+  subtext: string;
+  icon: string;
+  /** API-derived label string, or null to show nothing. Never hardcoded. */
+  trendLabel?: string | null;
+  theme: "light" | "dark";
+}
+
+function MetricCard({ title, value, subtext, icon, trendLabel, theme }: MetricCardProps) {
+  const cardBg = theme === "dark" ? "bg-[#141414] border-[#262626]" : "bg-white border-gray-200";
+  const textClass = theme === "dark" ? "text-white" : "text-gray-900";
+  const subClass = theme === "dark" ? "text-[#A3A3A3]" : "text-gray-600";
+
+  return (
+    <div className={`rounded-2xl border ${cardBg} p-6 shadow-sm`}>
+      <div className="flex items-center justify-between">
+        <span className="text-3xl">{icon}</span>
+        {trendLabel != null && (
+          <span className="text-xs font-mono text-[#A3A3A3]">{trendLabel}</span>
+        )}
+      </div>
+      <div className="mt-4">
+        <p className={`text-2xl font-bold tracking-tight ${textClass}`}>{value}</p>
+        <p className={`text-sm font-serif mt-1 ${textClass}`}>{title}</p>
+        <p className={`text-xs font-mono mt-2 ${subClass}`}>{subtext}</p>
+      </div>
+    </div>
+  );
+}
+
+function FunnelBar({
+  label,
+  count,
+  max,
+  color,
+}: {
+  label: string;
+  count: number;
+  max: number;
+  color: string;
+}) {
+  const pct = max > 0 ? Math.min(100, (count / max) * 100) : 0;
+  return (
+    <div>
+      <div className="flex justify-between mb-1.5">
+        <span className="text-xs font-mono text-[#A3A3A3]">{label}</span>
+        <span className="text-xs font-mono text-[#E5E5E5]">{count.toLocaleString()}</span>
+      </div>
+      <div className="h-2 bg-[#262626] rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${pct}%`, backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StatPill({
+  label,
+  count,
+  alert = false,
+}: {
+  label: string;
+  count: number;
+  alert?: boolean;
+}) {
+  const isAlerted = alert && count > 0;
+  return (
+    <div
+      className={`rounded-lg border p-4 text-center ${
+        isAlerted
+          ? "border-amber-500/30 bg-amber-500/5"
+          : "border-[#262626] bg-[#141414]"
+      }`}
+    >
+      <p className={`text-2xl font-bold tracking-tight ${isAlerted ? "text-amber-400" : "text-[#E5E5E5]"}`}>
+        {count}
+      </p>
+      <p className="text-xs font-mono text-[#A3A3A3] mt-1 leading-tight">{label}</p>
+    </div>
+  );
+}
+
+function Section({
+  label,
+  title,
+  children,
+}: {
+  label: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="mb-5">
+        <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#C5A059]/70">{label}</p>
+        <h2 className="text-lg font-serif font-semibold text-[#E5E5E5] mt-0.5">{title}</h2>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
+
 export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
   theme = "dark",
-  refreshMs = 30000,
+  refreshMs = 30_000,
   useMockData = DEFAULT_USE_MOCK_DATA,
-  onPDFSelect,
+  onPDFSelect: _onPDFSelect,
 }) => {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [trendData, setTrendData] = useState<PressureTrendPoint[]>([]);
   const [outcomeData, setOutcomeData] = useState<OutcomeDistribution[]>([]);
   const [activityFeed, setActivityFeed] = useState<RecentActivity[]>([]);
+  const [funnelData, setFunnelData] = useState<BoardroomFunnelData | null>(null);
+  const [fulfilmentData, setFulfilmentData] = useState<FulfilmentStateData | null>(null);
+  const [retainerData, setRetainerData] = useState<RetainerHealthData | null>(null);
+  const [failedEndpoints, setFailedEndpoints] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchDashboardData = useCallback(async () => {
     if (useMockData) {
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((r) => setTimeout(r, 400));
       setMetrics(generateMockMetrics());
       setTrendData(generateMockTrend());
       setOutcomeData(generateMockOutcomes());
       setActivityFeed(generateMockActivity());
+      setFunnelData(generateMockFunnel());
+      setFulfilmentData(generateMockFulfilment());
+      setRetainerData(generateMockRetainer());
+      setFailedEndpoints(0);
       setLastUpdated(new Date());
       setIsLoading(false);
-      setError(null);
       return;
     }
 
-    try {
-      // Real API calls – adjust endpoints to match your backend
-      const [metricsRes, trendRes, outcomesRes, activityRes] = await Promise.all([
-        fetch("/api/dashboard/metrics"),
-        fetch("/api/dashboard/pressure-trend?days=7"),
-        fetch("/api/dashboard/outcome-distribution"),
-        fetch("/api/dashboard/recent-activity?limit=10"),
-      ]);
+    let failed = 0;
 
-      if (!metricsRes.ok || !trendRes.ok || !outcomesRes.ok || !activityRes.ok) {
-        throw new Error("Failed to fetch dashboard data");
+    async function safeFetch<T>(url: string): Promise<T | null> {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          failed++;
+          return null;
+        }
+        return (await res.json()) as T;
+      } catch {
+        failed++;
+        return null;
       }
-
-      const metricsData = await metricsRes.json();
-      const trendData = await trendRes.json();
-      const outcomesData = await outcomesRes.json();
-      const activityData = await activityRes.json();
-
-      setMetrics(metricsData);
-      setTrendData(trendData);
-      setOutcomeData(outcomesData);
-      setActivityFeed(activityData);
-      setLastUpdated(new Date());
-      setError(null);
-    } catch (err) {
-      console.error("Dashboard fetch error:", err);
-      setError("Unable to load live data. Please refresh the page.");
-    } finally {
-      setIsLoading(false);
     }
+
+    const [
+      newMetrics,
+      newTrend,
+      newOutcomes,
+      newActivity,
+      newFunnel,
+      newFulfilment,
+      newRetainer,
+    ] = await Promise.all([
+      safeFetch<DashboardMetrics>("/api/dashboard/metrics"),
+      safeFetch<PressureTrendPoint[]>("/api/dashboard/pressure-trend?days=7"),
+      safeFetch<OutcomeDistribution[]>("/api/dashboard/outcome-distribution"),
+      safeFetch<RecentActivity[]>("/api/dashboard/recent-activity?limit=10"),
+      safeFetch<BoardroomFunnelData>("/api/dashboard/boardroom-funnel"),
+      safeFetch<FulfilmentStateData>("/api/dashboard/fulfilment-state"),
+      safeFetch<RetainerHealthData>("/api/dashboard/retainer-health"),
+    ]);
+
+    setMetrics(newMetrics);
+    setTrendData(newTrend ?? []);
+    setOutcomeData(newOutcomes ?? []);
+    setActivityFeed(newActivity ?? []);
+    setFunnelData(newFunnel);
+    setFulfilmentData(newFulfilment);
+    setRetainerData(newRetainer);
+    setFailedEndpoints(failed);
+    setLastUpdated(new Date());
+    setIsLoading(false);
   }, [useMockData]);
 
-  // Initial load and polling
   useEffect(() => {
-    fetchDashboardData();
-    const interval = setInterval(() => {
-      fetchDashboardData();
-    }, Math.max(5000, refreshMs));
+    void fetchDashboardData();
+    const interval = setInterval(() => { void fetchDashboardData(); }, Math.max(5_000, refreshMs));
     return () => clearInterval(interval);
   }, [fetchDashboardData, refreshMs]);
 
-  // Helper to format currency
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 0 }).format(amount);
+  const containerClass =
+    theme === "dark" ? "bg-[#0D0D0D] text-[#E5E5E5]" : "bg-gray-50 text-gray-900";
+  const cardClass =
+    theme === "dark" ? "bg-[#141414] border-[#262626]" : "bg-white border-gray-200";
+  const textSecondaryClass =
+    theme === "dark" ? "text-[#A3A3A3]" : "text-gray-600";
 
-  const formatRelativeTime = (isoString: string) => {
-    const diff = Date.now() - new Date(isoString).getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes} min ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hr ago`;
-    return `${Math.floor(hours / 24)} days ago`;
-  };
+  const dashboardStatus = computeDashboardStatus({
+    useMockData,
+    failedEndpoints,
+    totalEndpoints: TOTAL_ENDPOINTS,
+    metrics,
+  });
 
-  // Theme-aware classes
-  const containerClass = theme === "dark" ? "bg-[#0D0D0D] text-[#E5E5E5]" : "bg-gray-50 text-gray-900";
-  const cardClass = theme === "dark" ? "bg-[#141414] border-[#262626]" : "bg-white border-gray-200";
-  const textSecondaryClass = theme === "dark" ? "text-[#A3A3A3]" : "text-gray-600";
+  // ── Loading ────────────────────────────────────────────────────────────────
 
   if (isLoading) {
     return (
       <div className={`p-8 rounded-2xl border ${cardClass} ${containerClass}`}>
         <div className="flex flex-col items-center justify-center py-12">
           <div className="w-12 h-12 border-4 border-[#C5A059]/30 border-t-[#C5A059] rounded-full animate-spin" />
-          <p className="mt-6 text-sm font-mono text-[#C5A059]">Loading decision intelligence feed…</p>
+          <p className="mt-6 text-sm font-mono text-[#C5A059]">
+            Connecting to decision intelligence feed…
+          </p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  // ── Error ──────────────────────────────────────────────────────────────────
+
+  if (dashboardStatus === "ERROR") {
     return (
       <div className={`p-8 rounded-2xl border ${cardClass} ${containerClass}`}>
         <div className="text-center py-12">
-          <div className="text-red-500 text-4xl mb-4">⚠️</div>
-          <p className="text-sm font-mono text-red-400">{error}</p>
+          <StatusBadge status="ERROR" />
+          <p className="mt-4 text-sm font-mono text-[#A3A3A3] max-w-[50ch] mx-auto">
+            Core dashboard endpoint unavailable. Check Netlify environment and Prisma connection.
+          </p>
           <button
-            onClick={() => fetchDashboardData()}
+            onClick={() => { void fetchDashboardData(); }}
             className="mt-6 px-6 py-2 bg-[#C5A059]/20 border border-[#C5A059] text-[#C5A059] rounded-md text-sm font-medium hover:bg-[#C5A059]/30 transition"
           >
             Retry
@@ -252,28 +455,53 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
     );
   }
 
-  if (!metrics) return null;
+  const allOutcomesZero = outcomeData.every((d) => d.value === 0);
+  const funnelMax = funnelData?.pressureSignalStarts ?? 0;
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className={`space-y-8 ${containerClass}`}>
-      {/* Header with live indicator */}
+    <div className={`space-y-10 ${containerClass}`}>
+
+      {/* DEMO banner */}
+      {dashboardStatus === "DEMO" && (
+        <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 px-5 py-3 flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-purple-400 shrink-0" />
+          <p className="text-xs font-mono text-purple-300">
+            DEMO MODE — all figures are fictional design-preview data. This is not production.
+          </p>
+        </div>
+      )}
+
+      {/* DEGRADED banner */}
+      {dashboardStatus === "DEGRADED" && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-5 py-3 flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          <p className="text-xs font-mono text-amber-300">
+            DEGRADED — {failedEndpoints} of {TOTAL_ENDPOINTS} endpoints unavailable. Partial data shown.
+          </p>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold tracking-tight">Decision Intelligence Console</h1>
-          <p className={`text-sm mt-1 font-mono ${textSecondaryClass}`}>Live operational metrics & decision flow</p>
+          <h1 className="text-3xl font-serif font-bold tracking-tight">
+            Decision Intelligence Console
+          </h1>
+          <p className={`text-sm mt-1 font-mono ${textSecondaryClass}`}>
+            Operational command centre — Abraham of London
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-mono text-[#C5A059]">LIVE</span>
-          </div>
+        <div className="flex items-center gap-4 flex-wrap">
+          <StatusBadge status={dashboardStatus} />
           {lastUpdated && (
             <span className={`text-xs font-mono ${textSecondaryClass}`}>
               Updated {formatRelativeTime(lastUpdated.toISOString())}
             </span>
           )}
           <button
-            onClick={() => fetchDashboardData()}
+            onClick={() => { void fetchDashboardData(); }}
             className="px-3 py-1 text-xs font-mono border border-[#C5A059]/40 rounded-md hover:bg-[#C5A059]/10 transition"
           >
             ↻ Refresh
@@ -281,210 +509,292 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Pressure Signals"
-          value={metrics.totalPressureSignals.toLocaleString()}
-          subtext={`${metrics.pressureSignalsToday} today · ${metrics.pressureSignalsThisWeek} this week`}
-          icon="📡"
-          theme={theme}
-        />
-        <MetricCard
-          title="Conversion (Free → Paid)"
-          value={`${metrics.conversionRateFreeToPaid}%`}
-          subtext="of pressure signals → Boardroom Brief"
-          icon="⚡"
-          trend={metrics.conversionRateFreeToPaid > 7 ? "up" : metrics.conversionRateFreeToPaid > 4 ? "neutral" : "down"}
-          theme={theme}
-        />
-        <MetricCard
-          title="Active Briefs"
-          value={metrics.activeBoardroomBriefs.toString()}
-          subtext="in progress / delivered"
-          icon="📄"
-          theme={theme}
-        />
-        <MetricCard
-          title="Monthly Recurring Revenue"
-          value={formatCurrency(metrics.monthlyRecurringRevenue)}
-          subtext="from subscriptions & one‑time"
-          icon="💰"
-          theme={theme}
-        />
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Pressure Signal Trend */}
-        <div className={`rounded-2xl border ${cardClass} p-6 shadow-sm`}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-serif font-semibold">Pressure Signal Volume (7 days)</h3>
-            <span className="text-xs font-mono text-[#C5A059]">real‑time trend</span>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData}>
-                <defs>
-                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.gold} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={COLORS.gold} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#262626" : "#e5e7eb"} />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: theme === "dark" ? "#A3A3A3" : "#6b7280" }} />
-                <YAxis tick={{ fontSize: 12, fill: theme === "dark" ? "#A3A3A3" : "#6b7280" }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: theme === "dark" ? "#141414" : "white",
-                    borderColor: COLORS.gold,
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                  labelStyle={{ color: COLORS.gold }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke={COLORS.gold}
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorCount)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          <p className={`text-xs font-mono mt-4 ${textSecondaryClass}`}>
-            Each signal represents a decision tested through the free pressure aperture.
-          </p>
-        </div>
-
-        {/* Outcome Distribution */}
-        <div className={`rounded-2xl border ${cardClass} p-6 shadow-sm`}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-serif font-semibold">Decision Outcomes (Return Briefs)</h3>
-            <span className="text-xs font-mono text-[#C5A059]">last 90 days</span>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={outcomeData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={4}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {outcomeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={OUTCOME_COLORS[index % OUTCOME_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: theme === "dark" ? "#141414" : "white",
-                    borderColor: COLORS.gold,
-                    borderRadius: "8px",
-                  }}
-                />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex justify-between mt-2 text-xs font-mono">
-            <span className={textSecondaryClass}>Average outcome score: {metrics.averageDecisionOutcomeScore}/5</span>
-            <span className="text-[#C5A059]">+12% vs last quarter</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity Feed */}
-      <div className={`rounded-2xl border ${cardClass} overflow-hidden shadow-sm`}>
-        <div className="px-6 py-4 border-b border-[#262626] flex items-center justify-between">
-          <h3 className="text-lg font-serif font-semibold">Live Decision Activity</h3>
-          <span className="text-xs font-mono text-[#C5A059]">real‑time events</span>
-        </div>
-        <div className="divide-y divide-[#262626] max-h-[400px] overflow-y-auto">
-          {activityFeed.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[#A3A3A3]">No recent activity</div>
+      {/* ── 1. Estate Pulse ─────────────────────────────────────────────── */}
+      {metrics && (
+        <Section label="Estate Pulse" title="Core metrics">
+          {dashboardStatus === "NO_DATA_YET" ? (
+            <EmptyState message="No activity yet. Metrics will appear once pressure signals, orders, and entitlements are recorded." />
           ) : (
-            activityFeed.map((activity) => (
-              <div key={activity.id} className="px-6 py-4 hover:bg-[#C5A059]/5 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20">
-                        {activity.type === "pressure_signal" && "📡 SIGNAL"}
-                        {activity.type === "boardroom_brief_order" && "📄 BRIEF ORDER"}
-                        {activity.type === "return_brief_submitted" && "🔄 RETURN BRIEF"}
-                      </span>
-                      <span className={`text-sm font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                        {activity.title}
-                      </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <MetricCard
+                title="Pressure Signals"
+                value={metrics.totalPressureSignals.toLocaleString()}
+                subtext={`${metrics.pressureSignalsToday} today · ${metrics.pressureSignalsThisWeek} this week`}
+                icon="📡"
+                trendLabel={null}
+                theme={theme}
+              />
+              <MetricCard
+                title="Conversion (Free → Paid)"
+                value={
+                  metrics.totalPressureSignals > 0
+                    ? `${metrics.conversionRateFreeToPaid}%`
+                    : "—"
+                }
+                subtext={
+                  metrics.totalPressureSignals > 0
+                    ? "pressure signals → Boardroom Brief"
+                    : "No baseline yet"
+                }
+                icon="⚡"
+                trendLabel={null}
+                theme={theme}
+              />
+              <MetricCard
+                title="Active Briefs"
+                value={metrics.activeBoardroomBriefs.toString()}
+                subtext="paid, in review or delivered"
+                icon="📄"
+                trendLabel={null}
+                theme={theme}
+              />
+              <MetricCard
+                title="Revenue (30-day)"
+                value={formatCurrency(metrics.monthlyRecurringRevenue)}
+                subtext={
+                  metrics.monthlyRecurringRevenue > 0
+                    ? "subscriptions + recent one-time"
+                    : "No revenue recorded yet"
+                }
+                icon="💷"
+                trendLabel={null}
+                theme={theme}
+              />
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* ── 2. Revenue Path: Boardroom Brief funnel ─────────────────────── */}
+      <Section label="Revenue Path" title="Boardroom Brief conversion funnel">
+        {!funnelData ? (
+          <EmptyState message="Funnel data unavailable." />
+        ) : funnelData.pressureSignalStarts === 0 && funnelData.completedPayments === 0 ? (
+          <EmptyState message="No funnel activity yet. Pressure signals and Boardroom Brief payments will appear here once recorded." />
+        ) : (
+          <div className={`rounded-2xl border ${cardClass} p-6 space-y-5`}>
+            <FunnelBar
+              label="Pressure signal starts"
+              count={funnelData.pressureSignalStarts}
+              max={funnelMax}
+              color={COLORS.gold}
+            />
+            <FunnelBar
+              label="Checkout attempts"
+              count={funnelData.checkoutAttempts}
+              max={funnelMax}
+              color="#a78bfa"
+            />
+            <FunnelBar
+              label="Completed payments"
+              count={funnelData.completedPayments}
+              max={funnelMax}
+              color={COLORS.success}
+            />
+            <FunnelBar
+              label="Delivered dossiers"
+              count={funnelData.deliveredDossiers}
+              max={funnelMax}
+              color="#38bdf8"
+            />
+            <p className={`text-[10px] font-mono ${textSecondaryClass}`}>
+              From database at {new Date(funnelData.generatedAt).toLocaleTimeString()}
+            </p>
+          </div>
+        )}
+      </Section>
+
+      {/* ── 3. Decision Pressure trend ──────────────────────────────────── */}
+      <Section label="Decision Pressure" title="Pressure signal volume (7 days)">
+        {trendData.length === 0 || trendData.every((d) => d.count === 0) ? (
+          <EmptyState message="No pressure signals recorded yet. The chart will populate as decisions are tested." />
+        ) : (
+          <div className={`rounded-2xl border ${cardClass} p-6`}>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData}>
+                  <defs>
+                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={COLORS.gold} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={COLORS.gold} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: COLORS.textSecondary }}
+                  />
+                  <YAxis tick={{ fontSize: 11, fill: COLORS.textSecondary }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#141414",
+                      borderColor: COLORS.gold,
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                    }}
+                    labelStyle={{ color: COLORS.gold }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke={COLORS.gold}
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorCount)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <p className={`text-xs font-mono mt-3 ${textSecondaryClass}`}>
+              Daily counts from PressureSignalEvent — all real decisions.
+            </p>
+          </div>
+        )}
+      </Section>
+
+      {/* ── 4. Boardroom Fulfilment pipeline ────────────────────────────── */}
+      <Section label="Boardroom Fulfilment" title="Delivery pipeline state">
+        {!fulfilmentData ? (
+          <EmptyState message="Fulfilment data unavailable." />
+        ) : fulfilmentData.paidOrders === 0 ? (
+          <EmptyState message="No paid Boardroom Brief orders yet. Pipeline will appear once the first payment is processed." />
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <StatPill label="Paid orders" count={fulfilmentData.paidOrders} />
+              <StatPill label="Dossier generated" count={fulfilmentData.generatedDossiers} />
+              <StatPill label="Approved" count={fulfilmentData.approvedDossiers} />
+              <StatPill label="Delivered" count={fulfilmentData.deliveredDossiers} />
+              <StatPill label="Overdue (>48 h)" count={fulfilmentData.overdueDeliveries} alert />
+            </div>
+            <p className={`text-[10px] font-mono mt-3 ${textSecondaryClass}`}>
+              From database at {new Date(fulfilmentData.generatedAt).toLocaleTimeString()}
+            </p>
+          </>
+        )}
+      </Section>
+
+      {/* ── 5. Outcome Memory ───────────────────────────────────────────── */}
+      <Section label="Outcome Memory" title="Decision outcomes (Return Briefs)">
+        {allOutcomesZero ? (
+          <EmptyState message="No verified outcomes yet. Outcome data appears once Return Briefs are submitted and classified." />
+        ) : (
+          <div className={`rounded-2xl border ${cardClass} p-6`}>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={outcomeData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={({ name, percent }) =>
+                      `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                    }
+                    labelLine={false}
+                  >
+                    {outcomeData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={OUTCOME_COLORS[index % OUTCOME_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#141414",
+                      borderColor: COLORS.gold,
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {metrics && metrics.averageDecisionOutcomeScore > 0 && (
+              <p className={`text-xs font-mono mt-3 ${textSecondaryClass}`}>
+                Average outcome score: {metrics.averageDecisionOutcomeScore}/5
+                — from verified OutcomeVerificationRecord entries.
+              </p>
+            )}
+          </div>
+        )}
+      </Section>
+
+      {/* ── 6. Retainer Oversight ───────────────────────────────────────── */}
+      <Section label="Retainer Oversight" title="Contract health">
+        {!retainerData ? (
+          <EmptyState message="Retainer health data unavailable." />
+        ) : retainerData.activeContracts === 0 ? (
+          <EmptyState message="No active retainer contracts. Contract health will appear once retainer agreements are established." />
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatPill label="Active contracts" count={retainerData.activeContracts} />
+              <StatPill label="Open cycles" count={retainerData.openReviewCycles} />
+              <StatPill label="Overdue cycles" count={retainerData.overdueReviewCycles} alert />
+              <StatPill label="Completed cycles" count={retainerData.completedReviewCycles} />
+            </div>
+            <p className={`text-[10px] font-mono mt-3 ${textSecondaryClass}`}>
+              From database at {new Date(retainerData.generatedAt).toLocaleTimeString()}
+            </p>
+          </>
+        )}
+      </Section>
+
+      {/* ── 7. Recent Verified Activity ─────────────────────────────────── */}
+      <Section label="Recent Verified Activity" title="Latest decision infrastructure events">
+        <div className={`rounded-2xl border ${cardClass} overflow-hidden`}>
+          {activityFeed.length === 0 ? (
+            <div className="p-8">
+              <EmptyState message="No recent activity. Events will appear as pressure signals, orders, and return briefs are recorded." />
+            </div>
+          ) : (
+            <>
+              <div className="divide-y divide-[#262626] max-h-[360px] overflow-y-auto">
+                {activityFeed.map((item) => (
+                  <div
+                    key={item.id}
+                    className="px-6 py-4 hover:bg-[#C5A059]/5 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 shrink-0">
+                            {item.type === "pressure_signal" && "SIGNAL"}
+                            {item.type === "boardroom_brief_order" && "BRIEF ORDER"}
+                            {item.type === "return_brief_submitted" && "RETURN BRIEF"}
+                          </span>
+                          <span className="text-sm font-medium text-[#E5E5E5] truncate">
+                            {item.title}
+                          </span>
+                        </div>
+                        {item.userRole && (
+                          <p className={`text-xs mt-1 font-mono ${textSecondaryClass}`}>
+                            {item.userRole}
+                          </p>
+                        )}
+                      </div>
+                      <p className="text-xs font-mono text-[#C5A059] shrink-0">
+                        {formatRelativeTime(item.timestamp)}
+                      </p>
                     </div>
-                    {activity.userRole && (
-                      <p className={`text-xs mt-1 font-mono ${textSecondaryClass}`}>Role: {activity.userRole}</p>
-                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-mono text-[#C5A059]">{formatRelativeTime(activity.timestamp)}</p>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))
+              <div className="px-6 py-3 border-t border-[#262626]">
+                <p className={`text-[10px] font-mono ${textSecondaryClass} tracking-wider`}>
+                  All events anonymised and aggregated. Data from database — not synthetic.
+                </p>
+              </div>
+            </>
           )}
         </div>
-        <div className="px-6 py-3 border-t border-[#262626] bg-[#C5A059]/5">
-          <p className="text-[10px] font-mono text-[#A3A3A3] tracking-wider">
-            All events are anonymised and aggregated. Real‑time feed updates every {refreshMs / 1000} seconds.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+      </Section>
 
-// ------------------------------------------------------------------
-// Metric Card Subcomponent
-// ------------------------------------------------------------------
-interface MetricCardProps {
-  title: string;
-  value: string;
-  subtext: string;
-  icon: string;
-  trend?: "up" | "neutral" | "down";
-  theme: "light" | "dark";
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, subtext, icon, trend, theme }) => {
-  const cardBg = theme === "dark" ? "bg-[#141414] border-[#262626]" : "bg-white border-gray-200";
-  const textClass = theme === "dark" ? "text-white" : "text-gray-900";
-  const subClass = theme === "dark" ? "text-[#A3A3A3]" : "text-gray-600";
-
-  return (
-    <div className={`rounded-2xl border ${cardBg} p-6 shadow-sm transition-all hover:scale-[1.01]`}>
-      <div className="flex items-center justify-between">
-        <span className="text-3xl">{icon}</span>
-        {trend && (
-          <span
-            className={`text-xs font-mono ${
-              trend === "up" ? "text-emerald-500" : trend === "down" ? "text-red-500" : "text-amber-500"
-            }`}
-          >
-            {trend === "up" && "▲ +2.1%"}
-            {trend === "down" && "▼ -0.8%"}
-            {trend === "neutral" && "◆ stable"}
-          </span>
-        )}
-      </div>
-      <div className="mt-4">
-        <p className={`text-2xl font-bold tracking-tight ${textClass}`}>{value}</p>
-        <p className="text-sm font-serif mt-1">{title}</p>
-        <p className={`text-xs font-mono mt-2 ${subClass}`}>{subtext}</p>
-      </div>
     </div>
   );
 };
