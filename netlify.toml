@@ -1,6 +1,7 @@
-# netlify.toml — Abraham of London
-# Netlify is the public CDN/proxy shell.
-# Vercel is the full Next.js runtime for SSR, admin, API, payments, and delivery.
+# netlify.toml — Abraham of London (independent Next.js runtime fallback)
+# @netlify/plugin-nextjs v5 handles SSR/SSG/API routes as Netlify Functions.
+# Legacy Netlify functions in netlify/functions_src/ are disabled for fallback.
+# The @netlify/plugin-emails plugin must be disabled in the Netlify UI dashboard.
 
 [build]
   publish = ".next"
@@ -14,10 +15,12 @@
   PNPM_VERSION = "10.33.0"
   NEXT_TELEMETRY_DISABLED = "1"
   NEXT_SKIP_TYPE_CHECK = "1"
-  # RECAPTCHA_TIMEOUT_MS value is a plain number (e.g. 5000) that naturally
-  # appears as a literal throughout the codebase — not a real secret leak.
-  # DB_PASSWORD appears only in docker-compose.yml (dev-only).
-  SECRETS_SCAN_OMIT_KEYS = "RECAPTCHA_TIMEOUT_MS,DB_PASSWORD"
+
+# Disable legacy Netlify functions — all routes served by @netlify/plugin-nextjs.
+# Setting this to a non-existent path prevents netlify/functions_src/ from being
+# compiled and injected as Lambda functions (which would consume env var budget).
+[functions]
+  directory = "netlify/functions_disabled"
 
 [context.production.environment]
   NEXT_PUBLIC_SITE_URL = "https://www.abrahamoflondon.org"

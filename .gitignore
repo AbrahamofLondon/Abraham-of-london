@@ -293,3 +293,6 @@ _ct600_workingalomarada-ct600-2023-2400_Source_Originals
 _ct600_working
 
 .env*
+
+# Netlify env — never commit real values
+.netlify-env.json
