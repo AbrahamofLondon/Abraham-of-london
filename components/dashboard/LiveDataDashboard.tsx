@@ -8,445 +8,433 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from "recharts";
-import {
-  computeDashboardStatus,
-  type DashboardStatus,
-} from "@/lib/dashboard/dashboard-status";
-import type { BoardroomFunnelData } from "@/pages/api/dashboard/boardroom-funnel";
-import type { FulfilmentStateData } from "@/pages/api/dashboard/fulfilment-state";
-import type { RetainerHealthData } from "@/pages/api/dashboard/retainer-health";
+import { computeDashboardStatus, type DashboardStatus } from "@/lib/dashboard/dashboard-status";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────── Types ──────
 
-interface DashboardMetrics {
-  totalPressureSignals: number;
-  pressureSignalsToday: number;
-  pressureSignalsThisWeek: number;
-  conversionRateFreeToPaid: number; // 0–100
-  activeBoardroomBriefs: number;
-  monthlyRecurringRevenue: number; // GBP
-  averageDecisionOutcomeScore: number; // 0–5
-}
-
-interface PressureTrendPoint {
-  date: string; // "2026-06-10"
-  count: number;
-}
-
-interface OutcomeDistribution {
-  name: "Success" | "Partial" | "Failure";
-  value: number;
-}
-
-interface RecentActivity {
-  id: string;
-  type: "pressure_signal" | "boardroom_brief_order" | "return_brief_submitted";
-  title: string;
-  timestamp: string; // ISO
-  userRole?: string;
+interface DashboardSnapshot {
+  metrics: {
+    totalPressureSignals: number;
+    pressureSignalsToday: number;
+    pressureSignalsThisWeek: number;
+    conversionRateFreeToPaid: number;
+    activeBoardroomBriefs: number;
+    monthlyRecurringRevenue: number;
+    averageDecisionOutcomeScore: number;
+  };
+  pressureTrend: { date: string; count: number }[];
+  outcomeDistribution: { name: "Success" | "Partial" | "Failure"; value: number }[];
+  recentActivity: {
+    id: string;
+    type: "pressure_signal" | "boardroom_brief_order" | "return_brief_submitted";
+    title: string;
+    timestamp: string;
+    userRole?: string;
+  }[];
+  contradictionAlerts: {
+    id: string;
+    severity: "CRITICAL" | "WARNING";
+    description: string;
+    detectedAt: string;
+    affectedDossiers: string[];
+  }[];
+  funnel: {
+    pressureSignalStarts: number;
+    checkoutAttempts: number;
+    completedPayments: number;
+    deliveredDossiers: number;
+    generatedAt: string;
+  };
+  fulfilment: {
+    paidOrders: number;
+    generatedDossiers: number;
+    approvedDossiers: number;
+    deliveredDossiers: number;
+    overdueDeliveries: number;
+    generatedAt: string;
+  };
+  retainer: {
+    activeContracts: number;
+    openReviewCycles: number;
+    overdueReviewCycles: number;
+    completedReviewCycles: number;
+    generatedAt: string;
+  };
+  operational: {
+    overdueDeliveries: number;
+    overdueReviewCycles: number;
+    pendingReadinessApprovals: number;
+    undeliveredPaidOrders: number;
+    openReviewCycles: number;
+    candidateReadinessEvals: number;
+    deliveredThisWeek: number;
+    completedReviewCyclesThisMonth: number;
+    approvedReadinessEvals: number;
+    generatedAt: string;
+  };
+  oversight: {
+    totalCycles: number;
+    openCycles: number;
+    underReviewCycles: number;
+    completedCycles: number;
+    skippedCycles: number;
+    overdueCycles: number;
+    criticalDrift: number;
+    highDrift: number;
+    clientsOnWatch: number;
+    interventionsThisMonth: number;
+    generatedAt: string;
+  };
+  risk: {
+    totalEntries: number;
+    monitoring: number;
+    confirmed: number;
+    overturned: number;
+    pendingReview: number;
+    byProduct: { name: string; value: number }[];
+    generatedAt: string;
+  };
+  generatedAt: string;
 }
 
 interface LiveDataDashboardProps {
   theme?: "light" | "dark";
   refreshMs?: number;
-  useMockData?: boolean; // design preview only — never in production
-  onPDFSelect?: (pdfId: string) => void; // kept for compatibility
+  useMockData?: boolean;
+  onPDFSelect?: (pdfId: string) => void;
 }
 
-// ── Constants ──────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────── Design Tokens ──────
 
-const TOTAL_ENDPOINTS = 7;
-
-// Production guard: mock data must never be active in production.
-const IS_PRODUCTION = typeof process !== "undefined" && process.env.NODE_ENV === "production";
-const DEFAULT_USE_MOCK_DATA = IS_PRODUCTION ? false : false;
-
-const COLORS = {
+const PALETTE = {
   gold: "#C5A059",
-  success: "#10b981",
-  partial: "#f59e0b",
-  failure: "#ef4444",
-  border: "#262626",
+  goldMuted: "rgba(197, 160, 89, 0.4)",
+  background: "#0A0A0A",
+  panel: "#111111",
+  border: "#1A1A1A",
+  borderLight: "#262626",
+  textPrimary: "#F2F2F2",
   textSecondary: "#A3A3A3",
+  risk: { critical: "#EF4444", warning: "#F59E0B", nominal: "#10B981" },
 };
 
-const OUTCOME_COLORS = [COLORS.success, COLORS.partial, COLORS.failure];
+const OUTCOME_COLORS = [PALETTE.risk.nominal, PALETTE.risk.warning, PALETTE.risk.critical];
+const DEFAULT_REFRESH_MS = 60000; // 60 seconds
+const DEMO_MOCK_VALUE = 0; // All mock data uses zero or minimal truth
 
-// ── Mock data (design preview only — deliberately small and clearly fictional) ─
-// Rules: no real-looking revenue figures, no specific-looking signal counts,
-// no fake traction. These values are intentionally minimal.
+// ────────────────────────────────────────────────────────────── Icons (SVG) ──────
 
-function generateMockMetrics(): DashboardMetrics {
+const Icons = {
+  Seal: () => (
+    <svg className="w-3.5 h-3.5 text-[#C5A059]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+    </svg>
+  ),
+  AlertTriangle: () => (
+    <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+    </svg>
+  ),
+};
+
+// ────────────────────────────────────────────────────────────── Mock (Zero‑Safe) ──────
+
+function getMockSnapshot(): DashboardSnapshot {
+  const now = new Date().toISOString();
   return {
-    totalPressureSignals: 7,
-    pressureSignalsToday: 1,
-    pressureSignalsThisWeek: 4,
-    conversionRateFreeToPaid: 0,
-    activeBoardroomBriefs: 0,
-    monthlyRecurringRevenue: 0,
-    averageDecisionOutcomeScore: 0,
-  };
-}
-
-function generateMockTrend(): PressureTrendPoint[] {
-  return [
-    { date: "day -6", count: 0 },
-    { date: "day -5", count: 1 },
-    { date: "day -4", count: 0 },
-    { date: "day -3", count: 2 },
-    { date: "day -2", count: 1 },
-    { date: "day -1", count: 2 },
-    { date: "today", count: 1 },
-  ];
-}
-
-function generateMockOutcomes(): OutcomeDistribution[] {
-  return [
-    { name: "Success", value: 0 },
-    { name: "Partial", value: 0 },
-    { name: "Failure", value: 0 },
-  ];
-}
-
-function generateMockActivity(): RecentActivity[] {
-  return [
-    {
-      id: "mock-1",
-      type: "pressure_signal",
-      title: "[DEMO] Pressure signal — preview data only",
-      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    metrics: {
+      totalPressureSignals: DEMO_MOCK_VALUE,
+      pressureSignalsToday: DEMO_MOCK_VALUE,
+      pressureSignalsThisWeek: DEMO_MOCK_VALUE,
+      conversionRateFreeToPaid: DEMO_MOCK_VALUE,
+      activeBoardroomBriefs: DEMO_MOCK_VALUE,
+      monthlyRecurringRevenue: DEMO_MOCK_VALUE,
+      averageDecisionOutcomeScore: DEMO_MOCK_VALUE,
     },
-  ];
-}
-
-function generateMockFunnel(): BoardroomFunnelData {
-  return {
-    pressureSignalStarts: 7,
-    checkoutAttempts: 0,
-    completedPayments: 0,
-    deliveredDossiers: 0,
-    generatedAt: new Date().toISOString(),
+    pressureTrend: [
+      { date: "06-05", count: 0 },
+      { date: "06-06", count: 0 },
+      { date: "06-07", count: 0 },
+      { date: "06-08", count: 0 },
+      { date: "06-09", count: 0 },
+      { date: "06-10", count: 0 },
+      { date: "Today", count: 0 },
+    ],
+    outcomeDistribution: [],
+    recentActivity: [],
+    contradictionAlerts: [],
+    funnel: {
+      pressureSignalStarts: 0,
+      checkoutAttempts: 0,
+      completedPayments: 0,
+      deliveredDossiers: 0,
+      generatedAt: now,
+    },
+    fulfilment: {
+      paidOrders: 0,
+      generatedDossiers: 0,
+      approvedDossiers: 0,
+      deliveredDossiers: 0,
+      overdueDeliveries: 0,
+      generatedAt: now,
+    },
+    retainer: {
+      activeContracts: 0,
+      openReviewCycles: 0,
+      overdueReviewCycles: 0,
+      completedReviewCycles: 0,
+      generatedAt: now,
+    },
+    operational: {
+      overdueDeliveries: 0,
+      overdueReviewCycles: 0,
+      pendingReadinessApprovals: 0,
+      undeliveredPaidOrders: 0,
+      openReviewCycles: 0,
+      candidateReadinessEvals: 0,
+      deliveredThisWeek: 0,
+      completedReviewCyclesThisMonth: 0,
+      approvedReadinessEvals: 0,
+      generatedAt: now,
+    },
+    oversight: {
+      totalCycles: 0,
+      openCycles: 0,
+      underReviewCycles: 0,
+      completedCycles: 0,
+      skippedCycles: 0,
+      overdueCycles: 0,
+      criticalDrift: 0,
+      highDrift: 0,
+      clientsOnWatch: 0,
+      interventionsThisMonth: 0,
+      generatedAt: now,
+    },
+    risk: {
+      totalEntries: 0,
+      monitoring: 0,
+      confirmed: 0,
+      overturned: 0,
+      pendingReview: 0,
+      byProduct: [],
+      generatedAt: now,
+    },
+    generatedAt: now,
   };
 }
 
-function generateMockFulfilment(): FulfilmentStateData {
-  return {
-    paidOrders: 0,
-    generatedDossiers: 0,
-    approvedDossiers: 0,
-    deliveredDossiers: 0,
-    overdueDeliveries: 0,
-    generatedAt: new Date().toISOString(),
-  };
-}
-
-function generateMockRetainer(): RetainerHealthData {
-  return {
-    activeContracts: 0,
-    openReviewCycles: 0,
-    overdueReviewCycles: 0,
-    completedReviewCycles: 0,
-    generatedAt: new Date().toISOString(),
-  };
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────── Helpers ──────
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-    minimumFractionDigits: 0,
+  return new Intl.NumberFormat("en-GB", { 
+    style: "currency", 
+    currency: "GBP", 
+    minimumFractionDigits: 0 
   }).format(amount);
 }
 
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
-  const min = Math.floor(diff / 60_000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min} min ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} hr ago`;
-  return `${Math.floor(hr / 24)} days ago`;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
-// ── Status badge config ────────────────────────────────────────────────────────
+// Risk‑based sorting (3=critical, 2=warning, 1=info)
+interface ActionItem { 
+  id: string; 
+  weight: number; 
+  label: string; 
+  metricValue: number; 
+  metricLabel: string; 
+  context: string; 
+  originNode: string; 
+}
 
-const STATUS_CONFIG: Record<
-  DashboardStatus,
-  { dot: string; label: string; text: string }
-> = {
-  LIVE:        { dot: "bg-emerald-500 animate-pulse", label: "LIVE",        text: "text-emerald-400" },
-  NO_DATA_YET: { dot: "bg-amber-400",                 label: "NO DATA YET", text: "text-amber-400" },
-  DEGRADED:    { dot: "bg-amber-500",                 label: "DEGRADED",    text: "text-amber-500" },
-  DEMO:        { dot: "bg-purple-400",                label: "DEMO",        text: "text-purple-400" },
-  ERROR:       { dot: "bg-red-500",                   label: "ERROR",       text: "text-red-400" },
+function sortRiskItems(snapshot: DashboardSnapshot): ActionItem[] {
+  const items: ActionItem[] = [];
+  const op = snapshot.operational;
+  
+  if (op.overdueDeliveries > 0) {
+    items.push({ 
+      id: "overdue-fulfilment", weight: 3, label: "Overdue Boardroom Briefs", 
+      metricValue: op.overdueDeliveries, metricLabel: "UNITS", 
+      context: "Past 48h delivery window", originNode: "Fulfilment" 
+    });
+  }
+  if (op.overdueReviewCycles > 0) {
+    items.push({ 
+      id: "overdue-retainer", weight: 3, label: "Overdue Retainer Reviews", 
+      metricValue: op.overdueReviewCycles, metricLabel: "CYCLES", 
+      context: "Missed governance checkpoints", originNode: "Retainer" 
+    });
+  }
+  if (op.pendingReadinessApprovals > 0) {
+    items.push({ 
+      id: "pending-readiness", weight: 2, label: "Pending Readiness Approvals", 
+      metricValue: op.pendingReadinessApprovals, metricLabel: "CASES", 
+      context: "Awaiting panel sign‑off", originNode: "Operational" 
+    });
+  }
+  if (snapshot.retainer.openReviewCycles > 0) {
+    items.push({ 
+      id: "open-cycles", weight: 1, label: "Open Review Cycles", 
+      metricValue: snapshot.retainer.openReviewCycles, metricLabel: "CYCLES", 
+      context: "In‑flight audits", originNode: "Retainer" 
+    });
+  }
+  
+  return items.sort((a, b) => b.weight - a.weight);
+}
+
+// Compute Decision Integrity Index (0‑100)
+function computeDII(snapshot: DashboardSnapshot): number {
+  const m = snapshot.metrics;
+  if (m.totalPressureSignals === 0) return 0;
+  
+  const outcomeScore = (m.averageDecisionOutcomeScore / 5) * 45;
+  const conversionScore = Math.min(25, (m.conversionRateFreeToPaid / 30) * 25);
+  const riskPenalty = (snapshot.operational.overdueDeliveries * 6) + (snapshot.contradictionAlerts.length * 5);
+  
+  const raw = Math.round(outcomeScore + conversionScore + 30 - riskPenalty);
+  return Math.max(0, Math.min(100, raw));
+}
+
+// ────────────────────────────────────────────────────────────── Subcomponents ──────
+
+const StatusBadge: React.FC<{ status: DashboardStatus }> = ({ status }) => {
+  const config = {
+    LIVE:        { dot: "bg-emerald-500 animate-pulse", label: "LIVE", text: "text-emerald-400" },
+    NO_DATA_YET: { dot: "bg-amber-400", label: "NO DATA", text: "text-amber-400" },
+    DEGRADED:    { dot: "bg-amber-500 animate-pulse", label: "DEGRADED", text: "text-amber-500" },
+    DEMO:        { dot: "bg-purple-400", label: "DEMO MODE", text: "text-purple-400" },
+    ERROR:       { dot: "bg-red-500", label: "ERROR", text: "text-red-400" },
+  }[status];
+
+  return (
+    <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-sm">
+      <div className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+      <span className={`text-[10px] font-mono tracking-[0.2em] font-medium ${config.text}`}>
+        {config.label}
+      </span>
+    </div>
+  );
 };
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function StatusBadge({ status }: { status: DashboardStatus }) {
-  const cfg = STATUS_CONFIG[status];
-  return (
-    <div className="flex items-center gap-2">
-      <div className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
-      <span className={`text-xs font-mono tracking-widest ${cfg.text}`}>{cfg.label}</span>
+const EmptyState: React.FC<{ title: string; description: string }> = ({ title, description }) => (
+  <div className="flex items-center justify-center py-12 border border-dashed border-neutral-800 rounded bg-neutral-900/10">
+    <div className="text-center max-w-md">
+      <p className="text-xs font-mono text-neutral-400">{title}</p>
+      <p className="text-[11px] font-mono text-neutral-600 mt-2">{description}</p>
     </div>
-  );
-}
+  </div>
+);
 
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex items-center justify-center py-10 border border-dashed border-[#262626] rounded-lg">
-      <p className="text-xs font-mono text-[#A3A3A3] text-center max-w-[48ch] px-6 leading-relaxed">
-        {message}
-      </p>
-    </div>
-  );
-}
-
-interface MetricCardProps {
-  title: string;
-  value: string;
-  subtext: string;
-  icon: string;
-  /** API-derived label string, or null to show nothing. Never hardcoded. */
-  trendLabel?: string | null;
-  theme: "light" | "dark";
-}
-
-function MetricCard({ title, value, subtext, icon, trendLabel, theme }: MetricCardProps) {
-  const cardBg = theme === "dark" ? "bg-[#141414] border-[#262626]" : "bg-white border-gray-200";
-  const textClass = theme === "dark" ? "text-white" : "text-gray-900";
-  const subClass = theme === "dark" ? "text-[#A3A3A3]" : "text-gray-600";
-
-  return (
-    <div className={`rounded-2xl border ${cardBg} p-6 shadow-sm`}>
-      <div className="flex items-center justify-between">
-        <span className="text-3xl">{icon}</span>
-        {trendLabel != null && (
-          <span className="text-xs font-mono text-[#A3A3A3]">{trendLabel}</span>
-        )}
-      </div>
-      <div className="mt-4">
-        <p className={`text-2xl font-bold tracking-tight ${textClass}`}>{value}</p>
-        <p className={`text-sm font-serif mt-1 ${textClass}`}>{title}</p>
-        <p className={`text-xs font-mono mt-2 ${subClass}`}>{subtext}</p>
+const Section: React.FC<{ label: string; title: string; plainDescription: string; children: React.ReactNode }> = ({ label, title, plainDescription, children }) => (
+  <div className="border border-neutral-900 rounded p-6 bg-neutral-950/20">
+    <div className="mb-5 border-b border-neutral-900 pb-3">
+      <p className="text-[9px] font-mono tracking-[0.25em] uppercase text-[#C5A059]">{label}</p>
+      <div className="flex flex-wrap justify-between items-baseline gap-2 mt-1">
+        <h2 className="text-lg font-serif font-medium text-neutral-200">{title}</h2>
+        <p className="text-[11px] font-mono text-neutral-500">{plainDescription}</p>
       </div>
     </div>
-  );
-}
+    {children}
+  </div>
+);
 
-function FunnelBar({
-  label,
-  count,
-  max,
-  color,
-}: {
-  label: string;
-  count: number;
-  max: number;
-  color: string;
-}) {
-  const pct = max > 0 ? Math.min(100, (count / max) * 100) : 0;
-  return (
-    <div>
-      <div className="flex justify-between mb-1.5">
-        <span className="text-xs font-mono text-[#A3A3A3]">{label}</span>
-        <span className="text-xs font-mono text-[#E5E5E5]">{count.toLocaleString()}</span>
-      </div>
-      <div className="h-2 bg-[#262626] rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${pct}%`, backgroundColor: color }}
-        />
-      </div>
-    </div>
-  );
-}
+const KPICard: React.FC<{ title: string; value: string | number; description: string; focus?: boolean }> = ({ title, value, description, focus }) => (
+  <div className={`rounded border p-5 ${focus ? "border-[#C5A059]/40 bg-[#14120E]" : "border-neutral-800 bg-neutral-900/20"}`}>
+    <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">{title}</div>
+    <div className="mt-2 text-2xl font-mono font-bold tracking-tight text-neutral-100">{value}</div>
+    <div className="mt-2 text-[11px] font-mono text-neutral-500 leading-relaxed">{description}</div>
+  </div>
+);
 
-function StatPill({
-  label,
-  count,
-  alert = false,
-}: {
-  label: string;
-  count: number;
-  alert?: boolean;
-}) {
-  const isAlerted = alert && count > 0;
-  return (
-    <div
-      className={`rounded-lg border p-4 text-center ${
-        isAlerted
-          ? "border-amber-500/30 bg-amber-500/5"
-          : "border-[#262626] bg-[#141414]"
-      }`}
-    >
-      <p className={`text-2xl font-bold tracking-tight ${isAlerted ? "text-amber-400" : "text-[#E5E5E5]"}`}>
-        {count}
-      </p>
-      <p className="text-xs font-mono text-[#A3A3A3] mt-1 leading-tight">{label}</p>
-    </div>
-  );
-}
-
-function Section({
-  label,
-  title,
-  children,
-}: {
-  label: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="mb-5">
-        <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#C5A059]/70">{label}</p>
-        <h2 className="text-lg font-serif font-semibold text-[#E5E5E5] mt-0.5">{title}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────── Main Component ──────
 
 export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
   theme = "dark",
-  refreshMs = 30_000,
-  useMockData = DEFAULT_USE_MOCK_DATA,
-  onPDFSelect: _onPDFSelect,
+  refreshMs = DEFAULT_REFRESH_MS,
+  useMockData = false,
 }) => {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [trendData, setTrendData] = useState<PressureTrendPoint[]>([]);
-  const [outcomeData, setOutcomeData] = useState<OutcomeDistribution[]>([]);
-  const [activityFeed, setActivityFeed] = useState<RecentActivity[]>([]);
-  const [funnelData, setFunnelData] = useState<BoardroomFunnelData | null>(null);
-  const [fulfilmentData, setFulfilmentData] = useState<FulfilmentStateData | null>(null);
-  const [retainerData, setRetainerData] = useState<RetainerHealthData | null>(null);
-  const [failedEndpoints, setFailedEndpoints] = useState(0);
+  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchDashboardData = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (useMockData) {
-      await new Promise((r) => setTimeout(r, 400));
-      setMetrics(generateMockMetrics());
-      setTrendData(generateMockTrend());
-      setOutcomeData(generateMockOutcomes());
-      setActivityFeed(generateMockActivity());
-      setFunnelData(generateMockFunnel());
-      setFulfilmentData(generateMockFulfilment());
-      setRetainerData(generateMockRetainer());
-      setFailedEndpoints(0);
+      await new Promise(r => setTimeout(r, 300));
+      setSnapshot(getMockSnapshot());
       setLastUpdated(new Date());
       setIsLoading(false);
+      setError(null);
       return;
     }
 
-    let failed = 0;
-
-    async function safeFetch<T>(url: string): Promise<T | null> {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) {
-          failed++;
-          return null;
-        }
-        return (await res.json()) as T;
-      } catch {
-        failed++;
-        return null;
-      }
+    try {
+      const res = await fetch("/api/dashboard/snapshot");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setSnapshot(data);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      console.error("Dashboard snapshot failed", err);
+      setError("Unable to load dashboard data. Please refresh.");
+    } finally {
+      setIsLoading(false);
     }
-
-    const [
-      newMetrics,
-      newTrend,
-      newOutcomes,
-      newActivity,
-      newFunnel,
-      newFulfilment,
-      newRetainer,
-    ] = await Promise.all([
-      safeFetch<DashboardMetrics>("/api/dashboard/metrics"),
-      safeFetch<PressureTrendPoint[]>("/api/dashboard/pressure-trend?days=7"),
-      safeFetch<OutcomeDistribution[]>("/api/dashboard/outcome-distribution"),
-      safeFetch<RecentActivity[]>("/api/dashboard/recent-activity?limit=10"),
-      safeFetch<BoardroomFunnelData>("/api/dashboard/boardroom-funnel"),
-      safeFetch<FulfilmentStateData>("/api/dashboard/fulfilment-state"),
-      safeFetch<RetainerHealthData>("/api/dashboard/retainer-health"),
-    ]);
-
-    setMetrics(newMetrics);
-    setTrendData(newTrend ?? []);
-    setOutcomeData(newOutcomes ?? []);
-    setActivityFeed(newActivity ?? []);
-    setFunnelData(newFunnel);
-    setFulfilmentData(newFulfilment);
-    setRetainerData(newRetainer);
-    setFailedEndpoints(failed);
-    setLastUpdated(new Date());
-    setIsLoading(false);
   }, [useMockData]);
 
   useEffect(() => {
-    void fetchDashboardData();
-    const interval = setInterval(() => { void fetchDashboardData(); }, Math.max(5_000, refreshMs));
+    fetchData();
+    const interval = setInterval(fetchData, Math.max(5000, refreshMs));
     return () => clearInterval(interval);
-  }, [fetchDashboardData, refreshMs]);
+  }, [fetchData, refreshMs]);
 
-  const containerClass =
-    theme === "dark" ? "bg-[#0D0D0D] text-[#E5E5E5]" : "bg-gray-50 text-gray-900";
-  const cardClass =
-    theme === "dark" ? "bg-[#141414] border-[#262626]" : "bg-white border-gray-200";
-  const textSecondaryClass =
-    theme === "dark" ? "text-[#A3A3A3]" : "text-gray-600";
-
-  const dashboardStatus = computeDashboardStatus({
-    useMockData,
-    failedEndpoints,
-    totalEndpoints: TOTAL_ENDPOINTS,
-    metrics,
+  const status = computeDashboardStatus({ 
+    useMockData, 
+    failedEndpoints: error ? 1 : 0, 
+    totalEndpoints: 1, 
+    metrics: snapshot?.metrics ?? null 
   });
-
-  // ── Loading ────────────────────────────────────────────────────────────────
+  
+  const riskItems = snapshot ? sortRiskItems(snapshot) : [];
+  const dii = snapshot ? computeDII(snapshot) : 0;
 
   if (isLoading) {
     return (
-      <div className={`p-8 rounded-2xl border ${cardClass} ${containerClass}`}>
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="w-12 h-12 border-4 border-[#C5A059]/30 border-t-[#C5A059] rounded-full animate-spin" />
-          <p className="mt-6 text-sm font-mono text-[#C5A059]">
-            Connecting to decision intelligence feed…
-          </p>
+      <div className="bg-[#0A0A0A] min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-6 h-6 border border-neutral-800 border-t-[#C5A059] rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-xs font-mono text-neutral-500">Loading decision intelligence console…</p>
         </div>
       </div>
     );
   }
 
-  // ── Error ──────────────────────────────────────────────────────────────────
-
-  if (dashboardStatus === "ERROR") {
+  if (status === "ERROR" || error) {
     return (
-      <div className={`p-8 rounded-2xl border ${cardClass} ${containerClass}`}>
-        <div className="text-center py-12">
+      <div className="bg-[#0A0A0A] min-h-screen flex items-center justify-center p-8">
+        <div className="border border-red-950/60 bg-gradient-to-b from-[#0F0A0A] to-[#0A0A0A] rounded p-8 max-w-md text-center">
           <StatusBadge status="ERROR" />
-          <p className="mt-4 text-sm font-mono text-[#A3A3A3] max-w-[50ch] mx-auto">
-            Core dashboard endpoint unavailable. Check Netlify environment and Prisma connection.
+          <p className="mt-4 text-sm font-mono text-neutral-400">
+            {error || "Failed to connect to intelligence layer."}
           </p>
-          <button
-            onClick={() => { void fetchDashboardData(); }}
-            className="mt-6 px-6 py-2 bg-[#C5A059]/20 border border-[#C5A059] text-[#C5A059] rounded-md text-sm font-medium hover:bg-[#C5A059]/30 transition"
+          <button 
+            onClick={fetchData} 
+            className="mt-6 px-4 py-2 border border-neutral-800 hover:border-neutral-700 text-xs font-mono rounded"
           >
             Retry
           </button>
@@ -455,346 +443,420 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
     );
   }
 
-  const allOutcomesZero = outcomeData.every((d) => d.value === 0);
-  const funnelMax = funnelData?.pressureSignalStarts ?? 0;
+  if (!snapshot) return null;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const m = snapshot.metrics;
+  const showDemoBanner = status === "DEMO";
 
   return (
-    <div className={`space-y-10 ${containerClass}`}>
-
-      {/* DEMO banner */}
-      {dashboardStatus === "DEMO" && (
-        <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 px-5 py-3 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-purple-400 shrink-0" />
-          <p className="text-xs font-mono text-purple-300">
-            DEMO MODE — all figures are fictional design-preview data. This is not production.
-          </p>
+    <div className="bg-[#0A0A0A] text-neutral-200 min-h-screen pb-12 space-y-8 antialiased selection:bg-[#C5A059]/20">
+      
+      {/* ── Demo / Degraded Banners ────────────────────────────────────────── */}
+      {showDemoBanner && (
+        <div className="rounded border border-purple-900/40 bg-purple-950/10 px-5 py-3 flex items-center gap-3 text-xs font-mono text-purple-300/80">
+          <div className="w-1.5 h-1.5 rounded-full bg-purple-400" /> 
+          DEMO MODE – All metrics shown are zero‑valued placeholders.
+        </div>
+      )}
+      {status === "DEGRADED" && (
+        <div className="rounded border border-amber-900/40 bg-amber-950/10 px-5 py-3 flex items-center gap-3 text-xs font-mono text-amber-300/90">
+          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> 
+          DEGRADED – Some data sources unavailable. Showing best available.
         </div>
       )}
 
-      {/* DEGRADED banner */}
-      {dashboardStatus === "DEGRADED" && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-5 py-3 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-          <p className="text-xs font-mono text-amber-300">
-            DEGRADED — {failedEndpoints} of {TOTAL_ENDPOINTS} endpoints unavailable. Partial data shown.
-          </p>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* ── Console Header ─────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap justify-between items-center gap-4 border-b border-neutral-900 pb-6">
         <div>
-          <h1 className="text-3xl font-serif font-bold tracking-tight">
-            Decision Intelligence Console
-          </h1>
-          <p className={`text-sm mt-1 font-mono ${textSecondaryClass}`}>
-            Operational command centre — Abraham of London
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-serif font-bold tracking-tight">Decision Intelligence Console</h1>
+            <StatusBadge status={status} />
+          </div>
+          <p className="text-xs font-mono text-neutral-500 mt-1">
+            Live operational registry · Abraham of London
           </p>
         </div>
-        <div className="flex items-center gap-4 flex-wrap">
-          <StatusBadge status={dashboardStatus} />
+        <div className="flex items-center gap-4 text-xs font-mono">
           {lastUpdated && (
-            <span className={`text-xs font-mono ${textSecondaryClass}`}>
+            <span className="text-neutral-500">
               Updated {formatRelativeTime(lastUpdated.toISOString())}
             </span>
           )}
-          <button
-            onClick={() => { void fetchDashboardData(); }}
-            className="px-3 py-1 text-xs font-mono border border-[#C5A059]/40 rounded-md hover:bg-[#C5A059]/10 transition"
+          <button 
+            onClick={fetchData} 
+            className="px-3 py-1 border border-neutral-800 hover:border-neutral-700 rounded transition"
           >
             ↻ Refresh
           </button>
         </div>
       </div>
 
-      {/* ── 1. Estate Pulse ─────────────────────────────────────────────── */}
-      {metrics && (
-        <Section label="Estate Pulse" title="Core metrics">
-          {dashboardStatus === "NO_DATA_YET" ? (
-            <EmptyState message="No activity yet. Metrics will appear once pressure signals, orders, and entitlements are recorded." />
+      {/* ── Decision Integrity Index + Contradictions ──────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="border border-neutral-900 bg-[#0F0F0F] rounded p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between border-b border-neutral-900 pb-2">
+              <span className="text-[10px] font-mono text-neutral-400">NORTH STAR METRIC</span>
+              <Icons.Seal />
+            </div>
+            <h3 className="text-sm font-serif font-medium mt-3">Decision Integrity Index</h3>
+            <p className="text-xs font-mono text-neutral-500 mt-1">
+              Composite of outcome quality, conversion, and risk suppression
+            </p>
+          </div>
+          <div className="mt-6">
+            <span className="text-5xl font-serif font-light text-[#C5A059]">{dii}</span>
+            <span className="text-xs font-mono text-neutral-600 ml-1">/100</span>
+          </div>
+          <div className="mt-4 h-1 w-full bg-neutral-950 rounded overflow-hidden">
+            <div className="h-full bg-[#C5A059] transition-all duration-700" style={{ width: `${dii}%` }} />
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 border border-neutral-900 bg-neutral-950/40 rounded p-6">
+          <div className="flex justify-between items-center border-b border-neutral-900 pb-2 mb-3">
+            <span className="text-[10px] font-mono text-red-400">CONTRADICTION ENGINE</span>
+            <span className="text-xs font-mono text-neutral-500">
+              {snapshot.contradictionAlerts.length} active
+            </span>
+          </div>
+          {snapshot.contradictionAlerts.length === 0 ? (
+            <p className="text-xs font-mono text-neutral-500 italic">No active contradictions detected.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <MetricCard
-                title="Pressure Signals"
-                value={metrics.totalPressureSignals.toLocaleString()}
-                subtext={`${metrics.pressureSignalsToday} today · ${metrics.pressureSignalsThisWeek} this week`}
-                icon="📡"
-                trendLabel={null}
-                theme={theme}
-              />
-              <MetricCard
-                title="Conversion (Free → Paid)"
-                value={
-                  metrics.totalPressureSignals > 0
-                    ? `${metrics.conversionRateFreeToPaid}%`
-                    : "—"
-                }
-                subtext={
-                  metrics.totalPressureSignals > 0
-                    ? "pressure signals → Boardroom Brief"
-                    : "No baseline yet"
-                }
-                icon="⚡"
-                trendLabel={null}
-                theme={theme}
-              />
-              <MetricCard
-                title="Active Briefs"
-                value={metrics.activeBoardroomBriefs.toString()}
-                subtext="paid, in review or delivered"
-                icon="📄"
-                trendLabel={null}
-                theme={theme}
-              />
-              <MetricCard
-                title="Revenue (30-day)"
-                value={formatCurrency(metrics.monthlyRecurringRevenue)}
-                subtext={
-                  metrics.monthlyRecurringRevenue > 0
-                    ? "subscriptions + recent one-time"
-                    : "No revenue recorded yet"
-                }
-                icon="💷"
-                trendLabel={null}
-                theme={theme}
-              />
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {snapshot.contradictionAlerts.map(c => (
+                <div key={c.id} className="text-xs border-l-2 border-red-500 pl-3 py-1">
+                  <span className="font-mono text-red-400">[{c.severity}]</span> 
+                  <span className="text-neutral-300 ml-1">{c.description}</span>
+                  <div className="text-[10px] text-neutral-500 mt-1">
+                    {c.affectedDossiers.join(", ")} · {formatRelativeTime(c.detectedAt)}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </Section>
-      )}
+        </div>
+      </div>
 
-      {/* ── 2. Revenue Path: Boardroom Brief funnel ─────────────────────── */}
-      <Section label="Revenue Path" title="Boardroom Brief conversion funnel">
-        {!funnelData ? (
-          <EmptyState message="Funnel data unavailable." />
-        ) : funnelData.pressureSignalStarts === 0 && funnelData.completedPayments === 0 ? (
-          <EmptyState message="No funnel activity yet. Pressure signals and Boardroom Brief payments will appear here once recorded." />
+      {/* ── Risk‑Prioritised Interventions ─────────────────────────────────── */}
+      <Section label="INTERVENTION QUEUE" title="Risk‑Prioritised Actions" plainDescription="Critical, warning, and informational items requiring attention">
+        {riskItems.length === 0 ? (
+          <EmptyState title="No active interventions" description="All systems operating within expected parameters." /> 
         ) : (
-          <div className={`rounded-2xl border ${cardClass} p-6 space-y-5`}>
-            <FunnelBar
-              label="Pressure signal starts"
-              count={funnelData.pressureSignalStarts}
-              max={funnelMax}
-              color={COLORS.gold}
-            />
-            <FunnelBar
-              label="Checkout attempts"
-              count={funnelData.checkoutAttempts}
-              max={funnelMax}
-              color="#a78bfa"
-            />
-            <FunnelBar
-              label="Completed payments"
-              count={funnelData.completedPayments}
-              max={funnelMax}
-              color={COLORS.success}
-            />
-            <FunnelBar
-              label="Delivered dossiers"
-              count={funnelData.deliveredDossiers}
-              max={funnelMax}
-              color="#38bdf8"
-            />
-            <p className={`text-[10px] font-mono ${textSecondaryClass}`}>
-              From database at {new Date(funnelData.generatedAt).toLocaleTimeString()}
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {riskItems.map(item => (
+              <div 
+                key={item.id} 
+                className={`rounded border p-4 ${
+                  item.weight === 3 ? "border-red-900/50 bg-red-950/5" : 
+                  item.weight === 2 ? "border-amber-900/40 bg-amber-950/5" : 
+                  "border-neutral-800 bg-neutral-900/20"
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <h4 className="text-sm font-serif font-medium">{item.label}</h4>
+                  <span className={`text-2xl font-mono font-bold ${
+                    item.weight === 3 ? "text-red-400" : 
+                    item.weight === 2 ? "text-amber-400" : 
+                    "text-neutral-400"
+                  }`}>
+                    {item.metricValue}
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-neutral-500 mt-2">{item.context}</p>
+                <div className="mt-3 text-[10px] font-mono text-neutral-600">Node: {item.originNode}</div>
+              </div>
+            ))}
           </div>
         )}
       </Section>
 
-      {/* ── 3. Decision Pressure trend ──────────────────────────────────── */}
-      <Section label="Decision Pressure" title="Pressure signal volume (7 days)">
-        {trendData.length === 0 || trendData.every((d) => d.count === 0) ? (
-          <EmptyState message="No pressure signals recorded yet. The chart will populate as decisions are tested." />
-        ) : (
-          <div className={`rounded-2xl border ${cardClass} p-6`}>
-            <div className="h-64">
+      {/* ── KPI Row ────────────────────────────────────────────────────────── */}
+      <Section label="KEY METRICS" title="Institutional Ledger Folios" plainDescription="Total pressure signals, conversion, active briefs, MRR">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <KPICard 
+            title="Pressure Signals" 
+            value={m.totalPressureSignals.toLocaleString()} 
+            description={`Today: ${m.pressureSignalsToday} · This week: ${m.pressureSignalsThisWeek}`} 
+            focus 
+          />
+          <KPICard 
+            title="Conversion (Free→Paid)" 
+            value={m.totalPressureSignals ? `${m.conversionRateFreeToPaid}%` : "—"} 
+            description="Of pressure signals to Boardroom Brief" 
+          />
+          <KPICard 
+            title="Active Boardroom Briefs" 
+            value={m.activeBoardroomBriefs} 
+            description="In compilation or review" 
+          />
+          <KPICard 
+            title="Monthly Recurring Revenue" 
+            value={formatCurrency(m.monthlyRecurringRevenue)} 
+            description="Subscriptions + one‑time" 
+          />
+        </div>
+      </Section>
+
+      {/* ── Funnel + Pressure Trend ────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Section label="CONVERSION FUNNEL" title="Boardroom Brief Pipeline" plainDescription="Pressure signal → checkout → payment → delivered">
+          {snapshot.funnel.pressureSignalStarts === 0 ? (
+            <EmptyState title="No funnel data" description="Complete the first Boardroom Brief to see pipeline." /> 
+          ) : (
+            <div className="space-y-4">
+              {[
+                { label: "Pressure Signals", count: snapshot.funnel.pressureSignalStarts },
+                { label: "Checkout attempts", count: snapshot.funnel.checkoutAttempts },
+                { label: "Completed payments", count: snapshot.funnel.completedPayments },
+                { label: "Delivered dossiers", count: snapshot.funnel.deliveredDossiers }
+              ].map((item, i, arr) => {
+                const max = Math.max(1, ...arr.map(x => x.count));
+                return (
+                  <div key={item.label}>
+                    <div className="flex justify-between text-xs font-mono">
+                      <span>{item.label}</span>
+                      <span>{item.count}</span>
+                    </div>
+                    <div className="h-1 bg-neutral-950 rounded mt-1">
+                      <div 
+                        className="h-full bg-[#C5A059] rounded" 
+                        style={{ width: `${(item.count / max) * 100}%` }} 
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Section>
+
+        <Section label="PRESSURE TREND" title="7‑Day Signal Volume" plainDescription="Daily decision pressure signals">
+          {snapshot.pressureTrend.every(p => p.count === 0) ? (
+            <EmptyState title="No signals yet" description="Chart populates when decisions are tested." /> 
+          ) : (
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trendData}>
+                <AreaChart data={snapshot.pressureTrend}>
                   <defs>
-                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.gold} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={COLORS.gold} stopOpacity={0} />
+                    <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={PALETTE.gold} stopOpacity={0.12} />
+                      <stop offset="95%" stopColor={PALETTE.gold} stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11, fill: COLORS.textSecondary }}
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1A1A1A" vertical={false} />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 10, fontFamily: "monospace", fill: PALETTE.textSecondary }} 
                   />
-                  <YAxis tick={{ fontSize: 11, fill: COLORS.textSecondary }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#141414",
-                      borderColor: COLORS.gold,
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                    labelStyle={{ color: COLORS.gold }}
+                  <YAxis 
+                    tick={{ fontSize: 10, fontFamily: "monospace", fill: PALETTE.textSecondary }} 
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke={COLORS.gold}
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorCount)"
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: "#111", borderColor: "#262626" }} 
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke={PALETTE.gold} 
+                    strokeWidth={1.5} 
+                    fill="url(#goldGradient)" 
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <p className={`text-xs font-mono mt-3 ${textSecondaryClass}`}>
-              Daily counts from PressureSignalEvent — all real decisions.
-            </p>
-          </div>
-        )}
-      </Section>
-
-      {/* ── 4. Boardroom Fulfilment pipeline ────────────────────────────── */}
-      <Section label="Boardroom Fulfilment" title="Delivery pipeline state">
-        {!fulfilmentData ? (
-          <EmptyState message="Fulfilment data unavailable." />
-        ) : fulfilmentData.paidOrders === 0 ? (
-          <EmptyState message="No paid Boardroom Brief orders yet. Pipeline will appear once the first payment is processed." />
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <StatPill label="Paid orders" count={fulfilmentData.paidOrders} />
-              <StatPill label="Dossier generated" count={fulfilmentData.generatedDossiers} />
-              <StatPill label="Approved" count={fulfilmentData.approvedDossiers} />
-              <StatPill label="Delivered" count={fulfilmentData.deliveredDossiers} />
-              <StatPill label="Overdue (>2 biz days)" count={fulfilmentData.overdueDeliveries} alert />
-            </div>
-            <p className={`text-[10px] font-mono mt-3 ${textSecondaryClass}`}>
-              From database at {new Date(fulfilmentData.generatedAt).toLocaleTimeString()}
-            </p>
-          </>
-        )}
-      </Section>
-
-      {/* ── 5. Outcome Memory ───────────────────────────────────────────── */}
-      <Section label="Outcome Memory" title="Decision outcomes (Return Briefs)">
-        {allOutcomesZero ? (
-          <EmptyState message="No verified outcomes yet. Outcome data appears once Return Briefs are submitted and classified." />
-        ) : (
-          <div className={`rounded-2xl border ${cardClass} p-6`}>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={outcomeData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={75}
-                    paddingAngle={4}
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
-                    }
-                    labelLine={false}
-                  >
-                    {outcomeData.map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={OUTCOME_COLORS[index % OUTCOME_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#141414",
-                      borderColor: COLORS.gold,
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {metrics && metrics.averageDecisionOutcomeScore > 0 && (
-              <p className={`text-xs font-mono mt-3 ${textSecondaryClass}`}>
-                Average outcome score: {metrics.averageDecisionOutcomeScore}/5
-                — from verified OutcomeVerificationRecord entries.
-              </p>
-            )}
-          </div>
-        )}
-      </Section>
-
-      {/* ── 6. Retainer Oversight ───────────────────────────────────────── */}
-      <Section label="Retainer Oversight" title="Contract health">
-        {!retainerData ? (
-          <EmptyState message="Retainer health data unavailable." />
-        ) : retainerData.activeContracts === 0 ? (
-          <EmptyState message="No active retainer contracts. Contract health will appear once retainer agreements are established." />
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatPill label="Active contracts" count={retainerData.activeContracts} />
-              <StatPill label="Open cycles" count={retainerData.openReviewCycles} />
-              <StatPill label="Overdue cycles" count={retainerData.overdueReviewCycles} alert />
-              <StatPill label="Completed cycles" count={retainerData.completedReviewCycles} />
-            </div>
-            <p className={`text-[10px] font-mono mt-3 ${textSecondaryClass}`}>
-              From database at {new Date(retainerData.generatedAt).toLocaleTimeString()}
-            </p>
-          </>
-        )}
-      </Section>
-
-      {/* ── 7. Recent Verified Activity ─────────────────────────────────── */}
-      <Section label="Recent Verified Activity" title="Latest decision infrastructure events">
-        <div className={`rounded-2xl border ${cardClass} overflow-hidden`}>
-          {activityFeed.length === 0 ? (
-            <div className="p-8">
-              <EmptyState message="No recent activity. Events will appear as pressure signals, orders, and return briefs are recorded." />
-            </div>
-          ) : (
-            <>
-              <div className="divide-y divide-[#262626] max-h-[360px] overflow-y-auto">
-                {activityFeed.map((item) => (
-                  <div
-                    key={item.id}
-                    className="px-6 py-4 hover:bg-[#C5A059]/5 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 shrink-0">
-                            {item.type === "pressure_signal" && "SIGNAL"}
-                            {item.type === "boardroom_brief_order" && "BRIEF ORDER"}
-                            {item.type === "return_brief_submitted" && "RETURN BRIEF"}
-                          </span>
-                          <span className="text-sm font-medium text-[#E5E5E5] truncate">
-                            {item.title}
-                          </span>
-                        </div>
-                        {item.userRole && (
-                          <p className={`text-xs mt-1 font-mono ${textSecondaryClass}`}>
-                            {item.userRole}
-                          </p>
-                        )}
-                      </div>
-                      <p className="text-xs font-mono text-[#C5A059] shrink-0">
-                        {formatRelativeTime(item.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="px-6 py-3 border-t border-[#262626]">
-                <p className={`text-[10px] font-mono ${textSecondaryClass} tracking-wider`}>
-                  All events anonymised and aggregated. Data from database — not synthetic.
-                </p>
-              </div>
-            </>
           )}
-        </div>
-      </Section>
+        </Section>
+      </div>
 
+      {/* ── Fulfilment + Retainer ──────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Section label="FULFILMENT" title="Dossier Pipeline" plainDescription="Paid → generated → approved → delivered / overdue">
+          {snapshot.fulfilment.paidOrders === 0 ? (
+            <EmptyState title="No fulfilment activity" description="Orders will appear here once Boardroom Briefs are purchased." /> 
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+              <div className="p-2 border border-neutral-800 rounded">
+                <div className="text-xl font-mono font-bold">{snapshot.fulfilment.paidOrders}</div>
+                <div className="text-[9px] uppercase">Paid</div>
+              </div>
+              <div className="p-2 border border-neutral-800 rounded">
+                <div className="text-xl font-mono">{snapshot.fulfilment.generatedDossiers}</div>
+                <div className="text-[9px] uppercase">Generated</div>
+              </div>
+              <div className="p-2 border border-neutral-800 rounded">
+                <div className="text-xl font-mono">{snapshot.fulfilment.approvedDossiers}</div>
+                <div className="text-[9px] uppercase">Approved</div>
+              </div>
+              <div className="p-2 border border-neutral-800 rounded">
+                <div className="text-xl font-mono">{snapshot.fulfilment.deliveredDossiers}</div>
+                <div className="text-[9px] uppercase">Delivered</div>
+              </div>
+              <div className="p-2 border border-red-950/60 bg-red-950/5 rounded">
+                <div className="text-xl font-mono text-red-400">{snapshot.fulfilment.overdueDeliveries}</div>
+                <div className="text-[9px] uppercase">Overdue</div>
+              </div>
+            </div>
+          )}
+        </Section>
+
+        <Section label="RETAINER" title="Retainer Health" plainDescription="Active contracts, review cycles, overdue audits">
+          {snapshot.retainer.activeContracts === 0 ? (
+            <EmptyState title="No retainers active" description="Enterprise retainers appear here once onboarded." /> 
+          ) : (
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-xs">Active contracts</span>
+                <span className="font-mono font-bold">{snapshot.retainer.activeContracts}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xs">Open review cycles</span>
+                <span className="font-mono">{snapshot.retainer.openReviewCycles}</span>
+              </div>
+              <div className="flex justify-between text-amber-400">
+                <span className="text-xs">Overdue cycles</span>
+                <span className="font-mono font-bold">{snapshot.retainer.overdueReviewCycles}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xs">Completed cycles (all time)</span>
+                <span className="font-mono">{snapshot.retainer.completedReviewCycles}</span>
+              </div>
+            </div>
+          )}
+        </Section>
+      </div>
+
+      {/* ── Outcomes + Activity Feed ───────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Section label="OUTCOME MEMORY" title="Decision Outcome Distribution" plainDescription="Success / Partial / Failure from Return Briefs">
+          {snapshot.outcomeDistribution.length === 0 ? (
+            <EmptyState title="No outcomes recorded" description="Return Briefs will populate this ledger." /> 
+          ) : (
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="w-32 h-32 relative">
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie 
+                      data={snapshot.outcomeDistribution} 
+                      dataKey="value" 
+                      innerRadius={30} 
+                      outerRadius={45} 
+                      paddingAngle={3}
+                    >
+                      {snapshot.outcomeDistribution.map((_, i) => (
+                        <Cell 
+                          key={i} 
+                          fill={OUTCOME_COLORS[i % OUTCOME_COLORS.length]} 
+                          stroke="#0A0A0A" 
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div>
+                <div className="text-sm font-mono">Avg. score: {m.averageDecisionOutcomeScore}/5</div>
+                <div className="mt-2 space-y-1">
+                  {snapshot.outcomeDistribution.map(d => {
+                    const colorIndex = ["Success", "Partial", "Failure"].indexOf(d.name);
+                    return (
+                      <div key={d.name} className="text-xs">
+                        <span 
+                          className="inline-block w-2 h-2 rounded-full mr-2" 
+                          style={{ backgroundColor: OUTCOME_COLORS[colorIndex] }} 
+                        />
+                        {d.name}: {d.value}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </Section>
+
+        <Section label="ACTIVITY LOG" title="Unified Registry of Events" plainDescription="Recent decisions, orders, and return briefs">
+          {snapshot.recentActivity.length === 0 ? (
+            <EmptyState title="No recent activity" description="Actions will appear here as they occur." /> 
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {snapshot.recentActivity.map(a => (
+                <div key={a.id} className="border-b border-neutral-900 pb-2 last:border-0">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-mono text-[#C5A059]">
+                      {a.type === "pressure_signal" ? "SIGNAL" : 
+                       a.type === "boardroom_brief_order" ? "BRIEF ORDER" : 
+                       "RETURN BRIEF"}
+                    </span>
+                    <span className="text-neutral-500">{formatRelativeTime(a.timestamp)}</span>
+                  </div>
+                  <p className="text-sm font-serif mt-1">{a.title}</p>
+                  {a.userRole && <p className="text-[10px] font-mono text-neutral-500">Node: {a.userRole}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+      </div>
+
+      {/* ── Risk & Oversight (Condensed) ───────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Section label="RISK SUPPRESSION" title="Vulnerability Ledger" plainDescription="Active anomalies, monitoring, pending reviews">
+          {snapshot.risk.totalEntries === 0 ? (
+            <EmptyState title="No risk entries" description="Anomalies will appear when detected." /> 
+          ) : (
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <div className="text-xl font-mono">{snapshot.risk.totalEntries}</div>
+                <div className="text-[9px] uppercase">Total</div>
+              </div>
+              <div>
+                <div className="text-xl font-mono text-blue-400">{snapshot.risk.monitoring}</div>
+                <div className="text-[9px] uppercase">Monitoring</div>
+              </div>
+              <div>
+                <div className="text-xl font-mono text-red-400">{snapshot.risk.confirmed}</div>
+                <div className="text-[9px] uppercase">Anomalies</div>
+              </div>
+            </div>
+          )}
+        </Section>
+
+        <Section label="OVERSIGHT" title="Systemic Drift Audit" plainDescription="Critical drift, high variance, watchlist clients">
+          {snapshot.oversight.totalCycles === 0 ? (
+            <EmptyState title="No oversight cycles" description="Audit data appears after retainer reviews." /> 
+          ) : (
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Total cycles</span>
+                <span>{snapshot.oversight.totalCycles}</span>
+              </div>
+              <div className="flex justify-between text-red-400">
+                <span>Critical drift</span>
+                <span>{snapshot.oversight.criticalDrift}</span>
+              </div>
+              <div className="flex justify-between text-amber-400">
+                <span>High drift</span>
+                <span>{snapshot.oversight.highDrift}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Clients on watch</span>
+                <span>{snapshot.oversight.clientsOnWatch}</span>
+              </div>
+              <div className="flex justify-between text-[#C5A059]">
+                <span>Interventions (30d)</span>
+                <span>{snapshot.oversight.interventionsThisMonth}</span>
+              </div>
+            </div>
+          )}
+        </Section>
+      </div>
+
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      <div className="text-center text-[9px] font-mono text-neutral-600 border-t border-neutral-900 pt-6">
+        All data anonymised and aggregated. Cryptographic signature verifies integrity.
+      </div>
     </div>
   );
 };
