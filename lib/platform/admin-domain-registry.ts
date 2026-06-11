@@ -167,6 +167,11 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/provenance-chain", domain: "audit", requiredRole: "OWNER", canonicalRecord: "LineageEvent", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/access-diagnostics", domain: "access", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/security-assurance-requests", domain: "audit", requiredRole: "ADMIN", canonicalRecord: "AuditEvent", riskLevel: "HIGH", emitsAudit: true },
+  // ── Operations & Proof Support ─────────────────────────────────────────────
+  { route: "/admin/operations", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/billing", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "ClientEntitlement", riskLevel: "MEDIUM", emitsAudit: false },
+  { route: "/admin/briefs", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/artifacts", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "DiagnosticArtifact", riskLevel: "LOW", emitsAudit: false },
 ];
 
 export function getAdminRoute(route: string): AdminRouteEntry | undefined {

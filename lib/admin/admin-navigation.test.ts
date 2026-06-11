@@ -113,4 +113,43 @@ describe("admin navigation registry", () => {
     const bad = allItems().filter((i) => !i.href.startsWith("/admin"));
     expect(bad.map((i) => `${i.id}: ${i.href}`)).toEqual([]);
   });
+
+  it("/admin/operations is registered in nav under Operations & Support", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "operations");
+    expect(section, "operations section must exist").toBeDefined();
+    const item = section?.items.find((i) => i.href === "/admin/operations");
+    expect(item, "/admin/operations must be in nav").toBeDefined();
+    expect(item?.status).toBe("active");
+    expect(item?.visibility).toBe("admin");
+    expect(item?.router).toBe("pages");
+  });
+
+  it("/admin/billing is registered in nav under Operations & Support", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "operations");
+    const item = section?.items.find((i) => i.href === "/admin/billing");
+    expect(item, "/admin/billing must be in nav").toBeDefined();
+    expect(item?.status).toBe("active");
+    expect(item?.visibility).toBe("admin");
+  });
+
+  it("/admin/briefs is registered in nav under Operations & Support", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "operations");
+    const item = section?.items.find((i) => i.href === "/admin/briefs");
+    expect(item, "/admin/briefs must be in nav").toBeDefined();
+    expect(item?.status).toBe("active");
+    expect(item?.visibility).toBe("admin");
+  });
+
+  it("/admin/artifacts is registered in nav under Operations & Support", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "operations");
+    const item = section?.items.find((i) => i.href === "/admin/artifacts");
+    expect(item, "/admin/artifacts must be in nav").toBeDefined();
+    expect(item?.status).toBe("active");
+    expect(item?.visibility).toBe("admin");
+  });
+
+  it("/admin/dev/session is NOT in normal admin navigation", () => {
+    const item = allItems().find((i) => i.href === "/admin/dev/session");
+    expect(item, "/admin/dev/session must not appear in normal nav").toBeUndefined();
+  });
 });
