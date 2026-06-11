@@ -1250,9 +1250,14 @@ export default function ProductsPage() {
                   Global Market Intelligence
                 </h2>
               </div>
-              <p className="max-w-[70ch] text-[15px] leading-[1.85] text-white/[0.65] lg:justify-self-end">
-                Quarterly intelligence that publishes what would prove it wrong — and reviews prior calls before issuing the next report.
-              </p>
+              <div className="max-w-[70ch] space-y-3 lg:justify-self-end">
+                <p className="text-[15px] leading-[1.85] text-white/[0.65]">
+                  Every quarterly report reviews the material calls from the previous quarter before issuing the next one.
+                </p>
+                <p className="text-[13px] leading-[1.7] text-white/[0.42]" style={mono}>
+                  This intelligence line compounds through verification, not just publication.
+                </p>
+              </div>
             </div>
 
             {/* GMI differentiation — what makes this different */}

@@ -25,11 +25,7 @@ try {
     src: path.join(process.cwd(), 'public', 'fonts', 'EBGaramond-Regular.ttf')
   });
 } catch {
-  // Fallback to standard fonts if custom font not available
-  Font.register({
-    family: 'EB Garamond',
-    src: 'https://fonts.gstatic.com/s/ebgaramond/v26/Sl0V77v_Bp6itS5XooPGEExvXv9N.ttf'
-  });
+  // Local font not found — react-pdf will use its built-in Helvetica fallback
 }
 
 try {
