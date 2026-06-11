@@ -6,7 +6,8 @@
  * Accepts lightweight feedback (thumbs up/down + optional comment) from
  * major result and case surfaces. No auth required.
  *
- * Stored in SystemAuditLog with category=feedback for operator review.
+ * Stored as FeedbackEvent and mirrored to SystemAuditLog with category=feedback
+ * for operator review.
  * Free-text comment is stored only if provided; never required.
  * Privacy warning: Do not include confidential, legal, personal, or
  * client-identifying information in feedback comments.
@@ -17,27 +18,19 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { applyRateLimit, getClientIp } from "@/lib/server/apply-rate-limit";
+import { submitFeedback } from "@/lib/feedback/feedback-service";
+import type { FeedbackPublicResponse } from "@/lib/feedback/feedback-types";
 
-const schema = z.object({
-  surface: z.string().trim().min(1).max(80),
-  subjectId: z.string().trim().max(200).optional().nullable(),
-  rating: z.enum(["positive", "negative"]),
-  comment: z.string().trim().max(500).optional().nullable(),
-}).strict();
-
-type OkResponse = { ok: true };
-type ErrorResponse = { error: string };
+type ErrorResponse = { ok: false; error: string };
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<OkResponse | ErrorResponse>,
+  res: NextApiResponse<FeedbackPublicResponse | ErrorResponse>,
 ) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   const ip = getClientIp(req);
@@ -50,36 +43,19 @@ export default async function handler(
   });
   if (!ok) return;
 
-  const parsed = schema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid request" });
-  }
-
-  const { surface, subjectId, rating, comment } = parsed.data;
-
   try {
-    await prisma.systemAuditLog.create({
-      data: {
-        action: "FEEDBACK_SUBMITTED",
-        category: "user",
-        severity: "info",
-        status: "success",
-        resourceType: "FEEDBACK",
-        resourceId: surface,
-        metadata: JSON.stringify({
-          surface,
-          subjectId: subjectId ?? null,
-          rating,
-          comment: comment ?? null,
-        }),
-      },
-    });
-
+    const response = await submitFeedback(req.body, req);
     res.setHeader("Cache-Control", "no-store");
-    return res.status(200).json({ ok: true });
+    return res.status(200).json(response);
   } catch (err) {
     console.error("[feedback/submit]", err);
-    return res.status(500).json({ error: "Feedback could not be recorded" });
+    const message = err instanceof Error && err.name === "ZodError"
+      ? "Invalid request"
+      : "Feedback could not be recorded";
+    return res.status(message === "Invalid request" ? 400 : 500).json({
+      ok: false,
+      error: message,
+    });
   }
 }
 

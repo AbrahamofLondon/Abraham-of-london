@@ -45,6 +45,7 @@ import CommercialExposurePanel from "@/components/diagnostics/CommercialExposure
 import OutcomeContributionPanel from "@/components/product/OutcomeContributionPanel";
 import ContextualUpgradePrompt from "@/components/product/ContextualUpgradePrompt";
 import CaseSharePanel from "@/components/product/CaseSharePanel";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import type { DecisionCentreCase } from "@/lib/product/decision-centre-contract";
 import type { CaseVerifyResult } from "@/pages/api/provenance/verify-case";
 
@@ -796,6 +797,15 @@ const CaseDetailPage: NextPage = () => {
 
           {/* ── CASE SHARING ─────────────────────────────────────────── */}
           <CaseSharePanel caseId={c.caseId} />
+
+          {/* ── GOVERNED FEEDBACK ─────────────────────────────────────── */}
+          <FeedbackWidget
+            surface="decision_centre_case"
+            subjectType="decision_centre_case"
+            subjectId={c.caseId}
+            productCode={c.sourceType ?? undefined}
+            compact
+          />
 
           {/* ── FOOTER ACTIONS ──────────────────────────────────────── */}
           <div className="flex flex-wrap gap-3 pt-2">

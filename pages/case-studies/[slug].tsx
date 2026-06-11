@@ -10,6 +10,7 @@ import Head from "next/head";
 import Link from "next/link";
 import type { GetServerSideProps, NextPage } from "next";
 import Layout from "@/components/Layout";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import type { PublicCaseStudy } from "@/lib/evidence/case-study-public";
 import { EVIDENCE_STATUS_LABELS, OUTCOME_STATUS_LABELS } from "@/lib/evidence/case-study-public";
 
@@ -226,6 +227,15 @@ const CaseStudyDetailPage: NextPage<Props> = ({ cs }) => {
 
         {/* Product route */}
         <ProductRoute productCode={cs.productCode} />
+
+        <FeedbackWidget
+          surface="case_study_public"
+          subjectType="case_study"
+          subjectId={cs.id}
+          productCode={cs.productCode ?? undefined}
+          caseStudyId={cs.id}
+          compact
+        />
 
       </div>
     </Layout>

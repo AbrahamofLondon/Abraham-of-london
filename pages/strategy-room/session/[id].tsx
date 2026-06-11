@@ -18,6 +18,7 @@ import CounselStatusPanel from "@/components/strategy-room/CounselStatusPanel";
 import DecisionTimeline, { type DecisionTimelineItem } from "@/components/strategy-room/DecisionTimeline";
 import GovernanceEvidenceCarryForward from "@/components/strategy-room/GovernanceEvidenceCarryForward";
 import SignalPressurePanel from "@/components/strategy-room/SignalPressurePanel";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import {
   convertPurposeAlignmentToGovernedMemory,
 } from "@/lib/alignment/evidence-memory";
@@ -1241,6 +1242,14 @@ export default function StrategyRoomSessionPage({
                     : "Provenance status: case-specific provenance is not available for this Strategy Room record."}
               </p>
             </div>
+
+            <FeedbackWidget
+              surface="strategy_room_session"
+              subjectType="strategy_room_session"
+              subjectId={session.id}
+              productCode="strategy_room"
+              compact
+            />
 
             {/* Navigation */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>

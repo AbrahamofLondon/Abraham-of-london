@@ -471,7 +471,13 @@ const ReturnBriefPage: NextPage = () => {
           </div>
 
           {/* Feedback widget */}
-          <FeedbackWidget surface="return-brief" subjectId={typeof router.query.caseId === "string" ? router.query.caseId : undefined} />
+          <FeedbackWidget
+            surface="return_brief_outcome"
+            subjectType="outcome"
+            subjectId={typeof router.query.caseId === "string" ? router.query.caseId : undefined}
+            productCode="return_brief"
+            requireCategoryOnNegative
+          />
 
           {/* Mandatory boundary note */}
           <section

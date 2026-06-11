@@ -8,6 +8,7 @@
 import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import CostOfDelaySection, { type CostOfDelayData } from "@/components/diagnostics/CostOfDelaySection";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
 type DossierSection = {
   id: string;
@@ -214,6 +215,15 @@ function BoardroomDossierPageInner() {
             Contact your Abraham of London advisor to schedule a Strategy Room session.
           </p>
         </div>
+
+        <FeedbackWidget
+          surface="boardroom_brief_delivered"
+          subjectType="boardroom_dossier"
+          subjectId={dossier.id}
+          artifactId={dossier.id}
+          productCode="boardroom_brief"
+          compact
+        />
 
         {/* Footer */}
         <div className="border-t border-white/8 pt-6 text-center">

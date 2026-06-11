@@ -26,6 +26,7 @@ import {
 import CommercialExposurePanel from "@/components/diagnostics/CommercialExposurePanel";
 import BenchmarkContextPanel from "@/components/product/BenchmarkContextPanel";
 import ResultPathwayPanel from "@/components/product/ResultPathwayPanel";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import {
   deriveResultPathwayState,
   evidenceStateFromAssessmentResult,
@@ -461,6 +462,16 @@ export default function AssessmentResultSurface({
         <div style={{ marginTop: "24px" }}>
           <ResultPathwayPanel state={savedPathwayState} />
         </div>
+      )}
+
+      {result.kind === "FAST_DIAGNOSTIC" && (
+        <FeedbackWidget
+          surface="fast_diagnostic_result"
+          subjectType="diagnostic_result"
+          subjectId={result.recordStatus.caseId ?? result.kind}
+          productCode="fast_diagnostic"
+          compact
+        />
       )}
     </div>
   );

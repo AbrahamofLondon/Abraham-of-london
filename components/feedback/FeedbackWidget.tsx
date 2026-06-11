@@ -1,69 +1,151 @@
+"use client";
+
 /**
- * components/feedback/FeedbackWidget.tsx
+ * Lightweight product judgement widget.
  *
- * Lightweight, non-intrusive feedback widget.
- * Renders a small thumbs-up / thumbs-down prompt with optional comment.
- * Submits to POST /api/feedback/submit.
- *
- * Props:
- *   surface   — identifies the page/feature (e.g. "return-brief", "decision-centre-case")
- *   subjectId — optional: case ID, report ID, etc.
- *
- * Privacy: no free-text is required. If entered, it is stored as-is.
- * Callers should not place this widget adjacent to sensitive evidence fields.
+ * Backward compatible with the old { surface, subjectId } usage while allowing
+ * richer governed feedback context when product surfaces can provide it.
  */
 
 import * as React from "react";
-import { ThumbsUp, ThumbsDown, X } from "lucide-react";
+import { CheckCircle2, CircleHelp, ThumbsDown, X } from "lucide-react";
+import type { FeedbackCategory, FeedbackRating } from "@/lib/feedback/feedback-types";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
-type Rating = "positive" | "negative";
-
 type Props = {
   surface: string;
   subjectId?: string;
+  subjectType?: string;
+  productCode?: string;
+  evidenceHash?: string;
+  artifactVersion?: string | number;
+  orderId?: string;
+  artifactId?: string;
+  outcomeHypothesisId?: string;
+  falsificationEntryId?: string;
+  retainerCycleId?: string;
+  caseStudyId?: string;
+  compact?: boolean;
+  requireCategoryOnNegative?: boolean;
 };
 
-type State = "idle" | "rated" | "commenting" | "submitting" | "done" | "error";
+type State = "idle" | "details" | "submitting" | "done" | "error";
 
-export default function FeedbackWidget({ surface, subjectId }: Props) {
+const categoryOptions: Array<{ value: FeedbackCategory; label: string }> = [
+  { value: "clarity", label: "Clarity" },
+  { value: "accuracy", label: "Accuracy" },
+  { value: "usefulness", label: "Usefulness" },
+  { value: "actionability", label: "Actionability" },
+  { value: "trust", label: "Trust" },
+  { value: "evidence_quality", label: "Evidence quality" },
+  { value: "delivery_quality", label: "Delivery quality" },
+];
+
+function iconButtonStyle(active: boolean): React.CSSProperties {
+  return {
+    background: active ? `${GOLD}12` : "none",
+    border: active ? `1px solid ${GOLD}55` : "1px solid rgba(255,255,255,0.08)",
+    cursor: "pointer",
+    padding: "6px 10px",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    color: active ? `${GOLD}DD` : "rgba(255,255,255,0.42)",
+  };
+}
+
+function chipStyle(active: boolean): React.CSSProperties {
+  return {
+    ...mono,
+    fontSize: "7px",
+    letterSpacing: 0,
+    textTransform: "uppercase",
+    border: active ? `1px solid ${GOLD}55` : "1px solid rgba(255,255,255,0.08)",
+    background: active ? `${GOLD}10` : "rgba(255,255,255,0.02)",
+    color: active ? `${GOLD}DD` : "rgba(255,255,255,0.44)",
+    padding: "6px 8px",
+    cursor: "pointer",
+  };
+}
+
+export default function FeedbackWidget({
+  surface,
+  subjectId,
+  subjectType,
+  productCode,
+  evidenceHash,
+  artifactVersion,
+  orderId,
+  artifactId,
+  outcomeHypothesisId,
+  falsificationEntryId,
+  retainerCycleId,
+  caseStudyId,
+  compact = false,
+  requireCategoryOnNegative = true,
+}: Props) {
   const [state, setState] = React.useState<State>("idle");
-  const [rating, setRating] = React.useState<Rating | null>(null);
+  const [rating, setRating] = React.useState<FeedbackRating | null>(null);
+  const [category, setCategory] = React.useState<FeedbackCategory | null>(null);
+  const [confidence, setConfidence] = React.useState(3);
   const [comment, setComment] = React.useState("");
+  const [followupRequested, setFollowupRequested] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
+  const [message, setMessage] = React.useState("Feedback received. Thank you.");
 
   if (dismissed) return null;
 
-  async function submit(r: Rating, c: string) {
+  const needsCategory = rating === "negative" || rating === "neutral";
+  const categoryRequired = requireCategoryOnNegative && needsCategory;
+  const canSubmit = Boolean(rating) && (!categoryRequired || Boolean(category));
+
+  async function submit() {
+    if (!rating || !canSubmit) return;
     setState("submitting");
     try {
+      const payload = {
+        surface,
+        subjectId,
+        subjectType,
+        productCode,
+        evidenceHash,
+        artifactVersion,
+        orderId,
+        artifactId,
+        outcomeHypothesisId,
+        falsificationEntryId,
+        retainerCycleId,
+        caseStudyId,
+        rating,
+        category: category ?? "usefulness",
+        confidence,
+        comment: comment.trim() || null,
+        followupRequested,
+        sourceUrl: typeof window !== "undefined" ? window.location.href : undefined,
+      };
+
       const res = await fetch("/api/feedback/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ surface, subjectId, rating: r, comment: c.trim() || null }),
+        body: JSON.stringify(payload),
       });
-      setState(res.ok ? "done" : "error");
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error("feedback_submit_failed");
+      if (data?.publicMessage && typeof data.publicMessage === "string") {
+        setMessage(data.publicMessage);
+      }
+      setState("done");
     } catch {
       setState("error");
     }
   }
 
-  function handleRating(r: Rating) {
-    setRating(r);
-    setState("commenting");
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!rating) return;
-    void submit(rating, comment);
-  }
-
-  function handleSkipComment() {
-    if (!rating) return;
-    void submit(rating, "");
+  function chooseRating(next: FeedbackRating) {
+    setRating(next);
+    setCategory(next === "positive" ? "usefulness" : null);
+    setState("details");
   }
 
   return (
@@ -72,62 +154,96 @@ export default function FeedbackWidget({ surface, subjectId }: Props) {
       aria-label="Feedback"
       style={{
         border: "1px solid rgba(255,255,255,0.06)",
-        padding: "14px 18px",
-        marginTop: "2rem",
+        padding: compact ? "12px 14px" : "14px 18px",
+        marginTop: compact ? "1rem" : "2rem",
         position: "relative",
       }}
     >
-      {/* Dismiss */}
       <button
         aria-label="Dismiss feedback"
         onClick={() => setDismissed(true)}
-        style={{ position: "absolute", top: 10, right: 10, background: "none", border: "none", cursor: "pointer", padding: 2, display: "flex" }}
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: 2,
+          display: "flex",
+        }}
       >
         <X style={{ width: 12, height: 12, color: "rgba(255,255,255,0.18)" }} />
       </button>
 
       {state === "idle" && (
         <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
-            Was this useful?
+          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+            Was this a useful signal?
           </span>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              aria-label="Useful"
-              onClick={() => handleRating("positive")}
-              style={{ background: "none", border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", padding: "5px 10px", display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,0.40)" }}
-            >
-              <ThumbsUp style={{ width: 12, height: 12 }} />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em" }}>Yes</span>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button aria-label="Useful" onClick={() => chooseRating("positive")} style={iconButtonStyle(false)}>
+              <CheckCircle2 style={{ width: 12, height: 12 }} />
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: 0 }}>Useful</span>
             </button>
-            <button
-              aria-label="Not useful"
-              onClick={() => handleRating("negative")}
-              style={{ background: "none", border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", padding: "5px 10px", display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,0.40)" }}
-            >
+            <button aria-label="Not useful" onClick={() => chooseRating("negative")} style={iconButtonStyle(false)}>
               <ThumbsDown style={{ width: 12, height: 12 }} />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em" }}>No</span>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: 0 }}>Not useful</span>
+            </button>
+            <button aria-label="Unsure" onClick={() => chooseRating("neutral")} style={iconButtonStyle(false)}>
+              <CircleHelp style={{ width: 12, height: 12 }} />
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: 0 }}>Unsure</span>
             </button>
           </div>
         </div>
       )}
 
-      {state === "commenting" && (
-        <form onSubmit={handleSubmit}>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "10px" }}>
-            {rating === "positive" ? "Glad to hear it. Anything to add?" : "What could be improved?"}
-          </p>
+      {state === "details" && (
+        <div>
+          {needsCategory && (
+            <div style={{ marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+                What affected your judgement?
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
+                {categoryOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setCategory(option.value)}
+                    style={chipStyle(category === option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginBottom: "12px" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+              Confidence
+            </p>
+            <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
+              {[1, 2, 3, 4, 5].map((value) => (
+                <button key={value} type="button" onClick={() => setConfidence(value)} style={chipStyle(confidence === value)}>
+                  {value}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            maxLength={500}
+            maxLength={1000}
             rows={2}
-            placeholder="Optional — your feedback is anonymous"
+            placeholder="What should be improved?"
             style={{
               width: "100%",
               background: "rgba(255,255,255,0.03)",
               border: "1px solid rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.60)",
+              color: "rgba(255,255,255,0.62)",
               padding: "8px 10px",
               fontSize: "12px",
               fontFamily: "Georgia, serif",
@@ -136,41 +252,75 @@ export default function FeedbackWidget({ surface, subjectId }: Props) {
               lineHeight: 1.6,
             }}
           />
-          <p style={{ ...mono, fontSize: "6px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.18)", marginTop: "5px", lineHeight: 1.6 }}>
+          <p style={{ ...mono, fontSize: "6px", letterSpacing: 0, color: "rgba(255,255,255,0.20)", marginTop: "5px", lineHeight: 1.6 }}>
             Do not include confidential, legal, personal, or client-identifying information.
           </p>
-          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "10px", color: "rgba(255,255,255,0.42)", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={followupRequested}
+              onChange={(e) => setFollowupRequested(e.target.checked)}
+            />
+            <span style={{ ...mono, fontSize: "7px", letterSpacing: 0, textTransform: "uppercase" }}>
+              I want someone to follow up
+            </span>
+          </label>
+
+          <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
             <button
-              type="submit"
-              style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", padding: "5px 12px", border: `1px solid ${GOLD}40`, background: `${GOLD}0A`, color: `${GOLD}CC`, cursor: "pointer" }}
+              type="button"
+              onClick={() => void submit()}
+              disabled={!canSubmit}
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
+                padding: "6px 12px",
+                border: `1px solid ${GOLD}40`,
+                background: canSubmit ? `${GOLD}0A` : "rgba(255,255,255,0.02)",
+                color: canSubmit ? `${GOLD}CC` : "rgba(255,255,255,0.22)",
+                cursor: canSubmit ? "pointer" : "not-allowed",
+              }}
             >
               Submit
             </button>
             <button
               type="button"
-              onClick={handleSkipComment}
-              style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", padding: "5px 12px", border: "1px solid rgba(255,255,255,0.07)", background: "none", color: "rgba(255,255,255,0.28)", cursor: "pointer" }}
+              onClick={() => setState("idle")}
+              style={{
+                ...mono,
+                fontSize: "7px",
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
+                padding: "6px 12px",
+                border: "1px solid rgba(255,255,255,0.07)",
+                background: "none",
+                color: "rgba(255,255,255,0.30)",
+                cursor: "pointer",
+              }}
             >
-              Skip
+              Back
             </button>
           </div>
-        </form>
+        </div>
       )}
 
       {state === "submitting" && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
           Sending...
         </p>
       )}
 
       {state === "done" && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
-          Feedback received. Thank you.
+        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+          {message}
         </p>
       )}
 
       {state === "error" && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(220,50,50,0.60)" }}>
+        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(220,50,50,0.65)" }}>
           Could not send feedback. Try again later.
         </p>
       )}

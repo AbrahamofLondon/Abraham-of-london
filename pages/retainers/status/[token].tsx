@@ -11,6 +11,7 @@ import * as React from "react";
 import Head from "next/head";
 import type { GetServerSideProps } from "next";
 import Layout from "@/components/Layout";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import { getClientSafeContractStatus } from "@/lib/retainers/retainer-pipeline-service";
 import {
   PIPELINE_STAGE_LABELS,
@@ -163,6 +164,14 @@ export default function RetainerStatusPage(props: PageProps) {
               <p style={{ fontSize: 14, color: "#5e5850" }}>No review cycles have been opened yet for this contract.</p>
             </section>
           )}
+
+          <FeedbackWidget
+            surface="retainer_review_cycle"
+            subjectType="retainer_contract"
+            subjectId={status.contractId}
+            productCode="retainer_oversight"
+            compact
+          />
 
           {/* What is being monitored */}
           <section style={{ marginBottom: 48 }}>

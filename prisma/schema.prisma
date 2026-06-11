@@ -1596,6 +1596,62 @@ model ProofEvidence {
   @@map("proof_evidence")
 }
 
+/// Governed product/user judgement event.
+/// Separate from FindingFeedback (admin Foundry disposition) and ProofEvidence
+/// (proof/evidence capture). This records judgement signals that may require
+/// product, risk, commercial, retainer, or case-study follow-up.
+model FeedbackEvent {
+  id                           String   @id @default(cuid())
+  feedbackId                   String   @unique
+  surface                      String
+  subjectType                  String
+  subjectId                    String?
+  rating                       String
+  category                     String
+  confidence                   Int      @default(3)
+  comment                      String?
+  followupRequested            Boolean  @default(false)
+  evidenceHash                 String?
+  artifactVersion              String?
+  productCode                  String?
+  userId                       String?
+  email                        String?
+  sessionId                    String?
+  sourceUrl                    String?
+  referrer                     String?
+  environment                  String   @default("unknown")
+  deployCommit                 String?
+  schemaVersion                Int      @default(1)
+  actionStatus                 String   @default("logged")
+  severity                     String   @default("low")
+  triageStatus                 String   @default("unreviewed")
+  reviewRequired               Boolean  @default(false)
+  reviewedAt                   DateTime?
+  reviewedBy                   String?
+  linkedOrderId                String?
+  linkedArtifactId             String?
+  linkedFalsificationEntryId   String?
+  linkedOutcomeHypothesisId    String?
+  linkedCaseStudyId            String?
+  linkedRetainerCycleId        String?
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  @@index([surface, createdAt])
+  @@index([rating, createdAt])
+  @@index([category, createdAt])
+  @@index([actionStatus])
+  @@index([severity])
+  @@index([triageStatus])
+  @@index([reviewRequired])
+  @@index([productCode])
+  @@index([linkedOrderId])
+  @@index([linkedArtifactId])
+  @@index([linkedOutcomeHypothesisId])
+  @@index([linkedRetainerCycleId])
+  @@map("feedback_events")
+}
+
 model ClientEntitlement {
   id          String    @id @default(cuid())
   email       String

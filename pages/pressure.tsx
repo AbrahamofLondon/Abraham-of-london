@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, Copy, RefreshCw, Share2 } from "lucide-react";
 import Layout from "@/components/Layout";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import { track } from "@/lib/analytics/track";
 import type { PressureSignalResult } from "@/lib/inner-circle/operating-layer";
 
@@ -236,6 +237,14 @@ export default function PressurePage() {
                       ) : null}
                     </div>
                   </div>
+
+                  <FeedbackWidget
+                    surface="pressure_signal_result"
+                    subjectType="pressure_signal"
+                    subjectId={`${result.pressureLevel}:${result.route.productKey}`}
+                    productCode={result.route.productKey}
+                    compact
+                  />
                 </div>
               ) : null}
             </div>

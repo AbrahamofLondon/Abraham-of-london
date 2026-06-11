@@ -27,6 +27,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ArrowRight, Shield, FileText, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import Layout from '@/components/Layout'
+import FeedbackWidget from '@/components/feedback/FeedbackWidget'
 import CheckoutButton from '@/components/commercial/CheckoutButton'
 import { CATALOG } from '@/lib/commercial/catalog'
 import { trackLaunch } from '@/lib/analytics/client-launch-events'
@@ -646,6 +647,16 @@ export default function BoardroomBriefPage() {
                 : 'This brief is an early boardroom-readiness view from limited evidence. Executive Reporting, Boardroom Mode, and Strategy Room require stronger case evidence before they should be treated as eligible next steps.'}
             </p>
           </div>
+
+          {isSampleResult && (
+            <FeedbackWidget
+              surface="boardroom_brief_sample"
+              subjectType="boardroom_brief_sample"
+              subjectId="public-boardroom-brief-sample"
+              productCode="boardroom_brief"
+              compact
+            />
+          )}
 
           {/* Upgrade routing */}
           <div className="mt-6 flex flex-wrap gap-3">
