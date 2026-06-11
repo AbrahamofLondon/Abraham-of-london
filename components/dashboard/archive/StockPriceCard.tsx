@@ -1,6 +1,6 @@
 // components/dashboard/StockPriceCard.tsx
 import React from "react";
-import type { StockPrice } from "./types";
+import type { StockPrice } from "../types";
 
 interface StockPriceCardProps {
   stock: StockPrice;

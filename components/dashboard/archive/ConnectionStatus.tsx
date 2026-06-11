@@ -1,6 +1,6 @@
 // components/dashboard/ConnectionStatus.tsx
 import React from "react";
-import type { ConnectionState } from "./types";
+import type { ConnectionState } from "../types";
 
 export interface ConnectionStatusProps {
   state: ConnectionState;
