@@ -248,9 +248,8 @@ ehthumbs.db
 *.directory
 
 # Generated audit / verification reports
-reports/*.json
-reports/vercel-env-*.md
-reports/vercel-env-*.json
+reports/**/*.json
+reports/**/*.md
 
 # ------------------------------
 # Video build outputs (large files — use LFS or external storage)
