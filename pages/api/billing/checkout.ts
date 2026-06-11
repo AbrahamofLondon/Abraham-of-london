@@ -194,6 +194,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
       success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
+      allow_promotion_codes: true,
       metadata,
       ...(mode === "subscription" ? { subscription_data: { metadata } } : {}),
     });
