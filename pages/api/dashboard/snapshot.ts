@@ -374,7 +374,12 @@ export default async function handler(
         overdueDeliveries,
         overdueReviewCycles: overdueCycles,
         pendingReadinessApprovals,
-        undeliveredPaidOrders: paidOrders - deliveredDossiers,
+        undeliveredPaidOrders: allOrders.filter(o =>
+          o.paymentStatus === "paid" &&
+          o.deliveryStatus !== DELIVERED_STATUS &&
+          o.deliveryStatus !== "follow_up_due" &&
+          new Date(o.createdAt) >= overdueThreshold()
+        ).length,
         openReviewCycles: openCycles,
         candidateReadinessEvals,
         deliveredThisWeek,

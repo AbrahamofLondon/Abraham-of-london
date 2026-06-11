@@ -15,6 +15,8 @@ import {
   Cell,
 } from "recharts";
 import { computeDashboardStatus, type DashboardStatus } from "@/lib/dashboard/dashboard-status";
+import { DashboardDrilldownPanel } from "@/components/dashboard/DashboardDrilldownPanel";
+import type { DrilldownKey } from "@/lib/dashboard/drilldowns";
 
 // ────────────────────────────────────────────────────────────── Types ──────
 
@@ -353,13 +355,23 @@ const EmptyState: React.FC<{ title: string; description: string }> = ({ title, d
   </div>
 );
 
-const Section: React.FC<{ label: string; title: string; plainDescription: string; children: React.ReactNode }> = ({ label, title, plainDescription, children }) => (
+const Section: React.FC<{ label: string; title: string; plainDescription: string; children: React.ReactNode; drillDownKey?: DrilldownKey; onDrillDown?: (key: DrilldownKey) => void }> = ({ label, title, plainDescription, children, drillDownKey, onDrillDown }) => (
   <div className="border border-neutral-900 rounded p-6 bg-neutral-950/20">
     <div className="mb-5 border-b border-neutral-900 pb-3">
       <p className="text-[9px] font-mono tracking-[0.25em] uppercase text-[#C5A059]">{label}</p>
       <div className="flex flex-wrap justify-between items-baseline gap-2 mt-1">
         <h2 className="text-lg font-serif font-medium text-neutral-200">{title}</h2>
-        <p className="text-[11px] font-mono text-neutral-500">{plainDescription}</p>
+        <div className="flex items-center gap-3">
+          <p className="text-[11px] font-mono text-neutral-500">{plainDescription}</p>
+          {drillDownKey && onDrillDown && (
+            <button
+              onClick={() => onDrillDown(drillDownKey)}
+              className="text-[10px] font-mono text-[#C5A059] hover:text-[#D4B06A] transition shrink-0 border border-[#C5A059]/20 hover:border-[#C5A059]/40 px-2 py-0.5 rounded"
+            >
+              Details →
+            </button>
+          )}
+        </div>
       </div>
     </div>
     {children}
@@ -385,6 +397,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [activeDrilldown, setActiveDrilldown] = useState<DrilldownKey | null>(null);
 
   const fetchData = useCallback(async () => {
     if (useMockData) {
@@ -614,7 +627,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
 
       {/* ── Funnel + Pressure Trend ────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Section label="CONVERSION FUNNEL" title="Boardroom Brief Pipeline" plainDescription="Pressure signal → checkout → payment → delivered">
+        <Section label="CONVERSION FUNNEL" title="Boardroom Brief Pipeline" plainDescription="Pressure signal → checkout → payment → delivered" drillDownKey="boardroomFunnel" onDrillDown={setActiveDrilldown}>
           {snapshot.funnel.pressureSignalStarts === 0 ? (
             <EmptyState title="No funnel data" description="Complete the first Boardroom Brief to see pipeline." /> 
           ) : (
@@ -645,7 +658,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
           )}
         </Section>
 
-        <Section label="PRESSURE TREND" title="7‑Day Signal Volume" plainDescription="Daily decision pressure signals">
+        <Section label="PRESSURE TREND" title="7‑Day Signal Volume" plainDescription="Daily decision pressure signals" drillDownKey="pressureTrend" onDrillDown={setActiveDrilldown}>
           {snapshot.pressureTrend.every(p => p.count === 0) ? (
             <EmptyState title="No signals yet" description="Chart populates when decisions are tested." /> 
           ) : (
@@ -685,7 +698,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
 
       {/* ── Fulfilment + Retainer ──────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Section label="FULFILMENT" title="Dossier Pipeline" plainDescription="Paid → generated → approved → delivered / overdue">
+        <Section label="FULFILMENT" title="Dossier Pipeline" plainDescription="Paid → generated → approved → delivered / overdue" drillDownKey="fulfilmentState" onDrillDown={setActiveDrilldown}>
           {snapshot.fulfilment.paidOrders === 0 ? (
             <EmptyState title="No fulfilment activity" description="Orders will appear here once Boardroom Briefs are purchased." /> 
           ) : (
@@ -714,7 +727,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
           )}
         </Section>
 
-        <Section label="RETAINER" title="Retainer Health" plainDescription="Active contracts, review cycles, overdue audits">
+        <Section label="RETAINER" title="Retainer Health" plainDescription="Active contracts, review cycles, overdue audits" drillDownKey="retainerHealth" onDrillDown={setActiveDrilldown}>
           {snapshot.retainer.activeContracts === 0 ? (
             <EmptyState title="No retainers active" description="Enterprise retainers appear here once onboarded." /> 
           ) : (
@@ -742,7 +755,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
 
       {/* ── Outcomes + Activity Feed ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Section label="OUTCOME MEMORY" title="Decision Outcome Distribution" plainDescription="Success / Partial / Failure from Return Briefs">
+        <Section label="OUTCOME MEMORY" title="Decision Outcome Distribution" plainDescription="Success / Partial / Failure from Return Briefs" drillDownKey="outcomeDistribution" onDrillDown={setActiveDrilldown}>
           {snapshot.outcomeDistribution.length === 0 ? (
             <EmptyState title="No outcomes recorded" description="Return Briefs will populate this ledger." /> 
           ) : (
@@ -790,7 +803,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
           )}
         </Section>
 
-        <Section label="ACTIVITY LOG" title="Unified Registry of Events" plainDescription="Recent decisions, orders, and return briefs">
+        <Section label="ACTIVITY LOG" title="Unified Registry of Events" plainDescription="Recent decisions, orders, and return briefs" drillDownKey="recentActivity" onDrillDown={setActiveDrilldown}>
           {snapshot.recentActivity.length === 0 ? (
             <EmptyState title="No recent activity" description="Actions will appear here as they occur." /> 
           ) : (
@@ -816,7 +829,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
 
       {/* ── Risk & Oversight (Condensed) ───────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Section label="RISK SUPPRESSION" title="Vulnerability Ledger" plainDescription="Active anomalies, monitoring, pending reviews">
+        <Section label="RISK SUPPRESSION" title="Vulnerability Ledger" plainDescription="Active anomalies, monitoring, pending reviews" drillDownKey="riskSuppression" onDrillDown={setActiveDrilldown}>
           {snapshot.risk.totalEntries === 0 ? (
             <EmptyState title="No risk entries" description="Anomalies will appear when detected." /> 
           ) : (
@@ -837,7 +850,7 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
           )}
         </Section>
 
-        <Section label="OVERSIGHT" title="Systemic Drift Audit" plainDescription="Critical drift, high variance, watchlist clients">
+        <Section label="OVERSIGHT" title="Systemic Drift Audit" plainDescription="Critical drift, high variance, watchlist clients" drillDownKey="oversightReviews" onDrillDown={setActiveDrilldown}>
           {snapshot.oversight.totalCycles === 0 ? (
             <EmptyState title="No oversight cycles" description="Audit data appears after retainer reviews." /> 
           ) : (
@@ -871,6 +884,14 @@ export const LiveDataDashboard: React.FC<LiveDataDashboardProps> = ({
       <div className="text-center text-[9px] font-mono text-neutral-600 border-t border-neutral-900 pt-6">
         All data anonymised and aggregated. Cryptographic signature verifies integrity.
       </div>
+
+      {/* ── Drill-Down Panel ────────────────────────────────────────────────── */}
+      {activeDrilldown && (
+        <DashboardDrilldownPanel
+          section={activeDrilldown}
+          onClose={() => setActiveDrilldown(null)}
+        />
+      )}
     </div>
   );
 };
