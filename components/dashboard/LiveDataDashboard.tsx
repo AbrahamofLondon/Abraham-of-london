@@ -285,14 +285,28 @@ function sortRiskItems(snapshot: DashboardSnapshot): ActionItem[] {
       context: "Awaiting panel sign‑off", originNode: "Operational" 
     });
   }
-  if (snapshot.retainer.openReviewCycles > 0) {
-    items.push({ 
-      id: "open-cycles", weight: 1, label: "Open Review Cycles", 
-      metricValue: snapshot.retainer.openReviewCycles, metricLabel: "CYCLES", 
-      context: "In‑flight audits", originNode: "Retainer" 
+  if (op.undeliveredPaidOrders > 0) {
+    items.push({
+      id: "undelivered-paid", weight: 2, label: "Undelivered Paid Orders",
+      metricValue: op.undeliveredPaidOrders, metricLabel: "ORDERS",
+      context: "Paid but not yet delivered", originNode: "Fulfilment",
     });
   }
-  
+  if (snapshot.retainer.openReviewCycles > 0) {
+    items.push({
+      id: "open-cycles", weight: 1, label: "Open Review Cycles",
+      metricValue: snapshot.retainer.openReviewCycles, metricLabel: "CYCLES",
+      context: "In‑flight audits", originNode: "Retainer"
+    });
+  }
+  if (op.candidateReadinessEvals > 0) {
+    items.push({
+      id: "candidate-readiness", weight: 1, label: "Retainer Candidates",
+      metricValue: op.candidateReadinessEvals, metricLabel: "CASES",
+      context: "Self-qualified — not yet escalated to review", originNode: "Retainer",
+    });
+  }
+
   return items.sort((a, b) => b.weight - a.weight);
 }
 

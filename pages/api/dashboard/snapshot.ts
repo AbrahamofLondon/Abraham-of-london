@@ -129,7 +129,7 @@ export default async function handler(
 
     // ── 2. Boardroom Brief Orders ──────────────────────────────────────────────
     const allOrders = await prisma.boardroomBriefOrder.findMany({
-      select: { paymentStatus: true, deliveryStatus: true, createdAt: true },
+      select: { paymentStatus: true, deliveryStatus: true, createdAt: true, deliveredAt: true },
     }).catch(() => []);
 
     const paidOrders = allOrders.filter(o => o.paymentStatus === "paid").length;
@@ -146,7 +146,9 @@ export default async function handler(
       new Date(o.createdAt) < overdueThreshold()
     ).length;
     const deliveredThisWeek = allOrders.filter(o =>
-      o.deliveryStatus === DELIVERED_STATUS && new Date(o.createdAt) >= daysAgo(7)
+      o.deliveryStatus === DELIVERED_STATUS &&
+      o.deliveredAt !== null &&
+      new Date(o.deliveredAt!) >= daysAgo(7)
     ).length;
 
     // ── 3. Revenue (from ClientEntitlement — Professional subscriptions) ───────
@@ -270,14 +272,18 @@ export default async function handler(
 
     // ── 10. Falsification Entries (Risk Suppression) ───────────────────────────
     const falsifications = await prisma.falsificationEntry.findMany({
-      select: { status: true, productCode: true },
+      select: { status: true, productCode: true, reviewDate: true },
     }).catch(() => []);
 
     const totalRisk = falsifications.length;
     const monitoring = falsifications.filter(f => f.status === "MONITORING").length;
     const confirmed = falsifications.filter(f => f.status === "CONFIRMED").length;
     const overturned = falsifications.filter(f => f.status === "OVERTURNED").length;
-    const pendingReview = falsifications.filter(f => f.status === "MONITORING").length;
+    const pendingReview = falsifications.filter(f =>
+      f.status === "MONITORING" &&
+      f.reviewDate !== null &&
+      new Date(f.reviewDate).getTime() < snapshotTime.getTime()
+    ).length;
 
     const byProductMap = new Map<string, number>();
     for (const f of falsifications) {
@@ -291,11 +297,12 @@ export default async function handler(
       select: { readinessClass: true, adminApprovedAt: true },
     }).catch(() => []);
 
+    // REVIEW_READY requires admin sign-off; CANDIDATE is still self-qualifying
     const pendingReadinessApprovals = readinessEvals.filter(e =>
-      e.readinessClass === "CANDIDATE" || e.readinessClass === "REVIEW_READY"
+      e.readinessClass === "REVIEW_READY"
     ).length;
     const candidateReadinessEvals = readinessEvals.filter(e =>
-      e.readinessClass === "CANDIDATE" || e.readinessClass === "REVIEW_READY"
+      e.readinessClass === "CANDIDATE"
     ).length;
     const approvedReadinessEvals = readinessEvals.filter(e =>
       e.readinessClass === "APPROVED" && e.adminApprovedAt !== null
@@ -371,7 +378,7 @@ export default async function handler(
         openReviewCycles: openCycles,
         candidateReadinessEvals,
         deliveredThisWeek,
-        completedReviewCyclesThisMonth: completedCycles,
+        completedReviewCyclesThisMonth: cycles.filter(c => c.status === "COMPLETED" && c.updatedAt >= startOfMonth()).length,
         approvedReadinessEvals,
         generatedAt: snapshotTime.toISOString(),
       },
