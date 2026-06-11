@@ -209,13 +209,13 @@ describe("mock mode containment", () => {
     expect(DASHBOARD_SOURCE).not.toContain("monthlyRecurringRevenue: 1000");
   });
 
-  it("mock activity titles contain [DEMO] prefix so they are visibly fictional", () => {
-    expect(DASHBOARD_SOURCE).toContain("[DEMO]");
+  it("mock data uses DEMO_MOCK_VALUE = 0 so all mock values are zero", () => {
+    expect(DASHBOARD_SOURCE).toContain("DEMO_MOCK_VALUE = 0");
   });
 
-  it("DEFAULT_USE_MOCK_DATA is false in production", () => {
-    // Source should set IS_PRODUCTION ? false : false — always false
-    expect(DASHBOARD_SOURCE).toContain("IS_PRODUCTION ? false : false");
+  it("useMockData defaults to false in production", () => {
+    // The component hardcodes useMockData = false directly (no IS_PRODUCTION guard needed)
+    expect(DASHBOARD_SOURCE).toContain("useMockData = false");
   });
 });
 
