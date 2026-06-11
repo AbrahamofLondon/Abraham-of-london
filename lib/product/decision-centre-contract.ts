@@ -188,6 +188,17 @@ export type DecisionCentreRetainerMemoryPreview = {
   }>;
 };
 
+export type DecisionCentreFeedbackContinuity = {
+  feedbackReceived: number;
+  qualityConcernsUnderReview: number;
+  outcomeHypothesisLinked: boolean;
+  caseMemoryUpdated: boolean;
+  nextReviewRecommended: boolean;
+  unresolvedFeedback: number;
+  retainerReadinessSignal: boolean;
+  summary: string;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DECISION CENTRE CASE — the primary card model
 // ─────────────────────────────────────────────────────────────────────────────
@@ -293,6 +304,8 @@ export type DecisionCentreCase = {
   strategyRoomRecord?: StrategyRoomSessionRef | null;
   /** Governed memory carried with explicit source, date, and evidence posture */
   governedMemory?: GovernedMemoryItem[] | null;
+  /** Client-safe feedback continuity summary. No raw comments or internal scores. */
+  feedbackContinuity?: DecisionCentreFeedbackContinuity | null;
   /**
    * Client-safe recommendations from the recommendation-outcome ledger.
    * Each entry includes recommendationId for outcome verification binding.

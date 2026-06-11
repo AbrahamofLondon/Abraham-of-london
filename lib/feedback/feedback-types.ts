@@ -119,6 +119,15 @@ export type FeedbackPublicResponse = {
   actionStatus: FeedbackActionStatus;
   reviewRequired: boolean;
   publicMessage: string;
+  nextActions?: Array<{
+    id: string;
+    label: string;
+    href: string;
+  }>;
+  routing?: {
+    actionKind: string;
+    reviewEscalationState: "none" | "review_required" | "risk_review";
+  };
 };
 
 export type FeedbackActionResult = {
@@ -142,6 +151,32 @@ export type FeedbackHealthMetrics = {
   paidProductNegativeCount: number;
   boardroomBriefDeliveredPositiveRate: number | null;
   unresolvedPatternCount: number;
+  positiveHighConfidenceRate: number | null;
+  negativeHighConfidenceRate: number | null;
+  followupRequestedCount: number;
+};
+
+export type FeedbackAdoptionAnalytics = {
+  bySurface: Array<{
+    surface: string;
+    total: number;
+    positiveRate: number | null;
+    positiveHighConfidenceRate: number | null;
+    negativeHighConfidenceRate: number | null;
+    followupRequestedCount: number;
+  }>;
+  categoryDistribution: Array<{
+    surface: string;
+    category: string;
+    count: number;
+  }>;
+  conversionSignals: {
+    freeFeedbackToCheckout14d: number;
+    feedbackToSaveCase14d: number;
+    feedbackToReturnVisit14d: number;
+    feedbackToCaseStudyConsent30d: number;
+    feedbackToRetainerEvaluation30d: number;
+  };
 };
 
 export type FeedbackAdminRow = Pick<

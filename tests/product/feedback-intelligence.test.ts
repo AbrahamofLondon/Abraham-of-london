@@ -38,7 +38,11 @@ const {
       }),
       findMany: vi.fn(async () => state.events),
     },
-    systemAuditLog: { create: vi.fn(async () => ({})) },
+    systemAuditLog: {
+      create: vi.fn(async () => ({})),
+      count: vi.fn(async () => 0),
+      findMany: vi.fn(async () => []),
+    },
     falsificationEntry: {
       findFirst: vi.fn(async () => null),
       create: vi.fn(async ({ data }: any) => ({
@@ -94,6 +98,12 @@ const {
     oversightReviewCycle: {
       findUnique: vi.fn(async ({ where }: any) => ({ id: where.id })),
     },
+    retainerReadinessEvaluation: {
+      create: vi.fn(async ({ data }: any) => ({
+        id: "retainer-eval-1",
+        readinessClass: data.readinessClass,
+      })),
+    },
   };
 
   return { db, state };
@@ -104,6 +114,14 @@ vi.mock("@/lib/prisma.server", () => ({ prisma: db }));
 
 import { submitFeedback } from "@/lib/feedback/feedback-service";
 import { normalizeFeedbackPayload } from "@/lib/feedback/feedback-service";
+import { evaluateFeedbackRouting } from "@/lib/feedback/feedback-routing-engine";
+import {
+  calculateRetainerTriggerScore,
+  createRetainerReadinessEvaluationFromFeedbackCluster,
+} from "@/lib/feedback/retainer-trigger-score";
+import { classifyCaseStudyCandidateFromFeedback } from "@/lib/feedback/case-study-classification";
+import { correlateProvidedEvents } from "@/lib/feedback/feedback-conversion-correlation";
+import { buildClientContinuitySummary } from "@/lib/feedback/client-continuity-summary";
 import fs from "fs";
 import path from "path";
 
@@ -182,8 +200,34 @@ describe("governed feedback intelligence", () => {
       }),
     }));
     expect(response.reviewRequired).toBe(true);
-    expect(response.publicMessage).toBe("Feedback received. Thank you.");
+    expect(response.publicMessage).toBe("Recorded for review. This type of feedback is used to check accuracy and evidence quality.");
     expect((response as any).linkedFalsificationEntryId).toBeUndefined();
+  });
+
+  it("positive high-confidence free feedback returns next-step CTAs", async () => {
+    const response = await submitFeedback({
+      surface: "pressure_signal_result",
+      rating: "positive",
+      category: "clarity",
+      confidence: 5,
+    });
+
+    expect(response.nextActions?.map((action) => action.label)).toEqual(expect.arrayContaining([
+      "Save this as a governed case",
+      "Get a Boardroom Brief",
+    ]));
+    expect(response.routing?.actionKind).toBe("user_next_step_prompt");
+  });
+
+  it("positive diagnostic feedback can route to governed case creation", async () => {
+    const response = await submitFeedback({
+      surface: "fast_diagnostic_result",
+      rating: "positive",
+      category: "actionability",
+      confidence: 4,
+    });
+
+    expect(response.nextActions?.some((action) => action.label === "Turn this into a governed case")).toBe(true);
   });
 
   it("negative Boardroom Brief delivery feedback flags quality review without mutating delivery status", async () => {
@@ -224,6 +268,22 @@ describe("governed feedback intelligence", () => {
     }));
     expect(JSON.stringify(createArg.data.narrative)).not.toContain("Raw client quote");
     expect(response.actionStatus).toBe("linked_to_case_study_candidate");
+  });
+
+  it("classifies paid feedback candidates without allowing public proof", async () => {
+    await submitFeedback({
+      surface: "boardroom_brief_delivered",
+      rating: "positive",
+      category: "trust",
+      orderId: "order-1",
+      artifactId: "artifact-1",
+      outcomeHypothesisId: "hypothesis-1",
+    });
+
+    const classification = classifyCaseStudyCandidateFromFeedback(state.events[0]);
+    expect(classification.classification).toBe("proof_candidate_pending_outcome");
+    expect(classification.publicUseAllowed).toBe(false);
+    expect(classification.rawCommentPrivate).toBe(true);
   });
 
   it("three negative events on one surface create a PatternObservation", async () => {
@@ -267,6 +327,112 @@ describe("governed feedback intelligence", () => {
     }));
   });
 
+  it("retainer trigger score returns readiness classes and creates admin-gated evaluation from a feedback cluster", async () => {
+    const notReady = calculateRetainerTriggerScore({ governedCaseCount: 1 });
+    const reviewReady = calculateRetainerTriggerScore({
+      governedCaseCount: 2,
+      decisionCentreUsageCount: 2,
+      paidArtifactFeedbackCount: 1,
+      unresolvedOutcomeHypothesisCount: 1,
+    });
+    const recommended = calculateRetainerTriggerScore({
+      governedCaseCount: 2,
+      returnBriefCount: 1,
+      unresolvedOutcomeHypothesisCount: 1,
+      trustAccuracyOutcomeFeedbackCount: 2,
+      decisionCentreUsageCount: 2,
+      paidArtifactFeedbackCount: 1,
+      highConfidenceOversightPositiveCount: 1,
+    });
+
+    expect(notReady.readiness).toBe("not_ready");
+    expect(reviewReady.readiness).toBe("review_ready");
+    expect(recommended.readiness).toBe("retainer_recommended");
+
+    await submitFeedback({
+      surface: "decision_centre_case",
+      rating: "positive",
+      category: "trust",
+      confidence: 5,
+      subjectId: "case-1",
+      artifactId: "artifact-1",
+    });
+    const result = await createRetainerReadinessEvaluationFromFeedbackCluster({
+      feedbackIds: [state.events[0].feedbackId],
+      adminEmail: "admin@abrahamoflondon.org",
+    });
+
+    expect(db.retainerReadinessEvaluation.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        adminApprovalRequired: true,
+        readinessClass: expect.stringMatching(/CANDIDATE|REVIEW_READY|NOT_READY/),
+      }),
+    }));
+    expect(result.id).toBe("retainer-eval-1");
+  });
+
+  it("free feedback followed by checkout is correlated without causation language", async () => {
+    await submitFeedback({
+      surface: "pressure_signal_result",
+      rating: "positive",
+      confidence: 5,
+    });
+    const correlations = correlateProvidedEvents(state.events[0], [{
+      eventType: "checkout",
+      observedAt: new Date("2026-06-15T10:00:00.000Z"),
+    }]);
+
+    expect(correlations[0]).toEqual(expect.objectContaining({
+      eventType: "checkout",
+      language: "conversion_observed_after_feedback",
+      observed: true,
+    }));
+  });
+
+  it("client continuity summary excludes internal fields and raw comments", () => {
+    const summary = buildClientContinuitySummary([{
+      id: "db-feedback-1",
+      feedbackId: "fb-1",
+      surface: "decision_centre_case",
+      subjectType: "decision_centre_case",
+      subjectId: "case-1",
+      rating: "negative",
+      category: "trust",
+      confidence: 5,
+      comment: "Do not expose this raw comment",
+      reviewRequired: true,
+      triageStatus: "unreviewed",
+      linkedOutcomeHypothesisId: "hypothesis-1",
+      linkedCaseStudyId: null,
+      linkedRetainerCycleId: null,
+      linkedFalsificationEntryId: null,
+      linkedArtifactId: null,
+      linkedOrderId: null,
+      actionStatus: "triage_required",
+      severity: "high",
+      followupRequested: false,
+      evidenceHash: null,
+      artifactVersion: null,
+      productCode: null,
+      userId: null,
+      email: null,
+      sessionId: null,
+      sourceUrl: null,
+      referrer: null,
+      environment: "test",
+      deployCommit: null,
+      schemaVersion: 1,
+      reviewedAt: null,
+      reviewedBy: null,
+      createdAt: new Date("2026-06-11T10:00:00.000Z"),
+      updatedAt: new Date("2026-06-11T10:00:00.000Z"),
+    }]);
+
+    expect(summary.summary).toContain("case memory has been updated");
+    expect(summary.summary).not.toContain("Do not expose");
+    expect((summary as any).retainerTriggerScore).toBeUndefined();
+  });
+
   it("normalises confidence labels for analytics weighting", () => {
     expect(normalizeFeedbackPayload({
       surface: "pressure_signal_result",
@@ -282,8 +448,36 @@ describe("governed feedback intelligence", () => {
     expect(widget).toContain("subjectId?: string");
     expect(widget).toContain("surface: string");
     expect(fs.readFileSync(path.join(process.cwd(), "pages/admin/feedback.tsx"), "utf8")).toContain("requireAdminPage");
+    expect(fs.readFileSync(path.join(process.cwd(), "pages/api/admin/feedback/retainer-readiness.ts"), "utf8")).toContain("requireAdminApi");
     expect(schema).toContain("model FindingFeedback");
     expect(schema).toContain("model FeedbackEvent");
+  });
+
+  it("confirms FeedbackEvent migration is additive and public proof remains separate", () => {
+    const migration = fs.readFileSync(path.join(process.cwd(), "migrations/003_feedback_events.sql"), "utf8");
+    const submitRoute = fs.readFileSync(path.join(process.cwd(), "pages/api/feedback/submit.ts"), "utf8");
+    const bridge = fs.readFileSync(path.join(process.cwd(), "lib/feedback/foundry-bridge.ts"), "utf8");
+
+    expect(migration).toContain("CREATE TABLE IF NOT EXISTS feedback_events");
+    expect(migration).not.toMatch(/DROP TABLE|ALTER TABLE .* DROP/i);
+    expect(submitRoute).toContain("submitFeedback(req.body, req)");
+    expect(bridge).toContain("No public proof has been created.");
+  });
+
+  it("routing service marks follow-up as sales signal without auto-email", async () => {
+    await submitFeedback({
+      surface: "boardroom_brief_sample",
+      rating: "positive",
+      category: "trust",
+      confidence: 5,
+      followupRequested: true,
+      email: "buyer@example.com",
+    });
+
+    const routing = await evaluateFeedbackRouting(state.events[0]);
+    expect(routing.adminActions.some((action) => action.actionType === "sales_followup")).toBe(true);
+    expect(JSON.stringify(db.systemAuditLog.create.mock.calls)).toContain("consentRequired");
+    expect(JSON.stringify(db.systemAuditLog.create.mock.calls)).not.toContain("email_sent");
   });
 
   it("mounts enhanced feedback only on disciplined strategic surfaces", () => {

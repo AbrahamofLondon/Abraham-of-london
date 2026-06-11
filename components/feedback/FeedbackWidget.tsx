@@ -94,6 +94,7 @@ export default function FeedbackWidget({
   const [followupRequested, setFollowupRequested] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
   const [message, setMessage] = React.useState("Feedback received. Thank you.");
+  const [nextActions, setNextActions] = React.useState<Array<{ id: string; label: string; href: string }>>([]);
 
   if (dismissed) return null;
 
@@ -135,6 +136,18 @@ export default function FeedbackWidget({
       if (!res.ok) throw new Error("feedback_submit_failed");
       if (data?.publicMessage && typeof data.publicMessage === "string") {
         setMessage(data.publicMessage);
+      }
+      if (Array.isArray(data?.nextActions)) {
+        setNextActions(
+          data.nextActions
+            .filter((item: unknown): item is { id: string; label: string; href: string } => (
+              Boolean(item) &&
+              typeof (item as { id?: unknown }).id === "string" &&
+              typeof (item as { label?: unknown }).label === "string" &&
+              typeof (item as { href?: unknown }).href === "string"
+            ))
+            .slice(0, 3),
+        );
       }
       setState("done");
     } catch {
@@ -314,9 +327,34 @@ export default function FeedbackWidget({
       )}
 
       {state === "done" && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
-          {message}
-        </p>
+        <div>
+          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)", lineHeight: 1.7 }}>
+            {message}
+          </p>
+          {nextActions.length > 0 && (
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px" }}>
+              {nextActions.map((action) => (
+                <a
+                  key={action.id}
+                  href={action.href}
+                  style={{
+                    ...mono,
+                    fontSize: "7px",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: `${GOLD}D0`,
+                    textDecoration: "none",
+                    border: `1px solid ${GOLD}40`,
+                    padding: "6px 9px",
+                    background: `${GOLD}08`,
+                  }}
+                >
+                  {action.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {state === "error" && (

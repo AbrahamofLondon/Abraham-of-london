@@ -4,9 +4,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getReferrer } from "@/lib/server/request-fingerprint";
 import { evaluateFeedbackActions } from "./feedback-action-engine";
+import { evaluateFeedbackRouting } from "./feedback-routing-engine";
 import {
   FEEDBACK_CATEGORIES,
   FEEDBACK_SCHEMA_VERSION,
+  type FeedbackAdoptionAnalytics,
   type FeedbackActionStatus,
   type FeedbackAdminRow,
   type FeedbackCategory,
@@ -17,8 +19,6 @@ import {
   type FeedbackSeverity,
   type FeedbackSubmitPayload,
 } from "./feedback-types";
-
-const DEFAULT_PUBLIC_MESSAGE = "Feedback received. Thank you.";
 
 const feedbackSchema = z.object({
   surface: z.string().trim().min(1).max(120),
@@ -332,13 +332,23 @@ export async function submitFeedback(
   if (hasActionUpdates) {
     event = await updateFeedbackEvent(event.feedbackId, action);
   }
+  const routing = await evaluateFeedbackRouting(event);
 
   return {
     ok: true,
     feedbackId: event.feedbackId,
     actionStatus: event.actionStatus,
     reviewRequired: event.reviewRequired,
-    publicMessage: DEFAULT_PUBLIC_MESSAGE,
+    publicMessage: routing.publicMessage,
+    nextActions: routing.userCtas.map((cta) => ({
+      id: cta.id,
+      label: cta.label,
+      href: cta.href,
+    })),
+    routing: {
+      actionKind: routing.actionKind,
+      reviewEscalationState: routing.reviewEscalationState,
+    },
   };
 }
 
@@ -417,6 +427,19 @@ export async function getFeedbackHealthMetrics(): Promise<FeedbackHealthMetrics>
     paidProductNegativeCount,
     boardroomBriefDeliveredPositiveRate: pct(boardroomPositive, boardroomTotal),
     unresolvedPatternCount,
+    positiveHighConfidenceRate: pct(
+      weightedRows.filter((row: { rating: string; confidence: number | null }) =>
+        row.rating === "positive" && (row.confidence ?? 3) >= 4,
+      ).length,
+      weightedRows.length,
+    ),
+    negativeHighConfidenceRate: pct(
+      weightedRows.filter((row: { rating: string; confidence: number | null }) =>
+        row.rating === "negative" && (row.confidence ?? 3) >= 4,
+      ).length,
+      weightedRows.length,
+    ),
+    followupRequestedCount: await (prisma as any).feedbackEvent.count({ where: { followupRequested: true } }),
   };
 }
 
@@ -436,4 +459,83 @@ export async function getFeedbackAdminRows(limit = 100): Promise<FeedbackAdminRo
     linkedCaseStudyId: event.linkedCaseStudyId,
     linkedFalsificationEntryId: event.linkedFalsificationEntryId,
   }));
+}
+
+export async function getFeedbackAdoptionAnalytics(): Promise<FeedbackAdoptionAnalytics> {
+  const rows = await (prisma as any).feedbackEvent.findMany({
+    select: {
+      surface: true,
+      rating: true,
+      category: true,
+      confidence: true,
+      followupRequested: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: 1000,
+  });
+
+  const bySurfaceMap = new Map<string, {
+    total: number;
+    positive: number;
+    positiveHigh: number;
+    negativeHigh: number;
+    followups: number;
+  }>();
+  const categoryMap = new Map<string, { surface: string; category: string; count: number }>();
+
+  for (const row of rows as Array<{
+    surface: string;
+    rating: string;
+    category: string;
+    confidence: number | null;
+    followupRequested: boolean;
+  }>) {
+    const current = bySurfaceMap.get(row.surface) ?? {
+      total: 0,
+      positive: 0,
+      positiveHigh: 0,
+      negativeHigh: 0,
+      followups: 0,
+    };
+    current.total += 1;
+    if (row.rating === "positive") current.positive += 1;
+    if (row.rating === "positive" && (row.confidence ?? 3) >= 4) current.positiveHigh += 1;
+    if (row.rating === "negative" && (row.confidence ?? 3) >= 4) current.negativeHigh += 1;
+    if (row.followupRequested) current.followups += 1;
+    bySurfaceMap.set(row.surface, current);
+
+    const categoryKey = `${row.surface}:${row.category}`;
+    const category = categoryMap.get(categoryKey) ?? { surface: row.surface, category: row.category, count: 0 };
+    category.count += 1;
+    categoryMap.set(categoryKey, category);
+  }
+
+  async function countAudit(actions: string[], days: number): Promise<number> {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    return prisma.systemAuditLog.count({
+      where: {
+        action: { in: actions },
+        createdAt: { gte: since },
+      },
+    }).catch(() => 0);
+  }
+
+  return {
+    bySurface: Array.from(bySurfaceMap.entries()).map(([surface, value]) => ({
+      surface,
+      total: value.total,
+      positiveRate: pct(value.positive, value.total),
+      positiveHighConfidenceRate: pct(value.positiveHigh, value.total),
+      negativeHighConfidenceRate: pct(value.negativeHigh, value.total),
+      followupRequestedCount: value.followups,
+    })),
+    categoryDistribution: Array.from(categoryMap.values()).sort((a, b) => b.count - a.count),
+    conversionSignals: {
+      freeFeedbackToCheckout14d: await countAudit(["CHECKOUT_COMPLETED", "stripe.checkout.completed", "purchase.completed"], 14),
+      feedbackToSaveCase14d: await countAudit(["DECISION_CASE_SAVED", "decision_centre.case_saved"], 14),
+      feedbackToReturnVisit14d: await countAudit(["RETURN_VISIT", "session.returned"], 14),
+      feedbackToCaseStudyConsent30d: await countAudit(["CASE_STUDY_CONSENT_GRANTED", "case_study.consent_granted"], 30),
+      feedbackToRetainerEvaluation30d: await countAudit(["FEEDBACK_RETAINER_READINESS_EVALUATION_CREATED", "retainer_readiness.candidate_created"], 30),
+    },
+  };
 }

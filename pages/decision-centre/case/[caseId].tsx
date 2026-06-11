@@ -736,6 +736,51 @@ const CaseDetailPage: NextPage = () => {
           </section>
 
           {/* ── RECORD STACK / GOVERNED MEMORY ──────────────────────── */}
+          {c.feedbackContinuity && (
+            <section
+              style={{
+                border: "1px solid rgba(255,255,255,0.06)",
+                padding: "1rem",
+              }}
+            >
+              <p
+                style={{
+                  ...mono,
+                  fontSize: "7px",
+                  letterSpacing: "0.20em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.28)",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                Feedback continuity
+              </p>
+              <p
+                style={{
+                  ...serif,
+                  fontSize: "0.95rem",
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.58)",
+                }}
+              >
+                {c.feedbackContinuity.summary}
+              </p>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
+                <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.36)" }}>
+                  Feedback received: {c.feedbackContinuity.feedbackReceived}
+                </span>
+                <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.36)" }}>
+                  Unresolved: {c.feedbackContinuity.unresolvedFeedback}
+                </span>
+                {c.feedbackContinuity.nextReviewRecommended && (
+                  <span style={{ ...mono, fontSize: "6.5px", color: `${GOLD}B8` }}>
+                    Next review recommended
+                  </span>
+                )}
+              </div>
+            </section>
+          )}
+
           {c.governedMemory && c.governedMemory.length > 0 && (
             <section
               style={{

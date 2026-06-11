@@ -69,6 +69,7 @@ import type { IntelligenceDataQuality, IntelligenceScope } from "@/lib/product/i
 import { createFieldProvenance } from "@/lib/product/field-provenance-contract";
 import { getTrialInfo } from "@/lib/product/professional-trial";
 import { getExpiredTrialResolutionState } from "@/lib/product/trial-expiry-service";
+import { loadClientContinuitySummaryForCase } from "@/lib/feedback/client-continuity-summary";
 
 function parseMoney(value: string | null | undefined): number | null {
   if (!value) return null;
@@ -1025,6 +1026,7 @@ export default async function handler(
       irreversibility: null,
       returnBriefs,
       governedMemory: null,
+      feedbackContinuity: null,
       updatedAt: livingCase.createdAt || generatedAt,
       lastEvidenceAt: livingCase.createdAt || generatedAt,
     };
@@ -1188,8 +1190,14 @@ export default async function handler(
         nextAction: caseCard.nextRequiredAction,
       });
 
-      caseCard.governedMemory = governedMemory.length ? governedMemory : null;
       caseCard.scope.journeyId = journey.journeyKey;
+
+      const feedbackContinuity = await loadClientContinuitySummaryForCase(livingCase.caseId);
+      caseCard.feedbackContinuity = feedbackContinuity.summary.feedbackReceived > 0
+        ? feedbackContinuity.summary
+        : null;
+      governedMemory.push(...feedbackContinuity.memory);
+      caseCard.governedMemory = governedMemory.length ? governedMemory : null;
     }
 
     // ── RECOMMENDATIONS ──────────────────────────────────────────────────────

@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdminApi } from "@/lib/access/server";
-import { getFeedbackHealthMetrics } from "@/lib/feedback/feedback-service";
-import type { FeedbackHealthMetrics } from "@/lib/feedback/feedback-types";
+import { getFeedbackAdoptionAnalytics, getFeedbackHealthMetrics } from "@/lib/feedback/feedback-service";
+import type { FeedbackAdoptionAnalytics, FeedbackHealthMetrics } from "@/lib/feedback/feedback-types";
 
 type ResponseBody =
-  | { ok: true; metrics: FeedbackHealthMetrics }
+  | { ok: true; metrics: FeedbackHealthMetrics; analytics: FeedbackAdoptionAnalytics }
   | { ok: false; error: string };
 
 export default async function handler(
@@ -20,9 +20,12 @@ export default async function handler(
   }
 
   try {
-    const metrics = await getFeedbackHealthMetrics();
+    const [metrics, analytics] = await Promise.all([
+      getFeedbackHealthMetrics(),
+      getFeedbackAdoptionAnalytics(),
+    ]);
     res.setHeader("Cache-Control", "no-store");
-    return res.status(200).json({ ok: true, metrics });
+    return res.status(200).json({ ok: true, metrics, analytics });
   } catch (error) {
     console.error("[dashboard.feedback-health]", error);
     return res.status(500).json({ ok: false, error: "FEEDBACK_HEALTH_FAILED" });
