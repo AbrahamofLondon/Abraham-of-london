@@ -283,6 +283,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             where: { stripeSessionId: session.id },
           }).catch(() => null);
 
+          let canonicalOrderId: string;
+
           if (!existingOrder) {
             const order = await prisma.boardroomBriefOrder.create({
               data: {
@@ -304,6 +306,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 },
               },
             });
+            canonicalOrderId = order.id;
             await recordBoardroomOrderEvent({
               orderId: order.id,
               actorEmail: "stripe:webhook",
@@ -313,6 +316,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               note: "Stripe checkout completed.",
             }).catch(() => undefined);
           } else {
+            canonicalOrderId = existingOrder.id;
             await prisma.boardroomBriefOrder.update({
               where: { id: existingOrder.id },
               data: {
@@ -330,6 +334,76 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               newStatus: "paid/in_review",
               note: "Stripe checkout replay updated existing order.",
             }).catch(() => undefined);
+          }
+
+          // ── Durable fulfilment stubs ───────────────────────────────────────
+          // These stubs ensure the fulfilment trail exists immediately after payment.
+          // Idempotent: stable IDs derived from order ID; repeated webhook is safe.
+
+          // ProductArtifact stub
+          try {
+            const artifactId = `pa_boardroom_${canonicalOrderId}`;
+            await prisma.productArtifact.upsert({
+              where: { artifactId },
+              create: {
+                artifactId,
+                productCode: "boardroom-brief",
+                sourceEntityType: "boardroom_brief_order",
+                sourceEntityId: canonicalOrderId,
+                userId: session.metadata?.userId || null,
+                userEmail: email,
+                status: "PENDING",
+                deliveryStatus: "PENDING",
+              },
+              update: {},
+            });
+          } catch (artifactError) {
+            console.error("[BILLING_WEBHOOK_BOARDROOM_ARTIFACT_STUB_FAILED]", artifactError);
+          }
+
+          // FalsificationEntry stub
+          try {
+            const existingFalsification = await prisma.falsificationEntry.findFirst({
+              where: { sourceEntityType: "boardroom_brief_order", sourceEntityId: canonicalOrderId },
+              select: { id: true },
+            });
+            if (!existingFalsification) {
+              await prisma.falsificationEntry.create({
+                data: {
+                  productCode: "boardroom-brief",
+                  sourceEntityType: "boardroom_brief_order",
+                  sourceEntityId: canonicalOrderId,
+                  claimOrRecommendation: "PENDING_REVIEW — awaiting human analysis",
+                  confidenceLevel: "LOW",
+                  whatWouldChangeThisView: "PENDING — to be completed during analysis",
+                  observableIndicator: "PENDING — to be defined",
+                  status: "MONITORING",
+                },
+              });
+            }
+          } catch (falsificationError) {
+            console.error("[BILLING_WEBHOOK_BOARDROOM_FALSIFICATION_STUB_FAILED]", falsificationError);
+          }
+
+          // OutcomeHypothesis stub
+          try {
+            const hypothesisId = `oh_boardroom_${canonicalOrderId}`;
+            await prisma.outcomeHypothesis.upsert({
+              where: { hypothesisId },
+              create: {
+                hypothesisId,
+                productCode: "boardroom-brief",
+                sourceRunId: canonicalOrderId,
+                userEmail: email,
+                predictedDecisionMove: "PENDING_REVIEW — awaiting human analysis",
+                expectedObservableChange: "PENDING_REVIEW — awaiting analysis",
+                reviewDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+                status: "OPEN",
+              },
+              update: {},
+            });
+          } catch (hypothesisError) {
+            console.error("[BILLING_WEBHOOK_BOARDROOM_HYPOTHESIS_STUB_FAILED]", hypothesisError);
           }
         } catch (orderError) {
           console.error("[BILLING_WEBHOOK_BOARDROOM_ORDER_FAILED]", orderError);
