@@ -47,7 +47,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).end();
   if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
 
-  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId, caseRef, handoffId } = req.body || {};
+  const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId, caseRef, handoffId, proofToken } = req.body || {};
+
+  // ── Proof mode: server-applied discount for controlled proof runs ──────────
+  // proofToken must match STRIPE_PROOF_TOKEN (never exposed in response).
+  // If token provided but invalid → hard reject (fail closed, not silent fallback).
+  // If valid → apply STRIPE_PROOF_PROMOTION_CODE_ID server-side.
+  // Normal checkout path is unaffected.
+  const proofPromoId = process.env.STRIPE_PROOF_PROMOTION_CODE_ID;
+  const proofTokenSecret = process.env.STRIPE_PROOF_TOKEN;
+  const proofTokenProvided = typeof proofToken === "string" && proofToken.length > 0;
+
+  if (proofTokenProvided && (!proofTokenSecret || proofToken !== proofTokenSecret)) {
+    return res.status(403).json({ ok: false, reason: "PROOF_TOKEN_INVALID" });
+  }
+  if (proofTokenProvided && proofTokenSecret && proofToken === proofTokenSecret && !proofPromoId) {
+    return res.status(503).json({ ok: false, reason: "PROOF_PROMOTION_CODE_NOT_CONFIGURED" });
+  }
+  const isProofMode = proofTokenProvided && !!proofTokenSecret && proofToken === proofTokenSecret && !!proofPromoId;
   const rawCode = String(productCode || entitlementSlug || contentId || priceCode || "").trim();
 
   // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
@@ -170,6 +187,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let session: Stripe.Checkout.Session;
   try {
     const mode = product.accessType === "subscription" ? "subscription" : "payment";
+
+    // Proof mode injects a server-applied discount; cannot combine with allow_promotion_codes.
+    // Normal mode enables allow_promotion_codes for customer-applied codes.
+    const discountConfig: Record<string, unknown> = isProofMode
+      ? { discounts: [{ promotion_code: proofPromoId }] }
+      : { allow_promotion_codes: true };
+
+    const proofMetadata: Record<string, string> = isProofMode
+      ? { proofMode: "true", discountSource: "server_applied_promotion_code", source: "controlled_boardroom_proof" }
+      : {};
+
     session = await stripe.checkout.sessions.create({
       mode,
       customer_email: String(email).trim().toLowerCase(),
@@ -194,10 +222,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
       success_url: `${baseUrl}${successPath}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}${cancelPath}?checkout=cancelled`,
-      allow_promotion_codes: true,
-      metadata,
+      ...discountConfig,
+      metadata: { ...metadata, ...proofMetadata },
       ...(mode === "subscription" ? { subscription_data: { metadata } } : {}),
-    });
+    } as Parameters<typeof stripe.checkout.sessions.create>[0]);
   } catch (error) {
     const details = stripeErrorDetails(error);
     console.error("[BILLING_CHECKOUT_ERROR]", { priceCode: code, ...details });
