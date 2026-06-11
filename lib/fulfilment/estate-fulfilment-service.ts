@@ -14,7 +14,6 @@
  * - Returns stable JSON — safe for admin API serialisation.
  */
 
-import "server-only";
 import { prisma } from "@/lib/prisma.server";
 
 // ─── Contract ─────────────────────────────────────────────────────────────────
