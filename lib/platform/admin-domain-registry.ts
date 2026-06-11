@@ -123,6 +123,7 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/boardroom-archive", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "BoardroomDossier", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/boardroom/orders", domain: "product-operations", requiredRole: "ADMIN", productSurface: "boardroom-brief", canonicalRecord: "BoardroomBriefOrder", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/boardroom/orders/[id]", domain: "product-operations", requiredRole: "ADMIN", productSurface: "boardroom-brief", canonicalRecord: "BoardroomBriefOrder", riskLevel: "HIGH", emitsAudit: true },
+  { route: "/admin/fulfilment", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "EstateFulfilmentSpine", riskLevel: "HIGH", emitsAudit: false },
   { route: "/admin/counsel-review", domain: "audit", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
 
   // ── Campaigns & Organisations ───────────────────────────────────────────

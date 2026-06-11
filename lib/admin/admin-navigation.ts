@@ -148,7 +148,8 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     id: "operations",
     label: "Operations & Support",
     items: [
-      { id: "operations", label: "Operations", href: "/admin/operations", router: "pages", visibility: "admin", status: "active", description: "Background job triggers: diagnostic processing and retention sweep" },
+      { id: "estate-fulfilment", label: "Estate Fulfilment", href: "/admin/fulfilment", router: "pages", visibility: "admin", status: "active", description: "Unified estate-wide fulfilment queue: all paid, governed, and review-requiring items across every product" },
+      { id: "operations", label: "Jobs & Operations", href: "/admin/operations", router: "pages", visibility: "admin", status: "active", description: "Background job triggers: diagnostic processing and retention sweep" },
       { id: "billing", label: "Billing & Entitlements", href: "/admin/billing", router: "pages", visibility: "admin", status: "active", description: "Email-based lookup of paid product grants and active entitlements" },
       { id: "briefs", label: "Brief Search", href: "/admin/briefs", router: "pages", visibility: "admin", status: "active", description: "Search intelligence asset library by keyword" },
       { id: "artifacts", label: "Artifacts", href: "/admin/artifacts", router: "pages", visibility: "admin", status: "active", description: "Diagnostic report artifacts for the current session account" },

@@ -189,4 +189,23 @@ describe("admin navigation registry", () => {
     const item = allItems().find((i) => i.href === "/admin/boardroom/orders");
     expect(item?.visibility).toBe("admin");
   });
+
+  it("/admin/fulfilment (Estate Fulfilment) is registered in Operations section", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "operations");
+    const item = section?.items.find((i) => i.href === "/admin/fulfilment");
+    expect(item, "/admin/fulfilment must be in operations section").toBeDefined();
+    expect(item?.status).toBe("active");
+    expect(item?.visibility).toBe("admin");
+  });
+
+  it("/admin/delivery-queue is registered in admin nav (delivery section)", () => {
+    const item = allItems().find((i) => i.href === "/admin/delivery-queue");
+    expect(item, "/admin/delivery-queue must be registered in nav").toBeDefined();
+    expect(item?.status).toBe("active");
+  });
+
+  it("operations section has Estate Fulfilment as the first item", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "operations");
+    expect(section?.items[0]?.href).toBe("/admin/fulfilment");
+  });
 });

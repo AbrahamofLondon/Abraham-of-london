@@ -110,12 +110,20 @@ function buildHtml(input: BoardroomAdminNotificationInput): string {
         </table>
       </div>
 
-      <p style="margin:0 0 24px;">
-        <a href="https://www.abrahamoflondon.org/admin/briefs"
+      <p style="margin:0 0 8px;">
+        <a href="https://www.abrahamoflondon.org/admin/boardroom/orders/${input.orderId}"
            style="display:inline-block;padding:14px 32px;border:1px solid rgba(201,169,110,0.4);
                   background:rgba(201,169,110,0.1);color:#c9a96e;font-family:monospace;
                   font-size:11px;text-transform:uppercase;letter-spacing:0.28em;text-decoration:none;">
-          Open Admin → Brief Search →
+          Open Order Detail →
+        </a>
+      </p>
+      <p style="margin:0 0 24px;">
+        <a href="https://www.abrahamoflondon.org/admin/fulfilment?sourceType=boardroom_brief_order&amp;sourceId=${input.orderId}"
+           style="display:inline-block;padding:10px 24px;border:1px solid rgba(255,255,255,0.1);
+                  background:rgba(255,255,255,0.03);color:rgba(242,241,238,0.5);font-family:monospace;
+                  font-size:10px;text-transform:uppercase;letter-spacing:0.2em;text-decoration:none;">
+          Estate Fulfilment Queue →
         </a>
       </p>
 
@@ -148,7 +156,8 @@ function buildText(input: BoardroomAdminNotificationInput): string {
     `Received:    ${input.orderCreatedAt.toISOString()}`,
     `Deliver by:  ${deadline}`,
     "",
-    "Admin panel: https://www.abrahamoflondon.org/admin/briefs",
+    `Order detail: https://www.abrahamoflondon.org/admin/boardroom/orders/${input.orderId}`,
+    `Fulfilment queue: https://www.abrahamoflondon.org/admin/fulfilment?sourceType=boardroom_brief_order&sourceId=${input.orderId}`,
     "",
     "Abraham of London · Decision Authority Infrastructure",
   ]
