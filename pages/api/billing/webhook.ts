@@ -18,6 +18,7 @@ import {
 import { syncRetainerContractFromSubscription } from "@/lib/retainers/retainer-service";
 import { generatePaidExecutiveReport } from "@/lib/commercial/paid-er-generation";
 import { trackServerLaunch } from "@/lib/analytics/server-launch-event";
+import { sendBoardroomAdminNotification } from "@/lib/boardroom/admin-notification";
 
 const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
 
@@ -408,6 +409,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } catch (orderError) {
           console.error("[BILLING_WEBHOOK_BOARDROOM_ORDER_FAILED]", orderError);
         }
+
+        // P8 — Admin notification: non-blocking, fire-and-forget after stub creation
+        sendBoardroomAdminNotification({
+          orderId: session.metadata?.orderId || session.id.slice(0, 24),
+          customerEmail: email,
+          sessionId: session.id,
+          proofMode: session.metadata?.proofMode === "true",
+          orderCreatedAt: new Date(),
+        }).then((notifResult) => {
+          if (!notifResult.ok) {
+            console.error("[BILLING_WEBHOOK_BOARDROOM_ADMIN_NOTIFICATION_FAILED]", {
+              sessionId: session.id,
+              error: notifResult.error,
+            });
+          } else {
+            console.info("[BILLING_WEBHOOK_BOARDROOM_ADMIN_NOTIFICATION_SENT]", {
+              sessionId: session.id,
+              emailId: notifResult.emailId,
+            });
+          }
+        }).catch((err) => {
+          console.error("[BILLING_WEBHOOK_BOARDROOM_ADMIN_NOTIFICATION_EXCEPTION]", err);
+        });
 
         if (session.metadata?.handoffId) {
           try {
