@@ -624,6 +624,7 @@ function CorridorStageRow({ stage, index, isLast }: { stage: CorridorStageData; 
 
 function SectionNav() {
   const links = [
+    { href: "#routing",          label: "Find your route" },
     { href: "#start-here",      label: "Start here" },
     { href: "#boardroom-brief-feature", label: "Boardroom Brief" },
     { href: "#paid-corridor",   label: "Paid corridor" },
@@ -741,6 +742,117 @@ function PressureSignalBand() {
             </div>
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Phase 2: Guided routing layer ───────────────────────────────────────────
+
+type ProtectRoute = {
+  question: string;
+  route: string;
+  href: string;
+  status: ProductStatus;
+};
+
+const protectRoutes: ProtectRoute[] = [
+  {
+    question: "One decision needs an immediate read — is it under pressure?",
+    route: "Decision Pressure Signal",
+    href: "/decision-pressure",
+    status: "Free",
+  },
+  {
+    question: "A decision needs to survive boardroom-level scrutiny.",
+    route: "Boardroom Brief",
+    href: "/boardroom-brief",
+    status: "Open entry",
+  },
+  {
+    question: "I need to know whether this decision is actually ready for scrutiny.",
+    route: "Decision Pressure Signal → Boardroom Brief",
+    href: "/decision-pressure",
+    status: "Free",
+  },
+  {
+    question: "The whole organisation's decision authority is in question.",
+    route: "Enterprise Assessment",
+    href: "/diagnostics/enterprise-assessment",
+    status: "Free",
+  },
+  {
+    question: "A made decision needs execution governance, not just approval.",
+    route: "Strategy Room",
+    href: "/strategy-room",
+    status: "Evidence-gated",
+  },
+  {
+    question: "I work with clients and need stronger, evidence-backed challenge outputs.",
+    route: "Professional Access",
+    href: "/professionals",
+    status: "Selective access",
+  },
+  {
+    question: "I need macro market context before committing to a major position.",
+    route: "Global Market Intelligence",
+    href: "/intelligence/gmi",
+    status: "Paid",
+  },
+  {
+    question: "My team disagrees on what decision has actually been made.",
+    route: "Team Assessment",
+    href: "/diagnostics/team-assessment",
+    status: "Free",
+  },
+  {
+    question: "A decision has been made but I suspect the execution is drifting.",
+    route: "Drift Detection Framework",
+    href: "/playbooks/the-drift-detection-framework",
+    status: "Active",
+  },
+];
+
+function WhatAreYouProtectingSection() {
+  return (
+    <section id="routing" className="border-t border-white/[0.06] px-6 py-12 lg:px-12 lg:py-14">
+      <div className="mx-auto max-w-7xl">
+        <Eyebrow>Route yourself in</Eyebrow>
+        <h2
+          className="mt-5 max-w-[44rem]"
+          style={{ ...serif, color: "rgba(255,255,255,0.90)", fontSize: "clamp(1.9rem, 5vw, 3rem)", lineHeight: 1, fontStyle: "italic" }}
+        >
+          What are you trying to protect?
+        </h2>
+        <p className="mt-4 max-w-[68ch] text-[14px] leading-[1.8] text-white/[0.55]">
+          Find the right entry point. Each route is mapped to a specific governance need — not a product category.
+        </p>
+        <div className="mt-8 grid gap-px bg-white/[0.05] border border-white/[0.05]">
+          {protectRoutes.map((item, i) => (
+            <Link
+              key={i}
+              href={item.href}
+              className="group grid gap-4 bg-[#030305] p-4 transition-colors hover:bg-white/[0.022] md:grid-cols-[1fr_auto_auto] md:items-center"
+            >
+              <p className="text-[13.5px] leading-[1.6] text-white/[0.72] group-hover:text-white/[0.88] transition-colors">
+                {item.question}
+              </p>
+              <span
+                className="whitespace-nowrap text-right"
+                style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}
+              >
+                {item.route}
+              </span>
+              <div className="flex items-center justify-end gap-2">
+                <StatusBadge status={item.status} />
+                <ArrowRight className="h-3 w-3 shrink-0 text-white/[0.28] group-hover:text-white/[0.55] transition-colors" />
+              </div>
+            </Link>
+          ))}
+        </div>
+        <p className="mt-4 text-[12px] text-white/[0.35]" style={mono}>
+          Not sure? Start with the free Decision Pressure Signal — it takes 30 seconds and routes you automatically.
+        </p>
       </div>
     </section>
   );
@@ -1118,6 +1230,7 @@ export default function ProductsPage() {
         <HeroSection />
         <SectionNav />
         <PressureSignalBand />
+        <WhatAreYouProtectingSection />
         <StartHereSection />
         <BoardroomBriefFeature />
         <PaidCorridorSection />
@@ -1138,17 +1251,65 @@ export default function ProductsPage() {
                 </h2>
               </div>
               <p className="max-w-[70ch] text-[15px] leading-[1.85] text-white/[0.65] lg:justify-self-end">
-                Quarterly market intelligence that reviews prior material calls before issuing the next report.
+                Quarterly intelligence that publishes what would prove it wrong — and reviews prior calls before issuing the next report.
               </p>
             </div>
-            <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
-              <p className="text-[13px] leading-relaxed text-white/[0.58]">
-                Each quarterly report reviews material calls from the previous quarter before issuing the next. Built for operators who need disciplined market judgement.
-              </p>
+
+            {/* GMI differentiation — what makes this different */}
+            <div className="mb-8 grid gap-px bg-white/[0.05] border border-white/[0.05] sm:grid-cols-3">
+              {[
+                {
+                  label: "Call Ledger",
+                  body: "Every position is registered as a named call with a stated evidence basis. No anonymous claims.",
+                  href: "/intelligence/gmi/calls",
+                },
+                {
+                  label: "Falsification Register",
+                  body: "Every major thesis publishes the condition that would prove it wrong. This is not standard practice. It is the discipline.",
+                  href: "/intelligence/gmi/falsification",
+                },
+                {
+                  label: "Prior Quarter Review",
+                  body: "No new edition issues until material calls from the previous quarter are formally reviewed and scored.",
+                  href: "/intelligence/gmi",
+                },
+              ].map((item) => (
+                <Link key={item.label} href={item.href}
+                  className="group bg-[#030305] p-5 hover:bg-white/[0.022] transition-colors">
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                    {item.label}
+                  </p>
+                  <p className="mt-3 text-[13px] leading-[1.65] text-white/[0.62] group-hover:text-white/[0.78] transition-colors">
+                    {item.body}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}77` }}>
+                    View <ArrowRight className="h-2.5 w-2.5" />
+                  </span>
+                </Link>
+              ))}
             </div>
+
+            {/* Quarter status */}
+            <div className="mb-8 grid gap-2 sm:grid-cols-3">
+              {[
+                { quarter: "Q1 2026", status: "Archive", statusColor: "rgba(255,255,255,0.38)", href: catalogPath("gmi_q1_2026", "/artifacts/global-market-intelligence-report-q1-2026"), note: "Calls reviewed. Record closed." },
+                { quarter: "Q2 2026", status: "Active", statusColor: "rgba(110,231,183,0.85)", href: catalogPath("gmi_q2_2026", "/artifacts/global-market-intelligence-report-q2-2026"), note: "Current edition. Calls open." },
+                { quarter: "Q3 2026", status: "Pending", statusColor: "rgba(201,169,110,0.60)", href: "/intelligence/gmi", note: "Pending Q2 review completion." },
+              ].map((q) => (
+                <Link key={q.quarter} href={q.href}
+                  className="group border border-white/[0.06] bg-white/[0.014] p-4 hover:border-white/[0.10] transition-colors">
+                  <div className="flex items-center justify-between">
+                    <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>{q.quarter}</p>
+                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: q.statusColor }}>{q.status}</span>
+                  </div>
+                  <p className="mt-2 text-[12px] text-white/[0.40]">{q.note}</p>
+                </Link>
+              ))}
+            </div>
+
             <div className="flex flex-wrap gap-4">
-              <PrimaryBtn href="/artifacts/global-market-outlook-q1-2026-public" onClick={() => trackLaunch("products_to_gmi_outlook", "/products")}>
-                View intelligence line
+              <PrimaryBtn href="/intelligence/gmi" onClick={() => trackLaunch("products_to_gmi_outlook", "/products")}>
+                View GMI — falsification first
               </PrimaryBtn>
               <GhostBtn href={catalogPath("gmi_q2_2026", "/artifacts/global-market-intelligence-report-q2-2026")} onClick={() => trackLaunch("gmi_outlook_to_full_report", "/products")}>
                 View latest report — Q2 2026
@@ -1168,11 +1329,33 @@ export default function ProductsPage() {
 
         {/* Governed Playbooks — collapsible */}
         <div id="playbooks">
-          <CollapsibleSection title="Governed Playbooks" intro="Controlled-release governed methodology runs for execution restoration, alignment audit, and drift detection.">
-            <div className="mb-5 border-l-2 pl-4" style={{ borderColor: `${GOLD}40` }}>
-              <p className="text-[13px] leading-relaxed text-white/[0.58]">
-                Each playbook is a governed methodology run. Access is currently available by request while self-serve checkout is being enabled.
-              </p>
+          <CollapsibleSection title="Governed Playbooks" intro="Standalone governed methodology runs. Self-serve access. Each writes to Decision Centre memory.">
+            <div className="mb-6 grid gap-3 sm:grid-cols-3">
+              {[
+                { name: "Execution Integrity Protocol", price: "£49", href: catalogPath("execution_integrity_protocol", "/playbooks/execution-integrity-protocol"), note: "Restore execution discipline. 15 min run." },
+                { name: "Alignment Audit Playbook",     price: "£49", href: catalogPath("alignment_audit_playbook",    "/playbooks/the-alignment-audit-playbook"),    note: "Diagnose organisational misalignment. 20 min run." },
+                { name: "Drift Detection Framework",    price: "£39", href: catalogPath("drift_detection_framework",   "/playbooks/the-drift-detection-framework"),   note: "Detect silent organisational decay. 12 min run." },
+              ].map((pb) => (
+                <div key={pb.name} className="border border-white/[0.07] bg-white/[0.014] p-5">
+                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>{pb.price}</p>
+                  <p className="mt-2 text-[13.5px] leading-[1.5] text-white/[0.82]">{pb.name}</p>
+                  <p className="mt-2 text-[12px] text-white/[0.46]">{pb.note}</p>
+                  <Link href={pb.href}
+                    className="group mt-4 inline-flex items-center gap-2 border px-4 py-2"
+                    style={{ ...mono, borderColor: `${GOLD}35`, backgroundColor: `${GOLD}0D`, color: "rgba(255,255,255,0.82)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                    Get access <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+            <div className="mb-6 border border-white/[0.06] bg-white/[0.01] p-4">
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>All three playbooks</p>
+              <p className="mt-2 text-[13px] text-white/[0.62]">Bundle all three governed playbooks. See pricing page for current bundle option.</p>
+              <Link href="/pricing"
+                className="group mt-3 inline-flex items-center gap-2 border border-white/[0.10] px-4 py-2"
+                style={{ ...mono, color: "rgba(255,255,255,0.60)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                View bundle pricing <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </Link>
             </div>
             <InstrumentList items={playbookItems} />
           </CollapsibleSection>

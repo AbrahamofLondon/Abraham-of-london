@@ -262,6 +262,72 @@ export default function BoardroomBriefPage() {
               </p>
             </div>
 
+            {/* ── Phase 3: Trust and fulfilment clarity ──────────────────── */}
+            <div className="mt-10 max-w-2xl space-y-3">
+              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+                What the Boardroom Brief delivers
+              </p>
+
+              {/* Compact trust grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1px', border: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
+                {[
+                  {
+                    label: 'What happens after payment',
+                    body: 'Your intake is reviewed by a human analyst. The dossier is generated, reviewed, and delivered within 48 hours. You receive an email with a secure access link.',
+                  },
+                  {
+                    label: 'What you receive',
+                    body: 'A structured decision brief: the decision read, evidence assessment, objection set, decision-path consequences, and the next admissible move. Not a generic report.',
+                  },
+                  {
+                    label: 'What is human-reviewed',
+                    body: 'Every Boardroom Brief is reviewed by a human before delivery. The analyst checks the evidence read, the objection logic, and the decision-path claims. No unreviewed output is delivered.',
+                  },
+                  {
+                    label: 'What is generated',
+                    body: 'The structure, objection set, and decision paths are produced by the Abraham of London analytical framework from your intake. The reviewer then validates, corrects, and annotates before delivery.',
+                  },
+                  {
+                    label: 'What evidence is tested',
+                    body: 'The brief tests whether the decision can survive a serious board challenge: authority clarity, evidence sufficiency, objection weight, and consequence credibility.',
+                  },
+                  {
+                    label: 'What falsification means',
+                    body: 'Every brief includes at least one falsification condition — a specific statement of what would prove the decision read wrong. This is not rhetorical. It is the standard for institutional accountability.',
+                  },
+                  {
+                    label: 'What the outcome hypothesis does',
+                    body: 'The brief records a testable outcome prediction: what should be observable if the recommended path is taken. This is the basis for a Return Brief and long-term case memory.',
+                  },
+                  {
+                    label: 'Delivery window',
+                    body: '48 hours from confirmed payment. If delivery is delayed, you will be contacted directly. Overdue deliveries are tracked operationally — not forgiven silently.',
+                  },
+                  {
+                    label: 'Sample structure',
+                    body: 'The brief contains: decision read, authority and evidence assessment, the primary contradiction, objection handling (2–5 objections), decision paths with consequences, and the next admissible move.',
+                  },
+                  {
+                    label: 'When this is not the right product',
+                    body: 'If you need real-time execution support, a full executive report, or ongoing governance — this brief is not sufficient on its own. View Executive Reporting or the Retainer pathway instead.',
+                  },
+                ].map(({ label, body }) => (
+                  <div key={label} style={{ backgroundColor: 'rgb(3,3,5)', padding: '1.1rem 1.25rem' }}>
+                    <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '0.4rem' }}>
+                      {label}
+                    </p>
+                    <p style={{ ...serif, fontSize: '0.875rem', lineHeight: 1.65, color: 'rgba(255,255,255,0.50)' }}>
+                      {body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.25)', marginTop: '0.5rem' }}>
+                The delivery is manual and governed by design. The £99 price reflects governed decision scrutiny with human review — not automated report generation.
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="mt-10 space-y-5 max-w-2xl">
               <div>
                 <label style={labelStyle()}>What decision is being considered?</label>

@@ -32,10 +32,14 @@ try {
   });
 }
 
-Font.register({
-  family: 'Inter',
-  src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZg.ttf'
-});
+try {
+  Font.register({
+    family: 'Inter',
+    src: path.join(process.cwd(), 'public', 'fonts', 'Inter-Regular.ttf'),
+  });
+} catch {
+  // Inter not available locally — fall back to system sans-serif
+}
 
 Font.registerHyphenationCallback((word) => [word]);
 
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
 
 interface PremiumPDFConfig {
   format: 'A4' | 'Letter' | 'A3' | 'bundle';
-  tier: "public" | 'member' | 'architect' | 'inner-circle';
+  tier: 'free' | 'member' | 'architect' | 'inner-circle';
   quality: 'draft' | 'premium' | 'enterprise';
   outputDir: string;
   interactive?: boolean;
@@ -419,32 +423,47 @@ export class PremiumPDFGenerator {
       }
       
       const finalBuffer = await pdfDoc.save();
-      
+
+      // Compute SHA-256 artifact hash for provenance
+      const artifactHash = crypto.createHash('sha256').update(finalBuffer).digest('hex');
+      const generatedAt = new Date().toISOString();
+
+      // Embed hash + provenance in PDF custom metadata
+      pdfDoc.setKeywords([
+        'legacy', 'architecture', 'canvas', tier, quality,
+        `sha256:${artifactHash.slice(0, 16)}`,
+        `generated:${generatedAt}`,
+      ]);
+
+      const finalBufferWithMeta = await pdfDoc.save();
+
       // Generate dynamic filename with all relevant parameters
       const fileName = this.generateFileName();
       const filePath = path.join(outputDir, fileName);
-      
-      await fs.writeFile(filePath, Buffer.from(finalBuffer));
-      
+
+      await fs.writeFile(filePath, Buffer.from(finalBufferWithMeta));
+
       const duration = Date.now() - startTime;
       const stats = await fs.stat(filePath);
-      
+
       console.log(`✅ Generated: ${fileName} (${(stats.size / 1024).toFixed(2)} KB, ${duration}ms)`);
-      
+      console.log(`   SHA-256: ${artifactHash}`);
+
       return {
         success: true,
         filePath,
         size: stats.size,
         duration,
         metadata: {
-          id: crypto.createHash('md5').update(finalBuffer).digest('hex'),
-          generatedAt: new Date().toISOString(),
+          artifactHash,
+          hashAlgorithm: 'sha256',
+          generatedAt,
           tier,
           format,
           quality,
           version,
           interactive,
-          fillable
+          fillable,
         }
       };
       
