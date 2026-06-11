@@ -94,7 +94,8 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     id: "boardroom",
     label: "Boardroom",
     items: [
-      { id: "boardroom-archive", label: "Boardroom Archive", href: "/admin/boardroom-archive", router: "pages", visibility: "admin", status: "active", description: "Boardroom dossier history" },
+      { id: "boardroom-orders", label: "Boardroom Orders", href: "/admin/boardroom/orders", router: "pages", visibility: "admin", status: "active", description: "Live paid Boardroom Brief orders requiring review, generation, and delivery" },
+      { id: "boardroom-archive", label: "Boardroom Archive", href: "/admin/boardroom-archive", router: "pages", visibility: "admin", status: "active", description: "Boardroom dossier history — delivered and historical records" },
     ],
   },
   {

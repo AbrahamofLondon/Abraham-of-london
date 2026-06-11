@@ -152,4 +152,41 @@ describe("admin navigation registry", () => {
     const item = allItems().find((i) => i.href === "/admin/dev/session");
     expect(item, "/admin/dev/session must not appear in normal nav").toBeUndefined();
   });
+
+  // P5 — Boardroom fulfilment visibility tests
+
+  it("boardroom section includes Boardroom Orders entry (not just Archive)", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "boardroom");
+    expect(section, "boardroom section must exist").toBeDefined();
+    const ordersItem = section?.items.find((i) => i.href === "/admin/boardroom/orders");
+    expect(ordersItem, "/admin/boardroom/orders must be in boardroom section").toBeDefined();
+    expect(ordersItem?.status).toBe("active");
+    expect(ordersItem?.visibility).toBe("admin");
+  });
+
+  it("boardroom section still includes Archive entry", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "boardroom");
+    const archiveItem = section?.items.find((i) => i.href === "/admin/boardroom-archive");
+    expect(archiveItem, "/admin/boardroom-archive must remain in boardroom section").toBeDefined();
+    expect(archiveItem?.status).toBe("active");
+  });
+
+  it("Archive is not the only Boardroom nav entry", () => {
+    const section = ADMIN_NAVIGATION.find((s) => s.id === "boardroom");
+    expect(section, "boardroom section must exist").toBeDefined();
+    expect(section!.items.length).toBeGreaterThan(1);
+    const nonArchive = section!.items.filter((i) => i.href !== "/admin/boardroom-archive");
+    expect(nonArchive.length, "boardroom section must have entries beyond Archive").toBeGreaterThan(0);
+  });
+
+  it("/admin/boardroom/orders is registered in admin-domain-registry", async () => {
+    const { ADMIN_ROUTES } = await import("@/lib/platform/admin-domain-registry");
+    const entry = ADMIN_ROUTES.find((r) => r.route === "/admin/boardroom/orders");
+    expect(entry, "/admin/boardroom/orders must be in ADMIN_ROUTES").toBeDefined();
+  });
+
+  it("/admin/boardroom/orders has admin visibility (not operator-only)", () => {
+    const item = allItems().find((i) => i.href === "/admin/boardroom/orders");
+    expect(item?.visibility).toBe("admin");
+  });
 });
