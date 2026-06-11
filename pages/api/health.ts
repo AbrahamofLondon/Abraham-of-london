@@ -1,6 +1,6 @@
 // pages/api/health.ts - Production Health Check with Monitoring
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getRedis } from '@/lib/redis';
+import { checkCanonicalRedisHealth, type RedisClientMode, type RedisEnvShape } from '@/lib/redis-health';
 
 // Types for health check responses
 type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
@@ -8,6 +8,12 @@ type ServiceStatus = {
   status: HealthStatus;
   latency?: number;
   message?: string;
+  clientMode?: RedisClientMode;
+  configured?: boolean;
+  required?: boolean;
+  timeoutMs?: number;
+  errorClass?: string;
+  env?: RedisEnvShape;
   /**
    * true when the degradation is the result of a deliberate operator decision
    * (e.g. REDIS_DISABLED=true, known runtime manifest gap) rather than an
@@ -222,29 +228,35 @@ async function checkDatabaseConnection(): Promise<ServiceStatus> {
 }
 
 async function checkRedisConnection(): Promise<ServiceStatus> {
-  const start = Date.now();
+  const result = await checkCanonicalRedisHealth();
 
-  // REDIS_DISABLED=true means Redis is intentionally not provisioned on this
-  // deployment. Report as "degraded" (known/expected state) rather than
-  // "unhealthy" (broken), so the overall health endpoint returns 206 instead
-  // of 503 and monitoring systems do not false-alarm.
-  if (process.env.REDIS_DISABLED === "true") {
+  if (result.ok) {
     return {
-      status: "degraded",
-      message: "Redis intentionally disabled (REDIS_DISABLED=true)",
-      latency: 0,
-      intentional: true,
+      status: "healthy",
+      message: result.message,
+      latency: result.latency,
+      clientMode: result.clientMode,
+      configured: result.configured,
+      required: result.required,
+      timeoutMs: result.timeoutMs,
+      env: result.env,
     };
   }
 
-  try {
-    const redis = await getRedis();
-    if (!redis) return { status: 'degraded', message: 'Redis not configured', latency: Date.now() - start };
-    await redis.ping();
-    return { status: 'healthy', latency: Date.now() - start };
-  } catch (error) {
-    return { status: 'unhealthy', message: 'Redis connection failed', latency: Date.now() - start };
-  }
+  const intentionallyDisabled = result.clientMode === "disabled";
+  const status: HealthStatus = result.required || result.configured ? "unhealthy" : "degraded";
+  return {
+    status: intentionallyDisabled ? "degraded" : status,
+    message: result.message,
+    latency: result.latency,
+    clientMode: result.clientMode,
+    configured: result.configured,
+    required: result.required,
+    timeoutMs: result.timeoutMs,
+    errorClass: result.errorClass,
+    env: result.env,
+    intentional: intentionallyDisabled && !result.required,
+  };
 }
 
 /**

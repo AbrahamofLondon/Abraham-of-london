@@ -66,20 +66,20 @@ export async function GET() {
 
   // 5. Redis status
   try {
-    const { isRedisAvailable } = await import("@/lib/redis");
-    const available = await isRedisAvailable();
-    if (available) {
-      components.redis = { status: "ok" };
+    const { checkCanonicalRedisHealth } = await import("@/lib/redis-health");
+    const redis = await checkCanonicalRedisHealth();
+    if (redis.ok) {
+      components.redis = { status: "ok", detail: redis.clientMode };
     } else {
       components.redis = {
-        status: "degraded",
-        detail: "Redis unavailable — rate limiting falls back to Postgres",
+        status: redis.required || redis.configured ? "unavailable" : "degraded",
+        detail: `${redis.message} (${redis.clientMode})`,
       };
     }
   } catch {
     components.redis = {
-      status: "degraded",
-      detail: "Redis unavailable — rate limiting falls back to Postgres",
+      status: process.env.USE_REDIS === "true" ? "unavailable" : "degraded",
+      detail: "Redis health check failed",
     };
   }
 
@@ -88,8 +88,8 @@ export async function GET() {
   let overall: HealthCheck["status"] = "healthy";
 
   if (statuses.includes("unavailable")) {
-    // Database unavailable = unhealthy; others = degraded
-    if (components.database?.status === "unavailable") {
+    // Database and required Redis are hard dependencies.
+    if (components.database?.status === "unavailable" || components.redis?.status === "unavailable") {
       overall = "unhealthy";
     } else {
       overall = "degraded";

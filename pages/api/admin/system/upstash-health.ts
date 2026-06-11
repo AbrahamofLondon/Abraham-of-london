@@ -3,7 +3,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdminServer } from "@/lib/auth/requireAdminServer";
-import { getRateLimitBackendStatus } from "@/lib/server/security/rate-limit-provider";
+import { checkCanonicalRedisHealth } from "@/lib/redis-health";
 
 type Response = {
   ok: boolean;
@@ -11,6 +11,7 @@ type Response = {
   configured: boolean;
   reachable: boolean;
   fallbackReason?: string;
+  clientMode?: string;
   redisConfigured: boolean;
   redisDisabled: boolean;
   hasRedisUrl: boolean;
@@ -24,17 +25,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (!session) return;
 
   try {
-    const status = await getRateLimitBackendStatus();
+    const status = await checkCanonicalRedisHealth();
     const hasRedisUrl = Boolean(process.env.REDIS_URL?.trim());
     const hasUpstashUrl = Boolean(process.env.UPSTASH_REDIS_REST_URL?.trim());
     const hasUpstashToken = Boolean(process.env.UPSTASH_REDIS_REST_TOKEN?.trim());
 
     return res.status(200).json({
       ok: true,
-      backend: status.backend,
+      backend: status.clientMode,
+      clientMode: status.clientMode,
       configured: status.configured,
-      reachable: status.reachable,
-      fallbackReason: status.fallbackReason,
+      reachable: status.ok,
+      fallbackReason: status.ok ? undefined : status.message,
       redisConfigured: Boolean(hasRedisUrl || hasUpstashUrl || process.env.REDIS_HOST?.trim()),
       redisDisabled: process.env.REDIS_DISABLED === "true" || process.env.USE_REDIS === "false",
       hasRedisUrl,
