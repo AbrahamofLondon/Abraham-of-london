@@ -19,9 +19,11 @@
  *   - delivered requires customerAccessUrl to exist
  *   - blocked/failed are terminal from most states
  *   - Every transition writes an audit event
+ *
+ * NOTE: This module avoids top-level imports of server-only code.
+ * The governance event bus (which uses "server-only") is imported dynamically
+ * inside recordBoardroomDeliveryEvent to keep this file safe for Pages Router usage.
  */
-
-import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -155,6 +157,9 @@ export async function recordBoardroomDeliveryEvent(params: {
     console.warn(`[BOARDROOM_DELIVERY_STATE] No audit event mapped for status: ${params.toStatus}`);
     return;
   }
+
+  // Dynamic import to avoid pulling server-only code into Pages Router
+  const { routeGovernanceEvent } = await import("@/lib/platform/governance-event-bus");
 
   await routeGovernanceEvent({
     eventType: auditEvent.toUpperCase().replace(/\s+/g, "_"),
