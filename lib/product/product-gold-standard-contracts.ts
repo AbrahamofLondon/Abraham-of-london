@@ -83,9 +83,7 @@ const OWNED_UPGRADE_CODES = new Set([
   "additional_collaborator",
 ]);
 
-const GOLD_STANDARD_CODES = new Set([
-  "boardroom_brief",
-]);
+const GOLD_STANDARD_CODES = new Set<string>();
 
 export function getProductGoldStandardContract(productCode: string): ProductGoldStandardContract | null {
   const product = getAllProducts().find((entry) => entry.code === productCode);
@@ -239,7 +237,7 @@ function classifyGoldReleaseStatus(
   tier: ProductGoldStandardContract["commercialTier"],
   scoreOutOf100: number,
 ): ProductGoldReleaseStatus {
-  if (tier === "internal" || !product.active) return "internal_only";
+  if (product.commercialStatus === "internal_only") return "internal_only";
   return scoreOutOf100 >= 98 ? "gold_standard" : "blocked_from_release";
 }
 
