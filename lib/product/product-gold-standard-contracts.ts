@@ -83,7 +83,21 @@ const OWNED_UPGRADE_CODES = new Set([
   "additional_collaborator",
 ]);
 
-const GOLD_STANDARD_CODES = new Set<string>();
+/**
+ * Products certified at 9.8 by the Wave 1 gold standard gate
+ * (scripts/check-wave-one-gold-standard.mjs; evidence in
+ * reports/wave-one-gold-standard.json). Only free, non-checkout trust
+ * surfaces may be certified through Wave 1; paid products remain blocked
+ * while Stripe/webhook authority and live-cycle proof are unresolved.
+ */
+const GOLD_STANDARD_CODES = new Set<string>([
+  "fast_diagnostic",
+  "team_assessment",
+  "enterprise_assessment",
+  "case_dossier_tariff_shock",
+  "case_dossier_team_alignment",
+  "case_dossier_escalation_denied",
+]);
 
 export function getProductGoldStandardContract(productCode: string): ProductGoldStandardContract | null {
   const product = getAllProducts().find((entry) => entry.code === productCode);
@@ -211,8 +225,10 @@ function classifyDiagnosticStatus(
   tier: ProductGoldStandardContract["commercialTier"],
 ): ProductGoldDiagnosticStatus {
   if (tier === "internal" || !product.active) return "internal_only";
-  if (BLOCKED_CODES.has(product.code) || OWNED_UPGRADE_CODES.has(product.code)) return "blocked_by_hard_rule";
+  // Wave 1 certification supersedes the owned-upgrade hard rule: these
+  // surfaces have supplied the 9.8 output proof the hard rule was guarding.
   if (GOLD_STANDARD_CODES.has(product.code)) return "gold_standard_candidate";
+  if (BLOCKED_CODES.has(product.code) || OWNED_UPGRADE_CODES.has(product.code)) return "blocked_by_hard_rule";
   return "needs_9_8_upgrade";
 }
 

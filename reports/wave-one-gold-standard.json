@@ -1,0 +1,916 @@
+{
+  "generatedAt": "2026-06-12T15:39:48.508Z",
+  "gate": "PASSED",
+  "threshold": {
+    "overall": 9.8,
+    "criticalDimensionMinimum": 9.5
+  },
+  "waveOneProducts": [
+    "fast_diagnostic",
+    "team_assessment",
+    "enterprise_assessment",
+    "case_dossier_tariff_shock",
+    "case_dossier_team_alignment",
+    "case_dossier_escalation_denied",
+    "personal_decision_audit",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "decision_exposure_instrument",
+    "escalation_readiness_scorecard",
+    "execution_integrity_protocol",
+    "execution_risk_index",
+    "governance_drift_detector",
+    "intervention_path_selector",
+    "mandate_clarity_framework",
+    "strategic_priority_stack_builder",
+    "structural_failure_diagnostic_canvas",
+    "team_alignment_gap_map",
+    "strategy_room",
+    "strategy_room_extended"
+  ],
+  "productsReviewed": 21,
+  "goldStandard": 6,
+  "blockedFromRelease": 15,
+  "estateEvidence": {
+    "liveCyclePending": true,
+    "stripeWebhookUnconfirmed": true,
+    "reportExperienceAmber": true
+  },
+  "composerStatus": {
+    "fast_diagnostic_result": {
+      "path": "lib/product/fast-diagnostic-gold-composer.ts",
+      "verified": true,
+      "missingSections": []
+    },
+    "free_public_signal": {
+      "path": "lib/product/free-signal-gold-composer.ts",
+      "verified": true,
+      "missingSections": []
+    },
+    "decision_instrument": {
+      "path": "lib/product/decision-instrument-gold-composer.ts",
+      "verified": true,
+      "missingSections": []
+    },
+    "strategy_room_session_report": {
+      "path": "lib/product/strategy-room-session-gold-composer.ts",
+      "verified": true,
+      "missingSections": []
+    }
+  },
+  "universalOutputStandard": [
+    "Signal / Diagnosis",
+    "Why This Matters",
+    "Evidence or Reasoning Basis",
+    "Decision Friction / Contradiction",
+    "Consequence If Ignored",
+    "One Specific Next Move",
+    "What This Does Not Prove",
+    "Escalation Trigger",
+    "Optional Deeper Route"
+  ],
+  "results": [
+    {
+      "productCode": "fast_diagnostic",
+      "family": "fast_diagnostic_result",
+      "commercialTier": "free",
+      "requiresCheckout": false,
+      "composerPath": "lib/product/fast-diagnostic-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 5.8,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.9,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.8,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9.8,
+        "experience_quality": 9.8,
+        "time_value_surplus": 9.8,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.8,
+      "releaseStatus": "gold_standard",
+      "minutesAskedOfUser": 8,
+      "timeValueSurplusPassed": true,
+      "reasons": [
+        "Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."
+      ]
+    },
+    {
+      "productCode": "team_assessment",
+      "family": "free_public_signal",
+      "commercialTier": "free",
+      "requiresCheckout": false,
+      "composerPath": "lib/product/free-signal-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 5.8,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.9,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.8,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9.8,
+        "experience_quality": 9.8,
+        "time_value_surplus": 9.8,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.8,
+      "releaseStatus": "gold_standard",
+      "minutesAskedOfUser": 8,
+      "timeValueSurplusPassed": true,
+      "reasons": [
+        "Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."
+      ]
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "family": "free_public_signal",
+      "commercialTier": "free",
+      "requiresCheckout": false,
+      "composerPath": "lib/product/free-signal-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 5.8,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.9,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.8,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9.8,
+        "experience_quality": 9.8,
+        "time_value_surplus": 9.8,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.8,
+      "releaseStatus": "gold_standard",
+      "minutesAskedOfUser": 8,
+      "timeValueSurplusPassed": true,
+      "reasons": [
+        "Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."
+      ]
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "family": "free_public_signal",
+      "commercialTier": "free",
+      "requiresCheckout": false,
+      "composerPath": "lib/product/free-signal-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.9,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.8,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9.8,
+        "experience_quality": 9.8,
+        "time_value_surplus": 9.8,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.8,
+      "releaseStatus": "gold_standard",
+      "minutesAskedOfUser": 8,
+      "timeValueSurplusPassed": true,
+      "reasons": [
+        "Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."
+      ]
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "family": "free_public_signal",
+      "commercialTier": "free",
+      "requiresCheckout": false,
+      "composerPath": "lib/product/free-signal-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.9,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.8,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9.8,
+        "experience_quality": 9.8,
+        "time_value_surplus": 9.8,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.8,
+      "releaseStatus": "gold_standard",
+      "minutesAskedOfUser": 8,
+      "timeValueSurplusPassed": true,
+      "reasons": [
+        "Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."
+      ]
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "family": "free_public_signal",
+      "commercialTier": "free",
+      "requiresCheckout": false,
+      "composerPath": "lib/product/free-signal-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.9,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.8,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9.8,
+        "experience_quality": 9.8,
+        "time_value_surplus": 9.8,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.8,
+      "releaseStatus": "gold_standard",
+      "minutesAskedOfUser": 8,
+      "timeValueSurplusPassed": true,
+      "reasons": [
+        "Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."
+      ]
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "execution_risk_index",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "family": "decision_instrument",
+      "commercialTier": "paid_entry",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/decision-instrument-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.7,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.8
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 20,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "strategy_room",
+      "family": "strategy_room_session_report",
+      "commercialTier": "paid_premium",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/strategy-room-session-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.4,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.9
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 90,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "family": "strategy_room_session_report",
+      "commercialTier": "paid_premium",
+      "requiresCheckout": true,
+      "composerPath": "lib/product/strategy-room-session-gold-composer.ts",
+      "composerVerified": true,
+      "before": {
+        "score": 7.4,
+        "status": "blocked_from_release"
+      },
+      "dimensionScores": {
+        "time_respect": 9.8,
+        "clarity_gain": 9.8,
+        "specificity": 9.8,
+        "decision_usefulness": 9.9,
+        "evidence_reasoning_basis": 9.8,
+        "actionability": 9.9,
+        "trust_and_authority": 9,
+        "experience_quality": 9.3,
+        "time_value_surplus": 9.7,
+        "reuse_value": 9.9
+      },
+      "overallScore": 9.7,
+      "releaseStatus": "blocked_from_release",
+      "minutesAskedOfUser": 90,
+      "timeValueSurplusPassed": false,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    }
+  ],
+  "goldStandardProducts": [
+    "fast_diagnostic",
+    "team_assessment",
+    "enterprise_assessment",
+    "case_dossier_tariff_shock",
+    "case_dossier_team_alignment",
+    "case_dossier_escalation_denied"
+  ],
+  "blockedProductsDetail": [
+    {
+      "productCode": "personal_decision_audit",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "execution_risk_index",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "strategy_room",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "overallScore": 9.7,
+      "reasons": [
+        "Stripe/webhook authority is unresolved for a checkout-dependent product.",
+        "Live-cycle fulfilment proof is pending for a paid product."
+      ]
+    }
+  ],
+  "timeValueSurplusEvidence": [
+    {
+      "productCode": "fast_diagnostic",
+      "minutesAskedOfUser": 8,
+      "passes": true,
+      "basis": "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget."
+    },
+    {
+      "productCode": "team_assessment",
+      "minutesAskedOfUser": 8,
+      "passes": true,
+      "basis": "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "minutesAskedOfUser": 8,
+      "passes": true,
+      "basis": "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget."
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "minutesAskedOfUser": 8,
+      "passes": true,
+      "basis": "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget."
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "minutesAskedOfUser": 8,
+      "passes": true,
+      "basis": "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget."
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "minutesAskedOfUser": 8,
+      "passes": true,
+      "basis": "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget."
+    }
+  ],
+  "remainingRisks": [
+    "Report experience remains AMBER for paid report-like products; no hard failures affect Wave 1 free-surface release.",
+    "Live-cycle proof remains pending — all paid Wave 1 products stay blocked regardless of composition quality.",
+    "Stripe/webhook authority remains unresolved — all checkout-dependent Wave 1 products stay blocked.",
+    "Composer verification is static; runtime validation executes in lib/product composers on every composition."
+  ],
+  "failures": [],
+  "finalRecommendation": "GREEN"
+}

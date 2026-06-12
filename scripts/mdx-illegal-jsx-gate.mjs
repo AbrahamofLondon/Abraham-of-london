@@ -243,7 +243,9 @@ async function run() {
 
   const files = await glob([`${CONTENT_DIR}/**/*.{md,mdx}`], {
     dot: false,
-    ignore: ["**/node_modules/**", "**/.next/**", "**/.contentlayer/**"],
+    // source-material is private working-draft input, excluded from git and
+    // Contentlayer (.contentlayerignore); it is not a product asset.
+    ignore: ["**/node_modules/**", "**/.next/**", "**/.contentlayer/**", "**/content/source-material/**"],
     absolute: true,
   });
 

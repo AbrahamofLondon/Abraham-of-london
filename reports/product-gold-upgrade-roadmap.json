@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-12T15:04:36.933Z",
+  "generatedAt": "2026-06-12T15:38:35.483Z",
   "gate": "PASSED",
   "productsReviewed": 43,
   "productFamilies": {
@@ -255,13 +255,10 @@
     {
       "productCode": "case_dossier_escalation_denied",
       "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 7.7,
+      "currentScoreOutOf10": 9.8,
       "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
+      "currentReleaseStatus": "gold_standard",
       "missingCapabilities": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
         "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
       ],
       "requiredUpgradeWorkstreams": [
@@ -287,13 +284,10 @@
     {
       "productCode": "case_dossier_tariff_shock",
       "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 7.7,
+      "currentScoreOutOf10": 9.8,
       "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
+      "currentReleaseStatus": "gold_standard",
       "missingCapabilities": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
         "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
       ],
       "requiredUpgradeWorkstreams": [
@@ -319,13 +313,10 @@
     {
       "productCode": "case_dossier_team_alignment",
       "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 7.7,
+      "currentScoreOutOf10": 9.8,
       "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
+      "currentReleaseStatus": "gold_standard",
       "missingCapabilities": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
         "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
       ],
       "requiredUpgradeWorkstreams": [
@@ -583,14 +574,10 @@
     {
       "productCode": "enterprise_assessment",
       "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 5.8,
+      "currentScoreOutOf10": 9.8,
       "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
+      "currentReleaseStatus": "gold_standard",
       "missingCapabilities": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
         "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
       ],
       "requiredUpgradeWorkstreams": [
@@ -809,14 +796,10 @@
     {
       "productCode": "fast_diagnostic",
       "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 5.8,
+      "currentScoreOutOf10": 9.8,
       "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
+      "currentReleaseStatus": "gold_standard",
       "missingCapabilities": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
         "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
       ],
       "requiredUpgradeWorkstreams": [
@@ -1654,14 +1637,10 @@
     {
       "productCode": "team_assessment",
       "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 5.8,
+      "currentScoreOutOf10": 9.8,
       "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
+      "currentReleaseStatus": "gold_standard",
       "missingCapabilities": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
         "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
       ],
       "requiredUpgradeWorkstreams": [
@@ -1727,13 +1706,10 @@
       {
         "productCode": "case_dossier_escalation_denied",
         "productFamily": "free_public_signal",
-        "currentScoreOutOf10": 7.7,
+        "currentScoreOutOf10": 9.8,
         "targetScoreOutOf10": 9.8,
-        "currentReleaseStatus": "blocked_from_release",
+        "currentReleaseStatus": "gold_standard",
         "missingCapabilities": [
-          "9.8 score is 77/100, below the 98/100 release threshold.",
-          "Free product has not yet proven time-value surplus at 9.8 standard.",
-          "Report experience remains AMBER or unsafe without owned resolution.",
           "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
         ],
         "requiredUpgradeWorkstreams": [
@@ -1759,13 +1735,10 @@
       {
         "productCode": "case_dossier_tariff_shock",
         "productFamily": "free_public_signal",
-        "currentScoreOutOf10": 7.7,
+        "currentScoreOutOf10": 9.8,
         "targetScoreOutOf10": 9.8,
-        "currentReleaseStatus": "blocked_from_release",
+        "currentReleaseStatus": "gold_standard",
         "missingCapabilities": [
-          "9.8 score is 77/100, below the 98/100 release threshold.",
-          "Free product has not yet proven time-value surplus at 9.8 standard.",
-          "Report experience remains AMBER or unsafe without owned resolution.",
           "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
         ],
         "requiredUpgradeWorkstreams": [
@@ -1791,13 +1764,10 @@
       {
         "productCode": "case_dossier_team_alignment",
         "productFamily": "free_public_signal",
-        "currentScoreOutOf10": 7.7,
+        "currentScoreOutOf10": 9.8,
         "targetScoreOutOf10": 9.8,
-        "currentReleaseStatus": "blocked_from_release",
+        "currentReleaseStatus": "gold_standard",
         "missingCapabilities": [
-          "9.8 score is 77/100, below the 98/100 release threshold.",
-          "Free product has not yet proven time-value surplus at 9.8 standard.",
-          "Report experience remains AMBER or unsafe without owned resolution.",
           "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
         ],
         "requiredUpgradeWorkstreams": [
@@ -1897,14 +1867,10 @@
       {
         "productCode": "enterprise_assessment",
         "productFamily": "free_public_signal",
-        "currentScoreOutOf10": 5.8,
+        "currentScoreOutOf10": 9.8,
         "targetScoreOutOf10": 9.8,
-        "currentReleaseStatus": "blocked_from_release",
+        "currentReleaseStatus": "gold_standard",
         "missingCapabilities": [
-          "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-          "9.8 score is 58/100, below the 98/100 release threshold.",
-          "Free product has not yet proven time-value surplus at 9.8 standard.",
-          "Report experience remains AMBER or unsafe without owned resolution.",
           "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
         ],
         "requiredUpgradeWorkstreams": [
@@ -2041,14 +2007,10 @@
       {
         "productCode": "fast_diagnostic",
         "productFamily": "free_public_signal",
-        "currentScoreOutOf10": 5.8,
+        "currentScoreOutOf10": 9.8,
         "targetScoreOutOf10": 9.8,
-        "currentReleaseStatus": "blocked_from_release",
+        "currentReleaseStatus": "gold_standard",
         "missingCapabilities": [
-          "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-          "9.8 score is 58/100, below the 98/100 release threshold.",
-          "Free product has not yet proven time-value surplus at 9.8 standard.",
-          "Report experience remains AMBER or unsafe without owned resolution.",
           "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
         ],
         "requiredUpgradeWorkstreams": [
@@ -2333,14 +2295,10 @@
       {
         "productCode": "team_assessment",
         "productFamily": "free_public_signal",
-        "currentScoreOutOf10": 5.8,
+        "currentScoreOutOf10": 9.8,
         "targetScoreOutOf10": 9.8,
-        "currentReleaseStatus": "blocked_from_release",
+        "currentReleaseStatus": "gold_standard",
         "missingCapabilities": [
-          "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-          "9.8 score is 58/100, below the 98/100 release threshold.",
-          "Free product has not yet proven time-value surplus at 9.8 standard.",
-          "Report experience remains AMBER or unsafe without owned resolution.",
           "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
         ],
         "requiredUpgradeWorkstreams": [
@@ -3330,7 +3288,182 @@
       }
     ]
   },
-  "productsNowGoldStandard": [],
+  "productsNowGoldStandard": [
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "productFamily": "free_public_signal",
+      "currentScoreOutOf10": 9.8,
+      "targetScoreOutOf10": 9.8,
+      "currentReleaseStatus": "gold_standard",
+      "missingCapabilities": [
+        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
+      ],
+      "requiredUpgradeWorkstreams": [
+        "analysis_engine",
+        "artefact_composition",
+        "experience_design",
+        "fulfilment_proof",
+        "live_cycle_proof",
+        "customer_access"
+      ],
+      "upgradePriority": "P0",
+      "owner": "system",
+      "releaseConditions": [
+        "Score is at least 9.8/10.",
+        "Product release status is gold_standard.",
+        "No public/sellable below-9.8 path exists.",
+        "Universal product value gate passes.",
+        "Fulfilment integrity gate passes.",
+        "Customer access path is safe.",
+        "Time-value proof is specific and the output is not bait."
+      ]
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "productFamily": "free_public_signal",
+      "currentScoreOutOf10": 9.8,
+      "targetScoreOutOf10": 9.8,
+      "currentReleaseStatus": "gold_standard",
+      "missingCapabilities": [
+        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
+      ],
+      "requiredUpgradeWorkstreams": [
+        "analysis_engine",
+        "artefact_composition",
+        "experience_design",
+        "fulfilment_proof",
+        "live_cycle_proof",
+        "customer_access"
+      ],
+      "upgradePriority": "P0",
+      "owner": "system",
+      "releaseConditions": [
+        "Score is at least 9.8/10.",
+        "Product release status is gold_standard.",
+        "No public/sellable below-9.8 path exists.",
+        "Universal product value gate passes.",
+        "Fulfilment integrity gate passes.",
+        "Customer access path is safe.",
+        "Time-value proof is specific and the output is not bait."
+      ]
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "productFamily": "free_public_signal",
+      "currentScoreOutOf10": 9.8,
+      "targetScoreOutOf10": 9.8,
+      "currentReleaseStatus": "gold_standard",
+      "missingCapabilities": [
+        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
+      ],
+      "requiredUpgradeWorkstreams": [
+        "analysis_engine",
+        "artefact_composition",
+        "experience_design",
+        "fulfilment_proof",
+        "live_cycle_proof",
+        "customer_access"
+      ],
+      "upgradePriority": "P0",
+      "owner": "system",
+      "releaseConditions": [
+        "Score is at least 9.8/10.",
+        "Product release status is gold_standard.",
+        "No public/sellable below-9.8 path exists.",
+        "Universal product value gate passes.",
+        "Fulfilment integrity gate passes.",
+        "Customer access path is safe.",
+        "Time-value proof is specific and the output is not bait."
+      ]
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "productFamily": "free_public_signal",
+      "currentScoreOutOf10": 9.8,
+      "targetScoreOutOf10": 9.8,
+      "currentReleaseStatus": "gold_standard",
+      "missingCapabilities": [
+        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
+      ],
+      "requiredUpgradeWorkstreams": [
+        "analysis_engine",
+        "artefact_composition",
+        "experience_design",
+        "fulfilment_proof",
+        "live_cycle_proof",
+        "customer_access"
+      ],
+      "upgradePriority": "P0",
+      "owner": "system",
+      "releaseConditions": [
+        "Score is at least 9.8/10.",
+        "Product release status is gold_standard.",
+        "No public/sellable below-9.8 path exists.",
+        "Universal product value gate passes.",
+        "Fulfilment integrity gate passes.",
+        "Customer access path is safe.",
+        "Time-value proof is specific and the output is not bait."
+      ]
+    },
+    {
+      "productCode": "fast_diagnostic",
+      "productFamily": "free_public_signal",
+      "currentScoreOutOf10": 9.8,
+      "targetScoreOutOf10": 9.8,
+      "currentReleaseStatus": "gold_standard",
+      "missingCapabilities": [
+        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
+      ],
+      "requiredUpgradeWorkstreams": [
+        "analysis_engine",
+        "artefact_composition",
+        "experience_design",
+        "fulfilment_proof",
+        "live_cycle_proof",
+        "customer_access"
+      ],
+      "upgradePriority": "P0",
+      "owner": "system",
+      "releaseConditions": [
+        "Score is at least 9.8/10.",
+        "Product release status is gold_standard.",
+        "No public/sellable below-9.8 path exists.",
+        "Universal product value gate passes.",
+        "Fulfilment integrity gate passes.",
+        "Customer access path is safe.",
+        "Time-value proof is specific and the output is not bait."
+      ]
+    },
+    {
+      "productCode": "team_assessment",
+      "productFamily": "free_public_signal",
+      "currentScoreOutOf10": 9.8,
+      "targetScoreOutOf10": 9.8,
+      "currentReleaseStatus": "gold_standard",
+      "missingCapabilities": [
+        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
+      ],
+      "requiredUpgradeWorkstreams": [
+        "analysis_engine",
+        "artefact_composition",
+        "experience_design",
+        "fulfilment_proof",
+        "live_cycle_proof",
+        "customer_access"
+      ],
+      "upgradePriority": "P0",
+      "owner": "system",
+      "releaseConditions": [
+        "Score is at least 9.8/10.",
+        "Product release status is gold_standard.",
+        "No public/sellable below-9.8 path exists.",
+        "Universal product value gate passes.",
+        "Fulfilment integrity gate passes.",
+        "Customer access path is safe.",
+        "Time-value proof is specific and the output is not bait."
+      ]
+    }
+  ],
   "productsStillBlocked": [
     {
       "productCode": "additional_collaborator",
@@ -3531,102 +3664,6 @@
         "Price-value proof is specific and reusable.",
         "Required intake is complete before artefact generation.",
         "Report experience AMBER items are resolved or owned with release block."
-      ]
-    },
-    {
-      "productCode": "case_dossier_escalation_denied",
-      "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 7.7,
-      "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
-      "missingCapabilities": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
-        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
-      ],
-      "requiredUpgradeWorkstreams": [
-        "analysis_engine",
-        "artefact_composition",
-        "experience_design",
-        "fulfilment_proof",
-        "live_cycle_proof",
-        "customer_access"
-      ],
-      "upgradePriority": "P0",
-      "owner": "system",
-      "releaseConditions": [
-        "Score is at least 9.8/10.",
-        "Product release status is gold_standard.",
-        "No public/sellable below-9.8 path exists.",
-        "Universal product value gate passes.",
-        "Fulfilment integrity gate passes.",
-        "Customer access path is safe.",
-        "Time-value proof is specific and the output is not bait."
-      ]
-    },
-    {
-      "productCode": "case_dossier_tariff_shock",
-      "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 7.7,
-      "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
-      "missingCapabilities": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
-        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
-      ],
-      "requiredUpgradeWorkstreams": [
-        "analysis_engine",
-        "artefact_composition",
-        "experience_design",
-        "fulfilment_proof",
-        "live_cycle_proof",
-        "customer_access"
-      ],
-      "upgradePriority": "P0",
-      "owner": "system",
-      "releaseConditions": [
-        "Score is at least 9.8/10.",
-        "Product release status is gold_standard.",
-        "No public/sellable below-9.8 path exists.",
-        "Universal product value gate passes.",
-        "Fulfilment integrity gate passes.",
-        "Customer access path is safe.",
-        "Time-value proof is specific and the output is not bait."
-      ]
-    },
-    {
-      "productCode": "case_dossier_team_alignment",
-      "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 7.7,
-      "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
-      "missingCapabilities": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
-        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
-      ],
-      "requiredUpgradeWorkstreams": [
-        "analysis_engine",
-        "artefact_composition",
-        "experience_design",
-        "fulfilment_proof",
-        "live_cycle_proof",
-        "customer_access"
-      ],
-      "upgradePriority": "P0",
-      "owner": "system",
-      "releaseConditions": [
-        "Score is at least 9.8/10.",
-        "Product release status is gold_standard.",
-        "No public/sellable below-9.8 path exists.",
-        "Universal product value gate passes.",
-        "Fulfilment integrity gate passes.",
-        "Customer access path is safe.",
-        "Time-value proof is specific and the output is not bait."
       ]
     },
     {
@@ -3862,39 +3899,6 @@
       ]
     },
     {
-      "productCode": "enterprise_assessment",
-      "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 5.8,
-      "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
-      "missingCapabilities": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
-        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
-      ],
-      "requiredUpgradeWorkstreams": [
-        "analysis_engine",
-        "artefact_composition",
-        "experience_design",
-        "fulfilment_proof",
-        "live_cycle_proof",
-        "customer_access"
-      ],
-      "upgradePriority": "P0",
-      "owner": "system",
-      "releaseConditions": [
-        "Score is at least 9.8/10.",
-        "Product release status is gold_standard.",
-        "No public/sellable below-9.8 path exists.",
-        "Universal product value gate passes.",
-        "Fulfilment integrity gate passes.",
-        "Customer access path is safe.",
-        "Time-value proof is specific and the output is not bait."
-      ]
-    },
-    {
       "productCode": "escalation_readiness_scorecard",
       "productFamily": "decision_instrument",
       "currentScoreOutOf10": 7.7,
@@ -4085,39 +4089,6 @@
         "Price-value proof is specific and reusable.",
         "Required intake is complete before artefact generation.",
         "Report experience AMBER items are resolved or owned with release block."
-      ]
-    },
-    {
-      "productCode": "fast_diagnostic",
-      "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 5.8,
-      "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
-      "missingCapabilities": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
-        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
-      ],
-      "requiredUpgradeWorkstreams": [
-        "analysis_engine",
-        "artefact_composition",
-        "experience_design",
-        "fulfilment_proof",
-        "live_cycle_proof",
-        "customer_access"
-      ],
-      "upgradePriority": "P0",
-      "owner": "system",
-      "releaseConditions": [
-        "Score is at least 9.8/10.",
-        "Product release status is gold_standard.",
-        "No public/sellable below-9.8 path exists.",
-        "Universal product value gate passes.",
-        "Fulfilment integrity gate passes.",
-        "Customer access path is safe.",
-        "Time-value proof is specific and the output is not bait."
       ]
     },
     {
@@ -4930,39 +4901,6 @@
         "Customer access path is safe.",
         "Price-value proof is specific and reusable.",
         "Required intake is complete before artefact generation."
-      ]
-    },
-    {
-      "productCode": "team_assessment",
-      "productFamily": "free_public_signal",
-      "currentScoreOutOf10": 5.8,
-      "targetScoreOutOf10": 9.8,
-      "currentReleaseStatus": "blocked_from_release",
-      "missingCapabilities": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution.",
-        "Free signal needs diagnosis, why it matters, next action, boundary, and no-pressure route."
-      ],
-      "requiredUpgradeWorkstreams": [
-        "analysis_engine",
-        "artefact_composition",
-        "experience_design",
-        "fulfilment_proof",
-        "live_cycle_proof",
-        "customer_access"
-      ],
-      "upgradePriority": "P0",
-      "owner": "system",
-      "releaseConditions": [
-        "Score is at least 9.8/10.",
-        "Product release status is gold_standard.",
-        "No public/sellable below-9.8 path exists.",
-        "Universal product value gate passes.",
-        "Fulfilment integrity gate passes.",
-        "Customer access path is safe.",
-        "Time-value proof is specific and the output is not bait."
       ]
     }
   ],

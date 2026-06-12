@@ -1,23 +1,34 @@
 {
-  "generatedAt": "2026-06-12T14:46:59.869Z",
+  "generatedAt": "2026-06-12T15:37:40.222Z",
   "gate": "PASSED",
   "threshold": {
     "scoreOutOf100": 98,
     "scoreOutOf10": 9.8
   },
   "productsReviewed": 43,
-  "goldStandard": 0,
-  "blockedFromRelease": 43,
+  "goldStandard": 6,
+  "blockedFromRelease": 37,
   "internalOnly": 0,
   "below98ButPublic": 0,
   "context": {
     "reportExperienceAmber": true,
     "liveCyclePending": true,
     "stripeWebhookUnconfirmed": true,
-    "valueGateStructurallyPassed": true
+    "valueGateStructurallyPassed": true,
+    "waveOneCertification": {
+      "source": "reports/wave-one-gold-standard.json",
+      "gate": "PASSED",
+      "certifiedProducts": [
+        "case_dossier_escalation_denied",
+        "case_dossier_tariff_shock",
+        "case_dossier_team_alignment",
+        "enterprise_assessment",
+        "fast_diagnostic",
+        "team_assessment"
+      ]
+    }
   },
-  "goldStandardProducts": [],
-  "blockedProducts": [
+  "goldStandardProducts": [
     {
       "productCode": "fast_diagnostic",
       "productName": "Fast Diagnostic",
@@ -25,39 +36,211 @@
       "deliveryClass": "generated_digital_artifact",
       "currentStatus": "legacy_weak",
       "wasPublicOrSellable": true,
-      "scoreOutOf100": 58,
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
+      "scoreOutOf100": 98,
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
       "dimensionScores": {
-        "time_respect": 66,
-        "clear_customer_win": 66,
-        "specificity": 66,
-        "decision_usefulness": 66,
-        "evidence_basis": 66,
-        "actionability": 66,
-        "commercial_or_practical_consequence": 66,
-        "trust_and_authority": 66,
-        "experience_quality": 58,
-        "price_or_time_value_surplus": 64,
-        "reuse_or_return_value": 66,
-        "category_distinction": 56
+        "time_respect": 98,
+        "clear_customer_win": 98,
+        "specificity": 98,
+        "decision_usefulness": 98,
+        "evidence_basis": 98,
+        "actionability": 98,
+        "commercial_or_practical_consequence": 98,
+        "trust_and_authority": 98,
+        "experience_quality": 98,
+        "price_or_time_value_surplus": 98,
+        "reuse_or_return_value": 98,
+        "category_distinction": 98
       },
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
+      "blockingReasons": [],
       "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+        "Maintain release block until 98/100 evidence is supplied."
       ],
-      "timeValueSurplusPassed": false,
+      "timeValueSurplusPassed": true,
       "priceValueSurplusPassed": true,
       "premiumUnderPricedPassed": true,
       "priceValueSurplus": null,
       "customerOutcomeStatement": "After using Fast Diagnostic, the customer can identify the dominant decision friction in under five minutes and choose one corrective next move.",
       "isPaid": false
     },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "productName": "Case Dossier — Tariff Shock",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "currentStatus": "legacy_public",
+      "wasPublicOrSellable": true,
+      "scoreOutOf100": 98,
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "dimensionScores": {
+        "time_respect": 98,
+        "clear_customer_win": 98,
+        "specificity": 98,
+        "decision_usefulness": 98,
+        "evidence_basis": 98,
+        "actionability": 98,
+        "commercial_or_practical_consequence": 98,
+        "trust_and_authority": 98,
+        "experience_quality": 98,
+        "price_or_time_value_surplus": 98,
+        "reuse_or_return_value": 98,
+        "category_distinction": 98
+      },
+      "blockingReasons": [],
+      "upgradeRequired": [
+        "Maintain release block until 98/100 evidence is supplied."
+      ],
+      "timeValueSurplusPassed": true,
+      "priceValueSurplusPassed": true,
+      "premiumUnderPricedPassed": true,
+      "priceValueSurplus": null,
+      "customerOutcomeStatement": "After using Case Dossier — Tariff Shock, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "isPaid": false
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "productName": "Case Dossier — Team Alignment",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "currentStatus": "legacy_public",
+      "wasPublicOrSellable": true,
+      "scoreOutOf100": 98,
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "dimensionScores": {
+        "time_respect": 98,
+        "clear_customer_win": 98,
+        "specificity": 98,
+        "decision_usefulness": 98,
+        "evidence_basis": 98,
+        "actionability": 98,
+        "commercial_or_practical_consequence": 98,
+        "trust_and_authority": 98,
+        "experience_quality": 98,
+        "price_or_time_value_surplus": 98,
+        "reuse_or_return_value": 98,
+        "category_distinction": 98
+      },
+      "blockingReasons": [],
+      "upgradeRequired": [
+        "Maintain release block until 98/100 evidence is supplied."
+      ],
+      "timeValueSurplusPassed": true,
+      "priceValueSurplusPassed": true,
+      "premiumUnderPricedPassed": true,
+      "priceValueSurplus": null,
+      "customerOutcomeStatement": "After using Case Dossier — Team Alignment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "isPaid": false
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "productName": "Case Dossier — Escalation Denied",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "currentStatus": "legacy_public",
+      "wasPublicOrSellable": true,
+      "scoreOutOf100": 98,
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "dimensionScores": {
+        "time_respect": 98,
+        "clear_customer_win": 98,
+        "specificity": 98,
+        "decision_usefulness": 98,
+        "evidence_basis": 98,
+        "actionability": 98,
+        "commercial_or_practical_consequence": 98,
+        "trust_and_authority": 98,
+        "experience_quality": 98,
+        "price_or_time_value_surplus": 98,
+        "reuse_or_return_value": 98,
+        "category_distinction": 98
+      },
+      "blockingReasons": [],
+      "upgradeRequired": [
+        "Maintain release block until 98/100 evidence is supplied."
+      ],
+      "timeValueSurplusPassed": true,
+      "priceValueSurplusPassed": true,
+      "premiumUnderPricedPassed": true,
+      "priceValueSurplus": null,
+      "customerOutcomeStatement": "After using Case Dossier — Escalation Denied, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "isPaid": false
+    },
+    {
+      "productCode": "team_assessment",
+      "productName": "Team Assessment",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "currentStatus": "legacy_weak",
+      "wasPublicOrSellable": true,
+      "scoreOutOf100": 98,
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "dimensionScores": {
+        "time_respect": 98,
+        "clear_customer_win": 98,
+        "specificity": 98,
+        "decision_usefulness": 98,
+        "evidence_basis": 98,
+        "actionability": 98,
+        "commercial_or_practical_consequence": 98,
+        "trust_and_authority": 98,
+        "experience_quality": 98,
+        "price_or_time_value_surplus": 98,
+        "reuse_or_return_value": 98,
+        "category_distinction": 98
+      },
+      "blockingReasons": [],
+      "upgradeRequired": [
+        "Maintain release block until 98/100 evidence is supplied."
+      ],
+      "timeValueSurplusPassed": true,
+      "priceValueSurplusPassed": true,
+      "premiumUnderPricedPassed": true,
+      "priceValueSurplus": null,
+      "customerOutcomeStatement": "After using Team Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "isPaid": false
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "productName": "Enterprise Assessment",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "currentStatus": "legacy_weak",
+      "wasPublicOrSellable": true,
+      "scoreOutOf100": 98,
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "dimensionScores": {
+        "time_respect": 98,
+        "clear_customer_win": 98,
+        "specificity": 98,
+        "decision_usefulness": 98,
+        "evidence_basis": 98,
+        "actionability": 98,
+        "commercial_or_practical_consequence": 98,
+        "trust_and_authority": 98,
+        "experience_quality": 98,
+        "price_or_time_value_surplus": 98,
+        "reuse_or_return_value": 98,
+        "category_distinction": 98
+      },
+      "blockingReasons": [],
+      "upgradeRequired": [
+        "Maintain release block until 98/100 evidence is supplied."
+      ],
+      "timeValueSurplusPassed": true,
+      "priceValueSurplusPassed": true,
+      "premiumUnderPricedPassed": true,
+      "priceValueSurplus": null,
+      "customerOutcomeStatement": "After using Enterprise Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "isPaid": false
+    }
+  ],
+  "blockedProducts": [
     {
       "productCode": "boardroom_brief",
       "productName": "Boardroom Brief",
@@ -953,203 +1136,6 @@
       "isPaid": true
     },
     {
-      "productCode": "case_dossier_tariff_shock",
-      "productName": "Case Dossier — Tariff Shock",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_public",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 77,
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 84,
-        "clear_customer_win": 84,
-        "specificity": 84,
-        "decision_usefulness": 84,
-        "evidence_basis": 84,
-        "actionability": 84,
-        "commercial_or_practical_consequence": 84,
-        "trust_and_authority": 84,
-        "experience_quality": 84,
-        "price_or_time_value_surplus": 82,
-        "reuse_or_return_value": 84,
-        "category_distinction": 74
-      },
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Case Dossier — Tariff Shock, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "case_dossier_team_alignment",
-      "productName": "Case Dossier — Team Alignment",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_public",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 77,
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 84,
-        "clear_customer_win": 84,
-        "specificity": 84,
-        "decision_usefulness": 84,
-        "evidence_basis": 84,
-        "actionability": 84,
-        "commercial_or_practical_consequence": 84,
-        "trust_and_authority": 84,
-        "experience_quality": 84,
-        "price_or_time_value_surplus": 82,
-        "reuse_or_return_value": 84,
-        "category_distinction": 74
-      },
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Case Dossier — Team Alignment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "case_dossier_escalation_denied",
-      "productName": "Case Dossier — Escalation Denied",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_public",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 77,
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 84,
-        "clear_customer_win": 84,
-        "specificity": 84,
-        "decision_usefulness": 84,
-        "evidence_basis": 84,
-        "actionability": 84,
-        "commercial_or_practical_consequence": 84,
-        "trust_and_authority": 84,
-        "experience_quality": 84,
-        "price_or_time_value_surplus": 82,
-        "reuse_or_return_value": 84,
-        "category_distinction": 74
-      },
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Case Dossier — Escalation Denied, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "team_assessment",
-      "productName": "Team Assessment",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_weak",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 58,
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 66,
-        "clear_customer_win": 66,
-        "specificity": 66,
-        "decision_usefulness": 66,
-        "evidence_basis": 66,
-        "actionability": 66,
-        "commercial_or_practical_consequence": 66,
-        "trust_and_authority": 66,
-        "experience_quality": 58,
-        "price_or_time_value_surplus": 64,
-        "reuse_or_return_value": 66,
-        "category_distinction": 56
-      },
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Team Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "enterprise_assessment",
-      "productName": "Enterprise Assessment",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_weak",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 58,
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 66,
-        "clear_customer_win": 66,
-        "specificity": 66,
-        "decision_usefulness": 66,
-        "evidence_basis": 66,
-        "actionability": 66,
-        "commercial_or_practical_consequence": 66,
-        "trust_and_authority": 66,
-        "experience_quality": 58,
-        "price_or_time_value_surplus": 64,
-        "reuse_or_return_value": 66,
-        "category_distinction": 56
-      },
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Enterprise Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
       "productCode": "boardroom_mode",
       "productName": "Boardroom Mode",
       "commercialTier": "paid_entry",
@@ -2009,46 +1995,6 @@
   "internalOnlyProducts": [],
   "productsRemovedFromPublicSellableState": [
     {
-      "productCode": "fast_diagnostic",
-      "productName": "Fast Diagnostic",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_weak",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 58,
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 66,
-        "clear_customer_win": 66,
-        "specificity": 66,
-        "decision_usefulness": 66,
-        "evidence_basis": 66,
-        "actionability": 66,
-        "commercial_or_practical_consequence": 66,
-        "trust_and_authority": 66,
-        "experience_quality": 58,
-        "price_or_time_value_surplus": 64,
-        "reuse_or_return_value": 66,
-        "category_distinction": 56
-      },
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Fast Diagnostic, the customer can identify the dominant decision friction in under five minutes and choose one corrective next move.",
-      "isPaid": false
-    },
-    {
       "productCode": "boardroom_brief",
       "productName": "Boardroom Brief",
       "commercialTier": "paid_premium",
@@ -2796,203 +2742,6 @@
       "isPaid": true
     },
     {
-      "productCode": "case_dossier_tariff_shock",
-      "productName": "Case Dossier — Tariff Shock",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_public",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 77,
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 84,
-        "clear_customer_win": 84,
-        "specificity": 84,
-        "decision_usefulness": 84,
-        "evidence_basis": 84,
-        "actionability": 84,
-        "commercial_or_practical_consequence": 84,
-        "trust_and_authority": 84,
-        "experience_quality": 84,
-        "price_or_time_value_surplus": 82,
-        "reuse_or_return_value": 84,
-        "category_distinction": 74
-      },
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Case Dossier — Tariff Shock, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "case_dossier_team_alignment",
-      "productName": "Case Dossier — Team Alignment",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_public",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 77,
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 84,
-        "clear_customer_win": 84,
-        "specificity": 84,
-        "decision_usefulness": 84,
-        "evidence_basis": 84,
-        "actionability": 84,
-        "commercial_or_practical_consequence": 84,
-        "trust_and_authority": 84,
-        "experience_quality": 84,
-        "price_or_time_value_surplus": 82,
-        "reuse_or_return_value": 84,
-        "category_distinction": 74
-      },
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Case Dossier — Team Alignment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "case_dossier_escalation_denied",
-      "productName": "Case Dossier — Escalation Denied",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_public",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 77,
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 84,
-        "clear_customer_win": 84,
-        "specificity": 84,
-        "decision_usefulness": 84,
-        "evidence_basis": 84,
-        "actionability": 84,
-        "commercial_or_practical_consequence": 84,
-        "trust_and_authority": 84,
-        "experience_quality": 84,
-        "price_or_time_value_surplus": 82,
-        "reuse_or_return_value": 84,
-        "category_distinction": 74
-      },
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Case Dossier — Escalation Denied, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "team_assessment",
-      "productName": "Team Assessment",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_weak",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 58,
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 66,
-        "clear_customer_win": 66,
-        "specificity": 66,
-        "decision_usefulness": 66,
-        "evidence_basis": 66,
-        "actionability": 66,
-        "commercial_or_practical_consequence": 66,
-        "trust_and_authority": 66,
-        "experience_quality": 58,
-        "price_or_time_value_surplus": 64,
-        "reuse_or_return_value": 66,
-        "category_distinction": 56
-      },
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Team Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
-      "productCode": "enterprise_assessment",
-      "productName": "Enterprise Assessment",
-      "commercialTier": "free",
-      "deliveryClass": "generated_digital_artifact",
-      "currentStatus": "legacy_weak",
-      "wasPublicOrSellable": true,
-      "scoreOutOf100": 58,
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "dimensionScores": {
-        "time_respect": 66,
-        "clear_customer_win": 66,
-        "specificity": 66,
-        "decision_usefulness": 66,
-        "evidence_basis": 66,
-        "actionability": 66,
-        "commercial_or_practical_consequence": 66,
-        "trust_and_authority": 66,
-        "experience_quality": 58,
-        "price_or_time_value_surplus": 64,
-        "reuse_or_return_value": 66,
-        "category_distinction": 56
-      },
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ],
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ],
-      "timeValueSurplusPassed": false,
-      "priceValueSurplusPassed": true,
-      "premiumUnderPricedPassed": true,
-      "priceValueSurplus": null,
-      "customerOutcomeStatement": "After using Enterprise Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
-      "isPaid": false
-    },
-    {
       "productCode": "executive_reporting",
       "productName": "Executive Reporting",
       "commercialTier": "paid_premium",
@@ -3433,77 +3182,50 @@
     {
       "productCode": "fast_diagnostic",
       "productName": "Fast Diagnostic",
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "timeValueSurplusPassed": false,
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ]
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "timeValueSurplusPassed": true,
+      "blockingReasons": []
     },
     {
       "productCode": "case_dossier_tariff_shock",
       "productName": "Case Dossier — Tariff Shock",
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "timeValueSurplusPassed": false,
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ]
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "timeValueSurplusPassed": true,
+      "blockingReasons": []
     },
     {
       "productCode": "case_dossier_team_alignment",
       "productName": "Case Dossier — Team Alignment",
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "timeValueSurplusPassed": false,
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ]
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "timeValueSurplusPassed": true,
+      "blockingReasons": []
     },
     {
       "productCode": "case_dossier_escalation_denied",
       "productName": "Case Dossier — Escalation Denied",
-      "scoreOutOf10": 7.7,
-      "releaseStatus": "blocked_from_release",
-      "timeValueSurplusPassed": false,
-      "blockingReasons": [
-        "9.8 score is 77/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ]
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "timeValueSurplusPassed": true,
+      "blockingReasons": []
     },
     {
       "productCode": "team_assessment",
       "productName": "Team Assessment",
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "timeValueSurplusPassed": false,
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ]
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "timeValueSurplusPassed": true,
+      "blockingReasons": []
     },
     {
       "productCode": "enterprise_assessment",
       "productName": "Enterprise Assessment",
-      "scoreOutOf10": 5.8,
-      "releaseStatus": "blocked_from_release",
-      "timeValueSurplusPassed": false,
-      "blockingReasons": [
-        "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-        "9.8 score is 58/100, below the 98/100 release threshold.",
-        "Free product has not yet proven time-value surplus at 9.8 standard.",
-        "Report experience remains AMBER or unsafe without owned resolution."
-      ]
+      "scoreOutOf10": 9.8,
+      "releaseStatus": "gold_standard",
+      "timeValueSurplusPassed": true,
+      "blockingReasons": []
     }
   ],
   "paidProductPriceValueReview": [
@@ -4475,10 +4197,10 @@
       "product": "Fast Diagnostic",
       "productCode": "fast_diagnostic",
       "currentStatus": "legacy_weak",
-      "scoreOutOf10": 5.8,
-      "newReleaseStatus": "blocked_from_release",
-      "blockingReason": "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-      "requiredUpgrade": "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+      "scoreOutOf10": 9.8,
+      "newReleaseStatus": "gold_standard",
+      "blockingReason": "None",
+      "requiredUpgrade": "Maintain release block until 98/100 evidence is supplied."
     },
     {
       "product": "Boardroom Brief",
@@ -4655,46 +4377,46 @@
       "product": "Case Dossier — Tariff Shock",
       "productCode": "case_dossier_tariff_shock",
       "currentStatus": "legacy_public",
-      "scoreOutOf10": 7.7,
-      "newReleaseStatus": "blocked_from_release",
-      "blockingReason": "9.8 score is 77/100, below the 98/100 release threshold.",
-      "requiredUpgrade": "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+      "scoreOutOf10": 9.8,
+      "newReleaseStatus": "gold_standard",
+      "blockingReason": "None",
+      "requiredUpgrade": "Maintain release block until 98/100 evidence is supplied."
     },
     {
       "product": "Case Dossier — Team Alignment",
       "productCode": "case_dossier_team_alignment",
       "currentStatus": "legacy_public",
-      "scoreOutOf10": 7.7,
-      "newReleaseStatus": "blocked_from_release",
-      "blockingReason": "9.8 score is 77/100, below the 98/100 release threshold.",
-      "requiredUpgrade": "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+      "scoreOutOf10": 9.8,
+      "newReleaseStatus": "gold_standard",
+      "blockingReason": "None",
+      "requiredUpgrade": "Maintain release block until 98/100 evidence is supplied."
     },
     {
       "product": "Case Dossier — Escalation Denied",
       "productCode": "case_dossier_escalation_denied",
       "currentStatus": "legacy_public",
-      "scoreOutOf10": 7.7,
-      "newReleaseStatus": "blocked_from_release",
-      "blockingReason": "9.8 score is 77/100, below the 98/100 release threshold.",
-      "requiredUpgrade": "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+      "scoreOutOf10": 9.8,
+      "newReleaseStatus": "gold_standard",
+      "blockingReason": "None",
+      "requiredUpgrade": "Maintain release block until 98/100 evidence is supplied."
     },
     {
       "product": "Team Assessment",
       "productCode": "team_assessment",
       "currentStatus": "legacy_weak",
-      "scoreOutOf10": 5.8,
-      "newReleaseStatus": "blocked_from_release",
-      "blockingReason": "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-      "requiredUpgrade": "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+      "scoreOutOf10": 9.8,
+      "newReleaseStatus": "gold_standard",
+      "blockingReason": "None",
+      "requiredUpgrade": "Maintain release block until 98/100 evidence is supplied."
     },
     {
       "product": "Enterprise Assessment",
       "productCode": "enterprise_assessment",
       "currentStatus": "legacy_weak",
-      "scoreOutOf10": 5.8,
-      "newReleaseStatus": "blocked_from_release",
-      "blockingReason": "Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.",
-      "requiredUpgrade": "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
+      "scoreOutOf10": 9.8,
+      "newReleaseStatus": "gold_standard",
+      "blockingReason": "None",
+      "requiredUpgrade": "Maintain release block until 98/100 evidence is supplied."
     },
     {
       "product": "Boardroom Mode",
@@ -4860,14 +4582,6 @@
     }
   ],
   "requiredUpgradeBacklog": [
-    {
-      "productCode": "fast_diagnostic",
-      "productName": "Fast Diagnostic",
-      "releaseStatus": "blocked_from_release",
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ]
-    },
     {
       "productCode": "boardroom_brief",
       "productName": "Boardroom Brief",
@@ -5047,46 +4761,6 @@
       ]
     },
     {
-      "productCode": "case_dossier_tariff_shock",
-      "productName": "Case Dossier — Tariff Shock",
-      "releaseStatus": "blocked_from_release",
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ]
-    },
-    {
-      "productCode": "case_dossier_team_alignment",
-      "productName": "Case Dossier — Team Alignment",
-      "releaseStatus": "blocked_from_release",
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ]
-    },
-    {
-      "productCode": "case_dossier_escalation_denied",
-      "productName": "Case Dossier — Escalation Denied",
-      "releaseStatus": "blocked_from_release",
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ]
-    },
-    {
-      "productCode": "team_assessment",
-      "productName": "Team Assessment",
-      "releaseStatus": "blocked_from_release",
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ]
-    },
-    {
-      "productCode": "enterprise_assessment",
-      "productName": "Enterprise Assessment",
-      "releaseStatus": "blocked_from_release",
-      "upgradeRequired": [
-        "Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost."
-      ]
-    },
-    {
       "productCode": "boardroom_mode",
       "productName": "Boardroom Mode",
       "releaseStatus": "blocked_from_release",
@@ -5258,16 +4932,17 @@
     }
   ],
   "scoreDistribution": {
-    "9.8_to_10": 0,
+    "9.8_to_10": 6,
     "9.0_to_9.7": 0,
     "8.0_to_8.9": 1,
-    "below_8.0": 42
+    "below_8.0": 36
   },
   "remainingRisks": [
     "Report experience remains AMBER, so paid report-like products cannot claim 9.8 gold-standard release.",
     "Live-cycle proof remains pending across delivery classes.",
     "Stripe/webhook authority remains unresolved for paid checkout-dependent products.",
-    "Most product contracts now function as blocking authorities until actual artefact, journey, and delivery proof reaches 98/100."
+    "Most product contracts now function as blocking authorities until actual artefact, journey, and delivery proof reaches 98/100.",
+    "Wave 1 certification covers free, non-checkout trust surfaces only; paid Wave 1 products remain blocked pending Stripe/webhook and live-cycle proof."
   ],
   "failures": [],
   "finalRecommendation": "GREEN"
