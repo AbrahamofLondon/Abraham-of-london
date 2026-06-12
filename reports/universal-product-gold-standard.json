@@ -1,0 +1,3949 @@
+{
+  "generatedAt": "2026-06-12T14:31:01.349Z",
+  "gate": "AMBER",
+  "productsReviewed": 43,
+  "freeProductsReviewed": 6,
+  "paidProductsReviewed": 26,
+  "premiumProductsReviewed": 8,
+  "meetsMarket": 16,
+  "exceedsMarket": 10,
+  "categoryLeading": 1,
+  "belowMarket": 5,
+  "notFitForRelease": 11,
+  "marketReadyProducts": [
+    {
+      "productCode": "personal_decision_audit",
+      "productName": "Personal Decision Audit",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "combined",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Personal Decision Audit, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "productName": "Decision Exposure Instrument",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Decision Exposure Instrument, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "productName": "Mandate Clarity Framework",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Mandate Clarity Framework, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "productName": "Intervention Path Selector",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Intervention Path Selector, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "productName": "Escalation Readiness Scorecard",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Escalation Readiness Scorecard, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "productName": "Structural Failure Diagnostic Canvas",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Structural Failure Diagnostic Canvas, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "execution_risk_index",
+      "productName": "Execution Risk Index",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Execution Risk Index, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "productName": "Decision Alignment Gap Map",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Decision Alignment Gap Map, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "productName": "Governance Drift Detector",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Governance Drift Detector, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "productName": "Strategic Priority Stack Builder",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Strategic Priority Stack Builder, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "productName": "Execution Integrity Protocol",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "governed_methodology_run",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Execution Integrity Protocol, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "productName": "The Alignment Audit Playbook",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "governed_methodology_run",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using The Alignment Audit Playbook, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "productName": "The Drift Detection Framework",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "governed_methodology_run",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using The Drift Detection Framework, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "productName": "Case Dossier — Tariff Shock",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Case Dossier — Tariff Shock, the customer can gain a clearer decision signal and decide the next useful action without wasting time."
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "productName": "Case Dossier — Team Alignment",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Case Dossier — Team Alignment, the customer can gain a clearer decision signal and decide the next useful action without wasting time."
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "productName": "Case Dossier — Escalation Denied",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "meets_market",
+      "outcomeStatement": "After using Case Dossier — Escalation Denied, the customer can gain a clearer decision signal and decide the next useful action without wasting time."
+    }
+  ],
+  "marketExceedingProducts": [
+    {
+      "productCode": "boardroom_brief",
+      "productName": "Boardroom Brief",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "manual_review_required",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Boardroom Brief, the customer can defend a high-consequence decision with structured judgement, falsification challenge, risk map, and 72-hour execution sequence."
+    },
+    {
+      "productCode": "board_brief_builder",
+      "productName": "Board Brief Builder",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "instant_digital_access",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Board Brief Builder, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "productName": "Operator Decision Pack",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "bundle_grant",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Operator Decision Pack, the customer can follow a guided sequence of tools and understand which decision outcome each component supports."
+    },
+    {
+      "productCode": "executive_reporting",
+      "productName": "Executive Reporting",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Executive Reporting, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "strategy_room",
+      "productName": "Strategy Room — Entry",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Strategy Room — Entry, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "productName": "Strategy Room — Active / Multi-Decision",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Strategy Room — Active / Multi-Decision, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "professional",
+      "productName": "Professional",
+      "commercialTier": "subscription",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Professional, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time."
+    },
+    {
+      "productCode": "professional_annual",
+      "productName": "Professional Annual",
+      "commercialTier": "subscription",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Professional Annual, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time."
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "productName": "Global Market Intelligence Report — Q1 2026",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "archived_digital_reference",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Global Market Intelligence Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context."
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "productName": "Global Market Intelligence Report — Q2 2026",
+      "commercialTier": "paid_premium",
+      "deliveryClass": "archived_digital_reference",
+      "verdict": "exceeds_market",
+      "outcomeStatement": "After using Global Market Intelligence Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context."
+    }
+  ],
+  "categoryLeadingProducts": [
+    {
+      "productCode": "enterprise",
+      "productName": "Enterprise",
+      "commercialTier": "enterprise",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "category_leading",
+      "outcomeStatement": "After using Enterprise, the customer can move serious organisational decisions through clearer governance, evidence, and escalation control."
+    }
+  ],
+  "ownedUpgradeRequired": [
+    {
+      "productCode": "fast_diagnostic",
+      "productName": "Fast Diagnostic",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "below_market",
+      "outcomeStatement": "After using Fast Diagnostic, the customer can identify the dominant decision friction in under five minutes and choose one corrective next move."
+    },
+    {
+      "productCode": "team_assessment",
+      "productName": "Team Assessment",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "below_market",
+      "outcomeStatement": "After using Team Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "productName": "Enterprise Assessment",
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "below_market",
+      "outcomeStatement": "After using Enterprise Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time."
+    },
+    {
+      "productCode": "boardroom_mode",
+      "productName": "Boardroom Mode",
+      "commercialTier": "paid_entry",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "below_market",
+      "outcomeStatement": "After using Boardroom Mode, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "additional_collaborator",
+      "productName": "Additional Collaborator",
+      "commercialTier": "subscription",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "below_market",
+      "outcomeStatement": "After using Additional Collaborator, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time."
+    }
+  ],
+  "blockedFromRelease": [
+    {
+      "productCode": "operator_essentials_pack",
+      "productName": "Operator Essentials",
+      "commercialTier": "internal",
+      "deliveryClass": "bundle_grant",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Operator Essentials, the customer can follow a guided sequence of tools and understand which decision outcome each component supports."
+    },
+    {
+      "productCode": "command_pack",
+      "productName": "Command Pack",
+      "commercialTier": "internal",
+      "deliveryClass": "bundle_grant",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Command Pack, the customer can follow a guided sequence of tools and understand which decision outcome each component supports."
+    },
+    {
+      "productCode": "governance_suite",
+      "productName": "Governance Suite",
+      "commercialTier": "internal",
+      "deliveryClass": "bundle_grant",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Governance Suite, the customer can follow a guided sequence of tools and understand which decision outcome each component supports."
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "productName": "Diagnostic Report — Basic",
+      "commercialTier": "internal",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Diagnostic Report — Basic, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "productName": "Diagnostic Report — Pro",
+      "commercialTier": "internal",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Diagnostic Report — Pro, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "productName": "Executive Reporting — Advanced",
+      "commercialTier": "internal",
+      "deliveryClass": "generated_digital_artifact",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Executive Reporting — Advanced, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "inner_circle",
+      "productName": "Inner Circle",
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Inner Circle, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "retainer_core",
+      "productName": "Decision Authority Retainer — Core",
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Decision Authority Retainer — Core, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "retainer_operational",
+      "productName": "Decision Authority Retainer — Operational",
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Decision Authority Retainer — Operational, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "retainer_institutional",
+      "productName": "Decision Authority Retainer — Institutional",
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Decision Authority Retainer — Institutional, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move."
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "productName": "Global Market Intelligence Report — Q3 2026",
+      "commercialTier": "internal",
+      "deliveryClass": "archived_digital_reference",
+      "verdict": "not_fit_for_release",
+      "outcomeStatement": "After using Global Market Intelligence Report — Q3 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context."
+    }
+  ],
+  "freeProductTimeRespectReview": [
+    {
+      "productCode": "fast_diagnostic",
+      "passed": true,
+      "status": "owned_upgrade_required"
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "passed": true,
+      "status": "market_ready"
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "passed": true,
+      "status": "market_ready"
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "passed": true,
+      "status": "market_ready"
+    },
+    {
+      "productCode": "team_assessment",
+      "passed": true,
+      "status": "owned_upgrade_required"
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "passed": true,
+      "status": "owned_upgrade_required"
+    }
+  ],
+  "paidProductPriceValueSurplusReview": [
+    {
+      "productCode": "boardroom_brief",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Boardroom Brief is worth more than £99 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Personal Decision Audit is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Decision Exposure Instrument is worth more than £29 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Mandate Clarity Framework is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Intervention Path Selector is worth more than £79 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Escalation Readiness Scorecard is worth more than £19 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Structural Failure Diagnostic Canvas is worth more than £19 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "execution_risk_index",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Execution Risk Index is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Decision Alignment Gap Map is worth more than £29 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Governance Drift Detector is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Strategic Priority Stack Builder is worth more than £79 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "board_brief_builder",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Board Brief Builder is worth more than £129 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Execution Integrity Protocol is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "The Alignment Audit Playbook is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "The Drift Detection Framework is worth more than £39 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Operator Decision Pack is worth more than £129 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "boardroom_mode",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Boardroom Mode is worth more than Evidence-gated because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "executive_reporting",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Executive Reporting is worth more than £295 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "strategy_room",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Strategy Room — Entry is worth more than £750 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Strategy Room — Active / Multi-Decision is worth more than £1,250 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "professional",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Professional is worth more than £59/month because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "professional_annual",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Professional Annual is worth more than £590/year because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "enterprise",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Enterprise is worth more than Custom because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "additional_collaborator",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Additional Collaborator is worth more than £15/month because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q1 2026 is worth more than £59 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "passed": true,
+      "surplus": {
+        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q2 2026 is worth more than £59 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      }
+    }
+  ],
+  "premiumProductMarketExceedingReview": [
+    {
+      "productCode": "boardroom_brief",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "board_brief_builder",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "executive_reporting",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "strategy_room",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "exceedsMarketExpectation": true,
+      "status": "market_exceeding"
+    }
+  ],
+  "productOutcomeStatements": {
+    "fast_diagnostic": "After using Fast Diagnostic, the customer can identify the dominant decision friction in under five minutes and choose one corrective next move.",
+    "boardroom_brief": "After using Boardroom Brief, the customer can defend a high-consequence decision with structured judgement, falsification challenge, risk map, and 72-hour execution sequence.",
+    "personal_decision_audit": "After using Personal Decision Audit, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "decision_exposure_instrument": "After using Decision Exposure Instrument, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "mandate_clarity_framework": "After using Mandate Clarity Framework, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "intervention_path_selector": "After using Intervention Path Selector, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "escalation_readiness_scorecard": "After using Escalation Readiness Scorecard, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "structural_failure_diagnostic_canvas": "After using Structural Failure Diagnostic Canvas, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "execution_risk_index": "After using Execution Risk Index, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "team_alignment_gap_map": "After using Decision Alignment Gap Map, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "governance_drift_detector": "After using Governance Drift Detector, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "strategic_priority_stack_builder": "After using Strategic Priority Stack Builder, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "board_brief_builder": "After using Board Brief Builder, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "execution_integrity_protocol": "After using Execution Integrity Protocol, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "alignment_audit_playbook": "After using The Alignment Audit Playbook, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "drift_detection_framework": "After using The Drift Detection Framework, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "operator_decision_pack": "After using Operator Decision Pack, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+    "operator_essentials_pack": "After using Operator Essentials, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+    "command_pack": "After using Command Pack, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+    "governance_suite": "After using Governance Suite, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+    "case_dossier_tariff_shock": "After using Case Dossier — Tariff Shock, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+    "case_dossier_team_alignment": "After using Case Dossier — Team Alignment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+    "case_dossier_escalation_denied": "After using Case Dossier — Escalation Denied, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+    "team_assessment": "After using Team Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+    "enterprise_assessment": "After using Enterprise Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+    "boardroom_mode": "After using Boardroom Mode, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "executive_reporting": "After using Executive Reporting, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "diagnostic_report_basic": "After using Diagnostic Report — Basic, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "diagnostic_report_pro": "After using Diagnostic Report — Pro, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "executive_reporting_priority": "After using Executive Reporting — Advanced, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "strategy_room": "After using Strategy Room — Entry, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "strategy_room_extended": "After using Strategy Room — Active / Multi-Decision, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "inner_circle": "After using Inner Circle, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "retainer_core": "After using Decision Authority Retainer — Core, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "retainer_operational": "After using Decision Authority Retainer — Operational, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "retainer_institutional": "After using Decision Authority Retainer — Institutional, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+    "professional": "After using Professional, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time.",
+    "professional_annual": "After using Professional Annual, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time.",
+    "enterprise": "After using Enterprise, the customer can move serious organisational decisions through clearer governance, evidence, and escalation control.",
+    "additional_collaborator": "After using Additional Collaborator, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time.",
+    "gmi_q1_2026": "After using Global Market Intelligence Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+    "gmi_q2_2026": "After using Global Market Intelligence Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+    "gmi_q3_2026": "After using Global Market Intelligence Report — Q3 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context."
+  },
+  "results": [
+    {
+      "productCode": "fast_diagnostic",
+      "productName": "Fast Diagnostic",
+      "active": true,
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A sharper decision state and one useful next move.",
+        "comparableMarketStandard": "Useful public diagnostic.",
+        "minimumCustomerWin": "Insight worth the time spent.",
+        "unacceptableOutcome": "Generic bait."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "owned_upgrade_required",
+      "customerOutcomeStatement": "After using Fast Diagnostic, the customer can identify the dominant decision friction in under five minutes and choose one corrective next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "overallScore": 12,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "below_market",
+      "reasonsBlocked": [],
+      "improvementRequired": [
+        "Owned upgrade required before market-ready claim."
+      ]
+    },
+    {
+      "productCode": "boardroom_brief",
+      "productName": "Boardroom Brief",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "manual_review_required",
+      "customerCost": {
+        "moneyCost": 9900,
+        "timeCostMinutes": 8,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A serious decision artifact or execution framework.",
+        "comparableMarketStandard": "Senior advisory diagnostic or board pack.",
+        "minimumCustomerWin": "A defensible artifact for a consequential move.",
+        "unacceptableOutcome": "Generic AI-grade analysis."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "decision_usefulness",
+        "diagnostic_accuracy",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "defensibility",
+        "trust_and_authority",
+        "price_value_surplus",
+        "category_distinction"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "defensibility",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 3,
+        "defensibility": 3,
+        "price_value_surplus": 3
+      },
+      "minimumOverallScore": 33,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Boardroom Brief, the customer can defend a high-consequence decision with structured judgement, falsification challenge, risk map, and 72-hour execution sequence.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Boardroom Brief is worth more than £99 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "decision_usefulness": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "evidence_basis": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "defensibility": 3,
+        "trust_and_authority": 3,
+        "price_value_surplus": 3,
+        "category_distinction": 3
+      },
+      "overallScore": 33,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "productName": "Personal Decision Audit",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "combined",
+      "customerCost": {
+        "moneyCost": 4900,
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Personal Decision Audit, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Personal Decision Audit is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "productName": "Decision Exposure Instrument",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 2900,
+        "timeCostMinutes": 8,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Decision Exposure Instrument, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Decision Exposure Instrument is worth more than £29 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "productName": "Mandate Clarity Framework",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 4900,
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Mandate Clarity Framework, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Mandate Clarity Framework is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "productName": "Intervention Path Selector",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 7900,
+        "timeCostMinutes": 15,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Intervention Path Selector, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Intervention Path Selector is worth more than £79 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "productName": "Escalation Readiness Scorecard",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 1900,
+        "timeCostMinutes": 6,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Escalation Readiness Scorecard, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Escalation Readiness Scorecard is worth more than £19 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "productName": "Structural Failure Diagnostic Canvas",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 1900,
+        "timeCostMinutes": 8,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Structural Failure Diagnostic Canvas, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Structural Failure Diagnostic Canvas is worth more than £19 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "execution_risk_index",
+      "productName": "Execution Risk Index",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 4900,
+        "timeCostMinutes": 10,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Execution Risk Index, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Execution Risk Index is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "productName": "Decision Alignment Gap Map",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 2900,
+        "timeCostMinutes": 10,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Decision Alignment Gap Map, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Decision Alignment Gap Map is worth more than £29 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "productName": "Governance Drift Detector",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 4900,
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Governance Drift Detector, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Governance Drift Detector is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "productName": "Strategic Priority Stack Builder",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 7900,
+        "timeCostMinutes": 15,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Strategic Priority Stack Builder, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Strategic Priority Stack Builder is worth more than £79 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "board_brief_builder",
+      "productName": "Board Brief Builder",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "instant_digital_access",
+      "customerCost": {
+        "moneyCost": 12900,
+        "timeCostMinutes": 20,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A serious decision artifact or execution framework.",
+        "comparableMarketStandard": "Senior advisory diagnostic or board pack.",
+        "minimumCustomerWin": "A defensible artifact for a consequential move.",
+        "unacceptableOutcome": "Generic AI-grade analysis."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "decision_usefulness",
+        "diagnostic_accuracy",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "defensibility",
+        "trust_and_authority",
+        "price_value_surplus",
+        "category_distinction"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "defensibility",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 3,
+        "defensibility": 3,
+        "price_value_surplus": 3
+      },
+      "minimumOverallScore": 33,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Board Brief Builder, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Board Brief Builder is worth more than £129 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "decision_usefulness": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "evidence_basis": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "defensibility": 3,
+        "trust_and_authority": 3,
+        "price_value_surplus": 3,
+        "category_distinction": 3
+      },
+      "overallScore": 33,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "productName": "Execution Integrity Protocol",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "governed_methodology_run",
+      "customerCost": {
+        "moneyCost": 4900,
+        "timeCostMinutes": 15,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Execution Integrity Protocol, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Execution Integrity Protocol is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "productName": "The Alignment Audit Playbook",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "governed_methodology_run",
+      "customerCost": {
+        "moneyCost": 4900,
+        "timeCostMinutes": 20,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using The Alignment Audit Playbook, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "The Alignment Audit Playbook is worth more than £49 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "productName": "The Drift Detection Framework",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "governed_methodology_run",
+      "customerCost": {
+        "moneyCost": 3900,
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using The Drift Detection Framework, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "The Drift Detection Framework is worth more than £39 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "productName": "Operator Decision Pack",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "bundle_grant",
+      "customerCost": {
+        "moneyCost": 12900,
+        "timeCostMinutes": 25,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A guided sequence of value.",
+        "comparableMarketStandard": "Bundled workflow with clear sequence.",
+        "minimumCustomerWin": "The customer knows what to use first and why.",
+        "unacceptableOutcome": "Disconnected entitlements."
+      },
+      "requiredGoldDimensions": [
+        "clarity_gain",
+        "decision_usefulness",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus",
+        "experience_quality"
+      ],
+      "criticalDimensions": [
+        "clarity_gain",
+        "actionability",
+        "experience_quality"
+      ],
+      "minimumDimensionScores": {
+        "clarity_gain": 3,
+        "actionability": 3,
+        "experience_quality": 3
+      },
+      "minimumOverallScore": 18,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Operator Decision Pack, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Operator Decision Pack is worth more than £129 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "clarity_gain": 3,
+        "decision_usefulness": 3,
+        "actionability": 3,
+        "reuse_value": 3,
+        "price_value_surplus": 3,
+        "experience_quality": 3
+      },
+      "overallScore": 18,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "operator_essentials_pack",
+      "productName": "Operator Essentials",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "bundle_grant",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A guided sequence of value.",
+        "comparableMarketStandard": "Bundled workflow with clear sequence.",
+        "minimumCustomerWin": "The customer knows what to use first and why.",
+        "unacceptableOutcome": "Disconnected entitlements."
+      },
+      "requiredGoldDimensions": [
+        "clarity_gain",
+        "decision_usefulness",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus",
+        "experience_quality"
+      ],
+      "criticalDimensions": [
+        "clarity_gain",
+        "actionability",
+        "experience_quality"
+      ],
+      "minimumDimensionScores": {
+        "clarity_gain": 2,
+        "actionability": 2,
+        "experience_quality": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [
+        "experience_quality"
+      ],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Operator Essentials, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "clarity_gain": 1,
+        "decision_usefulness": 1,
+        "actionability": 1,
+        "reuse_value": 1,
+        "price_value_surplus": 1,
+        "experience_quality": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": false,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "command_pack",
+      "productName": "Command Pack",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "bundle_grant",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A guided sequence of value.",
+        "comparableMarketStandard": "Bundled workflow with clear sequence.",
+        "minimumCustomerWin": "The customer knows what to use first and why.",
+        "unacceptableOutcome": "Disconnected entitlements."
+      },
+      "requiredGoldDimensions": [
+        "clarity_gain",
+        "decision_usefulness",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus",
+        "experience_quality"
+      ],
+      "criticalDimensions": [
+        "clarity_gain",
+        "actionability",
+        "experience_quality"
+      ],
+      "minimumDimensionScores": {
+        "clarity_gain": 2,
+        "actionability": 2,
+        "experience_quality": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [
+        "experience_quality"
+      ],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Command Pack, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "clarity_gain": 1,
+        "decision_usefulness": 1,
+        "actionability": 1,
+        "reuse_value": 1,
+        "price_value_surplus": 1,
+        "experience_quality": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": false,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "governance_suite",
+      "productName": "Governance Suite",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "bundle_grant",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A guided sequence of value.",
+        "comparableMarketStandard": "Bundled workflow with clear sequence.",
+        "minimumCustomerWin": "The customer knows what to use first and why.",
+        "unacceptableOutcome": "Disconnected entitlements."
+      },
+      "requiredGoldDimensions": [
+        "clarity_gain",
+        "decision_usefulness",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus",
+        "experience_quality"
+      ],
+      "criticalDimensions": [
+        "clarity_gain",
+        "actionability",
+        "experience_quality"
+      ],
+      "minimumDimensionScores": {
+        "clarity_gain": 2,
+        "actionability": 2,
+        "experience_quality": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [
+        "experience_quality"
+      ],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Governance Suite, the customer can follow a guided sequence of tools and understand which decision outcome each component supports.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "clarity_gain": 1,
+        "decision_usefulness": 1,
+        "actionability": 1,
+        "reuse_value": 1,
+        "price_value_surplus": 1,
+        "experience_quality": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": false,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "productName": "Case Dossier — Tariff Shock",
+      "active": true,
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A sharper decision state and one useful next move.",
+        "comparableMarketStandard": "Useful public diagnostic.",
+        "minimumCustomerWin": "Insight worth the time spent.",
+        "unacceptableOutcome": "Generic bait."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Case Dossier — Tariff Shock, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "overallScore": 12,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "productName": "Case Dossier — Team Alignment",
+      "active": true,
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A sharper decision state and one useful next move.",
+        "comparableMarketStandard": "Useful public diagnostic.",
+        "minimumCustomerWin": "Insight worth the time spent.",
+        "unacceptableOutcome": "Generic bait."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Case Dossier — Team Alignment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "overallScore": 12,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "productName": "Case Dossier — Escalation Denied",
+      "active": true,
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A sharper decision state and one useful next move.",
+        "comparableMarketStandard": "Useful public diagnostic.",
+        "minimumCustomerWin": "Insight worth the time spent.",
+        "unacceptableOutcome": "Generic bait."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_ready",
+      "customerOutcomeStatement": "After using Case Dossier — Escalation Denied, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "overallScore": 12,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "meets_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "team_assessment",
+      "productName": "Team Assessment",
+      "active": true,
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A sharper decision state and one useful next move.",
+        "comparableMarketStandard": "Useful public diagnostic.",
+        "minimumCustomerWin": "Insight worth the time spent.",
+        "unacceptableOutcome": "Generic bait."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "owned_upgrade_required",
+      "customerOutcomeStatement": "After using Team Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "overallScore": 12,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "below_market",
+      "reasonsBlocked": [],
+      "improvementRequired": [
+        "Owned upgrade required before market-ready claim."
+      ]
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "productName": "Enterprise Assessment",
+      "active": true,
+      "commercialTier": "free",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A sharper decision state and one useful next move.",
+        "comparableMarketStandard": "Useful public diagnostic.",
+        "minimumCustomerWin": "Insight worth the time spent.",
+        "unacceptableOutcome": "Generic bait."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "owned_upgrade_required",
+      "customerOutcomeStatement": "After using Enterprise Assessment, the customer can gain a clearer decision signal and decide the next useful action without wasting time.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 2,
+        "clarity_gain": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "actionability": 2,
+        "trust_and_authority": 2
+      },
+      "overallScore": 12,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "below_market",
+      "reasonsBlocked": [],
+      "improvementRequired": [
+        "Owned upgrade required before market-ready claim."
+      ]
+    },
+    {
+      "productCode": "boardroom_mode",
+      "productName": "Boardroom Mode",
+      "active": true,
+      "commercialTier": "paid_entry",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "variable",
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "medium",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "decision_usefulness",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 14,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "owned_upgrade_required",
+      "customerOutcomeStatement": "After using Boardroom Mode, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Boardroom Mode is worth more than Evidence-gated because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "decision_usefulness": 2,
+        "specificity": 2,
+        "evidence_basis": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 14,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "below_market",
+      "reasonsBlocked": [],
+      "improvementRequired": [
+        "Owned upgrade required before market-ready claim."
+      ]
+    },
+    {
+      "productCode": "executive_reporting",
+      "productName": "Executive Reporting",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": 29500,
+        "timeCostMinutes": 25,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A serious decision artifact or execution framework.",
+        "comparableMarketStandard": "Senior advisory diagnostic or board pack.",
+        "minimumCustomerWin": "A defensible artifact for a consequential move.",
+        "unacceptableOutcome": "Generic AI-grade analysis."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "decision_usefulness",
+        "diagnostic_accuracy",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "defensibility",
+        "trust_and_authority",
+        "price_value_surplus",
+        "category_distinction"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "defensibility",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 3,
+        "defensibility": 3,
+        "price_value_surplus": 3
+      },
+      "minimumOverallScore": 33,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Executive Reporting, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Executive Reporting is worth more than £295 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "decision_usefulness": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "evidence_basis": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "defensibility": 3,
+        "trust_and_authority": 3,
+        "price_value_surplus": 3,
+        "category_distinction": 3
+      },
+      "overallScore": 33,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "productName": "Diagnostic Report — Basic",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Diagnostic Report — Basic, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "productName": "Diagnostic Report — Pro",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Diagnostic Report — Pro, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "productName": "Executive Reporting — Advanced",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Executive Reporting — Advanced, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "strategy_room",
+      "productName": "Strategy Room — Entry",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": 75000,
+        "timeCostMinutes": 25,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A serious decision artifact or execution framework.",
+        "comparableMarketStandard": "Senior advisory diagnostic or board pack.",
+        "minimumCustomerWin": "A defensible artifact for a consequential move.",
+        "unacceptableOutcome": "Generic AI-grade analysis."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "decision_usefulness",
+        "diagnostic_accuracy",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "defensibility",
+        "trust_and_authority",
+        "price_value_surplus",
+        "category_distinction"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "defensibility",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 3,
+        "defensibility": 3,
+        "price_value_surplus": 3
+      },
+      "minimumOverallScore": 33,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Strategy Room — Entry, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Strategy Room — Entry is worth more than £750 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "decision_usefulness": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "evidence_basis": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "defensibility": 3,
+        "trust_and_authority": 3,
+        "price_value_surplus": 3,
+        "category_distinction": 3
+      },
+      "overallScore": 33,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "productName": "Strategy Room — Active / Multi-Decision",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "generated_digital_artifact",
+      "customerCost": {
+        "moneyCost": 125000,
+        "timeCostMinutes": 25,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A serious decision artifact or execution framework.",
+        "comparableMarketStandard": "Senior advisory diagnostic or board pack.",
+        "minimumCustomerWin": "A defensible artifact for a consequential move.",
+        "unacceptableOutcome": "Generic AI-grade analysis."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "decision_usefulness",
+        "diagnostic_accuracy",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "defensibility",
+        "trust_and_authority",
+        "price_value_surplus",
+        "category_distinction"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "defensibility",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 3,
+        "defensibility": 3,
+        "price_value_surplus": 3
+      },
+      "minimumOverallScore": 33,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Strategy Room — Active / Multi-Decision, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Strategy Room — Active / Multi-Decision is worth more than £1,250 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "decision_usefulness": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "evidence_basis": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "defensibility": 3,
+        "trust_and_authority": 3,
+        "price_value_surplus": 3,
+        "category_distinction": 3
+      },
+      "overallScore": 33,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "inner_circle",
+      "productName": "Inner Circle",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Inner Circle, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "retainer_core",
+      "productName": "Decision Authority Retainer — Core",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Decision Authority Retainer — Core, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "retainer_operational",
+      "productName": "Decision Authority Retainer — Operational",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Decision Authority Retainer — Operational, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "retainer_institutional",
+      "productName": "Decision Authority Retainer — Institutional",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 5,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Reusable insight or practical next-step guide worth more than price.",
+        "comparableMarketStandard": "Specialist diagnostic/tool.",
+        "minimumCustomerWin": "Outperforms generic AI and basic templates.",
+        "unacceptableOutcome": "A paid generic template."
+      },
+      "requiredGoldDimensions": [
+        "time_respect",
+        "clarity_gain",
+        "diagnostic_accuracy",
+        "specificity",
+        "actionability",
+        "trust_and_authority"
+      ],
+      "criticalDimensions": [
+        "decision_usefulness",
+        "actionability",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "decision_usefulness": 2,
+        "actionability": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Decision Authority Retainer — Institutional, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "time_respect": 1,
+        "clarity_gain": 1,
+        "diagnostic_accuracy": 1,
+        "specificity": 1,
+        "actionability": 1,
+        "trust_and_authority": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "professional",
+      "productName": "Professional",
+      "active": true,
+      "commercialTier": "subscription",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": 5900,
+        "timeCostMinutes": 20,
+        "cognitiveLoad": "medium",
+        "trustRequired": "high",
+        "opportunityCost": "medium",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Continuity, oversight, memory, escalation, and cumulative improvement.",
+        "comparableMarketStandard": "Ongoing advisory workspace.",
+        "minimumCustomerWin": "Value compounds over cases or cycles.",
+        "unacceptableOutcome": "Repeated static reports."
+      },
+      "requiredGoldDimensions": [
+        "continuity",
+        "diagnostic_accuracy",
+        "specificity",
+        "commercial_consequence",
+        "actionability",
+        "trust_and_authority",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "continuity",
+        "trust_and_authority",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "continuity": 2,
+        "trust_and_authority": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 16,
+      "mustExceedMarketOn": [
+        "continuity"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Professional, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Professional is worth more than £59/month because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "continuity": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "trust_and_authority": 3,
+        "reuse_value": 3,
+        "price_value_surplus": 3
+      },
+      "overallScore": 24,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "professional_annual",
+      "productName": "Professional Annual",
+      "active": true,
+      "commercialTier": "subscription",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": 59000,
+        "timeCostMinutes": 20,
+        "cognitiveLoad": "medium",
+        "trustRequired": "high",
+        "opportunityCost": "medium",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Continuity, oversight, memory, escalation, and cumulative improvement.",
+        "comparableMarketStandard": "Ongoing advisory workspace.",
+        "minimumCustomerWin": "Value compounds over cases or cycles.",
+        "unacceptableOutcome": "Repeated static reports."
+      },
+      "requiredGoldDimensions": [
+        "continuity",
+        "diagnostic_accuracy",
+        "specificity",
+        "commercial_consequence",
+        "actionability",
+        "trust_and_authority",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "continuity",
+        "trust_and_authority",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "continuity": 2,
+        "trust_and_authority": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 16,
+      "mustExceedMarketOn": [
+        "continuity"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Professional Annual, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Professional Annual is worth more than £590/year because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "continuity": 3,
+        "diagnostic_accuracy": 3,
+        "specificity": 3,
+        "commercial_consequence": 3,
+        "actionability": 3,
+        "trust_and_authority": 3,
+        "reuse_value": 3,
+        "price_value_surplus": 3
+      },
+      "overallScore": 24,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "enterprise",
+      "productName": "Enterprise",
+      "active": true,
+      "commercialTier": "enterprise",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": "variable",
+        "timeCostMinutes": 60,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "critical"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "A serious decision artifact or execution framework.",
+        "comparableMarketStandard": "Senior advisory diagnostic or board pack.",
+        "minimumCustomerWin": "A defensible artifact for a consequential move.",
+        "unacceptableOutcome": "Generic AI-grade analysis."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "decision_usefulness",
+        "diagnostic_accuracy",
+        "specificity",
+        "evidence_basis",
+        "commercial_consequence",
+        "actionability",
+        "defensibility",
+        "trust_and_authority",
+        "price_value_surplus",
+        "category_distinction"
+      ],
+      "criticalDimensions": [
+        "category_distinction",
+        "trust_and_authority",
+        "commercial_consequence"
+      ],
+      "minimumDimensionScores": {
+        "category_distinction": 3,
+        "trust_and_authority": 3,
+        "commercial_consequence": 3
+      },
+      "minimumOverallScore": 33,
+      "mustExceedMarketOn": [
+        "category_distinction",
+        "trust_and_authority"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "category_leading",
+      "customerOutcomeStatement": "After using Enterprise, the customer can move serious organisational decisions through clearer governance, evidence, and escalation control.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Enterprise is worth more than Custom because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 4,
+        "decision_usefulness": 4,
+        "diagnostic_accuracy": 4,
+        "specificity": 4,
+        "evidence_basis": 4,
+        "commercial_consequence": 4,
+        "actionability": 4,
+        "defensibility": 4,
+        "trust_and_authority": 4,
+        "price_value_surplus": 4,
+        "category_distinction": 4
+      },
+      "overallScore": 44,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": true,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "category_leading",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "additional_collaborator",
+      "productName": "Additional Collaborator",
+      "active": true,
+      "commercialTier": "subscription",
+      "deliveryClass": "subscription_retainer_cycle",
+      "customerCost": {
+        "moneyCost": 1500,
+        "timeCostMinutes": 20,
+        "cognitiveLoad": "medium",
+        "trustRequired": "high",
+        "opportunityCost": "medium",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Continuity, oversight, memory, escalation, and cumulative improvement.",
+        "comparableMarketStandard": "Ongoing advisory workspace.",
+        "minimumCustomerWin": "Value compounds over cases or cycles.",
+        "unacceptableOutcome": "Repeated static reports."
+      },
+      "requiredGoldDimensions": [
+        "continuity",
+        "diagnostic_accuracy",
+        "specificity",
+        "commercial_consequence",
+        "actionability",
+        "trust_and_authority",
+        "reuse_value",
+        "price_value_surplus"
+      ],
+      "criticalDimensions": [
+        "continuity",
+        "trust_and_authority",
+        "price_value_surplus"
+      ],
+      "minimumDimensionScores": {
+        "continuity": 2,
+        "trust_and_authority": 2,
+        "price_value_surplus": 2
+      },
+      "minimumOverallScore": 16,
+      "mustExceedMarketOn": [
+        "continuity"
+      ],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "owned_upgrade_required",
+      "customerOutcomeStatement": "After using Additional Collaborator, the customer can preserve governed decision continuity and return to case memory, evidence, and next actions over time.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Additional Collaborator is worth more than £15/month because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Vague diagnosis, wasted effort, and low-quality next steps.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "continuity": 2,
+        "diagnostic_accuracy": 2,
+        "specificity": 2,
+        "commercial_consequence": 2,
+        "actionability": 2,
+        "trust_and_authority": 2,
+        "reuse_value": 2,
+        "price_value_surplus": 2
+      },
+      "overallScore": 16,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "below_market",
+      "reasonsBlocked": [],
+      "improvementRequired": [
+        "Owned upgrade required before market-ready claim."
+      ]
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "productName": "Global Market Intelligence Report — Q1 2026",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "archived_digital_reference",
+      "customerCost": {
+        "moneyCost": 5900,
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Dated intelligence is understood and usable as historical context.",
+        "comparableMarketStandard": "Archived paid intelligence with current-use warning.",
+        "minimumCustomerWin": "The customer can interpret the report without mistaking it for current intelligence.",
+        "unacceptableOutcome": "Dated intelligence pretending to be current."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "evidence_basis",
+        "trust_and_authority",
+        "reuse_value",
+        "time_respect",
+        "archive_context"
+      ],
+      "criticalDimensions": [
+        "archive_context",
+        "time_respect",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "archive_context": 3,
+        "time_respect": 3,
+        "trust_and_authority": 3
+      },
+      "minimumOverallScore": 18,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q1 2026 is worth more than £59 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "evidence_basis": 3,
+        "trust_and_authority": 3,
+        "reuse_value": 3,
+        "time_respect": 3,
+        "archive_context": 3,
+        "price_value_surplus": 3
+      },
+      "overallScore": 21,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "productName": "Global Market Intelligence Report — Q2 2026",
+      "active": true,
+      "commercialTier": "paid_premium",
+      "deliveryClass": "archived_digital_reference",
+      "customerCost": {
+        "moneyCost": 5900,
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "high",
+        "trustRequired": "high",
+        "opportunityCost": "high",
+        "decisionConsequence": "high"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Dated intelligence is understood and usable as historical context.",
+        "comparableMarketStandard": "Archived paid intelligence with current-use warning.",
+        "minimumCustomerWin": "The customer can interpret the report without mistaking it for current intelligence.",
+        "unacceptableOutcome": "Dated intelligence pretending to be current."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "evidence_basis",
+        "trust_and_authority",
+        "reuse_value",
+        "time_respect",
+        "archive_context"
+      ],
+      "criticalDimensions": [
+        "archive_context",
+        "time_respect",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "archive_context": 3,
+        "time_respect": 3,
+        "trust_and_authority": 3
+      },
+      "minimumOverallScore": 18,
+      "mustExceedMarketOn": [
+        "price_value_surplus"
+      ],
+      "releaseBlockedBelowStandard": true,
+      "releaseQualityStatus": "market_exceeding",
+      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "priceValueSurplus": {
+        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q2 2026 is worth more than £59 because it turns customer context into a reusable decision asset.",
+        "alternativeCost": "The customer would otherwise spend founder, operator, analyst, or advisor time assembling evidence and interpretation.",
+        "helpsAvoid": "Premature approval, hidden execution risk, weak governance, and costly delay.",
+        "helpsDecideOrExecute": "It helps decide what condition exists, what matters commercially, and what next move is defensible."
+      },
+      "hasContract": true,
+      "isPaid": true,
+      "dimensionScores": {
+        "market_expectation": 3,
+        "evidence_basis": 3,
+        "trust_and_authority": 3,
+        "reuse_value": 3,
+        "time_respect": 3,
+        "archive_context": 3,
+        "price_value_surplus": 3
+      },
+      "overallScore": 21,
+      "meetsMarketExpectation": true,
+      "exceedsMarketExpectation": true,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": true,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "exceeds_market",
+      "reasonsBlocked": [],
+      "improvementRequired": []
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "productName": "Global Market Intelligence Report — Q3 2026",
+      "active": false,
+      "commercialTier": "internal",
+      "deliveryClass": "archived_digital_reference",
+      "customerCost": {
+        "moneyCost": "free",
+        "timeCostMinutes": 12,
+        "cognitiveLoad": "low",
+        "trustRequired": "medium",
+        "opportunityCost": "medium",
+        "decisionConsequence": "medium"
+      },
+      "marketExpectation": {
+        "expectedOutcome": "Dated intelligence is understood and usable as historical context.",
+        "comparableMarketStandard": "Archived paid intelligence with current-use warning.",
+        "minimumCustomerWin": "The customer can interpret the report without mistaking it for current intelligence.",
+        "unacceptableOutcome": "Dated intelligence pretending to be current."
+      },
+      "requiredGoldDimensions": [
+        "market_expectation",
+        "evidence_basis",
+        "trust_and_authority",
+        "reuse_value",
+        "time_respect",
+        "archive_context"
+      ],
+      "criticalDimensions": [
+        "archive_context",
+        "time_respect",
+        "trust_and_authority"
+      ],
+      "minimumDimensionScores": {
+        "archive_context": 2,
+        "time_respect": 2,
+        "trust_and_authority": 2
+      },
+      "minimumOverallScore": 12,
+      "mustExceedMarketOn": [],
+      "releaseBlockedBelowStandard": false,
+      "releaseQualityStatus": "blocked_from_release",
+      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q3 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "priceValueSurplus": null,
+      "hasContract": true,
+      "isPaid": false,
+      "dimensionScores": {
+        "market_expectation": 1,
+        "evidence_basis": 1,
+        "trust_and_authority": 1,
+        "reuse_value": 1,
+        "time_respect": 1,
+        "archive_context": 1
+      },
+      "overallScore": 6,
+      "meetsMarketExpectation": false,
+      "exceedsMarketExpectation": false,
+      "categoryLeadingSignal": false,
+      "releaseAllowed": false,
+      "freeTimeRespectPassed": true,
+      "priceValueSurplusPassed": true,
+      "guidedSequencePassed": true,
+      "customerCostRespected": true,
+      "verdict": "not_fit_for_release",
+      "reasonsBlocked": [
+        "Product is blocked from release."
+      ],
+      "improvementRequired": []
+    }
+  ],
+  "failures": [],
+  "warnings": [
+    "16 products are not fully market-ready but are owned or blocked.",
+    "Report experience gate remains AMBER with owned warnings."
+  ],
+  "estateWideRisks": [
+    "Owned-upgrade products are intentionally not claimed as market-ready until their time-respect, persistence, or experience gaps are closed.",
+    "Blocked products must remain unavailable for release until their gold-standard contract produces market-ready or better scores.",
+    "Report experience remains AMBER from owned arrival/admin-preview/live-cycle warnings; this pass does not hide those warnings."
+  ],
+  "finalRecommendation": "AMBER"
+}
