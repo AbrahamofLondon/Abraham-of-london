@@ -6,6 +6,8 @@
 
 import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
+import ArrivalScreen from "@/components/report/arrival/ArrivalScreen";
 
 type ReportData = {
   id: string;
@@ -86,7 +88,19 @@ function ClientReportPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <ArrivalScreen
+      tier="executive"
+      referenceId={`AoL-ER-${report.id.slice(0, 8).toUpperCase()}`}
+      productName="Executive Report"
+      issueDate={new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date())}
+      weightStatement="This report is a governed executive analysis generated through a controlled intelligence system and prepared for restricted review."
+      onComplete={() => undefined}
+    >
+      <div className="min-h-screen bg-black text-white">
       <header className="border-b border-white/10 px-6 py-5">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-3">
@@ -94,6 +108,9 @@ function ClientReportPageInner() {
               {report.state}
             </span>
             <span className="text-[10px] text-white/20 font-mono">Executive Report</span>
+            <span className="text-[10px] text-white/20 font-mono">
+              AoL-ER-{report.id.slice(0, 8).toUpperCase()}
+            </span>
           </div>
           <h1 className="text-xl font-serif italic text-white/80 leading-tight">
             {report.narrative.headline}
@@ -102,8 +119,22 @@ function ClientReportPageInner() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+        <div className="rounded-lg border border-amber-400/15 bg-amber-400/5 p-5">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-amber-400/60 mb-2">
+            Delivery State
+          </p>
+          <p className="text-sm text-amber-300/70 leading-relaxed">
+            This is a restricted executive report generated through Abraham of London's controlled
+            reporting system. Treat the output as decision support until an operator-approved
+            delivery note is attached.
+          </p>
+        </div>
+
         {/* Summary */}
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-3">
+            Executive Judgement
+          </p>
           <p className="text-sm text-white/50 leading-relaxed font-light">{report.narrative.summary}</p>
         </div>
 
@@ -199,12 +230,22 @@ function ClientReportPageInner() {
           </p>
         </div>
 
+        <FeedbackWidget
+          surface="strategy_room_session"
+          subjectType="executive_report"
+          subjectId={report.id}
+          artifactId={report.id}
+          productCode="executive_reporting"
+          compact
+        />
+
         <div className="border-t border-white/8 pt-6 text-center">
           <p className="text-xs text-white/20 font-mono">Abraham of London — Executive Report</p>
           <p className="text-[10px] text-white/10 mt-1">Restricted. Do not distribute.</p>
         </div>
       </main>
-    </div>
+      </div>
+    </ArrivalScreen>
   );
 }
 
