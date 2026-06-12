@@ -31,6 +31,7 @@ export type CanonicalRecordType =
   | "ExecutiveReport"
   | "StrategyRoomCase"
   | "BoardroomDossier"
+  | "BoardroomBriefOrder"
   | "EnterpriseCampaign"
   | "GmiRelease"
   | "OutboundPost"

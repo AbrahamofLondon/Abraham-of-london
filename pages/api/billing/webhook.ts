@@ -316,6 +316,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               newStatus: "paid/paid",
               note: "Stripe checkout completed.",
             }).catch(() => undefined);
+
+            // Emit governed boardroom_order_paid event
+            try {
+              const { routeGovernanceEvent } = await import("@/lib/platform/governance-event-bus");
+              await routeGovernanceEvent({
+                eventType: "BOARDROOM_ORDER_PAID",
+                sourceSurface: "billing-webhook",
+                canonicalRecordType: "BoardroomBriefOrder",
+                canonicalRecordId: order.id,
+                actorEmail: "stripe:webhook",
+                severity: "HIGH",
+                payload: {
+                  email,
+                  stripeSessionId: session.id,
+                  source: session.metadata?.source || "direct",
+                },
+                shouldWriteAudit: true,
+                shouldWriteLineage: true,
+              });
+            } catch (govErr) {
+              console.warn("[BILLING_WEBHOOK_BOARDROOM_ORDER_PAID_GOV_EVENT_FAILED]", govErr);
+            }
           } else {
             canonicalOrderId = existingOrder.id;
             await prisma.boardroomBriefOrder.update({
@@ -405,6 +427,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
           } catch (hypothesisError) {
             console.error("[BILLING_WEBHOOK_BOARDROOM_HYPOTHESIS_STUB_FAILED]", hypothesisError);
+          }
+
+          // Emit governed boardroom_case_stubs_created event
+          try {
+            const { routeGovernanceEvent } = await import("@/lib/platform/governance-event-bus");
+            await routeGovernanceEvent({
+              eventType: "BOARDROOM_CASE_STUBS_CREATED",
+              sourceSurface: "billing-webhook",
+              canonicalRecordType: "BoardroomBriefOrder",
+              canonicalRecordId: canonicalOrderId,
+              actorEmail: "stripe:webhook",
+              severity: "MEDIUM",
+              payload: {
+                email,
+                artifactStub: true,
+                falsificationStub: true,
+                hypothesisStub: true,
+              },
+              shouldWriteAudit: true,
+              shouldWriteLineage: true,
+            });
+          } catch (govErr) {
+            console.warn("[BILLING_WEBHOOK_BOARDROOM_STUBS_GOV_EVENT_FAILED]", govErr);
           }
         } catch (orderError) {
           console.error("[BILLING_WEBHOOK_BOARDROOM_ORDER_FAILED]", orderError);

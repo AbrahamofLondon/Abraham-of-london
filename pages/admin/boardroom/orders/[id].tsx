@@ -4,6 +4,10 @@
  * Boardroom Brief order detail and review page.
  * Shows order, stubs, entitlement, audit trail, and action buttons.
  * Admin-guarded. Delivery requires explicit human confirmation.
+ *
+ * Uses the governed Boardroom delivery state machine.
+ * States: paid → case_stubs_created → draft_generated → awaiting_operator_review
+ *         → approved_for_delivery → customer_access_ready → delivered
  */
 import * as React from "react";
 import type { GetServerSideProps } from "next";
@@ -11,6 +15,12 @@ import Head from "next/head";
 import Link from "next/link";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
+import {
+  isValidTransition,
+  DELIVERY_STATUS_LABELS,
+  DELIVERY_STATUS_COLORS,
+  type BoardroomDeliveryStatus,
+} from "@/lib/boardroom/boardroom-delivery-state-machine";
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const GOLD = "#C9A96E";
@@ -36,8 +46,17 @@ type OrderDetail = {
 
 type StubSummary = {
   status: string;
+  deliveryStatus?: string;
   createdAt: string;
+  artifactId?: string;
   [key: string]: unknown;
+} | null;
+
+type CaseStudyDraftInfo = {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: string;
 } | null;
 
 type Props = {
@@ -46,6 +65,7 @@ type Props = {
   artifact: StubSummary;
   falsification: StubSummary;
   hypothesis: StubSummary;
+  caseStudyDraft: CaseStudyDraftInfo;
   entitlement: { productCode: string; tier: string; createdAt: string } | null;
   auditLogs: Array<{ id: string; action: string; createdAt: string; actorEmail?: string | null }>;
   notFound: boolean;
@@ -63,21 +83,36 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const order = await prisma.boardroomBriefOrder.findUnique({ where: { id } });
 
     if (!order) {
-      return { props: { orderId: id, order: null, artifact: null, falsification: null, hypothesis: null, entitlement: null, auditLogs: [], notFound: true } };
+      return {
+        props: {
+          orderId: id, order: null, artifact: null, falsification: null,
+          hypothesis: null, caseStudyDraft: null, entitlement: null,
+          auditLogs: [], notFound: true,
+        },
+      };
     }
 
-    const [artifact, falsification, hypothesis, entitlement, auditLogs] = await Promise.all([
+    const [artifact, falsification, hypothesis, entitlement, auditLogs, caseStudyEvidence] = await Promise.all([
       prisma.productArtifact.findFirst({
         where: { sourceEntityType: "boardroom_brief_order", sourceEntityId: id },
-        select: { id: true, artifactId: true, status: true, deliveryStatus: true, generatedBy: true, createdAt: true, updatedAt: true },
+        select: {
+          id: true, artifactId: true, status: true, deliveryStatus: true,
+          generatedBy: true, downloadUrl: true, createdAt: true, updatedAt: true,
+        },
       }),
       prisma.falsificationEntry.findFirst({
         where: { sourceEntityType: "boardroom_brief_order", sourceEntityId: id },
-        select: { id: true, productCode: true, status: true, claimOrRecommendation: true, confidenceLevel: true, createdAt: true, updatedAt: true },
+        select: {
+          id: true, productCode: true, status: true, claimOrRecommendation: true,
+          confidenceLevel: true, createdAt: true, updatedAt: true,
+        },
       }),
       prisma.outcomeHypothesis.findFirst({
         where: { sourceRunId: id },
-        select: { id: true, hypothesisId: true, status: true, predictedDecisionMove: true, createdAt: true, updatedAt: true },
+        select: {
+          id: true, hypothesisId: true, status: true, predictedDecisionMove: true,
+          createdAt: true, updatedAt: true,
+        },
       }),
       prisma.clientEntitlement.findFirst({
         where: { email: order.email, productCode: "boardroom-brief" },
@@ -90,6 +125,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         take: 20,
         select: { id: true, action: true, createdAt: true, actorEmail: true },
       }).catch(() => []),
+      // Check for existing case study draft linked to this order
+      prisma.caseStudyEvidence.findFirst({
+        where: { sourceType: "boardroom_brief_order", sourceId: id },
+        select: { caseStudyId: true },
+      }).then(async (evidence) => {
+        if (!evidence) return null;
+        const cs = await prisma.caseStudy.findUnique({
+          where: { id: evidence.caseStudyId },
+          select: { id: true, title: true, status: true, createdAt: true },
+        });
+        return cs;
+      }),
     ]);
 
     const meta = (order.metadata as Record<string, unknown> | null) ?? {};
@@ -116,15 +163,37 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           stripeSessionId: order.stripeSessionId,
           metadata: meta,
         },
-        artifact: artifact ? { ...artifact, createdAt: artifact.createdAt.toISOString(), updatedAt: artifact.updatedAt.toISOString() } : null,
-        falsification: falsification ? { ...falsification, createdAt: falsification.createdAt.toISOString(), updatedAt: falsification.updatedAt.toISOString() } : null,
-        hypothesis: hypothesis ? { ...hypothesis, createdAt: hypothesis.createdAt.toISOString(), updatedAt: hypothesis.updatedAt.toISOString() } : null,
-        entitlement: entitlement ? { ...entitlement, createdAt: entitlement.createdAt.toISOString() } : null,
+        artifact: artifact
+          ? { ...artifact, createdAt: artifact.createdAt.toISOString(), updatedAt: artifact.updatedAt.toISOString() }
+          : null,
+        falsification: falsification
+          ? { ...falsification, createdAt: falsification.createdAt.toISOString(), updatedAt: falsification.updatedAt.toISOString() }
+          : null,
+        hypothesis: hypothesis
+          ? { ...hypothesis, createdAt: hypothesis.createdAt.toISOString(), updatedAt: hypothesis.updatedAt.toISOString() }
+          : null,
+        caseStudyDraft: caseStudyEvidence
+          ? {
+              id: caseStudyEvidence.id,
+              title: caseStudyEvidence.title,
+              status: caseStudyEvidence.status,
+              createdAt: caseStudyEvidence.createdAt.toISOString(),
+            }
+          : null,
+        entitlement: entitlement
+          ? { ...entitlement, createdAt: entitlement.createdAt.toISOString() }
+          : null,
         auditLogs: auditLogs.map((l) => ({ ...l, createdAt: l.createdAt.toISOString() })),
       },
     };
   } catch {
-    return { props: { orderId: id, order: null, artifact: null, falsification: null, hypothesis: null, entitlement: null, auditLogs: [], notFound: false } };
+    return {
+      props: {
+        orderId: id, order: null, artifact: null, falsification: null,
+        hypothesis: null, caseStudyDraft: null, entitlement: null,
+        auditLogs: [], notFound: false,
+      },
+    };
   }
 };
 
@@ -170,12 +239,13 @@ function StubCard({ label, stub }: { label: string; stub: StubSummary }) {
 }
 
 function ActionButton({
-  label, onClick, disabled, colour,
-}: { label: string; onClick: () => void; disabled?: boolean; colour?: string }) {
+  label, onClick, disabled, colour, title,
+}: { label: string; onClick: () => void; disabled?: boolean; colour?: string; title?: string }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      title={title}
       style={{
         ...MONO, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase",
         padding: "8px 16px",
@@ -191,11 +261,17 @@ function ActionButton({
   );
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function BoardroomOrderDetailPage({
-  orderId, order, artifact, falsification, hypothesis, entitlement, auditLogs, notFound,
+  orderId, order, artifact, falsification, hypothesis, caseStudyDraft,
+  entitlement, auditLogs, notFound,
 }: Props) {
-  const [actionState, setActionState] = React.useState<{ loading: boolean; error: string | null; success: string | null }>({ loading: false, error: null, success: null });
+  const [actionState, setActionState] = React.useState<{
+    loading: boolean; error: string | null; success: string | null;
+  }>({ loading: false, error: null, success: null });
   const [currentStatus, setCurrentStatus] = React.useState(order?.deliveryStatus ?? "");
+  const [currentArtifact, setCurrentArtifact] = React.useState(order?.deliveryStatus ?? "");
 
   if (notFound || !order) {
     return (
@@ -208,7 +284,22 @@ export default function BoardroomOrderDetailPage({
     );
   }
 
-  const isOverdue = order.deliveryStatus !== "delivered" && new Date(order.deliveryDeadline) < new Date();
+  const isOverdue = currentStatus !== "delivered" && new Date(order.deliveryDeadline) < new Date();
+  const statusColor = DELIVERY_STATUS_COLORS[currentStatus as BoardroomDeliveryStatus] ?? GOLD;
+  const statusLabel = DELIVERY_STATUS_LABELS[currentStatus as BoardroomDeliveryStatus] ?? currentStatus;
+
+  // Determine what actions are available based on current state
+  const canTransitionTo = (target: string) => isValidTransition(currentStatus, target);
+  const canStartReview = canTransitionTo("in_review") || canTransitionTo("awaiting_operator_review");
+  const canGenerateDraft = canTransitionTo("draft_generated");
+  const canApproveForDelivery = canTransitionTo("approved_for_delivery");
+  const canCreateCustomerAccess = canTransitionTo("customer_access_ready");
+  const canDeliver = canTransitionTo("delivered");
+
+  // Check if artefact is in a deliverable state
+  const artifactIsReady = artifact?.status === "READY" || artifact?.status === "READY_FOR_DELIVERY";
+  const hasAdminPreviewUrl = artifact?.downloadUrl != null;
+  const hasCustomerAccessUrl = order.metadata?.customerAccessUrl != null;
 
   async function transitionTo(nextStatus: string) {
     setActionState({ loading: true, error: null, success: null });
@@ -242,12 +333,116 @@ export default function BoardroomOrderDetailPage({
       if (!data.ok) {
         setActionState({ loading: false, error: data.reason || "Case study creation failed", success: null });
       } else {
-        setActionState({ loading: false, error: null, success: data.alreadyExists ? "Case study already exists" : "Case study draft created" });
+        setActionState({
+          loading: false, error: null,
+          success: data.alreadyExists
+            ? "Case study draft exists. Status: Awaiting operator review."
+            : "Case study draft created.",
+        });
+        // Reload the page to show the new draft
+        window.location.reload();
       }
     } catch {
       setActionState({ loading: false, error: "Network error", success: null });
     }
   }
+
+  async function generateDossierDraft() {
+    setActionState({ loading: true, error: null, success: null });
+    try {
+      const r = await fetch(`/api/admin/boardroom/orders/${order!.id}/generate-dossier`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        setActionState({ loading: false, error: data.error || data.reason || "Dossier generation failed", success: null });
+      } else {
+        setCurrentStatus(data.order.deliveryStatus);
+        setActionState({ loading: false, error: null, success: "Dossier draft generated and ready for review." });
+      }
+    } catch {
+      setActionState({ loading: false, error: "Network error", success: null });
+    }
+  }
+
+  async function approveForDelivery() {
+    setActionState({ loading: true, error: null, success: null });
+    try {
+      const r = await fetch(`/api/admin/boardroom/orders/${order!.id}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        setActionState({ loading: false, error: data.error || data.reason || "Approval failed", success: null });
+      } else {
+        setCurrentStatus(data.order.deliveryStatus);
+        setActionState({ loading: false, error: null, success: "Dossier approved for delivery." });
+      }
+    } catch {
+      setActionState({ loading: false, error: "Network error", success: null });
+    }
+  }
+
+  async function generateCustomerAccess() {
+    setActionState({ loading: true, error: null, success: null });
+    try {
+      const r = await fetch(`/api/admin/boardroom/orders/${order!.id}/customer-access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        setActionState({ loading: false, error: data.error || data.reason || "Customer access generation failed", success: null });
+      } else {
+        setCurrentStatus(data.order.deliveryStatus);
+        setActionState({ loading: false, error: null, success: "Customer access link created." });
+      }
+    } catch {
+      setActionState({ loading: false, error: "Network error", success: null });
+    }
+  }
+
+  async function markDelivered() {
+    if (!confirm(
+      `Confirm: mark order ${order!.id} as delivered?\n\n` +
+      `This will:\n` +
+      `- Set deliveryStatus to "delivered"\n` +
+      `- Persist deliveredAt timestamp\n` +
+      `- Send delivery notification to customer\n\n` +
+      `This cannot be undone without a DB update.`
+    )) return;
+
+    setActionState({ loading: true, error: null, success: null });
+    try {
+      const r = await fetch(`/api/admin/boardroom/orders/${order!.id}/deliver`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        setActionState({ loading: false, error: data.error || data.reason || "Delivery failed", success: null });
+      } else {
+        setCurrentStatus(data.order.deliveryStatus);
+        setActionState({ loading: false, error: null, success: "Order delivered successfully." });
+      }
+    } catch {
+      setActionState({ loading: false, error: "Network error", success: null });
+    }
+  }
+
+  // Build the admin preview URL if artifact exists
+  const adminPreviewUrl = artifact?.downloadUrl
+    ? (typeof artifact.downloadUrl === "string" ? artifact.downloadUrl : null)
+    : caseStudyDraft
+      ? `/admin/case-studies/${caseStudyDraft.id}`
+      : null;
+
+  // Build dossier preview URL
+  const dossierPreviewUrl = (order.metadata as Record<string, unknown> | null)?.dossierId
+    ? `/boardroom/dossier/${String((order.metadata as Record<string, unknown>).dossierId)}`
+    : null;
 
   return (
     <AdminLayout>
@@ -292,7 +487,8 @@ export default function BoardroomOrderDetailPage({
           <Field label="Order ID" value={order.id} />
           <Field label="Customer" value={order.email} />
           <Field label="Payment Status" value={order.paymentStatus} accent={order.paymentStatus === "paid" ? "#4ade80" : "#f87171"} />
-          <Field label="Delivery Status" value={currentStatus} accent={currentStatus === "delivered" ? "#4ade80" : GOLD} />
+          <Field label="Delivery Status" value={currentStatus} accent={statusColor} />
+          <Field label="Status Label" value={statusLabel} accent={statusColor} />
           <Field label="Risk Level" value={order.riskLevel} />
           <Field label="Score" value={order.score !== null ? String(order.score) : null} />
           <Field label="Source" value={order.source} />
@@ -323,36 +519,150 @@ export default function BoardroomOrderDetailPage({
           </div>
         </Section>
 
+        {/* Case Study / Dossier Draft Section */}
+        <Section title="Dossier / Case Study Draft">
+          {caseStudyDraft ? (
+            <div style={{
+              padding: "12px 16px",
+              background: "rgba(201,169,110,0.08)",
+              border: "1px solid rgba(201,169,110,0.3)",
+              marginBottom: 12,
+            }}>
+              <p style={{ ...MONO, fontSize: 11, color: GOLD, marginBottom: 4 }}>
+                Case study draft exists.
+              </p>
+              <p style={{ ...MONO, fontSize: 10, color: DIM, marginBottom: 10 }}>
+                Status: {currentStatus === "awaiting_operator_review" || currentStatus === "draft_generated"
+                  ? "Awaiting operator review"
+                  : currentStatus}
+                {caseStudyDraft.status ? ` · Case study status: ${caseStudyDraft.status}` : ""}
+              </p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <ActionButton
+                  label="Open Draft"
+                  onClick={() => window.open(`/admin/case-studies/${caseStudyDraft.id}`, "_blank")}
+                  colour="#818cf8"
+                />
+                {dossierPreviewUrl && (
+                  <ActionButton
+                    label="Preview Dossier"
+                    onClick={() => window.open(dossierPreviewUrl, "_blank")}
+                    colour="#818cf8"
+                  />
+                )}
+                {Boolean(artifact?.downloadUrl) && (
+                  <ActionButton
+                    label="View ProductArtifact"
+                    onClick={() => window.open(String(artifact?.downloadUrl), "_blank")}
+                    colour="#818cf8"
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <div style={{ ...MONO, fontSize: 11, color: DIM, padding: "8px 0", marginBottom: 12 }}>
+              No case study draft created yet. Use "Generate Dossier Draft" below to create one.
+            </div>
+          )}
+
+          {/* Admin preview link from artifact */}
+          {adminPreviewUrl && !caseStudyDraft && (
+            <div style={{ marginTop: 8 }}>
+              <ActionButton
+                label="Open Admin Preview"
+                onClick={() => window.open(adminPreviewUrl, "_blank")}
+                colour="#818cf8"
+              />
+            </div>
+          )}
+        </Section>
+
         <Section title="Actions">
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {/* Start Review — moves paid → in_review */}
             <ActionButton
               label="Start Review"
               onClick={() => transitionTo("in_review")}
-              disabled={actionState.loading || !["requested", "paid"].includes(currentStatus)}
+              disabled={actionState.loading || !canStartReview}
             />
+
+            {/* Generate Dossier Draft — creates the actual dossier + case study */}
             <ActionButton
-              label="Mark Dossier Generated"
-              onClick={() => transitionTo("dossier_generated")}
-              disabled={actionState.loading || currentStatus !== "in_review"}
+              label="Generate Dossier Draft"
+              onClick={generateDossierDraft}
+              disabled={actionState.loading || !canGenerateDraft}
+              colour="#60a5fa"
+              title="Generate the Boardroom dossier draft and case study from the paid order"
             />
-            <ActionButton
-              label="Mark Delivered"
-              onClick={() => {
-                if (!confirm(`Confirm: mark order ${order.id} as delivered? This persists deliveredAt and cannot be undone without a DB update.`)) return;
-                transitionTo("delivered");
-              }}
-              disabled={actionState.loading || currentStatus !== "dossier_generated"}
-              colour="#4ade80"
-            />
+
+            {/* Create Case Study Draft — legacy action, kept for compatibility */}
             <ActionButton
               label="Create Case Study Draft"
               onClick={createCaseStudyDraft}
               disabled={actionState.loading}
               colour="#818cf8"
             />
+
+            {/* Approve for Delivery */}
+            <ActionButton
+              label="Approve for Delivery"
+              onClick={approveForDelivery}
+              disabled={actionState.loading || !canApproveForDelivery}
+              colour="#fbbf24"
+              title="Approve the dossier draft for customer delivery"
+            />
+
+            {/* Generate Customer Access */}
+            <ActionButton
+              label="Generate Customer Access"
+              onClick={generateCustomerAccess}
+              disabled={actionState.loading || !canCreateCustomerAccess}
+              colour="#4ade80"
+              title="Create secure customer access link"
+            />
+
+            {/* Mark Delivered — guarded */}
+            <ActionButton
+              label="Mark Delivered"
+              onClick={markDelivered}
+              disabled={
+                actionState.loading ||
+                !canDeliver ||
+                !artifactIsReady ||
+                !hasAdminPreviewUrl
+              }
+              colour="#4ade80"
+              title={
+                !canDeliver ? "Cannot deliver from current state" :
+                !artifactIsReady ? "Cannot mark delivered: customer-facing artefact is not ready (artifact status must be READY or READY_FOR_DELIVERY)" :
+                !hasAdminPreviewUrl ? "Cannot mark delivered: admin preview URL is missing" :
+                "Mark as delivered and notify customer"
+              }
+            />
+
+            {/* Mark Blocked */}
+            <ActionButton
+              label="Mark Blocked"
+              onClick={() => transitionTo("blocked")}
+              disabled={actionState.loading || !isValidTransition(currentStatus, "blocked")}
+              colour="#ef4444"
+            />
           </div>
+
+          {/* Delivery readiness warnings */}
+          {currentStatus === "delivered" && !artifactIsReady && (
+            <div style={{
+              marginTop: 10, padding: "8px 12px",
+              background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+              ...MONO, fontSize: 10, color: "#f87171",
+            }}>
+              ⚠ Warning: Order is marked delivered but ProductArtifact is not in READY state.
+              This indicates a fulfilment pipeline gap.
+            </div>
+          )}
+
           <p style={{ ...MONO, fontSize: 10, color: DIM, marginTop: 10 }}>
-            Status flow: requested / paid → in_review → dossier_generated → delivered
+            Governed state machine: paid → case_stubs_created → draft_generated → awaiting_operator_review → approved_for_delivery → customer_access_ready → delivered
           </p>
         </Section>
 

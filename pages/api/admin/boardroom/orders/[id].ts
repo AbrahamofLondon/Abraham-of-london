@@ -2,19 +2,35 @@
  * pages/api/admin/boardroom/orders/[id].ts
  *
  * GET  — single Boardroom Brief order with all stubs and audit trail
- * PATCH — update deliveryStatus (start_review | dossier_generated | delivered)
+ * PATCH — update deliveryStatus using governed state machine
  *
- * Admin-guarded. Delivery requires persisted deliveredAt — not set via PATCH directly;
- * use the deliver endpoint for controlled delivery flow.
+ * Admin-guarded. Delivery requires a separate governed delivery flow —
+ * use the /deliver endpoint for controlled delivery.
+ *
+ * State machine (governed):
+ *   paid → case_stubs_created → draft_generated → awaiting_operator_review
+ *   → approved_for_delivery → customer_access_ready → delivered
+ *
+ * Legacy status values are mapped to the new state machine:
+ *   "in_review" → "awaiting_operator_review"
+ *   "dossier_generated" → "draft_generated"
  */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireAdminServer } from "@/lib/auth/requireAdminServer";
+import {
+  assertValidTransition,
+  recordBoardroomDeliveryEvent,
+  mapLegacyStatus,
+  toLegacyStatus,
+  type BoardroomDeliveryStatus,
+} from "@/lib/boardroom/boardroom-delivery-state-machine";
 
-const VALID_TRANSITIONS: Record<string, string[]> = {
-  requested: ["in_review"],
-  paid: ["in_review"],
-  in_review: ["dossier_generated"],
+// Legacy transition map for backward compatibility
+const LEGACY_TRANSITIONS: Record<string, string[]> = {
+  requested: ["in_review", "paid"],
+  paid: ["in_review", "case_stubs_created"],
+  in_review: ["dossier_generated", "draft_generated"],
   dossier_generated: ["delivered"],
 };
 
@@ -70,6 +86,9 @@ async function handleGet(id: string, res: NextApiResponse) {
     const proofMode = meta.proofMode === "true" || meta.proofMode === true;
     const deliveryDeadline = new Date(order.createdAt.getTime() + 48 * 60 * 60 * 1000).toISOString();
 
+    // Map legacy status to new state machine for response
+    const mappedStatus = mapLegacyStatus(order.deliveryStatus);
+
     return res.status(200).json({
       ok: true,
       order: {
@@ -79,6 +98,8 @@ async function handleGet(id: string, res: NextApiResponse) {
         deliveredAt: order.deliveredAt?.toISOString() ?? null,
         proofMode,
         deliveryDeadline,
+        mappedStatus, // New state machine status
+        statusLabel: mappedStatus, // For backward compat
       },
       artifact: artifact
         ? { ...artifact, createdAt: artifact.createdAt.toISOString(), updatedAt: artifact.updatedAt.toISOString() }
@@ -117,19 +138,50 @@ async function handlePatch(id: string, req: NextApiRequest, res: NextApiResponse
 
     if (!order) return res.status(404).json({ ok: false, error: "NOT_FOUND" });
 
-    const allowed = VALID_TRANSITIONS[order.deliveryStatus] ?? [];
-    if (!allowed.includes(nextStatus)) {
+    const currentStatus = order.deliveryStatus;
+
+    // Try the new state machine first, fall back to legacy transitions
+    let transitionValid = false;
+
+    try {
+      assertValidTransition(currentStatus, nextStatus, id);
+      transitionValid = true;
+    } catch {
+      // Check legacy transitions
+      const allowed = LEGACY_TRANSITIONS[currentStatus] ?? [];
+      transitionValid = allowed.includes(nextStatus);
+    }
+
+    if (!transitionValid) {
+      // Build allowed list from both state machines
+      const newAllowed = (() => {
+        try {
+          const { isValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+          const allStates: BoardroomDeliveryStatus[] = [
+            "paid", "case_stubs_created", "draft_generated", "awaiting_operator_review",
+            "approved_for_delivery", "customer_access_ready", "delivered", "blocked", "failed",
+          ];
+          return allStates.filter((s) => isValidTransition(currentStatus, s));
+        } catch { return []; }
+      })();
+
+      const legacyAllowed = LEGACY_TRANSITIONS[currentStatus] ?? [];
+      const allAllowed = [...new Set([...newAllowed, ...legacyAllowed])];
+
       return res.status(422).json({
         ok: false,
         error: "INVALID_TRANSITION",
-        current: order.deliveryStatus,
+        current: currentStatus,
         requested: nextStatus,
-        allowed,
+        allowed: allAllowed,
       });
     }
 
     // Delivery requires a separate governed delivery flow — persist deliveredAt only on "delivered"
-    const extra = nextStatus === "delivered" ? { deliveredAt: new Date() } : {};
+    const extra: Record<string, unknown> = {};
+    if (nextStatus === "delivered") {
+      extra.deliveredAt = new Date();
+    }
 
     const updated = await prisma.boardroomBriefOrder.update({
       where: { id },
@@ -137,9 +189,20 @@ async function handlePatch(id: string, req: NextApiRequest, res: NextApiResponse
       select: { id: true, deliveryStatus: true, deliveredAt: true, updatedAt: true },
     });
 
+    // Record audit event for the transition
+    await recordBoardroomDeliveryEvent({
+      orderId: id,
+      fromStatus: currentStatus,
+      toStatus: nextStatus,
+      actorEmail: adminEmail,
+      note: `Admin transition via PATCH: ${currentStatus} → ${nextStatus}`,
+    }).catch((err) => {
+      console.warn("[BOARDROOM_DELIVERY_AUDIT_FAILED]", err);
+    });
+
     console.info("[ADMIN_BOARDROOM_ORDER_STATUS_UPDATED]", {
       orderId: id,
-      from: order.deliveryStatus,
+      from: currentStatus,
       to: nextStatus,
       by: adminEmail,
     });

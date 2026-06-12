@@ -45,16 +45,24 @@ export type ArtifactSourceEntityType =
 
 export type ArtifactStatus =
   | "GENERATING"
+  | "PENDING"
+  | "DRAFT"
+  | "AWAITING_REVIEW"
   | "READY"
+  | "READY_FOR_DELIVERY"
+  | "DELIVERED"
   | "FAILED"
   | "SUPERSEDED"
   | "REVOKED";
 
 export type ArtifactDeliveryStatus =
   | "PENDING"
+  | "AWAITING_REVIEW"
+  | "READY_FOR_DELIVERY"
   | "DELIVERED"
   | "DOWNLOADED"
-  | "EXPIRED";
+  | "EXPIRED"
+  | "FAILED";
 
 export type EvidenceRef = {
   sourceId: string;
@@ -84,6 +92,8 @@ export type ProductArtifactRecord = {
   privateNotes: string | null;
   generatedBy: string | null;
   downloadUrl: string | null;
+  adminPreviewUrl: string | null;
+  customerAccessUrl: string | null;
   manifestId: string | null;
   parentArtifactId: string | null;
   createdAt: Date;
@@ -389,7 +399,7 @@ export async function getActiveArtifactForRun(
     where: {
       sourceEntityType,
       sourceEntityId,
-      status: { in: ["GENERATING", "READY"] },
+      status: { in: ["GENERATING", "DRAFT", "AWAITING_REVIEW", "READY", "READY_FOR_DELIVERY"] },
     },
     orderBy: { version: "desc" },
   });
@@ -411,10 +421,10 @@ export async function assertDeliveryAuthorised(
         "Register and finalise an artifact before marking delivery complete.",
     );
   }
-  if (artifact.status !== "READY") {
+  if (artifact.status !== "READY" && artifact.status !== "READY_FOR_DELIVERY") {
     throw new Error(
       `DELIVERY_BLOCKED: Artifact ${artifact.artifactId} is in state ${artifact.status}. ` +
-        "Only READY artifacts may be delivered.",
+        "Only READY or READY_FOR_DELIVERY artifacts may be delivered.",
     );
   }
   return artifact;
@@ -446,8 +456,8 @@ export async function getArtifactsPendingDelivery(
 ): Promise<ProductArtifactRecord[]> {
   const records = await prisma.productArtifact.findMany({
     where: {
-      status: "READY",
-      deliveryStatus: "PENDING",
+      status: { in: ["READY", "READY_FOR_DELIVERY"] },
+      deliveryStatus: { in: ["PENDING", "AWAITING_REVIEW", "READY_FOR_DELIVERY"] },
       ...(productCode ? { productCode } : {}),
     },
     orderBy: { createdAt: "asc" },
@@ -488,6 +498,8 @@ function parseArtifactRecord(record: Record<string, unknown>): ProductArtifactRe
     privateNotes: (record.privateNotes as string | null) ?? null,
     generatedBy: (record.generatedBy as string | null) ?? null,
     downloadUrl: (record.downloadUrl as string | null) ?? null,
+    adminPreviewUrl: (record.adminPreviewUrl as string | null) ?? null,
+    customerAccessUrl: (record.customerAccessUrl as string | null) ?? null,
     manifestId: (record.manifestId as string | null) ?? null,
     parentArtifactId: (record.parentArtifactId as string | null) ?? null,
     createdAt: record.createdAt as Date,

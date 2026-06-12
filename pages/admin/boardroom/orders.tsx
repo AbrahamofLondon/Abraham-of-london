@@ -127,19 +127,31 @@ function isOverdue(row: BoardroomOrderRow): boolean {
 function statusColor(status: string): string {
   switch (status) {
     case "delivered": return "#4ade80";
-    case "dossier_generated": return GOLD;
+    case "customer_access_ready": return "#4ade80";
+    case "approved_for_delivery": return "#4ade80";
+    case "dossier_generated":
+    case "draft_generated": return "#c9a96e";
+    case "awaiting_operator_review":
     case "in_review": return "#60a5fa";
+    case "case_stubs_created": return "#60a5fa";
     case "paid":
     case "requested": return "#f87171";
+    case "blocked":
+    case "failed": return "#ef4444";
     default: return DIM;
   }
 }
 
 function nextAction(row: BoardroomOrderRow): string {
   if (row.deliveryStatus === "delivered") return "Delivered";
-  if (row.deliveryStatus === "dossier_generated") return "Ready to deliver";
-  if (row.deliveryStatus === "in_review") return "Dossier generation pending";
+  if (row.deliveryStatus === "customer_access_ready") return "Ready to deliver";
+  if (row.deliveryStatus === "approved_for_delivery") return "Generate customer access";
+  if (row.deliveryStatus === "dossier_generated" || row.deliveryStatus === "draft_generated") return "Awaiting review";
+  if (row.deliveryStatus === "awaiting_operator_review" || row.deliveryStatus === "in_review") return "Review pending";
+  if (row.deliveryStatus === "case_stubs_created") return "Generate dossier";
   if (row.deliveryStatus === "paid" || row.deliveryStatus === "requested") return "Needs review";
+  if (row.deliveryStatus === "blocked") return "Blocked";
+  if (row.deliveryStatus === "failed") return "Failed";
   return "—";
 }
 
@@ -148,11 +160,20 @@ type FilterTab = "all" | "pending_review" | "generated" | "delivered" | "overdue
 function applyFilter(orders: BoardroomOrderRow[], filter: FilterTab): BoardroomOrderRow[] {
   switch (filter) {
     case "pending_review":
-      return orders.filter((o) => o.paymentStatus === "paid" && (o.deliveryStatus === "requested" || o.deliveryStatus === "paid" || o.deliveryStatus === "in_review"));
+      return orders.filter((o) =>
+        o.paymentStatus === "paid" &&
+        (o.deliveryStatus === "requested" || o.deliveryStatus === "paid" ||
+         o.deliveryStatus === "in_review" || o.deliveryStatus === "awaiting_operator_review" ||
+         o.deliveryStatus === "case_stubs_created")
+      );
     case "generated":
-      return orders.filter((o) => o.deliveryStatus === "dossier_generated");
+      return orders.filter((o) =>
+        o.deliveryStatus === "dossier_generated" || o.deliveryStatus === "draft_generated"
+      );
     case "delivered":
-      return orders.filter((o) => o.deliveryStatus === "delivered");
+      return orders.filter((o) =>
+        o.deliveryStatus === "delivered" || o.deliveryStatus === "customer_access_ready" || o.deliveryStatus === "approved_for_delivery"
+      );
     case "overdue":
       return orders.filter(isOverdue);
     case "proof":

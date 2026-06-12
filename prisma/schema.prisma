@@ -5457,18 +5457,20 @@ model ProductArtifact {
   userEmail             String?
   organisationId        String?
   version               Int       @default(1)
-  status                String    @default("GENERATING")
+  status                String    @default("GENERATING") // GENERATING | PENDING | DRAFT | AWAITING_REVIEW | READY | READY_FOR_DELIVERY | DELIVERED | FAILED | SUPERSEDED | REVOKED
   inputSnapshotHash     String?
   artifactHash          String?
   evidenceRefs          Json      @default("[]")
   falsificationRefs     Json      @default("[]")
   outcomeHypothesisId   String?
-  deliveryStatus        String    @default("PENDING")
+  deliveryStatus        String    @default("PENDING") // PENDING | AWAITING_REVIEW | READY_FOR_DELIVERY | DELIVERED | DOWNLOADED | EXPIRED | FAILED
   deliveredAt           DateTime?
   publicSafeSummary     String?
   privateNotes          String?
   generatedBy           String?
-  downloadUrl           String?
+  downloadUrl           String?   // Used as adminPreviewUrl for Boardroom dossiers
+  adminPreviewUrl       String?   // Explicit admin preview URL for the generated artifact
+  customerAccessUrl     String?   // Customer-facing secure access URL (populated after approval)
   manifestId            String?
   parentArtifactId      String?
   createdAt             DateTime  @default(now())
