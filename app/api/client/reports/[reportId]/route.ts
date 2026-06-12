@@ -79,6 +79,7 @@ export async function GET(
       select: {
         id: true,
         status: true,
+        fullName: true,
         canonicalSnapshot: true,
       },
     });
@@ -125,6 +126,7 @@ export async function GET(
       report: {
         id: run.id,
         state: snapshot.state,
+        clientName: run.fullName ?? null,
         narrative: snapshot.narrative,
         financialExposure: snapshot.financialExposure,
         priorityStack: snapshot.priorityStack,

@@ -12,6 +12,7 @@ import ArrivalScreen from "@/components/report/arrival/ArrivalScreen";
 type ReportData = {
   id: string;
   state: string;
+  clientName: string | null;
   narrative: { headline: string; summary: string; mandate: string };
   financialExposure: { totalExposure: number; replacementCost: number; executionLoss: number };
   priorityStack: string[];
@@ -90,6 +91,7 @@ function ClientReportPageInner() {
   return (
     <ArrivalScreen
       tier="executive"
+      customerName={report.clientName ?? undefined}
       referenceId={`AoL-ER-${report.id.slice(0, 8).toUpperCase()}`}
       productName="Executive Report"
       issueDate={new Intl.DateTimeFormat("en-GB", {
@@ -98,7 +100,9 @@ function ClientReportPageInner() {
         year: "numeric",
       }).format(new Date())}
       weightStatement="This report is a governed executive analysis generated through a controlled intelligence system and prepared for restricted review."
-      onComplete={() => undefined}
+      onComplete={() => {
+        fetch(`/api/client/reports/${report.id}/view`, { method: "POST" }).catch(() => undefined);
+      }}
     >
       <div className="min-h-screen bg-black text-white">
       <header className="border-b border-white/10 px-6 py-5">
@@ -115,6 +119,11 @@ function ClientReportPageInner() {
           <h1 className="text-xl font-serif italic text-white/80 leading-tight">
             {report.narrative.headline}
           </h1>
+          {report.clientName && (
+            <p className="text-[10px] font-mono text-white/25 mt-2 tracking-wider">
+              Prepared for {report.clientName}
+            </p>
+          )}
         </div>
       </header>
 
@@ -141,7 +150,7 @@ function ClientReportPageInner() {
         {/* Financial exposure */}
         <div className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
           <p className="text-[10px] font-mono uppercase tracking-widest text-white/20 mb-3">Financial Exposure</p>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-[10px] text-white/30">Total</p>
               <p className="text-lg font-mono text-amber-300/80">£{Math.round(report.financialExposure.totalExposure).toLocaleString()}</p>

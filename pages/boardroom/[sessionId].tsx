@@ -33,12 +33,20 @@ export default function BoardroomPage(props: PageProps) {
       </Head>
       <div style={{ backgroundColor: "rgb(3,3,5)", minHeight: "100vh", color: "white" }}>
         <div style={{ maxWidth: "72rem", margin: "0 auto", padding: "48px 24px 96px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
-            Boardroom dossier
-          </span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+              Boardroom dossier
+            </span>
+            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.10)", padding: "3px 8px" }}>
+              BOARDROOM · CONFIDENTIAL
+            </span>
+          </div>
           <h1 style={{ ...serif, fontSize: "clamp(2rem, 4vw, 3rem)", lineHeight: 1.02, color: "rgba(255,255,255,0.90)", fontStyle: "italic", marginTop: "10px" }}>
             {props.organisationName ?? "Boardroom readiness"}
           </h1>
+          <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
+            Ref: AoL-BB-{props.sessionId.slice(0, 8).toUpperCase()}
+          </p>
 
           {props.error && (
             <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(252,165,165,0.70)", marginTop: "16px" }}>
@@ -157,6 +165,18 @@ export default function BoardroomPage(props: PageProps) {
                 )}
               </div>
             </>
+          )}
+
+          {props.qualified && props.dossier && (
+            <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "18px 20px", marginTop: "32px" }}>
+              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                Challenge this dossier
+              </p>
+              <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.38)", marginTop: "8px" }}>
+                If any finding here does not reflect the decision as you understand it, or if key evidence was omitted, raise it through your delivery route before acting on this output.
+                This dossier reflects structured analysis of available evidence — it is not an audit and should be treated as decision support, not a final judgement.
+              </p>
+            </div>
           )}
 
           <div style={{ marginTop: "24px" }}>

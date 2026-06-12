@@ -191,20 +191,36 @@ export function evaluateGoldStandardStatus(params: {
   const premium = isPremiumCommercialTier(params.commercialTier);
   const hasPdf = params.outputFormat.includes("pdf");
 
-  if (
-    paid &&
-    (!params.arrivalImplemented ||
-      !params.preparedForImplemented ||
-      !params.executiveFramingImplemented ||
-      !params.deliveryStateClarityImplemented ||
-      !params.feedbackLoopImplemented ||
-      !params.adminPreviewSafe)
-  ) {
-    return "not_safe_for_paid_delivery";
+  // SAFETY GATE: only truly absent (score=0) critical dimensions trigger not_safe_for_paid_delivery.
+  // Quality gaps (score 1–2) belong in needs_upgrade, not safety classification.
+  if (paid) {
+    const arrivalAbsent = !params.arrivalImplemented && params.score.arrival === 0;
+    const deliveryAbsent = params.score.deliveryStateClarity === 0;
+    const framingAbsent = params.score.executiveFraming === 0;
+    if (arrivalAbsent || deliveryAbsent || framingAbsent) {
+      return "not_safe_for_paid_delivery";
+    }
   }
 
+  // UPGRADE GATE: paid output below acceptable threshold on any critical dimension
   if (
     paid &&
+    (params.score.arrival < 2 ||
+      params.score.identity < 2 ||
+      params.score.executiveFraming < 2 ||
+      params.score.decisionUsefulness < 2 ||
+      params.score.visualAuthority < 2 ||
+      params.score.deliveryStateClarity < 2 ||
+      params.score.clientSpecificity < 1 ||
+      params.score.evidenceAndProvenance < 1 ||
+      (hasPdf && params.score.pdfReadability < 2))
+  ) {
+    return "needs_upgrade";
+  }
+
+  // PREMIUM THRESHOLD: premium output below gold-standard on premium-specific dimensions
+  if (
+    premium &&
     (params.score.arrival < 3 ||
       params.score.identity < 3 ||
       params.score.executiveFraming < 3 ||
@@ -213,22 +229,10 @@ export function evaluateGoldStandardStatus(params: {
       params.score.deliveryStateClarity < 3 ||
       params.score.clientSpecificity < 2 ||
       params.score.evidenceAndProvenance < 2 ||
+      params.score.forensicTraceability < 2 ||
       params.score.mobileReadability < 2 ||
-      (hasPdf && params.score.pdfReadability < 2))
-  ) {
-    return "not_safe_for_paid_delivery";
-  }
-
-  if (
-    premium &&
-    (params.score.clientSpecificity < 3 ||
-      params.score.evidenceAndProvenance < 3 ||
-      params.score.forensicTraceability < 3 ||
-      params.score.mobileReadability < 3 ||
       (hasPdf && params.score.pdfReadability < 3) ||
-      params.score.adminPreviewSafety < 3 ||
-      params.score.feedbackLoop < 3 ||
-      params.score.reuseAndForwardability < 3)
+      !params.feedbackLoopImplemented)
   ) {
     return "needs_upgrade";
   }
