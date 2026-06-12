@@ -1,0 +1,1166 @@
+{
+  "generatedAt": "2026-06-12T16:06:28.530Z",
+  "rows": [
+    {
+      "productCode": "fast_diagnostic",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "fast_diagnostic",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "fast_diagnostic",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "boardroom_brief",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "boardroom_brief",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "boardroom_brief",
+      "alternative": "strategy_workshop",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Live facilitation, group alignment, real-time challenge from an experienced operator.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "execution_risk_index",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "execution_risk_index",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "execution_risk_index",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "board_brief_builder",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "board_brief_builder",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "board_brief_builder",
+      "alternative": "strategy_workshop",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Live facilitation, group alignment, real-time challenge from an experienced operator.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "operator_essentials_pack",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "operator_essentials_pack",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "operator_essentials_pack",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "command_pack",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "command_pack",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "command_pack",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "governance_suite",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "governance_suite",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "governance_suite",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "alternative": "market_report",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Institutional research depth, named analysts, methodological track record.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "alternative": "market_report",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Institutional research depth, named analysts, methodological track record.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "team_assessment",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "team_assessment",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "team_assessment",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "uncertain"
+    },
+    {
+      "productCode": "boardroom_mode",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "boardroom_mode",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "boardroom_mode",
+      "alternative": "strategy_workshop",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Live facilitation, group alignment, real-time challenge from an experienced operator.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "executive_reporting",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "executive_reporting",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "executive_reporting",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategy_room",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategy_room",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategy_room",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "inner_circle",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "inner_circle",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "inner_circle",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_core",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_core",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_core",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_operational",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_operational",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_operational",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_institutional",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_institutional",
+      "alternative": "downloadable_template",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "retainer_institutional",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "professional",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "professional",
+      "alternative": "internal_team_analysis",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Full context, institutional knowledge, always available.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "professional",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "professional_annual",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "professional_annual",
+      "alternative": "internal_team_analysis",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Full context, institutional knowledge, always available.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "professional_annual",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "enterprise",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "enterprise",
+      "alternative": "internal_team_analysis",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Full context, institutional knowledge, always available.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "enterprise",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "additional_collaborator",
+      "alternative": "generic_ai_prompt",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "additional_collaborator",
+      "alternative": "internal_team_analysis",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Full context, institutional knowledge, always available.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    },
+    {
+      "productCode": "additional_collaborator",
+      "alternative": "consultant_mini_audit",
+      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
+      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
+      "wouldCustomerReturnAfterOneUse": "no"
+    }
+  ]
+}

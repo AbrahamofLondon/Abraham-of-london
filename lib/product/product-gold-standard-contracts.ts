@@ -84,20 +84,19 @@ const OWNED_UPGRADE_CODES = new Set([
 ]);
 
 /**
- * Products certified at 9.8 by the Wave 1 gold standard gate
- * (scripts/check-wave-one-gold-standard.mjs; evidence in
- * reports/wave-one-gold-standard.json). Only free, non-checkout trust
- * surfaces may be certified through Wave 1; paid products remain blocked
- * while Stripe/webhook authority and live-cycle proof are unresolved.
+ * Doctrine: externally proven gold or blocked. No self-certification.
+ *
+ * Membership requires external proof via the external product value
+ * benchmark gate (scripts/check-external-product-value-benchmark.mjs):
+ * actual rendered output review, anti-toy test (toyRiskScore <= 5),
+ * red-team reviewer survival, market outperformance, and time-value proof.
+ *
+ * Wave 1 internal certification (composer/output-standard verification,
+ * reports/wave-one-gold-standard.json) is necessary but NOT sufficient;
+ * the 2026-06-12 external benchmark revoked all six internal gold claims
+ * (template-dominant judgement; live surfaces not wired to composers).
  */
-const GOLD_STANDARD_CODES = new Set<string>([
-  "fast_diagnostic",
-  "team_assessment",
-  "enterprise_assessment",
-  "case_dossier_tariff_shock",
-  "case_dossier_team_alignment",
-  "case_dossier_escalation_denied",
-]);
+const GOLD_STANDARD_CODES = new Set<string>();
 
 export function getProductGoldStandardContract(productCode: string): ProductGoldStandardContract | null {
   const product = getAllProducts().find((entry) => entry.code === productCode);

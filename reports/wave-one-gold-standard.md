@@ -1,4 +1,8 @@
-# Wave 1 Gold Standard Report
+# Wave 1 Gold Standard Report — Internal Certification Only
+
+> Internal certification is not gold. A product is gold only when externally
+> proven by the external product value benchmark: actual rendered output,
+> anti-toy test, red-team review, market comparison, time-value proof.
 
 ## Gate Result
 
@@ -51,12 +55,12 @@ PASSED
 
 | Product | Before Status | After Score | Release Status | Reason |
 |---|---:|---:|---|---|
-| fast_diagnostic | 5.8 (blocked_from_release) | 9.8 | gold_standard | Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface. |
-| team_assessment | 5.8 (blocked_from_release) | 9.8 | gold_standard | Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface. |
-| enterprise_assessment | 5.8 (blocked_from_release) | 9.8 | gold_standard | Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface. |
-| case_dossier_tariff_shock | 7.7 (blocked_from_release) | 9.8 | gold_standard | Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface. |
-| case_dossier_team_alignment | 7.7 (blocked_from_release) | 9.8 | gold_standard | Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface. |
-| case_dossier_escalation_denied | 7.7 (blocked_from_release) | 9.8 | gold_standard | Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface. |
+| fast_diagnostic | 5.8 (blocked_from_release) | 9.8 | internally_certified | Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark. |
+| team_assessment | 5.8 (blocked_from_release) | 9.8 | internally_certified | Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark. |
+| enterprise_assessment | 5.8 (blocked_from_release) | 9.8 | internally_certified | Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark. |
+| case_dossier_tariff_shock | 7.7 (blocked_from_release) | 9.8 | internally_certified | Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark. |
+| case_dossier_team_alignment | 7.7 (blocked_from_release) | 9.8 | internally_certified | Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark. |
+| case_dossier_escalation_denied | 7.7 (blocked_from_release) | 9.8 | internally_certified | Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark. |
 | personal_decision_audit | 7.7 (blocked_from_release) | 9.7 | blocked_from_release | Stripe/webhook authority is unresolved for a checkout-dependent product. |
 | alignment_audit_playbook | 7.7 (blocked_from_release) | 9.7 | blocked_from_release | Stripe/webhook authority is unresolved for a checkout-dependent product. |
 | drift_detection_framework | 7.7 (blocked_from_release) | 9.7 | blocked_from_release | Stripe/webhook authority is unresolved for a checkout-dependent product. |
@@ -116,7 +120,8 @@ PASSED
 
 ## Remaining Risks
 
-- Report experience remains AMBER for paid report-like products; no hard failures affect Wave 1 free-surface release.
+- Internal certification is composer-level only; it carries no release authority until the external value benchmark proves the actual output.
+- Report experience remains AMBER for paid report-like products; no hard failures affect Wave 1 free-surface certification.
 - Live-cycle proof remains pending — all paid Wave 1 products stay blocked regardless of composition quality.
 - Stripe/webhook authority remains unresolved — all checkout-dependent Wave 1 products stay blocked.
 - Composer verification is static; runtime validation executes in lib/product composers on every composition.

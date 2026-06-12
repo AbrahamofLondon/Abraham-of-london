@@ -162,7 +162,13 @@ export const WAVE_ONE_SCORING_DIMENSIONS: WaveOneScoringDimension[] = [
 export const WAVE_ONE_GOLD_THRESHOLD = 9.8;
 export const WAVE_ONE_CRITICAL_DIMENSION_MINIMUM = 9.5;
 
-export type WaveOneReleaseStatus = "gold_standard" | "blocked_from_release";
+/**
+ * Wave 1 can certify internally only. Internal certification is necessary
+ * but not sufficient for release: gold requires external proof through the
+ * external product value benchmark (actual rendered output, anti-toy test,
+ * red-team review, market comparison). Externally proven gold or blocked.
+ */
+export type WaveOneReleaseStatus = "internally_certified" | "blocked_from_release";
 
 export interface WaveOneValidationResult {
   productCode: string;

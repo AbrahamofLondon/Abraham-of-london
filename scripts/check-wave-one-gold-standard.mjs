@@ -2,10 +2,13 @@
 /**
  * Wave 1 Gold Standard gate — trust surfaces and decision instruments.
  *
- * Verifies that every Wave 1 product has a gold-standard composer enforcing
- * the universal nine-section output standard, rescores each product across
- * the ten Wave 1 dimensions at the 9.8 threshold, and certifies products as
- * gold_standard or blocked_from_release. Paid products remain blocked while
+ * INTERNAL CERTIFICATION ONLY. Verifies that every Wave 1 product has a
+ * composer enforcing the universal nine-section output standard, rescores
+ * each product across the ten Wave 1 dimensions at the 9.8 threshold, and
+ * classifies products as internally_certified or blocked_from_release.
+ * Internal certification carries no release authority: gold requires the
+ * external product value benchmark (actual rendered output, anti-toy test,
+ * red-team review, market comparison). Paid products remain blocked while
  * Stripe/webhook authority and live-cycle proof are unresolved.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -190,24 +193,24 @@ const evidence = {
 // ── Score each Wave 1 product ──
 const results = products.map((product) => scoreProduct(product, evidence));
 
-const goldProducts = results.filter((result) => result.releaseStatus === "gold_standard");
+const certifiedProducts = results.filter((result) => result.releaseStatus === "internally_certified");
 const blockedProducts = results.filter((result) => result.releaseStatus === "blocked_from_release");
 
-// Self-consistency: nothing below standard may be marked gold.
-for (const result of goldProducts) {
+// Self-consistency: nothing below standard may be internally certified.
+for (const result of certifiedProducts) {
   if (result.overallScore < GOLD_THRESHOLD) {
-    failures.push(`${result.productCode}: marked gold_standard below ${GOLD_THRESHOLD}.`);
+    failures.push(`${result.productCode}: internally certified below ${GOLD_THRESHOLD}.`);
   }
   const weakDimension = Object.entries(result.dimensionScores).find(([, score]) => score < CRITICAL_MINIMUM);
   if (weakDimension) {
-    failures.push(`${result.productCode}: gold_standard with critical dimension ${weakDimension[0]} below ${CRITICAL_MINIMUM}.`);
+    failures.push(`${result.productCode}: internally certified with critical dimension ${weakDimension[0]} below ${CRITICAL_MINIMUM}.`);
   }
 }
 
-// Wave 1 purpose: the free trust surfaces must reach gold this wave.
+// Wave 1 purpose: the free trust surfaces must reach internal certification.
 for (const result of results.filter((entry) => entry.commercialTier === "free")) {
-  if (result.releaseStatus !== "gold_standard") {
-    failures.push(`${result.productCode}: free trust surface did not reach gold standard — ${result.reasons.join(" ")}`);
+  if (result.releaseStatus !== "internally_certified") {
+    failures.push(`${result.productCode}: free trust surface did not reach internal certification — ${result.reasons.join(" ")}`);
   }
 }
 
@@ -217,9 +220,10 @@ const report = {
   generatedAt: new Date().toISOString(),
   gate,
   threshold: { overall: GOLD_THRESHOLD, criticalDimensionMinimum: CRITICAL_MINIMUM },
+  certificationAuthority: "INTERNAL ONLY — internal certification is not gold. Release gold requires external proof via scripts/check-external-product-value-benchmark.mjs (actual rendered output, anti-toy test, red-team review, market comparison).",
   waveOneProducts: products.map((product) => product.productCode),
   productsReviewed: results.length,
-  goldStandard: goldProducts.length,
+  internallyCertified: certifiedProducts.length,
   blockedFromRelease: blockedProducts.length,
   estateEvidence: evidence,
   composerStatus,
@@ -235,7 +239,7 @@ const report = {
     "Optional Deeper Route",
   ],
   results,
-  goldStandardProducts: goldProducts.map((result) => result.productCode),
+  internallyCertifiedProducts: certifiedProducts.map((result) => result.productCode),
   blockedProductsDetail: blockedProducts.map(({ productCode, overallScore, reasons }) => ({ productCode, overallScore, reasons })),
   timeValueSurplusEvidence: results
     .filter((result) => result.commercialTier === "free")
@@ -246,7 +250,8 @@ const report = {
       basis: "Composer-enforced output returns a named diagnosis, consequence, one directive next move, an honest limit, and an escalation trigger within the stated time budget.",
     })),
   remainingRisks: [
-    "Report experience remains AMBER for paid report-like products; no hard failures affect Wave 1 free-surface release.",
+    "Internal certification is composer-level only; it carries no release authority until the external value benchmark proves the actual output.",
+    "Report experience remains AMBER for paid report-like products; no hard failures affect Wave 1 free-surface certification.",
     "Live-cycle proof remains pending — all paid Wave 1 products stay blocked regardless of composition quality.",
     "Stripe/webhook authority remains unresolved — all checkout-dependent Wave 1 products stay blocked.",
     "Composer verification is static; runtime validation executes in lib/product composers on every composition.",
@@ -259,10 +264,11 @@ mkdirSync(REPORT_DIR, { recursive: true });
 writeFileSync(JSON_REPORT, `${JSON.stringify(report, null, 2)}\n`);
 writeFileSync(MD_REPORT, renderMarkdown(report));
 
-console.log("WAVE 1 GOLD STANDARD CHECK");
+console.log("WAVE 1 GOLD STANDARD CHECK (INTERNAL CERTIFICATION ONLY)");
 console.log(`Wave 1 products reviewed: ${report.productsReviewed}`);
-console.log(`Gold standard: ${report.goldStandard}`);
+console.log(`Internally certified (not gold): ${report.internallyCertified}`);
 console.log(`Blocked from release: ${report.blockedFromRelease}`);
+console.log("Release gold requires the external product value benchmark.");
 console.log(`Gate: ${report.gate}`);
 
 if (failures.length > 0) {
@@ -300,7 +306,7 @@ function scoreProduct(product, estate) {
   const overallScore = round1(average(Object.values(scores)));
   const criticalBreach = Object.values(scores).some((score) => score < CRITICAL_MINIMUM);
   const releaseStatus = overallScore >= GOLD_THRESHOLD && !criticalBreach && reasons.length === 0
-    ? "gold_standard"
+    ? "internally_certified"
     : "blocked_from_release";
 
   if (overallScore < GOLD_THRESHOLD && reasons.length === 0) {
@@ -320,8 +326,8 @@ function scoreProduct(product, estate) {
     releaseStatus,
     minutesAskedOfUser,
     timeValueSurplusPassed: product.commercialTier === "free" && composerVerified,
-    reasons: releaseStatus === "gold_standard"
-      ? ["Composer-enforced nine-section output verified; all dimensions at or above 9.5; overall at or above 9.8; time-value surplus holds; no unresolved authority applies to a free surface."]
+    reasons: releaseStatus === "internally_certified"
+      ? ["Internally certified: composer-enforced nine-section output verified at composer level. NOT gold — release gold requires external proof via the external product value benchmark."]
       : reasons,
   };
 }
@@ -368,7 +374,11 @@ function renderMarkdown(data) {
     `| ${result.productCode} | ${DIMENSIONS.map((dimension) => result.dimensionScores[dimension].toFixed(1)).join(" | ")} | ${result.overallScore.toFixed(1)} |`
   ).join("\n");
 
-  return `# Wave 1 Gold Standard Report
+  return `# Wave 1 Gold Standard Report — Internal Certification Only
+
+> Internal certification is not gold. A product is gold only when externally
+> proven by the external product value benchmark: actual rendered output,
+> anti-toy test, red-team review, market comparison, time-value proof.
 
 ## Gate Result
 

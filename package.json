@@ -155,6 +155,7 @@
     "check:product-gold-upgrade-roadmap": "node scripts/check-product-gold-upgrade-roadmap.mjs",
     "check:product-gold-release-readiness": "node scripts/check-product-gold-release-readiness.mjs",
     "check:wave-one-gold-standard": "node scripts/check-wave-one-gold-standard.mjs",
+    "check:external-product-value-benchmark": "node scripts/check-external-product-value-benchmark.mjs",
     "check:deps": "npm-check --skip-unused",
     "security:audit": "pnpm audit --prod",
     "security:grep": "node scripts/security/audit-public-ip-exposure.mjs",

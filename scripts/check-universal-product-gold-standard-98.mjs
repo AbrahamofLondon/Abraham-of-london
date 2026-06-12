@@ -61,17 +61,25 @@ const gmiRegistrySource = read("lib/commercial/gmi/gmi-edition-registry.ts");
 const valueReport = readJsonIfExists("reports/universal-product-value.json");
 const reportExperience = readJsonIfExists("reports/report-experience-gold-standard.json");
 const waveOneReport = readJsonIfExists("reports/wave-one-gold-standard.json");
+const externalBenchmarkReport = readJsonIfExists("reports/external-product-value-benchmark.json");
 
-// Wave 1 certification supplies the 9.8 output-standard proof for free,
-// non-checkout trust surfaces only. Paid products can never be certified
-// through this route while Stripe/webhook and live-cycle proof are
-// unresolved; the Wave 1 gate enforces that and this filter re-enforces it.
-const WAVE_ONE_CERTIFIED = new Set(
-  waveOneReport?.gate === "PASSED"
-    ? (waveOneReport.results ?? [])
-      .filter((result) => result.releaseStatus === "gold_standard" && result.commercialTier === "free" && !result.requiresCheckout)
+// Doctrine: externally proven gold or blocked. Internal certification
+// (Wave 1 composer/output-standard work) is necessary but NOT sufficient.
+// Only products proven by the external value benchmark gate — actual
+// rendered output, anti-toy test, red-team review, market comparison —
+// carry gold release authority here. No self-certification.
+const EXTERNALLY_PROVEN = new Set(
+  externalBenchmarkReport?.gate === "PASSED"
+    ? (externalBenchmarkReport.results ?? [])
+      .filter((result) => result.finalStatus === "externally_proven_gold")
       .map((result) => result.productCode)
     : [],
+);
+
+const INTERNALLY_CERTIFIED = new Set(
+  (waveOneReport?.results ?? [])
+    .filter((result) => result.releaseStatus === "internally_certified" || result.releaseStatus === "gold_standard")
+    .map((result) => result.productCode),
 );
 const products = mergeByCode([
   ...parseCatalogProducts(catalogSource),
@@ -89,10 +97,12 @@ const context = {
   liveCyclePending: hasWarning(reportExperience, "LIVE_CYCLE_PENDING"),
   stripeWebhookUnconfirmed: hasWarning(reportExperience, "STRIPE_WEBHOOK_UNCONFIRMED"),
   valueGateStructurallyPassed: valueReport?.gate === "PASSED STRUCTURALLY" || valueReport?.gate === "PASSED",
-  waveOneCertification: {
-    source: "reports/wave-one-gold-standard.json",
-    gate: waveOneReport?.gate ?? "NOT_RUN",
-    certifiedProducts: [...WAVE_ONE_CERTIFIED].sort(),
+  externalProof: {
+    source: "reports/external-product-value-benchmark.json",
+    gate: externalBenchmarkReport?.gate ?? "NOT_RUN",
+    externallyProvenProducts: [...EXTERNALLY_PROVEN].sort(),
+    internallyCertifiedNotProven: [...INTERNALLY_CERTIFIED].filter((code) => !EXTERNALLY_PROVEN.has(code)).sort(),
+    doctrine: "Internally certified is not gold. Externally proven gold or blocked.",
   },
 };
 
@@ -174,7 +184,7 @@ const report = {
     "Live-cycle proof remains pending across delivery classes.",
     "Stripe/webhook authority remains unresolved for paid checkout-dependent products.",
     "Most product contracts now function as blocking authorities until actual artefact, journey, and delivery proof reaches 98/100.",
-    "Wave 1 certification covers free, non-checkout trust surfaces only; paid Wave 1 products remain blocked pending Stripe/webhook and live-cycle proof.",
+    "Wave 1 internal certification was revoked as gold authority: products are gold only when externally proven (actual rendered output, anti-toy, red-team, market comparison).",
   ],
   failures,
   finalRecommendation: gate === "PASSED" ? "GREEN" : "RED",
@@ -240,10 +250,10 @@ function evaluateProduct(product, evidence) {
 }
 
 function scoreDimensions(product, tier, deliveryClass) {
-  const waveOneCertified = WAVE_ONE_CERTIFIED.has(product.code);
-  const strongCandidate = GOLD_CANDIDATE_CODES.has(product.code) || waveOneCertified;
+  const externallyProven = EXTERNALLY_PROVEN.has(product.code);
+  const strongCandidate = GOLD_CANDIDATE_CODES.has(product.code) || externallyProven;
   const inactive = !product.active || BLOCKED_CODES.has(product.code);
-  const previousBelowMarket = PREVIOUS_BELOW_MARKET_CODES.has(product.code) && !waveOneCertified;
+  const previousBelowMarket = PREVIOUS_BELOW_MARKET_CODES.has(product.code) && !externallyProven;
   const base =
     inactive ? 55 :
       previousBelowMarket ? 66 :
@@ -257,7 +267,7 @@ function scoreDimensions(product, tier, deliveryClass) {
   return Object.fromEntries(GOLD_98_DIMENSIONS.map((dimension) => {
     let score = base;
     if (dimension === "category_distinction" && !strongCandidate && tier !== "enterprise") score -= 10;
-    if (dimension === "price_or_time_value_surplus" && tier === "free" && !waveOneCertified) score -= 2;
+    if (dimension === "price_or_time_value_surplus" && tier === "free" && !externallyProven) score -= 2;
     if (dimension === "experience_quality" && previousBelowMarket) score -= 8;
     if (dimension === "reuse_or_return_value" && deliveryClass === "bundle_grant") score -= 12;
     return [dimension, clampScore(score)];
@@ -266,10 +276,11 @@ function scoreDimensions(product, tier, deliveryClass) {
 
 function applyEvidencePenalties(rawScore, product, tier, deliveryClass, evidence) {
   let score = rawScore;
-  // Wave-one-certified free surfaces have their output experience verified
-  // directly by the Wave 1 gate; the AMBER report-experience penalty
-  // concerns the paid report pipeline and is not hidden by this exemption.
-  if (evidence.reportExperienceAmber && isReportLike(product, tier, deliveryClass) && !WAVE_ONE_CERTIFIED.has(product.code)) score -= 6;
+  // Externally proven products have had their actual rendered output
+  // verified by the external value benchmark gate; the AMBER report-
+  // experience penalty concerns the paid report pipeline and is not hidden
+  // by this exemption.
+  if (evidence.reportExperienceAmber && isReportLike(product, tier, deliveryClass) && !EXTERNALLY_PROVEN.has(product.code)) score -= 6;
   if (evidence.liveCyclePending && isPaidTier(tier) && product.active) score -= 5;
   if (evidence.stripeWebhookUnconfirmed && product.requiresCheckout) score -= 5;
   if (!evidence.valueGateStructurallyPassed && isPaidTier(tier)) score -= 10;
@@ -284,8 +295,11 @@ function blockingReasonsFor(product, tier, deliveryClass, scoreOutOf100, evidenc
   if (!product.active || BLOCKED_CODES.has(product.code)) {
     reasons.push("Product is already inactive, future-dated, duplicate, or structurally blocked.");
   }
-  if (PREVIOUS_BELOW_MARKET_CODES.has(product.code) && !WAVE_ONE_CERTIFIED.has(product.code)) {
-    reasons.push("Previously below-market or owned-upgrade product; 9.8 proof has not been supplied.");
+  if (PREVIOUS_BELOW_MARKET_CODES.has(product.code) && !EXTERNALLY_PROVEN.has(product.code)) {
+    reasons.push("Previously below-market or owned-upgrade product; externally proven 9.8 evidence has not been supplied.");
+  }
+  if (INTERNALLY_CERTIFIED.has(product.code) && !EXTERNALLY_PROVEN.has(product.code)) {
+    reasons.push("Internally certified by Wave 1 but revoked or unproven by the external value benchmark; externally proven gold or blocked.");
   }
   if (scoreOutOf100 < GOLD_THRESHOLD) {
     reasons.push(`9.8 score is ${scoreOutOf100}/100, below the 98/100 release threshold.`);
@@ -308,7 +322,7 @@ function blockingReasonsFor(product, tier, deliveryClass, scoreOutOf100, evidenc
   if ((tier === "subscription" || tier === "retainer") && scoreOutOf100 < GOLD_THRESHOLD) {
     reasons.push("Subscription/retainer product needs continuity-value proof before scale.");
   }
-  if (evidence.reportExperienceAmber && isReportLike(product, tier, deliveryClass) && !WAVE_ONE_CERTIFIED.has(product.code)) {
+  if (evidence.reportExperienceAmber && isReportLike(product, tier, deliveryClass) && !EXTERNALLY_PROVEN.has(product.code)) {
     reasons.push("Report experience remains AMBER or unsafe without owned resolution.");
   }
   if (evidence.liveCyclePending && isPaidTier(tier) && product.active) {
