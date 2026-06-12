@@ -20,7 +20,7 @@ import {
   DELIVERY_STATUS_LABELS,
   DELIVERY_STATUS_COLORS,
   type BoardroomDeliveryStatus,
-} from "@/lib/boardroom/boardroom-delivery-state-machine";
+} from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const GOLD = "#C9A96E";

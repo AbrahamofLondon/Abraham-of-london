@@ -20,11 +20,11 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import {
   assertValidTransition,
-  recordBoardroomDeliveryEvent,
   mapLegacyStatus,
   toLegacyStatus,
   type BoardroomDeliveryStatus,
-} from "@/lib/boardroom/boardroom-delivery-state-machine";
+} from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
+import { recordBoardroomDeliveryEvent } from "@/lib/boardroom/boardroom-delivery-events.server";
 
 // Legacy transition map for backward compatibility
 const LEGACY_TRANSITIONS: Record<string, string[]> = {
@@ -156,7 +156,7 @@ async function handlePatch(id: string, req: NextApiRequest, res: NextApiResponse
       // Build allowed list from both state machines
       const newAllowed = (() => {
         try {
-          const { isValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+          const { isValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
           const allStates: BoardroomDeliveryStatus[] = [
             "paid", "case_stubs_created", "draft_generated", "awaiting_operator_review",
             "approved_for_delivery", "customer_access_ready", "delivered", "blocked", "failed",

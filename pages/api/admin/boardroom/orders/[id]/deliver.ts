@@ -24,9 +24,9 @@ import { sendBoardroomDeliveryEmail } from "@/lib/boardroom/boardroom-delivery-e
 import { BoardroomDeliveryLog } from "@/lib/boardroom/boardroom-delivery-log";
 import {
   assertValidTransition,
-  recordBoardroomDeliveryEvent,
   checkDeliveryReadiness,
-} from "@/lib/boardroom/boardroom-delivery-state-machine";
+} from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
+import { recordBoardroomDeliveryEvent } from "@/lib/boardroom/boardroom-delivery-events.server";
 import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
 import { markArtifactDelivered } from "@/lib/artifacts/artifact-authority";
 

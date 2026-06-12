@@ -13,10 +13,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import { BoardroomDossierService } from "@/lib/boardroom/boardroom-dossier-service";
-import {
-  assertValidTransition,
-  recordBoardroomDeliveryEvent,
-} from "@/lib/boardroom/boardroom-delivery-state-machine";
+import { assertValidTransition } from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
+import { recordBoardroomDeliveryEvent } from "@/lib/boardroom/boardroom-delivery-events.server";
 import { routeGovernanceEvent } from "@/lib/platform/governance-event-bus";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

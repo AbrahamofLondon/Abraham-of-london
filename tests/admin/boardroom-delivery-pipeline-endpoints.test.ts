@@ -94,24 +94,24 @@ describe("Boardroom Delivery Pipeline — State Machine Enforcement", () => {
 
   describe("Transition validation", () => {
     it("rejects paid → delivered (cannot skip states)", () => {
-      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(() => assertValidTransition("paid", "delivered", "order-1")).toThrow("INVALID_TRANSITION");
     });
 
     it("accepts customer_access_ready → delivered", () => {
-      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(() => assertValidTransition("customer_access_ready", "delivered", "order-1")).not.toThrow();
     });
 
     it("rejects draft_generated → delivered (must go through review and approval)", () => {
-      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(() => assertValidTransition("draft_generated", "delivered", "order-1")).toThrow("INVALID_TRANSITION");
     });
   });
 
   describe("Delivery readiness checks", () => {
     it("blocks delivery when artifact is PENDING", () => {
-      const { checkDeliveryReadiness } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { checkDeliveryReadiness } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       const result = checkDeliveryReadiness({
         deliveryStatus: "customer_access_ready",
         artifactStatus: "PENDING",
@@ -126,7 +126,7 @@ describe("Boardroom Delivery Pipeline — State Machine Enforcement", () => {
     });
 
     it("allows delivery when all conditions are met", () => {
-      const { checkDeliveryReadiness } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { checkDeliveryReadiness } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       const result = checkDeliveryReadiness({
         deliveryStatus: "customer_access_ready",
         artifactStatus: "READY",
@@ -142,12 +142,12 @@ describe("Boardroom Delivery Pipeline — State Machine Enforcement", () => {
 
   describe("Legacy status mapping", () => {
     it("maps dossier_generated to draft_generated", () => {
-      const { mapLegacyStatus } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { mapLegacyStatus } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(mapLegacyStatus("dossier_generated")).toBe("draft_generated");
     });
 
     it("maps in_review to awaiting_operator_review", () => {
-      const { mapLegacyStatus } = require("@/lib/boardroom/boardroom-delivery-state-machine");
+      const { mapLegacyStatus } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(mapLegacyStatus("in_review")).toBe("awaiting_operator_review");
     });
   });

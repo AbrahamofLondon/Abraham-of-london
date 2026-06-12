@@ -17,7 +17,7 @@ import {
   mapLegacyStatus,
   toLegacyStatus,
   DELIVERY_STATUS_LABELS,
-} from "@/lib/boardroom/boardroom-delivery-state-machine";
+} from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
 
 // ─── Transition Tests ─────────────────────────────────────────────────────────
 
