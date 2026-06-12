@@ -1,552 +1,754 @@
-/**
- * Boardroom Dossier PDF Renderer
- *
- * Professional board-grade PDF document using @react-pdf/renderer.
- * Classification: RESTRICTED
- */
-
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type {
-  BoardroomDossier,
-  DecisionPortfolioEntry,
-  ContradictionEntry,
-  AuthorityMapEntry,
-  RiskExposureEntry,
-  CommitmentEntry,
-  BreachEntry,
-  OutcomeEntry,
   BoardAction,
+  BoardroomDossier,
+  BreachEntry,
+  ContradictionEntry,
+  DecisionPortfolioEntry,
+  OutcomeEntry,
+  RiskExposureEntry,
 } from "./dossier-types";
-
-const colours = {
-  navy: "#0A1628",
-  gold: "#B8860B",
-  darkGrey: "#1A1713",
-  midGrey: "#4A4A4A",
-  lightGrey: "#F5F5F3",
-  white: "#FFFFFF",
-  red: "#8B0000",
-  green: "#1B5E20",
-};
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 48,
-    fontSize: 9.5,
-    fontFamily: "Helvetica",
-    color: colours.darkGrey,
-    lineHeight: 1.5,
-  },
-  coverPage: {
-    padding: 48,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  },
-  coverTitle: {
-    fontSize: 28,
-    fontWeight: 700,
-    fontFamily: "Helvetica-Bold",
-    color: colours.navy,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  coverSubtitle: {
-    fontSize: 14,
-    color: colours.midGrey,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  coverClassification: {
-    fontSize: 11,
-    fontFamily: "Helvetica-Bold",
-    color: colours.red,
-    marginTop: 36,
-    padding: 8,
-    borderWidth: 1,
-    borderColor: colours.red,
-    textAlign: "center",
-  },
-  coverPeriod: {
-    fontSize: 10,
-    color: colours.midGrey,
-    marginTop: 16,
-    textAlign: "center",
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
-    color: colours.navy,
-    marginBottom: 12,
-    marginTop: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: colours.gold,
-    paddingBottom: 6,
-  },
-  subsectionTitle: {
-    fontSize: 11,
-    fontFamily: "Helvetica-Bold",
-    color: colours.darkGrey,
-    marginBottom: 6,
-    marginTop: 12,
-  },
-  paragraph: {
-    fontSize: 9.5,
-    lineHeight: 1.6,
-    marginBottom: 8,
-    textAlign: "justify",
-  },
-  tableRow: {
-    flexDirection: "row",
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#E0E0E0",
-    paddingVertical: 4,
-    paddingHorizontal: 2,
-  },
-  tableHeader: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: colours.navy,
-    paddingVertical: 4,
-    paddingHorizontal: 2,
-    backgroundColor: colours.lightGrey,
-  },
-  tableCell: {
-    fontSize: 8.5,
-    paddingHorizontal: 3,
-  },
-  tableCellBold: {
-    fontSize: 8.5,
-    fontFamily: "Helvetica-Bold",
-    paddingHorizontal: 3,
-  },
-  badge: {
-    fontSize: 8,
-    fontFamily: "Helvetica-Bold",
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 2,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 24,
-    left: 48,
-    right: 48,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    fontSize: 7.5,
-    color: colours.midGrey,
-  },
-  disclaimer: {
-    fontSize: 8,
-    color: colours.midGrey,
-    fontStyle: "italic",
-    marginTop: 12,
-    padding: 8,
-    backgroundColor: colours.lightGrey,
-    borderRadius: 2,
-  },
-  actionItem: {
-    marginBottom: 8,
-    padding: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: colours.gold,
-    backgroundColor: colours.lightGrey,
-  },
-  financialHighlight: {
-    fontSize: 18,
-    fontFamily: "Helvetica-Bold",
-    color: colours.navy,
-    marginBottom: 4,
-  },
-});
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function formatCurrency(amount: number, currency: string): string {
-  if (amount === 0) return `${currency} 0`;
-  const prefix = currency === "GBP" ? "\u00A3" : currency === "USD" ? "$" : `${currency} `;
-  return `${prefix}${amount.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
-function priorityColor(priority: string): string {
-  switch (priority) {
-    case "critical": return colours.red;
-    case "high": return "#B45309";
-    case "medium": return colours.gold;
-    default: return colours.midGrey;
-  }
-}
-
-/* --- Sub-components --- */
-
-function CoverPage({ dossier, orgName }: { dossier: BoardroomDossier; orgName: string }) {
-  return (
-    <Page size="A4" style={styles.coverPage}>
-      <View style={{ alignItems: "center" }}>
-        <Text style={styles.coverTitle}>BOARDROOM DOSSIER</Text>
-        <Text style={styles.coverSubtitle}>{orgName}</Text>
-        <Text style={styles.coverPeriod}>
-          {formatDate(dossier.period.from)} — {formatDate(dossier.period.to)}
-        </Text>
-        <Text style={styles.coverClassification}>CLASSIFICATION: RESTRICTED</Text>
-        <Text style={{ ...styles.paragraph, marginTop: 24, textAlign: "center", maxWidth: 360 }}>
-          This document contains sensitive organisational intelligence.
-          Distribution is limited to authorised board members and senior executives.
-        </Text>
-        <Text style={{ fontSize: 8, color: colours.midGrey, marginTop: 48 }}>
-          Generated: {formatDate(dossier.generatedAt)} | Abraham of London
-        </Text>
-      </View>
-    </Page>
-  );
-}
-
-function ExecutiveSummaryPage({ dossier }: { dossier: BoardroomDossier }) {
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Executive Summary</Text>
-      <Text style={styles.paragraph}>{dossier.executiveSummary}</Text>
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function DecisionPortfolioPage({ decisions }: { decisions: DecisionPortfolioEntry[] }) {
-  if (decisions.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Decision Portfolio</Text>
-      <View style={styles.tableHeader}>
-        <Text style={{ ...styles.tableCellBold, width: "35%" }}>Decision</Text>
-        <Text style={{ ...styles.tableCellBold, width: "12%" }}>Stage</Text>
-        <Text style={{ ...styles.tableCellBold, width: "12%" }}>AI Exposure</Text>
-        <Text style={{ ...styles.tableCellBold, width: "12%" }}>Velocity</Text>
-        <Text style={{ ...styles.tableCellBold, width: "14%" }}>Terrain</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Date</Text>
-      </View>
-      {decisions.slice(0, 20).map((d) => (
-        <View key={d.decisionId} style={styles.tableRow}>
-          <Text style={{ ...styles.tableCell, width: "35%" }}>{d.decisionText.slice(0, 60)}</Text>
-          <Text style={{ ...styles.tableCell, width: "12%" }}>{d.sourceStage}</Text>
-          <Text style={{ ...styles.tableCell, width: "12%" }}>{d.aiExposureLevel}</Text>
-          <Text style={{ ...styles.tableCell, width: "12%" }}>{d.decisionVelocityScore}</Text>
-          <Text style={{ ...styles.tableCell, width: "14%" }}>{d.forwardTerrainState}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{formatDate(d.createdAt)}</Text>
-        </View>
-      ))}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function ContradictionsPage({ contradictions }: { contradictions: ContradictionEntry[] }) {
-  if (contradictions.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Structural Contradictions</Text>
-      <Text style={styles.paragraph}>
-        The following contradictions represent divergences in perception across the organisation.
-        These are high-value signals for board intervention.
-      </Text>
-      {contradictions.map((c, i) => (
-        <View key={i} style={{ marginBottom: 10, padding: 8, backgroundColor: colours.lightGrey }}>
-          <Text style={{ fontSize: 8.5, fontFamily: "Helvetica-Bold", marginBottom: 3 }}>
-            [{c.severity.toUpperCase()}] {c.type.replace(/_/g, " ")}
-          </Text>
-          <Text style={{ fontSize: 8.5, marginBottom: 2 }}>
-            Position A ({c.userA.role ?? "unknown"}): {c.userA.claim}
-          </Text>
-          <Text style={{ fontSize: 8.5, marginBottom: 2 }}>
-            Position B ({c.userB.role ?? "unknown"}): {c.userB.claim}
-          </Text>
-          <Text style={{ fontSize: 8.5, fontStyle: "italic" }}>{c.message}</Text>
-        </View>
-      ))}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function AuthorityMapPage({ authorityMap }: { authorityMap: AuthorityMapEntry[] }) {
-  if (authorityMap.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Authority Map</Text>
-      <View style={styles.tableHeader}>
-        <Text style={{ ...styles.tableCellBold, width: "22%" }}>Name</Text>
-        <Text style={{ ...styles.tableCellBold, width: "18%" }}>Role</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Team</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Function</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Seniority</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Status</Text>
-      </View>
-      {authorityMap.map((m) => (
-        <View key={m.membershipId} style={styles.tableRow}>
-          <Text style={{ ...styles.tableCell, width: "22%" }}>
-            {m.fullName ?? m.email}{m.isExecutive ? " [EXEC]" : ""}
-          </Text>
-          <Text style={{ ...styles.tableCell, width: "18%" }}>{m.roleTitle ?? "-"}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{m.teamName ?? "-"}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{m.functionName ?? "-"}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{m.seniorityBand ?? "-"}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{m.status}</Text>
-        </View>
-      ))}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function RiskAndBreachesPage({ riskExposure, breaches }: { riskExposure: RiskExposureEntry[]; breaches: BreachEntry[] }) {
-  if (riskExposure.length === 0 && breaches.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Risk Exposure</Text>
-      {riskExposure.length > 0 && (
-        <>
-          <View style={styles.tableHeader}>
-            <Text style={{ ...styles.tableCellBold, width: "40%" }}>Commitment</Text>
-            <Text style={{ ...styles.tableCellBold, width: "15%" }}>Breaches</Text>
-            <Text style={{ ...styles.tableCellBold, width: "15%" }}>Escalation</Text>
-            <Text style={{ ...styles.tableCellBold, width: "15%" }}>Due</Text>
-            <Text style={{ ...styles.tableCellBold, width: "15%" }}>Status</Text>
-          </View>
-          {riskExposure.map((r) => (
-            <View key={r.contractId} style={styles.tableRow}>
-              <Text style={{ ...styles.tableCell, width: "40%" }}>{r.commitment.slice(0, 50)}</Text>
-              <Text style={{ ...styles.tableCell, width: "15%" }}>{r.breachCount}</Text>
-              <Text style={{ ...styles.tableCell, width: "15%" }}>{r.escalationLevel}</Text>
-              <Text style={{ ...styles.tableCell, width: "15%" }}>{formatDate(r.dueAt)}</Text>
-              <Text style={{ ...styles.tableCell, width: "15%" }}>{r.status}</Text>
-            </View>
-          ))}
-        </>
-      )}
-
-      {breaches.length > 0 && (
-        <>
-          <Text style={styles.subsectionTitle}>Breach Detail</Text>
-          {breaches.map((b) => (
-            <View key={b.contractId} style={{ marginBottom: 6, padding: 6, backgroundColor: colours.lightGrey }}>
-              <Text style={{ fontSize: 8.5, fontFamily: "Helvetica-Bold" }}>
-                {b.commitment.slice(0, 80)} — {b.breachCount} breach(es)
-              </Text>
-              {b.consequenceOfInaction && (
-                <Text style={{ fontSize: 8, fontStyle: "italic", marginTop: 2 }}>
-                  Consequence: {b.consequenceOfInaction}
-                </Text>
-              )}
-            </View>
-          ))}
-        </>
-      )}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function CommitmentsPage({ commitments }: { commitments: CommitmentEntry[] }) {
-  if (commitments.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Open Commitments</Text>
-      <View style={styles.tableHeader}>
-        <Text style={{ ...styles.tableCellBold, width: "35%" }}>Commitment</Text>
-        <Text style={{ ...styles.tableCellBold, width: "20%" }}>Avoided Pattern</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Due</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Status</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Verification</Text>
-      </View>
-      {commitments.slice(0, 20).map((c) => (
-        <View key={c.contractId} style={styles.tableRow}>
-          <Text style={{ ...styles.tableCell, width: "35%" }}>{c.commitment.slice(0, 50)}</Text>
-          <Text style={{ ...styles.tableCell, width: "20%" }}>{(c.avoidedPattern ?? "-").slice(0, 30)}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{formatDate(c.dueAt)}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{c.status}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{c.verificationStatus}</Text>
-        </View>
-      ))}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function OutcomesPage({ outcomes }: { outcomes: OutcomeEntry[] }) {
-  if (outcomes.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Verified Outcomes</Text>
-      <View style={styles.tableHeader}>
-        <Text style={{ ...styles.tableCellBold, width: "20%" }}>Classification</Text>
-        <Text style={{ ...styles.tableCellBold, width: "15%" }}>Magnitude</Text>
-        <Text style={{ ...styles.tableCellBold, width: "17%" }}>Effectiveness</Text>
-        <Text style={{ ...styles.tableCellBold, width: "16%" }}>Velocity Delta</Text>
-        <Text style={{ ...styles.tableCellBold, width: "16%" }}>Position Shift</Text>
-        <Text style={{ ...styles.tableCellBold, width: "16%" }}>Date</Text>
-      </View>
-      {outcomes.map((o) => (
-        <View key={o.outcomeId} style={styles.tableRow}>
-          <Text style={{ ...styles.tableCell, width: "20%" }}>{o.outcomeClassification}</Text>
-          <Text style={{ ...styles.tableCell, width: "15%" }}>{o.magnitudeOfChange.toFixed(1)}</Text>
-          <Text style={{ ...styles.tableCell, width: "17%" }}>{o.effectivenessScore.toFixed(1)}</Text>
-          <Text style={{ ...styles.tableCell, width: "16%" }}>{o.decisionVelocityDelta.toFixed(1)}</Text>
-          <Text style={{ ...styles.tableCell, width: "16%" }}>{o.competitivePositionShift.toFixed(1)}</Text>
-          <Text style={{ ...styles.tableCell, width: "16%" }}>{formatDate(o.createdAt)}</Text>
-        </View>
-      ))}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function FinancialImpactPage({ dossier }: { dossier: BoardroomDossier }) {
-  const { financialImpact } = dossier;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Financial Impact Summary</Text>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 16 }}>
-        <View style={{ width: "45%" }}>
-          <Text style={{ fontSize: 9, color: colours.midGrey, marginBottom: 4 }}>Total Cost of Delay</Text>
-          <Text style={styles.financialHighlight}>
-            {formatCurrency(financialImpact.totalCostOfDelay, financialImpact.currency)}
-          </Text>
-        </View>
-        <View style={{ width: "45%" }}>
-          <Text style={{ fontSize: 9, color: colours.midGrey, marginBottom: 4 }}>Total Recovered Value</Text>
-          <Text style={{ ...styles.financialHighlight, color: colours.green }}>
-            {formatCurrency(financialImpact.totalRecovered, financialImpact.currency)}
-          </Text>
-        </View>
-      </View>
-      <Text style={{ ...styles.paragraph, marginTop: 24 }}>
-        Financial figures are derived from verified outcome records within the reporting period.
-        Figures represent aggregated organisational impact as reported through the diagnostic pipeline.
-      </Text>
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function BoardActionsPage({ actions }: { actions: BoardAction[] }) {
-  if (actions.length === 0) return null;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Recommended Board Actions</Text>
-      {actions.map((a, i) => (
-        <View key={i} style={{ ...styles.actionItem, borderLeftColor: priorityColor(a.priority) }}>
-          <Text style={{ fontSize: 8, fontFamily: "Helvetica-Bold", color: priorityColor(a.priority), marginBottom: 3 }}>
-            [{a.priority.toUpperCase()}] {a.category.replace(/_/g, " ")}
-          </Text>
-          <Text style={{ fontSize: 9 }}>{a.description}</Text>
-        </View>
-      ))}
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-function DataCompletenessPage({ dossier }: { dossier: BoardroomDossier }) {
-  const { dataCompleteness } = dossier;
-  return (
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.sectionTitle}>Data Completeness Disclaimer</Text>
-      <Text style={{ ...styles.paragraph, marginBottom: 16 }}>
-        This dossier reflects data available within the Abraham of London platform for the
-        specified reporting period. Data completeness score: {dataCompleteness.score}%.
-      </Text>
-      {dataCompleteness.missingFields.length > 0 && (
-        <>
-          <Text style={styles.subsectionTitle}>Sections With Insufficient Data</Text>
-          {dataCompleteness.missingFields.map((field) => (
-            <Text key={field} style={{ fontSize: 9, marginBottom: 3, paddingLeft: 8 }}>
-              - {field.replace(/([A-Z])/g, " $1").trim()}
-            </Text>
-          ))}
-        </>
-      )}
-      <View style={styles.disclaimer}>
-        <Text>
-          This document is generated from structured organisational data and does not contain
-          AI-generated analysis or inference. All findings are derived from verified diagnostic
-          records, contract states, and outcome measurements. Treat any gaps as indicators of
-          incomplete data capture rather than absence of organisational activity.
-        </Text>
-      </View>
-      <View style={styles.footer}>
-        <Text>RESTRICTED</Text>
-        <Text>Abraham of London — Boardroom Dossier</Text>
-      </View>
-    </Page>
-  );
-}
-
-/* --- Main Document --- */
 
 export type DossierPdfProps = {
   dossier: BoardroomDossier;
   organisationName: string;
+  customerName?: string | null;
+  orderId?: string | null;
+  referenceId?: string | null;
+  artifactHash?: string | null;
 };
 
-export function BoardroomDossierDocument({ dossier, organisationName }: DossierPdfProps) {
+const colours = {
+  paper: "#F5F0E8",
+  ink: "#1A1814",
+  brass: "#B8943F",
+  silver: "#8A8A8A",
+  panel: "#EDE8DC",
+  softPanel: "#FAF7F0",
+  risk: "#8A2F2F",
+  proof: "#2E6F4E",
+};
+
+const font = {
+  serif: "Times-Roman",
+  serifBold: "Times-Bold",
+  sans: "Times-Roman",
+  sansBold: "Times-Bold",
+  mono: "Courier",
+};
+
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: colours.paper,
+    color: colours.ink,
+    fontFamily: font.sans,
+    padding: 42,
+  },
+  coverPage: {
+    backgroundColor: colours.paper,
+    color: colours.ink,
+    fontFamily: font.sans,
+    padding: 50,
+  },
+  coverIdentity: {
+    fontFamily: font.serif,
+    fontSize: 26,
+    color: colours.brass,
+    marginBottom: 98,
+  },
+  coverTitle: {
+    fontFamily: font.serifBold,
+    fontSize: 42,
+    letterSpacing: 1.5,
+    marginBottom: 14,
+  },
+  brassRule: {
+    height: 1,
+    backgroundColor: colours.brass,
+    width: 150,
+    marginBottom: 16,
+  },
+  coverReference: {
+    fontFamily: font.mono,
+    fontSize: 9,
+    letterSpacing: 1.2,
+    color: colours.silver,
+    marginBottom: 130,
+  },
+  coverFooter: {
+    borderTopWidth: 0.5,
+    borderTopColor: colours.brass,
+    paddingTop: 14,
+    flexDirection: "row",
+    gap: 18,
+  },
+  coverFooterCol: {
+    flex: 1,
+  },
+  coverFooterLabel: {
+    fontFamily: font.mono,
+    fontSize: 7,
+    letterSpacing: 1,
+    color: colours.silver,
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+  coverFooterValue: {
+    fontFamily: font.serifBold,
+    fontSize: 10,
+    lineHeight: 1.3,
+  },
+  transmissionTitle: {
+    fontFamily: font.mono,
+    fontSize: 10,
+    letterSpacing: 2,
+    color: colours.brass,
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+  sectionKicker: {
+    fontFamily: font.mono,
+    fontSize: 8,
+    letterSpacing: 1.5,
+    color: colours.brass,
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  sectionTitle: {
+    fontFamily: font.serifBold,
+    fontSize: 24,
+    lineHeight: 1.15,
+    marginBottom: 12,
+  },
+  body: {
+    fontSize: 10.2,
+    lineHeight: 1.55,
+    color: colours.ink,
+  },
+  muted: {
+    fontSize: 8.5,
+    lineHeight: 1.45,
+    color: colours.silver,
+  },
+  metadataPanel: {
+    backgroundColor: colours.panel,
+    borderWidth: 0.5,
+    borderColor: "#D8CDBA",
+    padding: 14,
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  metadataRow: {
+    flexDirection: "row",
+    borderBottomWidth: 0.25,
+    borderBottomColor: "#D8CDBA",
+    paddingVertical: 6,
+  },
+  metadataKey: {
+    width: 145,
+    fontFamily: font.mono,
+    fontSize: 7.5,
+    letterSpacing: 0.8,
+    color: colours.silver,
+    textTransform: "uppercase",
+  },
+  metadataValue: {
+    flex: 1,
+    fontSize: 9.5,
+    lineHeight: 1.35,
+  },
+  weightStatement: {
+    fontFamily: font.serif,
+    fontSize: 15,
+    lineHeight: 1.45,
+    marginVertical: 22,
+  },
+  sectionPageHeader: {
+    borderBottomWidth: 0.5,
+    borderBottomColor: colours.brass,
+    paddingBottom: 10,
+    marginBottom: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  headerMeta: {
+    fontFamily: font.mono,
+    fontSize: 7,
+    color: colours.silver,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  sectionBody: {
+    flex: 1,
+  },
+  panel: {
+    backgroundColor: colours.softPanel,
+    borderWidth: 0.5,
+    borderColor: "#D8CDBA",
+    padding: 12,
+    marginBottom: 10,
+  },
+  table: {
+    borderWidth: 0.5,
+    borderColor: "#D8CDBA",
+    marginTop: 8,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 0.25,
+    borderBottomColor: "#D8CDBA",
+  },
+  tableHeader: {
+    backgroundColor: colours.panel,
+  },
+  tableCell: {
+    flex: 1,
+    padding: 7,
+    fontSize: 8.4,
+    lineHeight: 1.35,
+  },
+  tableCellNarrow: {
+    width: 72,
+    padding: 7,
+    fontSize: 8.4,
+    lineHeight: 1.35,
+  },
+  tableHeading: {
+    fontFamily: font.mono,
+    fontSize: 7,
+    color: colours.brass,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  bulletRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 7,
+  },
+  bulletMark: {
+    width: 12,
+    fontFamily: font.mono,
+    fontSize: 9,
+    color: colours.brass,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 9.6,
+    lineHeight: 1.42,
+  },
+  footer: {
+    borderTopWidth: 0.25,
+    borderTopColor: "#D8CDBA",
+    paddingTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  footerText: {
+    fontFamily: font.mono,
+    fontSize: 7,
+    color: colours.silver,
+  },
+});
+
+function cleanText(value: unknown, fallback = "Not provided."): string {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value)
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text || fallback;
+}
+
+function truncate(value: unknown, max = 500, fallback = "Not provided."): string {
+  const text = cleanText(value, fallback);
+  if (text.length <= max) return text;
+  return `${text.slice(0, Math.max(0, max - 16)).trim()} [...continued]`;
+}
+
+function formatDate(value: unknown): string {
+  const raw = cleanText(value, "");
+  const date = raw ? new Date(raw) : new Date();
+  if (Number.isNaN(date.getTime())) return raw || "Undated";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatCurrency(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: currency || "GBP",
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
+  } catch {
+    return `${currency || "GBP"} ${Math.round(amount || 0)}`;
+  }
+}
+
+function deriveReference(props: DossierPdfProps): string {
+  if (props.referenceId) return cleanText(props.referenceId, "");
+  const date = new Date(props.dossier.generatedAt);
+  const stamp = Number.isNaN(date.getTime())
+    ? "UNDATED"
+    : `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, "0")}${String(date.getUTCDate()).padStart(2, "0")}`;
+  const order = cleanText(props.orderId || props.dossier.organisationId, "UNFILED")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0, 10)
+    .toUpperCase();
+  return `AoL-BB-${order}-${stamp}`;
+}
+
+function preparedFor(props: DossierPdfProps): string {
+  return cleanText(props.customerName || props.organisationName, "Boardroom client");
+}
+
+function severityFromRisk(entry: RiskExposureEntry | BreachEntry): string {
+  if ("breachCount" in entry && entry.breachCount >= 3) return "High";
+  if ("escalationLevel" in entry && cleanText(entry.escalationLevel, "").toLowerCase().includes("critical")) return "High";
+  return "Medium";
+}
+
+function hasItems<T>(items: T[] | undefined | null): items is T[] {
+  return Array.isArray(items) && items.length > 0;
+}
+
+const EmptyState = ({ children }: { children: React.ReactNode }) => (
+  <View style={styles.panel}>
+    <Text style={styles.muted}>{children}</Text>
+  </View>
+);
+
+const Bullet = ({ children }: { children: React.ReactNode }) => (
+  <View style={styles.bulletRow}>
+    <Text style={styles.bulletMark}>-</Text>
+    <Text style={styles.bulletText}>{children}</Text>
+  </View>
+);
+
+function CoverPage(props: DossierPdfProps & { reference: string; issueDate: string }) {
+  return (
+    <Page size="A4" style={styles.coverPage}>
+      <Text style={styles.coverIdentity}>Abraham of London</Text>
+      <Text style={styles.coverTitle}>BOARDROOM BRIEF</Text>
+      <View style={styles.brassRule} />
+      <Text style={styles.coverReference}>{props.reference}</Text>
+
+      <View style={styles.coverFooter}>
+        <View style={styles.coverFooterCol}>
+          <Text style={styles.coverFooterLabel}>Prepared for</Text>
+          <Text style={styles.coverFooterValue}>{preparedFor(props)}</Text>
+        </View>
+        <View style={styles.coverFooterCol}>
+          <Text style={styles.coverFooterLabel}>Issue date</Text>
+          <Text style={styles.coverFooterValue}>{props.issueDate}</Text>
+        </View>
+        <View style={styles.coverFooterCol}>
+          <Text style={styles.coverFooterLabel}>Classification</Text>
+          <Text style={styles.coverFooterValue}>BOARDROOM · CONFIDENTIAL</Text>
+        </View>
+      </View>
+    </Page>
+  );
+}
+
+function Footer({ reference, pageLabel }: { reference: string; pageLabel: string }) {
+  return (
+    <View style={styles.footer}>
+      <Text style={styles.footerText}>Abraham of London · Boardroom Dossier</Text>
+      <Text style={styles.footerText}>{reference} · {pageLabel}</Text>
+    </View>
+  );
+}
+
+function TransmissionPage(props: DossierPdfProps & { reference: string; issueDate: string }) {
+  const hash = props.artifactHash ? truncate(props.artifactHash, 90, "") : "Pending final artifact hash";
+
+  return (
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.transmissionTitle}>Transmission Note</Text>
+      <View style={styles.brassRule} />
+
+      <View style={styles.metadataPanel}>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Issuer</Text>
+          <Text style={styles.metadataValue}>Abraham of London · Alomarada Ltd</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Reference</Text>
+          <Text style={styles.metadataValue}>{props.reference}</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Prepared for</Text>
+          <Text style={styles.metadataValue}>{preparedFor(props)}</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Order</Text>
+          <Text style={styles.metadataValue}>{cleanText(props.orderId, "Not linked to an order record in this export.")}</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Issue date</Text>
+          <Text style={styles.metadataValue}>{props.issueDate}</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Artifact hash</Text>
+          <Text style={styles.metadataValue}>{hash}</Text>
+        </View>
+      </View>
+
+      <Text style={styles.weightStatement}>
+        This brief was prepared on the basis of the submitted intake, available boardroom telemetry,
+        and Abraham of London's structured review of the decision context. It is intended for serious
+        reading, controlled circulation, and governed follow-through.
+      </Text>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionKicker}>Scope Note</Text>
+        <Text style={styles.body}>
+          The document uses decision, authority, risk, commitment, breach, outcome, and financial
+          signals available for the stated period. Where fields were incomplete, assumptions and
+          evidence gaps are stated explicitly rather than hidden in the judgement.
+        </Text>
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionKicker}>What Follows</Text>
+        <Text style={styles.body}>
+          The dossier begins with the executive judgement before moving through pressure diagnosis,
+          intake facts, assumptions, risk exposure, objections, decision paths, falsification questions,
+          outcome hypothesis, delivery note, and feedback instruction.
+        </Text>
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionKicker}>Circulation</Text>
+        <Text style={styles.body}>
+          BOARDROOM · CONFIDENTIAL. Prepared for {preparedFor(props)}. Not for redistribution without
+          express authorisation.
+        </Text>
+      </View>
+
+      <Footer reference={props.reference} pageLabel="2" />
+    </Page>
+  );
+}
+
+function SectionPage({
+  number,
+  title,
+  reference,
+  children,
+}: {
+  number: number;
+  title: string;
+  reference: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Page size="A4" style={styles.page}>
+      <View style={styles.sectionPageHeader}>
+        <Text style={styles.headerMeta}>BOARDROOM · CONFIDENTIAL</Text>
+        <Text style={styles.headerMeta}>{reference}</Text>
+      </View>
+      <View style={styles.sectionBody}>
+        <Text style={styles.sectionKicker}>Section {String(number).padStart(2, "0")}</Text>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {children}
+      </View>
+      <Footer reference={reference} pageLabel={`Section ${number}`} />
+    </Page>
+  );
+}
+
+function ExecutiveJudgement({ dossier }: { dossier: BoardroomDossier }) {
+  return (
+    <Text style={styles.body}>
+      {truncate(dossier.executiveSummary, 1100, "No executive judgement was generated for this dossier.")}
+    </Text>
+  );
+}
+
+function PressureDiagnosis({ dossier }: { dossier: BoardroomDossier }) {
+  const pressureLines = [
+    `${dossier.decisionPortfolio.length} active decision records in the reviewed period.`,
+    `${dossier.topContradictions.length} contradiction signals requiring board attention.`,
+    `${dossier.riskExposure.length + dossier.breaches.length} live risk or breach signals.`,
+    `${dossier.openCommitments.length} open commitments against the decision estate.`,
+  ];
+
+  return (
+    <View>
+      {pressureLines.map((line) => <Bullet key={line}>{line}</Bullet>)}
+      {dossier.sovereignSignalAssessment ? (
+        <View style={styles.panel}>
+          <Text style={styles.sectionKicker}>Signal Exposure</Text>
+          <Text style={styles.body}>
+            Sovereign signal assessment attached. Evidence strength should be read with the original
+            signal context and not as an independent market claim.
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function IntakeFacts({ decisions }: { decisions: DecisionPortfolioEntry[] }) {
+  if (!hasItems(decisions)) return <EmptyState>No decision intake records were available for this period.</EmptyState>;
+
+  return (
+    <View>
+      {decisions.slice(0, 6).map((decision) => (
+        <View key={decision.decisionId} style={styles.panel}>
+          <Text style={styles.sectionKicker}>{cleanText(decision.sourceStage, "Decision")}</Text>
+          <Text style={styles.body}>{truncate(decision.decisionText)}</Text>
+          <Text style={styles.muted}>
+            Domain {cleanText(decision.affectedDomain, "unclassified")} · Confidence {decision.confidence} · Velocity {decision.decisionVelocityScore}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function Assumptions({ dossier }: { dossier: BoardroomDossier }) {
+  const missing = dossier.dataCompleteness?.missingFields ?? [];
+  return (
+    <View>
+      <Text style={styles.body}>
+        Data completeness score: {dossier.dataCompleteness?.score ?? 0}. The judgement assumes that
+        missing records do not materially reverse the decision pressure unless listed below.
+      </Text>
+      <View style={{ marginTop: 12 }}>
+        {hasItems(missing)
+          ? missing.map((field) => <Bullet key={field}>{field}</Bullet>)
+          : <EmptyState>No missing fields were declared by the dossier builder.</EmptyState>}
+      </View>
+    </View>
+  );
+}
+
+function RiskMap({ risks, breaches }: { risks: RiskExposureEntry[]; breaches: BreachEntry[] }) {
+  const rows = [
+    ...risks.map((risk) => ({
+      id: risk.contractId,
+      risk: risk.commitment,
+      type: "Execution",
+      severity: severityFromRisk(risk),
+      status: risk.status,
+    })),
+    ...breaches.map((breach) => ({
+      id: breach.contractId,
+      risk: breach.commitment,
+      type: "Governance",
+      severity: severityFromRisk(breach),
+      status: breach.escalationLevel,
+    })),
+  ];
+
+  if (!hasItems(rows)) return <EmptyState>No risk exposure records were available.</EmptyState>;
+
+  return (
+    <View style={styles.table}>
+      <View style={[styles.tableRow, styles.tableHeader]}>
+        <Text style={[styles.tableCell, styles.tableHeading]}>Risk</Text>
+        <Text style={[styles.tableCellNarrow, styles.tableHeading]}>Type</Text>
+        <Text style={[styles.tableCellNarrow, styles.tableHeading]}>Severity</Text>
+        <Text style={[styles.tableCellNarrow, styles.tableHeading]}>Status</Text>
+      </View>
+      {rows.slice(0, 9).map((row) => (
+        <View key={`${row.id}-${row.status}`} style={styles.tableRow}>
+          <Text style={styles.tableCell}>{truncate(row.risk, 180)}</Text>
+          <Text style={styles.tableCellNarrow}>{row.type}</Text>
+          <Text style={styles.tableCellNarrow}>{row.severity}</Text>
+          <Text style={styles.tableCellNarrow}>{truncate(row.status, 45)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function ObjectionHandling({ contradictions }: { contradictions: ContradictionEntry[] }) {
+  if (!hasItems(contradictions)) {
+    return <EmptyState>No contradiction records were available. A human reviewer should still test the judgement against an opposing view before delivery.</EmptyState>;
+  }
+
+  return (
+    <View>
+      {contradictions.slice(0, 5).map((entry, index) => (
+        <View key={`${entry.type}-${index}`} style={styles.panel}>
+          <Text style={styles.sectionKicker}>{entry.type} · {entry.severity}</Text>
+          <Text style={styles.body}>{truncate(entry.message, 420)}</Text>
+          <Text style={styles.muted}>
+            Opposing claims: {truncate(entry.userA?.claim, 160)} / {truncate(entry.userB?.claim, 160)}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function DecisionPaths({ actions }: { actions: BoardAction[] }) {
+  if (!hasItems(actions)) return <EmptyState>No board action path was generated.</EmptyState>;
+
+  return (
+    <View>
+      {actions.slice(0, 5).map((action, index) => (
+        <View key={`${action.category}-${index}`} style={styles.panel}>
+          <Text style={styles.sectionKicker}>{action.priority} · {action.category}</Text>
+          <Text style={styles.body}>{truncate(action.description, 420)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function NextMove({ actions }: { actions: BoardAction[] }) {
+  const next = actions.find((action) => action.priority === "critical") ?? actions[0];
+  if (!next) {
+    return <Text style={styles.body}>The next admissible move is manual review: the available dossier data is not sufficient to recommend a board action without additional context.</Text>;
+  }
+  return (
+    <View style={styles.panel}>
+      <Text style={styles.sectionKicker}>{next.priority} · {next.category}</Text>
+      <Text style={styles.body}>{truncate(next.description, 700)}</Text>
+    </View>
+  );
+}
+
+function EvidenceGaps({ dossier }: { dossier: BoardroomDossier }) {
+  const gaps = dossier.dataCompleteness?.missingFields ?? [];
+  return (
+    <View>
+      {hasItems(gaps)
+        ? gaps.map((gap) => <Bullet key={gap}>{gap}</Bullet>)
+        : <EmptyState>No explicit evidence gaps were declared. This does not remove the need for reviewer challenge before delivery.</EmptyState>}
+    </View>
+  );
+}
+
+function FalsificationQuestions({ dossier }: { dossier: BoardroomDossier }) {
+  const questions = [
+    "What new evidence would materially weaken the executive judgement above?",
+    "Which stakeholder would credibly dispute the risk classification, and on what evidence?",
+    "Which assumption would change the recommended next move if it proved false?",
+    dossier.topContradictions[0]
+      ? `If the contradiction "${truncate(dossier.topContradictions[0].type, 80)}" resolves against the current view, what changes?`
+      : "If a hidden contradiction appears after delivery, which section of the judgement should be reopened first?",
+    "What outcome signal should be checked next quarter to test whether the recommendation held?",
+  ];
+
+  return <View>{questions.map((question) => <Bullet key={question}>{question}</Bullet>)}</View>;
+}
+
+function OutcomeHypothesis({ outcomes, financialImpact }: { outcomes: OutcomeEntry[]; financialImpact: BoardroomDossier["financialImpact"] }) {
+  const recovered = formatCurrency(financialImpact.totalRecovered, financialImpact.currency);
+  const delay = formatCurrency(financialImpact.totalCostOfDelay, financialImpact.currency);
+
+  return (
+    <View>
+      <Text style={styles.body}>
+        If the recommended path is followed under current conditions, the dossier expects risk exposure
+        to reduce through clearer ownership, earlier escalation, and disciplined review of unresolved commitments.
+      </Text>
+      <View style={styles.metadataPanel}>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Recovered value</Text>
+          <Text style={styles.metadataValue}>{recovered}</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Cost of delay</Text>
+          <Text style={styles.metadataValue}>{delay}</Text>
+        </View>
+        <View style={styles.metadataRow}>
+          <Text style={styles.metadataKey}>Verified outcomes</Text>
+          <Text style={styles.metadataValue}>{outcomes.length}</Text>
+        </View>
+      </View>
+      {hasItems(outcomes) ? (
+        outcomes.slice(0, 4).map((outcome) => (
+          <Bullet key={outcome.outcomeId}>
+            {outcome.outcomeClassification}: effectiveness {outcome.effectivenessScore}, velocity delta {outcome.decisionVelocityDelta}.
+          </Bullet>
+        ))
+      ) : (
+        <EmptyState>No verified outcome record is linked yet. Treat outcome claims as pending until tested.</EmptyState>
+      )}
+    </View>
+  );
+}
+
+export function BoardroomDossierDocument(props: DossierPdfProps) {
+  const reference = deriveReference(props);
+  const issueDate = formatDate(props.dossier.generatedAt);
+
   return (
     <Document
-      title={`Boardroom Dossier — ${organisationName}`}
+      title={`Boardroom Dossier ${reference}`}
       author="Abraham of London"
-      subject="Organisational Decision Governance Dossier"
-      creator="Abraham of London Platform"
+      subject="Boardroom Brief"
+      creator="Abraham of London"
+      producer="Abraham of London"
     >
-      <CoverPage dossier={dossier} orgName={organisationName} />
-      <ExecutiveSummaryPage dossier={dossier} />
-      <DecisionPortfolioPage decisions={dossier.decisionPortfolio} />
-      <ContradictionsPage contradictions={dossier.topContradictions} />
-      <AuthorityMapPage authorityMap={dossier.authorityMap} />
-      <RiskAndBreachesPage riskExposure={dossier.riskExposure} breaches={dossier.breaches} />
-      <CommitmentsPage commitments={dossier.openCommitments} />
-      <OutcomesPage outcomes={dossier.verifiedOutcomes} />
-      <FinancialImpactPage dossier={dossier} />
-      <BoardActionsPage actions={dossier.recommendedBoardActions} />
-      <DataCompletenessPage dossier={dossier} />
+      <CoverPage {...props} reference={reference} issueDate={issueDate} />
+      <TransmissionPage {...props} reference={reference} issueDate={issueDate} />
+
+      <SectionPage number={1} title="Executive Judgement" reference={reference}>
+        <ExecutiveJudgement dossier={props.dossier} />
+      </SectionPage>
+      <SectionPage number={2} title="Decision Pressure Diagnosis" reference={reference}>
+        <PressureDiagnosis dossier={props.dossier} />
+      </SectionPage>
+      <SectionPage number={3} title="Intake Facts" reference={reference}>
+        <IntakeFacts decisions={props.dossier.decisionPortfolio} />
+      </SectionPage>
+      <SectionPage number={4} title="Our Assumptions" reference={reference}>
+        <Assumptions dossier={props.dossier} />
+      </SectionPage>
+      <SectionPage number={5} title="Risk Exposure Map" reference={reference}>
+        <RiskMap risks={props.dossier.riskExposure} breaches={props.dossier.breaches} />
+      </SectionPage>
+      <SectionPage number={6} title="Objection Handling" reference={reference}>
+        <ObjectionHandling contradictions={props.dossier.topContradictions} />
+      </SectionPage>
+      <SectionPage number={7} title="Decision Paths" reference={reference}>
+        <DecisionPaths actions={props.dossier.recommendedBoardActions} />
+      </SectionPage>
+      <SectionPage number={8} title="Next Admissible Move" reference={reference}>
+        <NextMove actions={props.dossier.recommendedBoardActions} />
+      </SectionPage>
+      <SectionPage number={9} title="Evidence Gaps" reference={reference}>
+        <EvidenceGaps dossier={props.dossier} />
+      </SectionPage>
+      <SectionPage number={10} title="Falsification Questions" reference={reference}>
+        <FalsificationQuestions dossier={props.dossier} />
+      </SectionPage>
+      <SectionPage number={11} title="Outcome Hypothesis" reference={reference}>
+        <OutcomeHypothesis
+          outcomes={props.dossier.verifiedOutcomes}
+          financialImpact={props.dossier.financialImpact}
+        />
+      </SectionPage>
+      <SectionPage number={12} title="Delivery Note" reference={reference}>
+        <Text style={styles.body}>
+          Prepared on {issueDate} by Abraham of London. This dossier should be read as a governed
+          decision artefact, not as a generic report. If new evidence changes a material assumption,
+          the judgement should be reopened rather than informally amended.
+        </Text>
+      </SectionPage>
+      <SectionPage number={13} title="Feedback Instruction" reference={reference}>
+        <Text style={styles.body}>
+          Challenge, clarify, or return this report through the designated Abraham of London delivery
+          route. Serious feedback on accuracy, evidence quality, trust, or outcome relevance should
+          trigger human review and may update the evidence spine.
+        </Text>
+      </SectionPage>
     </Document>
   );
 }

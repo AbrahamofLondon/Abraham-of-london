@@ -9,6 +9,7 @@ import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import CostOfDelaySection, { type CostOfDelayData } from "@/components/diagnostics/CostOfDelaySection";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
+import ArrivalScreen from "@/components/report/arrival/ArrivalScreen";
 
 type DossierSection = {
   id: string;
@@ -48,6 +49,7 @@ function BoardroomDossierPageInner() {
   const searchParams = useSearchParams();
   const dossierId = params?.dossierId as string;
   const token = searchParams?.get("token") ?? "";
+  const previewMode = searchParams?.get("preview") === "true";
 
   const [dossier, setDossier] = React.useState<DossierData | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -76,7 +78,7 @@ function BoardroomDossierPageInner() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-sm text-white/30 font-mono">Loading dossier...</p>
+        <p className="text-sm text-white/30 font-mono">Opening secure dossier link...</p>
       </div>
     );
   }
@@ -97,7 +99,24 @@ function BoardroomDossierPageInner() {
   if (!dossier) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <ArrivalScreen
+      tier="boardroom"
+      referenceId={`AoL-BB-${dossier.id.slice(0, 8).toUpperCase()}`}
+      productName={dossier.title || "Boardroom Dossier"}
+      issueDate={new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date())}
+      weightStatement="This dossier was prepared for serious review: the judgement first, then the evidence, risks, objections, and next admissible move."
+      onComplete={() => undefined}
+    >
+      <div className="min-h-screen bg-black text-white">
+        {previewMode && (
+          <div className="sticky top-0 z-40 border-b border-amber-400/25 bg-amber-950/80 px-4 py-2 text-center text-[10px] font-mono uppercase tracking-[0.22em] text-amber-200 backdrop-blur">
+            [ADMIN PREVIEW — NOT DELIVERED]
+          </div>
+        )}
       {/* Header */}
       <header className="border-b border-white/10 px-6 py-5">
         <div className="max-w-4xl mx-auto">
@@ -131,12 +150,17 @@ function BoardroomDossierPageInner() {
         )}
 
         {/* Sections */}
-        {dossier.sections.map((section) => (
+        {dossier.sections.map((section, index) => (
           <div
             key={section.id}
-            className={`rounded-lg border ${TONE_BORDER[section.tone] ?? "border-white/10"} bg-white/[0.02] p-5`}
+            className={`rounded-lg border ${TONE_BORDER[section.tone] ?? "border-white/10"} bg-white/[0.02] p-5 ${
+              index === 0 ? "min-h-[60vh] flex flex-col justify-center" : ""
+            }`}
           >
             <div className="flex items-center gap-2 mb-3">
+              <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-amber-500/45">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <span className={`text-sm font-medium ${TONE_COLOR[section.tone] ?? "text-white/70"}`}>
                 {section.label}
               </span>
@@ -235,7 +259,8 @@ function BoardroomDossierPageInner() {
           </p>
         </div>
       </main>
-    </div>
+      </div>
+    </ArrivalScreen>
   );
 }
 
