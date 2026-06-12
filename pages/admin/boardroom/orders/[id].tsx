@@ -273,6 +273,77 @@ export default function BoardroomOrderDetailPage({
   const [currentStatus, setCurrentStatus] = React.useState(order?.deliveryStatus ?? "");
   const [currentArtifact, setCurrentArtifact] = React.useState(order?.deliveryStatus ?? "");
 
+  // Legacy contradiction detection
+  const [isLegacyContradiction, setIsLegacyContradiction] = React.useState(false);
+  const [legacyContradictionDetail, setLegacyContradictionDetail] = React.useState("");
+  const [reconcileResult, setReconcileResult] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    checkLegacyContradiction();
+  }, [order?.deliveryStatus, artifact?.status]);
+
+  async function checkLegacyContradiction() {
+    if (!order || !artifact) return;
+
+    const status = currentStatus || order.deliveryStatus;
+    const details: string[] = [];
+
+    // Check: dossier_generated + artifact PENDING
+    if (status === "dossier_generated" && artifact?.status === "PENDING") {
+      details.push("deliveryStatus is 'dossier_generated' but ProductArtifact is still PENDING");
+    }
+
+    // Check: in_review + artifact PENDING
+    if (status === "in_review" && artifact?.status === "PENDING") {
+      details.push("deliveryStatus is 'in_review' but ProductArtifact is still PENDING");
+    }
+
+    // Check: case study exists but artifact not DRAFT
+    if (caseStudyDraft && artifact?.status === "PENDING") {
+      details.push("Case study draft exists but ProductArtifact has not been updated to DRAFT");
+    }
+
+    // Check: dossier_generated but no admin preview URL
+    if ((status === "dossier_generated" || status === "draft_generated") && !artifact?.downloadUrl) {
+      details.push("No admin preview URL set despite draft/generated status");
+    }
+
+    if (details.length > 0) {
+      setIsLegacyContradiction(true);
+      setLegacyContradictionDetail(" " + details.join(". ") + ".");
+    } else {
+      setIsLegacyContradiction(false);
+      setLegacyContradictionDetail("");
+    }
+  }
+
+  async function reconcileLegacyOrder() {
+    setActionState({ loading: true, error: null, success: null });
+    try {
+      const r = await fetch(`/api/admin/boardroom/orders/${order!.id}/reconcile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        setActionState({ loading: false, error: data.error || data.result?.errors?.join("; ") || "Reconciliation failed", success: null });
+      } else {
+        setReconcileResult(data.result);
+        if (data.result?.newState?.deliveryStatus) {
+          setCurrentStatus(data.result.newState.deliveryStatus);
+        }
+        if (data.reconciled) {
+          setActionState({ loading: false, error: null, success: "Legacy order reconciled into governed delivery pipeline." });
+          setIsLegacyContradiction(false);
+        } else {
+          setActionState({ loading: false, error: null, success: "No reconciliation needed." });
+        }
+      }
+    } catch {
+      setActionState({ loading: false, error: "Network error during reconciliation", success: null });
+    }
+  }
+
   if (notFound || !order) {
     return (
       <AdminLayout>
@@ -480,6 +551,41 @@ export default function BoardroomOrderDetailPage({
         {actionState.success && (
           <div style={{ padding: "10px 14px", background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", color: "#4ade80", ...MONO, fontSize: 12, marginBottom: 16 }}>
             {actionState.success}
+          </div>
+        )}
+
+        {/* Legacy contradiction detection banner */}
+        {isLegacyContradiction && (
+          <div style={{
+            padding: "14px 18px",
+            background: "rgba(251,191,36,0.08)",
+            border: "1px solid rgba(251,191,36,0.3)",
+            marginBottom: 16,
+          }}>
+            <p style={{ ...MONO, fontSize: 11, color: "#fbbf24", marginBottom: 8 }}>
+              ⚠ Legacy fulfilment state detected
+            </p>
+            <p style={{ ...MONO, fontSize: 10, color: DIM, marginBottom: 10, lineHeight: 1.5 }}>
+              This order was created before the governed delivery pipeline was introduced.
+              The delivery status "{currentStatus}" is a legacy value and the ProductArtifact
+              has not been updated to reflect the actual draft state.
+              {legacyContradictionDetail}
+            </p>
+            <ActionButton
+              label="Reconcile Order"
+              onClick={reconcileLegacyOrder}
+              disabled={actionState.loading}
+              colour="#fbbf24"
+              title="Reconcile this legacy order into the governed delivery pipeline"
+            />
+            {reconcileResult && (
+              <div style={{ marginTop: 8, ...MONO, fontSize: 10, color: reconcileResult.reconciled ? "#4ade80" : "#f87171" }}>
+                {reconcileResult.reconciled
+                  ? `✓ Reconciled: ${reconcileResult.newState.deliveryStatus} | Artifact: ${reconcileResult.newState.artifactStatus}/${reconcileResult.newState.artifactDeliveryStatus}`
+                  : `✗ Reconciliation failed: ${reconcileResult.errors?.join("; ") ?? "Unknown error"}`
+                }
+              </div>
+            )}
           </div>
         )}
 

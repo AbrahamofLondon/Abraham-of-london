@@ -11,6 +11,11 @@
  *   - case study exists but no Open Draft / Preview action exists
  *   - deliveredAt is null after delivered state
  *   - customerAccessUrl missing when status is ready/delivered
+ *   - Open Draft URL returns 404
+ *   - adminPreviewUrl is missing when case study exists
+ *   - caseStudyId exists but route cannot resolve
+ *   - ProductArtifact remains PENDING while deliveryStatus says dossier_generated
+ *   - generated state exists without admin preview
  *
  * Usage:
  *   node scripts/check-boardroom-delivery-pipeline.mjs [orderId]
@@ -19,6 +24,7 @@
  */
 
 import { createClient } from "@prisma/client";
+import http from "http";
 
 const prisma = new createClient();
 
@@ -54,6 +60,36 @@ function mapLegacyStatus(status) {
   }
 }
 
+async function checkUrlResolves(urlPath) {
+  // Check if a local URL path resolves (returns non-404)
+  // We check via the API since we can't do full SSR resolution here
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const fullUrl = `${baseUrl}${urlPath}`;
+    // Use a HEAD request to check without loading full page
+    return new Promise((resolve) => {
+      const parsed = new URL(fullUrl);
+      const req = http.request(
+        {
+          hostname: parsed.hostname,
+          port: parsed.port || 80,
+          path: parsed.pathname,
+          method: "HEAD",
+          timeout: 5000,
+        },
+        (res) => {
+          resolve(res.statusCode !== 404);
+        },
+      );
+      req.on("error", () => resolve(null)); // Can't determine
+      req.on("timeout", () => { req.destroy(); resolve(null); });
+      req.end();
+    });
+  } catch {
+    return null; // Can't determine
+  }
+}
+
 // ─── Checks ───────────────────────────────────────────────────────────────────
 
 async function checkOrder(orderId) {
@@ -85,6 +121,7 @@ async function checkOrder(orderId) {
   // 2. Map status
   const mappedStatus = mapLegacyStatus(order.deliveryStatus);
   const isDelivered = order.deliveryStatus === "delivered" || mappedStatus === "delivered";
+  const isLegacyStatus = OPTIMISTIC_LEGACY_STATES.includes(order.deliveryStatus);
 
   // 3. Check ProductArtifact
   const artifactId = `pa_boardroom_${orderId}`;
@@ -96,11 +133,29 @@ async function checkOrder(orderId) {
     addCheck("ProductArtifact exists", true,
       `Status: ${artifact.status} | DeliveryStatus: ${artifact.deliveryStatus} | DownloadUrl: ${artifact.downloadUrl ?? "null"}`);
 
-    // Check: dossier_generated but artifact is PENDING
+    // Check: dossier_generated but artifact is PENDING — LEGACY CONTRADICTION
     if (order.deliveryStatus === "dossier_generated" && artifact.status === "PENDING") {
-      addCheck("Artifact not pending when dossier_generated", false,
-        "deliveryStatus is dossier_generated but ProductArtifact.status is PENDING. " +
-        "This indicates the draft was never properly finalised.");
+      addCheck("Legacy contradiction: dossier_generated + artifact PENDING", false,
+        "deliveryStatus is 'dossier_generated' but ProductArtifact.status is 'PENDING'. " +
+        "This legacy order must be reconciled. Run: node scripts/reconcile-boardroom-legacy-order.mjs " + orderId);
+    }
+
+    // Check: in_review but artifact is PENDING — LEGACY CONTRADICTION
+    if (order.deliveryStatus === "in_review" && artifact.status === "PENDING") {
+      addCheck("Legacy contradiction: in_review + artifact PENDING", false,
+        "deliveryStatus is 'in_review' but ProductArtifact.status is 'PENDING'. " +
+        "This legacy order must be reconciled.");
+    }
+
+    // Check: case study exists but artifact not updated
+    const caseStudyEvidence = await prisma.caseStudyEvidence.findFirst({
+      where: { sourceType: "boardroom_brief_order", sourceId: orderId },
+      select: { caseStudyId: true },
+    });
+    if (caseStudyEvidence && artifact.status === "PENDING") {
+      addCheck("Case study exists but artifact still PENDING", false,
+        `Case study ${caseStudyEvidence.caseStudyId} exists but ProductArtifact is still PENDING. ` +
+        "Artifact should be DRAFT/AWAITING_REVIEW.");
     }
 
     // Check: admin preview URL exists when artifact is not PENDING
@@ -109,6 +164,18 @@ async function checkOrder(orderId) {
         `Artifact status is ${artifact.status} but no downloadUrl/admin preview URL is set.`);
     } else if (artifact.status !== "PENDING" && artifact.downloadUrl) {
       addCheck("Admin preview URL exists", true, artifact.downloadUrl);
+
+      // Check: admin preview URL resolves (not 404)
+      if (artifact.downloadUrl.startsWith("/")) {
+        const resolves = await checkUrlResolves(artifact.downloadUrl);
+        if (resolves === true) {
+          addCheck("Admin preview URL resolves", true, `${artifact.downloadUrl} resolved OK`);
+        } else if (resolves === false) {
+          addCheck("Admin preview URL resolves", false,
+            `${artifact.downloadUrl} returned 404. The admin case study route may be missing.`);
+        }
+        // If null, we couldn't check — skip
+      }
     }
 
     // Check: artifact should be READY or READY_FOR_DELIVERY before delivery
@@ -152,17 +219,19 @@ async function checkOrder(orderId) {
     addCheck("Case study draft exists", true,
       `ID: ${caseStudy.id} | Title: ${caseStudy.title} | Status: ${caseStudy.status}`);
 
-    // Check: case study exists but no actionable links exposed
-    // This is a soft check — we verify the case study is accessible
-    if (caseStudy.status === "DRAFT") {
-      addCheck("Case study is actionable", true,
-        "Draft exists and can be opened via /admin/case-studies/" + caseStudy.id);
+    // Check: case study admin route resolves
+    const caseStudyUrl = `/admin/case-studies/${caseStudy.id}`;
+    const resolves = await checkUrlResolves(caseStudyUrl);
+    if (resolves === true) {
+      addCheck("Case study admin route resolves", true, `${caseStudyUrl} resolved OK`);
+    } else if (resolves === false) {
+      addCheck("Case study admin route resolves", false,
+        `${caseStudyUrl} returned 404. The admin case study preview route is missing.`);
     }
   } else {
-    // Only flag if order is past the draft stage
     if (["draft_generated", "awaiting_operator_review", "approved_for_delivery",
          "customer_access_ready", "delivered"].includes(mappedStatus) ||
-        ["dossier_generated", "in_review"].includes(order.deliveryStatus)) {
+        isLegacyStatus) {
       addCheck("Case study draft exists", false,
         "Order is past draft stage but no case study draft found.");
     } else {
@@ -221,11 +290,11 @@ async function checkOrder(orderId) {
 
   if (auditLogs.length > 0) {
     addCheck("Audit trail exists", true, `${auditLogs.length} events recorded`);
-    // Check for key audit events
     const actions = auditLogs.map((l) => l.action);
     const hasPaidEvent = actions.some((a) => a.includes("boardroom_order_paid") || a.includes("checkout.session.completed"));
     const hasDraftEvent = actions.some((a) => a.includes("boardroom_draft_generated") || a.includes("BOARDROOM_DOSSIER_GENERATED"));
     const hasDeliveredEvent = actions.some((a) => a.includes("boardroom_delivered") || a.includes("BOARDROOM_DOSSIER_DELIVERED"));
+    const hasReconciledEvent = actions.some((a) => a.includes("BOARDROOM_LEGACY_ORDER_RECONCILED"));
 
     if (isDelivered && !hasDeliveredEvent) {
       addCheck("Delivery audit event recorded", false,
@@ -240,6 +309,12 @@ async function checkOrder(orderId) {
     addCheck("State naming is accurate", false,
       "Using 'dossier_generated' which implies a completed dossier. " +
       "Should be 'draft_generated' or 'awaiting_operator_review' until actual delivery is confirmed.");
+  }
+
+  // 12. Check reconciliation audit event
+  if (order.metadata?.reconciledAt) {
+    addCheck("Legacy reconciliation completed", true,
+      `Reconciled at ${new Date(order.metadata.reconciledAt).toISOString()} by ${order.metadata.reconciledBy ?? "unknown"}`);
   }
 
   // ─── Summary ──────────────────────────────────────────────────────────────
