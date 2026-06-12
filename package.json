@@ -151,6 +151,7 @@
     "check:governance-events": "node scripts/check-governance-event-durability.mjs",
     "check:universal-product-value": "node scripts/check-universal-product-value.mjs",
     "check:universal-product-gold-standard": "node scripts/check-universal-product-gold-standard.mjs",
+    "check:universal-product-gold-standard-98": "node scripts/check-universal-product-gold-standard-98.mjs",
     "check:deps": "npm-check --skip-unused",
     "security:audit": "pnpm audit --prod",
     "security:grep": "node scripts/security/audit-public-ip-exposure.mjs",

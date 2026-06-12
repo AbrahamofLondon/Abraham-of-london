@@ -6,6 +6,8 @@
 **/*.swp
 **/*.DS_Store
 downloads/_generated.downloads.json
+content/source-material/frameworks/**
+content/source-material/dominion/**
 _templates/**
 **/_templates/**
 /public/assets/downloads/public-assets/resources/pdfs/*.pdf

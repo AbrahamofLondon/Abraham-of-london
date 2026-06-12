@@ -295,3 +295,7 @@ _ct600_working
 
 # Netlify env — never commit real values
 .netlify-env.json
+
+# Source material not for product (private working drafts)
+content/source-material/frameworks/
+content/source-material/dominion/

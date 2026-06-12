@@ -8,10 +8,11 @@ import {
 } from "@/lib/product/product-gold-standard-contracts";
 import type {
   ProductGoldScore,
+  ProductGoldScoreResult,
   ProductGoldStandardDimension,
 } from "@/lib/product/universal-product-gold-standard";
 
-export interface ProductGoldStandardResult {
+export interface ProductGoldStandardResult extends ProductGoldScoreResult {
   productCode: string;
   productName: string;
   commercialTier: string;
@@ -25,11 +26,9 @@ export interface ProductGoldStandardResult {
   improvementRequired: string[];
   customerCostRespected: boolean;
   verdict:
-    | "category_leading"
-    | "exceeds_market"
-    | "meets_market"
-    | "below_market"
-    | "not_fit_for_release";
+    | "gold_standard"
+    | "blocked_from_release"
+    | "internal_only";
 }
 
 export interface ProductGoldStandardEvidence {
@@ -52,15 +51,20 @@ export function evaluateProductGoldStandard(
       productName: productCode,
       commercialTier: "unknown",
       overallScore: 0,
+      scoreOutOf100: 0,
+      scoreOutOf10: 0,
+      releaseStatus: "blocked_from_release",
       dimensionScores: {},
       meetsMarketExpectation: false,
       exceedsMarketExpectation: false,
       categoryLeadingSignal: false,
       releaseAllowed: false,
       reasonsBlocked: ["Product has no gold standard contract."],
+      blockingReasons: ["Product has no gold standard contract."],
       improvementRequired: ["Create ProductGoldStandardContract."],
+      upgradeRequired: ["Create ProductGoldStandardContract."],
       customerCostRespected: false,
-      verdict: "not_fit_for_release",
+      verdict: "blocked_from_release",
     };
   }
 
@@ -78,9 +82,9 @@ export function evaluateProductGoldStandard(
     }
   }
 
-  if (overallScore < contract.minimumOverallScore) {
-    reasonsBlocked.push(`Overall score ${overallScore} below minimum ${contract.minimumOverallScore}.`);
-    improvementRequired.push("Raise aggregate customer-value proof above product-class threshold.");
+  if (contract.scoreOutOf100 < 98 && contract.releaseStatus !== "internal_only") {
+    reasonsBlocked.push(`9.8 score ${contract.scoreOutOf10.toFixed(1)} is below the 9.8 release threshold.`);
+    improvementRequired.push("Raise the product to 98/100 or keep it blocked from public release.");
   }
 
   if (!customerCostRespected) {
@@ -98,22 +102,27 @@ export function evaluateProductGoldStandard(
     : overallScore / contract.requiredGoldDimensions.length;
   const meetsMarketExpectation = reasonsBlocked.length === 0 && requiredAverage >= 2;
   const exceedsMarketExpectation = meetsMarketExpectation && requiredAverage >= 3;
-  const releaseAllowed = contract.releaseBlockedBelowStandard ? reasonsBlocked.length === 0 : true;
+  const releaseAllowed = contract.releaseStatus === "gold_standard" && reasonsBlocked.length === 0;
 
   return {
     productCode: contract.productCode,
     productName: contract.productName,
     commercialTier: contract.commercialTier,
     overallScore,
+    scoreOutOf100: contract.scoreOutOf100,
+    scoreOutOf10: contract.scoreOutOf10,
+    releaseStatus: contract.releaseStatus,
     dimensionScores,
     meetsMarketExpectation,
     exceedsMarketExpectation,
     categoryLeadingSignal,
     releaseAllowed,
     reasonsBlocked,
+    blockingReasons: reasonsBlocked,
     improvementRequired,
+    upgradeRequired: improvementRequired,
     customerCostRespected,
-    verdict: deriveVerdict(releaseAllowed, requiredAverage, categoryLeadingSignal),
+    verdict: contract.releaseStatus,
   };
 }
 
@@ -134,20 +143,14 @@ function scoreDimensions(
     }
   }
 
-  if (contract.releaseQualityStatus === "category_leading") {
+  if (contract.releaseStatus === "gold_standard") {
     scores.category_distinction = 4;
     scores.trust_and_authority = 4;
   }
 
-  if (contract.releaseQualityStatus === "owned_upgrade_required") {
-    for (const dimension of contract.criticalDimensions) {
-      scores[dimension] = Math.min(scores[dimension] ?? 2, 2) as ProductGoldScore;
-    }
-  }
-
-  if (contract.releaseQualityStatus === "blocked_from_release") {
+  if (contract.releaseStatus === "blocked_from_release") {
     for (const dimension of contract.requiredGoldDimensions) {
-      scores[dimension] = Math.min(scores[dimension] ?? 1, 1) as ProductGoldScore;
+      scores[dimension] = Math.min(scores[dimension] ?? 2, 2) as ProductGoldScore;
     }
   }
 
@@ -158,10 +161,9 @@ function baseScoreForContract(
   contract: ProductGoldStandardContract,
   evidence: ProductGoldStandardEvidence,
 ): ProductGoldScore {
-  if (contract.releaseQualityStatus === "blocked_from_release") return 1;
-  if (contract.releaseQualityStatus === "owned_upgrade_required") return 2;
-  if (contract.releaseQualityStatus === "category_leading") return 4;
-  if (contract.releaseQualityStatus === "market_exceeding") return 3;
+  if (contract.releaseStatus === "internal_only") return 1;
+  if (contract.releaseStatus === "blocked_from_release") return 2;
+  if (contract.releaseStatus === "gold_standard") return 4;
 
   const externalProofStrong =
     (evidence.artefactValueScore ?? 0) >= 70 ||
@@ -189,16 +191,4 @@ function respectsCustomerCost(
   }
 
   return true;
-}
-
-function deriveVerdict(
-  releaseAllowed: boolean,
-  average: number,
-  categoryLeadingSignal: boolean,
-): ProductGoldStandardResult["verdict"] {
-  if (!releaseAllowed) return "not_fit_for_release";
-  if (categoryLeadingSignal && average >= 3.5) return "category_leading";
-  if (average >= 3) return "exceeds_market";
-  if (average >= 2) return "meets_market";
-  return "below_market";
 }

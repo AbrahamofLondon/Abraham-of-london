@@ -12,8 +12,9 @@ import {
   PREMIUM_GOLD_DIMENSIONS,
   SUBSCRIPTION_GOLD_DIMENSIONS,
   type ProductGoldScore,
+  type ProductGoldDiagnosticStatus,
+  type ProductGoldReleaseStatus,
   type ProductGoldStandardDimension,
-  type ProductReleaseQualityStatus,
 } from "@/lib/product/universal-product-gold-standard";
 import {
   type CommercialTier,
@@ -45,8 +46,16 @@ export interface ProductGoldStandardContract {
   minimumOverallScore: number;
   mustExceedMarketOn?: ProductGoldStandardDimension[];
   releaseBlockedBelowStandard: boolean;
-  releaseQualityStatus: ProductReleaseQualityStatus;
+  releaseStatus: ProductGoldReleaseStatus;
+  diagnosticStatus: ProductGoldDiagnosticStatus;
+  scoreOutOf100: number;
+  scoreOutOf10: number;
   customerOutcomeStatement: string;
+  timeValueSurplus?: {
+    wasTimeRepaid: string;
+    usefulClarity: string;
+    nextAction: string;
+  };
   priceValueSurplus?: {
     whyWorthMoreThanPrice: string;
     alternativeCost: string;
@@ -74,6 +83,10 @@ const OWNED_UPGRADE_CODES = new Set([
   "additional_collaborator",
 ]);
 
+const GOLD_STANDARD_CODES = new Set([
+  "boardroom_brief",
+]);
+
 export function getProductGoldStandardContract(productCode: string): ProductGoldStandardContract | null {
   const product = getAllProducts().find((entry) => entry.code === productCode);
   if (!product) return null;
@@ -92,7 +105,9 @@ export function buildProductGoldStandardContract(product: CatalogProduct): Produ
   const requiredGoldDimensions = requiredDimensionsFor(product, commercialTier, deliveryClass);
   const criticalDimensions = criticalDimensionsFor(commercialTier, deliveryClass);
   const minimumDimensionScores = minimumScoresFor(commercialTier, criticalDimensions);
-  const releaseQualityStatus = classifyReleaseQuality(product, commercialTier, deliveryClass);
+  const diagnosticStatus = classifyDiagnosticStatus(product, commercialTier);
+  const scoreOutOf100 = scoreProductOutOf100(product, commercialTier, deliveryClass, diagnosticStatus);
+  const releaseStatus = classifyGoldReleaseStatus(product, commercialTier, scoreOutOf100);
 
   return {
     productCode: product.code,
@@ -104,11 +119,15 @@ export function buildProductGoldStandardContract(product: CatalogProduct): Produ
     requiredGoldDimensions,
     criticalDimensions,
     minimumDimensionScores,
-    minimumOverallScore: minimumOverallFor(commercialTier, requiredGoldDimensions.length),
+    minimumOverallScore: 98,
     mustExceedMarketOn: mustExceedMarketOnFor(commercialTier, deliveryClass),
-    releaseBlockedBelowStandard: product.active && releaseQualityStatus !== "owned_upgrade_required",
-    releaseQualityStatus,
+    releaseBlockedBelowStandard: releaseStatus === "blocked_from_release",
+    releaseStatus,
+    diagnosticStatus,
+    scoreOutOf100,
+    scoreOutOf10: scoreOutOf100 / 10,
     customerOutcomeStatement: customerOutcomeStatementFor(product, commercialTier, deliveryClass),
+    timeValueSurplus: commercialTier === "free" ? timeValueSurplusFor(product) : undefined,
     priceValueSurplus: commercialTier === "free" || commercialTier === "internal"
       ? undefined
       : priceValueSurplusFor(product, commercialTier),
@@ -189,17 +208,39 @@ function mustExceedMarketOnFor(
   return undefined;
 }
 
-function classifyReleaseQuality(
+function classifyDiagnosticStatus(
+  product: CatalogProduct,
+  tier: ProductGoldStandardContract["commercialTier"],
+): ProductGoldDiagnosticStatus {
+  if (tier === "internal" || !product.active) return "internal_only";
+  if (BLOCKED_CODES.has(product.code) || OWNED_UPGRADE_CODES.has(product.code)) return "blocked_by_hard_rule";
+  if (GOLD_STANDARD_CODES.has(product.code)) return "gold_standard_candidate";
+  return "needs_9_8_upgrade";
+}
+
+function scoreProductOutOf100(
   product: CatalogProduct,
   tier: ProductGoldStandardContract["commercialTier"],
   deliveryClass: string,
-): ProductReleaseQualityStatus {
-  if (BLOCKED_CODES.has(product.code) || !product.active || tier === "internal") return "blocked_from_release";
-  if (OWNED_UPGRADE_CODES.has(product.code)) return "owned_upgrade_required";
-  if (tier === "enterprise") return "category_leading";
-  if (tier === "paid_premium" || tier === "subscription" || tier === "retainer") return "market_exceeding";
-  if (deliveryClass === "archived_digital_reference") return "market_ready";
-  return "market_ready";
+  diagnosticStatus: ProductGoldDiagnosticStatus,
+): number {
+  if (diagnosticStatus === "internal_only") return 0;
+  if (diagnosticStatus === "blocked_by_hard_rule") return 55;
+  if (GOLD_STANDARD_CODES.has(product.code)) return 98;
+  if (tier === "paid_premium" || tier === "enterprise") return 91;
+  if (tier === "subscription" || tier === "retainer") return 82;
+  if (deliveryClass === "archived_digital_reference") return 86;
+  if (tier === "free") return 84;
+  return 88;
+}
+
+function classifyGoldReleaseStatus(
+  product: CatalogProduct,
+  tier: ProductGoldStandardContract["commercialTier"],
+  scoreOutOf100: number,
+): ProductGoldReleaseStatus {
+  if (tier === "internal" || !product.active) return "internal_only";
+  return scoreOutOf100 >= 98 ? "gold_standard" : "blocked_from_release";
 }
 
 function marketExpectationFor(
@@ -282,6 +323,14 @@ function customerOutcomeStatementFor(
     return `After using ${product.displayName}, the customer can gain a clearer decision signal and decide the next useful action without wasting time.`;
   }
   return `After using ${product.displayName}, the customer can turn a decision problem into a more specific diagnosis, consequence view, and practical next move.`;
+}
+
+function timeValueSurplusFor(product: CatalogProduct) {
+  return {
+    wasTimeRepaid: `${product.displayName} must repay the user's time with useful clarity rather than lead-magnet friction.`,
+    usefulClarity: "The user must receive one clear signal or diagnosis and one reason it matters.",
+    nextAction: "The user must leave with one specific next action without vague marketing filler.",
+  };
 }
 
 function priceValueSurplusFor(
