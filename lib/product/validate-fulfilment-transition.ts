@@ -154,6 +154,8 @@ export function getAdminBlockingMessage(params: {
     customerEmail: "Customer email is missing.",
     customerNotified: "Customer has not been notified.",
     deliveryAuditEventExists: "Delivery audit event has not been recorded.",
+    valueInspectionPassed: "The artefact has not passed content-based value inspection.",
+    valueReadinessPassed: "The artefact has not passed content-based value inspection.",
   };
 
   const messages = result.missingEvidence.map((e) => evidenceMessages[e] ?? `Missing: ${e}`);

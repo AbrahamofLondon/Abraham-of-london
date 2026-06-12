@@ -1,0 +1,626 @@
+{
+  "generatedAt": "2026-06-12T14:09:34.410Z",
+  "gate": "PASSED STRUCTURALLY",
+  "productsReviewed": 43,
+  "paidProductsReviewed": 25,
+  "premiumProductsReviewed": 7,
+  "valueContractsMissing": 0,
+  "metadataOnlyDeliveryAllowed": 0,
+  "premiumGenericOutputAllowed": 0,
+  "premiumMissingIntake": 0,
+  "approvalBlockingWeakArtifacts": 25,
+  "deliveryBlockingWeakArtifacts": 25,
+  "classCoverage": [
+    {
+      "deliveryClass": "instant_digital_access",
+      "productCode": "personal_decision_audit",
+      "covered": true
+    },
+    {
+      "deliveryClass": "generated_digital_artifact",
+      "productCode": "executive_reporting",
+      "covered": true
+    },
+    {
+      "deliveryClass": "manual_review_required",
+      "productCode": "boardroom_brief",
+      "covered": true
+    },
+    {
+      "deliveryClass": "subscription_retainer_cycle",
+      "productCode": "professional",
+      "covered": true
+    },
+    {
+      "deliveryClass": "archived_digital_reference",
+      "productCode": "gmi_q1_2026",
+      "covered": true
+    },
+    {
+      "deliveryClass": "bundle_grant",
+      "productCode": "operator_decision_pack",
+      "covered": true
+    },
+    {
+      "deliveryClass": "enterprise/manual_scoping",
+      "productCode": "enterprise",
+      "covered": true
+    }
+  ],
+  "productsRequiringIntake": [
+    "boardroom_brief",
+    "personal_decision_audit",
+    "decision_exposure_instrument",
+    "mandate_clarity_framework",
+    "intervention_path_selector",
+    "escalation_readiness_scorecard",
+    "structural_failure_diagnostic_canvas",
+    "execution_risk_index",
+    "team_alignment_gap_map",
+    "governance_drift_detector",
+    "strategic_priority_stack_builder",
+    "board_brief_builder",
+    "execution_integrity_protocol",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "operator_decision_pack",
+    "executive_reporting",
+    "strategy_room",
+    "strategy_room_extended",
+    "professional",
+    "professional_annual",
+    "enterprise",
+    "additional_collaborator"
+  ],
+  "productsReadyForPaidDelivery": [
+    "boardroom_brief",
+    "personal_decision_audit",
+    "decision_exposure_instrument",
+    "mandate_clarity_framework",
+    "intervention_path_selector",
+    "escalation_readiness_scorecard",
+    "structural_failure_diagnostic_canvas",
+    "execution_risk_index",
+    "team_alignment_gap_map",
+    "governance_drift_detector",
+    "strategic_priority_stack_builder",
+    "board_brief_builder",
+    "execution_integrity_protocol",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "operator_decision_pack",
+    "executive_reporting",
+    "strategy_room",
+    "strategy_room_extended",
+    "professional",
+    "professional_annual",
+    "enterprise",
+    "additional_collaborator",
+    "gmi_q1_2026",
+    "gmi_q2_2026"
+  ],
+  "productsNotReadyForPaidDelivery": [],
+  "valueContractsAdded": [
+    {
+      "productCode": "boardroom_brief",
+      "deliveryClass": "manual_review_required",
+      "commercialTier": "paid_premium",
+      "minimumValueScore": 70,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "commercial_context",
+        "current_constraint",
+        "desired_outcome",
+        "available_evidence",
+        "urgency_or_deadline",
+        "stakeholders",
+        "consequence_of_delay",
+        "definition_of_success"
+      ]
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "execution_risk_index",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "board_brief_builder",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_premium",
+      "minimumValueScore": 70,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "deliveryClass": "bundle_grant",
+      "commercialTier": "paid_premium",
+      "minimumValueScore": 70,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step",
+        "child_artifact_value"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "executive_reporting",
+      "deliveryClass": "generated_digital_artifact",
+      "commercialTier": "paid_premium",
+      "minimumValueScore": 70,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "commercial_context",
+        "current_constraint",
+        "desired_outcome",
+        "available_evidence",
+        "urgency_or_deadline",
+        "stakeholders",
+        "consequence_of_delay",
+        "definition_of_success"
+      ]
+    },
+    {
+      "productCode": "strategy_room",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_premium",
+      "minimumValueScore": 70,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "deliveryClass": "instant_digital_access",
+      "commercialTier": "paid_premium",
+      "minimumValueScore": 70,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "current_constraint",
+        "consequence_of_delay"
+      ]
+    },
+    {
+      "productCode": "professional",
+      "deliveryClass": "subscription_retainer_cycle",
+      "commercialTier": "subscription",
+      "minimumValueScore": 60,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "recommendation",
+        "execution_next_step",
+        "continuity_value"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "available_evidence",
+        "definition_of_success"
+      ]
+    },
+    {
+      "productCode": "professional_annual",
+      "deliveryClass": "subscription_retainer_cycle",
+      "commercialTier": "subscription",
+      "minimumValueScore": 60,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "recommendation",
+        "execution_next_step",
+        "continuity_value"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "available_evidence",
+        "definition_of_success"
+      ]
+    },
+    {
+      "productCode": "enterprise",
+      "deliveryClass": "enterprise/manual_scoping",
+      "commercialTier": "enterprise",
+      "minimumValueScore": 80,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "options",
+        "recommendation",
+        "execution_next_step"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "commercial_context",
+        "current_constraint",
+        "desired_outcome",
+        "available_evidence",
+        "urgency_or_deadline",
+        "stakeholders",
+        "consequence_of_delay",
+        "definition_of_success"
+      ]
+    },
+    {
+      "productCode": "additional_collaborator",
+      "deliveryClass": "subscription_retainer_cycle",
+      "commercialTier": "subscription",
+      "minimumValueScore": 60,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "diagnosis",
+        "consequence",
+        "recommendation",
+        "execution_next_step",
+        "continuity_value"
+      ],
+      "requiredInputBasis": [
+        "decision_or_issue",
+        "available_evidence",
+        "definition_of_success"
+      ]
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "deliveryClass": "archived_digital_reference",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "consequence",
+        "usage_context",
+        "archive_warning",
+        "recommendation"
+      ],
+      "requiredInputBasis": [
+        "usage_context"
+      ]
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "deliveryClass": "archived_digital_reference",
+      "commercialTier": "paid_entry",
+      "minimumValueScore": 55,
+      "requiredOutputSections": [
+        "input_basis",
+        "interpretation",
+        "consequence",
+        "usage_context",
+        "archive_warning",
+        "recommendation"
+      ],
+      "requiredInputBasis": [
+        "usage_context"
+      ]
+    }
+  ],
+  "structuralFailures": [],
+  "structuralWarnings": [],
+  "estateWideRisks": [
+    "The gate proves structure and simulated weak-artifact blocking; it does not claim every historic artifact has been rehydrated and re-inspected.",
+    "Legacy artifacts without a value inspection marker are intentionally blocked from approval/delivery until finalised through the universal value engine.",
+    "Manual billing and enterprise products require scoped intake records before customer-facing deliverables can be marked value-ready."
+  ],
+  "finalRecommendation": "GREEN"
+}

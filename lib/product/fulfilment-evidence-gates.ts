@@ -58,6 +58,10 @@ export interface FulfilmentEvidenceContext {
   artifactStatus: string | null;
   /** Artifact delivery status if one exists */
   artifactDeliveryStatus: string | null;
+  /** Has the generated artifact passed content-based value inspection? */
+  valueInspectionPassed?: boolean;
+  /** Inspection marker or report ID proving content-based value inspection ran */
+  valueInspectionId?: string | null;
 }
 
 export interface EvidenceGateResult {
@@ -119,18 +123,18 @@ export const UNIVERSAL_EVIDENCE_GATES: FulfilmentEvidenceGate[] = [
   {
     from: "awaiting_operator_review",
     to: "approved_for_delivery",
-    requiredEvidence: ["operatorApproved", "adminPreviewUrl"],
+    requiredEvidence: ["operatorApproved", "adminPreviewUrl", "valueInspectionPassed"],
     blockingIfMissing: true,
-    failureMessage: "Cannot approve for delivery: operator has not approved or admin preview is missing.",
+    failureMessage: "Cannot approve for delivery: operator approval, admin preview, or value inspection is missing.",
   },
 
   // ── Approved for Delivery → Customer Access Created ─────────────────────
   {
     from: "approved_for_delivery",
     to: "customer_access_created",
-    requiredEvidence: ["customerAccessUrl", "artifactId"],
+    requiredEvidence: ["customerAccessUrl", "artifactId", "valueInspectionPassed"],
     blockingIfMissing: true,
-    failureMessage: "Cannot create customer access: customer access URL or artifact ID is missing.",
+    failureMessage: "Cannot create customer access: customer access URL, artifact ID, or value readiness is missing.",
   },
 
   // ── Customer Access Created → Customer Notified ─────────────────────────
@@ -146,16 +150,16 @@ export const UNIVERSAL_EVIDENCE_GATES: FulfilmentEvidenceGate[] = [
   {
     from: "customer_access_created",
     to: "delivered",
-    requiredEvidence: ["customerAccessUrl", "deliveryAuditEventExists", "customerEmail"],
+    requiredEvidence: ["customerAccessUrl", "deliveryAuditEventExists", "customerEmail", "valueInspectionPassed"],
     blockingIfMissing: true,
-    failureMessage: "Cannot mark delivered: customer access URL, delivery audit event, or customer email is missing.",
+    failureMessage: "Cannot mark delivered: customer access URL, delivery audit event, customer email, or value readiness is missing.",
   },
   {
     from: "customer_notified",
     to: "delivered",
-    requiredEvidence: ["customerAccessUrl", "deliveryAuditEventExists", "customerEmail", "customerNotified"],
+    requiredEvidence: ["customerAccessUrl", "deliveryAuditEventExists", "customerEmail", "customerNotified", "valueInspectionPassed"],
     blockingIfMissing: true,
-    failureMessage: "Cannot mark delivered: customer access URL, delivery audit event, or customer notification is missing.",
+    failureMessage: "Cannot mark delivered: customer access URL, delivery audit event, customer notification, or value readiness is missing.",
   },
 
   // ── Any → Blocked ───────────────────────────────────────────────────────
@@ -448,6 +452,8 @@ function checkEvidence(evidence: string, context: FulfilmentEvidenceContext): bo
       return context.customerNotified;
     case "deliveryAuditEventExists":
       return context.deliveryAuditEventExists;
+    case "valueInspectionPassed":
+      return context.valueInspectionPassed === true;
     default:
       return false;
   }
@@ -509,6 +515,10 @@ export interface FulfilmentEvidence {
   deliveredAt: Date | null;
   /** Stripe webhook event ID for idempotency */
   webhookEventId: string | null;
+  /** Content-based value inspection passed */
+  valueReadinessPassed?: boolean;
+  /** Inspection marker/report proving content inspection ran */
+  valueInspectionId?: string | null;
 }
 
 export interface FulfilmentGateResult {
@@ -580,6 +590,18 @@ export function checkFulfilmentTransitionEvidence(params: {
       if (!evidence.artifactStatus || !readyStatuses.includes(evidence.artifactStatus)) {
         missing.push("artifactStatus:READY_or_READY_FOR_DELIVERY");
       }
+    }
+  }
+
+  // ── Content value readiness required before approval, access, or delivery ─
+  if (
+    toState === "approved_for_delivery" ||
+    toState === "customer_access_created" ||
+    toState === "customer_notified" ||
+    toState === "delivered"
+  ) {
+    if (evidence.valueReadinessPassed !== true) {
+      missing.push("valueReadinessPassed");
     }
   }
 

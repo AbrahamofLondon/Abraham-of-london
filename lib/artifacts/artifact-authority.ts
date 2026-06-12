@@ -16,6 +16,11 @@
 
 import { createHash, randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma.server";
+import { inspectArtefactContent } from "@/lib/product/artefact-content-inspector";
+import {
+  parseValueReadinessInspection,
+  serializeValueReadinessInspection,
+} from "@/lib/product/value-readiness-gate";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +140,13 @@ export type FinaliseArtifactInput = {
   outcomeHypothesisId?: string | null;
 };
 
+export type ArtifactValueReadiness = {
+  valueScore: number;
+  approvalAllowed: boolean;
+  deliveryAllowed: boolean;
+  blockingReasons: string[];
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 export function generateArtifactId(): string {
@@ -211,6 +223,20 @@ export async function finaliseArtifact(
   }
 
   const artifactHash = hashContent(input.artifactContent);
+  const evidenceRefs = Array.isArray(existing.evidenceRefs)
+    ? existing.evidenceRefs
+    : typeof existing.evidenceRefs === "string"
+      ? safeJsonArray(existing.evidenceRefs)
+      : [];
+  const valueInspection = inspectArtefactContent({
+    productCode: existing.productCode,
+    artifactId: existing.artifactId,
+    inspectedContentSource: "generated_artifact",
+    content: input.artifactContent,
+    hasInputSnapshot: Boolean(existing.inputSnapshotHash),
+    evidenceRefCount: evidenceRefs.length,
+  });
+  const valueReadinessMarker = serializeValueReadinessInspection(valueInspection);
 
   const record = await prisma.productArtifact.update({
     where: { artifactId: input.artifactId },
@@ -222,6 +248,7 @@ export async function finaliseArtifact(
       falsificationRefs: (input.falsificationRefs ?? []) as never,
       outcomeHypothesisId:
         input.outcomeHypothesisId ?? existing.outcomeHypothesisId ?? null,
+      privateNotes: appendValueReadinessMarker(existing.privateNotes, valueReadinessMarker),
     },
   });
 
@@ -251,6 +278,14 @@ export async function failArtifact(
 export async function markArtifactDelivered(
   artifactId: string,
 ): Promise<ProductArtifactRecord> {
+  const existing = await prisma.productArtifact.findUnique({
+    where: { artifactId },
+  });
+  if (!existing) {
+    throw new Error(`Artifact not found: ${artifactId}`);
+  }
+  assertArtifactValueReadinessFromRecord(existing, "delivery");
+
   const record = await prisma.productArtifact.update({
     where: { artifactId },
     data: {
@@ -427,7 +462,14 @@ export async function assertDeliveryAuthorised(
         "Only READY or READY_FOR_DELIVERY artifacts may be delivered.",
     );
   }
+  assertArtifactValueReadinessFromRecord(artifact, "delivery");
   return artifact;
+}
+
+export function assertArtifactValueReadyForApproval(
+  artifact: ProductArtifactRecord,
+): void {
+  assertArtifactValueReadinessFromRecord(artifact, "approval");
 }
 
 // ── Admin Queries ────────────────────────────────────────────────────────────
@@ -506,4 +548,50 @@ function parseArtifactRecord(record: Record<string, unknown>): ProductArtifactRe
     updatedAt: record.updatedAt as Date,
     supersededAt: (record.supersededAt as Date | null) ?? null,
   };
+}
+
+function safeJsonArray(value: string): unknown[] {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function appendValueReadinessMarker(
+  existingNotes: string | null,
+  marker: string,
+): string {
+  const notesWithoutPreviousMarker = (existingNotes ?? "")
+    .split("\n")
+    .filter((line) => !line.startsWith("VALUE_READINESS_INSPECTION:"))
+    .join("\n")
+    .trim();
+  return [notesWithoutPreviousMarker, marker].filter(Boolean).join("\n");
+}
+
+function assertArtifactValueReadinessFromRecord(
+  record: ProductArtifactRecord | Record<string, unknown>,
+  gate: "approval" | "delivery",
+): void {
+  const privateNotes = (record.privateNotes as string | null | undefined) ?? null;
+  const inspection = parseValueReadinessInspection(privateNotes);
+  if (!inspection) {
+    throw new Error(
+      `VALUE_READINESS_BLOCKED: Artifact ${String(record.artifactId)} has no content inspection marker. ` +
+      "Finalise the artifact through the universal value engine before approval or delivery.",
+    );
+  }
+
+  const allowed = gate === "approval"
+    ? inspection.approvalAllowed
+    : inspection.deliveryAllowed;
+
+  if (!allowed) {
+    throw new Error(
+      `VALUE_READINESS_BLOCKED: Artifact ${String(record.artifactId)} cannot pass ${gate}. ` +
+      `Reasons: ${(inspection.blockingReasons ?? []).join("; ") || "value readiness failed"}.`,
+    );
+  }
 }

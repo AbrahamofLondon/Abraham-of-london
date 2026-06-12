@@ -85,6 +85,23 @@ function makeDbArtifact(overrides: Record<string, unknown> = {}) {
   };
 }
 
+const PASSING_VALUE_READINESS_MARKER = `VALUE_READINESS_INSPECTION:${JSON.stringify({
+  valueScore: 90,
+  approvalAllowed: true,
+  deliveryAllowed: true,
+  blockingReasons: [],
+  missingCriticalSections: [],
+  inspectedContentSource: "generated_artifact",
+})}`;
+
+function makeValueReadyArtifact(overrides: Record<string, unknown> = {}) {
+  return makeDbArtifact({
+    status: "READY",
+    privateNotes: PASSING_VALUE_READINESS_MARKER,
+    ...overrides,
+  });
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe("generateArtifactId", () => {
@@ -209,6 +226,7 @@ describe("finaliseArtifact", () => {
     const updateCall = mockProductArtifact.update.mock.calls[0][0];
     expect(updateCall.data.status).toBe("READY");
     expect(updateCall.data.artifactHash).toHaveLength(64);
+    expect(updateCall.data.privateNotes).toContain("VALUE_READINESS_INSPECTION:");
   });
 
   it("throws if artifact not found", async () => {
@@ -253,7 +271,9 @@ describe("markArtifactDelivered / markArtifactDownloaded", () => {
     const delivered = makeDbArtifact({
       deliveryStatus: "DELIVERED",
       deliveredAt: new Date(),
+      privateNotes: PASSING_VALUE_READINESS_MARKER,
     });
+    mockProductArtifact.findUnique.mockResolvedValue(makeValueReadyArtifact());
     mockProductArtifact.update.mockResolvedValue(delivered);
 
     const result = await markArtifactDelivered("ART-AABBCCDD11223344");
@@ -352,7 +372,7 @@ describe("assertDeliveryAuthorised", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("returns artifact when READY artifact exists", async () => {
-    const readyArtifact = makeDbArtifact({ status: "READY" });
+    const readyArtifact = makeValueReadyArtifact();
     mockProductArtifact.findFirst.mockResolvedValue(readyArtifact);
 
     const result = await assertDeliveryAuthorised("BRIEF_ORDER", "order-001");
