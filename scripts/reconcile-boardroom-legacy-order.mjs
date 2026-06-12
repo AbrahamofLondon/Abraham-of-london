@@ -13,25 +13,12 @@
  *   node scripts/reconcile-boardroom-legacy-order.mjs cmqa10fcl0000l8093s0jucwr admin@example.com
  */
 
-import { createClient } from "@prisma/client";
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg;
 
-const prisma = new createClient();
+const prisma = new PrismaClient();
 
-// ─── Audit Event Map ──────────────────────────────────────────────────────────
-
-const AUDIT_EVENT_MAP = {
-  paid: "boardroom_order_paid",
-  case_stubs_created: "boardroom_case_stubs_created",
-  draft_generated: "boardroom_draft_generated",
-  awaiting_operator_review: "boardroom_operator_review_started",
-  approved_for_delivery: "boardroom_draft_approved",
-  customer_access_ready: "boardroom_customer_access_created",
-  delivered: "boardroom_delivered",
-  failed: "boardroom_delivery_failed",
-  blocked: "boardroom_delivery_blocked",
-};
-
-// ─── Detection ────────────────────────────────────────────────────────────────
+// ─── Detection (raw queries to avoid schema mismatch) ─────────────────────────
 
 async function detectContradictions(orderId) {
   const contradictions = [];
@@ -39,22 +26,26 @@ async function detectContradictions(orderId) {
   const order = await prisma.boardroomBriefOrder.findUnique({ where: { id: orderId } });
   if (!order) return { contradictions: ["ORDER_NOT_FOUND"], order: null, artifact: null, caseStudy: null, caseStudyId: null };
 
-  const artifactId = `pa_boardroom_${orderId}`;
-  const artifact = await prisma.productArtifact.findUnique({ where: { artifactId } });
+  const artRows = await prisma.$queryRawUnsafe(
+    `SELECT id, "artifactId", status, "deliveryStatus", "downloadUrl", "deliveredAt" FROM product_artifacts WHERE "artifactId" = $1`,
+    `pa_boardroom_${orderId}`
+  );
+  const artifact = artRows.length > 0 ? artRows[0] : null;
 
-  const caseStudyEvidence = await prisma.caseStudyEvidence.findFirst({
-    where: { sourceType: "boardroom_brief_order", sourceId: orderId },
-    select: { caseStudyId: true },
-  });
+  const evRows = await prisma.$queryRawUnsafe(
+    `SELECT "caseStudyId" FROM case_study_evidence WHERE "sourceType" = $1 AND "sourceId" = $2 LIMIT 1`,
+    "boardroom_brief_order", orderId
+  );
 
   let caseStudy = null;
   let caseStudyId = null;
-  if (caseStudyEvidence) {
-    caseStudyId = caseStudyEvidence.caseStudyId;
-    caseStudy = await prisma.caseStudy.findUnique({
-      where: { id: caseStudyEvidence.caseStudyId },
-      select: { id: true, title: true, status: true },
-    });
+  if (evRows.length > 0) {
+    caseStudyId = evRows[0].caseStudyId;
+    const csRows = await prisma.$queryRawUnsafe(
+      `SELECT id, title, status FROM case_studies WHERE id = $1 LIMIT 1`,
+      caseStudyId
+    );
+    caseStudy = csRows.length > 0 ? csRows[0] : null;
   }
 
   if (order.deliveryStatus === "dossier_generated" && artifact?.status === "PENDING") {
@@ -122,24 +113,32 @@ async function reconcile(orderId, actorEmail) {
     actions.push(`Set adminPreviewUrl: ${adminPreviewUrl}`);
   }
 
-  // Update ProductArtifact
+  // Update ProductArtifact via raw query
   if (artifact) {
-    const updates = {};
+    const updateFields = [];
+    const updateValues = [];
+
     if (artifact.status === "PENDING" && caseStudy) {
-      updates.status = "DRAFT";
+      updateFields.push(`status = $${updateValues.length + 1}`);
+      updateValues.push("DRAFT");
       actions.push("Set artifact status: PENDING → DRAFT");
     }
     if (artifact.deliveryStatus === "PENDING" && caseStudy) {
-      updates.deliveryStatus = "AWAITING_REVIEW";
+      updateFields.push(`"deliveryStatus" = $${updateValues.length + 1}`);
+      updateValues.push("AWAITING_REVIEW");
       actions.push("Set artifact deliveryStatus: PENDING → AWAITING_REVIEW");
     }
     if (adminPreviewUrl && adminPreviewUrl !== artifact.downloadUrl) {
-      updates.downloadUrl = adminPreviewUrl;
+      updateFields.push(`"downloadUrl" = $${updateValues.length + 1}`);
+      updateValues.push(adminPreviewUrl);
       actions.push(`Set artifact downloadUrl: ${adminPreviewUrl}`);
     }
-    if (Object.keys(updates).length > 0) {
-      await prisma.productArtifact.update({ where: { artifactId: `pa_boardroom_${orderId}` }, data: updates });
-      console.log(`  ✓ ProductArtifact updated: ${JSON.stringify(updates)}`);
+
+    if (updateFields.length > 0) {
+      const sql = `UPDATE product_artifacts SET ${updateFields.join(", ")} WHERE "artifactId" = $${updateValues.length + 1}`;
+      updateValues.push(`pa_boardroom_${orderId}`);
+      await prisma.$queryRawUnsafe(sql, ...updateValues);
+      console.log(`  ✓ ProductArtifact updated`);
     }
   }
 
@@ -159,23 +158,23 @@ async function reconcile(orderId, actorEmail) {
   });
   console.log(`  ✓ Order status updated to: ${newDeliveryStatus}`);
 
-  // Write audit event (directly to accessAuditLog since we can't import server-only in script)
+  // Write audit event via raw query (AccessAuditLog has actorType required)
   try {
-    await prisma.accessAuditLog.create({
-      data: {
-        action: "BOARDROOM_LEGACY_ORDER_RECONCILED",
-        actorEmail: actorEmail,
-        targetKey: orderId,
-        targetType: "BoardroomBriefOrder",
-        metadata: JSON.stringify({
-          previousStatus: order.deliveryStatus,
-          newStatus: newDeliveryStatus,
-          contradictions: contradictions.filter(c => c !== "none"),
-          actions,
-          caseStudyId,
-        }),
-      },
-    });
+    await prisma.$queryRawUnsafe(
+      `INSERT INTO "AccessAuditLog" (action, "actorEmail", "targetKey", "targetType", metadata, "createdAt", "actorType") VALUES ($1, $2, $3, $4, $5, NOW(), $6)`,
+      "BOARDROOM_LEGACY_ORDER_RECONCILED",
+      actorEmail,
+      orderId,
+      "BoardroomBriefOrder",
+      JSON.stringify({
+        previousStatus: order.deliveryStatus,
+        newStatus: newDeliveryStatus,
+        contradictions: contradictions.filter(c => c !== "none"),
+        actions,
+        caseStudyId,
+      }),
+      "admin"
+    );
     console.log("  ✓ Audit event written: BOARDROOM_LEGACY_ORDER_RECONCILED");
   } catch (err) {
     errors.push(`Audit write failed: ${err.message}`);
