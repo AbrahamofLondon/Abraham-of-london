@@ -460,6 +460,31 @@ const GlobalMarketOutlookPublicPage: NextPage<PublicBriefProps> = ({
                     </span>
                   </motion.div>
 
+                  {/* ── Archive notice — required before content ─────────── */}
+                  <div
+                    className="mt-5"
+                    style={{
+                      border: "1px solid rgba(245,158,11,0.25)",
+                      backgroundColor: "rgba(245,158,11,0.05)",
+                      padding: "0.75rem 1rem",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "10px",
+                    }}
+                  >
+                    <Scale style={{ width: "11px", height: "11px", color: "#F59E0B", flexShrink: 0, marginTop: "2px" }} />
+                    <p style={{
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "7.5px",
+                      letterSpacing: "0.14em",
+                      color: "rgba(245,158,11,0.75)",
+                      lineHeight: 1.7,
+                      margin: 0,
+                    }}>
+                      This is an archived Q1 2026 intelligence product. It is available for reference and historical review, but it is not the current quarter&rsquo;s market intelligence report.
+                    </p>
+                  </div>
+
                   <motion.h1
                     initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
                     animate={{ opacity: 1, y: 0 }}

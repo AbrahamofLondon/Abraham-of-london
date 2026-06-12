@@ -574,6 +574,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: subscription.status,
       });
     }
+
+    // Audit log for Professional subscription payment failure — makes past_due
+    // visible to admin via AccessAuditLog even when no RetainerContract exists.
+    if (
+      event.type === "customer.subscription.updated" &&
+      subscription.status === "past_due"
+    ) {
+      const priceId = subscription.items.data[0]?.price.id ?? null;
+      const customerId = typeof subscription.customer === "string" ? subscription.customer : null;
+      await prisma.accessAuditLog.create({
+        data: {
+          actorType: "SYSTEM",
+          actorEmail: customerId ?? "stripe:subscription",
+          action: "subscription_payment_failed",
+          targetType: "stripe_subscription",
+          targetKey: subscription.id,
+          success: false,
+          reason: "past_due",
+          metadata: { priceId, customerId, subscriptionId: subscription.id, status: "past_due" },
+        },
+      }).catch(() => {
+        // Audit write failure must never mask webhook handling.
+      });
+    }
   }
 
   // HubSpot sync on successful checkout

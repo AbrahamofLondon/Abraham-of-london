@@ -1248,6 +1248,23 @@ export async function POST(
     });
   } catch (error) {
     console.error("[EXECUTIVE_REPORTING_RUN_ERROR]", error);
+    // Write failure audit record so admin can detect, investigate, and remediate.
+    try {
+      await prisma.accessAuditLog.create({
+        data: {
+          actorType: "SYSTEM",
+          actorEmail: null,
+          action: "executive_report_generation_failed",
+          targetType: "executive_reporting_run",
+          targetKey: "run_error",
+          success: false,
+          reason: error instanceof Error ? error.message : "Unknown generation error",
+          metadata: { errorName: error instanceof Error ? error.name : null },
+        },
+      });
+    } catch {
+      // Audit write is best-effort; never mask the original failure.
+    }
     return jsonFailure("Failed to generate executive report.", 500);
   }
 }

@@ -669,9 +669,9 @@ function ExecutionEntryState({
           <div
             className="mb-4"
             style={{
-              border: `1px solid ${GOLD}24`,
+              border: `1px solid ${GOLD}30`,
               backgroundColor: "rgba(0,0,0,0.72)",
-              padding: "0.85rem 1rem",
+              padding: "1rem 1.1rem",
             }}
           >
             <div style={{
@@ -679,9 +679,20 @@ function ExecutionEntryState({
               fontSize: "7.5px",
               letterSpacing: "0.28em",
               textTransform: "uppercase",
-              color: `${GOLD}AA`,
+              color: `${GOLD}CC`,
+              marginBottom: "6px",
             }}>
-              Access granted. Execution environment ready.
+              Strategy Room access is active
+            </div>
+            <div style={{
+              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+              fontSize: "7px",
+              letterSpacing: "0.12em",
+              color: "rgba(242,241,238,0.45)",
+              lineHeight: 1.7,
+            }}>
+              The execution tool is ready. Begin with the first intervention below.<br />
+              Supplementary counsel or strategic review may follow where applicable.
             </div>
           </div>
         )}
