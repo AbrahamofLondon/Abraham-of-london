@@ -51,6 +51,7 @@ function checkHardFailures(c: ProductFulfilmentContract): ValidationFailure[] {
   const failures: ValidationFailure[] = [];
   const isPaid = c.commercialStatus === "paid";
   const isContracted = c.commercialStatus === "contracted";
+  // manual_billing products have no self-serve checkout — skip paid route checks
 
   if (isPaid && !c.stripePriceId) {
     failures.push({
@@ -169,7 +170,11 @@ function checkWarnings(c: ProductFulfilmentContract): ValidationFailure[] {
 // ── Compute readiness status from failures ────────────────────────────────────
 
 function computeStatus(c: ProductFulfilmentContract, hardFailures: ValidationFailure[]): ReadinessStatus {
-  if (c.commercialStatus === "inactive" || c.commercialStatus === "contracted") return "not_applicable";
+  if (
+    c.commercialStatus === "inactive" ||
+    c.commercialStatus === "contracted" ||
+    c.commercialStatus === "manual_billing"
+  ) return "not_applicable";
   if (c.commercialStatus === "free_controlled" || c.commercialStatus === "evidence_gated") {
     return "not_applicable";
   }
@@ -183,9 +188,18 @@ function computeStatus(c: ProductFulfilmentContract, hardFailures: ValidationFai
 
 // ── Public API ─────────────────────────────────────────────────────────────────
 
+function isNotApplicable(c: ProductFulfilmentContract): boolean {
+  if (c.commercialStatus === "inactive" || c.commercialStatus === "contracted" || c.commercialStatus === "manual_billing") return true;
+  if (c.commercialStatus === "free_controlled" || c.commercialStatus === "evidence_gated") return true;
+  if (c.fulfilmentType === "free_asset" || c.fulfilmentType === "corridor_stage") return true;
+  return false;
+}
+
 export function validateContract(c: ProductFulfilmentContract): ProductReadinessResult {
-  const hardFailures = checkHardFailures(c);
-  const warnings = checkWarnings(c);
+  // Skip structural checks for products that cannot be sold
+  const na = isNotApplicable(c);
+  const hardFailures = na ? [] : checkHardFailures(c);
+  const warnings = na ? [] : checkWarnings(c);
   const computedStatus = computeStatus(c, hardFailures);
   const statusMismatch = computedStatus !== c.readinessStatus;
   const isBlocked = computedStatus === "not_sellable";

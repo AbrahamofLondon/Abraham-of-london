@@ -63,7 +63,7 @@ export type ProductFulfilmentContract = {
   displayName: string;
   entitlementSlug: string;
   stripePriceId: string | null;
-  commercialStatus: "paid" | "free_controlled" | "contracted" | "inactive" | "evidence_gated";
+  commercialStatus: "paid" | "free_controlled" | "contracted" | "inactive" | "evidence_gated" | "manual_billing";
 
   // Routes
   checkoutRoute: string | null;     // /api/checkout/... or /checkout/...
@@ -679,6 +679,379 @@ export const RETAINER_INSTITUTIONAL_CONTRACT = contract({
   notes: "Contracted monthly. Inactive until Stripe price confirmed.",
 });
 
+// ── Professional Subscriptions ───────────────────────────────────────────────
+
+export const PROFESSIONAL_CONTRACT = contract({
+  productCode: "professional",
+  displayName: "Professional",
+  entitlementSlug: "tier.professional",
+  stripePriceId: "price_1TXsvkQFpelVFMXJ4OSKRCiR",
+  commercialStatus: "paid",
+  checkoutRoute: "/api/billing/checkout",
+  intakeRoute: "/pricing",
+  successRoute: "/decision-centre",
+  customerAccessRoute: "/decision-centre",
+  adminRoute: "/admin/billing",
+  fulfilmentType: "retainer_cycle",
+  artifactModel: null,
+  deliveryModel: "entitlement_on_payment",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "proof_ready",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [
+    "No admin queue for incoming Professional subscriptions — entitlements granted by webhook but not surfaced in estate spine",
+    "Subscription renewal and cancellation (customer.subscription.updated/deleted) handled in webhook but not visible in any admin view",
+    "No cycle-end notification to customer before expiry",
+  ],
+  notes: "Monthly subscription (£59/mo). Access to /decision-centre. Entitlement created by billing webhook on checkout.session.completed.",
+});
+
+export const PROFESSIONAL_ANNUAL_CONTRACT = contract({
+  productCode: "professional_annual",
+  displayName: "Professional Annual",
+  entitlementSlug: "tier.professional",
+  stripePriceId: "price_1TXsyXQFpelVFMXJp9Ey5FiB",
+  commercialStatus: "paid",
+  checkoutRoute: "/api/billing/checkout",
+  intakeRoute: "/pricing",
+  successRoute: "/decision-centre",
+  customerAccessRoute: "/decision-centre",
+  adminRoute: "/admin/billing",
+  fulfilmentType: "retainer_cycle",
+  artifactModel: null,
+  deliveryModel: "entitlement_on_payment",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "proof_ready",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [
+    "Annual billing shares entitlementSlug with monthly — both grant tier.professional. Verify renewal path handles annual cadence correctly.",
+    "No admin queue for incoming Professional Annual subscriptions",
+  ],
+  notes: "Annual subscription (£590/yr). Same entitlement slug as monthly Professional. Shares access path.",
+});
+
+// ── GMI Intelligence Reports ──────────────────────────────────────────────────
+
+export const GMI_Q1_2026_CONTRACT = contract({
+  productCode: "gmi_q1_2026",
+  displayName: "Global Market Intelligence Report — Q1 2026",
+  entitlementSlug: "global-market-intelligence-report-q1-2026",
+  stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
+  commercialStatus: "paid",
+  checkoutRoute: "/api/billing/checkout",
+  intakeRoute: "/artifacts/global-market-intelligence-report-q1-2026",
+  successRoute: "/artifacts/global-market-intelligence-report-q1-2026",
+  customerAccessRoute: "/artifacts/global-market-intelligence-report-q1-2026",
+  adminRoute: "/admin/intelligence/gmi-control-plane",
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "entitlement_on_payment",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: "product_artifact",
+  readinessStatus: "proof_ready",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [
+    "Archived edition — superseded by Q2. Checkout still possible for historical reference.",
+    "No automated post-purchase delivery email for GMI access confirmation",
+  ],
+  notes: "Archived Q1 2026 edition. Has active Stripe price. Report delivered as entitlement-gated artifact route.",
+});
+
+export const GMI_Q2_2026_CONTRACT = contract({
+  productCode: "gmi_q2_2026",
+  displayName: "Global Market Intelligence Report — Q2 2026",
+  entitlementSlug: "global-market-intelligence-report-q2-2026",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/artifacts/global-market-intelligence-report-q2-2026",
+  successRoute: "/artifacts/global-market-intelligence-report-q2-2026",
+  customerAccessRoute: "/artifacts/global-market-intelligence-report-q2-2026",
+  adminRoute: "/admin/intelligence/gmi-control-plane",
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "immediate_access",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: "product_artifact",
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [
+    "Current edition — no self-serve checkout yet (manual_billing). Add Stripe IDs to enable paid checkout.",
+    "Access is currently open or manual — no entitlement gate on the artifact route",
+  ],
+  notes: "Current published Q2 2026 edition. Status: manual_billing. No self-serve checkout until Stripe IDs added to registry.",
+});
+
+export const GMI_Q3_2026_CONTRACT = contract({
+  productCode: "gmi_q3_2026",
+  displayName: "Global Market Intelligence Report — Q3 2026",
+  entitlementSlug: "global-market-intelligence-report-q3-2026",
+  stripePriceId: null,
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: "/admin/intelligence/gmi-control-plane",
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "entitlement_on_payment",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Draft edition — not yet released. Blocked from checkout. Change registry status to active or manual_billing when ready.",
+});
+
+// ── Additional Inactive / Contracted ─────────────────────────────────────────
+
+export const ENTERPRISE_CONTRACT = contract({
+  ...{
+    checkoutRoute: null,
+    adminRoute: null,
+    artifactModel: null,
+    dashboardVisibility: false,
+    caseStudyEligible: false,
+    feedbackSurface: null,
+    estateSpineSourceType: null,
+    readinessStatus: "not_applicable" as ReadinessStatus,
+    proofRunCompleted: false,
+    hardFailures: [],
+    warnings: [],
+    notes: null,
+  },
+  productCode: "enterprise",
+  displayName: "Enterprise",
+  entitlementSlug: "tier.enterprise",
+  stripePriceId: null,
+  commercialStatus: "contracted",
+  intakeRoute: "/contact",
+  successRoute: "/contact",
+  customerAccessRoute: "/decision-centre",
+  adminRoute: "/admin/billing",
+  fulfilmentType: "retainer_cycle",
+  deliveryModel: "contracted_onboarding",
+  notes: "Annual custom plan. No self-serve checkout. Contracted externally. Access provisioned manually.",
+});
+
+export const ADDITIONAL_COLLABORATOR_CONTRACT = contract({
+  productCode: "additional_collaborator",
+  displayName: "Additional Collaborator",
+  entitlementSlug: "seat.additional",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/pricing",
+  successRoute: "/decision-centre",
+  customerAccessRoute: "/decision-centre",
+  adminRoute: "/admin/billing",
+  fulfilmentType: "retainer_cycle",
+  artifactModel: null,
+  deliveryModel: "contracted_onboarding",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Additional collaborator seat. Manual billing — no self-serve checkout. Provisioned through account support.",
+});
+
+export const OPERATOR_ESSENTIALS_PACK_CONTRACT = contract({
+  productCode: "operator_essentials_pack",
+  displayName: "Operator Essentials",
+  entitlementSlug: "operator-essentials-pack",
+  stripePriceId: "price_1TVaioQFpelVFMXJe2jvAB0C",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "bundle_grant",
+  artifactModel: null,
+  deliveryModel: "bundle_entitlement",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive — bundle entitlement resolution not verified. Checkout blocked. Includes: decision_exposure_instrument, escalation_readiness_scorecard, structural_failure_diagnostic_canvas, execution_risk_index. Enable after confirming each included product delivers independently.",
+});
+
+export const COMMAND_PACK_CONTRACT = contract({
+  productCode: "command_pack",
+  displayName: "Command Pack",
+  entitlementSlug: "command-pack",
+  stripePriceId: "price_1TVak1QFpelVFMXJekck5w1o",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "bundle_grant",
+  artifactModel: null,
+  deliveryModel: "bundle_entitlement",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive — bundle entitlement resolution not verified. Checkout blocked. Includes: decision_exposure_instrument, escalation_readiness_scorecard, structural_failure_diagnostic_canvas, execution_risk_index, mandate_clarity_framework, team_alignment_gap_map.",
+});
+
+export const GOVERNANCE_SUITE_CONTRACT = contract({
+  productCode: "governance_suite",
+  displayName: "Governance Suite",
+  entitlementSlug: "governance-suite",
+  stripePriceId: "price_1TVallQFpelVFMXJZdNH3bOh",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "bundle_grant",
+  artifactModel: null,
+  deliveryModel: "bundle_entitlement",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive — bundle entitlement resolution not verified. Checkout blocked. Includes: decision_exposure_instrument, escalation_readiness_scorecard, structural_failure_diagnostic_canvas, execution_risk_index, team_alignment_gap_map, mandate_clarity_framework, governance_drift_detector, strategic_priority_stack_builder, intervention_path_selector, board_brief_builder.",
+});
+
+export const INNER_CIRCLE_CONTRACT = contract({
+  productCode: "inner_circle",
+  displayName: "Inner Circle",
+  entitlementSlug: "inner-circle",
+  stripePriceId: "price_1TP20xQFpelVFMXJwBO0Kz1h",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "retainer_cycle",
+  artifactModel: null,
+  deliveryModel: "entitlement_on_payment",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive monthly membership. No active checkout.",
+});
+
+export const DIAGNOSTIC_REPORT_BASIC_CONTRACT = contract({
+  productCode: "diagnostic_report_basic",
+  displayName: "Diagnostic Report — Basic",
+  entitlementSlug: "diagnostic-report-basic",
+  stripePriceId: "price_1TP1ufQFpelVFMXJ4NqwIXjv",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "ai_generation_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive. Superseded by executive_reporting. Stripe product ID absent.",
+});
+
+export const DIAGNOSTIC_REPORT_PRO_CONTRACT = contract({
+  productCode: "diagnostic_report_pro",
+  displayName: "Diagnostic Report — Pro",
+  entitlementSlug: "diagnostic-report-pro",
+  stripePriceId: "price_1TP1w5QFpelVFMXJvIQUVqgz",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "ai_generation_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive. Superseded by executive_reporting.",
+});
+
+export const EXECUTIVE_REPORTING_PRIORITY_CONTRACT = contract({
+  productCode: "executive_reporting_priority",
+  displayName: "Executive Reporting — Advanced",
+  entitlementSlug: "executive-reporting-priority",
+  stripePriceId: "price_1TXtNlQFpelVFMXJtn73BFTl",
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: null,
+  successRoute: null,
+  customerAccessRoute: null,
+  adminRoute: null,
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ExecutiveReportingRun",
+  deliveryModel: "ai_generation_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes: "Inactive — duplicate of executive_reporting at same price. Use executive_reporting as canonical. Shares same Stripe price ID.",
+});
+
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 /**
@@ -726,10 +1099,34 @@ export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   CASE_DOSSIER_TEAM_ALIGNMENT_CONTRACT,
   CASE_DOSSIER_ESCALATION_DENIED_CONTRACT,
 
+  // Professional subscriptions
+  PROFESSIONAL_CONTRACT,
+  PROFESSIONAL_ANNUAL_CONTRACT,
+
+  // GMI intelligence reports
+  GMI_Q1_2026_CONTRACT,
+  GMI_Q2_2026_CONTRACT,
+  GMI_Q3_2026_CONTRACT,
+
   // Contracted / inactive
   RETAINER_CORE_CONTRACT,
   RETAINER_OPERATIONAL_CONTRACT,
   RETAINER_INSTITUTIONAL_CONTRACT,
+
+  // Enterprise + additional seat
+  ENTERPRISE_CONTRACT,
+  ADDITIONAL_COLLABORATOR_CONTRACT,
+
+  // Inactive bundles
+  OPERATOR_ESSENTIALS_PACK_CONTRACT,
+  COMMAND_PACK_CONTRACT,
+  GOVERNANCE_SUITE_CONTRACT,
+  INNER_CIRCLE_CONTRACT,
+
+  // Inactive reporting products
+  DIAGNOSTIC_REPORT_BASIC_CONTRACT,
+  DIAGNOSTIC_REPORT_PRO_CONTRACT,
+  EXECUTIVE_REPORTING_PRIORITY_CONTRACT,
 ];
 
 /** Quick lookup by productCode */
