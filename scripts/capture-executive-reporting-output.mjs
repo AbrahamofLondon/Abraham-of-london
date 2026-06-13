@@ -112,7 +112,7 @@ async function captureScenarioOutput(scenario) {
   const intake = {
     decisionContext: scenario.decisionContext.decision,
     decision: scenario.decisionContext.decision,
-    audience: scenario.audience.join(', '),
+    audience: typeof scenario.audience === 'string' ? scenario.audience : scenario.audience.join(', '),
     availableEvidence: scenario.availableEvidence,
     missingEvidence: scenario.missingEvidence,
     pressure: scenario.reportingPressure,

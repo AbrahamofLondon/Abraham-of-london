@@ -25,7 +25,7 @@ import {
   ProductAuthorityContract,
   canMakePublicClaim,
   getPublicClaimLanguage,
-} from "./product-authority-contract.js";
+} from "./product-authority-contract";
 
 export interface ProductAuthorityResolverInput {
   productCode: string;
