@@ -112,7 +112,42 @@ export default function PressurePage() {
       </Head>
 
       <main className="min-h-screen bg-[rgb(3,3,5)] text-white">
-        <section className="px-6 pb-16 pt-32">
+        {/* Pain-Proof-Action Framework */}
+        <section className="border-b px-6 pt-32 pb-8" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          <div className="mx-auto max-w-3xl">
+            <div className="grid gap-8 md:grid-cols-3">
+              {/* Pain */}
+              <div>
+                <p style={{ ...mono, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+                  The Pain
+                </p>
+                <p className="text-sm leading-6 text-white/65">
+                  Leaders make expensive decisions from incomplete evidence. Internal confidence often exceeds what the facts support.
+                </p>
+              </div>
+              {/* Proof */}
+              <div>
+                <p style={{ ...mono, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+                  The Proof
+                </p>
+                <p className="text-sm leading-6 text-white/65">
+                  This is accountable decision infrastructure—not generic AI advice. It derives judgement by pattern, exposes consequence, and identifies what would falsify your case.
+                </p>
+              </div>
+              {/* Action */}
+              <div>
+                <p style={{ ...mono, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+                  The Action
+                </p>
+                <p className="text-sm leading-6 text-white/65">
+                  Enter your decision concern. Get a pressure signal (Red/Amber/Green). See your first weakness. Choose your next route through the product estate.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 pb-16 pt-8">
           <div className="mx-auto max-w-3xl">
             <p style={{ ...mono, color: `${GOLD}AA`, fontSize: 8, letterSpacing: "0.28em", textTransform: "uppercase" }}>
               Public Pressure Signal
