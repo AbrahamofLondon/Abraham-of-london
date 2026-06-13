@@ -13,9 +13,9 @@ PASSED
 ## Classification
 
 - **Internally certified (Wave 1):** fast_diagnostic, team_assessment, enterprise_assessment, case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied
-- **Externally proven:** fast_diagnostic
-- **Revoked:** case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied, team_assessment, enterprise_assessment
-- **Blocked:** 31 products
+- **Externally proven:** fast_diagnostic, team_assessment, enterprise_assessment
+- **Revoked:** case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied
+- **Blocked:** 29 products
 - **Internal only:** operator_essentials_pack, command_pack, governance_suite, gmi_q3_2026, diagnostic_report_basic, diagnostic_report_pro, executive_reporting_priority, inner_circle, retainer_core, retainer_operational, retainer_institutional
 
 ## Gold Claims Reviewed
@@ -30,10 +30,6 @@ PASSED
   Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator. High input echo (47%). Consequence section is not grounded in the user's stated situation.
 - **case_dossier_escalation_denied** → blocked_for_low_value
   Internal gold claim REVOKED by actual-output testing: toy risk 15/100; rejected by busy_operator. High input echo (45%). Next action lacks an owner or a timeframe.
-- **team_assessment** → blocked_pending_external_proof
-  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true).
-- **enterprise_assessment** → blocked_pending_external_proof
-  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true).
 
 ## Product-by-Product Matrix
 
@@ -65,8 +61,8 @@ PASSED
 | gmi_q1_2026 | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q2_2026 | 7.9 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q3_2026 | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
-| team_assessment | 5.8 | defined | 8 | survives | fails_generic_ai_outperform | blocked_pending_external_proof |
-| enterprise_assessment | 5.8 | defined | 8 | survives | fails_generic_ai_outperform | blocked_pending_external_proof |
+| team_assessment | 5.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
+| enterprise_assessment | 5.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
 | boardroom_mode | 5.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | executive_reporting | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | diagnostic_report_basic | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
@@ -85,8 +81,8 @@ PASSED
 
 ## Counts
 
-- Externally proven gold: 1
-- Blocked pending external proof: 28
+- Externally proven gold: 3
+- Blocked pending external proof: 26
 - Blocked for low value: 3
 - Internal only: 11
 

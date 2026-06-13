@@ -1,5 +1,7 @@
 import { composeFastDiagnosticGoldResult } from "@/lib/product/fast-diagnostic-gold-composer";
 import { composeFreeSignalGoldResult } from "@/lib/product/free-signal-gold-composer";
+import { composeTeamAssessmentGoldResult } from "@/lib/product/team-assessment-gold-composer";
+import { composeEnterpriseAssessmentGoldResult } from "@/lib/product/enterprise-assessment-gold-composer";
 import { composeDecisionInstrumentGoldResult } from "@/lib/product/decision-instrument-gold-composer";
 import { composeStrategyRoomSessionGoldReport } from "@/lib/product/strategy-room-session-gold-composer";
 import { GOLDEN_DECISION_SCENARIOS } from "@/lib/judgement/golden-decision-scenarios";
@@ -108,8 +110,8 @@ export const WAVE_ONE_ROUTE_DISCOVERY: WaveOneRouteDiscovery[] = [
 export function captureRequiredWaveOneLiveRouteOutputs(capturedAt = new Date().toISOString()): LiveRouteOutputCapture[] {
   return [
     captureFastDiagnostic(capturedAt),
-    captureFreeSignal("team_assessment", "/diagnostics/team-assessment", "team-misalignment", capturedAt),
-    captureFreeSignal("enterprise_assessment", "/diagnostics/enterprise-assessment", "board-disagreement", capturedAt),
+    captureTeamAssessment(capturedAt),
+    captureEnterpriseAssessment(capturedAt),
     captureCaseDossier(
       "/evidence/tariff-shock-growth-break",
       "tariff-route-proof",
@@ -204,6 +206,74 @@ function captureFastDiagnostic(capturedAt: string): LiveRouteOutputCapture {
     },
     usesJudgementEngine: result.patternStatus === "judged",
     captureMethod: "api_response",
+    capturedAt,
+  });
+}
+
+function captureTeamAssessment(capturedAt: string): LiveRouteOutputCapture {
+  const scenario = mustScenario("team-misalignment");
+  const result = composeTeamAssessmentGoldResult({
+    productCode: "team_assessment",
+    teamContext: scenario.caseInput.decisionDescription,
+    observedFriction: scenario.caseInput.constraint,
+    teamEvidence: scenario.caseInput.evidenceAvailable,
+    minutesAskedOfUser: 10,
+    consequenceOfInaction: scenario.caseInput.consequenceOfDelay,
+    stakeholders: scenario.caseInput.stakeholders,
+    deadline: scenario.caseInput.deadline,
+    desiredOutcome: scenario.caseInput.desiredOutcome,
+  });
+
+  return buildCapture({
+    productCode: "team_assessment",
+    route: "/diagnostics/team-assessment",
+    scenarioId: scenario.id,
+    inputPayload: scenario.caseInput as unknown as Record<string, unknown>,
+    sections: {
+      diagnosis: result.dominantTeamFriction,
+      consequence: result.commercialConsequence,
+      nextMove: result.recommendedNextStep,
+      falsification: result.causedByPattern,
+      escalation: result.whenToEscalate,
+      executionSequence: result.executionSequence.join("\n"),
+      limitation: result.whatThisResultDoesNotYetProve,
+    },
+    usesJudgementEngine: result.patternStatus === "judged",
+    captureMethod: "component_render",
+    capturedAt,
+  });
+}
+
+function captureEnterpriseAssessment(capturedAt: string): LiveRouteOutputCapture {
+  const scenario = mustScenario("board-disagreement");
+  const result = composeEnterpriseAssessmentGoldResult({
+    productCode: "enterprise_assessment",
+    enterpriseContext: scenario.caseInput.decisionDescription,
+    observedFriction: scenario.caseInput.constraint,
+    enterpriseEvidence: scenario.caseInput.evidenceAvailable,
+    minutesAskedOfUser: 12,
+    consequenceOfInaction: scenario.caseInput.consequenceOfDelay,
+    stakeholders: scenario.caseInput.stakeholders,
+    deadline: scenario.caseInput.deadline,
+    desiredOutcome: scenario.caseInput.desiredOutcome,
+  });
+
+  return buildCapture({
+    productCode: "enterprise_assessment",
+    route: "/diagnostics/enterprise-assessment",
+    scenarioId: scenario.id,
+    inputPayload: scenario.caseInput as unknown as Record<string, unknown>,
+    sections: {
+      diagnosis: result.dominantEnterpriseFriction,
+      consequence: result.strategicConsequence,
+      nextMove: result.recommendedNextStep,
+      falsification: result.causedByPattern,
+      escalation: result.whenToEscalate,
+      executionSequence: result.executionSequence.join("\n"),
+      limitation: result.whatThisResultDoesNotYetProve,
+    },
+    usesJudgementEngine: result.patternStatus === "judged",
+    captureMethod: "component_render",
     capturedAt,
   });
 }

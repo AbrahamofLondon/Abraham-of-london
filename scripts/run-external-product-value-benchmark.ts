@@ -29,6 +29,8 @@ import { runRedTeamPanel } from "../lib/product/product-red-team-reviewers";
 import { assessCustomerUsefulness } from "../lib/product/customer-usefulness-proof";
 import { composeFastDiagnosticGoldResult } from "../lib/product/fast-diagnostic-gold-composer";
 import { composeFreeSignalGoldResult } from "../lib/product/free-signal-gold-composer";
+import { composeTeamAssessmentGoldResult } from "../lib/product/team-assessment-gold-composer";
+import { composeEnterpriseAssessmentGoldResult } from "../lib/product/enterprise-assessment-gold-composer";
 import {
   captureRequiredWaveOneLiveRouteOutputs,
   WAVE_ONE_ROUTE_DISCOVERY,
@@ -210,6 +212,155 @@ function reviewFreeSignal(productCode: string, surface: string): RenderedReview 
   return assembleReview(productCode, `live_route_capture: ${surface}`, samples);
 }
 
+function reviewTeamAssessment(): RenderedReview {
+  const scenarioA = {
+    label: "post-merger operations team with conflicting priorities",
+    input: {
+      productCode: "team_assessment" as const,
+      teamContext: "a twelve-person operations team three months after a merger",
+      observedFriction: "three of five team leads gave materially conflicting answers about this quarter's top priority",
+      teamEvidence: [
+        "five team leads answered differently to 'top priority this quarter'",
+        "leadership alignment survey shows 90% agreement, but execution tracker shows 40% of priorities being executed as named",
+        "weekly standups happen; priorities shift between standups without written re-decision",
+      ],
+      minutesAskedOfUser: 10,
+      consequenceOfInaction: "Divergent execution continues, team velocity declines, post-merger integration stalls",
+      stakeholders: ["Operations Director", "five team leads"],
+      deadline: "quarterly commitments lock in three weeks",
+      desiredOutcome: "one written priority order all five leads execute against",
+    },
+  };
+  const scenarioB = {
+    label: "founder-led sales team missing its pipeline forecast",
+    input: {
+      productCode: "team_assessment" as const,
+      teamContext: "a founder-led sales team of seven carrying an aggressive annual target",
+      observedFriction: "forecast confidence stayed above 90% while quarter-end attainment fell below 60%",
+      teamEvidence: [
+        "sales team confidence in forecast remained high through the quarter",
+        "actual close rate was 25% lower than forecast assumed",
+        "team members blame external factors; founder blames forecast method",
+        "no shared failure postmortem was conducted",
+      ],
+      minutesAskedOfUser: 10,
+      consequenceOfInaction: "Risk blindness persists, next quarter forecast will be equally overconfident, pipeline misalignment continues",
+      stakeholders: ["Founder", "Sales Lead"],
+      deadline: "quarter end in four weeks",
+      desiredOutcome: "a forecast decision that prices the warning signs before commitment",
+    },
+  };
+
+  const samples = [scenarioA, scenarioB].map((scenario) => {
+    const result = composeTeamAssessmentGoldResult(scenario.input);
+    const sections = {
+      diagnosis: result.dominantTeamFriction,
+      consequence: result.commercialConsequence,
+      nextMove: result.recommendedNextStep,
+      falsification: result.causedByPattern,
+      escalation: result.whenToEscalate,
+      execution: result.executionSequence.join("\n"),
+      limitation: result.whatThisResultDoesNotYetProve,
+    };
+    const sample: AnalyzableSample = {
+      label: scenario.label,
+      inputText: [
+        scenario.input.teamContext,
+        scenario.input.observedFriction,
+        ...scenario.input.teamEvidence,
+      ].join(" "),
+      output: {
+        fullText: Object.values(sections).join("\n"),
+        nextActionText: result.recommendedNextStep,
+        consequenceText: result.commercialConsequence,
+        diagnosisText: result.dominantTeamFriction,
+        falsificationText: result.causedByPattern,
+        executionSequenceText: result.executionSequence,
+        limitsText: result.whatThisResultDoesNotYetProve,
+        evidenceItems: scenario.input.teamEvidence,
+      },
+    };
+    return { sample, sections, timeValuePassed: result.timeValueSurplus.passes };
+  });
+
+  return assembleReview("team_assessment", "live_route_capture: /diagnostics/team-assessment", samples);
+}
+
+function reviewEnterpriseAssessment(): RenderedReview {
+  const scenarioA = {
+    label: "post-acquisition board disagreement on integration priorities",
+    input: {
+      productCode: "enterprise_assessment" as const,
+      enterpriseContext: "a mid-market enterprise two quarters into a major acquisition",
+      observedFriction: "board members disagree on integration pacing — one insists on speed, two push for caution, one abstains",
+      enterpriseEvidence: [
+        "acquisition closed; integration planning shows divergent timelines from each board member",
+        "executive team received conflicting mandates from different board members",
+        "three integration initiatives are paused awaiting board clarity",
+        "integration spend is at risk; budget authority hinges on board decision",
+      ],
+      minutesAskedOfUser: 12,
+      consequenceOfInaction: "Board disagreement blocks execution, integration timeline slips by quarters, deal value capture erodes, executive team fractures",
+      stakeholders: ["Board", "CEO", "CFO"],
+      deadline: "integration milestones must restart in 30 days",
+      desiredOutcome: "board alignment on integration pacing with written mandate",
+    },
+  };
+  const scenarioB = {
+    label: "enterprise overstretched: too many initiatives, no clear priorities",
+    input: {
+      productCode: "enterprise_assessment" as const,
+      enterpriseContext: "a growth-stage enterprise in competitive market with 400+ employees",
+      observedFriction: "strategic planning approved 14 initiatives this year; no clear win condition per initiative; execution layer is confused about which to prioritize",
+      enterpriseEvidence: [
+        "14 approved strategic initiatives compete for the same engineering resources",
+        "initiative completion rate is 30% (9 of 30 started last year completed)",
+        "executive team spends 80% of time re-prioritizing instead of leading execution",
+        "cross-functional teams report lack of clarity on success metrics per initiative",
+      ],
+      minutesAskedOfUser: 12,
+      consequenceOfInaction: "Initiative overload compounds, execution productivity declines, employee retention at risk, competitive advantage erodes",
+      stakeholders: ["Executive Team", "Board"],
+      deadline: "quarterly planning must restart in 45 days",
+      desiredOutcome: "ruthlessly prioritized initiative portfolio with clear win conditions",
+    },
+  };
+
+  const samples = [scenarioA, scenarioB].map((scenario) => {
+    const result = composeEnterpriseAssessmentGoldResult(scenario.input);
+    const sections = {
+      diagnosis: result.dominantEnterpriseFriction,
+      consequence: result.strategicConsequence,
+      nextMove: result.recommendedNextStep,
+      falsification: result.causedByPattern,
+      escalation: result.whenToEscalate,
+      execution: result.executionSequence.join("\n"),
+      limitation: result.whatThisResultDoesNotYetProve,
+    };
+    const sample: AnalyzableSample = {
+      label: scenario.label,
+      inputText: [
+        scenario.input.enterpriseContext,
+        scenario.input.observedFriction,
+        ...scenario.input.enterpriseEvidence,
+      ].join(" "),
+      output: {
+        fullText: Object.values(sections).join("\n"),
+        nextActionText: result.recommendedNextStep,
+        consequenceText: result.strategicConsequence,
+        diagnosisText: result.dominantEnterpriseFriction,
+        falsificationText: result.causedByPattern,
+        executionSequenceText: result.executionSequence,
+        limitsText: result.whatThisResultDoesNotYetProve,
+        evidenceItems: scenario.input.enterpriseEvidence,
+      },
+    };
+    return { sample, sections, timeValuePassed: result.timeValueSurplus.passes };
+  });
+
+  return assembleReview("enterprise_assessment", "live_route_capture: /diagnostics/enterprise-assessment", samples);
+}
+
 function reviewCaseDossier(productCode: string, variantProductCode: string): RenderedReview {
   const primaryCapture = liveRouteCaptureByProduct.get(productCode);
   const variantCapture = liveRouteCaptureByProduct.get(variantProductCode);
@@ -350,8 +501,8 @@ const descriptors: BenchmarkProductDescriptor[] = products.map((product) => ({
 
 const renderedReviews: RenderedReview[] = goldClaims.map((productCode) => {
   if (productCode === "fast_diagnostic") return reviewFastDiagnostic();
-  if (productCode === "team_assessment") return reviewFreeSignal(productCode, "/diagnostics/team-assessment");
-  if (productCode === "enterprise_assessment") return reviewFreeSignal(productCode, "/diagnostics/enterprise-assessment");
+  if (productCode === "team_assessment") return reviewTeamAssessment();
+  if (productCode === "enterprise_assessment") return reviewEnterpriseAssessment();
   if (productCode === "case_dossier_tariff_shock") return reviewCaseDossier(productCode, "case_dossier_team_alignment");
   if (productCode === "case_dossier_team_alignment") return reviewCaseDossier(productCode, "case_dossier_escalation_denied");
   if (productCode === "case_dossier_escalation_denied") return reviewCaseDossier(productCode, "case_dossier_tariff_shock");

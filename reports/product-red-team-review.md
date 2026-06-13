@@ -28,7 +28,7 @@ Survives: **yes** — rejections: none
 | experienced_consultant | Is this just dressed-up common sense? | accept | The judgement varies materially with the case — there is method here, not just framing. |
 | returning_user | Would I come back to this? | accept | The checkpoint and record structure give me a concrete reason to return. |
 
-Scores: usefulness 9.2, specificity 8.4, credibility 9, actionability 10, distinctiveness 7.8, reuse 9
+Scores: usefulness 10, specificity 8.5, credibility 9, actionability 10, distinctiveness 7.7, reuse 9
 
 ## enterprise_assessment
 
@@ -42,7 +42,7 @@ Survives: **yes** — rejections: none
 | experienced_consultant | Is this just dressed-up common sense? | accept | The judgement varies materially with the case — there is method here, not just framing. |
 | returning_user | Would I come back to this? | accept | The checkpoint and record structure give me a concrete reason to return. |
 
-Scores: usefulness 9.2, specificity 8.4, credibility 9, actionability 10, distinctiveness 7.8, reuse 9
+Scores: usefulness 10, specificity 8.1, credibility 9, actionability 10, distinctiveness 7.1, reuse 9
 
 ## case_dossier_tariff_shock
 

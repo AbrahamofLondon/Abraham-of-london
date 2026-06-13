@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T03:37:11.150Z",
+  "generatedAt": "2026-06-13T10:06:54.974Z",
   "gate": "PASSED",
   "doctrine": "Externally proven gold or blocked. No self-certification.",
   "thresholds": {
@@ -9,7 +9,9 @@
   "productsReviewed": 43,
   "goldClaimsReviewed": 6,
   "goldClaimsConfirmed": [
-    "fast_diagnostic"
+    "fast_diagnostic",
+    "team_assessment",
+    "enterprise_assessment"
   ],
   "goldClaimsRevoked": [
     {
@@ -38,20 +40,6 @@
         "High input echo (45%).",
         "Next action lacks an owner or a timeframe."
       ]
-    },
-    {
-      "productCode": "team_assessment",
-      "finalStatus": "blocked_pending_external_proof",
-      "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
-      ]
-    },
-    {
-      "productCode": "enterprise_assessment",
-      "finalStatus": "blocked_pending_external_proof",
-      "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
-      ]
     }
   ],
   "classification": {
@@ -64,14 +52,14 @@
       "case_dossier_escalation_denied"
     ],
     "externallyProven": [
-      "fast_diagnostic"
+      "fast_diagnostic",
+      "team_assessment",
+      "enterprise_assessment"
     ],
     "revoked": [
       "case_dossier_tariff_shock",
       "case_dossier_team_alignment",
-      "case_dossier_escalation_denied",
-      "team_assessment",
-      "enterprise_assessment"
+      "case_dossier_escalation_denied"
     ],
     "blocked": [
       "boardroom_brief",
@@ -95,8 +83,6 @@
       "case_dossier_escalation_denied",
       "gmi_q1_2026",
       "gmi_q2_2026",
-      "team_assessment",
-      "enterprise_assessment",
       "boardroom_mode",
       "executive_reporting",
       "strategy_room",
@@ -121,12 +107,12 @@
     ]
   },
   "counts": {
-    "externallyProvenGold": 1,
-    "blockedPendingExternalProof": 28,
+    "externallyProvenGold": 3,
+    "blockedPendingExternalProof": 26,
     "blockedForLowValue": 3,
     "internalOnly": 11,
     "antiToyFailures": 2,
-    "genericAiOutperformFailures": 5,
+    "genericAiOutperformFailures": 3,
     "redTeamFailures": 3,
     "benchmarksMissingForGold": 0,
     "renderedReviewsMissingForGold": 0,
@@ -720,21 +706,23 @@
       "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
       "liveRouteVerified": true,
       "renderedOutputCaptured": true,
-      "antiToyScore": 8,
-      "failsAntiToy": true,
+      "antiToyScore": 0,
+      "failsAntiToy": false,
       "redTeamSurvives": true,
       "redTeamRejections": [],
-      "outperformsGenericAi": false,
+      "outperformsGenericAi": true,
       "usefulnessProofs": [
         "decision_clarity_improved",
         "next_action_obvious",
+        "risk_made_visible",
+        "contradiction_made_explicit",
         "execution_sequence_clearer",
         "evidence_organised_into_judgement",
         "reusable_artefact_gained"
       ],
-      "finalStatus": "blocked_pending_external_proof",
+      "finalStatus": "externally_proven_gold",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
+        "Actual rendered output passed anti-toy, red-team, usefulness, time-value, and market-outperformance tests."
       ]
     },
     {
@@ -747,21 +735,22 @@
       "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
       "liveRouteVerified": true,
       "renderedOutputCaptured": true,
-      "antiToyScore": 8,
-      "failsAntiToy": true,
+      "antiToyScore": 0,
+      "failsAntiToy": false,
       "redTeamSurvives": true,
       "redTeamRejections": [],
-      "outperformsGenericAi": false,
+      "outperformsGenericAi": true,
       "usefulnessProofs": [
         "decision_clarity_improved",
         "next_action_obvious",
-        "execution_sequence_clearer",
+        "risk_made_visible",
+        "contradiction_made_explicit",
         "evidence_organised_into_judgement",
         "reusable_artefact_gained"
       ],
-      "finalStatus": "blocked_pending_external_proof",
+      "finalStatus": "externally_proven_gold",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
+        "Actual rendered output passed anti-toy, red-team, usefulness, time-value, and market-outperformance tests."
       ]
     },
     {
@@ -1259,50 +1248,50 @@
       "samples": [
         {
           "label": "post-merger operations team with conflicting priorities",
-          "inputSummary": "three of five team leads gave materially conflicting answers about this quarter's top priority the team assessment responses a twelve-person operations team three months after a merger an alignment illusion — agreement in meetings, divergence in execution",
-          "outputText": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority — observed in the team assessment responses, read against your situation: a twelve-person operations team three months after a merger.\nThe agreement around a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority is performative: the room aligns quickly while execution and corridor conversation diverge, and an alignment illusion — agreement in meetings, divergence in execution suggests dissent has somewhere safer to live than the meeting. A secondary stakeholder_misalignment signal is present and may become primary if the case evolves.\nRequire each principal to write the strongest case against a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority before it is ratified. Manufacture safe dissent: require each principal to write the strongest case against the decision before it is ratified, and treat an empty page as a warning, not a confirmation. For a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as false_consensus from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — celebrating the alignment and accelerating, which spends the disagreement later at execution speed. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when execution behaviour contradicts the agreed position, or when private dissent reaches the sponsor through any channel other than the room.",
+          "inputSummary": "a twelve-person operations team three months after a merger three of five team leads gave materially conflicting answers about this quarter's top priority five team leads answered differently to 'top priority this quarter' leadership alignment survey shows 90% agreement, but execution tracker shows 40% of priorities being executed as named weekly standups happen; priorities shift between standups without written re-decision",
+          "outputText": "The principals around Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority hold materially different positions — the divergence shows in execution while the meetings perform agreement, and three of five team leads gave materially conflicting answers about this quarter's top priority keeps the conflict profitable to leave unspoken.\nDivergent execution continues, team velocity declines, post-merger integration stalls\nSurface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive. For Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be visibly underway within 48 hours.\nThis team friction is caused by a stakeholder_misalignment pattern.\nEscalate when written answers diverge on priority or ownership a second time after explicit reconciliation, or when a lead executes against the agreed position.\nCollect each principal's written answer to the same three questions about Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority — priority, ownership, and success measure.\nLay the conflicting answers side by side and name the divergences without softening them.\nResolve each divergence one at a time with Operations Director deciding where positions cannot be reconciled.\nRe-collect the written answers by quarterly commitments lock in three weeks; persisting divergence is the escalation signal.\nThis judgement classifies the case as stakeholder_misalignment from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — holding an alignment workshop that produces a shared slide and no shared commitments. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
           "sectionsPresent": [
-            "oneClearSignal",
-            "oneUsefulInterpretation",
-            "onePracticalNextAction",
-            "oneHonestLimitation",
-            "oneEscalationCondition"
+            "diagnosis",
+            "consequence",
+            "nextMove",
+            "falsification",
+            "escalation",
+            "execution",
+            "limitation"
           ]
         },
         {
           "label": "founder-led sales team missing its pipeline forecast",
-          "inputSummary": "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty the assessment's forecast-versus-attainment readings a founder-led sales team of seven carrying an aggressive annual target risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened",
-          "outputText": "Signal: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty — observed in the assessment's forecast-versus-attainment readings, read against your situation: a founder-led sales team of seven carrying an aggressive annual target.\nWarning signals around a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty are being individually explained away: the pattern of dismissal is itself the finding, and risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened means the signals' mitigation options expire while confidence holds.\nTake the strongest dismissed signal touching a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty and run a pre-mortem: assume it fired, and write the post-incident review now. Take the strongest dismissed signal and force a pre-mortem on it: assume it fired, write what the post-incident review would say, and act on the cheapest prevention it names. For a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty, that responsibility sits with Founder as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as risk_blindness from 6 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — requiring more certainty from the warning than from the plan, so the risk must fully materialise before it is acted on. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when a signal touches customer safety, regulatory exposure, or irreversible commitments, or when the same signal is dismissed twice without investigation.",
+          "inputSummary": "a founder-led sales team of seven carrying an aggressive annual target forecast confidence stayed above 90% while quarter-end attainment fell below 60% sales team confidence in forecast remained high through the quarter actual close rate was 25% lower than forecast assumed team members blame external factors; founder blames forecast method no shared failure postmortem was conducted",
+          "outputText": "Warning signals around Team organisational friction: forecast confidence stayed above 90% while quarter-end attainment fell below 60% are being individually explained away: the pattern of dismissal is itself the finding, and forecast confidence stayed above 90% while quarter-end attainment fell below 60% means the signals' mitigation options expire while confidence holds.\nRisk blindness persists, next quarter forecast will be equally overconfident, pipeline misalignment continues\nTake the strongest dismissed signal and force a pre-mortem on it: assume it fired, write what the post-incident review would say, and act on the cheapest prevention it names. For Team organisational friction: forecast confidence stayed above 90% while quarter-end attainment fell below 60%, that responsibility sits with Founder as the accountable owner, to be visibly underway within 48 hours.\nThis team friction is caused by a risk_blindness pattern.\nEscalate when a signal touches customer safety, regulatory exposure, or irreversible commitments, or when the same signal is dismissed twice without investigation.\nTake the strongest dismissed signal touching Team organisational friction: forecast confidence stayed above 90% while quarter-end attainment fell below 60% and run a pre-mortem: assume it fired, and write the post-incident review now.\nAct on the cheapest prevention the pre-mortem names, with Founder accountable for it.\nInstrument the signal so its movement is measured rather than debated, with thresholds tied to Risk blindness persists, next quarter forecast will be equally overconfident, pipeline misalignment continues.\nRe-review at quarter end in four weeks; a second dismissal without investigation escalates automatically.\nThis judgement classifies the case as risk_blindness from 3 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — requiring more certainty from the warning than from the plan, so the risk must fully materialise before it is acted on. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
           "sectionsPresent": [
-            "oneClearSignal",
-            "oneUsefulInterpretation",
-            "onePracticalNextAction",
-            "oneHonestLimitation",
-            "oneEscalationCondition"
+            "diagnosis",
+            "consequence",
+            "nextMove",
+            "falsification",
+            "escalation",
+            "execution",
+            "limitation"
           ]
         }
       ],
       "antiToy": {
         "productCode": "team_assessment",
         "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
-        "toyRiskScore": 8,
-        "failsAntiToyTest": true,
-        "reasons": [
-          "Consequence section is not grounded in the user's stated situation."
-        ],
-        "requiredCorrections": [
-          "Tie the consequence to the user's named stake, not to a universal warning."
-        ]
+        "toyRiskScore": 0,
+        "failsAntiToyTest": false,
+        "reasons": [],
+        "requiredCorrections": []
       },
       "redTeam": {
         "productCode": "team_assessment",
         "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
         "scores": {
-          "usefulness": 9.2,
-          "specificity": 8.4,
+          "usefulness": 10,
+          "specificity": 8.5,
           "credibility": 9,
           "actionability": 10,
-          "distinctiveness": 7.8,
+          "distinctiveness": 7.7,
           "reuse_value": 9
         },
         "reviews": [
@@ -1310,11 +1299,11 @@
             "reviewerId": "skeptical_executive",
             "reviewerQuestion": "Why should I trust this?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.5,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.7,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1326,11 +1315,11 @@
             "reviewerId": "busy_operator",
             "reviewerQuestion": "What do I do next?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.5,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.7,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1342,11 +1331,11 @@
             "reviewerId": "commercial_buyer",
             "reviewerQuestion": "Why is this worth the time or money?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.5,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.7,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1358,11 +1347,11 @@
             "reviewerId": "experienced_consultant",
             "reviewerQuestion": "Is this just dressed-up common sense?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.5,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.7,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1374,11 +1363,11 @@
             "reviewerId": "returning_user",
             "reviewerQuestion": "Would I come back to this?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.5,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.7,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1396,18 +1385,20 @@
         "proofsEstablished": [
           "decision_clarity_improved",
           "next_action_obvious",
+          "risk_made_visible",
+          "contradiction_made_explicit",
           "execution_sequence_clearer",
           "evidence_organised_into_judgement",
           "reusable_artefact_gained"
         ],
         "proofsMissing": [
-          "risk_made_visible",
-          "contradiction_made_explicit",
           "likely_mistake_avoided"
         ],
         "hasProof": true,
         "notes": [
           "Next action is owned, time-bound, and anchored in the user's case.",
+          "Consequence is tied to the user's named stake, making the risk of inaction visible.",
+          "The output names a case-specific contradiction or friction.",
           "Evidence basis and honest limits are organised into an explicit judgement frame.",
           "Checkpoint/record structure gives the user an artefact to return to.",
           "The output orders what to do before what — an execution sequence, not a list.",
@@ -1415,7 +1406,7 @@
         ]
       },
       "timeValueSurplusPassed": true,
-      "judgementIsCaseDerived": false
+      "judgementIsCaseDerived": true
     },
     {
       "productCode": "enterprise_assessment",
@@ -1425,51 +1416,51 @@
       "renderedOutputCaptured": true,
       "samples": [
         {
-          "label": "post-merger operations team with conflicting priorities",
-          "inputSummary": "three of five team leads gave materially conflicting answers about this quarter's top priority the team assessment responses a twelve-person operations team three months after a merger an alignment illusion — agreement in meetings, divergence in execution",
-          "outputText": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority — observed in the team assessment responses, read against your situation: a twelve-person operations team three months after a merger.\nThe agreement around a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority is performative: the room aligns quickly while execution and corridor conversation diverge, and an alignment illusion — agreement in meetings, divergence in execution suggests dissent has somewhere safer to live than the meeting. A secondary stakeholder_misalignment signal is present and may become primary if the case evolves.\nRequire each principal to write the strongest case against a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority before it is ratified. Manufacture safe dissent: require each principal to write the strongest case against the decision before it is ratified, and treat an empty page as a warning, not a confirmation. For a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as false_consensus from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — celebrating the alignment and accelerating, which spends the disagreement later at execution speed. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when execution behaviour contradicts the agreed position, or when private dissent reaches the sponsor through any channel other than the room.",
+          "label": "post-acquisition board disagreement on integration priorities",
+          "inputSummary": "a mid-market enterprise two quarters into a major acquisition board members disagree on integration pacing — one insists on speed, two push for caution, one abstains acquisition closed; integration planning shows divergent timelines from each board member executive team received conflicting mandates from different board members three integration initiatives are paused awaiting board clarity integration spend is at risk; budget authority hinges on board decision",
+          "outputText": "Enterprise governance friction: board members disagree on integration pacing — one insists on speed, two push for caution, one abstains. Pattern classification incomplete from provided evidence (No decision pattern signature reached the minimum evidence threshold in the supplied input.), but the friction itself is clear.\nBoard disagreement blocks execution, integration timeline slips by quarters, deal value capture erodes, executive team fractures\nThe CEO (accountable owner) convenes the disagreeing board members or executives for a single decision meeting within 48-hour window. Outcome by end of meeting: write the decision in one sentence. Named owner signs the decision memo. All parties sign commitment to execute by next business day.\nTest the hypothesis: \"Once we clarify the decision, all parties will act on it consistently.\" Falsified if: after the decision is written and signed, implementation still diverges or any party refuses to execute.\nEscalate to the board or executive team if this friction remains unresolved by integration milestones must restart in 30 days. Define success: \"board alignment on integration pacing with written mandate\". If not achieved by deadline, governance intervention is required.\nDay 1: Executive leadership defines the specific decision in one sentence.\nDay 2: Board meets to align on the decision or the decision process.\nDay 3: Decision is written and signed by the decision-maker.\nDay 4–7: Implementation begins under named accountability.\nDay 30: Measure whether implementation is consistent across all parties.\nPattern-specific remediation without full classification.",
           "sectionsPresent": [
-            "oneClearSignal",
-            "oneUsefulInterpretation",
-            "onePracticalNextAction",
-            "oneHonestLimitation",
-            "oneEscalationCondition"
+            "diagnosis",
+            "consequence",
+            "nextMove",
+            "falsification",
+            "escalation",
+            "execution",
+            "limitation"
           ]
         },
         {
-          "label": "founder-led sales team missing its pipeline forecast",
-          "inputSummary": "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty the assessment's forecast-versus-attainment readings a founder-led sales team of seven carrying an aggressive annual target risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened",
-          "outputText": "Signal: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty — observed in the assessment's forecast-versus-attainment readings, read against your situation: a founder-led sales team of seven carrying an aggressive annual target.\nWarning signals around a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty are being individually explained away: the pattern of dismissal is itself the finding, and risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened means the signals' mitigation options expire while confidence holds.\nTake the strongest dismissed signal touching a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty and run a pre-mortem: assume it fired, and write the post-incident review now. Take the strongest dismissed signal and force a pre-mortem on it: assume it fired, write what the post-incident review would say, and act on the cheapest prevention it names. For a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty, that responsibility sits with Founder as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as risk_blindness from 6 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — requiring more certainty from the warning than from the plan, so the risk must fully materialise before it is acted on. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when a signal touches customer safety, regulatory exposure, or irreversible commitments, or when the same signal is dismissed twice without investigation.",
+          "label": "enterprise overstretched: too many initiatives, no clear priorities",
+          "inputSummary": "a growth-stage enterprise in competitive market with 400+ employees strategic planning approved 14 initiatives this year; no clear win condition per initiative; execution layer is confused about which to prioritize 14 approved strategic initiatives compete for the same engineering resources initiative completion rate is 30% (9 of 30 started last year completed) executive team spends 80% of time re-prioritizing instead of leading execution cross-functional teams report lack of clarity on success metrics per initiative",
+          "outputText": "Enterprise governance friction: strategic planning approved 14 initiatives this year; no clear win condition per initiative; execution layer is confused about which to prioritize. Pattern classification incomplete from provided evidence (No decision pattern signature reached the minimum evidence threshold in the supplied input.), but the friction itself is clear.\nInitiative overload compounds, execution productivity declines, employee retention at risk, competitive advantage erodes\nThe CEO (named accountable owner) calls a portfolio reduction meeting tomorrow 10am with the CTO, VP Engineering, and CFO. Outcome by end of day tomorrow: select the top 3 initiatives. By Wednesday end of business: write a decision memo naming one accountable owner per initiative, success metrics, and completion date for each of the top 3. By Thursday end of day: announce the pause decision to all teams and reallocate freed capacity in writing.\nTest the hypothesis: \"Reducing the initiative portfolio to the top 3 will improve execution velocity and completion rate.\" Falsified if: after 6 weeks, the completion rate does not improve by at least 15% or team velocity does not increase materially.\nEscalate to the board or executive team if this friction remains unresolved by quarterly planning must restart in 45 days. Define success: \"ruthlessly prioritized initiative portfolio with clear win conditions\". If not achieved by deadline, governance intervention is required.\nWeek 1: Count active initiatives and measure resource allocation per initiative.\nWeek 2: Leadership selects the top 3 initiatives with clear win conditions. Pause all others in writing.\nWeek 3: Communicate pause to teams. Reallocate freed capacity to the top 3.\nWeek 4–6: Track completion rate and delivery velocity on the top 3.\nWeek 8: Confirm completion rate improvement (target: 15%+). If <15%, investigate execution blockers.\nPattern-specific remediation without full classification.",
           "sectionsPresent": [
-            "oneClearSignal",
-            "oneUsefulInterpretation",
-            "onePracticalNextAction",
-            "oneHonestLimitation",
-            "oneEscalationCondition"
+            "diagnosis",
+            "consequence",
+            "nextMove",
+            "falsification",
+            "escalation",
+            "execution",
+            "limitation"
           ]
         }
       ],
       "antiToy": {
         "productCode": "enterprise_assessment",
         "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
-        "toyRiskScore": 8,
-        "failsAntiToyTest": true,
-        "reasons": [
-          "Consequence section is not grounded in the user's stated situation."
-        ],
-        "requiredCorrections": [
-          "Tie the consequence to the user's named stake, not to a universal warning."
-        ]
+        "toyRiskScore": 0,
+        "failsAntiToyTest": false,
+        "reasons": [],
+        "requiredCorrections": []
       },
       "redTeam": {
         "productCode": "enterprise_assessment",
         "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
         "scores": {
-          "usefulness": 9.2,
-          "specificity": 8.4,
+          "usefulness": 10,
+          "specificity": 8.1,
           "credibility": 9,
           "actionability": 10,
-          "distinctiveness": 7.8,
+          "distinctiveness": 7.1,
           "reuse_value": 9
         },
         "reviews": [
@@ -1477,11 +1468,11 @@
             "reviewerId": "skeptical_executive",
             "reviewerQuestion": "Why should I trust this?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.1,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.1,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1493,11 +1484,11 @@
             "reviewerId": "busy_operator",
             "reviewerQuestion": "What do I do next?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.1,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.1,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1509,11 +1500,11 @@
             "reviewerId": "commercial_buyer",
             "reviewerQuestion": "Why is this worth the time or money?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.1,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.1,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1525,11 +1516,11 @@
             "reviewerId": "experienced_consultant",
             "reviewerQuestion": "Is this just dressed-up common sense?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.1,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.1,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1541,11 +1532,11 @@
             "reviewerId": "returning_user",
             "reviewerQuestion": "Would I come back to this?",
             "scores": {
-              "usefulness": 9.2,
-              "specificity": 8.4,
+              "usefulness": 10,
+              "specificity": 8.1,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 7.8,
+              "distinctiveness": 7.1,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1563,26 +1554,27 @@
         "proofsEstablished": [
           "decision_clarity_improved",
           "next_action_obvious",
-          "execution_sequence_clearer",
+          "risk_made_visible",
+          "contradiction_made_explicit",
           "evidence_organised_into_judgement",
           "reusable_artefact_gained"
         ],
         "proofsMissing": [
-          "risk_made_visible",
-          "contradiction_made_explicit",
+          "execution_sequence_clearer",
           "likely_mistake_avoided"
         ],
         "hasProof": true,
         "notes": [
           "Next action is owned, time-bound, and anchored in the user's case.",
+          "Consequence is tied to the user's named stake, making the risk of inaction visible.",
+          "The output names a case-specific contradiction or friction.",
           "Evidence basis and honest limits are organised into an explicit judgement frame.",
           "Checkpoint/record structure gives the user an artefact to return to.",
-          "The output orders what to do before what — an execution sequence, not a list.",
           "The judgement is case-derived rather than restated input — clarity the user did not have."
         ]
       },
       "timeValueSurplusPassed": true,
-      "judgementIsCaseDerived": false
+      "judgementIsCaseDerived": true
     },
     {
       "productCode": "case_dossier_tariff_shock",

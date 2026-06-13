@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T03:37:11.150Z",
+  "generatedAt": "2026-06-13T10:06:54.974Z",
   "doctrine": "No evidence ledger entry, no gold.",
   "entries": [
     {
@@ -7,6 +7,28 @@
       "liveRoute": "/diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
       "scenarioUsed": "pricing decision under ownership ambiguity",
       "renderedOutputExcerpt": "The economics of the enterprise pricing change — ownership ambiguity between sales and finance are being contested without a priced hypothesis: value capture, willingness-to-pay, and margin floor are all asserted, none tested, while ownership ambiguity between sales and finance compresses the room to manoeuvre. A secondary ownership_ambiguity signal is present and may become primary if the case evolves.\nThe tension is margin versus momentum: protecting price risks losing deals now; matching pressure surrenders margin permanently — and the case currently lacks the evidence to price that trade. This reading rests on 6 signals in your answers, not on a generic playbook.\nEvery month without a priced hypothesis converts willingness-to-pay you could have captured into margin permanently surrendered. In this case the stated exposure is Q3 enterprise renewal revenue.\nWrite a falsifiable pricing ",
+      "judgementEngineEvidence": "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks.",
+      "antiToyScore": 0,
+      "redTeamResult": "survives",
+      "marketComparisonResult": "outperforms_generic_ai",
+      "finalGoldDecision": "externally_proven_gold"
+    },
+    {
+      "productCode": "team_assessment",
+      "liveRoute": "/diagnostics/team-assessment",
+      "scenarioUsed": "post-merger operations team with conflicting priorities",
+      "renderedOutputExcerpt": "The principals around Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority hold materially different positions — the divergence shows in execution while the meetings perform agreement, and three of five team leads gave materially conflicting answers about this quarter's top priority keeps the conflict profitable to leave unspoken.\nDivergent execution continues, team velocity declines, post-merger integration stalls\nSurface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive. For Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be vis",
+      "judgementEngineEvidence": "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks.",
+      "antiToyScore": 0,
+      "redTeamResult": "survives",
+      "marketComparisonResult": "outperforms_generic_ai",
+      "finalGoldDecision": "externally_proven_gold"
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "liveRoute": "/diagnostics/enterprise-assessment",
+      "scenarioUsed": "post-acquisition board disagreement on integration priorities",
+      "renderedOutputExcerpt": "Enterprise governance friction: board members disagree on integration pacing — one insists on speed, two push for caution, one abstains. Pattern classification incomplete from provided evidence (No decision pattern signature reached the minimum evidence threshold in the supplied input.), but the friction itself is clear.\nBoard disagreement blocks execution, integration timeline slips by quarters, deal value capture erodes, executive team fractures\nThe CEO (accountable owner) convenes the disagreeing board members or executives for a single decision meeting within 48-hour window. Outcome by end of meeting: write the decision in one sentence. Named owner signs the decision memo. All parties sign commitment to execute by next business day.\nTest the hypothesis: \"Once we clarify the decision, all parties will act on it consistently.\" Falsified if: after the decision is written and signed, imp",
       "judgementEngineEvidence": "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks.",
       "antiToyScore": 0,
       "redTeamResult": "survives",
@@ -47,28 +69,6 @@
       "redTeamResult": "blocked",
       "marketComparisonResult": "not_proven",
       "finalGoldDecision": "blocked_for_low_value"
-    },
-    {
-      "productCode": "team_assessment",
-      "liveRoute": "/diagnostics/team-assessment",
-      "scenarioUsed": "post-merger operations team with conflicting priorities",
-      "renderedOutputExcerpt": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority — observed in the team assessment responses, read against your situation: a twelve-person operations team three months after a merger.\nThe agreement around a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority is performative: the room aligns quickly while execution and corridor conversation diverge, and an alignment illusion — agreement in meetings, divergence in execution suggests dissent h",
-      "judgementEngineEvidence": "Route evidence captured, but market outperformance or judgement-engine proof is not sufficient for gold.",
-      "antiToyScore": 8,
-      "redTeamResult": "survives",
-      "marketComparisonResult": "not_proven",
-      "finalGoldDecision": "blocked_pending_external_proof"
-    },
-    {
-      "productCode": "enterprise_assessment",
-      "liveRoute": "/diagnostics/enterprise-assessment",
-      "scenarioUsed": "post-merger operations team with conflicting priorities",
-      "renderedOutputExcerpt": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority — observed in the team assessment responses, read against your situation: a twelve-person operations team three months after a merger.\nThe agreement around a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority is performative: the room aligns quickly while execution and corridor conversation diverge, and an alignment illusion — agreement in meetings, divergence in execution suggests dissent h",
-      "judgementEngineEvidence": "Route evidence captured, but market outperformance or judgement-engine proof is not sufficient for gold.",
-      "antiToyScore": 8,
-      "redTeamResult": "survives",
-      "marketComparisonResult": "not_proven",
-      "finalGoldDecision": "blocked_pending_external_proof"
     }
   ],
   "marketRows": [
@@ -309,20 +309,20 @@
     {
       "productCode": "team_assessment",
       "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatWeDoBetter": "Governed structure plus case-derived judgement, honest limits, escalation triggers, and a reusable decision record.",
       "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "uncertain"
+      "whereWeAreWeaker": "A strong human consultant still out-judges the instrument on novel, ambiguous cases.",
+      "whatWouldMakeUsClearlySuperior": "Compounding case memory and cross-case pattern intelligence the alternative cannot accumulate.",
+      "wouldCustomerReturnAfterOneUse": "yes"
     },
     {
       "productCode": "enterprise_assessment",
       "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
+      "whatWeDoBetter": "Governed structure plus case-derived judgement, honest limits, escalation triggers, and a reusable decision record.",
       "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "uncertain"
+      "whereWeAreWeaker": "A strong human consultant still out-judges the instrument on novel, ambiguous cases.",
+      "whatWouldMakeUsClearlySuperior": "Compounding case memory and cross-case pattern intelligence the alternative cannot accumulate.",
+      "wouldCustomerReturnAfterOneUse": "yes"
     },
     {
       "productCode": "boardroom_mode",

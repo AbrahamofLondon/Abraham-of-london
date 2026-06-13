@@ -17,20 +17,20 @@ The decisive instrument is cross-input comparison: the same product run against 
 ### team_assessment
 
 - **Tested output source:** live_route_capture: /diagnostics/team-assessment
-- **Toy risk score:** 8/100 — FAILS anti-toy test
+- **Toy risk score:** 0/100 — passes
 - **Reasons:**
-  - Consequence section is not grounded in the user's stated situation.
+
 - **Required corrections:**
-  - Tie the consequence to the user's named stake, not to a universal warning.
+
 
 ### enterprise_assessment
 
 - **Tested output source:** live_route_capture: /diagnostics/enterprise-assessment
-- **Toy risk score:** 8/100 — FAILS anti-toy test
+- **Toy risk score:** 0/100 — passes
 - **Reasons:**
-  - Consequence section is not grounded in the user's stated situation.
+
 - **Required corrections:**
-  - Tie the consequence to the user's named stake, not to a universal warning.
+
 
 ### case_dossier_tariff_shock
 
