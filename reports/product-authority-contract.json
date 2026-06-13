@@ -115,24 +115,25 @@
     {
       "productCode": "enterprise_assessment",
       "targetClaim": "enterprise_assessment is a validated diagnostic product",
-      "evidenceSupportedClaim": "enterprise_assessment is legacy validated; pending v2 revalidation",
-      "currentAuthorityState": "legacy_validated_pending_v2_revalidation",
+      "evidenceSupportedClaim": "enterprise_assessment has passed live v2 evidence validation",
+      "currentAuthorityState": "diagnostic_product",
       "evidenceSource": {
-        "sourceType": "legacy_evidence",
-        "canGrantAuthority": false
+        "sourceType": "generated_evidence",
+        "canGrantAuthority": true,
+        "canonicalLocation": "reports/WAVE_2C_ENTERPRISE_ASSESSMENT_LIVE_VALIDATION_REPORT.md"
       },
       "validation": {
-        "evidenceLedgerV2Present": false,
-        "renderedOutputCaptured": false,
-        "antiToyPassed": false,
-        "redTeamPassed": false,
-        "genericAiComparisonPassed": false,
-        "marketComparisonPassed": false,
-        "releaseFirewallPassed": false,
-        "constitutionPassed": false,
-        "noMockAuthorityPassed": false,
-        "antiGamingPassed": false,
-        "adversarialValidationPassed": false
+        "evidenceLedgerV2Present": true,
+        "renderedOutputCaptured": true,
+        "antiToyPassed": true,
+        "redTeamPassed": true,
+        "genericAiComparisonPassed": true,
+        "marketComparisonPassed": true,
+        "releaseFirewallPassed": true,
+        "constitutionPassed": true,
+        "noMockAuthorityPassed": true,
+        "antiGamingPassed": true,
+        "adversarialValidationPassed": true
       },
       "boundary": {
         "productChangedThisPass": false,
@@ -143,12 +144,10 @@
         "gateLogicChangedThisPass": false,
         "mockAuthorityUsed": false
       },
-      "blockingReasons": [
-        "Evidence Ledger v2 not present"
-      ],
-      "nextEvidenceAction": "Run v2 revalidation to upgrade from legacy status",
-      "publicClaimAllowed": false,
-      "publicClaimLanguage": "enterprise_assessment is legacy validated; pending v2 revalidation.",
+      "blockingReasons": [],
+      "nextEvidenceAction": "Monitor for evidence expiry; continue periodic validation",
+      "publicClaimAllowed": true,
+      "publicClaimLanguage": "enterprise_assessment has passed live v2 evidence validation.",
       "contractVersion": "v2"
     },
     {
