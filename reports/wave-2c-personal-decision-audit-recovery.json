@@ -1,0 +1,77 @@
+{
+  "productCode": "personal_decision_audit",
+  "testedAt": "2026-06-13T11:05:41.503Z",
+  "scenarios": [
+    {
+      "scenarioId": "career-move-financial-pressure",
+      "title": "Career Move Under Financial Pressure",
+      "wave2bAntiToy": 10,
+      "wave2bRedTeam": 5,
+      "wave2bInputEcho": 50,
+      "wave2cDistilledOutput": "\nDECISION QUESTION: Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves.\n\nDECISION TENSION: Financial security (dependent on job stability) vs. career growth (depends on taking risk). Timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks.\n\nKEY ASSUMPTION: At least one of the options is viable: Accept startup, aggressive savings plan, Decline startup, stay corporate, revisit startup world in 2 years, Negotiate startup offer for higher base or longer cliff, Ask spouse to temporarily increase work hours during startup ramp\n\nFALSIFICATION PRESSURE: What is the one scenario where your chosen option fails catastrophically?\n\nNEXT MOVE: Stress-test each option against irreversible consequences and hidden dependencies by Chief Technology Officer, age 38, two dependents (deadline: 14 days)\n\nWHAT WOULD CHANGE THIS: Evidence that the scenario is not as unlikely as assumed\n  ",
+      "wave2cAntiToy": 10,
+      "wave2cRedTeam": 5,
+      "wave2cInputEcho": 36.754176610978526,
+      "wave2cInputEchoPass": false,
+      "wave2cInputEchoFeedback": "Echo ratio: 36.8% (fail)",
+      "antiToyImprovement": 0,
+      "redTeamImprovement": 0,
+      "echoImprovement": 13.245823389021474
+    },
+    {
+      "scenarioId": "partnership-trust-uncertainty",
+      "title": "Business Partnership Decision with Trust Uncertainty",
+      "wave2bAntiToy": 10,
+      "wave2bRedTeam": 5,
+      "wave2bInputEcho": 50,
+      "wave2cDistilledOutput": "\nDECISION QUESTION: Bring operational/sales specialist into existing technical SaaS business as co-founder (40% equity split, immediate) vs. hire as Head of Operations (salary, no equity) vs. remain solo founder. Candidate has strong network and operating track record but different risk tolerance and product vision (wants to pivot to enterprise focus; founder prefers bottom-up SMB).\n\nDECISION TENSION: Founder needs capital/network (candidate offers) but fears loss of control and dilution (candidate requires equity and decision-making power). Speed of growth vs. founder's product philosophy.\n\nKEY ASSUMPTION: At least one of the options is viable: Co-founder: 40% equity, immediate, defined decision authority on product, Co-founder: 40% equity, vested over 4 years, required alignment on product roadmap, Head of Operations: $180k salary, 5% equity, advisory board seat, no veto power, Decline partnership, stay solo, hire Head of Operations in 12 months when runway allows\n\nFALSIFICATION PRESSURE: What is the one scenario where your chosen option fails catastrophically?\n\nNEXT MOVE: Stress-test each option against irreversible consequences and hidden dependencies by Solo technical founder, 3-year-old SaaS, $800k ARR, bootstrapped (deadline: 20 days)\n\nWHAT WOULD CHANGE THIS: Evidence that the scenario is not as unlikely as assumed\n  ",
+      "wave2cAntiToy": 10,
+      "wave2cRedTeam": 5,
+      "wave2cInputEcho": 37.088388214904676,
+      "wave2cInputEchoPass": false,
+      "wave2cInputEchoFeedback": "Echo ratio: 37.1% (fail)",
+      "antiToyImprovement": 0,
+      "redTeamImprovement": 0,
+      "echoImprovement": 12.911611785095324
+    },
+    {
+      "scenarioId": "family-legal-timing-pressure",
+      "title": "Family/Legal/Admin Decision with Emotional and Timing Pressure",
+      "wave2bAntiToy": 10,
+      "wave2bRedTeam": 5,
+      "wave2bInputEcho": 50,
+      "wave2cDistilledOutput": "\nDECISION QUESTION: Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.'\n\nDECISION TENSION: Parent's autonomy preference vs. safety/clinical needs. Adult child 2's care commitment vs. realistic time/emotional availability. Clinical supervision adequacy (spouse's 4 hours/week) vs. 24-hour risk. Family harmony vs. best-outcome safety.\n\nKEY ASSUMPTION: At least one of the options is viable: Facility now (decision ends ambiguity; parent unhappy initially but research shows adjustment), Home care + clinical supervision for 12 months, then reassess (delays decision; risk increases during delay), Move in with adult child 2 + hired clinical caregiver (balances autonomy + safety; requires family commitment), Hybrid: assisted living (more autonomy than facility, more support than home) once available (waitlist: unknown, likely 6-12 months)\n\nFALSIFICATION PRESSURE: What is the one scenario where your chosen option fails catastrophically?\n\nNEXT MOVE: Stress-test each option against irreversible consequences and hidden dependencies by Primary adult child (age 43, lives 15 minutes away, full-time employment) (deadline: 60 days)\n\nWHAT WOULD CHANGE THIS: Evidence that the scenario is not as unlikely as assumed\n  ",
+      "wave2cAntiToy": 10,
+      "wave2cRedTeam": 5,
+      "wave2cInputEcho": 46.05263157894737,
+      "wave2cInputEchoPass": false,
+      "wave2cInputEchoFeedback": "Echo ratio: 46.1% (fail)",
+      "antiToyImprovement": 0,
+      "redTeamImprovement": 0,
+      "echoImprovement": 3.94736842105263
+    }
+  ],
+  "aggregateMetrics": {
+    "antiToyWave2b": 10,
+    "antiToyWave2c": 10,
+    "antiToyImprovement": 0,
+    "antiToyPass": false,
+    "redTeamWave2b": 5,
+    "redTeamWave2c": 5,
+    "redTeamImprovement": 0,
+    "redTeamPass": false,
+    "inputEchoPass": false
+  },
+  "thresholds": {
+    "antiToyMax": 5,
+    "redTeamMin": 7,
+    "inputEchoRatioMax": 30
+  },
+  "gatePassed": false,
+  "gateFailureReasons": [
+    "Anti-toy: 10.0 (threshold: <= 5)",
+    "Red-team: 5.0 (threshold: >= 7.0)",
+    "Input echo: not all scenarios pass (must be < 30%)"
+  ],
+  "recommendedClassification": "blocked_until_claim_evidenced"
+}
