@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T10:06:54.791Z",
+  "generatedAt": "2026-06-13T10:08:08.182Z",
   "goldClaimsSource": "reports/wave-one-gold-standard.json (Wave 1 internal certification)",
   "goldClaims": [
     "fast_diagnostic",
@@ -114,7 +114,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "api_response",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "team_assessment",
@@ -163,7 +163,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "enterprise_assessment",
@@ -213,7 +213,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "case_dossier_tariff_shock",
@@ -255,7 +255,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "case_dossier_team_alignment",
@@ -297,7 +297,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "case_dossier_escalation_denied",
@@ -339,7 +339,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "personal_decision_audit",
@@ -388,7 +388,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     },
     {
       "productCode": "strategy_room",
@@ -438,7 +438,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:06:54.744Z"
+      "capturedAt": "2026-06-13T10:08:08.099Z"
     }
   ],
   "benchmarks": [

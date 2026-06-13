@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T10:06:54.974Z",
+  "generatedAt": "2026-06-13T10:08:08.436Z",
   "gate": "PASSED",
   "doctrine": "Externally proven gold or blocked. No self-certification.",
   "thresholds": {
@@ -122,7 +122,7 @@
     {
       "productCode": "fast_diagnostic",
       "productFamily": "free_public_signal",
-      "internalScoreOutOf10": 5.8,
+      "internalScoreOutOf10": 9.8,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
@@ -699,7 +699,7 @@
     {
       "productCode": "team_assessment",
       "productFamily": "free_public_signal",
-      "internalScoreOutOf10": 5.8,
+      "internalScoreOutOf10": 9.8,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
@@ -728,7 +728,7 @@
     {
       "productCode": "enterprise_assessment",
       "productFamily": "free_public_signal",
-      "internalScoreOutOf10": 5.8,
+      "internalScoreOutOf10": 9.8,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
