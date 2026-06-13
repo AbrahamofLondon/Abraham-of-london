@@ -108,26 +108,51 @@ async function loadScenarios() {
 async function captureScenarioOutput(scenario) {
   log(`Capturing output for scenario: ${scenario.scenarioId} - ${scenario.name}`);
 
-  // Build intake form data based on scenario context
+  // Transform scenario to required nested intake structure
+  const problemStatement = `${scenario.decisionContext.decision}. Stakes: ${scenario.decisionContext.stakes}. Timeframe: ${scenario.decisionContext.timeframe}. Pressure: ${scenario.decisionContext.pressure}`;
+
+  const symptoms = scenario.availableEvidence.join('; ').substring(0, 500);
+  const desiredOutcome = scenario.expectedNextEvidenceAction.substring(0, 200);
+
   const intake = {
-    decisionContext: scenario.decisionContext.decision,
-    decision: scenario.decisionContext.decision,
-    audience: typeof scenario.audience === 'string' ? scenario.audience : scenario.audience.join(', '),
-    availableEvidence: scenario.availableEvidence,
-    missingEvidence: scenario.missingEvidence,
-    pressure: scenario.reportingPressure,
-    timeframe: scenario.decisionContext.timeframe,
-    stakes: scenario.decisionContext.stakes
+    fullName: 'Executive Reporting Validator',
+    email: 'validation@authority-test.internal',
+    organisation: 'Validation Framework',
+    role: 'Authority Validator',
+    problemStatement: problemStatement,
+    symptoms: symptoms,
+    desiredOutcome: desiredOutcome,
+    currentConstraint: scenario.reportingPressure.substring(0, 200),
+    governance: {
+      authorityScope: 'strategic',
+      sponsorNameOrSeat: 'Executive Team',
+      boardInvolved: 'yes',
+      decisionWindow: scenario.decisionContext.timeframe
+    },
+    economics: {
+      revenueBand: '100M+',
+      marketExposure: 'enterprise',
+      estimatedExposureGBP: 5000000
+    },
+    history: {
+      evidenceQuality: 'mixed',
+      evidenceNotes: `Available evidence: ${scenario.availableEvidence.length} items. Missing evidence: ${scenario.missingEvidence.length} items. Authority risk: ${scenario.authorityRisk}`
+    },
+    decisionNeed: {
+      decisionQuestion: scenario.decisionContext.decision,
+      whatHappensIfNothingChanges: scenario.decisionContext.stakes
+    }
   };
 
   try {
-    log(`POSTing to ${API_ENDPOINT}`);
-    const response = await fetch(API_ENDPOINT, {
+    const runEndpoint = `${APP_URL_BASE}/api/executive-reporting/run`;
+    log(`POSTing to ${runEndpoint}`);
+    const response = await fetch(runEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(intake)
+      body: JSON.stringify({ intake })
     });
 
     if (!response.ok) {
@@ -135,22 +160,23 @@ async function captureScenarioOutput(scenario) {
       return null;
     }
 
-    const renderedOutput = await response.text();
+    // Parse JSON response
+    const responseData = await response.json();
 
-    if (!renderedOutput || renderedOutput.trim().length === 0) {
-      error(`Rendered output is empty for scenario ${scenario.scenarioId}`);
+    // Validate API response structure
+    if (!responseData.ok) {
+      error(`API returned error for ${scenario.scenarioId}: ${responseData.error || 'Unknown error'}`);
       return null;
     }
 
-    // Parse response if JSON, otherwise treat as HTML
-    let output;
-    try {
-      output = JSON.parse(renderedOutput);
-    } catch {
-      output = { html: renderedOutput };
+    if (!responseData.result) {
+      error(`Response missing result for ${scenario.scenarioId}`);
+      return null;
     }
 
-    // Validate required elements
+    const output = responseData;
+
+    // Validate rendered output contains required elements
     const issues = validateScenarioOutput(output, scenario);
     if (issues.length > 0) {
       error(`Validation issues for ${scenario.scenarioId}:`);
@@ -174,30 +200,41 @@ async function captureScenarioOutput(scenario) {
 
 function validateScenarioOutput(output, scenario) {
   const issues = [];
-  const outputStr = JSON.stringify(output).toLowerCase();
 
-  // Check for required elements
-  const requiredPatterns = [
-    { pattern: 'authority', reason: 'Authority state block missing' },
-    { pattern: 'evidence', reason: 'Evidence section missing' },
-    { pattern: 'limitation', reason: 'Limitations section missing' },
-    { pattern: 'next', reason: 'Next evidence action missing' }
-  ];
-
-  requiredPatterns.forEach(({ pattern, reason }) => {
-    if (!outputStr.includes(pattern)) {
-      issues.push(reason);
-    }
-  });
-
-  // Check output is not empty placeholder
-  if (outputStr.includes('placeholder') || outputStr.includes('mock') || outputStr.includes('todo')) {
-    issues.push('Output appears to be placeholder/mock (contains placeholder, mock, or todo keywords)');
+  // Validate response structure
+  if (!output.ok || !output.ok === true) {
+    issues.push('Response ok field is not true');
   }
 
-  // Check for manual-write indicators
-  if (outputStr.includes('manually written') || outputStr.includes('not generated')) {
-    issues.push('Output appears to be manually written');
+  if (!output.result) {
+    issues.push('Response missing result object');
+  }
+
+  if (!output.runKey) {
+    issues.push('Response missing runKey');
+  }
+
+  if (!output.result) {
+    return issues; // Can't check further without result
+  }
+
+  // Check result contains required sections
+  const result = output.result;
+  const resultStr = JSON.stringify(result).toLowerCase();
+
+  // Look for evidence of actual report generation
+  if (!result.header && !result.summary && !result.findings && !result.narrative) {
+    issues.push('Result does not contain expected report structure (header/summary/findings/narrative)');
+  }
+
+  // Check for authority information
+  if (!resultStr.includes('authority') && !resultStr.includes('evidence') && !resultStr.includes('limitation')) {
+    issues.push('Result does not contain authority/evidence/limitation information');
+  }
+
+  // Validate against scenario expectations
+  if (result.restrictions && result.restrictions.length === 0) {
+    issues.push('Result has no restrictions/limitations (expected for incomplete evidence scenario)');
   }
 
   return issues;
