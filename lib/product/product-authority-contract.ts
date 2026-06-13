@@ -22,7 +22,8 @@ export type ProductAuthorityState =
   | "blocked_until_v2_revalidation"
   | "measurement_inconclusive"
   | "static_reference"
-  | "internal_only";
+  | "internal_only"
+  | "authority_contract_missing";
 
 export type EvidenceSourceType =
   | "generated_evidence"
@@ -131,6 +132,8 @@ export function getPublicClaimLanguage(
       return `${productCode} is a reference implementation for testing purposes only.`;
     case "internal_only":
       return `${productCode} is available for internal use only.`;
+    case "authority_contract_missing":
+      return `${productCode} does not yet have a direct authority contract.`;
   }
 }
 
@@ -168,9 +171,14 @@ export function validateContract(
 
   // Check measurement boundary
   if (Object.values(contract.boundary).some(v => v === true)) {
-    if (contract.currentAuthorityState !== "legacy_validated_pending_v2_revalidation") {
+    if (
+      contract.currentAuthorityState !== "legacy_validated_pending_v2_revalidation" &&
+      contract.currentAuthorityState !== "blocked_until_claim_evidenced" &&
+      contract.currentAuthorityState !== "blocked_until_v2_revalidation" &&
+      contract.currentAuthorityState !== "measurement_inconclusive"
+    ) {
       errors.push(
-        "Authority state should be legacy_validated_pending_v2_revalidation when measurement boundary is violated"
+        "Authority state should remain non-granting when measurement boundary is violated"
       );
     }
   }

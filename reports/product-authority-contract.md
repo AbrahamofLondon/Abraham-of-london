@@ -1,51 +1,41 @@
-# Product Authority Contract — Validation Report
-
-**Audit Date:** 2026-06-13T14:48:22.280Z
+# Product Authority Contract - Validation Report
 
 ## Gate Result
 
-**Status:** ✓ PASSED — core contract validity only
+Status: CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED
 
-**Direct Contracts Validated:** 4
-**Estate Products Reviewed:** 43
-**Products Missing Direct Contract:** 34
-**Estate Coverage Complete:** ✗ No
-**Contracts Valid:** 4
-**Contracts Invalid:** 0
+Direct contracts validated: 22
 
-## Scope Boundary
+Estate products reviewed: 43
 
-This gate validates the core ProductAuthorityContract records currently present. It does not establish estate-wide authority coverage unless `estateCoverageComplete` is true.
+Public / non-exempt contract blockers identified: 18
+
+Public / non-exempt blocker contracts covered: 18
+
+Products missing direct contract: 21
+
+Estate coverage complete: no
+
+## Public / Non-Exempt Products Missing Direct Contract
+
+- None
 
 ## Products Missing Direct Contract
 
-- boardroom_brief
-- decision_exposure_instrument
-- mandate_clarity_framework
-- intervention_path_selector
-- escalation_readiness_scorecard
-- structural_failure_diagnostic_canvas
-- execution_risk_index
-- team_alignment_gap_map
-- governance_drift_detector
-- strategic_priority_stack_builder
-- board_brief_builder
-- execution_integrity_protocol
-- alignment_audit_playbook
-- drift_detection_framework
-- operator_decision_pack
-- executive_reporting
-- strategy_room
-- boardroom_mode
+- strategy_room_extended
 - case_dossier_tariff_shock
 - case_dossier_team_alignment
 - case_dossier_escalation_denied
 - retainer_core
 - retainer_operational
 - retainer_institutional
+- professional
+- professional_annual
 - gmi_q1_2026
 - gmi_q2_2026
 - gmi_q3_2026
+- enterprise
+- additional_collaborator
 - operator_essentials_pack
 - command_pack
 - governance_suite
@@ -54,85 +44,29 @@ This gate validates the core ProductAuthorityContract records currently present.
 - diagnostic_report_pro
 - executive_reporting_priority
 
+## Contract Summary
 
-
-## Product Authority States
-
-
-### fast_diagnostic
-
-**Authority State:** `externally_proven_gold_product`
-
-**Evidence Source:** `generated_evidence`
-
-**Can Make Public Claims:** ✓ Yes
-
-**Public Claim Language:**
-> fast_diagnostic is externally proven under v2 evidence validation.
-
-**Contract Valid:** ✓ Yes
-
-
-### team_assessment
-
-**Authority State:** `legacy_validated_pending_v2_revalidation`
-
-**Evidence Source:** `legacy_evidence`
-
-**Can Make Public Claims:** ✗ No
-
-**Public Claim Language:**
-> team_assessment is legacy validated; pending v2 revalidation.
-
-**Contract Valid:** ✓ Yes
-
-
-### enterprise_assessment
-
-**Authority State:** `legacy_validated_pending_v2_revalidation`
-
-**Evidence Source:** `legacy_evidence`
-
-**Can Make Public Claims:** ✗ No
-
-**Public Claim Language:**
-> enterprise_assessment is legacy validated; pending v2 revalidation.
-
-**Contract Valid:** ✓ Yes
-
-
-### personal_decision_audit
-
-**Authority State:** `blocked_until_claim_evidenced`
-
-**Evidence Source:** `reported_summary_only`
-
-**Can Make Public Claims:** ✗ No
-
-**Public Claim Language:**
-> personal_decision_audit is under validation; not currently released as an evidenced product.
-
-**Contract Valid:** ✓ Yes
-
-
-## Constitutional Rules Enforced
-
-1. No product may claim authority beyond what evidence supports
-2. Public language must match the authority state
-3. Authority sources must be deterministic and auditable
-4. No hardcoded mock data may grant authority
-5. No manual assertions may override validation results
-6. Legacy products cannot claim v2-proven status
-7. Blocked products must indicate limitation in public language
-
-## No Remaining Blockers
-
-✓ Core contracts valid
-✓ Core authority states correct
-✓ Core public claims aligned with evidence
-⚠ Estate contract coverage remains incomplete unless estateCoverageComplete is true
-
----
-
-**Report Generated:** 2026-06-13T14:48:22.284Z
-**Gate Status:** PASSED
+| Product | Authority State | Evidence Source | Public Claim Allowed | Valid |
+| --- | --- | --- | ---: | ---: |
+| fast_diagnostic | externally_proven_gold_product | generated_evidence | yes | yes |
+| team_assessment | legacy_validated_pending_v2_revalidation | legacy_evidence | no | yes |
+| enterprise_assessment | legacy_validated_pending_v2_revalidation | legacy_evidence | no | yes |
+| personal_decision_audit | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| boardroom_brief | blocked_until_v2_revalidation | reported_summary_only | no | yes |
+| decision_exposure_instrument | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| mandate_clarity_framework | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| intervention_path_selector | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| escalation_readiness_scorecard | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| structural_failure_diagnostic_canvas | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| execution_risk_index | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| team_alignment_gap_map | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| governance_drift_detector | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| strategic_priority_stack_builder | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| board_brief_builder | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| execution_integrity_protocol | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| alignment_audit_playbook | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| drift_detection_framework | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| operator_decision_pack | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| executive_reporting | blocked_until_v2_revalidation | reported_summary_only | no | yes |
+| strategy_room | blocked_until_claim_evidenced | reported_summary_only | no | yes |
+| boardroom_mode | blocked_until_v2_revalidation | reported_summary_only | no | yes |

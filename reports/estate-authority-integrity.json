@@ -1,26 +1,8 @@
 {
   "totalProducts": 43,
   "productsClassified": 43,
-  "directAuthorityContracts": 9,
+  "directAuthorityContracts": 27,
   "productsMissingAuthorityContract": [
-    "boardroom_brief",
-    "decision_exposure_instrument",
-    "mandate_clarity_framework",
-    "intervention_path_selector",
-    "escalation_readiness_scorecard",
-    "structural_failure_diagnostic_canvas",
-    "execution_risk_index",
-    "team_alignment_gap_map",
-    "governance_drift_detector",
-    "strategic_priority_stack_builder",
-    "board_brief_builder",
-    "execution_integrity_protocol",
-    "alignment_audit_playbook",
-    "drift_detection_framework",
-    "operator_decision_pack",
-    "executive_reporting",
-    "strategy_room",
-    "boardroom_mode",
     "case_dossier_tariff_shock",
     "case_dossier_team_alignment",
     "case_dossier_escalation_denied",
@@ -38,26 +20,7 @@
     "diagnostic_report_pro",
     "executive_reporting_priority"
   ],
-  "publicProductsMissingAuthorityContract": [
-    "boardroom_brief",
-    "decision_exposure_instrument",
-    "mandate_clarity_framework",
-    "intervention_path_selector",
-    "escalation_readiness_scorecard",
-    "structural_failure_diagnostic_canvas",
-    "execution_risk_index",
-    "team_alignment_gap_map",
-    "governance_drift_detector",
-    "strategic_priority_stack_builder",
-    "board_brief_builder",
-    "execution_integrity_protocol",
-    "alignment_audit_playbook",
-    "drift_detection_framework",
-    "operator_decision_pack",
-    "executive_reporting",
-    "strategy_room",
-    "boardroom_mode"
-  ],
+  "publicProductsMissingAuthorityContract": [],
   "routesAudited": 7,
   "routesDemonstratingAuthority": 4,
   "checkoutFailures": [
@@ -200,8 +163,7 @@
     }
   ],
   "localPassesThatCannotImplyEstateReadiness": [
-    "category-route-proof: selected-route pattern pass cannot imply estate readiness; scope-contained by estate integrity lock",
-    "product-authority-contract: core contract validity pass cannot imply estate contract coverage; scope-contained by estate integrity lock"
+    "category-route-proof: selected-route pattern pass cannot imply estate readiness; scope-contained by estate integrity lock"
   ],
   "readinessScope": "estate_partially_governed",
   "gatePassed": false,
@@ -210,13 +172,12 @@
     "16 checkout / fulfilment authority failure(s).",
     "2 admin release authority failure(s).",
     "12 report-surface authority failure(s).",
-    "18 public/non-exempt product(s) missing direct ProductAuthorityContract coverage.",
     "One or more local passes must be scope-contained and cannot imply estate readiness."
   ],
   "localGateResult": {
     "routeProof": "PASSED_LOCAL_PATTERN_ONLY",
     "categoryReadiness": "PASSED_LOCAL_PATTERN_ONLY",
-    "productAuthorityContract": "PASSED",
+    "productAuthorityContract": "CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED",
     "checkout": "FAILED_WITH_FINDINGS",
     "report": "FAILED_WITH_FINDINGS",
     "admin": "FAILED_WITH_FINDINGS"

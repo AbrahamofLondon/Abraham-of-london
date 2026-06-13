@@ -2,12 +2,12 @@
 
 ## Mandatory Status Block
 
-- Local Gate Result: {"routeProof":"PASSED_LOCAL_PATTERN_ONLY","categoryReadiness":"PASSED_LOCAL_PATTERN_ONLY","productAuthorityContract":"PASSED","checkout":"FAILED_WITH_FINDINGS","report":"FAILED_WITH_FINDINGS","admin":"FAILED_WITH_FINDINGS"}
+- Local Gate Result: {"routeProof":"PASSED_LOCAL_PATTERN_ONLY","categoryReadiness":"PASSED_LOCAL_PATTERN_ONLY","productAuthorityContract":"CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED","checkout":"FAILED_WITH_FINDINGS","report":"FAILED_WITH_FINDINGS","admin":"FAILED_WITH_FINDINGS"}
 - Estate Coverage Result: estate_coverage_has_findings
 - Category Readiness Scope: estate_partially_governed
 - Products Covered: 43/43
-- Products Missing Coverage: 34
-- Public Products Missing Coverage: 18
+- Products Missing Coverage: 16
+- Public Products Missing Coverage: 0
 - Checkout Failures: 16
 - Report Failures: 12
 - Admin Failures: 2
@@ -22,34 +22,14 @@ Gate: FAILED_WITH_FINDINGS
 - 16 checkout / fulfilment authority failure(s).
 - 2 admin release authority failure(s).
 - 12 report-surface authority failure(s).
-- 18 public/non-exempt product(s) missing direct ProductAuthorityContract coverage.
 - One or more local passes must be scope-contained and cannot imply estate readiness.
 
 ## Local Passes That Cannot Imply Estate Readiness
 
 - category-route-proof: selected-route pattern pass cannot imply estate readiness; scope-contained by estate integrity lock
-- product-authority-contract: core contract validity pass cannot imply estate contract coverage; scope-contained by estate integrity lock
 
 ## Missing Direct ProductAuthorityContract Coverage
 
-- boardroom_brief
-- decision_exposure_instrument
-- mandate_clarity_framework
-- intervention_path_selector
-- escalation_readiness_scorecard
-- structural_failure_diagnostic_canvas
-- execution_risk_index
-- team_alignment_gap_map
-- governance_drift_detector
-- strategic_priority_stack_builder
-- board_brief_builder
-- execution_integrity_protocol
-- alignment_audit_playbook
-- drift_detection_framework
-- operator_decision_pack
-- executive_reporting
-- strategy_room
-- boardroom_mode
 - case_dossier_tariff_shock
 - case_dossier_team_alignment
 - case_dossier_escalation_denied
@@ -69,24 +49,7 @@ Gate: FAILED_WITH_FINDINGS
 
 ## Public / Non-Exempt Products Missing Direct ProductAuthorityContract Coverage
 
-- boardroom_brief
-- decision_exposure_instrument
-- mandate_clarity_framework
-- intervention_path_selector
-- escalation_readiness_scorecard
-- structural_failure_diagnostic_canvas
-- execution_risk_index
-- team_alignment_gap_map
-- governance_drift_detector
-- strategic_priority_stack_builder
-- board_brief_builder
-- execution_integrity_protocol
-- alignment_audit_playbook
-- drift_detection_framework
-- operator_decision_pack
-- executive_reporting
-- strategy_room
-- boardroom_mode
+- None
 
 ## Checkout / Fulfilment Failures
 

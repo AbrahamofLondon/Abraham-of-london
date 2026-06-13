@@ -1,36 +1,26 @@
 {
-  "auditDate": "2026-06-13T14:48:22.280Z",
-  "gateStatus": "PASSED",
-  "directContractsValidated": 4,
+  "auditDate": "2026-06-13T15:00:48.354Z",
+  "gateStatus": "CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED",
+  "directContractsValidated": 22,
   "estateProductsReviewed": 43,
+  "publicNonExemptProducts": 18,
+  "publicNonExemptContractsCovered": 18,
+  "publicNonExemptProductsMissingDirectContract": [],
   "productsMissingDirectContract": [
-    "boardroom_brief",
-    "decision_exposure_instrument",
-    "mandate_clarity_framework",
-    "intervention_path_selector",
-    "escalation_readiness_scorecard",
-    "structural_failure_diagnostic_canvas",
-    "execution_risk_index",
-    "team_alignment_gap_map",
-    "governance_drift_detector",
-    "strategic_priority_stack_builder",
-    "board_brief_builder",
-    "execution_integrity_protocol",
-    "alignment_audit_playbook",
-    "drift_detection_framework",
-    "operator_decision_pack",
-    "executive_reporting",
-    "strategy_room",
-    "boardroom_mode",
+    "strategy_room_extended",
     "case_dossier_tariff_shock",
     "case_dossier_team_alignment",
     "case_dossier_escalation_denied",
     "retainer_core",
     "retainer_operational",
     "retainer_institutional",
+    "professional",
+    "professional_annual",
     "gmi_q1_2026",
     "gmi_q2_2026",
     "gmi_q3_2026",
+    "enterprise",
+    "additional_collaborator",
     "operator_essentials_pack",
     "command_pack",
     "governance_suite",
@@ -39,10 +29,9 @@
     "diagnostic_report_pro",
     "executive_reporting_priority"
   ],
-  "productsMissingDirectContractCount": 34,
+  "productsMissingDirectContractCount": 21,
   "estateCoverageComplete": false,
-  "productsReviewed": 4,
-  "contractsValid": 4,
+  "contractsValid": 22,
   "contractsInvalid": 0,
   "findings": [],
   "contracts": [
@@ -201,6 +190,904 @@
       "publicClaimAllowed": false,
       "publicClaimLanguage": "personal_decision_audit is under validation; not currently released as an evidenced product.",
       "contractVersion": "v2"
+    },
+    {
+      "productCode": "boardroom_brief",
+      "targetClaim": "boardroom_brief is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "boardroom_brief authority is not granted",
+      "currentAuthorityState": "blocked_until_v2_revalidation",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Run v2 revalidation pass to resolve blocking conditions",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "boardroom_brief requires v2 revalidation before authority can be restored.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "targetClaim": "decision_exposure_instrument is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "decision_exposure_instrument authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "decision_exposure_instrument is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "targetClaim": "mandate_clarity_framework is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "mandate_clarity_framework authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "mandate_clarity_framework is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "targetClaim": "intervention_path_selector is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "intervention_path_selector authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "intervention_path_selector is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "targetClaim": "escalation_readiness_scorecard is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "escalation_readiness_scorecard authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "escalation_readiness_scorecard is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "targetClaim": "structural_failure_diagnostic_canvas is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "structural_failure_diagnostic_canvas authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "structural_failure_diagnostic_canvas is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "execution_risk_index",
+      "targetClaim": "execution_risk_index is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "execution_risk_index authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "execution_risk_index is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "targetClaim": "team_alignment_gap_map is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "team_alignment_gap_map authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "team_alignment_gap_map is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "targetClaim": "governance_drift_detector is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "governance_drift_detector authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "governance_drift_detector is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "targetClaim": "strategic_priority_stack_builder is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "strategic_priority_stack_builder authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "strategic_priority_stack_builder is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "board_brief_builder",
+      "targetClaim": "board_brief_builder is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "board_brief_builder authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "board_brief_builder is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "targetClaim": "execution_integrity_protocol is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "execution_integrity_protocol authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "execution_integrity_protocol is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "targetClaim": "alignment_audit_playbook is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "alignment_audit_playbook authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "alignment_audit_playbook is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "targetClaim": "drift_detection_framework is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "drift_detection_framework authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "drift_detection_framework is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "targetClaim": "operator_decision_pack is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "operator_decision_pack authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "operator_decision_pack is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "executive_reporting",
+      "targetClaim": "executive_reporting is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "executive_reporting authority is not granted",
+      "currentAuthorityState": "blocked_until_v2_revalidation",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted"
+      ],
+      "nextEvidenceAction": "Run v2 revalidation pass to resolve blocking conditions",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "executive_reporting requires v2 revalidation before authority can be restored.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "strategy_room",
+      "targetClaim": "strategy_room is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "strategy_room authority is not granted",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted"
+      ],
+      "nextEvidenceAction": "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "strategy_room is under validation; not currently released as an evidenced product.",
+      "contractVersion": "v2"
+    },
+    {
+      "productCode": "boardroom_mode",
+      "targetClaim": "boardroom_mode is a public product requiring direct ProductAuthorityContract coverage",
+      "evidenceSupportedClaim": "boardroom_mode authority is not granted",
+      "currentAuthorityState": "blocked_until_v2_revalidation",
+      "evidenceSource": {
+        "sourceType": "reported_summary_only",
+        "canGrantAuthority": false
+      },
+      "validation": {
+        "evidenceLedgerV2Present": false,
+        "renderedOutputCaptured": false,
+        "antiToyPassed": false,
+        "redTeamPassed": false,
+        "genericAiComparisonPassed": false,
+        "marketComparisonPassed": false,
+        "releaseFirewallPassed": false,
+        "constitutionPassed": false,
+        "noMockAuthorityPassed": false,
+        "antiGamingPassed": false,
+        "adversarialValidationPassed": false
+      },
+      "boundary": {
+        "productChangedThisPass": false,
+        "scorerChangedThisPass": false,
+        "scenarioChangedThisPass": false,
+        "benchmarkChangedThisPass": false,
+        "validationInfrastructureChangedThisPass": false,
+        "gateLogicChangedThisPass": false,
+        "mockAuthorityUsed": false
+      },
+      "blockingReasons": [
+        "Evidence Ledger v2 not present",
+        "Boardroom mode requires v2 evidence-gated route proof before authority can be restored"
+      ],
+      "nextEvidenceAction": "Run v2 revalidation pass to resolve blocking conditions",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "boardroom_mode requires v2 revalidation before authority can be restored.",
+      "contractVersion": "v2"
+    }
+  ],
+  "contractSummary": [
+    {
+      "productCode": "fast_diagnostic",
+      "currentAuthorityState": "externally_proven_gold_product",
+      "evidenceSourceType": "generated_evidence",
+      "publicClaimAllowed": true,
+      "publicClaimLanguage": "fast_diagnostic is externally proven under v2 evidence validation.",
+      "contractValid": true
+    },
+    {
+      "productCode": "team_assessment",
+      "currentAuthorityState": "legacy_validated_pending_v2_revalidation",
+      "evidenceSourceType": "legacy_evidence",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "team_assessment is legacy validated; pending v2 revalidation.",
+      "contractValid": true
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "currentAuthorityState": "legacy_validated_pending_v2_revalidation",
+      "evidenceSourceType": "legacy_evidence",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "enterprise_assessment is legacy validated; pending v2 revalidation.",
+      "contractValid": true
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "personal_decision_audit is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "boardroom_brief",
+      "currentAuthorityState": "blocked_until_v2_revalidation",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "boardroom_brief requires v2 revalidation before authority can be restored.",
+      "contractValid": true
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "decision_exposure_instrument is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "mandate_clarity_framework is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "intervention_path_selector is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "escalation_readiness_scorecard is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "structural_failure_diagnostic_canvas is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "execution_risk_index",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "execution_risk_index is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "team_alignment_gap_map is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "governance_drift_detector is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "strategic_priority_stack_builder is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "board_brief_builder",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "board_brief_builder is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "execution_integrity_protocol is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "alignment_audit_playbook is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "drift_detection_framework is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "operator_decision_pack is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "executive_reporting",
+      "currentAuthorityState": "blocked_until_v2_revalidation",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "executive_reporting requires v2 revalidation before authority can be restored.",
+      "contractValid": true
+    },
+    {
+      "productCode": "strategy_room",
+      "currentAuthorityState": "blocked_until_claim_evidenced",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "strategy_room is under validation; not currently released as an evidenced product.",
+      "contractValid": true
+    },
+    {
+      "productCode": "boardroom_mode",
+      "currentAuthorityState": "blocked_until_v2_revalidation",
+      "evidenceSourceType": "reported_summary_only",
+      "publicClaimAllowed": false,
+      "publicClaimLanguage": "boardroom_mode requires v2 revalidation before authority can be restored.",
+      "contractValid": true
     }
   ]
 }

@@ -1,0 +1,186 @@
+{
+  "generatedAt": "2026-06-13T15:00:48.354Z",
+  "productsIdentified": 18,
+  "blockers": [
+    {
+      "productCode": "boardroom_brief",
+      "productName": "Boardroom Brief",
+      "route": "/boardroom-brief",
+      "checkoutPath": "/api/checkout/boardroom-brief",
+      "reportSurface": true,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_v2_revalidation",
+      "blockingReason": "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted"
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "productName": "Decision Exposure Instrument",
+      "route": "/decision-instruments/decision-exposure-instrument/run",
+      "checkoutPath": "/api/checkout/decision-exposure-instrument",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "productName": "Mandate Clarity Framework",
+      "route": "/decision-instruments/mandate-clarity-framework/run",
+      "checkoutPath": "/api/checkout/mandate-clarity-framework",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "productName": "Intervention Path Selector",
+      "route": "/decision-instruments/intervention-path-selector/run",
+      "checkoutPath": "/api/checkout/intervention-path-selector",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "productName": "Escalation Readiness Scorecard",
+      "route": "/decision-instruments/escalation-readiness-scorecard/run",
+      "checkoutPath": "/api/checkout/escalation-readiness-scorecard",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "productName": "Structural Failure Diagnostic Canvas",
+      "route": "/decision-instruments/structural-failure-diagnostic-canvas/run",
+      "checkoutPath": "/api/checkout/structural-failure-diagnostic-canvas",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "execution_risk_index",
+      "productName": "Execution Risk Index",
+      "route": "/decision-instruments/execution-risk-index/run",
+      "checkoutPath": "/api/checkout/execution-risk-index",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "productName": "Team Alignment Gap Map",
+      "route": "/decision-instruments/team-alignment-gap-map/run",
+      "checkoutPath": "/api/checkout/team-alignment-gap-map",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "productName": "Governance Drift Detector",
+      "route": "/decision-instruments/governance-drift-detector/run",
+      "checkoutPath": "/api/checkout/governance-drift-detector",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "productName": "Strategic Priority Stack Builder",
+      "route": "/decision-instruments/strategic-priority-stack-builder/run",
+      "checkoutPath": "/api/checkout/strategic-priority-stack-builder",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "board_brief_builder",
+      "productName": "Board Brief Builder",
+      "route": "/decision-instruments/board-brief-builder/run",
+      "checkoutPath": "/api/checkout/board-brief-builder",
+      "reportSurface": true,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "productName": "Execution Integrity Protocol",
+      "route": "/playbooks/execution-integrity-protocol/run",
+      "checkoutPath": "/api/checkout/execution-integrity-protocol",
+      "reportSurface": false,
+      "currentMatrixClassification": "authority_demonstrated",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "productName": "The Alignment Audit Playbook",
+      "route": "/playbooks/the-alignment-audit-playbook/run",
+      "checkoutPath": "/api/checkout/alignment-audit-playbook",
+      "reportSurface": false,
+      "currentMatrixClassification": "authority_demonstrated",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "productName": "The Drift Detection Framework",
+      "route": "/playbooks/the-drift-detection-framework/run",
+      "checkoutPath": "/api/checkout/drift-detection-framework",
+      "reportSurface": false,
+      "currentMatrixClassification": "authority_demonstrated",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "productName": "Operator Decision Pack",
+      "route": "/decision-instruments",
+      "checkoutPath": "/api/checkout/operator-decision-pack",
+      "reportSurface": false,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
+    },
+    {
+      "productCode": "executive_reporting",
+      "productName": "Executive Reporting",
+      "route": "/diagnostics/executive-reporting/run",
+      "checkoutPath": "/api/checkout/executive-reporting",
+      "reportSurface": true,
+      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "recommendedAuthorityState": "blocked_until_v2_revalidation",
+      "blockingReason": "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted"
+    },
+    {
+      "productCode": "strategy_room",
+      "productName": "Strategy Room — Entry",
+      "route": "/strategy-room",
+      "checkoutPath": "/api/checkout/strategy-room",
+      "reportSurface": false,
+      "currentMatrixClassification": "authority_demonstrated",
+      "recommendedAuthorityState": "blocked_until_claim_evidenced",
+      "blockingReason": "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted"
+    },
+    {
+      "productCode": "boardroom_mode",
+      "productName": "Boardroom Mode",
+      "route": "/boardroom-mode",
+      "checkoutPath": null,
+      "reportSurface": false,
+      "currentMatrixClassification": "underwired",
+      "recommendedAuthorityState": "blocked_until_v2_revalidation",
+      "blockingReason": "Boardroom mode requires v2 evidence-gated route proof before authority can be restored"
+    }
+  ]
+}

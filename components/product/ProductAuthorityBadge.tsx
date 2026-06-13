@@ -65,6 +65,7 @@ function getBadgeStyle(state: ProductAuthorityState): {
       };
     case "static_reference":
     case "internal_only":
+    case "authority_contract_missing":
       return {
         backgroundColor: "#6b7280",
         textColor: "#ffffff",
@@ -96,6 +97,8 @@ function getBadgeLabel(state: ProductAuthorityState): string {
       return "Reference";
     case "internal_only":
       return "Internal";
+    case "authority_contract_missing":
+      return "Contract Missing";
   }
 }
 

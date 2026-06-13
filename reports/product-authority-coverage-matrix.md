@@ -12,10 +12,10 @@ Market adoption state: credible_but_too_complex
 
 ## Classification Counts
 
-- checkout_or_fulfilment_risk: 16
-- authority_demonstrated: 5
-- authority_contract_missing: 2
+- checkout_or_fulfilment_risk: 13
+- authority_demonstrated: 9
 - authority_visible_but_thin: 2
+- underwired: 1
 - static_reference_correctly_labelled: 4
 - internal_only_exempt: 14
 
@@ -35,29 +35,29 @@ Market adoption state: credible_but_too_complex
 
 | Product | Name | Authority State | Route | Checkout | Report | Admin | Contract | Authority | Evidence | Limitation | Next Evidence | Blocking | Risk | Falsification | Classification | Required Next Action |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| boardroom_brief | Boardroom Brief | blocked_until_claim_evidenced | yes | no | yes | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| decision_exposure_instrument | Decision Exposure Instrument | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| mandate_clarity_framework | Mandate Clarity Framework | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| intervention_path_selector | Intervention Path Selector | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| escalation_readiness_scorecard | Escalation Readiness Scorecard | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| structural_failure_diagnostic_canvas | Structural Failure Diagnostic Canvas | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| execution_risk_index | Execution Risk Index | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| team_alignment_gap_map | Team Alignment Gap Map | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| governance_drift_detector | Governance Drift Detector | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| strategic_priority_stack_builder | Strategic Priority Stack Builder | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| board_brief_builder | Board Brief Builder | blocked_until_claim_evidenced | yes | no | yes | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| execution_integrity_protocol | Execution Integrity Protocol | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| alignment_audit_playbook | The Alignment Audit Playbook | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| drift_detection_framework | The Drift Detection Framework | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
+| boardroom_brief | Boardroom Brief | blocked_until_v2_revalidation | yes | no | yes | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| decision_exposure_instrument | Decision Exposure Instrument | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| mandate_clarity_framework | Mandate Clarity Framework | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| intervention_path_selector | Intervention Path Selector | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| escalation_readiness_scorecard | Escalation Readiness Scorecard | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| structural_failure_diagnostic_canvas | Structural Failure Diagnostic Canvas | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| execution_risk_index | Execution Risk Index | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| team_alignment_gap_map | Team Alignment Gap Map | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| governance_drift_detector | Governance Drift Detector | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| strategic_priority_stack_builder | Strategic Priority Stack Builder | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| board_brief_builder | Board Brief Builder | blocked_until_claim_evidenced | yes | no | yes | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| execution_integrity_protocol | Execution Integrity Protocol | blocked_until_claim_evidenced | yes | no | no | yes | yes | yes | yes | yes | yes | yes | yes | yes | authority_demonstrated | Maintain coverage and verify with live route capture. |
+| alignment_audit_playbook | The Alignment Audit Playbook | blocked_until_claim_evidenced | yes | no | no | yes | yes | yes | yes | yes | yes | yes | yes | yes | authority_demonstrated | Maintain coverage and verify with live route capture. |
+| drift_detection_framework | The Drift Detection Framework | blocked_until_claim_evidenced | yes | no | no | yes | yes | yes | yes | yes | yes | yes | yes | yes | authority_demonstrated | Maintain coverage and verify with live route capture. |
 | personal_decision_audit | Personal Decision Audit | blocked_until_claim_evidenced | yes | no | no | yes | yes | yes | yes | yes | yes | yes | yes | yes | authority_demonstrated | Maintain coverage and verify with live route capture. |
-| operator_decision_pack | Operator Decision Pack | blocked_until_claim_evidenced | yes | no | no | yes | no | no | no | yes | yes | yes | yes | no | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| executive_reporting | Executive Reporting | blocked_until_claim_evidenced | yes | no | yes | yes | no | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Create or resolve ProductAuthorityContract coverage for this product. |
-| strategy_room | Strategy Room — Entry | blocked_until_claim_evidenced | yes | no | no | yes | no | yes | yes | yes | yes | yes | yes | no | authority_contract_missing | Create or resolve ProductAuthorityContract coverage for this product. |
+| operator_decision_pack | Operator Decision Pack | blocked_until_claim_evidenced | yes | no | no | yes | yes | no | no | yes | yes | yes | yes | no | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| executive_reporting | Executive Reporting | blocked_until_v2_revalidation | yes | no | yes | yes | yes | no | no | yes | yes | yes | yes | yes | checkout_or_fulfilment_risk | Render authority state on the product route and all claim-bearing surfaces. |
+| strategy_room | Strategy Room — Entry | blocked_until_claim_evidenced | yes | no | no | yes | yes | yes | yes | yes | yes | yes | yes | no | authority_demonstrated | Maintain coverage and verify with live route capture. |
 | strategy_room_extended | Strategy Room — Active / Multi-Decision | blocked_until_claim_evidenced | yes | no | no | yes | yes | yes | yes | yes | yes | yes | yes | yes | authority_demonstrated | Maintain coverage and verify with live route capture. |
 | fast_diagnostic | Fast Diagnostic | externally_proven_gold_product | yes | no | no | no | yes | yes | yes | yes | yes | yes | yes | yes | authority_demonstrated | Maintain coverage and verify with live route capture. |
 | team_assessment | Team Assessment | legacy_validated_pending_v2_revalidation | yes | no | no | no | yes | yes | no | yes | yes | yes | yes | yes | authority_visible_but_thin | Render evidence-supported claim and evidence state. |
 | enterprise_assessment | Enterprise Assessment | legacy_validated_pending_v2_revalidation | yes | no | no | no | yes | yes | no | yes | yes | yes | yes | yes | authority_visible_but_thin | Render evidence-supported claim and evidence state. |
-| boardroom_mode | Boardroom Mode | blocked_until_claim_evidenced | yes | no | no | no | no | no | no | yes | yes | yes | yes | yes | authority_contract_missing | Create or resolve ProductAuthorityContract coverage for this product. |
+| boardroom_mode | Boardroom Mode | blocked_until_v2_revalidation | yes | no | no | no | yes | no | no | yes | yes | yes | yes | yes | underwired | Render authority state on the product route and all claim-bearing surfaces. |
 | case_dossier_tariff_shock | Case Dossier — Tariff Shock | static_reference | yes | no | no | no | no | no | no | yes | yes | yes | yes | yes | static_reference_correctly_labelled | Keep exemption explicit on every route and claim surface. |
 | case_dossier_team_alignment | Case Dossier — Team Alignment | static_reference | yes | no | no | no | no | no | no | yes | yes | yes | yes | yes | static_reference_correctly_labelled | Keep exemption explicit on every route and claim surface. |
 | case_dossier_escalation_denied | Case Dossier — Escalation Denied | static_reference | yes | no | no | no | no | no | no | yes | yes | yes | yes | yes | static_reference_correctly_labelled | Keep exemption explicit on every route and claim surface. |
@@ -81,6 +81,5 @@ Market adoption state: credible_but_too_complex
 
 ## Implementation Priorities
 
-- Expand ProductAuthorityContract resolution from 4 products to all 43 estate products.
 - Add authority state to every paid checkout and fulfilment path before purchase or release.
 - Re-run live route capture after coverage wiring; static coverage cannot grant final category readiness.

@@ -31,6 +31,11 @@ export interface ProductAuthorityResolverInput {
   productCode: string;
   currentClassification?: string;
   hasValidV2Evidence: boolean;
+  policyState?: Exclude<
+    ProductAuthorityState,
+    "externally_proven_gold_product" | "diagnostic_product" | "judgement_product"
+  >;
+  policyReason?: string;
   v2EvidencePath?: string;
   priorV1Evidence?: {
     sourceType: "wave2g" | "historical" | "none";
@@ -65,12 +70,16 @@ export function deriveAuthorityState(
   input: ProductAuthorityResolverInput
 ): ProductAuthorityState {
   const {
-    productCode,
     hasValidV2Evidence,
     priorV1Evidence,
     validationResults,
     boundary,
+    policyState,
   } = input;
+
+  if (policyState) {
+    return policyState;
+  }
 
   // Check if any measurement boundary is violated
   const boundaryViolated = boundary
@@ -160,6 +169,10 @@ export function determineBlockingReasons(
     reasons.push("Evidence Ledger v2 not present");
   }
 
+  if (input.policyReason) {
+    reasons.push(input.policyReason);
+  }
+
   if (input.validationResults) {
     if (!input.validationResults.antiToyPassed) {
       reasons.push("Anti-toy validation failed");
@@ -227,6 +240,8 @@ export function determineNextAction(
       return "Static reference; no action needed";
     case "internal_only":
       return "Internal use only; publish restrictions enforced";
+    case "authority_contract_missing":
+      return "Create direct ProductAuthorityContract before publishing or selling";
   }
 }
 
@@ -252,6 +267,10 @@ export function resolveProductAuthority(
         ? `${input.productCode} is externally proven under v2 evidence validation`
         : state === "legacy_validated_pending_v2_revalidation"
           ? `${input.productCode} is legacy validated; pending v2 revalidation`
+          : state === "static_reference"
+            ? `${input.productCode} is static/reference only and cannot claim judgement authority`
+            : state === "internal_only"
+              ? `${input.productCode} is internal-only and cannot make public product claims`
           : `${input.productCode} authority is not granted`,
     currentAuthorityState: state,
 
@@ -356,5 +375,54 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
         status: "measurement_inconclusive",
       },
     },
+    ...PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS,
   ];
 }
+
+export const PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS: ProductAuthorityResolverInput[] = [
+  {
+    productCode: "boardroom_brief",
+    hasValidV2Evidence: false,
+    policyState: "blocked_until_v2_revalidation",
+    policyReason: "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted",
+  },
+  ...[
+    "decision_exposure_instrument",
+    "mandate_clarity_framework",
+    "intervention_path_selector",
+    "escalation_readiness_scorecard",
+    "structural_failure_diagnostic_canvas",
+    "execution_risk_index",
+    "team_alignment_gap_map",
+    "governance_drift_detector",
+    "strategic_priority_stack_builder",
+    "board_brief_builder",
+    "execution_integrity_protocol",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "operator_decision_pack",
+  ].map((productCode) => ({
+    productCode,
+    hasValidV2Evidence: false,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted",
+  })),
+  {
+    productCode: "executive_reporting",
+    hasValidV2Evidence: false,
+    policyState: "blocked_until_v2_revalidation",
+    policyReason: "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted",
+  },
+  {
+    productCode: "strategy_room",
+    hasValidV2Evidence: false,
+    policyState: "blocked_until_claim_evidenced",
+    policyReason: "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted",
+  },
+  {
+    productCode: "boardroom_mode",
+    hasValidV2Evidence: false,
+    policyState: "blocked_until_v2_revalidation",
+    policyReason: "Boardroom mode requires v2 evidence-gated route proof before authority can be restored",
+  },
+];

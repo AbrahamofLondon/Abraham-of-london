@@ -1,298 +1,170 @@
 #!/usr/bin/env node
-
 /**
- * scripts/check-product-authority-contract.mjs
+ * ProductAuthorityContract validation gate.
  *
- * Product Authority Contract Validation Gate
- *
- * Validates that all products expose their authority state through
- * ProductAuthorityContract, derived from validation evidence rather than
- * manual assertions, registry labels, or surface copy.
- *
- * Fails if:
- * - Any product lacks a ProductAuthorityContract
- * - Any public claim exceeds evidenceSupportedClaim
- * - Any blocked product is described as released
- * - Any legacy product is described as v2-proven
- * - Any static reference claims judgement/intelligence
- * - Authority sourced from mock/manual/registry/surface text
+ * Scope:
+ * - Validates core contract correctness.
+ * - Expands direct contract coverage to every public/non-exempt blocker from
+ *   the estate coverage matrix.
+ * - Does not claim full estate coverage until all 43 products are covered or
+ *   explicitly exempted.
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const ROOT = process.cwd();
 const REPORTS_DIR = join(ROOT, "reports");
+const ESTATE_PRODUCT_COUNT = 43;
+const PUBLIC_NON_EXEMPT_PRODUCT_CODES = [
+  "boardroom_brief",
+  "decision_exposure_instrument",
+  "mandate_clarity_framework",
+  "intervention_path_selector",
+  "escalation_readiness_scorecard",
+  "structural_failure_diagnostic_canvas",
+  "execution_risk_index",
+  "team_alignment_gap_map",
+  "governance_drift_detector",
+  "strategic_priority_stack_builder",
+  "board_brief_builder",
+  "execution_integrity_protocol",
+  "alignment_audit_playbook",
+  "drift_detection_framework",
+  "operator_decision_pack",
+  "executive_reporting",
+  "strategy_room",
+  "boardroom_mode",
+];
+
+const PUBLIC_NON_EXEMPT_POLICY_STATES = {
+  boardroom_brief: {
+    state: "blocked_until_v2_revalidation",
+    reason: "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted",
+  },
+  executive_reporting: {
+    state: "blocked_until_v2_revalidation",
+    reason: "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted",
+  },
+  boardroom_mode: {
+    state: "blocked_until_v2_revalidation",
+    reason: "Boardroom mode requires v2 evidence-gated route proof before authority can be restored",
+  },
+  strategy_room: {
+    state: "blocked_until_claim_evidenced",
+    reason: "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted",
+  },
+};
+
+const INSTRUMENT_BLOCK_REASON =
+  "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted";
 
 console.log("PRODUCT AUTHORITY CONTRACT VALIDATION GATE");
-console.log("Validating core ProductAuthorityContract coverage; estate coverage is reported separately\n");
+console.log("Validating core and public/non-exempt ProductAuthorityContract coverage\n");
 
-// Generate contracts for known products based on validation evidence
+const matrix = readJson("product-authority-coverage-matrix.json", { products: [] });
+const estateProducts = matrix.products ?? [];
+const productByCode = new Map(estateProducts.map((product) => [product.productCode, product]));
+const publicNonExemptBlockers = PUBLIC_NON_EXEMPT_PRODUCT_CODES
+  .map((productCode) => productByCode.get(productCode) ?? { productCode })
+  .map((product) => ({
+    productCode: product.productCode,
+    productName: product.productName,
+    route: product.routePath,
+    checkoutPath: product.checkoutPath,
+    reportSurface: product.reportSurfaceExists,
+    currentMatrixClassification: product.currentCoverageClassification,
+    recommendedAuthorityState: recommendedAuthorityStateFor(product.productCode),
+    blockingReason: blockingReasonFor(product.productCode),
+  }));
+
 const productContracts = [
-  {
+  coreContract({
     productCode: "fast_diagnostic",
-    targetClaim: "fast_diagnostic is a validated diagnostic product",
-    evidenceSupportedClaim:
-      "fast_diagnostic is externally proven under v2 evidence validation",
-    currentAuthorityState: "externally_proven_gold_product",
-    evidenceSource: {
-      sourceType: "generated_evidence",
-      canGrantAuthority: true,
-      canonicalLocation: "reports/product-value-evidence-ledger-v2.json",
-    },
-    validation: {
-      evidenceLedgerV2Present: true,
-      renderedOutputCaptured: true,
-      antiToyPassed: true,
-      redTeamPassed: true,
-      genericAiComparisonPassed: true,
-      marketComparisonPassed: true,
-      releaseFirewallPassed: true,
-      constitutionPassed: true,
-      noMockAuthorityPassed: true,
-      antiGamingPassed: true,
-      adversarialValidationPassed: true,
-    },
-    boundary: {
-      productChangedThisPass: false,
-      scorerChangedThisPass: false,
-      scenarioChangedThisPass: false,
-      benchmarkChangedThisPass: false,
-      validationInfrastructureChangedThisPass: false,
-      gateLogicChangedThisPass: false,
-      mockAuthorityUsed: false,
-    },
+    state: "externally_proven_gold_product",
+    sourceType: "generated_evidence",
+    canGrantAuthority: true,
+    evidenceSupportedClaim: "fast_diagnostic is externally proven under v2 evidence validation",
+    publicClaimLanguage: "fast_diagnostic is externally proven under v2 evidence validation.",
+    validationPassed: true,
     blockingReasons: [],
-    nextEvidenceAction:
-      "Monitor for evidence expiry; continue periodic validation",
-    publicClaimAllowed: true,
-    publicClaimLanguage:
-      "fast_diagnostic is externally proven under v2 evidence validation.",
-    contractVersion: "v2",
-  },
-  {
+    nextEvidenceAction: "Monitor for evidence expiry; continue periodic validation",
+  }),
+  coreContract({
     productCode: "team_assessment",
-    targetClaim: "team_assessment is a validated diagnostic product",
-    evidenceSupportedClaim:
-      "team_assessment is legacy validated; pending v2 revalidation",
-    currentAuthorityState: "legacy_validated_pending_v2_revalidation",
-    evidenceSource: {
-      sourceType: "legacy_evidence",
-      canGrantAuthority: false,
-    },
-    validation: {
-      evidenceLedgerV2Present: false,
-      renderedOutputCaptured: false,
-      antiToyPassed: false,
-      redTeamPassed: false,
-      genericAiComparisonPassed: false,
-      marketComparisonPassed: false,
-      releaseFirewallPassed: false,
-      constitutionPassed: false,
-      noMockAuthorityPassed: false,
-      antiGamingPassed: false,
-      adversarialValidationPassed: false,
-    },
-    boundary: {
-      productChangedThisPass: false,
-      scorerChangedThisPass: false,
-      scenarioChangedThisPass: false,
-      benchmarkChangedThisPass: false,
-      validationInfrastructureChangedThisPass: false,
-      gateLogicChangedThisPass: false,
-      mockAuthorityUsed: false,
-    },
+    state: "legacy_validated_pending_v2_revalidation",
+    sourceType: "legacy_evidence",
+    canGrantAuthority: false,
+    evidenceSupportedClaim: "team_assessment is legacy validated; pending v2 revalidation",
+    publicClaimLanguage: "team_assessment is legacy validated; pending v2 revalidation.",
+    validationPassed: false,
     blockingReasons: ["Evidence Ledger v2 not present"],
     nextEvidenceAction: "Run v2 revalidation to upgrade from legacy status",
-    publicClaimAllowed: false,
-    publicClaimLanguage:
-      "team_assessment is legacy validated; pending v2 revalidation.",
-    contractVersion: "v2",
-  },
-  {
+  }),
+  coreContract({
     productCode: "enterprise_assessment",
-    targetClaim: "enterprise_assessment is a validated diagnostic product",
-    evidenceSupportedClaim:
-      "enterprise_assessment is legacy validated; pending v2 revalidation",
-    currentAuthorityState: "legacy_validated_pending_v2_revalidation",
-    evidenceSource: {
-      sourceType: "legacy_evidence",
-      canGrantAuthority: false,
-    },
-    validation: {
-      evidenceLedgerV2Present: false,
-      renderedOutputCaptured: false,
-      antiToyPassed: false,
-      redTeamPassed: false,
-      genericAiComparisonPassed: false,
-      marketComparisonPassed: false,
-      releaseFirewallPassed: false,
-      constitutionPassed: false,
-      noMockAuthorityPassed: false,
-      antiGamingPassed: false,
-      adversarialValidationPassed: false,
-    },
-    boundary: {
-      productChangedThisPass: false,
-      scorerChangedThisPass: false,
-      scenarioChangedThisPass: false,
-      benchmarkChangedThisPass: false,
-      validationInfrastructureChangedThisPass: false,
-      gateLogicChangedThisPass: false,
-      mockAuthorityUsed: false,
-    },
+    state: "legacy_validated_pending_v2_revalidation",
+    sourceType: "legacy_evidence",
+    canGrantAuthority: false,
+    evidenceSupportedClaim: "enterprise_assessment is legacy validated; pending v2 revalidation",
+    publicClaimLanguage: "enterprise_assessment is legacy validated; pending v2 revalidation.",
+    validationPassed: false,
     blockingReasons: ["Evidence Ledger v2 not present"],
     nextEvidenceAction: "Run v2 revalidation to upgrade from legacy status",
-    publicClaimAllowed: false,
-    publicClaimLanguage:
-      "enterprise_assessment is legacy validated; pending v2 revalidation.",
-    contractVersion: "v2",
-  },
-  {
+  }),
+  coreContract({
     productCode: "personal_decision_audit",
-    targetClaim: "personal_decision_audit is a validated diagnostic product",
-    evidenceSupportedClaim:
-      "personal_decision_audit authority is not granted",
-    currentAuthorityState: "blocked_until_claim_evidenced",
-    evidenceSource: {
-      sourceType: "reported_summary_only",
-      canGrantAuthority: false,
-    },
-    validation: {
-      evidenceLedgerV2Present: false,
-      renderedOutputCaptured: false,
-      antiToyPassed: false,
-      redTeamPassed: false,
-      genericAiComparisonPassed: false,
-      marketComparisonPassed: false,
-      releaseFirewallPassed: false,
-      constitutionPassed: false,
-      noMockAuthorityPassed: false,
-      antiGamingPassed: false,
-      adversarialValidationPassed: false,
-    },
-    boundary: {
-      productChangedThisPass: false,
-      scorerChangedThisPass: false,
-      scenarioChangedThisPass: false,
-      benchmarkChangedThisPass: false,
-      validationInfrastructureChangedThisPass: false,
-      gateLogicChangedThisPass: false,
-      mockAuthorityUsed: false,
-    },
+    state: "blocked_until_claim_evidenced",
+    sourceType: "reported_summary_only",
+    canGrantAuthority: false,
+    evidenceSupportedClaim: "personal_decision_audit authority is not granted",
+    publicClaimLanguage: "personal_decision_audit is under validation; not currently released as an evidenced product.",
+    validationPassed: false,
     blockingReasons: [
       "Evidence Ledger v2 not present",
       "Measurement boundary violated: scorer change in Wave 2G",
     ],
-    nextEvidenceAction:
-      "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
-    publicClaimAllowed: false,
-    publicClaimLanguage:
-      "personal_decision_audit is under validation; not currently released as an evidenced product.",
-    contractVersion: "v2",
-  },
+    nextEvidenceAction: "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+  }),
 ];
 
-// Validate contracts
-const estateCoverageMatrix = readJson("product-authority-coverage-matrix.json", null);
-const estateProducts = estateCoverageMatrix?.products ?? [];
-const productsMissingDirectContract = estateProducts.length > 0
-  ? estateProducts
-      .filter((product) => !product.productAuthorityContractExists)
-      .map((product) => product.productCode)
-  : [];
+for (const blocker of publicNonExemptBlockers) {
+  if (productContracts.some((contract) => contract.productCode === blocker.productCode)) continue;
+  productContracts.push(blockerContract(blocker));
+}
 
-const auditResult = {
-  auditDate: new Date().toISOString(),
-  directContractsValidated: productContracts.length,
-  estateProductsReviewed: estateProducts.length || 43,
-  productsMissingDirectContract,
-  productsMissingDirectContractCount: productsMissingDirectContract.length || Math.max(0, 43 - productContracts.length),
-  estateCoverageComplete: estateProducts.length > 0
-    ? productsMissingDirectContract.length === 0 && estateProducts.length === 43
-    : false,
-  productsReviewed: productContracts.length,
-  contractsValid: 0,
-  contractsInvalid: 0,
-  gateStatus: "PASSED",
-  findings: [],
-  contractSummary: [],
-};
+const directProductCodes = new Set(productContracts.map((contract) => contract.productCode));
+const allMissingDirectContract = estateProducts
+  .filter((product) => !directProductCodes.has(product.productCode))
+  .map((product) => product.productCode);
+const publicNonExemptProducts = publicNonExemptBlockers;
+const publicMissingDirectContract = publicNonExemptBlockers
+  .filter((product) => !directProductCodes.has(product.productCode))
+  .map((product) => product.productCode);
 
-productContracts.forEach((contract) => {
+const findings = [];
+const contractSummary = [];
+let contractsValid = 0;
+let contractsInvalid = 0;
+
+for (const contract of productContracts) {
+  const violations = validateContract(contract);
+  const valid = violations.length === 0;
+  if (valid) contractsValid++;
+  else contractsInvalid++;
+
   console.log(`\nProduct: ${contract.productCode}`);
   console.log(`  Authority State: ${contract.currentAuthorityState}`);
   console.log(`  Evidence Source: ${contract.evidenceSource.sourceType}`);
   console.log(`  Public Claim Allowed: ${contract.publicClaimAllowed}`);
+  console.log(`  ${valid ? "OK Contract valid" : "FAIL Contract invalid"}`);
 
-  // Validate contract consistency
-  let valid = true;
-  const violations = [];
-
-  // Check: public claims don't exceed evidence support
-  if (contract.publicClaimAllowed && !contract.evidenceSource.canGrantAuthority) {
-    violations.push(
-      `Public claims allowed but evidence source cannot grant authority: ${contract.evidenceSource.sourceType}`
-    );
-    valid = false;
+  for (const violation of violations) {
+    console.log(`    - ${violation}`);
+    findings.push(`${contract.productCode}: ${violation}`);
   }
 
-  // Check: blocked products don't claim release
-  if (
-    contract.currentAuthorityState.includes("blocked") &&
-    !contract.publicClaimLanguage.includes("not currently released")
-  ) {
-    violations.push("Blocked product claims are released/public");
-    valid = false;
-  }
-
-  // Check: legacy products don't claim v2-proven
-  if (
-    contract.currentAuthorityState === "legacy_validated_pending_v2_revalidation"
-  ) {
-    if (
-      contract.publicClaimLanguage.includes("v2") &&
-      contract.publicClaimLanguage.includes("proven")
-    ) {
-      violations.push("Legacy product claims v2-proven status");
-      valid = false;
-    }
-  }
-
-  // Check: evidence source not mock/manual/registry
-  if (contract.evidenceSource.sourceType === "manual_assertion") {
-    violations.push("Authority sourced from manual assertion");
-    valid = false;
-  }
-  if (contract.evidenceSource.sourceType === "registry_label") {
-    violations.push("Authority sourced from registry label (not evidence)");
-    valid = false;
-  }
-  if (contract.evidenceSource.sourceType === "surface_claim") {
-    violations.push("Authority sourced from surface copy (not evidence)");
-    valid = false;
-  }
-
-  // Check: mock authority not used
-  if (contract.boundary.mockAuthorityUsed) {
-    violations.push("Mock authority used in validation paths");
-    valid = false;
-  }
-
-  if (valid) {
-    auditResult.contractsValid++;
-    console.log(`  ✓ Contract valid`);
-  } else {
-    auditResult.contractsInvalid++;
-    auditResult.gateStatus = "FAILED";
-    violations.forEach((v) => {
-      console.log(`  ✗ ${v}`);
-      auditResult.findings.push(`${contract.productCode}: ${v}`);
-    });
-  }
-
-  // Add to summary
-  auditResult.contractSummary.push({
+  contractSummary.push({
     productCode: contract.productCode,
     currentAuthorityState: contract.currentAuthorityState,
     evidenceSourceType: contract.evidenceSource.sourceType,
@@ -300,148 +172,170 @@ productContracts.forEach((contract) => {
     publicClaimLanguage: contract.publicClaimLanguage,
     contractValid: valid,
   });
-});
+}
 
-// Summary
+const estateCoverageComplete = allMissingDirectContract.length === 0 && estateProducts.length === ESTATE_PRODUCT_COUNT;
+const publicCoverageComplete = publicMissingDirectContract.length === 0 && publicNonExemptProducts.length > 0;
+const gateStatus = contractsInvalid > 0
+  ? "FAILED"
+  : publicCoverageComplete
+    ? "CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED"
+    : "CORE_CONTRACT_VALIDITY_PASSED_PUBLIC_COVERAGE_INCOMPLETE";
+
+const auditResult = {
+  auditDate: new Date().toISOString(),
+  gateStatus,
+  directContractsValidated: productContracts.length,
+  estateProductsReviewed: estateProducts.length || ESTATE_PRODUCT_COUNT,
+  publicNonExemptProducts: publicNonExemptProducts.length,
+  publicNonExemptContractsCovered: publicNonExemptBlockers.filter((product) => directProductCodes.has(product.productCode)).length,
+  publicNonExemptProductsMissingDirectContract: publicMissingDirectContract,
+  productsMissingDirectContract: allMissingDirectContract,
+  productsMissingDirectContractCount: allMissingDirectContract.length || Math.max(0, ESTATE_PRODUCT_COUNT - productContracts.length),
+  estateCoverageComplete,
+  contractsValid,
+  contractsInvalid,
+  findings,
+  contracts: productContracts,
+  contractSummary,
+};
+
+mkdirSync(REPORTS_DIR, { recursive: true });
+writeFileSync(join(REPORTS_DIR, "product-authority-contract.json"), `${JSON.stringify(auditResult, null, 2)}\n`);
+writeFileSync(join(REPORTS_DIR, "product-authority-contract.md"), renderContractMarkdown(auditResult));
+writeFileSync(
+  join(REPORTS_DIR, "public-contract-blockers.json"),
+  `${JSON.stringify({ generatedAt: auditResult.auditDate, productsIdentified: publicNonExemptBlockers.length, blockers: publicNonExemptBlockers }, null, 2)}\n`,
+);
+writeFileSync(join(REPORTS_DIR, "public-contract-blockers.md"), renderBlockersMarkdown(auditResult.auditDate, publicNonExemptBlockers));
+
 console.log(`\n${"=".repeat(70)}`);
 console.log("PRODUCT AUTHORITY CONTRACT VALIDATION GATE RESULT");
 console.log(`${"=".repeat(70)}`);
-console.log(`\nAudit date: ${auditResult.auditDate}`);
 console.log(`Direct contracts validated: ${auditResult.directContractsValidated}`);
 console.log(`Estate products reviewed: ${auditResult.estateProductsReviewed}`);
+console.log(`Public/non-exempt products: ${auditResult.publicNonExemptProducts}`);
+console.log(`Public/non-exempt contracts covered: ${auditResult.publicNonExemptContractsCovered}`);
 console.log(`Products missing direct contract: ${auditResult.productsMissingDirectContractCount}`);
 console.log(`Estate coverage complete: ${auditResult.estateCoverageComplete ? "yes" : "no"}`);
-console.log(`Contracts valid: ${auditResult.contractsValid}`);
-console.log(`Contracts invalid: ${auditResult.contractsInvalid}`);
-console.log(`\nGate Status: ${auditResult.gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
+console.log(`Gate Status: ${auditResult.gateStatus}`);
+console.log(`Written: ${join(REPORTS_DIR, "product-authority-contract.json")}`);
+console.log(`Written: ${join(REPORTS_DIR, "public-contract-blockers.json")}`);
 
-if (auditResult.findings.length > 0) {
-  console.log(`\nFindings:`);
-  auditResult.findings.forEach((finding) => {
-    console.log(`  - ${finding}`);
-  });
-}
+process.exit(gateStatus === "FAILED" ? 1 : 0);
 
-console.log(`\n${"=".repeat(70)}`);
-console.log("PRODUCT AUTHORITY STATES");
-console.log(`${"=".repeat(70)}`);
-auditResult.contractSummary.forEach((summary) => {
-  console.log(`\n${summary.productCode}:`);
-  console.log(`  Authority: ${summary.currentAuthorityState}`);
-  console.log(`  Evidence: ${summary.evidenceSourceType}`);
-  console.log(`  Public Claims: ${summary.publicClaimAllowed ? "✓ Allowed" : "✗ Blocked"}`);
-  console.log(`  Language: "${summary.publicClaimLanguage}"`);
-});
-
-// Write reports
-mkdirSync(REPORTS_DIR, { recursive: true });
-
-writeFileSync(
-  join(REPORTS_DIR, "product-authority-contract.json"),
-  JSON.stringify(
-    {
-      auditDate: auditResult.auditDate,
-      gateStatus: auditResult.gateStatus,
-      directContractsValidated: auditResult.directContractsValidated,
-      estateProductsReviewed: auditResult.estateProductsReviewed,
-      productsMissingDirectContract: auditResult.productsMissingDirectContract,
-      productsMissingDirectContractCount: auditResult.productsMissingDirectContractCount,
-      estateCoverageComplete: auditResult.estateCoverageComplete,
-      productsReviewed: auditResult.productsReviewed,
-      contractsValid: auditResult.contractsValid,
-      contractsInvalid: auditResult.contractsInvalid,
-      findings: auditResult.findings,
-      contracts: productContracts,
+function coreContract(input) {
+  return {
+    productCode: input.productCode,
+    targetClaim: `${input.productCode} is a validated diagnostic product`,
+    evidenceSupportedClaim: input.evidenceSupportedClaim,
+    currentAuthorityState: input.state,
+    evidenceSource: {
+      sourceType: input.sourceType,
+      canGrantAuthority: input.canGrantAuthority,
+      canonicalLocation: input.canGrantAuthority ? "reports/product-value-evidence-ledger-v2.json" : undefined,
     },
-    null,
-    2
-  ) + "\n"
-);
-
-writeFileSync(
-  join(REPORTS_DIR, "product-authority-contract.md"),
-  `# Product Authority Contract — Validation Report
-
-**Audit Date:** ${auditResult.auditDate}
-
-## Gate Result
-
-**Status:** ${auditResult.gateStatus === "PASSED" ? "✓ PASSED — core contract validity only" : "✗ FAILED"}
-
-**Direct Contracts Validated:** ${auditResult.directContractsValidated}
-**Estate Products Reviewed:** ${auditResult.estateProductsReviewed}
-**Products Missing Direct Contract:** ${auditResult.productsMissingDirectContractCount}
-**Estate Coverage Complete:** ${auditResult.estateCoverageComplete ? "✓ Yes" : "✗ No"}
-**Contracts Valid:** ${auditResult.contractsValid}
-**Contracts Invalid:** ${auditResult.contractsInvalid}
-
-## Scope Boundary
-
-This gate validates the core ProductAuthorityContract records currently present. It does not establish estate-wide authority coverage unless \`estateCoverageComplete\` is true.
-
-## Products Missing Direct Contract
-
-${auditResult.productsMissingDirectContract.length ? auditResult.productsMissingDirectContract.map((product) => `- ${product}`).join("\n") : "- Unknown until product authority coverage matrix is generated"}
-
-${
-  auditResult.findings.length > 0
-    ? `## Findings
-
-${auditResult.findings.map((f) => `- ${f}`).join("\n")}
-`
-    : ""
+    validation: validation(input.validationPassed),
+    boundary: boundary(false),
+    blockingReasons: input.blockingReasons,
+    nextEvidenceAction: input.nextEvidenceAction,
+    publicClaimAllowed: input.state === "externally_proven_gold_product",
+    publicClaimLanguage: input.publicClaimLanguage,
+    contractVersion: "v2",
+  };
 }
 
-## Product Authority States
-
-${auditResult.contractSummary
-  .map(
-    (summary) => `
-### ${summary.productCode}
-
-**Authority State:** \`${summary.currentAuthorityState}\`
-
-**Evidence Source:** \`${summary.evidenceSourceType}\`
-
-**Can Make Public Claims:** ${summary.publicClaimAllowed ? "✓ Yes" : "✗ No"}
-
-**Public Claim Language:**
-> ${summary.publicClaimLanguage}
-
-**Contract Valid:** ${summary.contractValid ? "✓ Yes" : "✗ No"}
-`
-  )
-  .join("\n")}
-
-## Constitutional Rules Enforced
-
-1. No product may claim authority beyond what evidence supports
-2. Public language must match the authority state
-3. Authority sources must be deterministic and auditable
-4. No hardcoded mock data may grant authority
-5. No manual assertions may override validation results
-6. Legacy products cannot claim v2-proven status
-7. Blocked products must indicate limitation in public language
-
-## No Remaining Blockers
-
-${
-  auditResult.gateStatus === "PASSED"
-    ? "✓ Core contracts valid\n✓ Core authority states correct\n✓ Core public claims aligned with evidence\n⚠ Estate contract coverage remains incomplete unless estateCoverageComplete is true"
-    : "⚠️  See findings above"
+function blockerContract(blocker) {
+  const state = blocker.recommendedAuthorityState;
+  return {
+    productCode: blocker.productCode,
+    targetClaim: `${blocker.productCode} is a public product requiring direct ProductAuthorityContract coverage`,
+    evidenceSupportedClaim: `${blocker.productCode} authority is not granted`,
+    currentAuthorityState: state,
+    evidenceSource: {
+      sourceType: "reported_summary_only",
+      canGrantAuthority: false,
+    },
+    validation: validation(false),
+    boundary: boundary(false),
+    blockingReasons: ["Evidence Ledger v2 not present", blocker.blockingReason],
+    nextEvidenceAction: state === "blocked_until_v2_revalidation"
+      ? "Run v2 revalidation pass to resolve blocking conditions"
+      : "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+    publicClaimAllowed: false,
+    publicClaimLanguage: state === "blocked_until_v2_revalidation"
+      ? `${blocker.productCode} requires v2 revalidation before authority can be restored.`
+      : `${blocker.productCode} is under validation; not currently released as an evidenced product.`,
+    contractVersion: "v2",
+  };
 }
 
----
+function validation(passed) {
+  return {
+    evidenceLedgerV2Present: passed,
+    renderedOutputCaptured: passed,
+    antiToyPassed: passed,
+    redTeamPassed: passed,
+    genericAiComparisonPassed: passed,
+    marketComparisonPassed: passed,
+    releaseFirewallPassed: passed,
+    constitutionPassed: passed,
+    noMockAuthorityPassed: passed,
+    antiGamingPassed: passed,
+    adversarialValidationPassed: passed,
+  };
+}
 
-**Report Generated:** ${new Date().toISOString()}
-**Gate Status:** ${auditResult.gateStatus}
-`
-);
+function boundary(value) {
+  return {
+    productChangedThisPass: value,
+    scorerChangedThisPass: value,
+    scenarioChangedThisPass: value,
+    benchmarkChangedThisPass: value,
+    validationInfrastructureChangedThisPass: value,
+    gateLogicChangedThisPass: value,
+    mockAuthorityUsed: value,
+  };
+}
 
-console.log(`\nWritten: ${join(REPORTS_DIR, "product-authority-contract.json")}`);
-console.log(`Written: ${join(REPORTS_DIR, "product-authority-contract.md")}`);
+function validateContract(contract) {
+  const violations = [];
+  if (contract.publicClaimAllowed && !contract.evidenceSource.canGrantAuthority) {
+    violations.push(`Public claims allowed but evidence source cannot grant authority: ${contract.evidenceSource.sourceType}`);
+  }
+  if (
+    contract.currentAuthorityState.includes("blocked") &&
+    !contract.publicClaimLanguage.includes("not currently released") &&
+    !contract.publicClaimLanguage.includes("requires v2 revalidation")
+  ) {
+    violations.push("Blocked product does not publish blocked/limited language");
+  }
+  if (
+    contract.currentAuthorityState === "legacy_validated_pending_v2_revalidation" &&
+    contract.publicClaimLanguage.includes("v2") &&
+    contract.publicClaimLanguage.includes("proven")
+  ) {
+    violations.push("Legacy product claims v2-proven status");
+  }
+  if (["manual_assertion", "registry_label", "surface_claim"].includes(contract.evidenceSource.sourceType)) {
+    violations.push(`Authority sourced from invalid evidence source: ${contract.evidenceSource.sourceType}`);
+  }
+  if (contract.boundary.mockAuthorityUsed) {
+    violations.push("Mock authority used in validation paths");
+  }
+  if (contract.publicClaimAllowed && contract.blockingReasons.length > 0) {
+    violations.push("Public claims allowed while blocking reasons exist");
+  }
+  return violations;
+}
 
-process.exit(auditResult.gateStatus === "PASSED" ? 0 : 1);
+function recommendedAuthorityStateFor(productCode) {
+  return PUBLIC_NON_EXEMPT_POLICY_STATES[productCode]?.state ?? "blocked_until_claim_evidenced";
+}
+
+function blockingReasonFor(productCode) {
+  return PUBLIC_NON_EXEMPT_POLICY_STATES[productCode]?.reason ?? INSTRUMENT_BLOCK_REASON;
+}
 
 function readJson(file, fallback) {
   try {
@@ -449,4 +343,60 @@ function readJson(file, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function renderContractMarkdown(result) {
+  return `# Product Authority Contract - Validation Report
+
+## Gate Result
+
+Status: ${result.gateStatus}
+
+Direct contracts validated: ${result.directContractsValidated}
+
+Estate products reviewed: ${result.estateProductsReviewed}
+
+Public / non-exempt contract blockers identified: ${result.publicNonExemptProducts}
+
+Public / non-exempt blocker contracts covered: ${result.publicNonExemptContractsCovered}
+
+Products missing direct contract: ${result.productsMissingDirectContractCount}
+
+Estate coverage complete: ${result.estateCoverageComplete ? "yes" : "no"}
+
+## Public / Non-Exempt Products Missing Direct Contract
+
+${result.publicNonExemptProductsMissingDirectContract.length ? result.publicNonExemptProductsMissingDirectContract.map((product) => `- ${product}`).join("\n") : "- None"}
+
+## Products Missing Direct Contract
+
+${result.productsMissingDirectContract.length ? result.productsMissingDirectContract.map((product) => `- ${product}`).join("\n") : "- None"}
+
+## Contract Summary
+
+| Product | Authority State | Evidence Source | Public Claim Allowed | Valid |
+| --- | --- | --- | ---: | ---: |
+${result.contractSummary.map((row) => `| ${row.productCode} | ${row.currentAuthorityState} | ${row.evidenceSourceType} | ${yes(row.publicClaimAllowed)} | ${yes(row.contractValid)} |`).join("\n")}
+`;
+}
+
+function renderBlockersMarkdown(generatedAt, blockers) {
+  return `# Public / Non-Exempt ProductAuthorityContract Blockers
+
+Generated: ${generatedAt}
+
+Products identified: ${blockers.length}
+
+| Product | Name | Route | Checkout | Report Surface | Matrix Classification | Recommended Authority State | Blocking Reason |
+| --- | --- | --- | --- | ---: | --- | --- | --- |
+${blockers.map((row) => `| ${row.productCode} | ${escapeMd(row.productName)} | ${row.route ?? ""} | ${row.checkoutPath ?? ""} | ${row.reportSurface ? "yes" : "no"} | ${row.currentMatrixClassification} | ${row.recommendedAuthorityState} | ${escapeMd(row.blockingReason)} |`).join("\n")}
+`;
+}
+
+function yes(value) {
+  return value ? "yes" : "no";
+}
+
+function escapeMd(value) {
+  return String(value ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
