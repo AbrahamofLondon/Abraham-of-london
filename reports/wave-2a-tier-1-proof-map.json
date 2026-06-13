@@ -1,0 +1,341 @@
+{
+  "generatedAt": "2026-06-13T10:50:00.000Z",
+  "mission": "Wave 2A Tier 1 Product Proof: Wire and externally validate 8 Tier 1 products",
+  "baselineState": "All 8 products currently blocked_pending_external_proof",
+  "products": [
+    {
+      "productCode": "personal_decision_audit",
+      "displayName": "Personal Decision Audit",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/diagnostics/purpose-alignment",
+      "commercialStatus": "paid",
+      "displayPrice": "£49",
+      "composerExists": true,
+      "composerType": "free_signal_purpose_clarity",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "output_capture_only",
+      "requiresPayment": true,
+      "requiresCheckout": true,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "live_route_capture_→_rendered_output_→_anti_toy_→_red_team",
+      "testScenarios": [
+        "founder_lacking_strategic_clarity",
+        "operator_unsure_mandate_alignment"
+      ],
+      "expectedMaximumStateIfPassed": "diagnostic_product",
+      "alternativeDowngradePath": "signal_product",
+      "highConsequence": false,
+      "riskLevel": "low",
+      "blockers": []
+    },
+    {
+      "productCode": "boardroom_brief",
+      "displayName": "Boardroom Brief",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/boardroom-brief",
+      "commercialStatus": "paid",
+      "displayPrice": "£99",
+      "composerExists": true,
+      "composerType": "board_brief_reasoning_depth",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "artefact_capture_plus_evidence_ledger",
+      "requiresPayment": true,
+      "requiresCheckout": true,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "live_route_→_board_brief_artefact_→_reasoning_chain_→_red_team",
+      "testScenarios": [
+        "executive_decision_with_hidden_dependencies",
+        "contentious_board_brief_scenario"
+      ],
+      "expectedMaximumStateIfPassed": "board_grade_product",
+      "alternativeDowngradePath": "diagnostic_product",
+      "highConsequence": true,
+      "riskLevel": "high",
+      "blockers": [
+        "Cannot claim board-grade without rigorous external proof",
+        "Must demonstrate reasoning depth, not template output"
+      ],
+      "mandatoryProofRequirements": [
+        "mandatory_intake",
+        "reasoning_chain",
+        "board_grade_reasoning_depth",
+        "falsification_pressure",
+        "risk_dependency_map",
+        "decision_options",
+        "recommended_next_move",
+        "72_hour_execution_sequence",
+        "operator_review_readiness",
+        "rendered_artefact_capture",
+        "external_benchmark_pass",
+        "evidence_ledger_entry"
+      ]
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "displayName": "Decision Exposure Instrument",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/decision-instruments/decision-exposure-instrument/start",
+      "commercialStatus": "paid",
+      "displayPrice": "£29",
+      "composerExists": true,
+      "composerType": "risk_dependency_mapping",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "output_capture_only",
+      "requiresPayment": true,
+      "requiresCheckout": true,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "live_route_→_exposure_map_→_anti_toy_→_red_team",
+      "testScenarios": [
+        "strategic_decision_multiple_dependencies",
+        "tactical_execution_hidden_exposure"
+      ],
+      "expectedMaximumStateIfPassed": "diagnostic_product",
+      "alternativeDowngradePath": "signal_product",
+      "highConsequence": false,
+      "riskLevel": "low",
+      "blockers": []
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "displayName": "Mandate Clarity Framework",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/decision-instruments/mandate-clarity-framework/start",
+      "commercialStatus": "paid",
+      "displayPrice": "£49",
+      "composerExists": true,
+      "composerType": "mandate_role_clarity",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "output_capture_only",
+      "requiresPayment": true,
+      "requiresCheckout": true,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "live_route_→_mandate_map_→_anti_toy_→_red_team",
+      "testScenarios": [
+        "executive_overlapping_mandates",
+        "role_clarity_post_restructure"
+      ],
+      "expectedMaximumStateIfPassed": "diagnostic_product",
+      "alternativeDowngradePath": "signal_product",
+      "highConsequence": false,
+      "riskLevel": "low",
+      "blockers": []
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "displayName": "Intervention Path Selector",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/decision-instruments/intervention-path-selector/start",
+      "commercialStatus": "paid",
+      "displayPrice": "£79",
+      "composerExists": true,
+      "composerType": "intervention_path_selection",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "output_capture_only",
+      "requiresPayment": true,
+      "requiresCheckout": true,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "live_route_→_pathway_→_anti_toy_→_red_team",
+      "testScenarios": [
+        "escalation_decision_path_selection",
+        "intervention_urgency_assessment"
+      ],
+      "expectedMaximumStateIfPassed": "diagnostic_product",
+      "alternativeDowngradePath": "signal_product",
+      "highConsequence": false,
+      "riskLevel": "low",
+      "blockers": []
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "displayName": "Escalation Readiness Scorecard",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/decision-instruments/escalation-readiness-scorecard/run",
+      "commercialStatus": "paid",
+      "displayPrice": "£29",
+      "composerExists": true,
+      "composerType": "escalation_readiness_scoring",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "output_capture_only",
+      "requiresPayment": true,
+      "requiresCheckout": true,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "live_route_→_scorecard_→_anti_toy_→_red_team",
+      "testScenarios": [
+        "escalation_readiness_assessment",
+        "boundary_decision_urgency"
+      ],
+      "expectedMaximumStateIfPassed": "signal_product",
+      "alternativeDowngradePath": "static_reference",
+      "highConsequence": false,
+      "riskLevel": "low",
+      "blockers": []
+    },
+    {
+      "productCode": "boardroom_mode",
+      "displayName": "Boardroom Mode",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/boardroom-mode",
+      "commercialStatus": "evidence_gated",
+      "displayPrice": "Free (gated)",
+      "composerExists": true,
+      "composerType": "boardroom_adversarial_challenge",
+      "routeExists": true,
+      "routeVerified": true,
+      "routeWiringNeeded": "output_capture_plus_gating_logic",
+      "requiresPayment": false,
+      "requiresCheckout": false,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": true,
+      "proofMethod": "live_route_→_challenge_output_→_red_team",
+      "testScenarios": [
+        "executive_decision_from_fast_diagnostic_challenged",
+        "strategic_choice_hidden_assumptions"
+      ],
+      "expectedMaximumStateIfPassed": "diagnostic_product",
+      "alternativeDowngradePath": "signal_product",
+      "highConsequence": true,
+      "riskLevel": "high",
+      "blockers": [
+        "Controls access to high-stakes testing",
+        "Requires gating logic verification"
+      ]
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "displayName": "Diagnostic Report — Basic",
+      "currentState": "blocked_pending_external_proof",
+      "routePath": "/diagnostics",
+      "commercialStatus": "inactive",
+      "displayPrice": "£250",
+      "composerExists": true,
+      "composerType": "report_basic_template",
+      "routeExists": false,
+      "routeVerified": false,
+      "routeWiringNeeded": "dedicated_route_plus_input_handler_major_redesign",
+      "requiresPayment": false,
+      "requiresCheckout": false,
+      "requiresWebhook": false,
+      "requiresCustomerInput": true,
+      "requiresOperatorReview": false,
+      "proofMethod": "route_redesign_→_render_→_anti_toy_→_red_team",
+      "testScenarios": [
+        "basic_diagnostic_template",
+        "standard_decision_taxonomy_report"
+      ],
+      "expectedMaximumStateIfPassed": "signal_product",
+      "alternativeDowngradePath": "static_reference",
+      "highConsequence": false,
+      "riskLevel": "medium",
+      "blockers": [
+        "Currently inactive product",
+        "No dedicated route (points to generic /diagnostics)",
+        "Requires major wiring: route design, input handler, render pipeline"
+      ],
+      "deferralCandidate": true
+    }
+  ],
+  "testingThresholds": {
+    "antiToyScore": {
+      "goldMaximum": 5,
+      "diagnosticMaximum": 10,
+      "blockerThreshold": "> 15"
+    },
+    "crossScenarioSimilarity": {
+      "maxPercentage": 20,
+      "indicatorOfTemplatRisk": "> 75%"
+    },
+    "redTeamPass": {
+      "minimumMeanScore": 7.0,
+      "blockerThreshold": "< 6.0"
+    },
+    "genericAiOutperform": {
+      "required": true,
+      "blockerIfFails": true
+    },
+    "reasoningChain": {
+      "required": "for diagnostic and board-grade claims"
+    }
+  },
+  "executionPhases": {
+    "phase1": {
+      "name": "Wire Output Capture",
+      "products": [
+        "personal_decision_audit",
+        "decision_exposure_instrument",
+        "mandate_clarity_framework",
+        "intervention_path_selector",
+        "escalation_readiness_scorecard",
+        "boardroom_mode"
+      ],
+      "action": "Add output capture integration to live routes"
+    },
+    "phase2": {
+      "name": "Run Live-Route Benchmark",
+      "products": [
+        "personal_decision_audit",
+        "decision_exposure_instrument",
+        "mandate_clarity_framework",
+        "intervention_path_selector",
+        "escalation_readiness_scorecard",
+        "boardroom_mode"
+      ],
+      "action": "Execute all 6 products against test scenarios; measure anti-toy, red-team, output capture"
+    },
+    "phase3": {
+      "name": "Evaluate Boardroom Brief",
+      "products": ["boardroom_brief"],
+      "action": "High-consequence separate test; verify board-grade reasoning requirements"
+    },
+    "phase4": {
+      "name": "Decide on Diagnostic Report Basic",
+      "products": ["diagnostic_report_basic"],
+      "action": "Assess route wiring complexity; defer to Tier 3 if major redesign required"
+    },
+    "phase5": {
+      "name": "Aggregate Results & Upgrade",
+      "products": "all_8",
+      "action": "Assign final states; create evidence ledgers; upgrade passing products"
+    },
+    "phase6": {
+      "name": "Gate Verification",
+      "action": "Run all gates (surface claim, universal claim, benchmark); confirm PASSED"
+    }
+  },
+  "expectedOutcomes": {
+    "targetUpgradesToDiagnostic": 4,
+    "targetUpgradesToSignal": 2,
+    "targetUpgradesToBoardGrade": 0,
+    "targetRemainBlocked": 2,
+    "successCriteria": [
+      "All 8 products proof-mapped",
+      "Live routes and output captures verified",
+      "Every tested product has benchmark evidence",
+      "Products upgrade only to evidence-supported state",
+      "Failed products remain blocked with precise blockers",
+      "Boardroom Brief not over-promoted (board-grade only if rigorous proof)",
+      "No paid product released without payment/webhook proof",
+      "Surface claim authority PASSED",
+      "Universal claim authority PASSED",
+      "Existing 3 gold products remain validated"
+    ]
+  }
+}
