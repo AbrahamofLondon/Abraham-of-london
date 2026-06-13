@@ -27,6 +27,8 @@ const ANTI_TOY_REPORT = join(REPORT_DIR, "product-anti-toy-review.md");
 const RED_TEAM_REPORT = join(REPORT_DIR, "product-red-team-review.md");
 const MARKET_JSON = join(REPORT_DIR, "product-market-comparison-matrix.json");
 const MARKET_MD = join(REPORT_DIR, "product-market-comparison-matrix.md");
+const VALUE_LEDGER_JSON = join(REPORT_DIR, "product-value-evidence-ledger.json");
+const VALUE_LEDGER_MD = join(REPORT_DIR, "product-value-evidence-ledger.md");
 
 const ANTI_TOY_GOLD_MAXIMUM = 5;
 const ANTI_TOY_RELEASE_MAXIMUM = 20;
@@ -74,19 +76,22 @@ const results = descriptors.map((descriptor) => {
   if (internalProduct?.currentStatus === "legacy_blocked") {
     finalStatus = "internal_only";
     reasons.push("Structurally blocked or inactive product; not a customer-facing release candidate.");
-  } else if (isGoldClaim && review?.renderedOutputAvailable) {
-    const toyRisk = review.antiToy?.toyRiskScore ?? 100;
-    const redTeamSurvives = review.redTeam?.survives ?? false;
+    } else if (isGoldClaim && review?.renderedOutputAvailable) {
+      const toyRisk = review.antiToy?.toyRiskScore ?? 100;
+      const redTeamSurvives = review.redTeam?.survives ?? false;
     if (toyRisk > ANTI_TOY_RELEASE_MAXIMUM || !redTeamSurvives) {
       finalStatus = "blocked_for_low_value";
       reasons.push(`Internal gold claim REVOKED by actual-output testing: toy risk ${toyRisk}/100${redTeamSurvives ? "" : `; rejected by ${review.redTeam.criticalRejections.join(", ")}`}.`);
       reasons.push(...(review.antiToy?.reasons ?? []).slice(0, 2));
-    } else if (toyRisk > ANTI_TOY_GOLD_MAXIMUM || !review.liveRouteVerified || review.judgementIsCaseDerived !== true) {
+    } else if (toyRisk > ANTI_TOY_GOLD_MAXIMUM || !review.liveRouteVerified || review.renderedOutputCaptured !== true || review.judgementIsCaseDerived !== true) {
       finalStatus = "blocked_pending_external_proof";
-      reasons.push(`Internal gold claim REVOKED: output quality is close but unproven (toy risk ${toyRisk}, live route verified: ${review.liveRouteVerified}).`);
+      reasons.push(`Internal gold claim REVOKED: output quality is close but unproven (toy risk ${toyRisk}, live route verified: ${review.liveRouteVerified}, rendered output captured: ${review.renderedOutputCaptured}).`);
     } else if (!review.usefulnessProof?.hasProof || !review.timeValueSurplusPassed) {
       finalStatus = "blocked_pending_external_proof";
       reasons.push("Internal gold claim REVOKED: customer usefulness proof or time-value surplus not established on actual output.");
+    } else if (review.renderedOutputCaptured !== true || review.liveRouteVerified !== true) {
+      finalStatus = "blocked_pending_external_proof";
+      reasons.push("Internal gold claim REVOKED: rendered output was not captured from a verified live customer-facing route.");
     } else {
       finalStatus = "externally_proven_gold";
       reasons.push("Actual rendered output passed anti-toy, red-team, usefulness, time-value, and market-outperformance tests.");
@@ -108,6 +113,7 @@ const results = descriptors.map((descriptor) => {
     renderedOutputReviewed: Boolean(review?.renderedOutputAvailable),
     testedOutputSource: review?.testedOutputSource ?? "none",
     liveRouteVerified: review?.liveRouteVerified ?? false,
+    renderedOutputCaptured: review?.renderedOutputCaptured ?? false,
     antiToyScore: review?.antiToy?.toyRiskScore ?? null,
     failsAntiToy: review?.antiToy?.failsAntiToyTest ?? null,
     redTeamSurvives: review?.redTeam?.survives ?? null,
@@ -127,6 +133,7 @@ const revoked = results.filter((result) => result.wasInternalGoldClaim && result
 for (const result of confirmedGold) {
   if (!result.hasExternalBenchmark) failures.push(`${result.productCode}: gold without external benchmark.`);
   if (!result.renderedOutputReviewed) failures.push(`${result.productCode}: gold without actual rendered-output review.`);
+  if (!result.renderedOutputCaptured) failures.push(`${result.productCode}: gold without machine-readable rendered-output capture.`);
   if (result.antiToyScore === null) failures.push(`${result.productCode}: gold without anti-toy test.`);
   if ((result.antiToyScore ?? 100) > ANTI_TOY_GOLD_MAXIMUM) failures.push(`${result.productCode}: gold with toyRiskScore ${result.antiToyScore} > ${ANTI_TOY_GOLD_MAXIMUM}.`);
   if (result.outperformsGenericAi !== true) failures.push(`${result.productCode}: gold without proven generic-AI outperformance.`);
@@ -143,6 +150,7 @@ const evidenceCounts = {
   redTeamFailures: results.filter((result) => result.redTeamSurvives === false).length,
   benchmarksMissingForGold: confirmedGold.filter((result) => !result.hasExternalBenchmark).length,
   renderedReviewsMissingForGold: confirmedGold.filter((result) => !result.renderedOutputReviewed).length,
+  liveRouteProofMissingForGold: confirmedGold.filter((result) => !result.liveRouteVerified || !result.renderedOutputCaptured).length,
 };
 
 const gate = failures.length === 0 ? "PASSED" : "FAILED";
@@ -183,12 +191,15 @@ writeFileSync(ANTI_TOY_REPORT, renderAntiToyMarkdown(report, evidence));
 writeFileSync(RED_TEAM_REPORT, renderRedTeamMarkdown(report, evidence));
 writeFileSync(MARKET_JSON, `${JSON.stringify({ generatedAt: report.generatedAt, rows: evidence.marketComparison }, null, 2)}\n`);
 writeFileSync(MARKET_MD, renderMarketMarkdown(evidence));
+writeFileSync(VALUE_LEDGER_JSON, `${JSON.stringify(buildValueEvidenceLedger(report, evidence), null, 2)}\n`);
+writeFileSync(VALUE_LEDGER_MD, renderValueEvidenceLedgerMarkdown(buildValueEvidenceLedger(report, evidence)));
 
 console.log("EXTERNAL PRODUCT VALUE BENCHMARK CHECK");
 console.log(`Products reviewed: ${report.productsReviewed}`);
 console.log(`Gold-standard claims reviewed: ${report.goldClaimsReviewed}`);
 console.log(`External benchmarks missing: ${evidenceCounts.benchmarksMissingForGold}`);
 console.log(`Rendered-output reviews missing: ${evidenceCounts.renderedReviewsMissingForGold}`);
+console.log(`Live-route proof missing for gold: ${evidenceCounts.liveRouteProofMissingForGold}`);
 console.log(`Anti-toy failures: ${evidenceCounts.antiToyFailures}`);
 console.log(`Generic-AI outperform failures: ${evidenceCounts.genericAiOutperformFailures}`);
 console.log(`Red-team failures: ${evidenceCounts.redTeamFailures}`);
@@ -320,6 +331,101 @@ Every product compared against generic AI output, a basic template/diagnostic, a
 |---|---|---|---|---|---|---|
 ${rows.map((row) => `| ${row.productCode} | ${row.alternative} | ${cell(row.whatWeDoBetter)} | ${cell(row.whatTheAlternativeDoesBetter)} | ${cell(row.whereWeAreWeaker)} | ${cell(row.whatWouldMakeUsClearlySuperior)} | ${row.wouldCustomerReturnAfterOneUse} |`).join("\n")}
 `;
+}
+
+function buildValueEvidenceLedger(data, rawEvidence) {
+  const reviewByCode = new Map((rawEvidence.renderedOutputReviews ?? []).map((review) => [review.productCode, review]));
+  const marketByCode = new Map((rawEvidence.marketComparison ?? []).map((row) => [row.productCode, row]));
+
+  const entries = data.goldClaimsConfirmed.map((productCode) => {
+    const result = data.results.find((entry) => entry.productCode === productCode);
+    const review = reviewByCode.get(productCode);
+    const sample = review?.samples?.[0];
+    return {
+      productCode,
+      liveRoute: liveRouteFromSource(review?.testedOutputSource ?? result?.testedOutputSource ?? "unknown"),
+      scenarioUsed: sample?.label ?? "not_recorded",
+      renderedOutputExcerpt: sample?.outputText?.slice(0, 900) ?? "",
+      judgementEngineEvidence: review?.judgementIsCaseDerived === true
+        ? "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks."
+        : "No judgement-engine evidence recorded.",
+      antiToyScore: review?.antiToy?.toyRiskScore ?? null,
+      redTeamResult: review?.redTeam?.survives === true ? "survives" : "blocked",
+      marketComparisonResult: result?.outperformsGenericAi === true ? "outperforms_generic_ai" : "not_proven",
+      finalGoldDecision: result?.finalStatus ?? "unknown",
+    };
+  });
+
+  const blockedProductsWithRouteEvidence = data.results
+    .filter((result) => result.finalStatus !== "externally_proven_gold" && result.renderedOutputCaptured)
+    .map((result) => {
+      const review = reviewByCode.get(result.productCode);
+      const sample = review?.samples?.[0];
+      return {
+        productCode: result.productCode,
+        liveRoute: liveRouteFromSource(result.testedOutputSource),
+        scenarioUsed: sample?.label ?? "not_recorded",
+        renderedOutputExcerpt: sample?.outputText?.slice(0, 600) ?? "",
+        judgementEngineEvidence: review?.judgementIsCaseDerived === true
+          ? "Route evidence is judgement-engine derived."
+          : "Route evidence captured, but market outperformance or judgement-engine proof is not sufficient for gold.",
+        antiToyScore: result.antiToyScore,
+        redTeamResult: result.redTeamSurvives === true ? "survives" : result.redTeamSurvives === false ? "blocked" : "not_run",
+        marketComparisonResult: result.outperformsGenericAi === true ? "outperforms_generic_ai" : "not_proven",
+        finalGoldDecision: result.finalStatus,
+      };
+    });
+
+  return {
+    generatedAt: data.generatedAt,
+    doctrine: "No evidence ledger entry, no gold.",
+    entries,
+    blockedProductsWithRouteEvidence,
+    marketRows: [...marketByCode.values()],
+  };
+}
+
+function renderValueEvidenceLedgerMarkdown(data) {
+  return `# Product Value Evidence Ledger
+
+## Doctrine
+
+${data.doctrine}
+
+## Externally Proven Products
+
+${data.entries.length === 0 ? "None." : data.entries.map((entry) => `### ${entry.productCode}
+
+- Product code: ${entry.productCode}
+- Live route: ${entry.liveRoute}
+- Scenario used: ${entry.scenarioUsed}
+- Rendered output excerpt: ${cell(entry.renderedOutputExcerpt)}
+- Judgement engine evidence: ${entry.judgementEngineEvidence}
+- Anti-toy score: ${entry.antiToyScore}
+- Red-team result: ${entry.redTeamResult}
+- Market comparison result: ${entry.marketComparisonResult}
+- Final gold decision: ${entry.finalGoldDecision}
+`).join("\n")}
+
+## Blocked Products With Route Evidence
+
+${data.blockedProductsWithRouteEvidence.length === 0 ? "None." : data.blockedProductsWithRouteEvidence.map((entry) => `### ${entry.productCode}
+
+- Live route: ${entry.liveRoute}
+- Scenario used: ${entry.scenarioUsed}
+- Anti-toy score: ${entry.antiToyScore ?? "not_run"}
+- Red-team result: ${entry.redTeamResult}
+- Market comparison result: ${entry.marketComparisonResult}
+- Final decision: ${entry.finalGoldDecision}
+- Reason: ${entry.judgementEngineEvidence}
+`).join("\n")}
+`;
+}
+
+function liveRouteFromSource(source) {
+  const text = String(source);
+  const match = text.match(/live_route_capture:\s*([^()]+)/);
+  return match ? match[1].trim() : text;
 }
 
 function redTeamCell(result) {

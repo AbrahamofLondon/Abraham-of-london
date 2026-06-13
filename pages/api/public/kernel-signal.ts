@@ -19,6 +19,8 @@ import type { AdversarialPreview } from '@/lib/kernel/adversarial-preview'
 import { extractSafeUserLanguageQuotes } from '@/lib/product/user-language-extraction'
 import { runDecisionIntelligence } from '@/lib/intelligence/decision-intelligence-orchestrator'
 import type { DecisionIntelligenceResult } from '@/lib/intelligence/decision-intelligence-orchestrator'
+import { composeCaseDerivedJudgement } from '@/lib/judgement/compose-case-derived-judgement'
+import type { DecisionPattern } from '@/lib/judgement/decision-pattern-model'
 
 const kernel = new DecisionIntelligenceKernel()
 
@@ -41,6 +43,19 @@ export type KernelSignalResponse = {
   clarificationQuestions: Array<{ domain: string; question: string }> | null
   userLanguageEvidence?: string[]
   decisionIntelligence?: DecisionIntelligenceResult
+  caseDerivedJudgement?: {
+    primaryPattern: DecisionPattern
+    secondaryPatterns: DecisionPattern[]
+    patternEvidence: string[]
+    diagnosis: string
+    consequence: string
+    nextMove: string
+    falsificationChallenge: string
+    escalationTrigger: string
+    executionSequence: string[]
+    limitations: string[]
+    confidence: number
+  } | null
   error?: string
 }
 
@@ -68,6 +83,7 @@ export default async function handler(
       clarificationQuestions: null,
       userLanguageEvidence: [],
       decisionIntelligence: undefined,
+      caseDerivedJudgement: null,
       error: 'Method not allowed. Use POST.',
     })
     return
@@ -110,6 +126,7 @@ export default async function handler(
       clarificationQuestions: null,
       userLanguageEvidence: [],
       decisionIntelligence: undefined,
+      caseDerivedJudgement: null,
       error: 'Situation text is required.',
     })
     return
@@ -159,6 +176,7 @@ export default async function handler(
           ...(progressiveEvidence ? { progressiveEvidence } : {}),
           ...(previousDecisionIntelligence ? { previousDecisionIntelligence } : {}),
         }),
+        caseDerivedJudgement: buildPublicCaseDerivedJudgement(situation.trim()),
       })
       return
     }
@@ -224,6 +242,7 @@ export default async function handler(
       clarificationQuestions: null,
       userLanguageEvidence: extractSafeUserLanguageQuotes([situation.trim()]),
       decisionIntelligence,
+      caseDerivedJudgement: buildPublicCaseDerivedJudgement(situation.trim()),
     })
   } catch (error) {
     console.error('[KERNEL_SIGNAL] Error:', error)
@@ -246,7 +265,38 @@ export default async function handler(
       clarificationQuestions: null,
       userLanguageEvidence: [],
       decisionIntelligence: undefined,
+      caseDerivedJudgement: null,
       error: 'An internal error occurred while processing your situation.',
     })
+  }
+}
+
+function buildPublicCaseDerivedJudgement(situation: string): KernelSignalResponse['caseDerivedJudgement'] {
+  const result = composeCaseDerivedJudgement({
+    decisionDescription: situation,
+    stakeholders: ['the accountable owner'],
+    deadline: situation,
+    evidenceAvailable: [situation],
+    constraint: situation,
+    desiredOutcome: 'resolve the decision without unmanaged risk',
+    priorAttempts: [],
+    consequenceOfDelay: situation,
+    optionsUnderConsideration: [],
+  })
+
+  if (result.status === 'insufficient_pattern_evidence') return null
+
+  return {
+    primaryPattern: result.classification.primaryPattern,
+    secondaryPatterns: result.classification.secondaryPatterns,
+    patternEvidence: result.classification.evidenceMatched,
+    diagnosis: result.judgement.primaryDiagnosis,
+    consequence: result.judgement.commercialConsequence,
+    nextMove: result.judgement.recommendedNextMove,
+    falsificationChallenge: result.judgement.falsificationChallenge,
+    escalationTrigger: result.judgement.escalationTrigger,
+    executionSequence: result.judgement.executionSequence,
+    limitations: result.judgement.limitations,
+    confidence: result.judgement.confidence,
   }
 }

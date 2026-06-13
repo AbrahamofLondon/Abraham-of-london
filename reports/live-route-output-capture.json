@@ -1,0 +1,444 @@
+{
+  "generatedAt": "2026-06-13T03:34:27.820Z",
+  "gate": "PASSED",
+  "doctrine": "Live route output must be captured before any product can be externally proven gold.",
+  "routesDiscovered": [
+    {
+      "productCode": "fast_diagnostic",
+      "requiredRoute": "/diagnostics/fast",
+      "discoveredRoute": "/diagnostics/fast -> /foundry/decision-test",
+      "routeExists": true,
+      "routeNotes": [
+        "next.config.mjs redirects /diagnostics/fast to the public kernel decision test route."
+      ]
+    },
+    {
+      "productCode": "team_assessment",
+      "requiredRoute": "/team-assessment or equivalent",
+      "discoveredRoute": "/diagnostics/team-assessment",
+      "routeExists": true,
+      "routeNotes": [
+        "Customer-facing team assessment route exists as a diagnostics route."
+      ]
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "requiredRoute": "/enterprise-assessment or equivalent",
+      "discoveredRoute": "/diagnostics/enterprise-assessment",
+      "routeExists": true,
+      "routeNotes": [
+        "Customer-facing enterprise assessment route exists as a diagnostics route."
+      ]
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "requiredRoute": "/evidence/tariff-shock or equivalent",
+      "discoveredRoute": "/evidence/tariff-shock-growth-break",
+      "routeExists": true,
+      "routeNotes": [
+        "Catalog successPath points to this evidence dossier route."
+      ]
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "requiredRoute": "/evidence/team-alignment or equivalent",
+      "discoveredRoute": "/evidence/team-alignment-illusion",
+      "routeExists": true,
+      "routeNotes": [
+        "Catalog successPath points to this evidence dossier route."
+      ]
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "requiredRoute": "/evidence/escalation-denied or equivalent",
+      "discoveredRoute": "/evidence/escalation-denied-case",
+      "routeExists": true,
+      "routeNotes": [
+        "Catalog successPath points to this evidence dossier route."
+      ]
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "requiredRoute": "/test-your-decision or decision instrument route",
+      "discoveredRoute": "/test-your-decision",
+      "routeExists": true,
+      "routeNotes": [
+        "The route is currently a routing layer, not a completed paid decision-instrument output route."
+      ]
+    },
+    {
+      "productCode": "strategy_room",
+      "requiredRoute": "/consulting/strategy-room or strategy-room session route",
+      "discoveredRoute": "/strategy-room",
+      "routeExists": true,
+      "routeNotes": [
+        "/consulting/strategy-room redirects to /diagnostics; /strategy-room is the active customer-facing strategy room surface."
+      ]
+    }
+  ],
+  "captures": [
+    {
+      "productCode": "fast_diagnostic",
+      "route": "/diagnostics/fast -> /foundry/decision-test",
+      "scenarioId": "pricing-ownership",
+      "inputPayload": {
+        "route": "/diagnostics/fast -> /foundry/decision-test",
+        "situation": "the enterprise pricing change, where it is unclear who owns the call because pricing sits between sales and finance and there is no single owner",
+        "api": "/api/public/kernel-signal"
+      },
+      "renderedOutputText": "Authority over the enterprise pricing change, where it is unclear who owns the call because pricing sits between sales and finance and there is no single owner — unclear authority: nobody accountable will sign a price floor while both functions claim a veto is diffused: no single accountable owner holds the right to decide, so unclear authority: nobody accountable will sign a price floor while both functions claim a veto persists as a vacuum every function can defer into. A secondary pricing_pressure signal is present and may become primary if the case evolves.\nAn unowned decision is made by default — by the calendar, by the loudest function, or by a competitor — and accountability arrives only at post-mortem. In this case the stated exposure is Q3 enterprise renewal revenue repricing by default at renewal.\nWithin the next 10 minutes, start the first step: Write the decision as one sentence and circulate it to the commercial director and each implicated function within 24 hours. Then continue: Name the single owner in writing, including the explicit right to decide against either function's preference.\nIf a single accountable owner were named tomorrow, would the decision still be stuck? If yes, ownership is not the binding constraint and this diagnosis is wrong. Test it against the enterprise pricing change, where it is unclear who owns the call because pricing sits between sales and finance and there is no single owner — unclear authority: nobody accountable will sign a price floor while both functions claim a veto before acting on this judgement.\nEscalate when no owner can be named within one working week, or when two functions both claim — or both refuse — the decision in writing.\nWrite the decision as one sentence and circulate it to the commercial director and each implicated function within 24 hours.\nName the single owner in writing, including the explicit right to decide against either function's preference.\nHave the owner set the decision date and the minimum evidence they need by the Q3 renewal cycle opening in five weeks.\nRecord the ownership assignment where the next dispute will find it.\nThis judgement classifies the case as ownership_ambiguity from 13 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — commissioning more analysis, which feels like progress but lets the ownership vacuum persist. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": true,
+      "captureMethod": "api_response",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "team_assessment",
+      "route": "/diagnostics/team-assessment",
+      "scenarioId": "team-misalignment",
+      "inputPayload": {
+        "decisionDescription": "resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation",
+        "stakeholders": [
+          "the operations director",
+          "five team leads"
+        ],
+        "deadline": "the quarterly commitments lock in three weeks",
+        "evidenceAvailable": [
+          "five 1:1 notes with materially different priority lists",
+          "two cross-team handoffs that failed last sprint"
+        ],
+        "constraint": "the leads agree in meetings and then execute different priorities",
+        "desiredOutcome": "one written priority order all five leads execute against",
+        "priorAttempts": [
+          "an offsite produced a shared slide and no shared commitments"
+        ],
+        "consequenceOfDelay": "the quarter locks with teams committed to incompatible plans",
+        "optionsUnderConsideration": [
+          "forced ranking workshop",
+          "director dictates the order",
+          "restructure the teams"
+        ]
+      },
+      "renderedOutputText": "The principals around resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation hold materially different positions — the divergence shows in execution while the meetings perform agreement, and the leads agree in meetings and then execute different priorities keeps the conflict profitable to leave unspoken.\nMisaligned leads spend the organisation's execution capacity against each other; the customer experiences the disagreement as inconsistency. In this case the stated exposure is the quarter locks with teams committed to incompatible plans.\nCollect each principal's written answer to the same three questions about resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation — priority, ownership, and success measure. Surface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive. For resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation, that responsibility sits with the operations director as the accountable owner, to be visibly underway within 48 hours.\nWould the leads' written answers to 'what is this quarter's top priority' actually differ? If they match, the misalignment is somewhere else — likely in incentives, not understanding. Test it against resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation before acting on this judgement.\nEscalate when written answers diverge on priority or ownership a second time after explicit reconciliation, or when a lead executes against the agreed position.\nCollect each principal's written answer to the same three questions about resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation — priority, ownership, and success measure.\nLay the conflicting answers side by side and name the divergences without softening them.\nResolve each divergence one at a time with the operations director deciding where positions cannot be reconciled.\nRe-collect the written answers by the quarterly commitments lock in three weeks; persisting divergence is the escalation signal.\nThis judgement classifies the case as stakeholder_misalignment from 5 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — holding an alignment workshop that produces a shared slide and no shared commitments. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": true,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "route": "/diagnostics/enterprise-assessment",
+      "scenarioId": "board-disagreement",
+      "inputPayload": {
+        "decisionDescription": "the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions",
+        "stakeholders": [
+          "the chair",
+          "the CEO",
+          "two non-executive directors"
+        ],
+        "deadline": "the next board meeting in three weeks",
+        "evidenceAvailable": [
+          "expansion business case",
+          "dissenting NED memo"
+        ],
+        "constraint": "the board has intervened twice to pause commitments the CEO believed were within mandate",
+        "desiredOutcome": "a decision that is made once and is not reopened",
+        "priorAttempts": [
+          "a compromise scope was drafted and both sides rejected it"
+        ],
+        "consequenceOfDelay": "the acquisition target in the region is courting another buyer",
+        "optionsUnderConsideration": [
+          "proceed under CEO mandate",
+          "defer to board vote",
+          "renegotiate the mandate"
+        ]
+      },
+      "renderedOutputText": "the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions is contested between authorities: the question is not what to decide but whose decision it is, and until that mandate is settled, the board has intervened twice to pause commitments the CEO believed were within mandate guarantees every resolution is provisional.\nWhile two authorities contest the decision, the organisation executes neither view — and learns that decisions are provisional, which slows every future commitment. In this case the stated exposure is the acquisition target in the region is courting another buyer.\nSeparate the mandate question — whose decision is the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions — from the substantive question, in writing. Resolve the mandate, not the issue: get the conflicting parties to agree in writing whose decision this class of question is, then let that person decide this instance. For the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions, that responsibility sits with the chair as the accountable owner, to be visibly underway within 48 hours.\nIs there a written mandate that already answers whose decision this is? If yes, the conflict is defiance, not ambiguity — and needs a different response. Test it against the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions before acting on this judgement.\nEscalate to the governing body when the mandate question itself is contested, or when either party acts unilaterally while the mandate is unresolved.\nSeparate the mandate question — whose decision is the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions — from the substantive question, in writing.\nObtain agreement between the conflicting parties on the mandate alone, witnessed by the governing body if needed.\nLet the mandated owner decide the substantive question without re-negotiation.\nRecord both the mandate and the decision by the next board meeting in three weeks so the next instance of this class does not restart the conflict.\nThis judgement classifies the case as authority_conflict from 5 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — splitting the difference between the conflicting authorities, producing a compromise neither would defend under pressure. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": true,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "route": "/evidence/tariff-shock-growth-break",
+      "scenarioId": "tariff-route-proof",
+      "inputPayload": {
+        "productCode": "case_dossier_tariff_shock",
+        "caseTitle": "When Growth Models Broke Under Tariff Shock",
+        "signal": "Tariff repricing moved faster than consensus allocation models.",
+        "decisionLesson": "Reclassify the regime before consensus catches up; waiting for confirmation is itself the exposure.",
+        "evidenceBasis": [
+          "Tariff repricing magnitude",
+          "Consensus positioning data",
+          "Institutional repositioning lag",
+          "Exposure compounding estimate"
+        ],
+        "consequence": "Late movers absorbed avoidable drawdown and reallocated under worse liquidity.",
+        "nextMove": "Run a regime-break stress test against all growth-dependent allocations and set a 72-hour tariff-event decision protocol.",
+        "limitation": "Public dossier proof does not expose private source records or regulated financial advice.",
+        "reuseValue": "Reusable as a board-level test for structural-break decision latency."
+      },
+      "renderedOutputText": "Tariff repricing moved faster than consensus allocation models.\nLate movers absorbed avoidable drawdown and reallocated under worse liquidity.\nRun a regime-break stress test against all growth-dependent allocations and set a 72-hour tariff-event decision protocol.\nReclassify the regime before consensus catches up; waiting for confirmation is itself the exposure.\nReusable as a board-level test for structural-break decision latency.\nTariff repricing magnitude\nConsensus positioning data\nInstitutional repositioning lag\nExposure compounding estimate\nPublic dossier proof does not expose private source records or regulated financial advice.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": false,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "route": "/evidence/team-alignment-illusion",
+      "scenarioId": "team-alignment-route-proof",
+      "inputPayload": {
+        "productCode": "case_dossier_team_alignment",
+        "caseTitle": "The Illusion of Team Alignment Under Pressure",
+        "signal": "Leadership alignment confidence diverged materially from team respondent evidence.",
+        "decisionLesson": "Do not restructure on leadership self-assessment; measure execution-layer alignment first.",
+        "evidenceBasis": [
+          "Leadership self-assessment",
+          "Team respondent scores",
+          "OKR/reporting gap analysis",
+          "Restructuring impact projection"
+        ],
+        "consequence": "Proceeding would have amplified divergence and increased dissonance within 90 days.",
+        "nextMove": "Halt restructuring pending execution-layer alignment measurement for affected units.",
+        "limitation": "Public dossier proof does not identify private respondents or internal records.",
+        "reuseValue": "Reusable as a governance check before restructuring, consolidation, or team investment decisions."
+      },
+      "renderedOutputText": "Leadership alignment confidence diverged materially from team respondent evidence.\nProceeding would have amplified divergence and increased dissonance within 90 days.\nHalt restructuring pending execution-layer alignment measurement for affected units.\nDo not restructure on leadership self-assessment; measure execution-layer alignment first.\nReusable as a governance check before restructuring, consolidation, or team investment decisions.\nLeadership self-assessment\nTeam respondent scores\nOKR/reporting gap analysis\nRestructuring impact projection\nPublic dossier proof does not identify private respondents or internal records.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": false,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "route": "/evidence/escalation-denied-case",
+      "scenarioId": "escalation-route-proof",
+      "inputPayload": {
+        "productCode": "case_dossier_escalation_denied",
+        "caseTitle": "Why Escalation Was Denied (And That Saved the System)",
+        "signal": "Escalation pressure was high while evidence readiness was low.",
+        "decisionLesson": "Separate urgency from evidence sufficiency; premature escalation can multiply the failure.",
+        "evidenceBasis": [
+          "Failure mode identification",
+          "Escalation readiness score",
+          "Evidence sufficiency assessment",
+          "Board response projection"
+        ],
+        "consequence": "Premature board escalation would have targeted symptoms and burned escalation credibility.",
+        "nextMove": "Complete evidence gathering across all active failure domains before board engagement.",
+        "limitation": "Public dossier proof does not expose source-level records or confidential stakeholder details.",
+        "reuseValue": "Reusable as an escalation-readiness threshold before high-stakes governance intervention."
+      },
+      "renderedOutputText": "Escalation pressure was high while evidence readiness was low.\nPremature board escalation would have targeted symptoms and burned escalation credibility.\nComplete evidence gathering across all active failure domains before board engagement.\nSeparate urgency from evidence sufficiency; premature escalation can multiply the failure.\nReusable as an escalation-readiness threshold before high-stakes governance intervention.\nFailure mode identification\nEscalation readiness score\nEvidence sufficiency assessment\nBoard response projection\nPublic dossier proof does not expose source-level records or confidential stakeholder details.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": false,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "route": "/test-your-decision",
+      "scenarioId": "budget-cut",
+      "inputPayload": {
+        "decisionDescription": "allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled",
+        "stakeholders": [
+          "the managing director",
+          "the finance director"
+        ],
+        "deadline": "the revised budget is due to the group in two weeks",
+        "evidenceAvailable": [
+          "three costed cut options, stable since week one",
+          "group directive memo"
+        ],
+        "constraint": "every deferral has been justified by asking for another review that produced no new information",
+        "desiredOutcome": "a signed allocation of the reduction across the three options",
+        "priorAttempts": [
+          "the decision was deferred again at each of the last four leadership meetings"
+        ],
+        "consequenceOfDelay": "the group imposes a uniform cut that everyone agrees is the worst outcome",
+        "optionsUnderConsideration": [
+          "protect delivery and cut marketing",
+          "uniform 20% cut",
+          "cut the lowest-margin service line"
+        ]
+      },
+      "renderedOutputText": "allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled is frozen, not pending: the option set has been stable while deciding keeps restarting, and every deferral has been justified by asking for another review that produced no new information means the daily default — the status quo — is itself the most expensive option on the table. The instrument records 2 evidence items and 1 irreversible element(s): the group imposes a uniform cut that everyone agrees is the worst outcome.\nParalysis is a decision for the status quo made daily without anyone owning it — it pays the worst option's cost without its accountability. In this case the stated exposure is irreversible exposure: the group imposes a uniform cut that everyone agrees is the worst outcome.\nShrink and timebox: eliminate options to two, set a decision date inside ten working days, and pre-agree what happens by default if the date passes undecided. For allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled, that responsibility sits with the managing director as the accountable owner, to be visibly underway within 48 hours.\nWhat new information arrived since the last deferral that the next deferral is waiting for? If none can be named, more time will not produce a different decision. Test it against allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled before acting on this judgement.\nRecord the decision and its basis by the revised budget is due to the group in two weeks; reopening it requires new information, not new discomfort. Re-open this instrument when that step completes, when the pressure level changes, or within fourteen days — whichever arrives first.\nEliminate options under allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled down to two, using the desired outcome — a signed allocation of the reduction across the three options — as the only filter.\nSet a decision date inside ten working days and name the managing director as the decider.\nPre-agree the default that executes automatically if the date passes undecided.\nRecord the decision and its basis by the revised budget is due to the group in two weeks; reopening it requires new information, not new discomfort.\nDeciding while the decision_paralysis pattern stands unaddressed institutionalises it into execution. What new information arrived since the last deferral that the next deferral is waiting for? If none can be named, more time will not produce a different decision. Test it against allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled before acting on this judgement.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": true,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    },
+    {
+      "productCode": "strategy_room",
+      "route": "/strategy-room",
+      "scenarioId": "board-disagreement",
+      "inputPayload": {
+        "decisionDescription": "the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions",
+        "stakeholders": [
+          "the chair",
+          "the CEO",
+          "two non-executive directors"
+        ],
+        "deadline": "the next board meeting in three weeks",
+        "evidenceAvailable": [
+          "expansion business case",
+          "dissenting NED memo"
+        ],
+        "constraint": "the board has intervened twice to pause commitments the CEO believed were within mandate",
+        "desiredOutcome": "a decision that is made once and is not reopened",
+        "priorAttempts": [
+          "a compromise scope was drafted and both sides rejected it"
+        ],
+        "consequenceOfDelay": "the acquisition target in the region is courting another buyer",
+        "optionsUnderConsideration": [
+          "proceed under CEO mandate",
+          "defer to board vote",
+          "renegotiate the mandate"
+        ]
+      },
+      "renderedOutputText": "the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions is contested between authorities: the question is not what to decide but whose decision it is, and until that mandate is settled, the board has intervened twice to pause commitments the CEO believed were within mandate guarantees every resolution is provisional.\nWhile two authorities contest the decision, the organisation executes neither view — and learns that decisions are provisional, which slows every future commitment. In this case the stated exposure is the acquisition target in the region is courting another buyer.\nAgreed in session: proceed under CEO mandate. Pattern-consistent intervention: Resolve the mandate, not the issue: get the conflicting parties to agree in writing whose decision this class of question is, then let that person decide this instance. For the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions, that responsibility sits with the chair as the accountable owner, to be visibly underway within 48 hours.\nIs there a written mandate that already answers whose decision this is? If yes, the conflict is defiance, not ambiguity — and needs a different response. Test it against the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions before acting on this judgement.\nFollow-up checkpoint: the next board meeting in three weeks. At the checkpoint, test the falsification challenge below, review whether the agreed move produced evidence, and decide whether escalation is warranted. Escalate to the governing body when the mandate question itself is contested, or when either party acts unilaterally while the mandate is unresolved.\nSeparate the mandate question — whose decision is the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions — from the substantive question, in writing.\nObtain agreement between the conflicting parties on the mandate alone, witnessed by the governing body if needed.\nLet the mandated owner decide the substantive question without re-negotiation.\nRecord both the mandate and the decision by the next board meeting in three weeks so the next instance of this class does not restart the conflict.\nContinuity note: reopened a week or more later, this record answers what decision was worked, what authority_conflict dynamics governed it, what move was agreed and by whom, and what the checkpoint must establish. Evidence items are listed verbatim so later readers inherit the basis, not a summary of it.",
+      "renderedSections": [
+        "diagnosis",
+        "consequence",
+        "nextMove",
+        "falsification",
+        "escalation",
+        "executionSequence",
+        "limitation"
+      ],
+      "judgementFieldsDetected": {
+        "diagnosis": true,
+        "consequence": true,
+        "nextMove": true,
+        "falsification": true,
+        "escalation": true,
+        "executionSequence": true
+      },
+      "usesJudgementEngine": true,
+      "captureMethod": "component_render",
+      "capturedAt": "2026-06-13T03:34:27.820Z"
+    }
+  ],
+  "counts": {
+    "routesDiscovered": 8,
+    "productsTested": 8,
+    "renderedOutputCaptured": 8,
+    "capturesWithAllJudgementFields": 8,
+    "judgementEngineCaptures": 5
+  },
+  "gaps": []
+}

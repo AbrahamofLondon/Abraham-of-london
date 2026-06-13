@@ -13,9 +13,9 @@ PASSED
 ## Classification
 
 - **Internally certified (Wave 1):** fast_diagnostic, team_assessment, enterprise_assessment, case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied
-- **Externally proven:** none
-- **Revoked:** fast_diagnostic, case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied, team_assessment, enterprise_assessment
-- **Blocked:** 32 products
+- **Externally proven:** fast_diagnostic
+- **Revoked:** case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied, team_assessment, enterprise_assessment
+- **Blocked:** 31 products
 - **Internal only:** operator_essentials_pack, command_pack, governance_suite, gmi_q3_2026, diagnostic_report_basic, diagnostic_report_pro, executive_reporting_priority, inner_circle, retainer_core, retainer_operational, retainer_institutional
 
 ## Gold Claims Reviewed
@@ -24,24 +24,22 @@ PASSED
 
 ## Gold Claims Revoked
 
-- **fast_diagnostic** → blocked_pending_external_proof
-  Internal gold claim REVOKED: output quality is close but unproven (toy risk 0, live route verified: false).
-- **case_dossier_tariff_shock** → blocked_pending_external_proof
-  Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.
-- **case_dossier_team_alignment** → blocked_pending_external_proof
-  Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.
-- **case_dossier_escalation_denied** → blocked_pending_external_proof
-  Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.
+- **case_dossier_tariff_shock** → blocked_for_low_value
+  Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator. High input echo (42%). Consequence section is not grounded in the user's stated situation.
+- **case_dossier_team_alignment** → blocked_for_low_value
+  Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator. High input echo (47%). Consequence section is not grounded in the user's stated situation.
+- **case_dossier_escalation_denied** → blocked_for_low_value
+  Internal gold claim REVOKED by actual-output testing: toy risk 15/100; rejected by busy_operator. High input echo (45%). Next action lacks an owner or a timeframe.
 - **team_assessment** → blocked_pending_external_proof
-  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false).
+  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true).
 - **enterprise_assessment** → blocked_pending_external_proof
-  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false).
+  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true).
 
 ## Product-by-Product Matrix
 
 | Product | Internal Score | External Benchmark | Anti-Toy Score | Red-Team Result | Market Comparison | Final Status |
 |---|---:|---|---:|---|---|---|
-| fast_diagnostic | 5.8 | defined | 0 | survives | outperforms_generic_ai | blocked_pending_external_proof |
+| fast_diagnostic | 5.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
 | boardroom_brief | 8.2 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | personal_decision_audit | 7.7 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | decision_exposure_instrument | 7.7 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
@@ -61,9 +59,9 @@ PASSED
 | operator_essentials_pack | 4.7 | defined | not_tested | not_run | outperform_unproven | internal_only |
 | command_pack | 4.7 | defined | not_tested | not_run | outperform_unproven | internal_only |
 | governance_suite | 4.7 | defined | not_tested | not_run | outperform_unproven | internal_only |
-| case_dossier_tariff_shock | 7.7 | defined | not_tested | not_run | fails_generic_ai_outperform | blocked_pending_external_proof |
-| case_dossier_team_alignment | 7.7 | defined | not_tested | not_run | fails_generic_ai_outperform | blocked_pending_external_proof |
-| case_dossier_escalation_denied | 7.7 | defined | not_tested | not_run | fails_generic_ai_outperform | blocked_pending_external_proof |
+| case_dossier_tariff_shock | 7.7 | defined | 23 | rejected_by: busy_operator | fails_generic_ai_outperform | blocked_for_low_value |
+| case_dossier_team_alignment | 7.7 | defined | 23 | rejected_by: busy_operator | fails_generic_ai_outperform | blocked_for_low_value |
+| case_dossier_escalation_denied | 7.7 | defined | 15 | rejected_by: busy_operator | fails_generic_ai_outperform | blocked_for_low_value |
 | gmi_q1_2026 | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q2_2026 | 7.9 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q3_2026 | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
@@ -87,9 +85,9 @@ PASSED
 
 ## Counts
 
-- Externally proven gold: 0
-- Blocked pending external proof: 32
-- Blocked for low value: 0
+- Externally proven gold: 1
+- Blocked pending external proof: 28
+- Blocked for low value: 3
 - Internal only: 11
 
 ## Final Recommendation

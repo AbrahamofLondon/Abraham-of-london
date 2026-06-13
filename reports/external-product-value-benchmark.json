@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T03:22:04.347Z",
+  "generatedAt": "2026-06-13T03:37:11.150Z",
   "gate": "PASSED",
   "doctrine": "Externally proven gold or blocked. No self-certification.",
   "thresholds": {
@@ -8,48 +8,49 @@
   },
   "productsReviewed": 43,
   "goldClaimsReviewed": 6,
-  "goldClaimsConfirmed": [],
+  "goldClaimsConfirmed": [
+    "fast_diagnostic"
+  ],
   "goldClaimsRevoked": [
     {
-      "productCode": "fast_diagnostic",
-      "finalStatus": "blocked_pending_external_proof",
-      "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 0, live route verified: false)."
-      ]
-    },
-    {
       "productCode": "case_dossier_tariff_shock",
-      "finalStatus": "blocked_pending_external_proof",
+      "finalStatus": "blocked_for_low_value",
       "reasons": [
-        "Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established."
+        "Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator.",
+        "High input echo (42%).",
+        "Consequence section is not grounded in the user's stated situation."
       ]
     },
     {
       "productCode": "case_dossier_team_alignment",
-      "finalStatus": "blocked_pending_external_proof",
+      "finalStatus": "blocked_for_low_value",
       "reasons": [
-        "Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established."
+        "Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator.",
+        "High input echo (47%).",
+        "Consequence section is not grounded in the user's stated situation."
       ]
     },
     {
       "productCode": "case_dossier_escalation_denied",
-      "finalStatus": "blocked_pending_external_proof",
+      "finalStatus": "blocked_for_low_value",
       "reasons": [
-        "Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established."
+        "Internal gold claim REVOKED by actual-output testing: toy risk 15/100; rejected by busy_operator.",
+        "High input echo (45%).",
+        "Next action lacks an owner or a timeframe."
       ]
     },
     {
       "productCode": "team_assessment",
       "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
       ]
     },
     {
       "productCode": "enterprise_assessment",
       "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
       ]
     }
   ],
@@ -62,9 +63,10 @@
       "case_dossier_team_alignment",
       "case_dossier_escalation_denied"
     ],
-    "externallyProven": [],
+    "externallyProven": [
+      "fast_diagnostic"
+    ],
     "revoked": [
-      "fast_diagnostic",
       "case_dossier_tariff_shock",
       "case_dossier_team_alignment",
       "case_dossier_escalation_denied",
@@ -72,7 +74,6 @@
       "enterprise_assessment"
     ],
     "blocked": [
-      "fast_diagnostic",
       "boardroom_brief",
       "personal_decision_audit",
       "decision_exposure_instrument",
@@ -120,15 +121,16 @@
     ]
   },
   "counts": {
-    "externallyProvenGold": 0,
-    "blockedPendingExternalProof": 32,
-    "blockedForLowValue": 0,
+    "externallyProvenGold": 1,
+    "blockedPendingExternalProof": 28,
+    "blockedForLowValue": 3,
     "internalOnly": 11,
-    "antiToyFailures": 0,
-    "genericAiOutperformFailures": 2,
-    "redTeamFailures": 0,
+    "antiToyFailures": 2,
+    "genericAiOutperformFailures": 5,
+    "redTeamFailures": 3,
     "benchmarksMissingForGold": 0,
-    "renderedReviewsMissingForGold": 0
+    "renderedReviewsMissingForGold": 0,
+    "liveRouteProofMissingForGold": 0
   },
   "results": [
     {
@@ -138,8 +140,9 @@
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
-      "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
-      "liveRouteVerified": false,
+      "testedOutputSource": "live_route_capture: /diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
       "antiToyScore": 0,
       "failsAntiToy": false,
       "redTeamSurvives": true,
@@ -154,9 +157,9 @@
         "evidence_organised_into_judgement",
         "reusable_artefact_gained"
       ],
-      "finalStatus": "blocked_pending_external_proof",
+      "finalStatus": "externally_proven_gold",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 0, live route verified: false)."
+        "Actual rendered output passed anti-toy, red-team, usefulness, time-value, and market-outperformance tests."
       ]
     },
     {
@@ -168,6 +171,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -188,6 +192,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -208,6 +213,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -228,6 +234,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -248,6 +255,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -268,6 +276,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -288,6 +297,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -308,6 +318,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -328,6 +339,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -348,6 +360,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -368,6 +381,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -388,6 +402,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -408,6 +423,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -428,6 +444,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -448,6 +465,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -468,6 +486,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -488,6 +507,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -508,6 +528,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -528,6 +549,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -545,18 +567,26 @@
       "internalScoreOutOf10": 7.7,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
-      "renderedOutputReviewed": false,
-      "testedOutputSource": "none",
-      "liveRouteVerified": false,
-      "antiToyScore": null,
-      "failsAntiToy": null,
-      "redTeamSurvives": null,
-      "redTeamRejections": [],
+      "renderedOutputReviewed": true,
+      "testedOutputSource": "live_route_capture: /evidence/tariff-shock-growth-break",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
+      "antiToyScore": 23,
+      "failsAntiToy": true,
+      "redTeamSurvives": false,
+      "redTeamRejections": [
+        "busy_operator"
+      ],
       "outperformsGenericAi": false,
-      "usefulnessProofs": [],
-      "finalStatus": "blocked_pending_external_proof",
+      "usefulnessProofs": [
+        "evidence_organised_into_judgement",
+        "reusable_artefact_gained"
+      ],
+      "finalStatus": "blocked_for_low_value",
       "reasons": [
-        "Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established."
+        "Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator.",
+        "High input echo (42%).",
+        "Consequence section is not grounded in the user's stated situation."
       ]
     },
     {
@@ -565,18 +595,27 @@
       "internalScoreOutOf10": 7.7,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
-      "renderedOutputReviewed": false,
-      "testedOutputSource": "none",
-      "liveRouteVerified": false,
-      "antiToyScore": null,
-      "failsAntiToy": null,
-      "redTeamSurvives": null,
-      "redTeamRejections": [],
+      "renderedOutputReviewed": true,
+      "testedOutputSource": "live_route_capture: /evidence/team-alignment-illusion",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
+      "antiToyScore": 23,
+      "failsAntiToy": true,
+      "redTeamSurvives": false,
+      "redTeamRejections": [
+        "busy_operator"
+      ],
       "outperformsGenericAi": false,
-      "usefulnessProofs": [],
-      "finalStatus": "blocked_pending_external_proof",
+      "usefulnessProofs": [
+        "execution_sequence_clearer",
+        "evidence_organised_into_judgement",
+        "reusable_artefact_gained"
+      ],
+      "finalStatus": "blocked_for_low_value",
       "reasons": [
-        "Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established."
+        "Internal gold claim REVOKED by actual-output testing: toy risk 23/100; rejected by busy_operator.",
+        "High input echo (47%).",
+        "Consequence section is not grounded in the user's stated situation."
       ]
     },
     {
@@ -585,18 +624,27 @@
       "internalScoreOutOf10": 7.7,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
-      "renderedOutputReviewed": false,
-      "testedOutputSource": "none",
-      "liveRouteVerified": false,
-      "antiToyScore": null,
-      "failsAntiToy": null,
-      "redTeamSurvives": null,
-      "redTeamRejections": [],
+      "renderedOutputReviewed": true,
+      "testedOutputSource": "live_route_capture: /evidence/escalation-denied-case",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
+      "antiToyScore": 15,
+      "failsAntiToy": true,
+      "redTeamSurvives": false,
+      "redTeamRejections": [
+        "busy_operator"
+      ],
       "outperformsGenericAi": false,
-      "usefulnessProofs": [],
-      "finalStatus": "blocked_pending_external_proof",
+      "usefulnessProofs": [
+        "risk_made_visible",
+        "evidence_organised_into_judgement",
+        "reusable_artefact_gained"
+      ],
+      "finalStatus": "blocked_for_low_value",
       "reasons": [
-        "Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established."
+        "Internal gold claim REVOKED by actual-output testing: toy risk 15/100; rejected by busy_operator.",
+        "High input echo (45%).",
+        "Next action lacks an owner or a timeframe."
       ]
     },
     {
@@ -608,6 +656,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -628,6 +677,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -648,6 +698,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -666,8 +717,9 @@
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
-      "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
-      "liveRouteVerified": false,
+      "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
       "antiToyScore": 8,
       "failsAntiToy": true,
       "redTeamSurvives": true,
@@ -682,7 +734,7 @@
       ],
       "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
       ]
     },
     {
@@ -692,8 +744,9 @@
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
-      "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
-      "liveRouteVerified": false,
+      "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
       "antiToyScore": 8,
       "failsAntiToy": true,
       "redTeamSurvives": true,
@@ -708,7 +761,7 @@
       ],
       "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: true, rendered output captured: true)."
       ]
     },
     {
@@ -720,6 +773,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -740,6 +794,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -760,6 +815,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -780,6 +836,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -800,6 +857,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -820,6 +878,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -840,6 +899,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -860,6 +920,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -880,6 +941,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -900,6 +962,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -920,6 +983,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -940,6 +1004,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -960,6 +1025,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -980,6 +1046,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -1000,6 +1067,7 @@
       "renderedOutputReviewed": false,
       "testedOutputSource": "none",
       "liveRouteVerified": false,
+      "renderedOutputCaptured": false,
       "antiToyScore": null,
       "failsAntiToy": null,
       "redTeamSurvives": null,
@@ -1016,8 +1084,9 @@
     {
       "productCode": "fast_diagnostic",
       "renderedOutputAvailable": true,
-      "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
-      "liveRouteVerified": false,
+      "testedOutputSource": "live_route_capture: /diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
       "samples": [
         {
           "label": "pricing decision under ownership ambiguity",
@@ -1050,7 +1119,7 @@
       ],
       "antiToy": {
         "productCode": "fast_diagnostic",
-        "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
+        "testedOutputSource": "live_route_capture: /diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
         "toyRiskScore": 0,
         "failsAntiToyTest": false,
         "reasons": [],
@@ -1058,7 +1127,7 @@
       },
       "redTeam": {
         "productCode": "fast_diagnostic",
-        "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
+        "testedOutputSource": "live_route_capture: /diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
         "scores": {
           "usefulness": 10,
           "specificity": 8.7,
@@ -1154,7 +1223,7 @@
       },
       "usefulnessProof": {
         "productCode": "fast_diagnostic",
-        "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
+        "testedOutputSource": "live_route_capture: /diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
         "proofsEstablished": [
           "decision_clarity_improved",
           "next_action_obvious",
@@ -1184,8 +1253,9 @@
     {
       "productCode": "team_assessment",
       "renderedOutputAvailable": true,
-      "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
-      "liveRouteVerified": false,
+      "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
       "samples": [
         {
           "label": "post-merger operations team with conflicting priorities",
@@ -1214,7 +1284,7 @@
       ],
       "antiToy": {
         "productCode": "team_assessment",
-        "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
+        "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
         "toyRiskScore": 8,
         "failsAntiToyTest": true,
         "reasons": [
@@ -1226,7 +1296,7 @@
       },
       "redTeam": {
         "productCode": "team_assessment",
-        "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
+        "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
         "scores": {
           "usefulness": 9.2,
           "specificity": 8.4,
@@ -1322,7 +1392,7 @@
       },
       "usefulnessProof": {
         "productCode": "team_assessment",
-        "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
+        "testedOutputSource": "live_route_capture: /diagnostics/team-assessment",
         "proofsEstablished": [
           "decision_clarity_improved",
           "next_action_obvious",
@@ -1350,8 +1420,9 @@
     {
       "productCode": "enterprise_assessment",
       "renderedOutputAvailable": true,
-      "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
-      "liveRouteVerified": false,
+      "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
       "samples": [
         {
           "label": "post-merger operations team with conflicting priorities",
@@ -1380,7 +1451,7 @@
       ],
       "antiToy": {
         "productCode": "enterprise_assessment",
-        "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
+        "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
         "toyRiskScore": 8,
         "failsAntiToyTest": true,
         "reasons": [
@@ -1392,7 +1463,7 @@
       },
       "redTeam": {
         "productCode": "enterprise_assessment",
-        "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
+        "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
         "scores": {
           "usefulness": 9.2,
           "specificity": 8.4,
@@ -1488,7 +1559,7 @@
       },
       "usefulnessProof": {
         "productCode": "enterprise_assessment",
-        "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
+        "testedOutputSource": "live_route_capture: /diagnostics/enterprise-assessment",
         "proofsEstablished": [
           "decision_clarity_improved",
           "next_action_obvious",
@@ -1515,27 +1586,519 @@
     },
     {
       "productCode": "case_dossier_tariff_shock",
-      "renderedOutputAvailable": false,
-      "testedOutputSource": "none",
-      "liveRouteVerified": false,
-      "unavailableReason": "Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.",
-      "judgementIsCaseDerived": null
+      "renderedOutputAvailable": true,
+      "testedOutputSource": "live_route_capture: /evidence/tariff-shock-growth-break",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
+      "samples": [
+        {
+          "label": "tariff-route-proof",
+          "inputSummary": "case_dossier_tariff_shock /evidence/tariff-shock-growth-break When Growth Models Broke Under Tariff Shock Tariff repricing moved faster than consensus allocation models. Reclassify the regime before consensus catches up; waiting for confirmation is itself the exposure. Tariff repricing magnitude Consensus positioning data Institutional repositioning lag Exposure compounding estimate",
+          "outputText": "Tariff repricing moved faster than consensus allocation models.\nLate movers absorbed avoidable drawdown and reallocated under worse liquidity.\nRun a regime-break stress test against all growth-dependent allocations and set a 72-hour tariff-event decision protocol.\nReclassify the regime before consensus catches up; waiting for confirmation is itself the exposure.\nReusable as a board-level test for structural-break decision latency.\nTariff repricing magnitude\nConsensus positioning data\nInstitutional repositioning lag\nExposure compounding estimate\nPublic dossier proof does not expose private source records or regulated financial advice.",
+          "sectionsPresent": [
+            "signal",
+            "consequence",
+            "nextMove",
+            "limitation",
+            "decisionLesson",
+            "reuseValue"
+          ]
+        },
+        {
+          "label": "team-alignment-route-proof",
+          "inputSummary": "case_dossier_team_alignment /evidence/team-alignment-illusion The Illusion of Team Alignment Under Pressure Leadership alignment confidence diverged materially from team respondent evidence. Do not restructure on leadership self-assessment; measure execution-layer alignment first. Leadership self-assessment Team respondent scores OKR/reporting gap analysis Restructuring impact projection",
+          "outputText": "Leadership alignment confidence diverged materially from team respondent evidence.\nProceeding would have amplified divergence and increased dissonance within 90 days.\nHalt restructuring pending execution-layer alignment measurement for affected units.\nDo not restructure on leadership self-assessment; measure execution-layer alignment first.\nReusable as a governance check before restructuring, consolidation, or team investment decisions.\nLeadership self-assessment\nTeam respondent scores\nOKR/reporting gap analysis\nRestructuring impact projection\nPublic dossier proof does not identify private respondents or internal records.",
+          "sectionsPresent": [
+            "signal",
+            "consequence",
+            "nextMove",
+            "limitation",
+            "decisionLesson",
+            "reuseValue"
+          ]
+        }
+      ],
+      "antiToy": {
+        "productCode": "case_dossier_tariff_shock",
+        "testedOutputSource": "live_route_capture: /evidence/tariff-shock-growth-break",
+        "toyRiskScore": 23,
+        "failsAntiToyTest": true,
+        "reasons": [
+          "High input echo (42%).",
+          "Consequence section is not grounded in the user's stated situation.",
+          "Next action lacks an owner or a timeframe."
+        ],
+        "requiredCorrections": [
+          "Cut restated input; keep only what anchors the judgement.",
+          "Tie the consequence to the user's named stake, not to a universal warning.",
+          "Bind the next action to a named owner and a concrete timeframe."
+        ]
+      },
+      "redTeam": {
+        "productCode": "case_dossier_tariff_shock",
+        "testedOutputSource": "live_route_capture: /evidence/tariff-shock-growth-break",
+        "scores": {
+          "usefulness": 7.4,
+          "specificity": 8.8,
+          "credibility": 9,
+          "actionability": 6,
+          "distinctiveness": 9.3,
+          "reuse_value": 9
+        },
+        "reviews": [
+          {
+            "reviewerId": "skeptical_executive",
+            "reviewerQuestion": "Why should I trust this?",
+            "scores": {
+              "usefulness": 7.4,
+              "specificity": 8.8,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9.3,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The output cites its evidence basis and states what it does not prove — that earns provisional trust."
+            ]
+          },
+          {
+            "reviewerId": "busy_operator",
+            "reviewerQuestion": "What do I do next?",
+            "scores": {
+              "usefulness": 7.4,
+              "specificity": 8.8,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9.3,
+              "reuse_value": 9
+            },
+            "verdict": "reject",
+            "reasons": [
+              "No clear, owned, time-bound next action — I would close this and move on."
+            ]
+          },
+          {
+            "reviewerId": "commercial_buyer",
+            "reviewerQuestion": "Why is this worth the time or money?",
+            "scores": {
+              "usefulness": 7.4,
+              "specificity": 8.8,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9.3,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The result repays the time spent with case-specific clarity I would otherwise have to assemble myself."
+            ]
+          },
+          {
+            "reviewerId": "experienced_consultant",
+            "reviewerQuestion": "Is this just dressed-up common sense?",
+            "scores": {
+              "usefulness": 7.4,
+              "specificity": 8.8,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9.3,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The judgement varies materially with the case — there is method here, not just framing."
+            ]
+          },
+          {
+            "reviewerId": "returning_user",
+            "reviewerQuestion": "Would I come back to this?",
+            "scores": {
+              "usefulness": 7.4,
+              "specificity": 8.8,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9.3,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The checkpoint and record structure give me a concrete reason to return."
+            ]
+          }
+        ],
+        "criticalRejections": [
+          "busy_operator"
+        ],
+        "survives": false
+      },
+      "usefulnessProof": {
+        "productCode": "case_dossier_tariff_shock",
+        "testedOutputSource": "live_route_capture: /evidence/tariff-shock-growth-break",
+        "proofsEstablished": [
+          "evidence_organised_into_judgement",
+          "reusable_artefact_gained"
+        ],
+        "proofsMissing": [
+          "decision_clarity_improved",
+          "next_action_obvious",
+          "risk_made_visible",
+          "contradiction_made_explicit",
+          "execution_sequence_clearer",
+          "likely_mistake_avoided"
+        ],
+        "hasProof": true,
+        "notes": [
+          "Evidence basis and honest limits are organised into an explicit judgement frame.",
+          "Checkpoint/record structure gives the user an artefact to return to."
+        ]
+      },
+      "timeValueSurplusPassed": true,
+      "judgementIsCaseDerived": false
     },
     {
       "productCode": "case_dossier_team_alignment",
-      "renderedOutputAvailable": false,
-      "testedOutputSource": "none",
-      "liveRouteVerified": false,
-      "unavailableReason": "Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.",
-      "judgementIsCaseDerived": null
+      "renderedOutputAvailable": true,
+      "testedOutputSource": "live_route_capture: /evidence/team-alignment-illusion",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
+      "samples": [
+        {
+          "label": "team-alignment-route-proof",
+          "inputSummary": "case_dossier_team_alignment /evidence/team-alignment-illusion The Illusion of Team Alignment Under Pressure Leadership alignment confidence diverged materially from team respondent evidence. Do not restructure on leadership self-assessment; measure execution-layer alignment first. Leadership self-assessment Team respondent scores OKR/reporting gap analysis Restructuring impact projection",
+          "outputText": "Leadership alignment confidence diverged materially from team respondent evidence.\nProceeding would have amplified divergence and increased dissonance within 90 days.\nHalt restructuring pending execution-layer alignment measurement for affected units.\nDo not restructure on leadership self-assessment; measure execution-layer alignment first.\nReusable as a governance check before restructuring, consolidation, or team investment decisions.\nLeadership self-assessment\nTeam respondent scores\nOKR/reporting gap analysis\nRestructuring impact projection\nPublic dossier proof does not identify private respondents or internal records.",
+          "sectionsPresent": [
+            "signal",
+            "consequence",
+            "nextMove",
+            "limitation",
+            "decisionLesson",
+            "reuseValue"
+          ]
+        },
+        {
+          "label": "escalation-route-proof",
+          "inputSummary": "case_dossier_escalation_denied /evidence/escalation-denied-case Why Escalation Was Denied (And That Saved the System) Escalation pressure was high while evidence readiness was low. Separate urgency from evidence sufficiency; premature escalation can multiply the failure. Failure mode identification Escalation readiness score Evidence sufficiency assessment Board response projection",
+          "outputText": "Escalation pressure was high while evidence readiness was low.\nPremature board escalation would have targeted symptoms and burned escalation credibility.\nComplete evidence gathering across all active failure domains before board engagement.\nSeparate urgency from evidence sufficiency; premature escalation can multiply the failure.\nReusable as an escalation-readiness threshold before high-stakes governance intervention.\nFailure mode identification\nEscalation readiness score\nEvidence sufficiency assessment\nBoard response projection\nPublic dossier proof does not expose source-level records or confidential stakeholder details.",
+          "sectionsPresent": [
+            "signal",
+            "consequence",
+            "nextMove",
+            "limitation",
+            "decisionLesson",
+            "reuseValue"
+          ]
+        }
+      ],
+      "antiToy": {
+        "productCode": "case_dossier_team_alignment",
+        "testedOutputSource": "live_route_capture: /evidence/team-alignment-illusion",
+        "toyRiskScore": 23,
+        "failsAntiToyTest": true,
+        "reasons": [
+          "High input echo (47%).",
+          "Consequence section is not grounded in the user's stated situation.",
+          "Next action lacks an owner or a timeframe."
+        ],
+        "requiredCorrections": [
+          "Cut restated input; keep only what anchors the judgement.",
+          "Tie the consequence to the user's named stake, not to a universal warning.",
+          "Bind the next action to a named owner and a concrete timeframe."
+        ]
+      },
+      "redTeam": {
+        "productCode": "case_dossier_team_alignment",
+        "testedOutputSource": "live_route_capture: /evidence/team-alignment-illusion",
+        "scores": {
+          "usefulness": 7.1,
+          "specificity": 8.1,
+          "credibility": 9,
+          "actionability": 6,
+          "distinctiveness": 8.7,
+          "reuse_value": 9
+        },
+        "reviews": [
+          {
+            "reviewerId": "skeptical_executive",
+            "reviewerQuestion": "Why should I trust this?",
+            "scores": {
+              "usefulness": 7.1,
+              "specificity": 8.1,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 8.7,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The output cites its evidence basis and states what it does not prove — that earns provisional trust."
+            ]
+          },
+          {
+            "reviewerId": "busy_operator",
+            "reviewerQuestion": "What do I do next?",
+            "scores": {
+              "usefulness": 7.1,
+              "specificity": 8.1,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 8.7,
+              "reuse_value": 9
+            },
+            "verdict": "reject",
+            "reasons": [
+              "No clear, owned, time-bound next action — I would close this and move on."
+            ]
+          },
+          {
+            "reviewerId": "commercial_buyer",
+            "reviewerQuestion": "Why is this worth the time or money?",
+            "scores": {
+              "usefulness": 7.1,
+              "specificity": 8.1,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 8.7,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The result repays the time spent with case-specific clarity I would otherwise have to assemble myself."
+            ]
+          },
+          {
+            "reviewerId": "experienced_consultant",
+            "reviewerQuestion": "Is this just dressed-up common sense?",
+            "scores": {
+              "usefulness": 7.1,
+              "specificity": 8.1,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 8.7,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The judgement varies materially with the case — there is method here, not just framing."
+            ]
+          },
+          {
+            "reviewerId": "returning_user",
+            "reviewerQuestion": "Would I come back to this?",
+            "scores": {
+              "usefulness": 7.1,
+              "specificity": 8.1,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 8.7,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The checkpoint and record structure give me a concrete reason to return."
+            ]
+          }
+        ],
+        "criticalRejections": [
+          "busy_operator"
+        ],
+        "survives": false
+      },
+      "usefulnessProof": {
+        "productCode": "case_dossier_team_alignment",
+        "testedOutputSource": "live_route_capture: /evidence/team-alignment-illusion",
+        "proofsEstablished": [
+          "execution_sequence_clearer",
+          "evidence_organised_into_judgement",
+          "reusable_artefact_gained"
+        ],
+        "proofsMissing": [
+          "decision_clarity_improved",
+          "next_action_obvious",
+          "risk_made_visible",
+          "contradiction_made_explicit",
+          "likely_mistake_avoided"
+        ],
+        "hasProof": true,
+        "notes": [
+          "Evidence basis and honest limits are organised into an explicit judgement frame.",
+          "Checkpoint/record structure gives the user an artefact to return to.",
+          "The output orders what to do before what — an execution sequence, not a list."
+        ]
+      },
+      "timeValueSurplusPassed": true,
+      "judgementIsCaseDerived": false
     },
     {
       "productCode": "case_dossier_escalation_denied",
-      "renderedOutputAvailable": false,
-      "testedOutputSource": "none",
-      "liveRouteVerified": false,
-      "unavailableReason": "Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.",
-      "judgementIsCaseDerived": null
+      "renderedOutputAvailable": true,
+      "testedOutputSource": "live_route_capture: /evidence/escalation-denied-case",
+      "liveRouteVerified": true,
+      "renderedOutputCaptured": true,
+      "samples": [
+        {
+          "label": "escalation-route-proof",
+          "inputSummary": "case_dossier_escalation_denied /evidence/escalation-denied-case Why Escalation Was Denied (And That Saved the System) Escalation pressure was high while evidence readiness was low. Separate urgency from evidence sufficiency; premature escalation can multiply the failure. Failure mode identification Escalation readiness score Evidence sufficiency assessment Board response projection",
+          "outputText": "Escalation pressure was high while evidence readiness was low.\nPremature board escalation would have targeted symptoms and burned escalation credibility.\nComplete evidence gathering across all active failure domains before board engagement.\nSeparate urgency from evidence sufficiency; premature escalation can multiply the failure.\nReusable as an escalation-readiness threshold before high-stakes governance intervention.\nFailure mode identification\nEscalation readiness score\nEvidence sufficiency assessment\nBoard response projection\nPublic dossier proof does not expose source-level records or confidential stakeholder details.",
+          "sectionsPresent": [
+            "signal",
+            "consequence",
+            "nextMove",
+            "limitation",
+            "decisionLesson",
+            "reuseValue"
+          ]
+        },
+        {
+          "label": "tariff-route-proof",
+          "inputSummary": "case_dossier_tariff_shock /evidence/tariff-shock-growth-break When Growth Models Broke Under Tariff Shock Tariff repricing moved faster than consensus allocation models. Reclassify the regime before consensus catches up; waiting for confirmation is itself the exposure. Tariff repricing magnitude Consensus positioning data Institutional repositioning lag Exposure compounding estimate",
+          "outputText": "Tariff repricing moved faster than consensus allocation models.\nLate movers absorbed avoidable drawdown and reallocated under worse liquidity.\nRun a regime-break stress test against all growth-dependent allocations and set a 72-hour tariff-event decision protocol.\nReclassify the regime before consensus catches up; waiting for confirmation is itself the exposure.\nReusable as a board-level test for structural-break decision latency.\nTariff repricing magnitude\nConsensus positioning data\nInstitutional repositioning lag\nExposure compounding estimate\nPublic dossier proof does not expose private source records or regulated financial advice.",
+          "sectionsPresent": [
+            "signal",
+            "consequence",
+            "nextMove",
+            "limitation",
+            "decisionLesson",
+            "reuseValue"
+          ]
+        }
+      ],
+      "antiToy": {
+        "productCode": "case_dossier_escalation_denied",
+        "testedOutputSource": "live_route_capture: /evidence/escalation-denied-case",
+        "toyRiskScore": 15,
+        "failsAntiToyTest": true,
+        "reasons": [
+          "High input echo (45%).",
+          "Next action lacks an owner or a timeframe."
+        ],
+        "requiredCorrections": [
+          "Cut restated input; keep only what anchors the judgement.",
+          "Bind the next action to a named owner and a concrete timeframe."
+        ]
+      },
+      "redTeam": {
+        "productCode": "case_dossier_escalation_denied",
+        "testedOutputSource": "live_route_capture: /evidence/escalation-denied-case",
+        "scores": {
+          "usefulness": 8.2,
+          "specificity": 8.4,
+          "credibility": 9,
+          "actionability": 6,
+          "distinctiveness": 9,
+          "reuse_value": 9
+        },
+        "reviews": [
+          {
+            "reviewerId": "skeptical_executive",
+            "reviewerQuestion": "Why should I trust this?",
+            "scores": {
+              "usefulness": 8.2,
+              "specificity": 8.4,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The output cites its evidence basis and states what it does not prove — that earns provisional trust."
+            ]
+          },
+          {
+            "reviewerId": "busy_operator",
+            "reviewerQuestion": "What do I do next?",
+            "scores": {
+              "usefulness": 8.2,
+              "specificity": 8.4,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9,
+              "reuse_value": 9
+            },
+            "verdict": "reject",
+            "reasons": [
+              "No clear, owned, time-bound next action — I would close this and move on."
+            ]
+          },
+          {
+            "reviewerId": "commercial_buyer",
+            "reviewerQuestion": "Why is this worth the time or money?",
+            "scores": {
+              "usefulness": 8.2,
+              "specificity": 8.4,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The result repays the time spent with case-specific clarity I would otherwise have to assemble myself."
+            ]
+          },
+          {
+            "reviewerId": "experienced_consultant",
+            "reviewerQuestion": "Is this just dressed-up common sense?",
+            "scores": {
+              "usefulness": 8.2,
+              "specificity": 8.4,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The judgement varies materially with the case — there is method here, not just framing."
+            ]
+          },
+          {
+            "reviewerId": "returning_user",
+            "reviewerQuestion": "Would I come back to this?",
+            "scores": {
+              "usefulness": 8.2,
+              "specificity": 8.4,
+              "credibility": 9,
+              "actionability": 6,
+              "distinctiveness": 9,
+              "reuse_value": 9
+            },
+            "verdict": "accept",
+            "reasons": [
+              "The checkpoint and record structure give me a concrete reason to return."
+            ]
+          }
+        ],
+        "criticalRejections": [
+          "busy_operator"
+        ],
+        "survives": false
+      },
+      "usefulnessProof": {
+        "productCode": "case_dossier_escalation_denied",
+        "testedOutputSource": "live_route_capture: /evidence/escalation-denied-case",
+        "proofsEstablished": [
+          "risk_made_visible",
+          "evidence_organised_into_judgement",
+          "reusable_artefact_gained"
+        ],
+        "proofsMissing": [
+          "decision_clarity_improved",
+          "next_action_obvious",
+          "contradiction_made_explicit",
+          "execution_sequence_clearer",
+          "likely_mistake_avoided"
+        ],
+        "hasProof": true,
+        "notes": [
+          "Consequence is tied to the user's named stake, making the risk of inaction visible.",
+          "Evidence basis and honest limits are organised into an explicit judgement frame.",
+          "Checkpoint/record structure gives the user an artefact to return to."
+        ]
+      },
+      "timeValueSurplusPassed": true,
+      "judgementIsCaseDerived": false
     }
   ],
   "failures": [],

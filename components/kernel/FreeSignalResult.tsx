@@ -288,6 +288,53 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
           </Section>
         )}
 
+        {/* Judgement Engine */}
+        {signal.caseDerivedJudgement && !signal.clarificationRequired && (
+          <Section label="Case-Derived Judgement">
+            <div className="space-y-5">
+              <div>
+                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+                  Primary pattern
+                </p>
+                <Badge>{signal.caseDerivedJudgement.primaryPattern.replace(/_/g, ' ')}</Badge>
+              </div>
+
+              <JudgementBlock label="Diagnosis" text={signal.caseDerivedJudgement.diagnosis} />
+              <JudgementBlock label="Commercial consequence" text={signal.caseDerivedJudgement.consequence} />
+              <JudgementBlock label="Specific next move" text={signal.caseDerivedJudgement.nextMove} />
+              <JudgementBlock label="Falsification challenge" text={signal.caseDerivedJudgement.falsificationChallenge} />
+              <JudgementBlock label="Escalation trigger" text={signal.caseDerivedJudgement.escalationTrigger} />
+
+              {signal.caseDerivedJudgement.executionSequence.length > 0 && (
+                <div>
+                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '8px' }}>
+                    Execution sequence
+                  </p>
+                  <ol className="space-y-2">
+                    {signal.caseDerivedJudgement.executionSequence.map((step, index) => (
+                      <li key={step} className="flex gap-3 text-[13px] leading-[1.7] text-white/60">
+                        <span style={{ ...mono, color: `${GOLD}70`, fontSize: '9px' }}>{String(index + 1).padStart(2, '0')}</span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {signal.caseDerivedJudgement.limitations.length > 0 && (
+                <div className="border-t border-white/[0.06] pt-4">
+                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', marginBottom: '6px' }}>
+                    What this does not prove
+                  </p>
+                  {signal.caseDerivedJudgement.limitations.map((limit) => (
+                    <p key={limit} className="text-[12px] leading-[1.7] text-white/40">{limit}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Section>
+        )}
+
         {/* Governing Tension */}
         {signal.governingTension && !signal.clarificationRequired && (
           <Section label="Governing Tension">
@@ -594,6 +641,17 @@ function Section({ label, children }: { label: string; children: React.ReactNode
         {label}
       </p>
       {children}
+    </div>
+  )
+}
+
+function JudgementBlock({ label, text }: { label: string; text: string }) {
+  return (
+    <div>
+      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '5px' }}>
+        {label}
+      </p>
+      <p className="text-[14px] leading-[1.8] text-white/68">{text}</p>
     </div>
   )
 }

@@ -156,6 +156,7 @@
     "check:product-gold-release-readiness": "node scripts/check-product-gold-release-readiness.mjs",
     "check:wave-one-gold-standard": "node scripts/check-wave-one-gold-standard.mjs",
     "check:judgement-engine-differentiation": "tsx scripts/check-judgement-engine-differentiation.mjs",
+    "capture:live-route-product-output": "tsx scripts/capture-live-route-product-output.mjs",
     "check:external-product-value-benchmark": "node scripts/check-external-product-value-benchmark.mjs",
     "check:deps": "npm-check --skip-unused",
     "security:audit": "pnpm audit --prod",

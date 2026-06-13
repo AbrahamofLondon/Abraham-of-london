@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T03:22:04.347Z",
+  "generatedAt": "2026-06-13T03:37:11.150Z",
   "rows": [
     {
       "productCode": "fast_diagnostic",
@@ -546,81 +546,81 @@
       "alternative": "generic_ai_prompt",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_tariff_shock",
       "alternative": "downloadable_template",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_tariff_shock",
       "alternative": "consultant_mini_audit",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_team_alignment",
       "alternative": "generic_ai_prompt",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_team_alignment",
       "alternative": "downloadable_template",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_team_alignment",
       "alternative": "consultant_mini_audit",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_escalation_denied",
       "alternative": "generic_ai_prompt",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Instant, conversational, infinitely patient; produces structured, plausible analysis on demand.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_escalation_denied",
       "alternative": "downloadable_template",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Cheap, immediate, reusable structure the customer fills in themselves.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "case_dossier_escalation_denied",
       "alternative": "consultant_mini_audit",
       "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
       "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
+      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
       "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "wouldCustomerReturnAfterOneUse": "uncertain"
     },
     {
       "productCode": "gmi_q1_2026",

@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
+import type { CaseDossierValuePayload } from "@/lib/product/live-route-output-capture";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOKENS
@@ -395,12 +396,19 @@ function ActionBand({ label, items }: { label: string; items: string[] }) {
 // PAGE — standardised section order
 // ─────────────────────────────────────────────────────────────────────────────
 
-type PageProps = { asset: EvidenceAsset };
+type PageProps = { asset: EvidenceAsset; valuePayload: CaseDossierValuePayload };
 
-export default function EvidenceDetailPage({ asset }: PageProps) {
+export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
   return (
     <Layout title={`${asset.title} | Abraham of London`} description={asset.context} canonicalUrl={`/evidence/${asset.slug}`}>
-      <Head><meta name="description" content={asset.context} /></Head>
+      <Head>
+        <meta name="description" content={asset.context} />
+        <script
+          id="case-dossier-value-payload"
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(valuePayload).replace(/</g, "\\u003c") }}
+        />
+      </Head>
 
       <div style={{ backgroundColor: VOID }}>
         <div className="mx-auto max-w-6xl px-6 lg:px-12">
@@ -500,6 +508,27 @@ export default function EvidenceDetailPage({ asset }: PageProps) {
           <div className="pb-5">
             <SL>Failure Pattern</SL>
             <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.70)", fontWeight: 700 }}>{asset.failurePattern}</span>
+          </div>
+
+          <GoldRule />
+
+          {/* PRODUCT VALUE PAYLOAD */}
+          <div
+            className="py-5"
+            data-product-code={valuePayload.productCode}
+            data-case-dossier-value-payload="true"
+            style={{ maxWidth: "56rem" }}
+          >
+            <SL>Product Value Payload</SL>
+            <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "0.85rem 1.1rem" }}>
+              <MetaRow label="Product" value={valuePayload.productCode} accent />
+              <MetaRow label="Signal" value={valuePayload.signal} />
+              <MetaRow label="Decision Lesson" value={valuePayload.decisionLesson} />
+              <MetaRow label="Consequence" value={valuePayload.consequence} />
+              <MetaRow label="Next Move" value={valuePayload.nextMove} />
+              <MetaRow label="Limitation" value={valuePayload.limitation} />
+              <MetaRow label="Reuse Value" value={valuePayload.reuseValue} />
+            </div>
           </div>
 
           <GoldRule />
@@ -634,5 +663,26 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slug = params?.slug as string;
   const asset = ASSETS[slug];
   if (!asset) return { notFound: true };
-  return { props: { asset } };
+  return { props: { asset, valuePayload: buildCaseDossierValuePayload(asset) } };
 };
+
+function buildCaseDossierValuePayload(asset: EvidenceAsset): CaseDossierValuePayload {
+  return {
+    productCode: productCodeForDossier(asset.slug),
+    caseTitle: asset.title,
+    signal: asset.primarySignals[0] ?? asset.systemInterpretation,
+    decisionLesson: asset.principle,
+    evidenceBasis: asset.evidenceBasis.map((entry) => `${entry.label} (${entry.basis})`),
+    consequence: asset.decisionConsequence[0] ?? asset.resultOfPath,
+    nextMove: asset.boardActions.immediate[0] ?? asset.requiredDecision,
+    limitation: "This public dossier proves the decision pattern and consequence frame; it does not expose private source records, internal scoring, or regulated advice.",
+    reuseValue: `Reusable as a ${asset.domain.toLowerCase()} decision check before acting on similar signals.`,
+  };
+}
+
+function productCodeForDossier(slug: string): string {
+  if (slug === "tariff-shock-growth-break") return "case_dossier_tariff_shock";
+  if (slug === "team-alignment-illusion") return "case_dossier_team_alignment";
+  if (slug === "escalation-denied-case") return "case_dossier_escalation_denied";
+  return "case_dossier_unknown";
+}

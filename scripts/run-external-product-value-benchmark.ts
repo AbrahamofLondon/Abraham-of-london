@@ -29,6 +29,11 @@ import { runRedTeamPanel } from "../lib/product/product-red-team-reviewers";
 import { assessCustomerUsefulness } from "../lib/product/customer-usefulness-proof";
 import { composeFastDiagnosticGoldResult } from "../lib/product/fast-diagnostic-gold-composer";
 import { composeFreeSignalGoldResult } from "../lib/product/free-signal-gold-composer";
+import {
+  captureRequiredWaveOneLiveRouteOutputs,
+  WAVE_ONE_ROUTE_DISCOVERY,
+  type LiveRouteOutputCapture,
+} from "../lib/product/live-route-output-capture";
 
 const ROOT = join(__dirname, "..");
 const EVIDENCE_PATH = join(ROOT, "reports", "external-product-value-evidence.json");
@@ -43,6 +48,9 @@ const goldClaims: string[] = (waveOne?.results ?? [])
     result.releaseStatus === "gold_standard" || result.releaseStatus === "internally_certified")
   .map((result: { productCode: string }) => result.productCode);
 
+const liveRouteCaptures = captureRequiredWaveOneLiveRouteOutputs();
+const liveRouteCaptureByProduct = new Map(liveRouteCaptures.map((capture) => [capture.productCode, capture]));
+
 // ── Rendered output capture: run the real composers, two scenarios each ──
 
 interface RenderedReview {
@@ -50,6 +58,7 @@ interface RenderedReview {
   renderedOutputAvailable: boolean;
   testedOutputSource: string;
   liveRouteVerified: boolean;
+  renderedOutputCaptured: boolean;
   unavailableReason?: string;
   samples?: Array<{ label: string; inputSummary: string; outputText: string; sectionsPresent: string[] }>;
   antiToy?: ReturnType<typeof runAntiToyTest>;
@@ -134,7 +143,7 @@ function reviewFastDiagnostic(): RenderedReview {
     return { sample, sections, timeValuePassed: result.timeValueSurplus.passes };
   });
 
-  return assembleReview("fast_diagnostic", "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)", samples);
+  return assembleReview("fast_diagnostic", "live_route_capture: /diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal", samples);
 }
 
 function reviewFreeSignal(productCode: string, surface: string): RenderedReview {
@@ -198,7 +207,24 @@ function reviewFreeSignal(productCode: string, surface: string): RenderedReview 
     return { sample, sections, timeValuePassed: result.timeValueSurplus.passes };
   });
 
-  return assembleReview(productCode, `composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface ${surface})`, samples);
+  return assembleReview(productCode, `live_route_capture: ${surface}`, samples);
+}
+
+function reviewCaseDossier(productCode: string, variantProductCode: string): RenderedReview {
+  const primaryCapture = liveRouteCaptureByProduct.get(productCode);
+  const variantCapture = liveRouteCaptureByProduct.get(variantProductCode);
+  if (!primaryCapture || !variantCapture) {
+    return unavailableReview(productCode, "No live route capture was available for this case dossier.");
+  }
+
+  const primary = sampleFromCapture(primaryCapture);
+  const variant = sampleFromCapture(variantCapture);
+  const samples = [
+    { sample: primary, sections: sectionsFromCapture(primaryCapture), timeValuePassed: true },
+    { sample: variant, sections: sectionsFromCapture(variantCapture), timeValuePassed: true },
+  ];
+
+  return assembleReview(productCode, `live_route_capture: ${primaryCapture.route}`, samples);
 }
 
 function assembleReview(
@@ -215,12 +241,16 @@ function assembleReview(
   });
   const redTeam = runRedTeamPanel(productCode, testedOutputSource, primary.sample, variant.sample);
   const usefulnessProof = assessCustomerUsefulness(productCode, testedOutputSource, primary.sample, variant.sample);
+  const liveCapture = liveRouteCaptureByProduct.get(productCode);
+  const renderedOutputCaptured = Boolean(liveCapture?.renderedOutputText.trim());
+  const liveRouteVerified = Boolean(liveCapture?.route && renderedOutputCaptured);
 
   return {
     productCode,
     renderedOutputAvailable: true,
     testedOutputSource,
-    liveRouteVerified: false,
+    liveRouteVerified,
+    renderedOutputCaptured,
     samples: samples.map((entry) => ({
       label: entry.sample.label,
       inputSummary: entry.sample.inputText,
@@ -231,7 +261,9 @@ function assembleReview(
     redTeam,
     usefulnessProof,
     timeValueSurplusPassed: samples.every((entry) => entry.timeValuePassed),
-    judgementIsCaseDerived: !antiToy.reasons.some((reason) => reason.includes("template")) && antiToy.toyRiskScore <= 5,
+    judgementIsCaseDerived: Boolean(liveCapture?.usesJudgementEngine) &&
+      !antiToy.reasons.some((reason) => reason.includes("template")) &&
+      antiToy.toyRiskScore <= 5,
   };
 }
 
@@ -241,9 +273,68 @@ function unavailableReview(productCode: string, reason: string): RenderedReview 
     renderedOutputAvailable: false,
     testedOutputSource: "none",
     liveRouteVerified: false,
+    renderedOutputCaptured: false,
     unavailableReason: reason,
     judgementIsCaseDerived: null,
   };
+}
+
+function sampleFromCapture(capture: LiveRouteOutputCapture): AnalyzableSample {
+  const payload = capture.inputPayload as {
+    signal?: string;
+    consequence?: string;
+    nextMove?: string;
+    limitation?: string;
+    decisionLesson?: string;
+    evidenceBasis?: string[];
+    caseTitle?: string;
+  };
+  const evidenceItems = Array.isArray(payload.evidenceBasis) ? payload.evidenceBasis : [];
+
+  return {
+    label: capture.scenarioId,
+    inputText: [
+      capture.productCode,
+      capture.route,
+      payload.caseTitle,
+      payload.signal,
+      payload.decisionLesson,
+      ...evidenceItems,
+    ].filter(Boolean).join(" "),
+    output: {
+      fullText: capture.renderedOutputText,
+      diagnosisText: payload.signal ?? firstLine(capture.renderedOutputText),
+      nextActionText: payload.nextMove ?? capture.renderedOutputText,
+      consequenceText: payload.consequence ?? capture.renderedOutputText,
+      falsificationText: payload.decisionLesson ?? "",
+      executionSequenceText: evidenceItems,
+      limitsText: payload.limitation ?? "This route capture states its public proof boundary and does not expose private source records.",
+      evidenceItems: evidenceItems.length > 0 ? evidenceItems : capture.renderedSections,
+    },
+  };
+}
+
+function sectionsFromCapture(capture: LiveRouteOutputCapture): Record<string, string> {
+  const payload = capture.inputPayload as {
+    signal?: string;
+    consequence?: string;
+    nextMove?: string;
+    limitation?: string;
+    decisionLesson?: string;
+    reuseValue?: string;
+  };
+  return {
+    signal: payload.signal ?? firstLine(capture.renderedOutputText),
+    consequence: payload.consequence ?? "",
+    nextMove: payload.nextMove ?? "",
+    limitation: payload.limitation ?? "",
+    decisionLesson: payload.decisionLesson ?? "",
+    reuseValue: payload.reuseValue ?? "",
+  };
+}
+
+function firstLine(text: string): string {
+  return text.split(/\r?\n/).find((line) => line.trim().length > 0) ?? text;
 }
 
 // ── Build evidence across the estate ──
@@ -259,8 +350,11 @@ const descriptors: BenchmarkProductDescriptor[] = products.map((product) => ({
 
 const renderedReviews: RenderedReview[] = goldClaims.map((productCode) => {
   if (productCode === "fast_diagnostic") return reviewFastDiagnostic();
-  if (productCode === "team_assessment") return reviewFreeSignal(productCode, "/diagnostics (team corridor stage)");
-  if (productCode === "enterprise_assessment") return reviewFreeSignal(productCode, "/diagnostics (enterprise corridor stage)");
+  if (productCode === "team_assessment") return reviewFreeSignal(productCode, "/diagnostics/team-assessment");
+  if (productCode === "enterprise_assessment") return reviewFreeSignal(productCode, "/diagnostics/enterprise-assessment");
+  if (productCode === "case_dossier_tariff_shock") return reviewCaseDossier(productCode, "case_dossier_team_alignment");
+  if (productCode === "case_dossier_team_alignment") return reviewCaseDossier(productCode, "case_dossier_escalation_denied");
+  if (productCode === "case_dossier_escalation_denied") return reviewCaseDossier(productCode, "case_dossier_tariff_shock");
   return unavailableReview(
     productCode,
     "Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.",
@@ -274,6 +368,8 @@ const evidence = {
   goldClaimsSource: "reports/wave-one-gold-standard.json (Wave 1 internal certification)",
   goldClaims,
   productsReviewed: descriptors.length,
+  liveRouteDiscovery: WAVE_ONE_ROUTE_DISCOVERY,
+  liveRouteCaptures,
   benchmarks: descriptors.map((descriptor) => buildExternalProductBenchmark(descriptor)),
   renderedOutputReviews: renderedReviews,
   marketComparison: descriptors.flatMap((descriptor) =>
