@@ -1,0 +1,3867 @@
+{
+  "generatedAt": "2026-06-13T19:29:42.518Z",
+  "filesScanned": 4916,
+  "summary": {
+    "totalClaims": 7944,
+    "questionableClaims": 6664,
+    "byStatus": {
+      "supported_scope_limited": 1280,
+      "requires_evidence_check": 6419,
+      "unknown": 245
+    }
+  },
+  "questionableClaims": [
+    {
+      "file": "reports/adversarial-free-signal-adoption-layer.md",
+      "line": 90,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Complete fallback path | ❌ Forbidden | ✅ Included |"
+    },
+    {
+      "file": "reports/adversarial-free-signal-adoption-layer.md",
+      "line": 129,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_STRIPE_TEST_SMOKE**"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status**: HARDENING COMPLETE; WAVE 2G UPGRADE REJECTED"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 72,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- evidenceLedgerComplete !== true"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 107,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Full validation chain complete (anti-toy + red-team + generic-AI + market)"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 111,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Evidence ledger complete"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 189,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Validation chain incomplete"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 359,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status**: Anti-Gaming Hardening COMPLETE"
+    },
+    {
+      "file": "reports/authority-surface-integration.md",
+      "line": 29,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **ProductAuthorityPanel** — Shows complete authority details and evidence"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETE ✓"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 43,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Displays complete authority details with expandable detail section."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 127,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Product Authority States — Display Ready"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** INFRASTRUCTURE COMPLETE, VISIBILITY GAP IDENTIFIED"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 10,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "The Evidence-Governed Decision Infrastructure is **complete and operational** at the code and validation level."
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 33,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Infrastructure Assessment — ✓ COMPLETE"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 73,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### UI Components: Deployed and Ready ✓"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 109,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Fast Diagnostic Entry | not_category_ready | Overclaim risk: claims without evidence |"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 211,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Verified all product authority states are correct"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 329,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Honest Verdict:** Infrastructure Complete. Visibility Gap Identified. Path Forward Clear."
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 4,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** READY FOR IMPLEMENTATION"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 83,
+      "term": "done",
+      "supportStatus": "unknown",
+      "context": "## What Needs to Be Done"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 226,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Code Template (Copy-Paste Ready)"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 1,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "# Category Surface Integration Setup — Complete"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 4,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** INFRASTRUCTURE READY FOR ROUTE INTEGRATION"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Products: All 4 configured and ready to resolve"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 61,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Ready to wire into each route."
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 107,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Integration guide: Complete"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 108,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Wrapper component: Ready"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 160,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Just wire the ready-made components into 5 routes and authority becomes visible."
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 172,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "4. `reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md` — This report"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 182,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Validation Commands Ready"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 236,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Overall Status: category_foundation_ready (or better) ✓"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 260,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Category demonstration: Ready to implement"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 261,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Market-ready status: One phase away"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 268,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- The fix is simple and ready to execute"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 285,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Ready Signal"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 287,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** READY TO INTEGRATE"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 293,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Ready to implement"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 300,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Setup Status:** COMPLETE"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 70,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- All with complete authority detail visibility"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 94,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Infrastructure Completeness: PASSED (4/4)"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 146,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "4. `reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md` — Setup summary"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 268,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Category Surface Route Integration: ✓ COMPLETE**"
+    },
+    {
+      "file": "reports/commerce-architecture-consolidation-audit.md",
+      "line": 16,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Verdict:** READY_FOR_STRIPE_TEST_SMOKE — with the caveat that legacy code should be reserved/retired to prevent confusion."
+    },
+    {
+      "file": "reports/commerce-architecture-consolidation-audit.md",
+      "line": 147,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_STRIPE_TEST_SMOKE**"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 72,
+      "term": "all gates passing",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Validation Results — All Gates Passing"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 131,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Infrastructure Completeness: PASSED (4/4)"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 147,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md` — Complete route inventory with exemptions and justifications"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 209,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Safety Guarantees Verified"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 311,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Category Surface Route Integration:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 316,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**The system is production-ready for the 4 demonstrating routes and positioned for expansion to 6-8+ routes as organizational priorities define.**"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 322,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Overall Status:** ✓ READY FOR MARKET DEMONSTRATION"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md",
+      "line": 105,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Authority state was already demonstrated at `/foundry/decision-test`, `/enterprise-decision-scan`, or checkout routes"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md",
+      "line": 108,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **Safety Note:** This route is already gated by entitlement verification (enforceExecutiveReportingAccess)"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md",
+      "line": 188,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETE"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 64,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"liveRouteVerified\": true,"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 112,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ **Live Route Verified:** Yes"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 141,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Boundary Status:** CLEAN — All flags false; clean pass verified"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 163,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Gates Ready for Rerun:  ✓ YES (v2 evidence now available)"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 178,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Complete test results"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 186,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "This infrastructure pass is complete. The **fast_diagnostic v2 clean validation pass** can now proceed:"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 206,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ All measurement boundaries verified"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 224,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Infrastructure Pass Status:** COMPLETE"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 25,
+      "term": "authority granted",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Release Authority Firewall | ✓ PASSED | Authority granted based on v2 evidence |"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 29,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Product Gold Release Readiness | ✓ PASSED | Ready for release |"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 81,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Evidence Ledger v2 is valid and complete"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 118,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Infrastructure Completed"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 170,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Evidence Ledger v2 valid and complete"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 181,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Validation Pass:** COMPLETE"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETE"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 83,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Validation chain incomplete"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 114,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "This infrastructure repair pass is complete. The validation infrastructure is now:"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 117,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Ready for clean `fast_diagnostic` v2 validation"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 125,
+      "term": "all gates passing",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Authority restoration depends on all gates passing"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 130,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Infrastructure Repair Status:** COMPLETE"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 447,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"action\": \"Ignore the filing deadline or treat a placeholder submission as a completed obligation\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 531,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 523,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 404,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 86,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Release Risk: Security review incomplete | CRITICAL | 0.8 | release-risk |"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 296,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"label\": \"Release Risk: Security review incomplete\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 297,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"summary\": \"Security review incomplete\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 633,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-05-procurement-supplier-risk.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-05-procurement-supplier-risk.md",
+      "line": 421,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 127,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data** (CRITICAL): Misrepresentation to investors carries both legal and regulatory risk. Projections presented as results is a known"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 245,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"summary\": \"Market claim has some supporting evidence but should be verified\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 380,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"action\": \"Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 471,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-07-operational-failure-unclear-owner.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-07-operational-failure-unclear-owner.md",
+      "line": 408,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-08-legal-admin-deadline.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-08-legal-admin-deadline.md",
+      "line": 460,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 123,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data** (CRITICAL): Misrepresentation to investors carries both legal and regulatory risk. Projections presented as results is a known"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 365,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"action\": \"Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 456,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 564,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 520,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-12-low-stakes-preference.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-12-low-stakes-preference.md",
+      "line": 181,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 17,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Readiness verdict | NOT_READY |"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 68,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**NOT_READY**"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 78,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "5. If all scenarios pass manual review, update readiness to READY_FOR_PUBLIC_APERTURE_REWIRE"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 42,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Two handler instances receive each `checkout.session.completed` event"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 66,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Events enabled on primary endpoint:      checkout.session.completed, customer.subscription.*"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 81,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Customer access banner updated to: \"Strategy Room access is active. The execution tool is ready.\""
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 85,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Required operator action:** Complete one live/test Stripe checkout for strategy_room; confirm `ClientEntitlement` record created with `entitlementSlug: \"strategy-room.entry\"`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 95,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Canonical webhook creates order on `checkout.session.completed`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 111,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `checkout.session.completed` → `ensureEntitlementAfterPayment` → `ClientEntitlement(entitlementSlug: \"tier.professional\")`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 123,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Canonical webhook at line 469: `generatePaidExecutiveReport` called on `checkout.session.completed` for `executive_reporting`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 143,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "2. Complete one live/test purchase of `operator_decision_pack`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 201,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Controlled access products already structurally proven"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 212,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Complete the **Boardroom Brief live order**."
+    },
+    {
+      "file": "reports/living-case-admin-fulfilment-readiness.md",
+      "line": 71,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_STRIPE_TEST_SMOKE**"
+    },
+    {
+      "file": "reports/market-adoption-posture-audit.md",
+      "line": 35,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| checkout_fulfilment | A buyer needs clear fulfilment after purchase and confidence that the delivered output matches the public promise. | A user is ready to buy or has paid for a decision product. | Consulting booking form or generic downloadable product. |"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 29,
+      "term": "done",
+      "supportStatus": "unknown",
+      "context": "- /pressure (DONE in Pass 1 ✓)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 34,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Pain (Clear):** Leaders make expensive decisions from incomplete evidence."
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 201,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** Posture already strong. No action needed for Market Clarity Pass 2."
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 222,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### /test-your-decision (Already improved in 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 224,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ Per-route authority visible (completed in Stage 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 257,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### /library (Already improved in 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 259,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ Governance classification visible (completed in Stage 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 291,
+      "term": "done",
+      "supportStatus": "requires_evidence_check",
+      "context": "| /pressure | DONE ✓ | Low | Already improved | fast_diagnostic AI contrast |"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 301,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| /decision-centre | — | — | No change | Already dominant |"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 337,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Analysis:** 8 surfaces need clarity work; 1 is already dominant"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 5,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 73,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Maintains authority visibility (already present from Stage 2E)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 175,
+      "term": "all gates passing",
+      "supportStatus": "requires_evidence_check",
+      "context": "### All Gates Passing"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 222,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/why-not-ai` — Already has clear AI differentiation"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 223,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/method` — Already explains proof/mechanism"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 224,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/decision-centre` — Already dominant (no work needed)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 295,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Marketing language improvements incomplete"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 303,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### Immediate (Ready Now)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 405,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Market Clarity Pass 2:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 414,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Pass Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 5,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 22,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Result:** Framework applied to critical entry points; authority infrastructure unchanged; estate ready for market positioning."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 58,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Leaders make expensive decisions from incomplete evidence."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 93,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/why-not-ai` - Explicit AI differentiation (already strong)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 94,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/method` - Proof/mechanism layer (already clear)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 98,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** Framework layer already in place; Market Clarity Pass reinforces and extends."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 108,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Product | Before State | After State | Delta | Verified |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 153,
+      "term": "no regressions",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Result:** ✓ No regressions. All prior achievements maintained."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 248,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Examples: \"Leaders make expensive decisions from incomplete evidence\""
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 283,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Authority infrastructure verified and intact"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 288,
+      "term": "no regressions",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ No regressions detected"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 295,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Estate remains ready for Wave 2 work"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 307,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### Immediate (Ready Now)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 344,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Estate ready for Wave 2 validation and market work"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 349,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Pass Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 74,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- [CRITICAL] Ignore the filing deadline or treat a placeholder submission as a completed obligation"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-02-board-political-pressure.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-05-procurement-supplier-risk.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 73,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- [CRITICAL] Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-07-operational-failure-unclear-owner.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-08-legal-admin-deadline.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-09-cash-constrained-survival.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-09-cash-constrained-survival.md",
+      "line": 75,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- [CRITICAL] Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-12-low-stakes-preference.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/summary.md",
+      "line": 16,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Readiness verdict | READY_FOR_CHECKOUT_REWIRE |"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/summary.md",
+      "line": 55,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_CHECKOUT_REWIRE**"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/summary.md",
+      "line": 57,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "All cases are deliverable. The admin fulfilment workflow is ready for checkout rewiring."
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 17,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Readiness verdict | READY_FOR_PAID_DOSSIER_REWIRE |"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 72,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_PAID_DOSSIER_REWIRE**"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 74,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "The Full Dossier passes all 12 scenarios with no embarrassment risk. It is ready for paid dossier rewiring."
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 80,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "3. If all pass manual review, readiness may advance to READY_FOR_PAID_DOSSIER_REWIRE"
+    },
+    {
+      "file": "reports/premium-artefact-generation-proof.md",
+      "line": 51,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Option 2: delay until every open item is complete. This protects control quality but may damage the account relationship and the quarter's commercial position."
+    },
+    {
+      "file": "reports/premium-artefact-generation-proof.md",
+      "line": 62,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Primary risk: contractual exposure from an incomplete data-processing variation. Dependency: General Counsel sign-off."
+    },
+    {
+      "file": "reports/product-authority-contract.md",
+      "line": 17,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Estate coverage complete: no"
+    },
+    {
+      "file": "reports/product-authority-coverage-matrix.md",
+      "line": 9,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Category readiness state: category_foundation_ready"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 14,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| 🟡 Proof Ready | 8 |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 43,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `operator_decision_pack` | Operator Decision Pack | paid £129 | bundle_grant | Y | PROOF READY | N — bundle grant path unverified |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 50,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `gmi_q1_2026` | GMI Report — Q1 2026 | paid £59 (archived) | executive_report_artifact | Y | PROOF READY | N — post-purchase delivery email missing |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 56,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `executive_reporting` | Executive Reporting | paid £295 | executive_report_artifact | Y | PROOF READY | N — AI gen pipeline unverified |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 60,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `strategy_room` | Strategy Room — Entry | paid £750 | scheduled_session | Y | PROOF READY | N — no scheduling system |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 61,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `strategy_room_extended` | Strategy Room — Active | paid £1,250 | scheduled_session | Y | PROOF READY | N — no scheduling system |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 66,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `professional` | Professional | paid £59/mo | retainer_cycle | Y | PROOF READY | N — no admin queue for subscriptions |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 67,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `professional_annual` | Professional Annual | paid £590/yr | retainer_cycle | Y | PROOF READY | N — renewal path unverified |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 75,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### Products at PROOF READY — what blocks confirmation"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 86,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `professional_annual` | Annual renewal cadence unverified. Shares entitlementSlug with monthly. |"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 10,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| 🟡 Proof Ready | 8 |"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 25,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `human_reviewed_dossier`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 148,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `bundle_grant`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 159,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `executive_report_artifact`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 169,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `scheduled_session`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 181,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `scheduled_session`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 248,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `retainer_cycle`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 260,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `retainer_cycle`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 271,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `executive_report_artifact`"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 43,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Complete option comparison"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 68,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Evidence graph (verified / assumed / absent / stale)"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 81,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Regulated boundary check completed"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 97,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Board-ready summary (1 page)"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 10,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Phase 3 established structural proof (code-path verification) for all 8 proof-ready products."
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 56,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `BoardroomBriefOrder` created by canonical webhook on `checkout.session.completed`"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 62,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**What the operator must do to complete live proof:**"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 81,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "**What was verified (structural):**"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 84,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Customer access banner updated: \"Strategy Room access is active. The execution tool is ready.\""
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 165,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "2. ⏳ At minimum one live boardroom_brief order completed end-to-end (payment → delivered → customer access confirmed)"
+    },
+    {
+      "file": "reports/product-proof-run-phase-3.md",
+      "line": 20,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Proof-ready products | 8 |"
+    },
+    {
+      "file": "reports/product-proof-run-phase-3.md",
+      "line": 21,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Passed (live cycle complete) | 0 |"
+    },
+    {
+      "file": "reports/product-proof-run-phase-3.md",
+      "line": 55,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "7. Update contract: `proofRunCompleted: true`, `readinessStatus: \"sellable\"`"
+    },
+    {
+      "file": "reports/product-proof-run-phase-3.md",
+      "line": 119,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Before: `\"Access granted. Execution environment ready.\"`"
+    },
+    {
+      "file": "reports/product-proof-run-phase-3.md",
+      "line": 120,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- After: `\"Strategy Room access is active. The execution tool is ready. Begin with the first intervention below. Supplementary counsel or review may follow where applicable.\"`"
+    },
+    {
+      "file": "reports/product-proof-run-phase-3.md",
+      "line": 137,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "1. Complete the live `boardroom_brief` proof run (order is in queue now)"
+    },
+    {
+      "file": "reports/product-surface-claims-focused.md",
+      "line": 32,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "These claims are already authorized by evidence. No action needed."
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 31,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"I watched capable people defer decisions they already understood, in environments where delay carrie\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 1345,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"message: \"No legacy contradictions detected. Order is already in a governed state.\",\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 1660,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"\"boardroom_checkout_completed\",\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 1723,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"trackServerLaunch(\"boardroom_checkout_completed\", \"/api/billing/webhook\", {\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 1966,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"// All data already exists in PressureSignalEvent, BoardroomBriefOrder,\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 2497,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"content: 'Complete competitive intelligence methodology...',\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 2524,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"* Generates a governed PDF dossier for a completed instrument result.\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 2923,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"COMPLETED: \"The governed record is marked complete. A Return Brief is available if the condition has\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 3337,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"/* pages/blog/index.tsx — EDITORIAL ARCHIVE (Premium, editorial, scan-ready) */\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 3637,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"Adversarial scrutiny for a judgement already built through Executive\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 4030,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"A governed case is a decision record that can be returned to, compared, and verified\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 4501,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"<CommitmentRow text=\"Complete at least two governed instruments or sessions during the engagement pe\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5308,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"body=\"Use this when the buyer already understands the value of governed continuity and needs sponsor\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5311,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"body=\"Use this when the buyer already understands the value of governed continuity and needs sponsor\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5365,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"Current honest classification: selective high-value ready. This pathway exists where the buyer alrea\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5368,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"Sponsors, owners, and serious operators who already understand the value of governed continuity and \""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5416,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"output: 'Boardroom-ready dossier with full provenance chain',\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5527,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"to see the complete governed progression.\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 5719,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"A governed case is a decision record that can be returned to, compared, verified,\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 7210,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"The Strategy Room exists for situations where the diagnosis is complete\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 7690,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"A governed case gives your decision a verified provenance record —\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 7822,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"* is ready for retainer oversight. No auth required.\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 8053,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"\"For users ready to begin the governed product pathway and generate a fuller decision record.\",\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 8236,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"* Compiles registry data into a board-ready intelligence brief.\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 8494,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"\"boardroom-mode\":               \"The executive brief for this surface is incomplete or contradictory\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 8851,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"\"SIMULATION_ONLY→PILOT_READY\": [\""
+    },
+    {
+      "file": "reports/product-surface-claims.md",
+      "line": 8857,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Context: \"\"PILOT_READY→LIVE_GOVERNED\": [\""
+    }
+  ],
+  "sampleClaims": [
+    {
+      "file": "reports/adversarial-free-signal-adoption-layer.md",
+      "line": 68,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "> *Why it matters: Irrevocable commitments cannot be undone.*"
+    },
+    {
+      "file": "reports/adversarial-free-signal-adoption-layer.md",
+      "line": 90,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Complete fallback path | ❌ Forbidden | ✅ Included |"
+    },
+    {
+      "file": "reports/adversarial-free-signal-adoption-layer.md",
+      "line": 129,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_STRIPE_TEST_SMOKE**"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status**: HARDENING COMPLETE; WAVE 2G UPGRADE REJECTED"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 72,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- evidenceLedgerComplete !== true"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 107,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Full validation chain complete (anti-toy + red-team + generic-AI + market)"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 111,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Evidence ledger complete"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 147,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Result**: Validation chain incomplete → upgrade blocked"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 189,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Validation chain incomplete"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 312,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "Finding: personal_decision_audit: Validation chain incomplete"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 328,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "Full validation chain incomplete (anti-toy, red-team not independently passed)"
+    },
+    {
+      "file": "reports/anti-gaming-validation-hardening.md",
+      "line": 359,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status**: Anti-Gaming Hardening COMPLETE"
+    },
+    {
+      "file": "reports/authority-surface-integration.md",
+      "line": 29,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **ProductAuthorityPanel** — Shows complete authority details and evidence"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETE ✓"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 43,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Displays complete authority details with expandable detail section."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 127,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Product Authority States — Display Ready"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** INFRASTRUCTURE COMPLETE, VISIBILITY GAP IDENTIFIED"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 10,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "The Evidence-Governed Decision Infrastructure is **complete and operational** at the code and validation level."
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 33,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Infrastructure Assessment — ✓ COMPLETE"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 73,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### UI Components: Deployed and Ready ✓"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 82,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "### Audit Hardening: Complete ✓"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 108,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "| Landing / Home | not_category_ready | Authority components not rendered |"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 109,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Fast Diagnostic Entry | not_category_ready | Overclaim risk: claims without evidence |"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 211,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Verified all product authority states are correct"
+    },
+    {
+      "file": "reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md",
+      "line": 329,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Honest Verdict:** Infrastructure Complete. Visibility Gap Identified. Path Forward Clear."
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 4,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** READY FOR IMPLEMENTATION"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 83,
+      "term": "done",
+      "supportStatus": "unknown",
+      "context": "## What Needs to Be Done"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 226,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Code Template (Copy-Paste Ready)"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_EXECUTION_BRIEF.md",
+      "line": 431,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "**This is ready to implement. Everything is provided. The gap is now in route integration, not in infrastructure.**"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 1,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "# Category Surface Integration Setup — Complete"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 4,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** INFRASTRUCTURE READY FOR ROUTE INTEGRATION"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Products: All 4 configured and ready to resolve"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 61,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Ready to wire into each route."
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 107,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Integration guide: Complete"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 108,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Wrapper component: Ready"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 160,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Just wire the ready-made components into 5 routes and authority becomes visible."
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 172,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "4. `reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md` — This report"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 182,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Validation Commands Ready"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 236,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Overall Status: category_foundation_ready (or better) ✓"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 260,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Category demonstration: Ready to implement"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 261,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Market-ready status: One phase away"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 268,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- The fix is simple and ready to execute"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 285,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Ready Signal"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 287,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** READY TO INTEGRATE"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 293,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Ready to implement"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md",
+      "line": 300,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Setup Status:** COMPLETE"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 70,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- All with complete authority detail visibility"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 94,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Infrastructure Completeness: PASSED (4/4)"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 146,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "4. `reports/CATEGORY_SURFACE_INTEGRATION_SETUP_COMPLETE.md` — Setup summary"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 268,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Category Surface Route Integration: ✓ COMPLETE**"
+    },
+    {
+      "file": "reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md",
+      "line": 280,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Final Recommendation:** READY FOR MARKET DEMONSTRATION"
+    },
+    {
+      "file": "reports/commerce-architecture-consolidation-audit.md",
+      "line": 16,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Verdict:** READY_FOR_STRIPE_TEST_SMOKE — with the caveat that legacy code should be reserved/retired to prevent confusion."
+    },
+    {
+      "file": "reports/commerce-architecture-consolidation-audit.md",
+      "line": 147,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_STRIPE_TEST_SMOKE**"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 33,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Authority Grant Eligible:** blocked_until_full_flow_complete"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 72,
+      "term": "all gates passing",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Validation Results — All Gates Passing"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 131,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Infrastructure Completeness: PASSED (4/4)"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 147,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md` — Complete route inventory with exemptions and justifications"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 181,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "## Integration Pattern Verified"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 209,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Safety Guarantees Verified"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 311,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Category Surface Route Integration:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 316,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**The system is production-ready for the 4 demonstrating routes and positioned for expansion to 6-8+ routes as organizational priorities define.**"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md",
+      "line": 322,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Overall Status:** ✓ READY FOR MARKET DEMONSTRATION"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md",
+      "line": 105,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Authority state was already demonstrated at `/foundry/decision-test`, `/enterprise-decision-scan`, or checkout routes"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md",
+      "line": 108,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **Safety Note:** This route is already gated by entitlement verification (enforceExecutiveReportingAccess)"
+    },
+    {
+      "file": "reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md",
+      "line": 188,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETE"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 64,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"liveRouteVerified\": true,"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 112,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ **Live Route Verified:** Yes"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 141,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Boundary Status:** CLEAN — All flags false; clean pass verified"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 163,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Gates Ready for Rerun:  ✓ YES (v2 evidence now available)"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 178,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Complete test results"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 186,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "This infrastructure pass is complete. The **fast_diagnostic v2 clean validation pass** can now proceed:"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 194,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Critical:** The next validation pass will be clean (working tree already committed) and can restore authority if gates pass."
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 206,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ All measurement boundaries verified"
+    },
+    {
+      "file": "reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md",
+      "line": 224,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Infrastructure Pass Status:** COMPLETE"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 25,
+      "term": "authority granted",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Release Authority Firewall | ✓ PASSED | Authority granted based on v2 evidence |"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 29,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Product Gold Release Readiness | ✓ PASSED | Ready for release |"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 81,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Evidence Ledger v2 is valid and complete"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 118,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Infrastructure Completed"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 170,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Evidence Ledger v2 valid and complete"
+    },
+    {
+      "file": "reports/FAST_DIAGNOSTIC_V2_CLEAN_VALIDATION_FINAL.md",
+      "line": 181,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Validation Pass:** COMPLETE"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETE"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 83,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Validation chain incomplete"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 114,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "This infrastructure repair pass is complete. The validation infrastructure is now:"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 117,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- ✓ Ready for clean `fast_diagnostic` v2 validation"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 125,
+      "term": "all gates passing",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Authority restoration depends on all gates passing"
+    },
+    {
+      "file": "reports/INFRASTRUCTURE_REPAIR_PASS.md",
+      "line": 130,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Infrastructure Repair Status:** COMPLETE"
+    },
+    {
+      "file": "reports/judgement-engine-differentiation.md",
+      "line": 25,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "- churn-drift: expected execution_drift, detected execution_drift; evidence \"promised but not\" matched in decisionDescription, \"promised but not\" matched in evidenceAvailable, \"keeps slipping\" matched in decisionDescription, \"keeps slipping\" matched in constra"
+    },
+    {
+      "file": "reports/judgement-engine-differentiation.md",
+      "line": 40,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "- churn-drift: expected execution_drift, detected execution_drift; evidence \"promised but not\" matched in decisionDescription, \"promised but not\" matched in evidenceAvailable, \"keeps slipping\" matched in constraint, \"committed work\" matched in decisionDescript"
+    },
+    {
+      "file": "reports/judgement-engine-differentiation.md",
+      "line": 55,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "- churn-drift: expected execution_drift, detected execution_drift; evidence \"promised but not\" matched in decisionDescription, \"keeps slipping\" matched in constraint, \"committed work\" matched in decisionDescription, \"still not done\" matched in decisionDescript"
+    },
+    {
+      "file": "reports/judgement-engine-differentiation.md",
+      "line": 70,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "- churn-drift: expected execution_drift, detected execution_drift; evidence \"promised but not\" matched in decisionDescription, \"keeps slipping\" matched in constraint, \"committed work\" matched in decisionDescription, \"still not done\" matched in decisionDescript"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 136,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- **Ignore the filing deadline or treat a placeholder submission as a completed obligation** (CRITICAL): Missing the deadline triggers penalties, strike-off, or director disqualification. A provisional submission does not discharge the duty."
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 447,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"action\": \"Ignore the filing deadline or treat a placeholder submission as a completed obligation\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 514,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"whatToDoNext\": ["
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 531,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 129,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "| 1 | Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge. | IMMEDIATE |"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 139,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge."
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 178,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge."
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 404,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"description\": \"Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 462,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge.\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 506,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"whatToDoNext\": ["
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 523,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 12,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "We are launching a new product and the marketing team has prepared claims about market leadership and customer adoption. The actual customer data shows only 12 beta users, none of whom have completed the onboarding. The CEO wants to launch with the strong clai"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 404,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 12,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "We need to launch this product in Q2 or we miss our revenue target. The engineering team says it is not ready — there are three known critical bugs and the security review is incomplete. Sales has already pre-sold £500k based on the Q2 launch date. The board d"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 86,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Release Risk: Security review incomplete | CRITICAL | 0.8 | release-risk |"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 87,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "| Release Risk: Product or service not ready for release | CRITICAL | 0.8 | release-risk |"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 296,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"label\": \"Release Risk: Security review incomplete\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 297,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"summary\": \"Security review incomplete\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 305,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"label\": \"Release Risk: Product or service not ready for release\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 306,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"summary\": \"Product or service not ready for release\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 633,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-05-procurement-supplier-risk.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-05-procurement-supplier-risk.md",
+      "line": 421,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 127,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data** (CRITICAL): Misrepresentation to investors carries both legal and regulatory risk. Projections presented as results is a known"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 245,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"summary\": \"Market claim has some supporting evidence but should be verified\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 380,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"action\": \"Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 454,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"whatToDoNext\": ["
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 471,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-07-operational-failure-unclear-owner.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-07-operational-failure-unclear-owner.md",
+      "line": 408,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-08-legal-admin-deadline.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-08-legal-admin-deadline.md",
+      "line": 443,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"whatToDoNext\": ["
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-08-legal-admin-deadline.md",
+      "line": 460,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 123,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- **Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data** (CRITICAL): Misrepresentation to investors carries both legal and regulatory risk. Projections presented as results is a known"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 365,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "\"action\": \"Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 439,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"whatToDoNext\": ["
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md",
+      "line": 456,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 144,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "- **Transfer IP rights, exclusivity, or exit options without documenting the irreversibility and the capability loss it creates** (CRITICAL): Irrevocable capability loss cannot be undone. It must be a conscious, documented decision — not an oversight obscured "
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 505,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"reason\": \"Irrevocable capability loss cannot be undone. It must be a conscious, documented decision — not an oversight obscured in contract language.\","
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 564,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 503,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "\"whatToDoNext\": ["
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 520,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-12-low-stakes-preference.md",
+      "line": 4,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Kernel Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/scenario-12-low-stakes-preference.md",
+      "line": 181,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** COMPLETED"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 17,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Readiness verdict | NOT_READY |"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 68,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**NOT_READY**"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 70,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "The kernel is not yet ready for public rewiring. Automatic failures indicate the kernel is not producing reliable, category-grade outputs across all scenarios. Hostile review of each scenario output is required before proceeding."
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 78,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "5. If all scenarios pass manual review, update readiness to READY_FOR_PUBLIC_APERTURE_REWIRE"
+    },
+    {
+      "file": "reports/kernel-reality-proof/summary.md",
+      "line": 79,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "6. Do NOT rewire checkout until READY_FOR_PAID_DOSSIER_REWIRE is achieved"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 42,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Two handler instances receive each `checkout.session.completed` event"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 66,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Events enabled on primary endpoint:      checkout.session.completed, customer.subscription.*"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 81,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Customer access banner updated to: \"Strategy Room access is active. The execution tool is ready.\""
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 85,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Required operator action:** Complete one live/test Stripe checkout for strategy_room; confirm `ClientEntitlement` record created with `entitlementSlug: \"strategy-room.entry\"`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 95,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Canonical webhook creates order on `checkout.session.completed`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 111,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `checkout.session.completed` → `ensureEntitlementAfterPayment` → `ClientEntitlement(entitlementSlug: \"tier.professional\")`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 116,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Required operator action:** Complete one live Professional subscription checkout; confirm subscription renewal does not break entitlement"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 123,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Canonical webhook at line 469: `generatePaidExecutiveReport` called on `checkout.session.completed` for `executive_reporting`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 143,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "2. Complete one live/test purchase of `operator_decision_pack`"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 192,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "| operator_decision_pack fan-out unverified in production | HIGH | BLOCKED | Requires webhook confirmation |"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 201,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Controlled access products already structurally proven"
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 212,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Complete the **Boardroom Brief live order**."
+    },
+    {
+      "file": "reports/live-commercial-authority-closeout.md",
+      "line": 227,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- [ ] **boardroom_brief live order completed**: order visible → in_review → delivered → customer entitlement confirmed → audit trail present"
+    },
+    {
+      "file": "reports/live-route-output-capture.md",
+      "line": 21,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "| personal_decision_audit | /test-your-decision or decision instrument route | /test-your-decision | yes | The route is currently a routing layer, not a completed paid decision-instrument output route. |"
+    },
+    {
+      "file": "reports/living-case-admin-fulfilment-readiness.md",
+      "line": 71,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_STRIPE_TEST_SMOKE**"
+    },
+    {
+      "file": "reports/market-adoption-posture-audit.md",
+      "line": 27,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "| fast_diagnostic | Leaders make expensive decisions from incomplete evidence and need a fast signal before committing. | A decision is live, stakes are high, and internal confidence feels stronger than the evidence. | Ask a senior colleague, consultant, or ge"
+    },
+    {
+      "file": "reports/market-adoption-posture-audit.md",
+      "line": 35,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| checkout_fulfilment | A buyer needs clear fulfilment after purchase and confidence that the delivered output matches the public promise. | A user is ready to buy or has paid for a decision product. | Consulting booking form or generic downloadable product. |"
+    },
+    {
+      "file": "reports/market-adoption-posture-audit.md",
+      "line": 93,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "## Implementation-Ready Recommendations"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 29,
+      "term": "done",
+      "supportStatus": "unknown",
+      "context": "- /pressure (DONE in Pass 1 ✓)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 34,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Pain (Clear):** Leaders make expensive decisions from incomplete evidence."
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 35,
+      "term": "done",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Proof (Done):** Added in /pressure, but not on other entry points."
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 201,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** Posture already strong. No action needed for Market Clarity Pass 2."
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 222,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### /test-your-decision (Already improved in 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 224,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ Per-route authority visible (completed in Stage 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 257,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### /library (Already improved in 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 259,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ Governance classification visible (completed in Stage 2E)"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 291,
+      "term": "done",
+      "supportStatus": "requires_evidence_check",
+      "context": "| /pressure | DONE ✓ | Low | Already improved | fast_diagnostic AI contrast |"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 301,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| /decision-centre | — | — | No change | Already dominant |"
+    },
+    {
+      "file": "reports/market-clarity-blockers.md",
+      "line": 337,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Analysis:** 8 surfaces need clarity work; 1 is already dominant"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 5,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 73,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Maintains authority visibility (already present from Stage 2E)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 175,
+      "term": "all gates passing",
+      "supportStatus": "requires_evidence_check",
+      "context": "### All Gates Passing"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 222,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/why-not-ai` — Already has clear AI differentiation"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 223,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/method` — Already explains proof/mechanism"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 224,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/decision-centre` — Already dominant (no work needed)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 295,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Marketing language improvements incomplete"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 303,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### Immediate (Ready Now)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 405,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Market Clarity Pass 2:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 414,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Pass Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 424,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Recommendation:** Market clarity improvements complete and honest. Estate authority infrastructure intact. Ready for independent Wave 2 validation and/or market positioning work."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 5,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 22,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Result:** Framework applied to critical entry points; authority infrastructure unchanged; estate ready for market positioning."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 58,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Leaders make expensive decisions from incomplete evidence."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 93,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/why-not-ai` - Explicit AI differentiation (already strong)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 94,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `/method` - Proof/mechanism layer (already clear)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 98,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** Framework layer already in place; Market Clarity Pass reinforces and extends."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 108,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Product | Before State | After State | Delta | Verified |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 153,
+      "term": "no regressions",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Result:** ✓ No regressions. All prior achievements maintained."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 248,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Examples: \"Leaders make expensive decisions from incomplete evidence\""
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 283,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ Authority infrastructure verified and intact"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 288,
+      "term": "no regressions",
+      "supportStatus": "requires_evidence_check",
+      "context": "✓ No regressions detected"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 295,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Estate remains ready for Wave 2 work"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 299,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- All products market-ready (requires separate validation)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 307,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### Immediate (Ready Now)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 344,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Estate ready for Wave 2 validation and market work"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 349,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Pass Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_REPORT.md",
+      "line": 355,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Recommendation:** Market Clarity improvements in place. Estate authority infrastructure intact. Ready for Wave 2 evidence validation and/or market positioning work (independent initiatives)."
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-01-hmrc-filing-rescue.md",
+      "line": 74,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- [CRITICAL] Ignore the filing deadline or treat a placeholder submission as a completed obligation"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-02-board-political-pressure.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-02-board-political-pressure.md",
+      "line": 76,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge."
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-05-procurement-supplier-risk.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-06-investor-pitch-unsupported-traction.md",
+      "line": 73,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- [CRITICAL] Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-07-operational-failure-unclear-owner.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-08-legal-admin-deadline.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-09-cash-constrained-survival.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-09-cash-constrained-survival.md",
+      "line": 75,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- [CRITICAL] Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-10-strategic-asymmetric-partnership.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-11-executive-reputational-exposure.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/scenario-12-low-stakes-preference.md",
+      "line": 33,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "## Delivery-Ready Artefact"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/summary.md",
+      "line": 16,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Readiness verdict | READY_FOR_CHECKOUT_REWIRE |"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/summary.md",
+      "line": 55,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_CHECKOUT_REWIRE**"
+    },
+    {
+      "file": "reports/paid-dossier-fulfilment-proof/summary.md",
+      "line": 57,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "All cases are deliverable. The admin fulfilment workflow is ready for checkout rewiring."
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/scenario-02-board-political-pressure.md",
+      "line": 52,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- Do not bring the decision to a vote until all material reservations are formally documented and due diligence is confirmed as complete or consciously waived. A vote taken before objections are recorded is vulnerable to challenge."
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/scenario-03-market-claim-weak-proof.md",
+      "line": 11,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "We are launching a new product and the marketing team has prepared claims about market leadership and customer adoption. The actual customer data shows only 12 beta users, none of whom have completed the onboarding. The CEO wants to launch with the strong clai"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/scenario-04-product-launch-revenue-pressure.md",
+      "line": 11,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "We need to launch this product in Q2 or we miss our revenue target. The engineering team says it is not ready — there are three known critical bugs and the security review is incomplete. Sales has already pre-sold £500k based on the Q2 launch date. The board d"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 17,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| Readiness verdict | READY_FOR_PAID_DOSSIER_REWIRE |"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 72,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**READY_FOR_PAID_DOSSIER_REWIRE**"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 74,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "The Full Dossier passes all 12 scenarios with no embarrassment risk. It is ready for paid dossier rewiring."
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 80,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "3. If all pass manual review, readiness may advance to READY_FOR_PAID_DOSSIER_REWIRE"
+    },
+    {
+      "file": "reports/paid-dossier-reality-proof/summary.md",
+      "line": 81,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "4. Do NOT enable checkout until READY_FOR_CHECKOUT_REWIRE is achieved"
+    },
+    {
+      "file": "reports/premium-artefact-generation-proof.md",
+      "line": 43,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "The evidence means the rollout is commercially attractive but not yet approval-ready as a full release. The pipeline forecast indicates upside, but the legal redline log and operations capacity estimate suggest the uncontrolled path carries execution risk. Bec"
+    },
+    {
+      "file": "reports/premium-artefact-generation-proof.md",
+      "line": 51,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Option 2: delay until every open item is complete. This protects control quality but may damage the account relationship and the quarter's commercial position."
+    },
+    {
+      "file": "reports/premium-artefact-generation-proof.md",
+      "line": 62,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Primary risk: contractual exposure from an incomplete data-processing variation. Dependency: General Counsel sign-off."
+    },
+    {
+      "file": "reports/product-authority-contract.md",
+      "line": 17,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "Estate coverage complete: no"
+    },
+    {
+      "file": "reports/product-authority-coverage-matrix.md",
+      "line": 9,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Category readiness state: category_foundation_ready"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 14,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| 🟡 Proof Ready | 8 |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 28,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "| `boardroom_brief` | Boardroom Brief | paid £99 | human_reviewed_dossier | Y | PROOF READY | N — proof run pending |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 43,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `operator_decision_pack` | Operator Decision Pack | paid £129 | bundle_grant | Y | PROOF READY | N — bundle grant path unverified |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 50,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `gmi_q1_2026` | GMI Report — Q1 2026 | paid £59 (archived) | executive_report_artifact | Y | PROOF READY | N — post-purchase delivery email missing |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 56,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `executive_reporting` | Executive Reporting | paid £295 | executive_report_artifact | Y | PROOF READY | N — AI gen pipeline unverified |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 60,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `strategy_room` | Strategy Room — Entry | paid £750 | scheduled_session | Y | PROOF READY | N — no scheduling system |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 61,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `strategy_room_extended` | Strategy Room — Active | paid £1,250 | scheduled_session | Y | PROOF READY | N — no scheduling system |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 66,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `professional` | Professional | paid £59/mo | retainer_cycle | Y | PROOF READY | N — no admin queue for subscriptions |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 67,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `professional_annual` | Professional Annual | paid £590/yr | retainer_cycle | Y | PROOF READY | N — renewal path unverified |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 75,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "### Products at PROOF READY — what blocks confirmation"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 79,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "| `boardroom_brief` | End-to-end cycle (paid→review→dossier_generated→delivered) not yet completed. One live paid order pending. |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 80,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "| `operator_decision_pack` | Bundle grant logic not verified: confirm each of 3 included products grants independently on single payment. |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 82,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "| `executive_reporting` | AI generation pipeline (ExecutiveReportingRun) not verified end-to-end in production. |"
+    },
+    {
+      "file": "reports/product-estate-canonical.md",
+      "line": 86,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "| `professional_annual` | Annual renewal cadence unverified. Shares entitlementSlug with monthly. |"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 10,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "| 🟡 Proof Ready | 8 |"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 25,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `human_reviewed_dossier`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 27,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"boardroom_brief\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 28,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ℹ Proof run not yet completed end-to-end in production (paid → review → dossier_generated → delivered)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 148,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `bundle_grant`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 151,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"operator_decision_pack\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 152,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ℹ Bundle entitlement resolution not verified end-to-end: confirm each included product grants independently"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 159,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `executive_report_artifact`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 161,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"executive_reporting\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 162,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ℹ AI generation pipeline not verified end-to-end in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 169,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `scheduled_session`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 172,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"strategy_room\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 181,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `scheduled_session`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 184,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"strategy_room_extended\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 248,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `retainer_cycle`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 251,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"professional\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 260,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `retainer_cycle`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 263,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"professional_annual\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 271,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "**Status:** 🟡 PROOF READY  |  **Type:** `executive_report_artifact`"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 274,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- ⚠ \"gmi_q1_2026\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 155,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- command_pack: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 157,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- diagnostic_report_basic: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 158,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- diagnostic_report_pro: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 166,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- executive_reporting_priority: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 170,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- gmi_q3_2026: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 172,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- governance_suite: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 173,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- inner_circle: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 177,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- operator_essentials_pack: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 181,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- retainer_core: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 182,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- retainer_institutional: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-gold-upgrade-roadmap.md",
+      "line": 183,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "- retainer_operational: Product is already inactive, future-dated, duplicate, or structurally blocked."
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 43,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Complete option comparison"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 68,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Evidence graph (verified / assumed / absent / stale)"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 81,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Regulated boundary check completed"
+    },
+    {
+      "file": "reports/product-ladder-canonical-map.md",
+      "line": 97,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Board-ready summary (1 page)"
+    },
+    {
+      "file": "reports/product-language-authority-audit.md",
+      "line": 30,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "| pages/about/founder.tsx | 303 | intelligence | make customer-clearer | I watched capable people defer decisions they already understood, in environments where delay carried measurable cost. The problem was never intelligence. It was always enforcement — the "
+    },
+    {
+      "file": "reports/product-language-authority-audit.md",
+      "line": 45,
+      "term": "ready",
+      "supportStatus": "supported_scope_limited",
+      "context": "| pages/admin/boardroom/orders/[id].tsx | 771 | governed | make customer-clearer | Governed state machine: paid → case_stubs_created → draft_generated → awaiting_operator_review → approved_for_delivery → customer_access_ready → delivered | Translate category l"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 10,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "Phase 3 established structural proof (code-path verification) for all 8 proof-ready products."
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 15,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "- Live-cycle proof: PENDING — no product has completed a full live payment transaction through the canonical webhook to delivered state"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 44,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "⚠️ **UNCONFIRMED** — cannot be verified from codebase or env files"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 53,
+      "term": "verified",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Live order state:** Cannot be verified from code — requires admin UI or direct DB query"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 56,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "- `BoardroomBriefOrder` created by canonical webhook on `checkout.session.completed`"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 62,
+      "term": "complete",
+      "supportStatus": "requires_evidence_check",
+      "context": "**What the operator must do to complete live proof:**"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 81,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "**What was verified (structural):**"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 84,
+      "term": "ready",
+      "supportStatus": "requires_evidence_check",
+      "context": "- Customer access banner updated: \"Strategy Room access is active. The execution tool is ready.\""
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 87,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Next action:** Complete a real Stripe checkout for strategy_room and confirm entitlement record in DB"
+    },
+    {
+      "file": "reports/product-live-proof-closeout.md",
+      "line": 102,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "**Next action:** Complete a live Professional subscription checkout; confirm `ClientEntitlement` with `entitlementSlug: \"tier.professional\"` is created; confirm subscription renewal cycle does not break access"
+    }
+  ]
+}

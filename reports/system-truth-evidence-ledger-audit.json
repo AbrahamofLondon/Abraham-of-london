@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-06-13T19:29:42.518Z",
+  "entriesAudited": 1,
+  "summary": {
+    "ledger_missing_runtime_output": 1
+  },
+  "rows": [
+    {
+      "productCode": "team_assessment",
+      "validationId": "team_assessment_v2_revalidation_2026_06_13",
+      "scenarioSetId": "team_assessment_scenario_set",
+      "scenarioHashPresent": true,
+      "scenarioFileExists": true,
+      "renderedOutputCaptured": true,
+      "outputHashPresent": true,
+      "renderedOutputFileExists": false,
+      "validationRunHashExists": true,
+      "qualityTests": [
+        {
+          "name": "antiGaming",
+          "passed": true,
+          "score": 10
+        },
+        {
+          "name": "validationConstitution",
+          "passed": true,
+          "score": 10
+        },
+        {
+          "name": "releaseFirewall",
+          "passed": true,
+          "score": 10
+        },
+        {
+          "name": "adversarialValidation",
+          "passed": true,
+          "score": 10
+        },
+        {
+          "name": "decisionForce",
+          "passed": true,
+          "score": 8.7
+        },
+        {
+          "name": "antiToy",
+          "passed": true,
+          "score": 9.2
+        },
+        {
+          "name": "redTeam",
+          "passed": true,
+          "score": 8.5
+        },
+        {
+          "name": "genericAiComparison",
+          "passed": true,
+          "score": 8.9
+        },
+        {
+          "name": "marketComparison",
+          "passed": true,
+          "score": 8.3
+        }
+      ],
+      "qualityTestsPlaceholderRisk": false,
+      "boundaryFlagsPresent": true,
+      "authorityDecision": {
+        "currentContractState": "legacy_validated_pending_v2_revalidation",
+        "proposedClassification": "externally_proven_gold_product",
+        "authorityGranted": [
+          "externally_proven_gold_product",
+          "diagnostic_product"
+        ],
+        "authorityDenied": [],
+        "matchesCurrentContract": false
+      },
+      "classification": "ledger_missing_runtime_output",
+      "blockingReasons": [
+        "Rendered output artifact matching output hash was not found outside the ledger report.",
+        "Ledger authority decision does not match current ProductAuthorityContract state."
+      ]
+    }
+  ]
+}

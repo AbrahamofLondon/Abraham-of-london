@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-06-13T19:29:42.518Z",
+  "gatesAudited": 8,
+  "summary": {
+    "medium_gate": 4,
+    "narrow_gate": 2,
+    "failing_gate": 1,
+    "misleading_gate": 1
+  },
+  "rows": [
+    {
+      "script": "scripts/check-product-authority-contract.mjs",
+      "exists": true,
+      "claimsToVerify": "ProductAuthorityContract consistency and public/non-exempt coverage.",
+      "actuallyVerifies": "Builds/validates contract records; does not prove product engine runtime behavior.",
+      "filesScanned": [
+        "reports/product-value-evidence-ledger-v2.json"
+      ],
+      "filesMissed": [],
+      "checksRuntimeWiring": true,
+      "checksImports": true,
+      "checksRenderedOutput": true,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": true,
+      "classification": "medium_gate",
+      "correctionNeeded": "Keep as useful signal, but do not let it imply runtime truth alone."
+    },
+    {
+      "script": "scripts/check-estate-authority-integrity.mjs",
+      "exists": true,
+      "claimsToVerify": "Estate-level authority readiness from generated coverage reports.",
+      "actuallyVerifies": "Reads generated reports and checks aggregate failures; depends on upstream report correctness.",
+      "filesScanned": [],
+      "filesMissed": [
+        "Direct runtime import checks",
+        "browser-rendered route capture"
+      ],
+      "checksRuntimeWiring": true,
+      "checksImports": false,
+      "checksRenderedOutput": false,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": true,
+      "classification": "medium_gate",
+      "correctionNeeded": "Keep as useful signal, but do not let it imply runtime truth alone."
+    },
+    {
+      "script": "scripts/check-no-mock-authority.mjs",
+      "exists": true,
+      "claimsToVerify": "No mock/fixture/placeholder authority grants.",
+      "actuallyVerifies": "Scans selected paths for suspicious terms; produces many lexical findings but can pass.",
+      "filesScanned": [
+        "scripts/check-*.mjs",
+        "lib/validation/*.ts",
+        "lib/product/*.ts",
+        "lib/commercial/*.ts",
+        "lib/reporting/*.ts",
+        "lib/server/*.ts",
+        "components/admin/*.tsx",
+        "components/reporting/*.tsx",
+        "pages/api/*.ts",
+        "app/api/**/*.ts"
+      ],
+      "filesMissed": [
+        "Runtime data provenance",
+        "rendered output inspection",
+        "actual database records"
+      ],
+      "checksRuntimeWiring": true,
+      "checksImports": false,
+      "checksRenderedOutput": false,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": true,
+      "classification": "narrow_gate",
+      "correctionNeeded": "Broaden file coverage and add runtime/rendered-output checks."
+    },
+    {
+      "script": "scripts/check-surface-claim-authority.mjs",
+      "exists": true,
+      "claimsToVerify": "Public claim language does not exceed authority.",
+      "actuallyVerifies": "Scans registered surfaces/claims; does not exhaustively scan all public copy.",
+      "filesScanned": [],
+      "filesMissed": [
+        "MDX content",
+        "product catalogue copy",
+        "comments and report copy outside registered surfaces"
+      ],
+      "checksRuntimeWiring": false,
+      "checksImports": false,
+      "checksRenderedOutput": false,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": true,
+      "classification": "narrow_gate",
+      "correctionNeeded": "Broaden file coverage and add runtime/rendered-output checks."
+    },
+    {
+      "script": "scripts/audit-market-adoption-posture.mjs",
+      "exists": true,
+      "claimsToVerify": "Market adoption posture and pain clarity.",
+      "actuallyVerifies": "Static script/content inspection.",
+      "filesScanned": [
+        "lib/product",
+        "lib/commercial",
+        "pages/diagnostics/fast.tsx",
+        "pages/foundry/decision-test.tsx",
+        "components/kernel/FreeSignalResult.tsx",
+        "pages/diagnostics/team-assessment.tsx",
+        "pages/api/diagnostics/team-alignment.ts",
+        "components/diagnostics/AssessmentResultSurface.tsx",
+        "pages/diagnostics/enterprise-assessment.tsx",
+        "pages/api/diagnostics/enterprise.ts",
+        "pages/test-your-decision.tsx",
+        "pages/checkout/personal-decision-audit.tsx",
+        "pages/decision-instruments/[slug].tsx",
+        "pages/decision-centre.tsx",
+        "pages/decision-centre/case/[caseId].tsx",
+        "lib/product/decision-centre-contract.ts",
+        "app/boardroom/dossier/[dossierId]/page.tsx",
+        "app/boardroom/dossier/[dossierId]/BoardroomDossierClient.tsx",
+        "lib/boardroom/boardroom-dossier-service.ts",
+        "pages/intelligence/market.tsx",
+        "pages/artifacts/global-market-outlook-q1-2026-public.tsx",
+        "lib/intelligence/market-intelligence-lifecycle.ts",
+        "pages/admin/authority-center.tsx",
+        "pages/admin/index.tsx",
+        "components/product/ProductAuthorityPanel.tsx",
+        "pages/api/checkout/decision-failure-brief.ts",
+        "lib/product/product-fulfilment-contract.ts"
+      ],
+      "filesMissed": [],
+      "checksRuntimeWiring": true,
+      "checksImports": true,
+      "checksRenderedOutput": true,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": false,
+      "classification": "medium_gate",
+      "correctionNeeded": "Keep as useful signal, but do not let it imply runtime truth alone."
+    },
+    {
+      "script": "scripts/audit-wave-2-product-readiness.mjs",
+      "exists": true,
+      "claimsToVerify": "Wave 2 product readiness classification.",
+      "actuallyVerifies": "Static script/content inspection.",
+      "filesScanned": [
+        "lib/product/resolve-product-authority.ts",
+        "reports/wave-2-product-readiness.json"
+      ],
+      "filesMissed": [],
+      "checksRuntimeWiring": true,
+      "checksImports": false,
+      "checksRenderedOutput": true,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": false,
+      "classification": "medium_gate",
+      "correctionNeeded": "Keep as useful signal, but do not let it imply runtime truth alone."
+    },
+    {
+      "script": "scripts/check-board-facing-authority-language.mjs",
+      "exists": true,
+      "claimsToVerify": "Board-facing language does not overstate evidence.",
+      "actuallyVerifies": "Scans three files for a small phrase list; currently fails and misses several board-facing surfaces.",
+      "filesScanned": [
+        "lib/instruments/board-brief-template/engine.ts",
+        "lib/constitution/boardroom-mode.ts",
+        "pages/boardroom-brief.tsx"
+      ],
+      "filesMissed": [
+        "components/instruments/BoardBriefBuilderRunner.tsx",
+        "app/boardroom/dossier/[dossierId]/BoardroomDossierClient.tsx",
+        "app/api/admin/boardroom-delivery/generate/route.ts",
+        "lib/product/product-estate-contract.ts",
+        "pages/pricing.tsx",
+        "pages/products.tsx"
+      ],
+      "checksRuntimeWiring": true,
+      "checksImports": false,
+      "checksRenderedOutput": false,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": true,
+      "classification": "failing_gate",
+      "correctionNeeded": "Fix violations and expand scanned surface area before treating as protective."
+    },
+    {
+      "script": "scripts/generate-v2-evidence-ledger.mjs",
+      "exists": true,
+      "claimsToVerify": "Generate Evidence Ledger v2 authority evidence.",
+      "actuallyVerifies": "Generates ledger metadata; generation is not independent validation.",
+      "filesScanned": [],
+      "filesMissed": [],
+      "checksRuntimeWiring": true,
+      "checksImports": true,
+      "checksRenderedOutput": true,
+      "checksGeneratedEvidence": true,
+      "canPassWhileProductUnsafe": true,
+      "classification": "misleading_gate",
+      "correctionNeeded": "Rename or scope as generation only; independent validation must be separate."
+    }
+  ]
+}

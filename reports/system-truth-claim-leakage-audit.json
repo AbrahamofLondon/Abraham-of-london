@@ -1,0 +1,3868 @@
+{
+  "generatedAt": "2026-06-13T19:29:42.518Z",
+  "filesScanned": 5980,
+  "summary": {
+    "totalFindings": 51642,
+    "highRiskFindings": 17245,
+    "byStatus": {
+      "needs authority state check": 16622,
+      "unsupported": 623,
+      "bounded": 26996,
+      "stale": 7401
+    }
+  },
+  "highRiskFindings": [
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "line": 33,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "line": 105,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<p className=\"text-xl font-semibold\" style={{ color: GOLD }}>"
+    },
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "line": 175,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "style={{ ...mono, borderColor: `${GOLD}55`, color: GOLD }}"
+    },
+    {
+      "file": "app/actions/briefing.ts",
+      "line": 28,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "* Compiles registry data into a board-ready intelligence brief."
+    },
+    {
+      "file": "app/actions/deploy-intervention.ts",
+      "line": 15,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType?: \"DIRECT\" | \"PROXY\" | \"UNCLEAR\";"
+    },
+    {
+      "file": "app/actions/deploy-intervention.ts",
+      "line": 31,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType = \"PROXY\","
+    },
+    {
+      "file": "app/actions/deploy-intervention.ts",
+      "line": 45,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType,"
+    },
+    {
+      "file": "app/admin/campaigns/[id]/enterprise-report/page.tsx",
+      "line": 3,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Enterprise decision authority report — full pipeline output with FragilityRadar."
+    },
+    {
+      "file": "app/admin/campaigns/[id]/participant-table.tsx",
+      "line": 93,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "? `Validated: ${new Date(p.completedAt).toLocaleDateString('en-GB')}`"
+    },
+    {
+      "file": "app/admin/campaigns/[id]/participant-table.tsx",
+      "line": 139,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "label: 'Validated',"
+    },
+    {
+      "file": "app/admin/command/page.tsx",
+      "line": 23,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { isAuthorizedAdminSession } from \"@/lib/auth/admin-authority\";"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 5,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 64,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Commercial Authority"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 76,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<div style={{ ...mono, fontSize: \"1.5rem\", color: s.alert ? \"rgba(252,165,165,0.80)\" : GOLD }}>{s.value ?? 0}</div>"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 88,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<span style={{ ...mono, fontSize: \"8px\", color: GOLD }}>£{p.price}</span>"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 121,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<button onClick={lookupEmail} style={{ ...mono, fontSize: \"7px\", letterSpacing: \"0.14em\", textTransform: \"uppercase\", color: GOLD, background: \"none\", border: `1px solid ${GOLD}35`, padding: \"6px 12px\", cursor: \"pointer\" }}>"
+    },
+    {
+      "file": "app/admin/decision/contextual-efficacy/PageClient.tsx",
+      "line": 15,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: string;"
+    },
+    {
+      "file": "app/admin/decision/contextual-efficacy/PageClient.tsx",
+      "line": 25,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScore: number;"
+    },
+    {
+      "file": "app/admin/decision/contextual-ranking/PageClient.tsx",
+      "line": 17,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: string;"
+    },
+    {
+      "file": "app/admin/decision/contextual-ranking/PageClient.tsx",
+      "line": 27,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScore: number;"
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 216,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "title=\"Conditional Efficacy — By Authority Type\""
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 217,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "rows={efficacy.conditional?.byAuthorityType || []}"
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 238,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "title=\"Best Assets by Authority Type\""
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 239,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "rows={contextual.byAuthorityType || []}"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 59,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 100,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "color: accent ? GOLD : \"rgba(255,255,255,0.85)\","
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 167,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "backgroundColor: GOLD,"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 496,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "color: GOLD,"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 536,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "color: GOLD,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/brief-orders/PageClient.tsx",
+      "line": 13,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/brief-orders/PageClient.tsx",
+      "line": 342,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<p className=\"text-white/50\" style={{ color: selectedOrder.verificationToken ? GOLD : undefined }}>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 78,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"contradiction-scanner\":     \"Review the decision statement. Resolve contradictions and issue a revised directive with named authority.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 85,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"strategy-room\":             \"Issue a governance directive. Name the authority. Set a decision deadline.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 86,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"boardroom-mode\":            \"Review the executive brief. Resolve contradictions and obtain sign-off from the named authority.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 104,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/living-case-fulfilment/FulfilmentClient.tsx",
+      "line": 16,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = '#C9A96E'"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/page.tsx",
+      "line": 28,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "{ id: \"report-lineage-sim\",            category: \"Simulation\",   label: \"Report Lineage Simulation\",       href: \"/admin/intelligence-foundry/simulation/report-lineage\",                      desc: \"Runtime proof of governed product operatin"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/page.tsx",
+      "line": 29,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ id: \"constitutional-diagnostic-sim\", category: \"Simulation\",   label: \"Constitutional Diagnostic\",       href: \"/admin/intelligence-foundry/simulation/constitutional-diagnostic\",           desc: \"Interactive 10-question diagnostic using r"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 29,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 164,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 50,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "dimension: \"Authority Clarity\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 52,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "reference: \"≥ 85 — role-scoped authority matrix in place\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 53,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "simulation: \"40–60 — partial authority map, informal escalation\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 54,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "pilot: \"65–79 — authority map formalised, 80% adoption\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 75,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "description: \"Resource, authority, and cultural alignment for governed execution\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/boardroom-mode/PageClient.tsx",
+      "line": 37,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ value: \"qualifying\",     label: \"Qualifying — £8.5k/month, authority, accuracy confirmed\" },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/boardroom-mode/PageClient.tsx",
+      "line": 331,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<span className=\"text-white/50\">Authority condition</span>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 5,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// sliders per question. Returns constitutional route, authority score, coherence score,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 40,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScore?: number;"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 65,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ id: \"q7\",  text: \"There is a clear decision-maker who can authorise strategic intervention.\",                                              domain: \"authority\",   reverse: false },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 204,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Domain scoring across coherence, authority, environment, execution, trust, friction,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 315,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{typeof rawOutput?.authorityScore === \"number\" && ("
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/executive-reporting/PageClient.tsx",
+      "line": 71,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "label: \"Ordered — low dissonance, execution verified\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/fast-diagnostic/PageClient.tsx",
+      "line": 20,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q1\", prompt: \"Is decision ownership clear?\", value: 3 },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/fast-diagnostic/PageClient.tsx",
+      "line": 21,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q2\", prompt: \"Is there a named decision-maker?\", value: 3 },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/fast-diagnostic/PageClient.tsx",
+      "line": 29,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authority: \"Authority\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 20,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const AUTHORITY_OPTIONS = ["
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 32,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authority: { role: \"Chief Executive\", hasAuthority: \"Yes, fully\" as const, mandate: \"Full board mandate to resolve the growth ceiling decision and restructure the executive team within Q3.\" },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 33,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decision: { statement: \"We must decide whether to restructure the leadership team and delegate full P&L ownership to regional directors within the next 90 days, or pause expansion until the current authority structure is resolved.\", type: \""
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 36,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "readiness: { readyForUnpleasantDecision: \"Yes\" as \"Yes\" | \"No\", willingAccountability: \"Yes\" as \"Yes\" | \"No\", whyNow: \"The board has set a Q3 milestone. We are 60 days from it and the authority question is unresolved.\" },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 63,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authority: {"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 64,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "role: form.authority.role,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 65,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "hasAuthority: form.authority.hasAuthority,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 66,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "mandate: form.authority.mandate,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 186,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Runs real production logic: 8-component weighted scoring, authority gates, and decision directive derivation."
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 221,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Weak (authority=No, below threshold)"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 227,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{/* Authority */}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 231,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "value={form.authority.hasAuthority}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 232,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "onChange={(e) => setForm((f) => ({ ...f, authority: { ...f.authority, hasAuthority: e.target.value as typeof f.authority.hasAuthority } }))}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 235,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{AUTHORITY_OPTIONS.map((o) => ("
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 348,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<span className=\"text-white/50\">Authority (strong fixture)</span>"
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx",
+      "line": 61,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone?: \"neutral\" | \"gold\" | \"green\" | \"blue\" | \"red\";"
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx",
+      "line": 65,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "gold: \"border-amber-500/20 bg-amber-500/[0.08] text-amber-300\","
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx",
+      "line": 129,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "? \"gold\""
+    },
+    {
+      "file": "app/admin/organisations/[id]/page.tsx",
+      "line": 75,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone?: \"neutral\" | \"gold\" | \"green\" | \"blue\";"
+    },
+    {
+      "file": "app/admin/organisations/[id]/page.tsx",
+      "line": 79,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "gold: \"border-amber-500/20 bg-amber-500/[0.08] text-amber-300\","
+    },
+    {
+      "file": "app/admin/organisations/[id]/page.tsx",
+      "line": 362,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone=\"gold\""
+    },
+    {
+      "file": "app/admin/organisations/[id]/report/page.tsx",
+      "line": 97,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone?: \"neutral\" | \"gold\" | \"green\" | \"blue\" | \"red\";"
+    },
+    {
+      "file": "app/admin/organisations/[id]/report/page.tsx",
+      "line": 101,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "gold: \"border-amber-500/20 bg-amber-500/[0.08] text-amber-300\","
+    },
+    {
+      "file": "app/admin/organisations/[id]/report/page.tsx",
+      "line": 261,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "responseRate >= 70 ? \"green\" : responseRate >= 45 ? \"gold\" : \"red\";"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 21,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "type SurfaceAuthorityScore,"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 22,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "} from \"@/lib/product/product-surface-authority\";"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 68,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "function SurfaceRow({ surface, score }: { surface: ProductSurface; score?: SurfaceAuthorityScore }) {"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 94,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{surface.authorityGaps.length > 0 ? ("
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 95,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<span className={(surface.authorityGaps[0] ?? \"\").startsWith(\"[FAIL]\") ? \"text-red-300/70\" : \"text-amber-300/60\"}>"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 96,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{(surface.authorityGaps[0] ?? \"\").slice(0, 80)}{(surface.authorityGaps[0] ?? \"\").length > 80 ? \"…\" : \"\"}"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 106,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "function SurfaceTable({ surfaces, scores }: { surfaces: ProductSurface[]; scores: SurfaceAuthorityScore[] }) {"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 166,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Surface-by-surface authority map. Every named surface with a route, CTA, or buyer-facing promise is scored and classified here."
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 187,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ label: \"Paid with Gaps\", value: paidWithGaps.length.toString(), note: \"Paid surfaces with authority gaps\", tone: \"text-amber-300\" },"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 207,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<SectionHeader label=\"Paid Surfaces with Authority Gaps\" count={paidWithGaps.length} />"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 274,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Current exposure is more permissive than the authority score warrants. Review and reclassify."
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 6,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { ProductAuthorityPanel } from \"@/components/product/ProductAuthorityPanel\";"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 7,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { ProductAuthorityNotice } from \"@/components/product/ProductAuthorityNotice\";"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 9,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from \"@/lib/product/resolve-product-authority\";"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 70,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'executive_reporting');"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 71,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const contract = config ? resolveProductAuthority(config) : null;"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 74,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<ProductAuthorityPanel contract={contract} expanded={true} />"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 76,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<ProductAuthorityNotice contract={contract} />"
+    },
+    {
+      "file": "app/admin/strategy-room/page.tsx",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "redirect(\"/admin/authority-center\");"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 18,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "BoardroomDeliveryAuthorityError,"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 19,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "} from \"@/lib/boardroom/boardroom-brief-authority\";"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 103,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityResult = assertPaidDeliveryAuthorised({"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 118,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "inputSnapshotHash = authorityResult.inputSnapshotHash;"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 120,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "if (err instanceof BoardroomDeliveryAuthorityError) {"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 124,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "error: \"Paid delivery authority check failed\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 126,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "code: \"AUTHORITY_REJECTED\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 137,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "// For now, the spine is constructed from the verified order record itself."
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 189,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "label: \"Verified Boardroom Brief paid delivery spine\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 237,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "provenance: {"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 256,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "* Build a minimal real IntelligenceSpine from a verified paid order."
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 279,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "\"Generate a paid Boardroom Brief from a verified order for a consequential strategic decision.\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 282,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "const blocker = String(meta.blocker ?? \"The decision needs board-ready challenge, objection handling, and consequence framing.\");"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 283,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "const forcedAction = String(meta.forcedAction ?? \"Produce a board-ready brief and confirm the next admissible move.\");"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 312,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const signal = SIGNALS.AUTHORITY_LEAKAGE;"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 326,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "blockerClass: \"boardroom_delivery_authority\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 331,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "avoidedDecision: \"Avoiding a board-ready commitment on the paid decision record.\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 362,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "contribution: \"Verified paid Boardroom Brief order converted into boardroom delivery spine.\","
+    },
+    {
+      "file": "app/api/admin/campaigns/[id]/report/pdf/route.ts",
+      "line": 125,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: constitution.authorityType as any,"
+    },
+    {
+      "file": "app/api/admin/campaigns/[id]/report/route.ts",
+      "line": 44,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"authorityType\","
+    },
+    {
+      "file": "app/api/admin/campaigns/[id]/report/route.ts",
+      "line": 45,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "constitution.authorityType,"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 5,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { grantCanonicalEntitlement, resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 159,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "const verified = await resolveCanonicalEntitlement({"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 164,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!verified.granted || !verified.verified) {"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 168,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "// Mark as resolved only after canonical grant is verified"
+    },
+    {
+      "file": "app/api/admin/decision/contextual-ranking/route.ts",
+      "line": 54,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "byAuthorityType: byType(profiles, \"authorityType\"),"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 34,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityGain: number;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 50,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: number | string | null;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 66,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType?: string | null;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 77,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityDelta?: number | string | null;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 93,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityGain: 0,"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 123,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "avgAuthorityGain: Number("
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 124,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(bucket.followups > 0 ? bucket.authorityGain / bucket.followups : 0).toFixed(4),"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 184,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: toNumber(item.authorityImprovements),"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 194,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const byAuthorityType = new Map<string, ConditionBucket>();"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 217,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ map: byAuthorityType, key: safeString(session.authorityType) },"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 238,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "bucket.authorityGain += Math.max(0, toNumber(followup.authorityDelta));"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 266,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "byAuthorityType: serializeBucketMap(byAuthorityType),"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 51,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: number;"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 76,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: 0,"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 145,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "entry.authorityImprovements += Math.max("
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 147,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Number(followup.authorityDelta ?? 0)"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 171,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: row.authorityImprovements,"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 189,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: row.authorityImprovements,"
+    },
+    {
+      "file": "app/api/admin/decision-instrument-runs/route.ts",
+      "line": 42,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlementVerified: true,"
+    },
+    {
+      "file": "app/api/admin/dev-login/route.ts",
+      "line": 6,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "* that is verified against NextAuth in production flows."
+    },
+    {
+      "file": "app/api/admin/enterprise-foundation/route.ts",
+      "line": 6,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "} from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 45,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q1\", prompt: \"Decision clarity?\", value: 4 },"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 46,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q2\", prompt: \"Ownership clear?\", value: 3 },"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 58,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityFailures: [\"CEO override\"],"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 63,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityFailures: [\"CEO override\", \"Board bypass\"],"
+    },
+    {
+      "file": "app/api/admin/retainer/oversight-cycles/route.ts",
+      "line": 5,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// AUTHORITY RULES:"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 108,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "const validated = m.submitEnterpriseAssessmentSchema.safeParse({"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 112,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "if (!validated.success) {"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 116,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "validated.error.flatten(),"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 120,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "const score = m.scoreEnterpriseAssessment(validated.data.answers);"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 129,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "answersJson: validated.data.answers,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 26,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "const validatedData = createCampaignSchema.parse(body);"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 31,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "id: validatedData.organisationId,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 34,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "title: validatedData.title,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 35,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "objective: validatedData.objective ?? null,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 36,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "opensAt: validatedData.opensAt ? new Date(validatedData.opensAt) : null,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 37,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "closesAt: validatedData.closesAt ? new Date(validatedData.closesAt) : null,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 38,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "cadenceType: validatedData.cadenceType,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 40,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "createdByMembership: validatedData.createdByMembershipId ? {"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 42,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "id: validatedData.createdByMembershipId,"
+    },
+    {
+      "file": "app/api/analytics/executive-report/route.ts",
+      "line": 167,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "falseAuthority: spine.flags?.falseAuthority ?? false,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 47,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(domain.authority + domain.governance + domain.clarity + domain.execution + domain.trust) / 5;"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 66,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(domain.authority + domain.governance + domain.clarity + domain.execution + domain.trust) / 5,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 70,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(domain.authority + domain.governance + domain.clarity + domain.execution + domain.trust) / 5,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 95,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityPacket = buildGenericAuthorityPacket({"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 156,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "tensions: authorityPacket.nodes"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 160,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "evidenceNodes: authorityPacket.nodes,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 161,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decisionObject: authorityPacket.decisionObject,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 64,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const clarityValues = rows.map((row) => row.authorityClarity);"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 74,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const gap = Math.round(row.authorityClarity - row.executionTrust);"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 78,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "leaderPct: row.authorityClarity,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 92,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? \"Leadership likely believes authority is clearer than execution reality supports.\""
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 110,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityPacket = buildGenericAuthorityPacket({"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 125,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "formula: \"authority variance + trust gap + average friction / 2\","
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 127,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "`Authority variance: ${varianceIndex}`,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 172,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "tensions: authorityPacket.nodes"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 176,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "evidenceNodes: authorityPacket.nodes,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 177,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decisionObject: authorityPacket.decisionObject,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 182,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "tensions: authorityPacket.nodes"
+    },
+    {
+      "file": "app/api/audit/log/route.ts",
+      "line": 152,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "{ ok: true, logId, traceId, verifiedAt: nowIso },"
+    },
+    {
+      "file": "app/api/auth/sovereign/route.ts",
+      "line": 18,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "type AuthorityLevel ="
+    },
+    {
+      "file": "app/api/auth/sovereign/route.ts",
+      "line": 22,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "| \"AUTHORITY\""
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 11,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 131,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "const verified = await ensureEntitlementAfterPayment({"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 138,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!verified.ok || !verified.entitlement?.granted) {"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 165,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlement: verified.entitlement,"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 166,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlementVerified: verified.entitlement.verified,"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 167,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlementRepaired: verified.repaired,"
+    },
+    {
+      "file": "app/api/client-portal/dossier-redirect/route.ts",
+      "line": 14,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "//  - Redirect is to the boardroom dossier page with a fresh, validated token"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 29,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 41,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<span style=\"font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.4em;color:${GOLD};\">"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 52,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "background:rgba(201,169,110,0.1);color:${GOLD};font-family:monospace;"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 63,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Abraham of London · Decision Authority Infrastructure"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 78,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"Abraham of London · Decision Authority Infrastructure\","
+    },
+    {
+      "file": "app/api/constitutional/appeal/route.ts",
+      "line": 6,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { createAppeal, type ConstitutionalAction } from '@/lib/constitution/constitutional-authority';"
+    },
+    {
+      "file": "app/api/cron/escalation/route.ts",
+      "line": 43,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verificationStatus: { not: \"verified\" },"
+    },
+    {
+      "file": "app/api/decision/guidance/route.ts",
+      "line": 12,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "import { normalisePurposeAlignmentEvidence } from \"@/lib/product/field-provenance-normaliser\";"
+    },
+    {
+      "file": "app/api/decision/guidance/route.ts",
+      "line": 111,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "provenance: normalisePurposeAlignmentEvidence(paEvidence, {"
+    },
+    {
+      "file": "app/api/decisions/return-brief/route.ts",
+      "line": 15,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// AUTHORITY RULES:"
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 10,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityStated: true,"
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 27,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "required: \"Escalate to named authority and replace committee approval with one accountable owner.\","
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 36,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "immediateEffect: \"Escalation surfaces the authority vacuum and forces a named authority response.\","
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 43,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "immediateEffect: \"Informal authority continues to fill the vacuum.\","
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 7,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 41,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityInput: z.record(z.string(), z.unknown()).optional().nullable(),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 169,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "const verifiedToken = token"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 177,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!identityEmail && !verifiedToken?.ok) {"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 188,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!verifiedToken?.ok && requestedSubjectId && identity.subjectId !== requestedSubjectId) {"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 270,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedToken?.ok &&"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 272,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedToken.payload.subject !== decision.id &&"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 273,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedToken.payload.subject !== decision.sessionId"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 286,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (verifiedToken?.ok && requestedSubjectId && verifiedToken.payload.subject !== requestedSubjectId) {"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 297,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityInput = isObject(body?.authorityInput) ? body.authorityInput : null;"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 298,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const generatedPacket = authorityInput"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 299,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? buildGenericAuthorityPacket({"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 301,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "condition: s(authorityInput.condition, \"Diagnostic condition\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 302,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "contradiction: s(authorityInput.contradiction, \"Contradiction evidence recorded.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 303,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decisionText: s(authorityInput.decisionText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 304,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "constraintText: s(authorityInput.constraintText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 305,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "priorAttemptText: s(authorityInput.priorAttemptText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 306,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "costOfDelayText: s(authorityInput.costOfDelayText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 307,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "stakeholderText: s(authorityInput.stakeholderText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 308,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "affectedDomain: s(authorityInput.affectedDomain) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 309,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "firstMove: s(authorityInput.firstMove, \"Name the first corrective move and owner.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 310,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "skippedConsequence: s(authorityInput.skippedConsequence, \"The condition remains unpriced and unmanaged.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 311,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "escalationCondition: s(authorityInput.escalationCondition, \"Escalate if the contradiction repeats in the next stage.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 312,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "riskScore: typeof authorityInput.riskScore === \"number\" ? authorityInput.riskScore : 50,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 313,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "formula: s(authorityInput.formula, \"stage risk score\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 314,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "reasoning: Array.isArray(authorityInput.reasoning)"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 315,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? authorityInput.reasoning.map(String).filter(Boolean)"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 317,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "confidence: typeof authorityInput.confidence === \"number\" ? authorityInput.confidence : 0.65,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 318,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "payload: isObject(authorityInput.payload) ? authorityInput.payload : undefined,"
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 168,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: \"UNCLEAR\","
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 184,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityClarity: 50,"
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 198,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract: every diagnostic response includes these fields"
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 212,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/multi-stakeholder/route.ts",
+      "line": 177,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/multi-stakeholder/route.ts",
+      "line": 187,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/outcome/route.ts",
+      "line": 174,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/outcome/route.ts",
+      "line": 185,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/downloads/[slug]/route.ts",
+      "line": 7,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/enterprise-foundation/dependencies/route.ts",
+      "line": 3,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { createDecisionDependency, getDecisionImpactView } from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/enterprise-foundation/playbooks/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { applyEnforcementPlaybook, createEnforcementPlaybook } from \"@/lib/enterprise-foundation/authority-foundation\";"
+    }
+  ],
+  "sampleFindings": [
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "line": 33,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "line": 105,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<p className=\"text-xl font-semibold\" style={{ color: GOLD }}>"
+    },
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "line": 175,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "style={{ ...mono, borderColor: `${GOLD}55`, color: GOLD }}"
+    },
+    {
+      "file": "app/actions/briefing.ts",
+      "line": 28,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "* Compiles registry data into a board-ready intelligence brief."
+    },
+    {
+      "file": "app/actions/deploy-intervention.ts",
+      "line": 15,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType?: \"DIRECT\" | \"PROXY\" | \"UNCLEAR\";"
+    },
+    {
+      "file": "app/actions/deploy-intervention.ts",
+      "line": 31,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType = \"PROXY\","
+    },
+    {
+      "file": "app/actions/deploy-intervention.ts",
+      "line": 45,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType,"
+    },
+    {
+      "file": "app/admin/campaigns/[id]/enterprise-report/page.tsx",
+      "line": 3,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Enterprise decision authority report — full pipeline output with FragilityRadar."
+    },
+    {
+      "file": "app/admin/campaigns/[id]/participant-table.tsx",
+      "line": 93,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "? `Validated: ${new Date(p.completedAt).toLocaleDateString('en-GB')}`"
+    },
+    {
+      "file": "app/admin/campaigns/[id]/participant-table.tsx",
+      "line": 139,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "label: 'Validated',"
+    },
+    {
+      "file": "app/admin/command/page.tsx",
+      "line": 23,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { isAuthorizedAdminSession } from \"@/lib/auth/admin-authority\";"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 5,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 64,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Commercial Authority"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 76,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<div style={{ ...mono, fontSize: \"1.5rem\", color: s.alert ? \"rgba(252,165,165,0.80)\" : GOLD }}>{s.value ?? 0}</div>"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 88,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<span style={{ ...mono, fontSize: \"8px\", color: GOLD }}>£{p.price}</span>"
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "line": 121,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<button onClick={lookupEmail} style={{ ...mono, fontSize: \"7px\", letterSpacing: \"0.14em\", textTransform: \"uppercase\", color: GOLD, background: \"none\", border: `1px solid ${GOLD}35`, padding: \"6px 12px\", cursor: \"pointer\" }}>"
+    },
+    {
+      "file": "app/admin/decision/contextual-efficacy/PageClient.tsx",
+      "line": 15,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: string;"
+    },
+    {
+      "file": "app/admin/decision/contextual-efficacy/PageClient.tsx",
+      "line": 25,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScore: number;"
+    },
+    {
+      "file": "app/admin/decision/contextual-ranking/PageClient.tsx",
+      "line": 17,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: string;"
+    },
+    {
+      "file": "app/admin/decision/contextual-ranking/PageClient.tsx",
+      "line": 27,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScore: number;"
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 216,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "title=\"Conditional Efficacy — By Authority Type\""
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 217,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "rows={efficacy.conditional?.byAuthorityType || []}"
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 238,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "title=\"Best Assets by Authority Type\""
+    },
+    {
+      "file": "app/admin/decision/efficacy/page.tsx",
+      "line": 239,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "rows={contextual.byAuthorityType || []}"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 59,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 100,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "color: accent ? GOLD : \"rgba(255,255,255,0.85)\","
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 167,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "backgroundColor: GOLD,"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 496,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "color: GOLD,"
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "line": 536,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "color: GOLD,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/brief-orders/PageClient.tsx",
+      "line": 13,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/brief-orders/PageClient.tsx",
+      "line": 342,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<p className=\"text-white/50\" style={{ color: selectedOrder.verificationToken ? GOLD : undefined }}>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/content/PageClient.tsx",
+      "line": 190,
+      "term": "authority",
+      "status": "bounded",
+      "context": "evidence posture weakness, authority claim leakage. No AI — all findings reference"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 58,
+      "term": "authority",
+      "status": "bounded",
+      "context": "\"constitutional-diagnostic\":    \"This decision lacks a named authority or evidence chain. It cannot be executed, reversed, or audited — increasing the governance liability on this surface.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 61,
+      "term": "validated",
+      "status": "bounded",
+      "context": "\"content-red-team\":             \"A product claim in this surface has not been validated. If it reaches analysts or regulators, it will require emergency remediation.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 78,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"contradiction-scanner\":     \"Review the decision statement. Resolve contradictions and issue a revised directive with named authority.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 79,
+      "term": "authority",
+      "status": "bounded",
+      "context": "\"constitutional-diagnostic\": \"Run a full Constitutional Diagnostic with evidence chain. Assign a named authority before proceeding.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 85,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"strategy-room\":             \"Issue a governance directive. Name the authority. Set a decision deadline.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 86,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"boardroom-mode\":            \"Review the executive brief. Resolve contradictions and obtain sign-off from the named authority.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 104,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "line": 296,
+      "term": "gold",
+      "status": "bounded",
+      "context": "<p className=\"font-mono text-[9px] uppercase tracking-wider mb-2\" style={{ color: `${GOLD}55` }}>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/living-case-fulfilment/FulfilmentClient.tsx",
+      "line": 16,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = '#C9A96E'"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/page.tsx",
+      "line": 24,
+      "term": "authority",
+      "status": "bounded",
+      "context": "{ id: \"strategy-room-sim\",             category: \"Simulation\",   label: \"Strategy Room Simulator\",         href: \"/admin/intelligence-foundry/simulation/strategy-room\",                       desc: \"Dry-run Strategy Room intake scoring: 8-co"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/page.tsx",
+      "line": 28,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "{ id: \"report-lineage-sim\",            category: \"Simulation\",   label: \"Report Lineage Simulation\",       href: \"/admin/intelligence-foundry/simulation/report-lineage\",                      desc: \"Runtime proof of governed product operatin"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/page.tsx",
+      "line": 29,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ id: \"constitutional-diagnostic-sim\", category: \"Simulation\",   label: \"Constitutional Diagnostic\",       href: \"/admin/intelligence-foundry/simulation/constitutional-diagnostic\",           desc: \"Interactive 10-question diagnostic using r"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 29,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 35,
+      "term": "validated",
+      "status": "bounded",
+      "context": "\"board political pressure incomplete evidence\": \"The board needs to decide whether to acquire a competitor by next quarter. The CEO is pushing hard for it but the due diligence is incomplete. Two board members have conflicts of interest. Th"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 38,
+      "term": "authority",
+      "status": "bounded",
+      "context": "\"family/legal/admin deadline harm of delay\": \"I need to make a decision about my mother's power of attorney. She has dementia and can no longer manage her affairs. Her savings are running out. The care home fees are increasing. If I don't a"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 43,
+      "term": "proven",
+      "status": "bounded",
+      "context": "\"executive reputational exposure\": \"A senior partner at our firm has been accused of misconduct by a former employee. The allegations are unproven but damaging. The partner denies everything. We need to decide whether to launch an internal "
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "line": 164,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "style={{ borderColor: `${GOLD}50`, color: GOLD, backgroundColor: `${GOLD}12` }}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 50,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "dimension: \"Authority Clarity\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 52,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "reference: \"≥ 85 — role-scoped authority matrix in place\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 53,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "simulation: \"40–60 — partial authority map, informal escalation\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 54,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "pilot: \"65–79 — authority map formalised, 80% adoption\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/reference/page.tsx",
+      "line": 75,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "description: \"Resource, authority, and cultural alignment for governed execution\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/scenario/PageClient.tsx",
+      "line": 63,
+      "term": "authority",
+      "status": "bounded",
+      "context": "text: \"We work with founders who have built evidence-based authority in their sector and want to communicate it without compromise. Book a diagnostic call.\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/boardroom-mode/PageClient.tsx",
+      "line": 37,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ value: \"qualifying\",     label: \"Qualifying — £8.5k/month, authority, accuracy confirmed\" },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/boardroom-mode/PageClient.tsx",
+      "line": 331,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<span className=\"text-white/50\">Authority condition</span>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 5,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// sliders per question. Returns constitutional route, authority score, coherence score,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 40,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScore?: number;"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 60,
+      "term": "authority",
+      "status": "bounded",
+      "context": "{ id: \"q2\",  text: \"Decision authority is clear and exercised without chronic diffusion or bottleneck.\",                                     domain: \"authority\",   reverse: false },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 65,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ id: \"q7\",  text: \"There is a clear decision-maker who can authorise strategic intervention.\",                                              domain: \"authority\",   reverse: false },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 204,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Domain scoring across coherence, authority, environment, execution, trust, friction,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 315,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{typeof rawOutput?.authorityScore === \"number\" && ("
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 317,
+      "term": "authority",
+      "status": "bounded",
+      "context": "<p className=\"text-[9px] font-mono uppercase text-white/20 mb-0.5\">Authority</p>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/constitutional-diagnostic/PageClient.tsx",
+      "line": 318,
+      "term": "authority",
+      "status": "bounded",
+      "context": "<p className=\"text-xl font-mono text-white/60\">{rawOutput.authorityScore}</p>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/executive-reporting/PageClient.tsx",
+      "line": 71,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "label: \"Ordered — low dissonance, execution verified\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/fast-diagnostic/PageClient.tsx",
+      "line": 20,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q1\", prompt: \"Is decision ownership clear?\", value: 3 },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/fast-diagnostic/PageClient.tsx",
+      "line": 21,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q2\", prompt: \"Is there a named decision-maker?\", value: 3 },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/fast-diagnostic/PageClient.tsx",
+      "line": 29,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authority: \"Authority\","
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 20,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const AUTHORITY_OPTIONS = ["
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 32,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authority: { role: \"Chief Executive\", hasAuthority: \"Yes, fully\" as const, mandate: \"Full board mandate to resolve the growth ceiling decision and restructure the executive team within Q3.\" },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 33,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decision: { statement: \"We must decide whether to restructure the leadership team and delegate full P&L ownership to regional directors within the next 90 days, or pause expansion until the current authority structure is resolved.\", type: \""
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 34,
+      "term": "authority",
+      "status": "bounded",
+      "context": "constraints: { avoidedTradeOff: \"Cannot trade governance clarity for short-term revenue. The cost of authority ambiguity now exceeds the risk of restructuring.\", unacceptableOutcome: \"Another 90 days of drift without a named decision owner."
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 36,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "readiness: { readyForUnpleasantDecision: \"Yes\" as \"Yes\" | \"No\", willingAccountability: \"Yes\" as \"Yes\" | \"No\", whyNow: \"The board has set a Q3 milestone. We are 60 days from it and the authority question is unresolved.\" },"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 63,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authority: {"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 64,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "role: form.authority.role,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 65,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "hasAuthority: form.authority.hasAuthority,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 66,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "mandate: form.authority.mandate,"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 186,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Runs real production logic: 8-component weighted scoring, authority gates, and decision directive derivation."
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 221,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Weak (authority=No, below threshold)"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 227,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{/* Authority */}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 229,
+      "term": "authority",
+      "status": "bounded",
+      "context": "<p className=\"text-[10px] font-mono uppercase tracking-wider text-white/20\">Authority</p>"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 231,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "value={form.authority.hasAuthority}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 232,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "onChange={(e) => setForm((f) => ({ ...f, authority: { ...f.authority, hasAuthority: e.target.value as typeof f.authority.hasAuthority } }))}"
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 235,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{AUTHORITY_OPTIONS.map((o) => ("
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "line": 348,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<span className=\"text-white/50\">Authority (strong fixture)</span>"
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx",
+      "line": 61,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone?: \"neutral\" | \"gold\" | \"green\" | \"blue\" | \"red\";"
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx",
+      "line": 65,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "gold: \"border-amber-500/20 bg-amber-500/[0.08] text-amber-300\","
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx",
+      "line": 129,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "? \"gold\""
+    },
+    {
+      "file": "app/admin/organisations/[id]/page.tsx",
+      "line": 75,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone?: \"neutral\" | \"gold\" | \"green\" | \"blue\";"
+    },
+    {
+      "file": "app/admin/organisations/[id]/page.tsx",
+      "line": 79,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "gold: \"border-amber-500/20 bg-amber-500/[0.08] text-amber-300\","
+    },
+    {
+      "file": "app/admin/organisations/[id]/page.tsx",
+      "line": 362,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone=\"gold\""
+    },
+    {
+      "file": "app/admin/organisations/[id]/report/page.tsx",
+      "line": 97,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "tone?: \"neutral\" | \"gold\" | \"green\" | \"blue\" | \"red\";"
+    },
+    {
+      "file": "app/admin/organisations/[id]/report/page.tsx",
+      "line": 101,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "gold: \"border-amber-500/20 bg-amber-500/[0.08] text-amber-300\","
+    },
+    {
+      "file": "app/admin/organisations/[id]/report/page.tsx",
+      "line": 261,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "responseRate >= 70 ? \"green\" : responseRate >= 45 ? \"gold\" : \"red\";"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 21,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "type SurfaceAuthorityScore,"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 22,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "} from \"@/lib/product/product-surface-authority\";"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 68,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "function SurfaceRow({ surface, score }: { surface: ProductSurface; score?: SurfaceAuthorityScore }) {"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 94,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{surface.authorityGaps.length > 0 ? ("
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 95,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<span className={(surface.authorityGaps[0] ?? \"\").startsWith(\"[FAIL]\") ? \"text-red-300/70\" : \"text-amber-300/60\"}>"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 96,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{(surface.authorityGaps[0] ?? \"\").slice(0, 80)}{(surface.authorityGaps[0] ?? \"\").length > 80 ? \"…\" : \"\"}"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 106,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "function SurfaceTable({ surfaces, scores }: { surfaces: ProductSurface[]; scores: SurfaceAuthorityScore[] }) {"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 166,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Surface-by-surface authority map. Every named surface with a route, CTA, or buyer-facing promise is scored and classified here."
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 187,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ label: \"Paid with Gaps\", value: paidWithGaps.length.toString(), note: \"Paid surfaces with authority gaps\", tone: \"text-amber-300\" },"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 207,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<SectionHeader label=\"Paid Surfaces with Authority Gaps\" count={paidWithGaps.length} />"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 209,
+      "term": "authority",
+      "status": "bounded",
+      "context": "These surfaces accept payment. Authority gaps in entitlement, fulfilment, or market_authority must be closed before these surfaces are positioned as primary paid CTAs."
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 258,
+      "term": "authority",
+      "status": "bounded",
+      "context": "Supporting layers must not be sold as standalone products unless explicitly productised. Continuity Console requires case record. Authority Lens must position as a lens, not a replacement for Enterprise Assessment."
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 274,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Current exposure is more permissive than the authority score warrants. Review and reclassify."
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 295,
+      "term": "proven",
+      "status": "bounded",
+      "context": "{/* ─── Runtime Provenance Risks (legacy) ───────────────────────────── */}"
+    },
+    {
+      "file": "app/admin/product-estate/page.tsx",
+      "line": 297,
+      "term": "proven",
+      "status": "bounded",
+      "context": "<p className=\"mb-4 font-mono text-[10px] uppercase tracking-wide text-red-200/70\">Runtime Provenance Risks</p>"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 6,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { ProductAuthorityPanel } from \"@/components/product/ProductAuthorityPanel\";"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 7,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { ProductAuthorityNotice } from \"@/components/product/ProductAuthorityNotice\";"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 9,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from \"@/lib/product/resolve-product-authority\";"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 68,
+      "term": "authority",
+      "status": "bounded",
+      "context": "{/* Product Authority before Release */}"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 70,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'executive_reporting');"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 71,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const contract = config ? resolveProductAuthority(config) : null;"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 74,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<ProductAuthorityPanel contract={contract} expanded={true} />"
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "line": 76,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "<ProductAuthorityNotice contract={contract} />"
+    },
+    {
+      "file": "app/admin/strategy-room/page.tsx",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "redirect(\"/admin/authority-center\");"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "bounded",
+      "context": "// AUTHORITY RULES (enforced, not advisory):"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 18,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "BoardroomDeliveryAuthorityError,"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 19,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "} from \"@/lib/boardroom/boardroom-brief-authority\";"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 100,
+      "term": "authority",
+      "status": "bounded",
+      "context": "// ── Step 3: Authority gate — NO FIXTURE DATA MAY PASS THIS POINT ────────────"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 103,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityResult = assertPaidDeliveryAuthorised({"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 118,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "inputSnapshotHash = authorityResult.inputSnapshotHash;"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 120,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "if (err instanceof BoardroomDeliveryAuthorityError) {"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 124,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "error: \"Paid delivery authority check failed\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 126,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "code: \"AUTHORITY_REJECTED\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 137,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "// For now, the spine is constructed from the verified order record itself."
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 189,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "label: \"Verified Boardroom Brief paid delivery spine\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 237,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "provenance: {"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 256,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "* Build a minimal real IntelligenceSpine from a verified paid order."
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 279,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "\"Generate a paid Boardroom Brief from a verified order for a consequential strategic decision.\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 282,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "const blocker = String(meta.blocker ?? \"The decision needs board-ready challenge, objection handling, and consequence framing.\");"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 283,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "const forcedAction = String(meta.forcedAction ?? \"Produce a board-ready brief and confirm the next admissible move.\");"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 312,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const signal = SIGNALS.AUTHORITY_LEAKAGE;"
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 326,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "blockerClass: \"boardroom_delivery_authority\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 331,
+      "term": "board-ready",
+      "status": "unsupported",
+      "context": "avoidedDecision: \"Avoiding a board-ready commitment on the paid decision record.\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 336,
+      "term": "verified",
+      "status": "bounded",
+      "context": "certaintyBoundary: \"Generated from verified paid Boardroom Brief order metadata; it does not infer facts outside the order and provided metadata.\","
+    },
+    {
+      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
+      "line": 362,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "contribution: \"Verified paid Boardroom Brief order converted into boardroom delivery spine.\","
+    },
+    {
+      "file": "app/api/admin/campaigns/[id]/report/pdf/route.ts",
+      "line": 125,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: constitution.authorityType as any,"
+    },
+    {
+      "file": "app/api/admin/campaigns/[id]/report/route.ts",
+      "line": 44,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"authorityType\","
+    },
+    {
+      "file": "app/api/admin/campaigns/[id]/report/route.ts",
+      "line": 45,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "constitution.authorityType,"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 5,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { grantCanonicalEntitlement, resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 151,
+      "term": "authority",
+      "status": "bounded",
+      "context": "// Use canonical grant authority — no direct DB writes"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 159,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "const verified = await resolveCanonicalEntitlement({"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 164,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!verified.granted || !verified.verified) {"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 165,
+      "term": "verified",
+      "status": "bounded",
+      "context": "return NextResponse.json({ error: \"Repair attempted but grant not verified. Manual DB intervention required.\" }, { status: 500 });"
+    },
+    {
+      "file": "app/api/admin/commercial/route.ts",
+      "line": 168,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "// Mark as resolved only after canonical grant is verified"
+    },
+    {
+      "file": "app/api/admin/decision/contextual-ranking/route.ts",
+      "line": 54,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "byAuthorityType: byType(profiles, \"authorityType\"),"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 34,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityGain: number;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 50,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: number | string | null;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 66,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType?: string | null;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 77,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityDelta?: number | string | null;"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 93,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityGain: 0,"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 123,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "avgAuthorityGain: Number("
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 124,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(bucket.followups > 0 ? bucket.authorityGain / bucket.followups : 0).toFixed(4),"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 184,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: toNumber(item.authorityImprovements),"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 194,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const byAuthorityType = new Map<string, ConditionBucket>();"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 217,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ map: byAuthorityType, key: safeString(session.authorityType) },"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 238,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "bucket.authorityGain += Math.max(0, toNumber(followup.authorityDelta));"
+    },
+    {
+      "file": "app/api/admin/decision/efficacy/route.ts",
+      "line": 266,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "byAuthorityType: serializeBucketMap(byAuthorityType),"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 51,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: number;"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 76,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: 0,"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 145,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "entry.authorityImprovements += Math.max("
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 147,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Number(followup.authorityDelta ?? 0)"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 171,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: row.authorityImprovements,"
+    },
+    {
+      "file": "app/api/admin/decision/rebuild-efficacy/route.ts",
+      "line": 189,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityImprovements: row.authorityImprovements,"
+    },
+    {
+      "file": "app/api/admin/decision-instrument-runs/route.ts",
+      "line": 42,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlementVerified: true,"
+    },
+    {
+      "file": "app/api/admin/dev-login/route.ts",
+      "line": 5,
+      "term": "authority",
+      "status": "bounded",
+      "context": "* Does NOT create independent admin authority — sets a dev-only cookie"
+    },
+    {
+      "file": "app/api/admin/dev-login/route.ts",
+      "line": 6,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "* that is verified against NextAuth in production flows."
+    },
+    {
+      "file": "app/api/admin/enterprise-foundation/route.ts",
+      "line": 6,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "} from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 45,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q1\", prompt: \"Decision clarity?\", value: 4 },"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 46,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "{ sectionId: \"authority\", questionId: \"q2\", prompt: \"Ownership clear?\", value: 3 },"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 58,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityFailures: [\"CEO override\"],"
+    },
+    {
+      "file": "app/api/admin/intelligence-foundry/performance/run/route.ts",
+      "line": 63,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityFailures: [\"CEO override\", \"Board bypass\"],"
+    },
+    {
+      "file": "app/api/admin/retainer/oversight-cycles/route.ts",
+      "line": 5,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// AUTHORITY RULES:"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 108,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "const validated = m.submitEnterpriseAssessmentSchema.safeParse({"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 112,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "if (!validated.success) {"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 116,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "validated.error.flatten(),"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 120,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "const score = m.scoreEnterpriseAssessment(validated.data.answers);"
+    },
+    {
+      "file": "app/api/alignment/enterprise/assessments/route.ts",
+      "line": 129,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "answersJson: validated.data.answers,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 26,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "const validatedData = createCampaignSchema.parse(body);"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 31,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "id: validatedData.organisationId,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 34,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "title: validatedData.title,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 35,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "objective: validatedData.objective ?? null,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 36,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "opensAt: validatedData.opensAt ? new Date(validatedData.opensAt) : null,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 37,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "closesAt: validatedData.closesAt ? new Date(validatedData.closesAt) : null,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 38,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "cadenceType: validatedData.cadenceType,"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 40,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "createdByMembership: validatedData.createdByMembershipId ? {"
+    },
+    {
+      "file": "app/api/alignment/enterprise/campaigns/route.ts",
+      "line": 42,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "id: validatedData.createdByMembershipId,"
+    },
+    {
+      "file": "app/api/analytics/executive-report/route.ts",
+      "line": 167,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "falseAuthority: spine.flags?.falseAuthority ?? false,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 47,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(domain.authority + domain.governance + domain.clarity + domain.execution + domain.trust) / 5;"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 66,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(domain.authority + domain.governance + domain.clarity + domain.execution + domain.trust) / 5,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 70,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "(domain.authority + domain.governance + domain.clarity + domain.execution + domain.trust) / 5,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 95,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityPacket = buildGenericAuthorityPacket({"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 156,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "tensions: authorityPacket.nodes"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 160,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "evidenceNodes: authorityPacket.nodes,"
+    },
+    {
+      "file": "app/api/assessments/enterprise/run/route.ts",
+      "line": 161,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decisionObject: authorityPacket.decisionObject,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 64,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const clarityValues = rows.map((row) => row.authorityClarity);"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 74,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const gap = Math.round(row.authorityClarity - row.executionTrust);"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 78,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "leaderPct: row.authorityClarity,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 92,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? \"Leadership likely believes authority is clearer than execution reality supports.\""
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 110,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityPacket = buildGenericAuthorityPacket({"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 125,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "formula: \"authority variance + trust gap + average friction / 2\","
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 127,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "`Authority variance: ${varianceIndex}`,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 172,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "tensions: authorityPacket.nodes"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 176,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "evidenceNodes: authorityPacket.nodes,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 177,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decisionObject: authorityPacket.decisionObject,"
+    },
+    {
+      "file": "app/api/assessments/team/run/route.ts",
+      "line": 182,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "tensions: authorityPacket.nodes"
+    },
+    {
+      "file": "app/api/audit/log/route.ts",
+      "line": 152,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "{ ok: true, logId, traceId, verifiedAt: nowIso },"
+    },
+    {
+      "file": "app/api/audit/[id]/success/page.tsx",
+      "line": 39,
+      "term": "verified",
+      "status": "bounded",
+      "context": "<span className=\"text-[7px] font-mono uppercase tracking-wider text-neutral-500\">Verified</span>"
+    },
+    {
+      "file": "app/api/auth/sovereign/route.ts",
+      "line": 18,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "type AuthorityLevel ="
+    },
+    {
+      "file": "app/api/auth/sovereign/route.ts",
+      "line": 22,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "| \"AUTHORITY\""
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 11,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 131,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "const verified = await ensureEntitlementAfterPayment({"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 138,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!verified.ok || !verified.entitlement?.granted) {"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 165,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlement: verified.entitlement,"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 166,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlementVerified: verified.entitlement.verified,"
+    },
+    {
+      "file": "app/api/checkout/route.ts",
+      "line": 167,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "entitlementRepaired: verified.repaired,"
+    },
+    {
+      "file": "app/api/client-portal/dossier-redirect/route.ts",
+      "line": 14,
+      "term": "validated",
+      "status": "needs authority state check",
+      "context": "//  - Redirect is to the boardroom dossier page with a fresh, validated token"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 29,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "const GOLD = \"#C9A96E\";"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 41,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "<span style=\"font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.4em;color:${GOLD};\">"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 52,
+      "term": "gold",
+      "status": "needs authority state check",
+      "context": "background:rgba(201,169,110,0.1);color:${GOLD};font-family:monospace;"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 63,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "Abraham of London · Decision Authority Infrastructure"
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "line": 78,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "\"Abraham of London · Decision Authority Infrastructure\","
+    },
+    {
+      "file": "app/api/constitutional/appeal/route.ts",
+      "line": 6,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { createAppeal, type ConstitutionalAction } from '@/lib/constitution/constitutional-authority';"
+    },
+    {
+      "file": "app/api/cron/escalation/route.ts",
+      "line": 43,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verificationStatus: { not: \"verified\" },"
+    },
+    {
+      "file": "app/api/decision/guidance/route.ts",
+      "line": 12,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "import { normalisePurposeAlignmentEvidence } from \"@/lib/product/field-provenance-normaliser\";"
+    },
+    {
+      "file": "app/api/decision/guidance/route.ts",
+      "line": 111,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "provenance: normalisePurposeAlignmentEvidence(paEvidence, {"
+    },
+    {
+      "file": "app/api/decisions/return-brief/route.ts",
+      "line": 15,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// AUTHORITY RULES:"
+    },
+    {
+      "file": "app/api/decisions/return-brief/route.ts",
+      "line": 74,
+      "term": "verified",
+      "status": "bounded",
+      "context": "UNKNOWN:   'Decision outcome: unverified. ',"
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 10,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityStated: true,"
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 23,
+      "term": "authority",
+      "status": "bounded",
+      "context": "\"The sponsor says execution is urgent, but no owner has been given authority to force the move.\","
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 27,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "required: \"Escalate to named authority and replace committee approval with one accountable owner.\","
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 29,
+      "term": "authority",
+      "status": "bounded",
+      "context": "reason: \"Execution cannot proceed while authority remains distributed across a non-binding committee.\","
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 36,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "immediateEffect: \"Escalation surfaces the authority vacuum and forces a named authority response.\","
+    },
+    {
+      "file": "app/api/demo/governed-decision/route.ts",
+      "line": 43,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "immediateEffect: \"Informal authority continues to fill the vacuum.\","
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 7,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 41,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityInput: z.record(z.string(), z.unknown()).optional().nullable(),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 169,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "const verifiedToken = token"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 177,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!identityEmail && !verifiedToken?.ok) {"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 188,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (!verifiedToken?.ok && requestedSubjectId && identity.subjectId !== requestedSubjectId) {"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 270,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedToken?.ok &&"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 272,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedToken.payload.subject !== decision.id &&"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 273,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedToken.payload.subject !== decision.sessionId"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 286,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "if (verifiedToken?.ok && requestedSubjectId && verifiedToken.payload.subject !== requestedSubjectId) {"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 297,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityInput = isObject(body?.authorityInput) ? body.authorityInput : null;"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 298,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const generatedPacket = authorityInput"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 299,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? buildGenericAuthorityPacket({"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 301,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "condition: s(authorityInput.condition, \"Diagnostic condition\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 302,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "contradiction: s(authorityInput.contradiction, \"Contradiction evidence recorded.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 303,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "decisionText: s(authorityInput.decisionText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 304,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "constraintText: s(authorityInput.constraintText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 305,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "priorAttemptText: s(authorityInput.priorAttemptText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 306,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "costOfDelayText: s(authorityInput.costOfDelayText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 307,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "stakeholderText: s(authorityInput.stakeholderText) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 308,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "affectedDomain: s(authorityInput.affectedDomain) || null,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 309,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "firstMove: s(authorityInput.firstMove, \"Name the first corrective move and owner.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 310,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "skippedConsequence: s(authorityInput.skippedConsequence, \"The condition remains unpriced and unmanaged.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 311,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "escalationCondition: s(authorityInput.escalationCondition, \"Escalate if the contradiction repeats in the next stage.\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 312,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "riskScore: typeof authorityInput.riskScore === \"number\" ? authorityInput.riskScore : 50,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 313,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "formula: s(authorityInput.formula, \"stage risk score\"),"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 314,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "reasoning: Array.isArray(authorityInput.reasoning)"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 315,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? authorityInput.reasoning.map(String).filter(Boolean)"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 317,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "confidence: typeof authorityInput.confidence === \"number\" ? authorityInput.confidence : 0.65,"
+    },
+    {
+      "file": "app/api/diagnostics/evidence/route.ts",
+      "line": 318,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "payload: isObject(authorityInput.payload) ? authorityInput.payload : undefined,"
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 168,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: \"UNCLEAR\","
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 184,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityClarity: 50,"
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 198,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract: every diagnostic response includes these fields"
+    },
+    {
+      "file": "app/api/diagnostics/longitudinal/route.ts",
+      "line": 212,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/multi-stakeholder/route.ts",
+      "line": 155,
+      "term": "authority",
+      "status": "bounded",
+      "context": "summary: `${d.domain}: ${d.respondentA.label} sees ${d.respondentA.score}%, ${d.respondentB.label} sees ${d.respondentB.score}%. Authority is not operating from the same reality in this domain.`,"
+    },
+    {
+      "file": "app/api/diagnostics/multi-stakeholder/route.ts",
+      "line": 177,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/multi-stakeholder/route.ts",
+      "line": 187,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/outcome/route.ts",
+      "line": 174,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/diagnostics/outcome/route.ts",
+      "line": 185,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "// Authority contract"
+    },
+    {
+      "file": "app/api/downloads/[slug]/route.ts",
+      "line": 7,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/enterprise-foundation/dependencies/route.ts",
+      "line": 3,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { createDecisionDependency, getDecisionImpactView } from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/enterprise-foundation/playbooks/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { applyEnforcementPlaybook, createEnforcementPlaybook } from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/enterprise-foundation/stakeholders/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { createDecisionStakeholder } from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/entitlements/route.ts",
+      "line": 3,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { resolveCanonicalEntitlement } from \"@/lib/commercial/entitlement-authority\";"
+    },
+    {
+      "file": "app/api/evidence/case-draft/route.ts",
+      "line": 14,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "* Generate a case study draft from a verified outcome."
+    },
+    {
+      "file": "app/api/evidence/case-draft/route.ts",
+      "line": 102,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "adminVerifiedRecordId: body.outcomeId,"
+    },
+    {
+      "file": "app/api/evidence/case-draft/route.ts",
+      "line": 103,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verificationStatus: \"VERIFIED\","
+    },
+    {
+      "file": "app/api/evidence/case-draft/route.ts",
+      "line": 120,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verificationStatus: \"VERIFIED\","
+    },
+    {
+      "file": "app/api/evidence/case-draft/route.ts",
+      "line": 130,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedBy: session.user.email,"
+    },
+    {
+      "file": "app/api/evidence/case-draft/route.ts",
+      "line": 131,
+      "term": "verified",
+      "status": "needs authority state check",
+      "context": "verifiedAt: new Date(),"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 17,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { buildGenericAuthorityPacket } from \"@/lib/diagnostics/evidence-graph\";"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 33,
+      "term": "proven",
+      "status": "needs authority state check",
+      "context": "import { normalisePurposeAlignmentEvidence } from \"@/lib/product/field-provenance-normaliser\";"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 232,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityType: string;"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 243,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "if (input.authorityType === \"UNCLEAR\") {"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 269,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityScore = clamp(n(constitution.authorityScore, 50), 0, 100);"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 277,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityScope = s("
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 278,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "governance.authorityScope,"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 279,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "s(constitution.authorityType, \"UNCLEAR\"),"
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 294,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "const authorityReality ="
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 295,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "authorityScope === \"DIRECT\""
+    },
+    {
+      "file": "app/api/executive-reporting/run/route.ts",
+      "line": 296,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "? authorityScore"
+    }
+  ]
+}
