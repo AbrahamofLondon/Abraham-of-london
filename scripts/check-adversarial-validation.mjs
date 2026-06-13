@@ -122,7 +122,7 @@ const adversarialResult = {
   gamingVectorsRemaining: 0,
   highVulnerabilityVectors: [],
   criticalVulnerabilityVectors: [],
-  gateStatus: "PASSED",
+  gateStatus: null, // Computed below based on findings, not hardcoded
   findings: [],
 };
 
@@ -162,6 +162,11 @@ gamingVectors.forEach((vector) => {
 });
 
 // Summary
+// Compute gate status if not already set (based on findings, not hardcoded)
+if (adversarialResult.gateStatus === null) {
+  adversarialResult.gateStatus = adversarialResult.gamingVectorsRemaining === 0 ? "PASSED" : "FAILED";
+}
+
 console.log(`\n${"=".repeat(70)}`);
 console.log("ADVERSARIAL VALIDATION GATE RESULT");
 console.log(`${"=".repeat(70)}`);

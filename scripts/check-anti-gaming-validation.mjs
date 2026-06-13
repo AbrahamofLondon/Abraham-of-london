@@ -105,7 +105,7 @@ const audit = {
   manualOverrides: 0,
   decisionForceOnlyUpgrades: 0,
   failedValidationChains: 0,
-  gateStatus: "PASSED",
+  gateStatus: null, // Computed below based on findings, not hardcoded
   findings: [],
   gamingVectorsTested: 0,
   gamingVectorsBlocked: 0,
@@ -180,7 +180,7 @@ recordsToAudit.forEach((record) => {
   }
 });
 
-// Determine gate status (only for scoped records)
+// Determine gate status based on findings (not hardcoded)
 if (
   audit.scorerProductCouplingRisks > 0 ||
   audit.decisionForceOnlyUpgrades > 0 ||
@@ -188,6 +188,8 @@ if (
   audit.manualOverrides > 0
 ) {
   audit.gateStatus = "FAILED";
+} else {
+  audit.gateStatus = "PASSED";
 }
 
 // Add global estate context

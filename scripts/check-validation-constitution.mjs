@@ -146,7 +146,7 @@ const auditResult = {
   staleEvidenceBlocked: 0,
   productsBlockedFromUpgrade: [],
   productsClassifiedAsLegacy: [],
-  gateStatus: "PASSED",
+  gateStatus: null, // Computed below, not hardcoded
   findings: [],
   rulesEnforced: constitutionViolations.length,
 };
@@ -205,6 +205,9 @@ productRegistry.forEach((product) => {
     auditResult.elevatedClaimsReviewed++;
   }
 });
+
+// Compute gate status based on audit results (not hardcoded)
+auditResult.gateStatus = auditResult.constitutionViolations === 0 ? "PASSED" : "FAILED";
 
 // Summary
 console.log(`\n${"=".repeat(70)}`);
