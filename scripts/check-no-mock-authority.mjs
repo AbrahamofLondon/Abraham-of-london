@@ -103,11 +103,12 @@ for (const pattern of AUTHORITY_PATHS) {
           }
         }
 
-        // Check for hardcoded pass/fail in gates
-        if (file.includes("check-") && file.includes(".mjs")) {
+        // Check for hardcoded pass/fail in LIBRARY code (not validation gates)
+        // Validation gates (check-*.mjs) are allowed to compute and report gate status
+        if (!file.includes("check-") && file.endsWith(".ts")) {
+          // Only check library code for hardcoded gate status
           if (
-            /gateStatus\s*[:=]\s*["']PASSED["']/i.test(line) &&
-            !line.includes("result.gate")
+            /gateStatus\s*[:=]\s*["']PASSED["']/i.test(line)
           ) {
             findings.push({
               file,

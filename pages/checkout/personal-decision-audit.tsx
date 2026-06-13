@@ -15,6 +15,9 @@ import { ArrowRight, Shield, FileText, CheckCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
 
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
@@ -37,6 +40,11 @@ export default function PersonalDecisionAuditCheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Resolve authority for personal_decision_audit
+  const configs = getDefaultProductConfigurations();
+  const auditConfig = configs.find(c => c.productCode === "personal_decision_audit");
+  const contract = auditConfig ? resolveProductAuthority(auditConfig) : null;
 
   async function handlePurchase() {
     setLoading(true);
@@ -188,6 +196,15 @@ export default function PersonalDecisionAuditCheckoutPage() {
                 }}>
                   One-time purchase · Lifetime access · Full dossier
                 </p>
+
+                {contract && (
+                  <div style={{ marginTop: "20px", marginBottom: "20px" }}>
+                    <ProductAuthorityPanel contract={contract} />
+                    <div style={{ marginTop: "12px" }}>
+                      <ProductAuthorityNotice contract={contract} />
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="button"

@@ -15,6 +15,9 @@ import { ArrowRight, RefreshCw, FileText, Users, Building2, Crown, ShieldCheck }
 import Layout from '@/components/Layout'
 import { track } from '@/lib/analytics/track'
 import { trackLaunch } from '@/lib/analytics/client-launch-events'
+import { ProductAuthorityPanel } from '@/components/product/ProductAuthorityPanel'
+import { ProductAuthorityNotice } from '@/components/product/ProductAuthorityNotice'
+import { resolveProductAuthority, getDefaultProductConfigurations } from '@/lib/product/resolve-product-authority'
 
 const GOLD = '#C9A96E'
 const EMERALD = '#6EE7B7'
@@ -175,6 +178,11 @@ export default function EnterpriseDecisionScanPage() {
     orgLevel: 'ENTERPRISE',
     exposureType: 'FINANCIAL',
   })
+
+  // Resolve authority for enterprise_assessment
+  const configs = getDefaultProductConfigurations();
+  const enterpriseConfig = configs.find(c => c.productCode === "enterprise_assessment");
+  const contract = enterpriseConfig ? resolveProductAuthority(enterpriseConfig) : null;
   const [result, setResult] = useState<ScanResult | null>(null)
   const [loading, setLoading] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
@@ -259,6 +267,15 @@ export default function EnterpriseDecisionScanPage() {
             <p className="mt-3 text-[13px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.30)' }}>
               This is not a consumer quiz. It is a serious institutional intake. Tone is restrained, executive, forensic.
             </p>
+
+            {contract && (
+              <div style={{ marginTop: '20px' }}>
+                <ProductAuthorityPanel contract={contract} expanded={true} />
+                <div style={{ marginTop: '16px' }}>
+                  <ProductAuthorityNotice contract={contract} />
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

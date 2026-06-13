@@ -54,6 +54,9 @@ import DecisionCentreChecklist from "@/components/onboarding/DecisionCentreCheck
 import TrialExpiredCaseSelection from "@/components/product/TrialExpiredCaseSelection";
 import DecisionCentreLivingLayerPanel from "@/components/decision-centre/DecisionCentreLivingLayerPanel";
 import { buildDecisionCentreLivingViewModel } from "@/lib/product/decision-centre-living-adapter";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -1037,6 +1040,13 @@ export default function DecisionCentrePage() {
   const [loading, setLoading] = React.useState(true);
   const [activeFilter, setActiveFilter] = React.useState("all");
 
+  // Resolve authority for all products
+  const configs = getDefaultProductConfigurations();
+  const productContracts = configs.map(config => ({
+    productCode: config.productCode,
+    contract: resolveProductAuthority(config),
+  }));
+
   const filteredCases = React.useMemo(() => {
     if (!data) return [];
     if (activeFilter === "all") return data.cases;
@@ -1140,6 +1150,23 @@ export default function DecisionCentrePage() {
             <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "8px", maxWidth: "58ch", lineHeight: 1.6 }}>
               This is not a report viewer. It is the live state of decisions under governance — from diagnostic through to intervention and oversight.
             </p>
+
+            {/* Product Authority Status Overview */}
+            <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, display: "block", marginBottom: "12px" }}>
+                Authority Status of Core Products
+              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
+                {productContracts.map(({ productCode, contract }) => (
+                  <div key={productCode}>
+                    <ProductAuthorityPanel contract={contract} />
+                    <div style={{ marginTop: "12px" }}>
+                      <ProductAuthorityNotice contract={contract} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Progression ladder — compact inline */}
             <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", flexWrap: "wrap", gap: "0" }}>

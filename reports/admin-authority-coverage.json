@@ -1,0 +1,487 @@
+{
+  "generatedAt": "2026-06-13T14:31:26.136Z",
+  "gate": "FAILED_WITH_FINDINGS",
+  "productsAudited": 33,
+  "failures": 2,
+  "rows": [
+    {
+      "productCode": "boardroom_brief",
+      "productName": "Boardroom Brief",
+      "adminRoute": "/admin/boardroom/orders",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/boardroom/orders.tsx"
+      ],
+      "result": "FAIL",
+      "requiredAction": "Render authority, evidence, and blocking state before admin release/delivery."
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "productName": "Decision Exposure Instrument",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "productName": "Mandate Clarity Framework",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "productName": "Intervention Path Selector",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "productName": "Escalation Readiness Scorecard",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "productName": "Structural Failure Diagnostic Canvas",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "execution_risk_index",
+      "productName": "Execution Risk Index",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "productName": "Team Alignment Gap Map",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "productName": "Governance Drift Detector",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "productName": "Strategic Priority Stack Builder",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "board_brief_builder",
+      "productName": "Board Brief Builder",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "productName": "Execution Integrity Protocol",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "productName": "The Alignment Audit Playbook",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "productName": "The Drift Detection Framework",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "productName": "Personal Decision Audit",
+      "adminRoute": "/admin/artifacts",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/artifacts.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "productName": "Operator Decision Pack",
+      "adminRoute": "/admin/billing",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": false,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/billing.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "executive_reporting",
+      "productName": "Executive Reporting",
+      "adminRoute": "/admin/reporting/executive",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "app/admin/reporting/executive/page.tsx"
+      ],
+      "result": "FAIL",
+      "requiredAction": "Render authority, evidence, and blocking state before admin release/delivery."
+    },
+    {
+      "productCode": "strategy_room",
+      "productName": "Strategy Room — Entry",
+      "adminRoute": "/admin/operations",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/operations.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "productName": "Strategy Room — Active / Multi-Decision",
+      "adminRoute": "/admin/operations",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/operations.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "retainer_core",
+      "productName": "Decision Authority Retainer — Core",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "retainer_operational",
+      "productName": "Decision Authority Retainer — Operational",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "retainer_institutional",
+      "productName": "Decision Authority Retainer — Institutional",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "professional",
+      "productName": "Professional",
+      "adminRoute": "/admin/billing",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/billing.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "professional_annual",
+      "productName": "Professional Annual",
+      "adminRoute": "/admin/billing",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/billing.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "productName": "Global Market Intelligence Report — Q1 2026",
+      "adminRoute": "/admin/intelligence/gmi-control-plane",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/intelligence/gmi-control-plane.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "productName": "Global Market Intelligence Report — Q2 2026",
+      "adminRoute": "/admin/intelligence/gmi-control-plane",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/intelligence/gmi-control-plane.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "productName": "Global Market Intelligence Report — Q3 2026",
+      "adminRoute": "/admin/intelligence/gmi-control-plane",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/intelligence/gmi-control-plane.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "enterprise",
+      "productName": "Enterprise",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "additional_collaborator",
+      "productName": "Additional Collaborator",
+      "adminRoute": "/admin/billing",
+      "adminSurfaceExists": true,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
+      "blockingBeforeRelease": true,
+      "filesChecked": [
+        "pages/admin/billing.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "inner_circle",
+      "productName": "Inner Circle",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": false,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "productName": "Diagnostic Report — Basic",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "productName": "Diagnostic Report — Pro",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "productName": "Executive Reporting — Advanced",
+      "adminRoute": null,
+      "adminSurfaceExists": false,
+      "requiresAdminRelease": true,
+      "authorityBeforeRelease": false,
+      "evidenceBeforeRelease": false,
+      "blockingBeforeRelease": true,
+      "filesChecked": [],
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
+    }
+  ]
+}

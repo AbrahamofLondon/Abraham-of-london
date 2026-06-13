@@ -1,0 +1,221 @@
+{
+  "generatedAt": "2026-06-13T14:31:26.118Z",
+  "gate": "FAILED_WITH_FINDINGS",
+  "productsAudited": 12,
+  "failures": 3,
+  "rows": [
+    {
+      "productCode": "boardroom_brief",
+      "productName": "Boardroom Brief",
+      "fulfilmentType": "human_reviewed_dossier",
+      "routePath": "/boardroom-brief",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": false,
+      "filesChecked": [
+        "pages/boardroom-brief.tsx",
+        "pages/admin/boardroom/orders.tsx",
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output."
+    },
+    {
+      "productCode": "board_brief_builder",
+      "productName": "Board Brief Builder",
+      "fulfilmentType": "interactive_instrument",
+      "routePath": "/decision-instruments/board-brief-builder/run",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": false,
+      "filesChecked": [
+        "pages/decision-instruments/board-brief-builder/run.tsx",
+        "pages/admin/artifacts.tsx",
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output."
+    },
+    {
+      "productCode": "executive_reporting",
+      "productName": "Executive Reporting",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": "/diagnostics/executive-reporting/run",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": false,
+      "filesChecked": [
+        "pages/diagnostics/executive-reporting/run.tsx",
+        "app/admin/reporting/executive/page.tsx",
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output."
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "productName": "Case Dossier — Tariff Shock",
+      "fulfilmentType": "free_asset",
+      "routePath": "/evidence/tariff-shock-growth-break",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "productName": "Case Dossier — Team Alignment",
+      "fulfilmentType": "free_asset",
+      "routePath": "/evidence/team-alignment-illusion",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "productName": "Case Dossier — Escalation Denied",
+      "fulfilmentType": "free_asset",
+      "routePath": "/evidence/escalation-denied-case",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "productName": "Global Market Intelligence Report — Q1 2026",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": "/artifacts/global-market-intelligence-report-q1-2026",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/admin/intelligence/gmi-control-plane.tsx",
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "productName": "Global Market Intelligence Report — Q2 2026",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": "/artifacts/global-market-intelligence-report-q2-2026",
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/admin/intelligence/gmi-control-plane.tsx",
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "productName": "Global Market Intelligence Report — Q3 2026",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": null,
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/admin/intelligence/gmi-control-plane.tsx",
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "productName": "Diagnostic Report — Basic",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": null,
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "productName": "Diagnostic Report — Pro",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": null,
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "productName": "Executive Reporting — Advanced",
+      "fulfilmentType": "executive_report_artifact",
+      "routePath": null,
+      "authorityStatusVisible": false,
+      "evidenceStateVisible": false,
+      "limitationVisible": true,
+      "nextEvidenceActionVisible": true,
+      "staticLabelVisible": true,
+      "filesChecked": [
+        "pages/report/[reportId].tsx",
+        "app/client/reports/[reportId]/ClientReportClient.tsx"
+      ],
+      "result": "PASS",
+      "requiredAction": "Maintain report authority coverage."
+    }
+  ]
+}

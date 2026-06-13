@@ -13,6 +13,10 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { FreeSignalResult } from "@/components/kernel/FreeSignalResult";
 import { useKernelSignal } from "@/lib/kernel/use-kernel-signal";
+import { ProductAuthorityBadge } from "@/components/product/ProductAuthorityBadge";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
 
 const GOLD = "#C9A96E";
 
@@ -31,6 +35,11 @@ const SAMPLE =
 export default function DecisionTestPage() {
   const [text, setText] = React.useState("");
   const { signal, loading, error, submit, reset } = useKernelSignal();
+
+  // Resolve authority for fast_diagnostic
+  const configs = getDefaultProductConfigurations();
+  const fastDiagConfig = configs.find(c => c.productCode === "fast_diagnostic");
+  const contract = fastDiagConfig ? resolveProductAuthority(fastDiagConfig) : null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,6 +87,26 @@ export default function DecisionTestPage() {
           <h1 className="font-serif text-4xl font-light italic leading-tight text-white/90 md:text-5xl">
             Test a decision.
           </h1>
+
+          {contract && (
+            <div style={{ marginTop: "16px", marginBottom: "24px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                <ProductAuthorityBadge
+                  productCode={contract.productCode}
+                  currentAuthorityState={contract.currentAuthorityState}
+                  size="medium"
+                />
+                <p style={{ color: "#6b7280", fontSize: "14px", margin: 0 }}>
+                  {contract.publicClaimLanguage}
+                </p>
+              </div>
+              <ProductAuthorityPanel contract={contract} />
+              <div style={{ marginTop: "12px" }}>
+                <ProductAuthorityNotice contract={contract} />
+              </div>
+            </div>
+          )}
+
           <p className="mt-4 max-w-[54ch] text-[15px] leading-[1.85] text-white/55">
             Describe a real situation you are facing. The system will return a free
             perception check — what kind of decision this is, where it is most likely
