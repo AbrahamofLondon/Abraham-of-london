@@ -1,0 +1,322 @@
+{
+  "productCode": "personal_decision_audit",
+  "testedAt": "2026-06-13T11:09:34.072Z",
+  "architectureChange": "Replaced free-signal-gold-composer dependency with decision-diagnostic-composer",
+  "scenarios": [
+    {
+      "scenarioId": "career-move-financial-pressure",
+      "title": "Career Move Under Financial Pressure",
+      "input": {
+        "decisionUnderReview": "Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves.",
+        "decisionOwner": "Chief Technology Officer, age 38, two dependents",
+        "evidenceBasis": [
+          "Startup has proven market fit in beta",
+          "Team includes two successful founders from acquired company",
+          "Runway: 18 months with current burn",
+          "Personal savings: $45k after emergency expense"
+        ],
+        "primaryContradiction": "Financial security vs. career growth. Timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks.",
+        "deadlinePressure": "Startup offer expires in 14 days",
+        "irreversibleElements": [
+          "Corporate role will be filled by external hire",
+          "Startup equity cliff at year 2 means leaving before then forfeits most upside"
+        ],
+        "desiredOutcome": "A decision framework that balances financial obligations, career trajectory, and family stability.",
+        "priorAttempts": [
+          "Discussed with spouse twice (emotionally charged, no decision framework)",
+          "Consulted with mentor (told to follow the dream)"
+        ],
+        "optionsUnderConsideration": [
+          "Accept startup, aggressive savings plan",
+          "Decline startup, stay corporate",
+          "Negotiate startup offer for higher base"
+        ]
+      },
+      "diagnosticOutput": {
+        "productCode": "personal_decision_audit",
+        "generatedAt": "2026-06-13T11:09:34.068Z",
+        "actualDecisionQuestion": "Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves.",
+        "diagnosticJudgement": "The core issue is financial security vs. career growth. timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks.. The decision must be made by 14 days",
+        "decisionTension": "Financial security vs. career growth. Timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks.",
+        "hiddenConstraint": "Corporate role will be filled by external hire",
+        "unresolvedAssumption": "At least one of the options is viable: Accept startup, aggressive savings plan, Decline startup, stay corporate, Negotiate startup offer for higher base",
+        "consequenceIfDelayed": "Delaying the decision extends irreversible consequence exposure: Corporate role will be filled by external hire",
+        "consequenceIfWrong": "At least one of the options is viable: Accept startup, aggressive savings plan, Decline startup, stay corporate, Negotiate startup offer for higher base",
+        "falsificationTest": {
+          "claim": "Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves.",
+          "challenge": "What is the one scenario where your chosen option fails catastrophically?",
+          "evidenceThatWouldChangeJudgement": "Evidence that the scenario is not as unlikely as assumed"
+        },
+        "accountableNextMove": {
+          "action": "Stress-test each option against irreversible consequences and hidden dependencies",
+          "owner": "Chief Technology Officer, age 38, two dependents",
+          "deadline": "14 days",
+          "successCheck": "Evidence is gathered and reviewed; assumptions updated",
+          "questionsAnswered": [
+            "Is assumption still valid?",
+            "Does evidence change the best option?",
+            "Are we ready to decide or is more evidence needed?"
+          ]
+        },
+        "whatNotToDo": "Do not ignore the financial risk; the timeline is secondary",
+        "escalationTrigger": "If the deadline is breached without a decision, re-evaluate immediately",
+        "limitation": "This diagnosis is based on the stated context. If key assumptions (At least one of the , The decision deadlin) prove false, the judgment changes.",
+        "reasoningChainEvidence": {
+          "interpretedSignals": [
+            "Financial security vs. career growth. Timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks.",
+            "At least one of the options is viable: Accept startup, aggressive savings plan, Decline startup, stay corporate, Negotiate startup offer for higher base"
+          ],
+          "weightedSignals": [
+            "Primary: Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves.",
+            "Secondary: The decision deadline is real and non-negotiable"
+          ],
+          "contradictions": [
+            "Prior attempts show: Discussed with spouse twice (emotionally charged, no decision framework)"
+          ],
+          "patterns": [
+            "Decision pattern: general decision under constraint",
+            "Pressure type: Time-pressured"
+          ],
+          "consequenceModelPresent": true,
+          "falsificationPresent": true,
+          "executionTranslationPresent": true
+        },
+        "qualityGuards": {
+          "inputEchoRatio": 0.09574468085106383,
+          "inputEchoPass": false,
+          "genericLanguageDetected": [],
+          "accountableMovePresent": true,
+          "falsificationPressurePresent": true,
+          "allFieldsPopulated": true
+        }
+      },
+      "validationResult": {
+        "valid": false,
+        "failures": [
+          "Input echo too high: 9.6%"
+        ]
+      },
+      "antiToyScore": 10,
+      "redTeamScore": 5,
+      "improvedFromWave2C": false
+    },
+    {
+      "scenarioId": "partnership-trust-uncertainty",
+      "title": "Business Partnership Decision with Trust Uncertainty",
+      "input": {
+        "decisionUnderReview": "Bring operational/sales specialist into existing technical SaaS business as co-founder (40% equity split, immediate) vs. hire as Head of Operations vs. remain solo founder.",
+        "decisionOwner": "Solo technical founder, 3-year-old SaaS, $800k ARR, bootstrapped",
+        "evidenceBasis": [
+          "Candidate: 15+ years operations at two venture-backed companies (both exited)",
+          "Growth ceiling with current skill set: estimated $5M ARR",
+          "Candidate has investor relationships; founder does not"
+        ],
+        "primaryContradiction": "Founder needs capital/network but fears loss of control and dilution. Growth speed vs. founder's product philosophy.",
+        "deadlinePressure": "Candidate considering other venture; 60-day exclusivity window closing in 20 days",
+        "irreversibleElements": [
+          "40% equity grant is permanent",
+          "Co-founder relationship likely to define next 5-10 years",
+          "Enterprise vs. SMB pivot is structural"
+        ],
+        "desiredOutcome": "Clear decision logic about co-founder value and protective terms",
+        "priorAttempts": [
+          "One serious discussion (ended when founder raised control concerns)",
+          "Founder consulted advisor (advised against)"
+        ],
+        "optionsUnderConsideration": [
+          "Co-founder: 40% equity, immediate, defined decision authority",
+          "Co-founder: 40% equity, vested over 4 years",
+          "Head of Operations: $180k salary, 5% equity",
+          "Decline partnership, stay solo"
+        ]
+      },
+      "diagnosticOutput": {
+        "productCode": "personal_decision_audit",
+        "generatedAt": "2026-06-13T11:09:34.070Z",
+        "actualDecisionQuestion": "Bring operational/sales specialist into existing technical SaaS business as co-founder (40% equity split, immediate) vs. hire as Head of Operations vs. remain solo founder.",
+        "diagnosticJudgement": "The core issue is founder needs capital/network but fears loss of control and dilution. growth speed vs. founder's product philosophy.. The decision must be made by 20 days",
+        "decisionTension": "Founder needs capital/network but fears loss of control and dilution. Growth speed vs. founder's product philosophy.",
+        "hiddenConstraint": "40% equity grant is permanent",
+        "unresolvedAssumption": "At least one of the options is viable: Co-founder: 40% equity, immediate, defined decision authority, Co-founder: 40% equity, vested over 4 years, Head of Operations: $180k salary, 5% equity, Decline partnership, stay solo",
+        "consequenceIfDelayed": "Delaying the decision extends irreversible consequence exposure: 40% equity grant is permanent",
+        "consequenceIfWrong": "At least one of the options is viable: Co-founder: 40% equity, immediate, defined decision authority, Co-founder: 40% equity, vested over 4 years, Head of Operations: $180k salary, 5% equity, Decline partnership, stay solo",
+        "falsificationTest": {
+          "claim": "Bring operational/sales specialist into existing technical SaaS business as co-founder (40% equity split, immediate) vs. hire as Head of Operations vs. remain solo founder.",
+          "challenge": "What is the one scenario where your chosen option fails catastrophically?",
+          "evidenceThatWouldChangeJudgement": "Evidence that the scenario is not as unlikely as assumed"
+        },
+        "accountableNextMove": {
+          "action": "Stress-test each option against irreversible consequences and hidden dependencies",
+          "owner": "Solo technical founder, 3-year-old SaaS, $800k ARR, bootstrapped",
+          "deadline": "20 days",
+          "successCheck": "Evidence is gathered and reviewed; assumptions updated",
+          "questionsAnswered": [
+            "Is assumption still valid?",
+            "Does evidence change the best option?",
+            "Are we ready to decide or is more evidence needed?"
+          ]
+        },
+        "whatNotToDo": "Do not proceed without written terms; trust will emerge",
+        "escalationTrigger": "If any blocked assumption becomes a visible constraint, re-evaluate immediately",
+        "limitation": "This diagnosis is based on the stated context. If key assumptions (At least one of the , The decision deadlin) prove false, the judgment changes.",
+        "reasoningChainEvidence": {
+          "interpretedSignals": [
+            "Founder needs capital/network but fears loss of control and dilution. Growth speed vs. founder's product philosophy.",
+            "At least one of the options is viable: Co-founder: 40% equity, immediate, defined decision authority, Co-founder: 40% equity, vested over 4 years, Head of Operations: $180k salary, 5% equity, Decline partnership, stay solo"
+          ],
+          "weightedSignals": [
+            "Primary: Bring operational/sales specialist into existing technical SaaS business as co-founder (40% equity split, immediate) vs. hire as Head of Operations vs. remain solo founder.",
+            "Secondary: The decision deadline is real and non-negotiable"
+          ],
+          "contradictions": [
+            "Prior attempts show: One serious discussion (ended when founder raised control concerns)"
+          ],
+          "patterns": [
+            "Decision pattern: partnership/co-founder structure",
+            "Pressure type: Time-pressured"
+          ],
+          "consequenceModelPresent": true,
+          "falsificationPresent": true,
+          "executionTranslationPresent": true
+        },
+        "qualityGuards": {
+          "inputEchoRatio": 0.09701492537313433,
+          "inputEchoPass": false,
+          "genericLanguageDetected": [],
+          "accountableMovePresent": true,
+          "falsificationPressurePresent": true,
+          "allFieldsPopulated": true
+        }
+      },
+      "validationResult": {
+        "valid": false,
+        "failures": [
+          "Input echo too high: 9.7%"
+        ]
+      },
+      "antiToyScore": 10,
+      "redTeamScore": 5,
+      "improvedFromWave2C": false
+    },
+    {
+      "scenarioId": "family-legal-timing-pressure",
+      "title": "Family/Legal/Admin Decision with Emotional and Timing Pressure",
+      "input": {
+        "decisionUnderReview": "Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone. Options: memory-care facility ($6.5k/month), move in with adult child, hire 24-hour home care ($8k/month), or combination.",
+        "decisionOwner": "Primary adult child (age 43, lives 15 minutes away)",
+        "evidenceBasis": [
+          "Neuropsychiatric evaluation: mild dementia, 2-3 year decline trajectory",
+          "Fall risk assessment: moderate",
+          "Financial sustainability: 7-10 years at $8k/month; 15+ years at facility",
+          "Family prior pattern: conflict over parent's independence"
+        ],
+        "primaryContradiction": "Parent's autonomy vs. safety/clinical needs. Adult child 2's care commitment vs. realistic availability. Family harmony vs. best-outcome safety.",
+        "deadlinePressure": "Current living situation unsustainable within 60 days. Facility waitlist: 8 months.",
+        "irreversibleElements": [
+          "Staying home too long increases hospitalization risk",
+          "Facility placement psychological difficulty",
+          "Family relationship rupture risk"
+        ],
+        "desiredOutcome": "Decision framework that weighs autonomy against safety and manages family disagreement",
+        "priorAttempts": [
+          "Family meeting (ended in frustration)",
+          "Social worker consultation (recommended facility)"
+        ],
+        "optionsUnderConsideration": [
+          "Facility now",
+          "Home care + clinical supervision for 12 months",
+          "Move in with adult child 2 + hired clinical caregiver",
+          "Assisted living once available"
+        ]
+      },
+      "diagnosticOutput": {
+        "productCode": "personal_decision_audit",
+        "generatedAt": "2026-06-13T11:09:34.071Z",
+        "actualDecisionQuestion": "Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone. Options: memory-care facility ($6.5k/month), move in with adult child, hire 24-hour home care ($8k/month), or combination.",
+        "diagnosticJudgement": "The core issue is parent's autonomy vs. safety/clinical needs. adult child 2's care commitment vs. realistic availability. family harmony vs. best-outcome safety.. The decision must be made by 60 days",
+        "decisionTension": "Parent's autonomy vs. safety/clinical needs. Adult child 2's care commitment vs. realistic availability. Family harmony vs. best-outcome safety.",
+        "hiddenConstraint": "Staying home too long increases hospitalization risk",
+        "unresolvedAssumption": "At least one of the options is viable: Facility now, Home care + clinical supervision for 12 months, Move in with adult child 2 + hired clinical caregiver, Assisted living once available",
+        "consequenceIfDelayed": "Delaying the decision extends irreversible consequence exposure: Staying home too long increases hospitalization risk",
+        "consequenceIfWrong": "At least one of the options is viable: Facility now, Home care + clinical supervision for 12 months, Move in with adult child 2 + hired clinical caregiver, Assisted living once available",
+        "falsificationTest": {
+          "claim": "Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone. Options: memory-care facility ($6.5k/month), move in with adult child, hire 24-hour home care ($8k/month), or combination.",
+          "challenge": "What is the one scenario where your chosen option fails catastrophically?",
+          "evidenceThatWouldChangeJudgement": "Evidence that the scenario is not as unlikely as assumed"
+        },
+        "accountableNextMove": {
+          "action": "Stress-test each option against irreversible consequences and hidden dependencies",
+          "owner": "Primary adult child (age 43, lives 15 minutes away)",
+          "deadline": "60 days",
+          "successCheck": "Evidence is gathered and reviewed; assumptions updated",
+          "questionsAnswered": [
+            "Is assumption still valid?",
+            "Does evidence change the best option?",
+            "Are we ready to decide or is more evidence needed?"
+          ]
+        },
+        "whatNotToDo": "Do not delay the decision in hope that emotions will resolve it",
+        "escalationTrigger": "If 30 days have passed and key evidence still doesn't exist, re-evaluate immediately",
+        "limitation": "This diagnosis is based on the stated context. If key assumptions (At least one of the , The decision deadlin) prove false, the judgment changes.",
+        "reasoningChainEvidence": {
+          "interpretedSignals": [
+            "Parent's autonomy vs. safety/clinical needs. Adult child 2's care commitment vs. realistic availability. Family harmony vs. best-outcome safety.",
+            "At least one of the options is viable: Facility now, Home care + clinical supervision for 12 months, Move in with adult child 2 + hired clinical caregiver, Assisted living once available"
+          ],
+          "weightedSignals": [
+            "Primary: Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone. Options: memory-care facility ($6.5k/month), move in with adult child, hire 24-hour home care ($8k/month), or combination.",
+            "Secondary: The decision deadline is real and non-negotiable"
+          ],
+          "contradictions": [
+            "Prior attempts show: Family meeting (ended in frustration)"
+          ],
+          "patterns": [
+            "Decision pattern: family care/guardian decision",
+            "Pressure type: Time-pressured"
+          ],
+          "consequenceModelPresent": true,
+          "falsificationPresent": true,
+          "executionTranslationPresent": true
+        },
+        "qualityGuards": {
+          "inputEchoRatio": 0.1169811320754717,
+          "inputEchoPass": false,
+          "genericLanguageDetected": [],
+          "accountableMovePresent": true,
+          "falsificationPressurePresent": true,
+          "allFieldsPopulated": true
+        }
+      },
+      "validationResult": {
+        "valid": false,
+        "failures": [
+          "Input echo too high: 11.7%"
+        ]
+      },
+      "antiToyScore": 10,
+      "redTeamScore": 5,
+      "improvedFromWave2C": false
+    }
+  ],
+  "aggregateMetrics": {
+    "qualityValidationPass": false,
+    "antiToyMean": 10,
+    "antiToyPass": false,
+    "redTeamMean": 5,
+    "redTeamPass": false,
+    "inputEchoPass": false
+  },
+  "thresholds": {
+    "antiToyMax": 5,
+    "redTeamMin": 7
+  },
+  "gatePassed": false,
+  "gateFailureReasons": [
+    "Anti-toy: 10.0 (threshold: ≤5)",
+    "Red-team: 5.0 (threshold: ≥7.0)",
+    "Input echo: not all scenarios pass",
+    "Quality validation: 3 scenarios failed"
+  ],
+  "recommendedClassification": "blocked_until_claim_evidenced",
+  "architecturalSuccess": false
+}
