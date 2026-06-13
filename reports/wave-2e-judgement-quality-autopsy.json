@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-06-13T11:12:41.104Z",
+  "summary": {
+    "averageDecisionForceScore": 6.9259259259259265,
+    "passThreshold": 8.5,
+    "passed": false,
+    "scenariosWithCriticalFailures": 3,
+    "commonFailingLayers": [
+      "assumption_extraction",
+      "consequence_modelling",
+      "falsification_pressure",
+      "tradeoff_modelling"
+    ]
+  },
+  "findings": [
+    {
+      "scenarioId": "career-move-financial-pressure",
+      "title": "Career Move Under Financial Pressure",
+      "decisionForceScore": {
+        "actualDecisionNamed": 10,
+        "tradeOffSharpness": 2,
+        "assumptionSpecificity": 4,
+        "falsificationStrength": 5,
+        "accountabilityStrength": 10,
+        "consequenceSpecificity": 4,
+        "nonGenericity": 10,
+        "actionPressure": 7,
+        "reusableValue": 8,
+        "overall": 6.666666666666667,
+        "failureReasons": [
+          "The trade-off is not sharpened",
+          "The hidden assumption is not specific",
+          "The falsification test is not concrete",
+          "The consequence is generic, not specific to this case"
+        ],
+        "criticalFailures": [
+          "falsificationStrength"
+        ],
+        "recommendation": "investigate_specific_layers"
+      },
+      "engineLayerFailures": [
+        "tradeoff_modelling",
+        "assumption_extraction",
+        "falsification_pressure",
+        "consequence_modelling"
+      ],
+      "genericAiComparison": "Generic AI would say: \"Consider the trade-off between Financial security vs. career growth. Em... Weigh your options carefully.\" We say: \"Accept a startup offer ($100k base, equity) vs. stay in stab...\" Difference: specificity to case facts.",
+      "recommendation": "investigate_specific_layers"
+    },
+    {
+      "scenarioId": "partnership-trust-uncertainty",
+      "title": "Business Partnership with Trust Uncertainty",
+      "decisionForceScore": {
+        "actualDecisionNamed": 10,
+        "tradeOffSharpness": 2,
+        "assumptionSpecificity": 4,
+        "falsificationStrength": 5,
+        "accountabilityStrength": 10,
+        "consequenceSpecificity": 6,
+        "nonGenericity": 10,
+        "actionPressure": 7,
+        "reusableValue": 8,
+        "overall": 6.888888888888889,
+        "failureReasons": [
+          "The trade-off is not sharpened",
+          "The hidden assumption is not specific",
+          "The falsification test is not concrete",
+          "The consequence is generic, not specific to this case"
+        ],
+        "criticalFailures": [
+          "falsificationStrength"
+        ],
+        "recommendation": "investigate_specific_layers"
+      },
+      "engineLayerFailures": [
+        "tradeoff_modelling",
+        "assumption_extraction",
+        "falsification_pressure",
+        "consequence_modelling"
+      ],
+      "genericAiComparison": "Generic AI would say: \"Consider the trade-off between Need capital/network vs. fear of control... Weigh your options carefully.\" We say: \"Bring operational specialist as co-founder (40% equity) vs. ...\" Difference: specificity to case facts.",
+      "recommendation": "investigate_specific_layers"
+    },
+    {
+      "scenarioId": "family-legal-timing-pressure",
+      "title": "Family/Legal/Admin Decision with Emotional and Timing Pressure",
+      "decisionForceScore": {
+        "actualDecisionNamed": 10,
+        "tradeOffSharpness": 2,
+        "assumptionSpecificity": 7,
+        "falsificationStrength": 5,
+        "accountabilityStrength": 10,
+        "consequenceSpecificity": 6,
+        "nonGenericity": 10,
+        "actionPressure": 7,
+        "reusableValue": 8,
+        "overall": 7.222222222222222,
+        "failureReasons": [
+          "The trade-off is not sharpened",
+          "The falsification test is not concrete",
+          "The consequence is generic, not specific to this case"
+        ],
+        "criticalFailures": [
+          "falsificationStrength"
+        ],
+        "recommendation": "investigate_specific_layers"
+      },
+      "engineLayerFailures": [
+        "tradeoff_modelling",
+        "falsification_pressure",
+        "consequence_modelling"
+      ],
+      "genericAiComparison": "Generic AI would say: \"Consider the trade-off between Autonomy vs. safety/clinical. Child 2's ... Weigh your options carefully.\" We say: \"Parent age 75, mild dementia, living alone. Options: memory-...\" Difference: specificity to case facts.",
+      "recommendation": "investigate_specific_layers"
+    }
+  ]
+}
