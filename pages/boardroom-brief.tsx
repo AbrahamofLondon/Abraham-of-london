@@ -34,6 +34,9 @@ import { trackLaunch } from '@/lib/analytics/client-launch-events'
 import { buildBoardroomIntelligenceSpine } from '@/lib/constitution/boardroom-spine-builder'
 import { generateBoardroomDossier } from '@/lib/constitution/boardroom-mode'
 import type { BoardroomDossier } from '@/lib/constitution/boardroom-mode'
+import { ProductAuthorityPanel } from '@/components/product/ProductAuthorityPanel'
+import { ProductAuthorityNotice } from '@/components/product/ProductAuthorityNotice'
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from '@/lib/product/resolve-product-authority'
 
 const GOLD = '#C9A96E'
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" }
@@ -72,6 +75,10 @@ export default function BoardroomBriefPage() {
     authorityUncertainty: '',
     costOfDelay: '',
   })
+
+  // Resolve authority for boardroom_brief
+  const briefConfig = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'boardroom_brief')
+  const contract = briefConfig ? resolveProductAuthority(briefConfig) : null
 
   function updateField(key: keyof IntakeForm, value: string) {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -517,6 +524,15 @@ export default function BoardroomBriefPage() {
                   style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}BB`, textDecoration: 'none', border: `1px solid ${GOLD}35`, padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                   Generate your own brief <ArrowRight style={{ width: '10px', height: '10px' }} />
                 </Link>
+              </div>
+            </div>
+          )}
+
+          {!isSampleResult && contract && (
+            <div className="mt-6" style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1.25rem', borderRadius: '0.5rem' }}>
+              <ProductAuthorityPanel contract={contract} />
+              <div style={{ marginTop: '1rem' }}>
+                <ProductAuthorityNotice contract={contract} />
               </div>
             </div>
           )}
