@@ -2,6 +2,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { enforceConstitutionRetention } from "./lib/require-validation-constitution.mjs";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const GOLD_98_REPORT = join(ROOT, "reports/universal-product-gold-standard-98.json");
@@ -20,6 +21,18 @@ const products = [
   ...gold98.blockedProducts,
   ...gold98.internalOnlyProducts,
 ];
+
+// Constitution enforcement: check Gold 9.8 report for constitution failures
+if (gold98.constitutionEnforcement && !gold98.constitutionEnforcement.checkPerformed) {
+  failures.push("Gold 9.8 gate did not perform constitution enforcement check.");
+}
+if (gold98.gate === "FAILED") {
+  // Check if failures include constitution violations
+  const constitutionFailures = (gold98.failures ?? []).filter(f => f.includes("[CONSTITUTION]"));
+  if (constitutionFailures.length > 0) {
+    failures.push(...constitutionFailures);
+  }
+}
 
 if (products.length !== 43) failures.push(`Expected 43 products, reviewed ${products.length}.`);
 if (roadmap.productsReviewed !== 43) failures.push(`Roadmap expected 43 products, reviewed ${roadmap.productsReviewed}.`);

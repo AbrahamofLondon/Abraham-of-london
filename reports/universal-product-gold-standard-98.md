@@ -2,7 +2,7 @@
 
 ## Gate Result
 
-PASSED
+FAILED
 
 ## Products Reviewed
 
@@ -57,9 +57,9 @@ PASSED
 - professional_annual: Professional Annual (7.1/10)
 - enterprise: Enterprise (7.6/10)
 - additional_collaborator: Additional Collaborator (6/10)
-- gmi_q1_2026: Global Market Intelligence Report — Q1 2026 (7.4/10)
-- gmi_q2_2026: Global Market Intelligence Report — Q2 2026 (7.9/10)
-- gmi_q3_2026: Global Market Intelligence Report — Q3 2026 (4.8/10)
+- gmi_q1_2026: Global Market Report — Q1 2026 (7.4/10)
+- gmi_q2_2026: Global Market Report — Q2 2026 (7.9/10)
+- gmi_q3_2026: Global Market Report — Q3 2026 (4.8/10)
 
 ## Internal-Only Products
 
@@ -93,8 +93,8 @@ PASSED
 - professional_annual: Professional Annual
 - enterprise: Enterprise
 - additional_collaborator: Additional Collaborator
-- gmi_q1_2026: Global Market Intelligence Report — Q1 2026
-- gmi_q2_2026: Global Market Intelligence Report — Q2 2026
+- gmi_q1_2026: Global Market Report — Q1 2026
+- gmi_q2_2026: Global Market Report — Q2 2026
 
 ## Free Product Time-Value Review
 
@@ -207,9 +207,9 @@ PASSED
 | Professional Annual | legacy_above_market | 7.1 | blocked_from_release | 9.8 score is 71/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 | Enterprise | legacy_above_market | 7.6 | blocked_from_release | 9.8 score is 76/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 | Additional Collaborator | legacy_weak | 6.0 | blocked_from_release | Previously below-market or owned-upgrade product; externally proven 9.8 evidence has not been supplied. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
-| Global Market Intelligence Report — Q1 2026 | legacy_above_market | 7.4 | blocked_from_release | 9.8 score is 74/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
-| Global Market Intelligence Report — Q2 2026 | legacy_above_market | 7.9 | blocked_from_release | 9.8 score is 79/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
-| Global Market Intelligence Report — Q3 2026 | legacy_blocked | 4.8 | blocked_from_release | Product is already inactive, future-dated, duplicate, or structurally blocked. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
+| Global Market Report — Q1 2026 | legacy_above_market | 7.4 | blocked_from_release | 9.8 score is 74/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
+| Global Market Report — Q2 2026 | legacy_above_market | 7.9 | blocked_from_release | 9.8 score is 79/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
+| Global Market Report — Q3 2026 | legacy_blocked | 4.8 | blocked_from_release | Product is already inactive, future-dated, duplicate, or structurally blocked. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 
 ## Required Upgrade Backlog
 
@@ -264,4 +264,4 @@ PASSED
 
 ## Final Recommendation
 
-GREEN
+RED

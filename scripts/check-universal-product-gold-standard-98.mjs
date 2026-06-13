@@ -2,6 +2,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  enforceConstitutionRetention,
+  getConstitutionalClassification,
+} from "./lib/require-validation-constitution.mjs";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const REPORT_DIR = join(ROOT, "reports");
@@ -107,6 +111,16 @@ const context = {
 };
 
 const results = products.map((product) => evaluateProduct(product, context));
+
+// Constitution enforcement: validate all gold-classified products against v2 requirement
+const goldProducts = results.filter((result) => result.releaseStatus === "gold_standard");
+for (const goldProduct of goldProducts) {
+  const retention = enforceConstitutionRetention(goldProduct.productCode, "externally_proven_gold_product");
+  if (!retention.allowed) {
+    failures.push(`[CONSTITUTION] ${goldProduct.productCode}: ${retention.reasons[0]}`);
+  }
+}
+
 const below98ButPublic = results.filter((result) => result.scoreOutOf100 < GOLD_THRESHOLD && result.releaseStatus === "gold_standard");
 if (below98ButPublic.length > 0) {
   failures.push(`${below98ButPublic.length} products below 9.8 are still classified gold_standard.`);
@@ -121,9 +135,21 @@ const counts = {
 
 const gate = failures.length === 0 ? "PASSED" : "FAILED";
 const removedFromPublic = results.filter((result) => result.wasPublicOrSellable && result.releaseStatus === "blocked_from_release");
+
+// Constitution enforcement context
+const constitutionContext = {
+  required: true,
+  checkPerformed: true,
+  goldProductsReviewedForV2: goldProducts.length,
+  goldProductsWithoutV2Evidence: goldProducts.filter(
+    (p) => enforceConstitutionRetention(p.productCode, "externally_proven_gold_product").allowed === false
+  ).length,
+};
+
 const report = {
   generatedAt: new Date().toISOString(),
   gate,
+  constitutionEnforcement: constitutionContext,
   threshold: {
     scoreOutOf100: GOLD_THRESHOLD,
     scoreOutOf10: 9.8,

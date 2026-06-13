@@ -16,6 +16,7 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { enforceConstitutionRequirement } from "./lib/require-validation-constitution.mjs";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const REPORT_DIR = join(ROOT, "reports");
@@ -152,6 +153,21 @@ const evidenceCounts = {
   renderedReviewsMissingForGold: confirmedGold.filter((result) => !result.renderedOutputReviewed).length,
   liveRouteProofMissingForGold: confirmedGold.filter((result) => !result.liveRouteVerified || !result.renderedOutputCaptured).length,
 };
+
+// Constitution enforcement: check for scorer/product coupling or incomplete chains
+if (confirmedGold.length > 0) {
+  for (const gold of confirmedGold) {
+    const constitutionCheck = enforceConstitutionRequirement(
+      gold.productCode,
+      "externally_proven_gold_product",
+      join(REPORT_DIR, "validation-constitution-gate.json"),
+      join(REPORT_DIR, "release-authority-firewall.json")
+    );
+    if (!constitutionCheck.allowedToGrant) {
+      failures.push(`[CONSTITUTION] ${gold.productCode}: ${constitutionCheck.requirement.blockingReasons[0]}`);
+    }
+  }
+}
 
 const gate = failures.length === 0 ? "PASSED" : "FAILED";
 

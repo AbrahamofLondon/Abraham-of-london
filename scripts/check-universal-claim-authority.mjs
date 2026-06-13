@@ -17,6 +17,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import { enforcePublicClaimMatch, getConstitutionalClassification } from "./lib/require-validation-constitution.mjs";
 
 const ROOT = process.cwd();
 const REPORTS_DIR = join(ROOT, "reports");
@@ -71,6 +72,15 @@ goldProducts.forEach((code) => {
     console.log(`  ✓ ${code}: gold status confirmed (anti-toy: ${result.antiToyScore})`);
   }
 });
+
+// 1.5. Constitution enforcement: check for blocked products being claimed
+console.log("\nConstitution enforcement check:");
+const blockedProducts = ["personal_decision_audit"];
+for (const blocked of blockedProducts) {
+  if (products[blocked] && products[blocked].claimedStatus !== "blocked_until_claim_evidenced") {
+    failures.push(`[CONSTITUTION] ${blocked}: claimed as ${products[blocked].claimedStatus} but constitution requires blocked_until_claim_evidenced`);
+  }
+}
 
 // 2. Check for unsupported claims
 console.log("\nChecking product claims:");

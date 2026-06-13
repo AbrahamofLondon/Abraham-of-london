@@ -1,6 +1,12 @@
 {
-  "generatedAt": "2026-06-13T10:07:00.994Z",
-  "gate": "PASSED",
+  "generatedAt": "2026-06-13T12:08:59.475Z",
+  "gate": "FAILED",
+  "constitutionEnforcement": {
+    "required": true,
+    "checkPerformed": true,
+    "goldProductsReviewedForV2": 3,
+    "goldProductsWithoutV2Evidence": 3
+  },
   "threshold": {
     "scoreOutOf100": 98,
     "scoreOutOf10": 9.8
@@ -1862,7 +1868,7 @@
     },
     {
       "productCode": "gmi_q1_2026",
-      "productName": "Global Market Intelligence Report — Q1 2026",
+      "productName": "Global Market Report — Q1 2026",
       "commercialTier": "paid_premium",
       "deliveryClass": "archived_digital_reference",
       "currentStatus": "legacy_above_market",
@@ -1903,17 +1909,17 @@
       "priceValueSurplusPassed": false,
       "premiumUnderPricedPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q1 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q1 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
       },
-      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "customerOutcomeStatement": "After using Global Market Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
       "isPaid": true
     },
     {
       "productCode": "gmi_q2_2026",
-      "productName": "Global Market Intelligence Report — Q2 2026",
+      "productName": "Global Market Report — Q2 2026",
       "commercialTier": "paid_premium",
       "deliveryClass": "archived_digital_reference",
       "currentStatus": "legacy_above_market",
@@ -1952,17 +1958,17 @@
       "priceValueSurplusPassed": false,
       "premiumUnderPricedPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q2 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q2 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
       },
-      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "customerOutcomeStatement": "After using Global Market Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
       "isPaid": true
     },
     {
       "productCode": "gmi_q3_2026",
-      "productName": "Global Market Intelligence Report — Q3 2026",
+      "productName": "Global Market Report — Q3 2026",
       "commercialTier": "paid_premium",
       "deliveryClass": "archived_digital_reference",
       "currentStatus": "legacy_blocked",
@@ -2001,12 +2007,12 @@
       "priceValueSurplusPassed": false,
       "premiumUnderPricedPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q3 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q3 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
       },
-      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q3 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "customerOutcomeStatement": "After using Global Market Report — Q3 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
       "isPaid": true
     }
   ],
@@ -3217,7 +3223,7 @@
     },
     {
       "productCode": "gmi_q1_2026",
-      "productName": "Global Market Intelligence Report — Q1 2026",
+      "productName": "Global Market Report — Q1 2026",
       "commercialTier": "paid_premium",
       "deliveryClass": "archived_digital_reference",
       "currentStatus": "legacy_above_market",
@@ -3258,17 +3264,17 @@
       "priceValueSurplusPassed": false,
       "premiumUnderPricedPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q1 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q1 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
       },
-      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "customerOutcomeStatement": "After using Global Market Report — Q1 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
       "isPaid": true
     },
     {
       "productCode": "gmi_q2_2026",
-      "productName": "Global Market Intelligence Report — Q2 2026",
+      "productName": "Global Market Report — Q2 2026",
       "commercialTier": "paid_premium",
       "deliveryClass": "archived_digital_reference",
       "currentStatus": "legacy_above_market",
@@ -3307,12 +3313,12 @@
       "priceValueSurplusPassed": false,
       "premiumUnderPricedPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q2 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q2 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
       },
-      "customerOutcomeStatement": "After using Global Market Intelligence Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
+      "customerOutcomeStatement": "After using Global Market Report — Q2 2026, the customer can distinguish the edition's time-bound market thesis from current intelligence and use it as dated strategic context.",
       "isPaid": true
     }
   ],
@@ -4056,12 +4062,12 @@
     },
     {
       "productCode": "gmi_q1_2026",
-      "productName": "Global Market Intelligence Report — Q1 2026",
+      "productName": "Global Market Report — Q1 2026",
       "scoreOutOf10": 7.4,
       "releaseStatus": "blocked_from_release",
       "priceValueSurplusPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q1 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q1 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
@@ -4078,12 +4084,12 @@
     },
     {
       "productCode": "gmi_q2_2026",
-      "productName": "Global Market Intelligence Report — Q2 2026",
+      "productName": "Global Market Report — Q2 2026",
       "scoreOutOf10": 7.9,
       "releaseStatus": "blocked_from_release",
       "priceValueSurplusPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q2 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q2 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
@@ -4099,12 +4105,12 @@
     },
     {
       "productCode": "gmi_q3_2026",
-      "productName": "Global Market Intelligence Report — Q3 2026",
+      "productName": "Global Market Report — Q3 2026",
       "scoreOutOf10": 4.8,
       "releaseStatus": "blocked_from_release",
       "priceValueSurplusPassed": false,
       "priceValueSurplus": {
-        "whyWorthMoreThanPrice": "Global Market Intelligence Report — Q3 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
+        "whyWorthMoreThanPrice": "Global Market Report — Q3 2026 must be worth materially more than £59 by replacing advisor, analyst, operator, or leadership time.",
         "avoids": "It must help avoid wasted effort, hidden risk, weak governance, wrong sequencing, or an expensive poor decision.",
         "comparableSpend": "Comparable value would otherwise require paid analysis, senior advisory review, internal operator time, or repeated decision meetings.",
         "reusableBecause": "The artefact must be reusable as a decision record, challenge document, execution sequence, or archive reference."
@@ -4300,7 +4306,7 @@
     },
     {
       "productCode": "gmi_q1_2026",
-      "productName": "Global Market Intelligence Report — Q1 2026",
+      "productName": "Global Market Report — Q1 2026",
       "scoreOutOf10": 7.4,
       "releaseStatus": "blocked_from_release",
       "premiumUnderPricedPassed": false,
@@ -4316,7 +4322,7 @@
     },
     {
       "productCode": "gmi_q2_2026",
-      "productName": "Global Market Intelligence Report — Q2 2026",
+      "productName": "Global Market Report — Q2 2026",
       "scoreOutOf10": 7.9,
       "releaseStatus": "blocked_from_release",
       "premiumUnderPricedPassed": false,
@@ -4331,7 +4337,7 @@
     },
     {
       "productCode": "gmi_q3_2026",
-      "productName": "Global Market Intelligence Report — Q3 2026",
+      "productName": "Global Market Report — Q3 2026",
       "scoreOutOf10": 4.8,
       "releaseStatus": "blocked_from_release",
       "premiumUnderPricedPassed": false,
@@ -4707,7 +4713,7 @@
       "requiredUpgrade": "Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable."
     },
     {
-      "product": "Global Market Intelligence Report — Q1 2026",
+      "product": "Global Market Report — Q1 2026",
       "productCode": "gmi_q1_2026",
       "currentStatus": "legacy_above_market",
       "scoreOutOf10": 7.4,
@@ -4716,7 +4722,7 @@
       "requiredUpgrade": "Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable."
     },
     {
-      "product": "Global Market Intelligence Report — Q2 2026",
+      "product": "Global Market Report — Q2 2026",
       "productCode": "gmi_q2_2026",
       "currentStatus": "legacy_above_market",
       "scoreOutOf10": 7.9,
@@ -4725,7 +4731,7 @@
       "requiredUpgrade": "Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable."
     },
     {
-      "product": "Global Market Intelligence Report — Q3 2026",
+      "product": "Global Market Report — Q3 2026",
       "productCode": "gmi_q3_2026",
       "currentStatus": "legacy_blocked",
       "scoreOutOf10": 4.8,
@@ -5078,7 +5084,7 @@
     },
     {
       "productCode": "gmi_q1_2026",
-      "productName": "Global Market Intelligence Report — Q1 2026",
+      "productName": "Global Market Report — Q1 2026",
       "releaseStatus": "blocked_from_release",
       "upgradeRequired": [
         "Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable.",
@@ -5089,7 +5095,7 @@
     },
     {
       "productCode": "gmi_q2_2026",
-      "productName": "Global Market Intelligence Report — Q2 2026",
+      "productName": "Global Market Report — Q2 2026",
       "releaseStatus": "blocked_from_release",
       "upgradeRequired": [
         "Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable.",
@@ -5099,7 +5105,7 @@
     },
     {
       "productCode": "gmi_q3_2026",
-      "productName": "Global Market Intelligence Report — Q3 2026",
+      "productName": "Global Market Report — Q3 2026",
       "releaseStatus": "blocked_from_release",
       "upgradeRequired": [
         "Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable.",
@@ -5121,6 +5127,10 @@
     "Most product contracts now function as blocking authorities until actual artefact, journey, and delivery proof reaches 98/100.",
     "Wave 1 internal certification was revoked as gold authority: products are gold only when externally proven (actual rendered output, anti-toy, red-team, market comparison)."
   ],
-  "failures": [],
-  "finalRecommendation": "GREEN"
+  "failures": [
+    "[CONSTITUTION] fast_diagnostic: Product fast_diagnostic has prior v1 evidence but no v2 evidence",
+    "[CONSTITUTION] team_assessment: Product team_assessment has prior v1 evidence but no v2 evidence",
+    "[CONSTITUTION] enterprise_assessment: Product enterprise_assessment has prior v1 evidence but no v2 evidence"
+  ],
+  "finalRecommendation": "RED"
 }

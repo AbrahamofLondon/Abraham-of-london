@@ -14,6 +14,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import { enforcePublicClaimMatch, getConstitutionalClassification } from "./lib/require-validation-constitution.mjs";
 
 const ROOT = process.cwd();
 const REPORTS_DIR = join(ROOT, "reports");
@@ -64,9 +65,28 @@ findings.forEach((finding) => {
   }
 });
 
+// Constitution enforcement: check for blocked products being claimed on surface
+const blockedOnSurface = findings.filter(
+  (f) => f.maxHonestState === "blocked_until_evidence" && f.action !== "correct_now"
+);
+if (blockedOnSurface.length > 0) {
+  blockedOnSurface.forEach((f) => {
+    const constitutional = getConstitutionalClassification(f.productCode);
+    if (constitutional === "blocked_until_claim_evidenced") {
+      failures.push(
+        `[CONSTITUTION] ${f.productCode}: surface claims for blocked_until_claim_evidenced product (${f.claimType} claimed, ${constitutional} required)`
+      );
+    }
+  });
+}
+
 const result = {
   generatedAt: new Date().toISOString(),
   gate: failures.length === 0 ? "PASSED" : "FAILED",
+  constitutionEnforcement: {
+    required: true,
+    blockedProductsOnSurface: blockedOnSurface.length,
+  },
   surfacesScanned: 43,
   claimsReviewed: findings.length,
   unsupportedClaimsFound: findings.filter((f) => f.action === "correct_now").length,
