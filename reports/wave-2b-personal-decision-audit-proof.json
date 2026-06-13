@@ -1,0 +1,240 @@
+{
+  "productCode": "personal_decision_audit",
+  "productName": "Personal Decision Audit",
+  "testedAt": "2026-06-13T10:54:57.849Z",
+  "scenarios": [
+    {
+      "scenarioId": "career-move-financial-pressure",
+      "title": "Career Move Under Financial Pressure",
+      "description": "Mid-career professional considering a move to a riskier but potentially more rewarding position while facing unexpected household expenses.",
+      "input": {
+        "decisionUnderReview": "Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves.",
+        "decisionOwner": "Chief Technology Officer, age 38, two dependents",
+        "evidenceBasis": [
+          "Startup has proven market fit in beta",
+          "Team includes two successful founders from acquired company",
+          "Runway: 18 months with current burn",
+          "Personal savings: $45k after emergency expense",
+          "Mortgage: $2200/month; no other debt",
+          "Spouse income: $75k stable",
+          "Risk tolerance: historically moderate (changed roles twice, no forced exits)"
+        ],
+        "primaryContradiction": "Financial security (dependent on job stability) vs. career growth (depends on taking risk). Timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks.",
+        "deadlinePressure": "Startup offer expires in 14 days",
+        "irreversibleElements": [
+          "Corporate role will be filled by external hire (two-year notice would burn bridge)",
+          "Startup equity cliff at year 2 means leaving before then forfeits most upside"
+        ],
+        "desiredOutcome": "A decision framework that balances financial obligations, career trajectory, and family stability. Not a prediction of outcome, but a clear decision logic and execution sequence.",
+        "priorAttempts": [
+          "Discussed with spouse twice (emotionally charged, no decision framework)",
+          "Consulted with mentor (told to 'follow the dream')",
+          "Ran personal financial model once (conflicting assumptions about success rate)"
+        ],
+        "optionsUnderConsideration": [
+          "Accept startup, aggressive savings plan",
+          "Decline startup, stay corporate, revisit startup world in 2 years",
+          "Negotiate startup offer for higher base or longer cliff",
+          "Ask spouse to temporarily increase work hours during startup ramp"
+        ]
+      },
+      "output": {
+        "decisionState": "Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves. is being driven by the calendar: the date is treated as fixed while scope and quality flex informally, and Financial security (dependent on job stability) vs. career growth (depends on taking risk). Timing conflict: emergency creates short-term pressure; opportunity window closes in 2 weeks. makes the slippage non-linear rather than gradual. The instrument records 7 evidence items and 2 irreversible element(s): Corporate role will be filled by external hire (two-year notice would burn bridge); Startup equity cliff at year 2 means leaving before then forfeits most upside.",
+        "costOfDelay": "A missed external date costs trust once; a date met by silently cutting the wrong scope costs trust every week after delivery. In this case the stated exposure is irreversible exposure: Corporate role will be filled by external hire (two-year notice would burn bridge); Startup equity cliff at year 2 means leaving before then forfeits most upside.",
+        "nextMove": "Split the deadline into what is truly date-fixed and what is negotiable, then decide the cut: scope, quality bar, or date — explicitly, by the owner, in writing. For Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves., that responsibility sits with Chief Technology Officer, age 38, two dependents as the accountable owner, to be visibly underway within 48 hours.",
+        "falsificationChallenge": "What exactly happens on the day after the deadline is missed? If nobody can state the concrete consequence, the deadline may be softer than the panic suggests. Test it against Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves. before acting on this judgement.",
+        "reviewCheckpoint": "Name now what happens the day after a miss, so the contingency is a plan and not an improvisation. Re-open this instrument when that step completes, when the pressure level changes, or within fourteen days — whichever arrives first.",
+        "executionSequence": [
+          "Separate what is genuinely date-fixed in Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves. from what is negotiable, with the evidence for each.",
+          "Decide the cut explicitly — scope, quality bar, or date — and have Chief Technology Officer, age 38, two dependents sign it rather than letting it happen by exhaustion.",
+          "Re-order remaining work by dependency, not panic, against Startup offer expires in 14 days.",
+          "Name now what happens the day after a miss, so the contingency is a plan and not an improvisation."
+        ],
+        "strategicRisk": "Deciding while the timing_pressure pattern stands unaddressed institutionalises it into execution. What exactly happens on the day after the deadline is missed? If nobody can state the concrete consequence, the deadline may be softer than the panic suggests. Test it against Accept a startup offer ($100k base, equity vest over 4 years) vs. stay in stable corporate role ($110k, annual raises). Startup success probability: 25%. Household has just discovered $15k emergency expense (home repair) that depletes reserves. before acting on this judgement."
+      },
+      "evidenceExtracted": {
+        "reasoningChainPresent": true,
+        "diagnosisIsCaseDerived": true,
+        "consequenceIsSpecific": true,
+        "nextMoveIsActionable": true,
+        "falsificationPressurePresent": true,
+        "executionSequenceIsTimebound": true
+      },
+      "antiToyScore": 10,
+      "antiToyPass": false,
+      "redTeamScore": 5,
+      "redTeamPass": false
+    },
+    {
+      "scenarioId": "partnership-trust-uncertainty",
+      "title": "Business Partnership Decision with Trust Uncertainty",
+      "description": "Founder considering bringing on a co-founder with complementary skills but untested working relationship and some alignment tensions.",
+      "input": {
+        "decisionUnderReview": "Bring operational/sales specialist into existing technical SaaS business as co-founder (40% equity split, immediate) vs. hire as Head of Operations (salary, no equity) vs. remain solo founder. Candidate has strong network and operating track record but different risk tolerance and product vision (wants to pivot to enterprise focus; founder prefers bottom-up SMB).",
+        "decisionOwner": "Solo technical founder, 3-year-old SaaS, $800k ARR, bootstrapped",
+        "evidenceBasis": [
+          "Candidate: 15+ years operations at two venture-backed companies (both exited)",
+          "Growth ceiling with current skill set: estimated $5M ARR (hiring constraints)",
+          "Candidate has investor relationships; founder does not",
+          "Candidate's risk tolerance: prefers proven enterprise markets; founder: comfortable experiment phase",
+          "Product vision divergence: documented in email thread (friendly but real)",
+          "Working relationship: 3 customer projects together, no financial relationship yet",
+          "Founder's personal runway: 18 months without revenue"
+        ],
+        "primaryContradiction": "Founder needs capital/network (candidate offers) but fears loss of control and dilution (candidate requires equity and decision-making power). Speed of growth vs. founder's product philosophy.",
+        "deadlinePressure": "Candidate considering other venture (good market, but 60-day exclusivity window closing in 20 days)",
+        "irreversibleElements": [
+          "40% equity grant is permanent (can only be reversed through dilution or buyout)",
+          "Co-founder relationship likely to define next 5-10 years of company",
+          "Enterprise vs. SMB pivot is structural (cannot do both; customer base incompatible)"
+        ],
+        "desiredOutcome": "Clear decision logic about whether co-founder role creates net value despite control dilution, and if yes, what terms protect founder's interests (decision seat on product, explicit SKU roadmap, revision clauses).",
+        "priorAttempts": [
+          "One serious discussion (ended when founder raised control concerns; candidate felt dismissed)",
+          "Founder consulted advisor (advised against; too pessimistic on scaling solo)",
+          "Candidate shared operating deck (positive, but glossed over how to maintain SMB strategy)"
+        ],
+        "optionsUnderConsideration": [
+          "Co-founder: 40% equity, immediate, defined decision authority on product",
+          "Co-founder: 40% equity, vested over 4 years, required alignment on product roadmap",
+          "Head of Operations: $180k salary, 5% equity, advisory board seat, no veto power",
+          "Decline partnership, stay solo, hire Head of Operations in 12 months when runway allows"
+        ]
+      },
+      "output": {
+        "decisionState": "No judgement is issued: the case as stated does not carry enough signal to classify the decision pattern honestly. No decision pattern signature reached the minimum evidence threshold in the supplied input. Describe the decision friction in concrete terms: who is blocked, what contradicts what, what expires when.",
+        "costOfDelay": "Acting on an unfounded reading costs more than acting on none.",
+        "nextMove": "Restate the decision concretely — who is blocked, what contradicts what, what expires when — and re-run the instrument.",
+        "falsificationChallenge": "Not applicable: no diagnosis was made.",
+        "reviewCheckpoint": "Not applicable until a classifiable case is supplied.",
+        "executionSequence": [],
+        "strategicRisk": "No judgement is issued: the case as stated does not carry enough signal to classify the decision pattern honestly. No decision pattern signature reached the minimum evidence threshold in the supplied input. Describe the decision friction in concrete terms: who is blocked, what contradicts what, what expires when."
+      },
+      "evidenceExtracted": {
+        "reasoningChainPresent": true,
+        "diagnosisIsCaseDerived": false,
+        "consequenceIsSpecific": false,
+        "nextMoveIsActionable": false,
+        "falsificationPressurePresent": false,
+        "executionSequenceIsTimebound": false
+      },
+      "antiToyScore": 10,
+      "antiToyPass": false,
+      "redTeamScore": 5,
+      "redTeamPass": false
+    },
+    {
+      "scenarioId": "family-legal-timing-pressure",
+      "title": "Family/Legal/Admin Decision with Emotional and Timing Pressure",
+      "description": "Parent facing time-sensitive decision about elderly parent's care arrangements with family disagreement and legal/financial complexity.",
+      "input": {
+        "decisionUnderReview": "Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.'",
+        "decisionOwner": "Primary adult child (age 43, lives 15 minutes away, full-time employment)",
+        "evidenceBasis": [
+          "Neuropsychiatric evaluation: mild dementia, 2-3 year functional decline trajectory estimate",
+          "Fall risk assessment: moderate (recent minor fall, weak ankle history)",
+          "Financial sustainability: 7-10 years at $8k/month; 15+ years at facility (waiting list discount unlikely)",
+          "Family prior pattern: conflict over parent's independence after stroke 5 years ago",
+          "Clinical supervision availability: spouse (MD, available ~4 hours/week)",
+          "Agency home care: three inquiries, all report high staff turnover (average 6 months)",
+          "Facility waitlist: current 8 months; two facilities acceptable to children, but quality variance"
+        ],
+        "primaryContradiction": "Parent's autonomy preference vs. safety/clinical needs. Adult child 2's care commitment vs. realistic time/emotional availability. Clinical supervision adequacy (spouse's 4 hours/week) vs. 24-hour risk. Family harmony vs. best-outcome safety.",
+        "deadlinePressure": "Current living situation unsustainable within 60 days (medication mismanagement already causing minor health events). Facility waitlist: 8 months (enrollment decision needed in 14 days to secure spot, but commitment is reversible only if new opening elsewhere found).",
+        "irreversibleElements": [
+          "Staying home too long without adequate support increases hospitalization risk (irreversibly damages cognitive function)",
+          "Facility placement: psychological difficulty of reverting if regrets, though legally/financially possible",
+          "Family relationship rupture if disagreement escalates (already tension between children)"
+        ],
+        "desiredOutcome": "Decision framework that weighs parent's autonomy against safety, acknowledges family disagreement as real (not to be 'solved' but navigated), and establishes clear decision logic for phasing (e.g., start at home with clinical supervision + waitlist enrollment, trigger transition if specific events occur).",
+        "priorAttempts": [
+          "Family meeting (ended in frustration; children want parent to 'decide' but parent defers)",
+          "Social worker consultation (recommended facility; one child defensive)",
+          "Financial advisor review (indicated all options sustainable, so finance not discriminating factor)"
+        ],
+        "optionsUnderConsideration": [
+          "Facility now (decision ends ambiguity; parent unhappy initially but research shows adjustment)",
+          "Home care + clinical supervision for 12 months, then reassess (delays decision; risk increases during delay)",
+          "Move in with adult child 2 + hired clinical caregiver (balances autonomy + safety; requires family commitment)",
+          "Hybrid: assisted living (more autonomy than facility, more support than home) once available (waitlist: unknown, likely 6-12 months)"
+        ]
+      },
+      "output": {
+        "decisionState": "The agreement around Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.' is performative: the room aligns quickly while execution and corridor conversation diverge, and Parent's autonomy preference vs. safety/clinical needs. Adult child 2's care commitment vs. realistic time/emotional availability. Clinical supervision adequacy (spouse's 4 hours/week) vs. 24-hour risk. Family harmony vs. best-outcome safety. suggests dissent has somewhere safer to live than the meeting. The instrument records 7 evidence items and 3 irreversible element(s): Staying home too long without adequate support increases hospitalization risk (irreversibly damages cognitive function); Facility placement: psychological difficulty of reverting if regrets, though legally/financially possible; Family relationship rupture if disagreement escalates (already tension between children).",
+        "costOfDelay": "False consensus defers conflict to the most expensive possible moment — after commitment, in front of customers, under deadline. In this case the stated exposure is irreversible exposure: Staying home too long without adequate support increases hospitalization risk (irreversibly damages cognitive function); Facility placement: psychological difficulty of reverting if regrets, though legally/financially possible; Family relationship rupture if disagreement escalates (already tension between children).",
+        "nextMove": "Manufacture safe dissent: require each principal to write the strongest case against the decision before it is ratified, and treat an empty page as a warning, not a confirmation. For Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.', that responsibility sits with Primary adult child (age 43, lives 15 minutes away, full-time employment) as the accountable owner, to be visibly underway within 48 hours.",
+        "falsificationChallenge": "When did this group last change a decision because someone disagreed in the room? If the answer is never, silence is compliance, not consensus. Test it against Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.' before acting on this judgement.",
+        "reviewCheckpoint": "Watch execution against the agreed position until Current living situation unsustainable within 60 days (medication mismanagement already causing minor health events). Facility waitlist: 8 months (enrollment decision needed in 14 days to secure spot, but commitment is reversible only if new opening elsewhere found).; quiet contradiction in delivery is the escalation trigger. Re-open this instrument when that step completes, when the pressure level changes, or within fourteen days — whichever arrives first.",
+        "executionSequence": [
+          "Require each principal to write the strongest case against Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.' before it is ratified.",
+          "Treat an empty page as a warning signal and have Primary adult child (age 43, lives 15 minutes away, full-time employment) probe it directly.",
+          "Ratify only after the written objections have been answered on the record.",
+          "Watch execution against the agreed position until Current living situation unsustainable within 60 days (medication mismanagement already causing minor health events). Facility waitlist: 8 months (enrollment decision needed in 14 days to secure spot, but commitment is reversible only if new opening elsewhere found).; quiet contradiction in delivery is the escalation trigger."
+        ],
+        "strategicRisk": "Deciding while the false_consensus pattern stands unaddressed institutionalises it into execution. When did this group last change a decision because someone disagreed in the room? If the answer is never, silence is compliance, not consensus. Test it against Parent (age 75, declining cognition, diagnosed mild dementia) currently living alone; can no longer independently manage medications, finances, or home maintenance. Options: (1) move to memory-care facility ($6.5k/month, waitlist 8 months), (2) move in with adult child (emotional caregiving, no clinical support), (3) hire 24-hour home care ($8k/month, agency turnover high), (4) combination (assisted living + periodic clinical supervision). Estate: $320k liquid; home worth $450k; parent has $2.4k/month pension. Adult child 1 (recommends facility; concerned about quality of life at home); Adult child 2 (wants parent to move in; concerned about facility depersonalization). Spouse of adult child 1: medical professional, willing to provide periodic clinical supervision if parent stays home. Parent's stated preference: stay in home 'as long as possible.' before acting on this judgement."
+      },
+      "evidenceExtracted": {
+        "reasoningChainPresent": true,
+        "diagnosisIsCaseDerived": true,
+        "consequenceIsSpecific": true,
+        "nextMoveIsActionable": true,
+        "falsificationPressurePresent": true,
+        "executionSequenceIsTimebound": true
+      },
+      "antiToyScore": 10,
+      "antiToyPass": false,
+      "redTeamScore": 5,
+      "redTeamPass": false
+    }
+  ],
+  "crossScenarioAnalysis": {
+    "diagnosisSimilarity": 0.0364963503649635,
+    "tensionSimilarity": 0.045454545454545456,
+    "consequenceSimilarity": 0.017241379310344827,
+    "nextMoveSimilarity": 0.056179775280898875,
+    "falsificationSimilarity": 0,
+    "executionSimilarity": 0,
+    "overallJudgementSimilarity": 0.030892041881954126,
+    "passThreshold": true
+  },
+  "aggregateMetrics": {
+    "antiToyScores": [
+      10,
+      10,
+      10
+    ],
+    "antiToyMean": 10,
+    "antiToyMax": 10,
+    "antiToyPass": false,
+    "redTeamScores": [
+      5,
+      5,
+      5
+    ],
+    "redTeamMean": 5,
+    "redTeamPass": false,
+    "genericAiOutperformFailures": 0,
+    "marketComparisonPass": true
+  },
+  "thresholds": {
+    "crossScenarioSimilarityMax": 0.2,
+    "antiToyScoreMax": 5,
+    "antiToyScoreMean": 5,
+    "redTeamScoreMin": 7,
+    "genericAiOutperformRequired": true
+  },
+  "gatePassed": false,
+  "gateFailureReasons": [
+    "Anti-toy mean score: 10.0 (threshold: <= 5)",
+    "Red-team mean score: 5.0 (threshold: >= 7.0)"
+  ],
+  "recommendedClassification": "blocked_until_evidence",
+  "evidence": {
+    "reasoningChainPresent": true,
+    "outputCaptured": true,
+    "antiToyEvidence": false,
+    "redTeamEvidence": false,
+    "marketComparisonEvidence": true,
+    "evidenceLedgerQualified": false
+  }
+}
