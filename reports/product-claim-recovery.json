@@ -1,0 +1,1836 @@
+{
+  "generatedAt": "2026-06-13T11:01:18.648Z",
+  "productsReviewed": 43,
+  "productsWithTargetClaims": 33,
+  "productsBlockedUntilClaimEvidenced": 33,
+  "productsDowngraded": 0,
+  "downgradeJustifications": [],
+  "claimRecoveryPlans": [
+    {
+      "productCode": "fast_diagnostic",
+      "displayName": "Fast Diagnostic",
+      "targetClaim": "externally_proven_gold",
+      "evidenceSupportedClaim": "externally_proven_gold",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "upgrade_to_evidence_claim",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "boardroom_brief",
+      "displayName": "Boardroom Brief",
+      "targetClaim": "board_grade_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "displayName": "Personal Decision Audit",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "displayName": "Decision Exposure Instrument",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "displayName": "Mandate Clarity Framework",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "displayName": "Intervention Path Selector",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "displayName": "Escalation Readiness Scorecard",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "structural_failure_diagnostic_canvas",
+      "displayName": "Structural Failure Diagnostic Canvas",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "execution_risk_index",
+      "displayName": "Execution Risk Index",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "team_alignment_gap_map",
+      "displayName": "Decision Alignment Gap Map",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "displayName": "Governance Drift Detector",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "strategic_priority_stack_builder",
+      "displayName": "Strategic Priority Stack Builder",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "board_brief_builder",
+      "displayName": "Board Brief Builder",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "execution_integrity_protocol",
+      "displayName": "Execution Integrity Protocol",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "alignment_audit_playbook",
+      "displayName": "The Alignment Audit Playbook",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "drift_detection_framework",
+      "displayName": "The Drift Detection Framework",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "displayName": "Operator Decision Pack",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "operator_essentials_pack",
+      "displayName": "Operator Essentials",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "command_pack",
+      "displayName": "Command Pack",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "governance_suite",
+      "displayName": "Governance Suite",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "displayName": "Case Dossier — Tariff Shock",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "displayName": "Case Dossier — Team Alignment",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "displayName": "Case Dossier — Escalation Denied",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "displayName": "Global Market Report — Q1 2026",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "displayName": "Global Market Report — Q2 2026",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "displayName": "Global Market Report — Q3 2026",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "team_assessment",
+      "displayName": "Team Assessment",
+      "targetClaim": "externally_proven_gold",
+      "evidenceSupportedClaim": "externally_proven_gold",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "upgrade_to_evidence_claim",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "displayName": "Enterprise Assessment",
+      "targetClaim": "externally_proven_gold",
+      "evidenceSupportedClaim": "externally_proven_gold",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "upgrade_to_evidence_claim",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "boardroom_mode",
+      "displayName": "Boardroom Mode",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "executive_reporting",
+      "displayName": "Executive Reporting",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "displayName": "Diagnostic Report — Basic",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "displayName": "Diagnostic Report — Pro",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "displayName": "Executive Reporting — Advanced",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "strategy_room",
+      "displayName": "Strategy Room — Entry",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "displayName": "Strategy Room — Active / Multi-Decision",
+      "targetClaim": "diagnostic_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "inner_circle",
+      "displayName": "Inner Circle",
+      "targetClaim": "static_reference",
+      "evidenceSupportedClaim": "static_reference",
+      "failedEvidence": [],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Static reference products are appropriately classified; no recovery needed",
+      "requiredEngineUpgrades": [],
+      "requiredOutputUpgrades": [],
+      "releaseStatus": "released",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 0,
+      "recoveryActions": [],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": false,
+        "reasoningChainRequired": false,
+        "falsificationPressureRequired": false,
+        "operatorAccountabilityRequired": false
+      }
+    },
+    {
+      "productCode": "retainer_core",
+      "displayName": "Decision Authority Retainer — Core",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "retainer_operational",
+      "displayName": "Decision Authority Retainer — Operational",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "retainer_institutional",
+      "displayName": "Decision Authority Retainer — Institutional",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "professional",
+      "displayName": "Professional",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "professional_annual",
+      "displayName": "Professional Annual",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "enterprise",
+      "displayName": "Enterprise",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    },
+    {
+      "productCode": "additional_collaborator",
+      "displayName": "Additional Collaborator",
+      "targetClaim": "signal_product",
+      "evidenceSupportedClaim": "blocked_until_claim_evidenced",
+      "failedEvidence": [
+        "anti_toy",
+        "red_team",
+        "live_route"
+      ],
+      "recoveryDecision": "hold_target_claim_block_release",
+      "whyClaimRemainsWorthPursuing": "Product has working composer and route infrastructure. Evidence gap is fixable through output improvement and external testing.",
+      "requiredEngineUpgrades": [
+        "reduce_input_echo",
+        "distil_decision_logic",
+        "extract_falsification_pressure",
+        "identify_testable_assumptions",
+        "wire_live_route",
+        "implement_output_capture"
+      ],
+      "requiredOutputUpgrades": [
+        "eliminate_generic_language",
+        "add_case_specific_terminology",
+        "add_operator_accountability",
+        "add_decision_deadline"
+      ],
+      "releaseStatus": "blocked_until_claim_evidenced",
+      "downgradePermitted": false,
+      "estimatedRecoveryDays": 15,
+      "recoveryActions": [
+        "Reduce input echo via distiller engine",
+        "Extract falsification pressure",
+        "Add operator accountability",
+        "Remove generic language",
+        "Re-test anti-toy; target score <= 5"
+      ],
+      "upgradeThresholds": {
+        "antiToyScoreMax": 5,
+        "redTeamScoreMin": 7,
+        "genericAiOutperformRequired": true,
+        "marketComparisonRequired": true,
+        "reasoningChainRequired": true,
+        "falsificationPressureRequired": true,
+        "operatorAccountabilityRequired": true
+      }
+    }
+  ],
+  "gateResult": "PASSED",
+  "gateFailureReasons": []
+}
