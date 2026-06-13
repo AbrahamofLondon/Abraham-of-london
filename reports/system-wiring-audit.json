@@ -1,0 +1,377 @@
+{
+  "generatedAt": "2026-06-13T13:44:57.669Z",
+  "gate": "PASSED_WITH_FINDINGS",
+  "wiringState": "fragmented",
+  "journeys": [
+    {
+      "journey": "fast_diagnostic",
+      "route": "/diagnostics/fast -> /foundry/decision-test",
+      "routeExists": true,
+      "routeRenders": false,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/diagnostics/fast.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/foundry/decision-test.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/api/public/kernel-signal.ts",
+          "exists": true
+        },
+        {
+          "file": "components/kernel/FreeSignalResult.tsx",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into fast_diagnostic surface before relying on authority language."
+    },
+    {
+      "journey": "team_assessment",
+      "route": "/diagnostics/team-assessment",
+      "routeExists": true,
+      "routeRenders": false,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/diagnostics/team-assessment.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/api/diagnostics/team-alignment.ts",
+          "exists": true
+        },
+        {
+          "file": "lib/diagnostics/assessment-result-mappers.ts",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into team_assessment surface before relying on authority language."
+    },
+    {
+      "journey": "enterprise_assessment",
+      "route": "/diagnostics/enterprise-assessment",
+      "routeExists": true,
+      "routeRenders": false,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/diagnostics/enterprise-assessment.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/api/diagnostics/enterprise.ts",
+          "exists": true
+        },
+        {
+          "file": "lib/diagnostics/assessment-result-mappers.ts",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into enterprise_assessment surface before relying on authority language."
+    },
+    {
+      "journey": "personal_decision_audit",
+      "route": "/test-your-decision and /checkout/personal-decision-audit",
+      "routeExists": true,
+      "routeRenders": true,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/test-your-decision.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/checkout/personal-decision-audit.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/decision-instruments/[slug].tsx",
+          "exists": true
+        },
+        {
+          "file": "lib/product/decision-instrument-gold-composer.ts",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into personal_decision_audit surface before relying on authority language."
+    },
+    {
+      "journey": "decision_centre",
+      "route": "/decision-centre",
+      "routeExists": true,
+      "routeRenders": false,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/decision-centre.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/decision-centre/case/[caseId].tsx",
+          "exists": true
+        },
+        {
+          "file": "lib/product/decision-centre-contract.ts",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into decision_centre surface before relying on authority language."
+    },
+    {
+      "journey": "boardroom_mode",
+      "route": "/boardroom dossier routes",
+      "routeExists": true,
+      "routeRenders": false,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "app/boardroom/dossier/[dossierId]/page.tsx",
+          "exists": true
+        },
+        {
+          "file": "app/boardroom/dossier/[dossierId]/BoardroomDossierClient.tsx",
+          "exists": true
+        },
+        {
+          "file": "lib/boardroom/boardroom-dossier-service.ts",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into boardroom_mode surface before relying on authority language."
+    },
+    {
+      "journey": "global_market_reports",
+      "route": "/intelligence/market and /artifacts/global-market-outlook-q1-2026-public",
+      "routeExists": true,
+      "routeRenders": false,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/intelligence/market.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/artifacts/global-market-outlook-q1-2026-public.tsx",
+          "exists": true
+        },
+        {
+          "file": "lib/intelligence/market-intelligence-lifecycle.ts",
+          "exists": true
+        },
+        {
+          "file": "lib/intelligence/gmi-release-authority.ts",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "static_route_pretending_to_be_product",
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into global_market_reports surface before relying on authority language."
+    },
+    {
+      "journey": "admin_authority_dashboard",
+      "route": "/admin/authority-center",
+      "routeExists": true,
+      "routeRenders": true,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": true,
+      "displaysCorrectAuthorityState": true,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/admin/authority-center.tsx",
+          "exists": true
+        },
+        {
+          "file": "components/product/ProductAuthorityPanel.tsx",
+          "exists": true
+        },
+        {
+          "file": "lib/product/resolve-product-authority.ts",
+          "exists": true
+        }
+      ],
+      "flags": [],
+      "recommendedAction": "Keep route under observation; no immediate blocker detected by static audit."
+    },
+    {
+      "journey": "checkout_fulfilment",
+      "route": "/checkout/* -> fulfilment",
+      "routeExists": true,
+      "routeRenders": true,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "lib/product/product-fulfilment-contract.ts",
+          "exists": true
+        },
+        {
+          "file": "lib/product/product-fulfilment-assurance.ts",
+          "exists": true
+        },
+        {
+          "file": "pages/api/checkout/decision-failure-brief.ts",
+          "exists": true
+        },
+        {
+          "file": "pages/checkout/personal-decision-audit.tsx",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into checkout_fulfilment surface before relying on authority language."
+    },
+    {
+      "journey": "public_product_pages",
+      "route": "/products /pricing /diagnostics /decision-instruments",
+      "routeExists": true,
+      "routeRenders": true,
+      "usesRealProductLogic": true,
+      "usesProductAuthorityContract": false,
+      "displaysCorrectAuthorityState": false,
+      "capturesOrReferencesEvidence": true,
+      "preventsUnsupportedClaim": true,
+      "producesUsefulOutput": true,
+      "supportsNextAction": true,
+      "connectsToDashboardReportFulfilment": true,
+      "filesChecked": [
+        {
+          "file": "pages/products.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/pricing.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/diagnostics/index.tsx",
+          "exists": true
+        },
+        {
+          "file": "pages/decision-instruments/index.tsx",
+          "exists": true
+        }
+      ],
+      "flags": [
+        "authority_bypass",
+        "surface_overclaim"
+      ],
+      "recommendedAction": "Wire ProductAuthorityContract into public_product_pages surface before relying on authority language."
+    }
+  ],
+  "flagCounts": {
+    "authority_bypass": 9,
+    "surface_overclaim": 9,
+    "static_route_pretending_to_be_product": 1
+  },
+  "topRisks": [
+    "fast_diagnostic: authority_bypass, surface_overclaim",
+    "team_assessment: authority_bypass, surface_overclaim",
+    "enterprise_assessment: authority_bypass, surface_overclaim",
+    "personal_decision_audit: authority_bypass, surface_overclaim",
+    "decision_centre: authority_bypass, surface_overclaim",
+    "boardroom_mode: authority_bypass, surface_overclaim",
+    "global_market_reports: static_route_pretending_to_be_product, authority_bypass, surface_overclaim",
+    "checkout_fulfilment: authority_bypass, surface_overclaim",
+    "public_product_pages: authority_bypass, surface_overclaim"
+  ],
+  "recommendations": [
+    "Make ProductAuthorityContract visible in route output for every product with a commercial or diagnostic claim.",
+    "Attach route-output capture to live journeys, not only benchmark scripts.",
+    "Connect public product pages to evidence-supported status so buyers see what is proven, blocked, or pending.",
+    "Ensure checkout success routes land in fulfilled artifacts or persisted case state with authority/evidence status."
+  ]
+}

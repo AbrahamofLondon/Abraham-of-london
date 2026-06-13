@@ -1,0 +1,487 @@
+{
+  "generatedAt": "2026-06-13T13:45:20.032Z",
+  "gate": "PASSED_WITH_FINDINGS",
+  "marketAdoptionState": "credible_but_too_complex",
+  "productsAudited": 9,
+  "postureCounts": {
+    "strong_but_needs_clarity": 2,
+    "credible_but_too_complex": 7
+  },
+  "marketPainUnclearCount": 0,
+  "rows": [
+    {
+      "productCode": "fast_diagnostic",
+      "marketPain": "Leaders make expensive decisions from incomplete evidence and need a fast signal before committing.",
+      "buyer": "Founder, operator, functional executive",
+      "user": "Decision owner under time pressure",
+      "triggerEvent": "A decision is live, stakes are high, and internal confidence feels stronger than the evidence.",
+      "currentAlternative": "Ask a senior colleague, consultant, or generic AI prompt for a second opinion.",
+      "whyCurrentAlternativeFails": "The alternative may sound useful without forcing evidence, uncertainty, falsification, or authority limits.",
+      "productResolution": "Capture the case, derive judgement by pattern, expose consequence, next move, falsification, and escalation trigger.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "A fast evidence-governed decision signal that shows what would make the decision safer before you commit.",
+      "surfaceFiles": [
+        "pages/diagnostics/fast.tsx",
+        "pages/foundry/decision-test.tsx",
+        "components/kernel/FreeSignalResult.tsx"
+      ],
+      "routeFilesPresent": [
+        "pages/diagnostics/fast.tsx",
+        "pages/foundry/decision-test.tsx",
+        "components/kernel/FreeSignalResult.tsx"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": false,
+        "authorityContractVisible": true,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "generic_ai_contrast_weak"
+      ],
+      "adoptionPosture": "strong_but_needs_clarity",
+      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
+    },
+    {
+      "productCode": "team_assessment",
+      "marketPain": "Teams hide disagreement behind consensus language until execution exposes the split.",
+      "buyer": "CEO, COO, chief of staff, people/operations lead",
+      "user": "Team lead or facilitator",
+      "triggerEvent": "A leadership team says it agrees but execution signals, priorities, or ownership are diverging.",
+      "currentAlternative": "Run a workshop, survey, or retrospective.",
+      "whyCurrentAlternativeFails": "The output often records sentiment without forcing decision authority, evidence gaps, or next action.",
+      "productResolution": "Surface alignment gaps, decision risk, accountability, and the next evidence or operating move.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "A governed alignment diagnostic that turns soft consensus into visible decision risk and action.",
+      "surfaceFiles": [
+        "pages/diagnostics/team-assessment.tsx",
+        "pages/api/diagnostics/team-alignment.ts",
+        "components/diagnostics/AssessmentResultSurface.tsx"
+      ],
+      "routeFilesPresent": [
+        "pages/diagnostics/team-assessment.tsx",
+        "pages/api/diagnostics/team-alignment.ts",
+        "components/diagnostics/AssessmentResultSurface.tsx"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": true,
+        "authorityContractVisible": false,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "marketPain": "Enterprise decisions pass through committees without a clear evidence state or authority owner.",
+      "buyer": "Executive sponsor, transformation leader, risk/governance lead",
+      "user": "Programme owner, PMO, strategy/operations team",
+      "triggerEvent": "A strategic initiative is moving through governance with unresolved dependencies or unclear ownership.",
+      "currentAlternative": "Governance deck, steering committee pack, consultant assessment.",
+      "whyCurrentAlternativeFails": "The pack can describe risk but still permit unsupported authority and vague next steps.",
+      "productResolution": "Bind decision risk to evidence, authority, limitations, and escalation conditions.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "Decision governance that shows where enterprise confidence is unsupported before the programme hardens.",
+      "surfaceFiles": [
+        "pages/diagnostics/enterprise-assessment.tsx",
+        "pages/api/diagnostics/enterprise.ts",
+        "components/diagnostics/AssessmentResultSurface.tsx"
+      ],
+      "routeFilesPresent": [
+        "pages/diagnostics/enterprise-assessment.tsx",
+        "pages/api/diagnostics/enterprise.ts",
+        "components/diagnostics/AssessmentResultSurface.tsx"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": true,
+        "authorityContractVisible": false,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "marketPain": "A founder or leader needs a defensible decision record, not another reflective worksheet.",
+      "buyer": "Founder, executive, advisor, operator",
+      "user": "Individual decision owner",
+      "triggerEvent": "A personal or commercial decision has consequences but lacks a structured decision record.",
+      "currentAlternative": "Coaching call, template, generic AI analysis, private notes.",
+      "whyCurrentAlternativeFails": "The output rarely creates a traceable evidence position, falsification test, and execution sequence.",
+      "productResolution": "Use a decision instrument to convert the case into a governed judgement and action path.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "A decision audit that turns one live choice into a traceable judgement and next evidence action.",
+      "surfaceFiles": [
+        "pages/test-your-decision.tsx",
+        "pages/checkout/personal-decision-audit.tsx",
+        "pages/decision-instruments/[slug].tsx"
+      ],
+      "routeFilesPresent": [
+        "pages/test-your-decision.tsx",
+        "pages/checkout/personal-decision-audit.tsx",
+        "pages/decision-instruments/[slug].tsx"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": true,
+        "authorityContractVisible": false,
+        "limitationVisible": false,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible",
+        "limitations_not_visible"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "decision_centre",
+      "marketPain": "Organisations repeat the same decision failures because cases, evidence, and lessons are not retained in one operating surface.",
+      "buyer": "COO, chief of staff, transformation leader",
+      "user": "Decision operations team",
+      "triggerEvent": "Multiple decisions are moving at once and leadership cannot see evidence quality or risk state.",
+      "currentAlternative": "Spreadsheets, PMO dashboards, Slack threads, board packs.",
+      "whyCurrentAlternativeFails": "The alternatives track activity but not decision authority, falsification, or reusable learning.",
+      "productResolution": "Create a live centre for decision cases, evidence state, authority state, and next action.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "A decision operating surface for tracking which choices are supported, exposed, or blocked.",
+      "surfaceFiles": [
+        "pages/decision-centre.tsx",
+        "pages/decision-centre/case/[caseId].tsx",
+        "lib/product/decision-centre-contract.ts"
+      ],
+      "routeFilesPresent": [
+        "pages/decision-centre.tsx",
+        "pages/decision-centre/case/[caseId].tsx",
+        "lib/product/decision-centre-contract.ts"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": true,
+        "authorityContractVisible": false,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "boardroom_mode",
+      "marketPain": "Boards approve strategy without seeing what would falsify the case or where authority is unsupported.",
+      "buyer": "Chair, board member, CEO, investor",
+      "user": "Board secretary, strategy lead, executive sponsor",
+      "triggerEvent": "A board-level decision requires scrutiny before approval.",
+      "currentAlternative": "Board paper or consultant deck.",
+      "whyCurrentAlternativeFails": "The format can reward persuasive narrative over evidence pressure and explicit challenge.",
+      "productResolution": "Present decision risk, evidence, falsification triggers, and unsupported claims in board-facing form.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "Boardroom evidence pressure for decisions that should not pass on narrative strength alone.",
+      "surfaceFiles": [
+        "app/boardroom/dossier/[dossierId]/page.tsx",
+        "app/boardroom/dossier/[dossierId]/BoardroomDossierClient.tsx",
+        "lib/boardroom/boardroom-dossier-service.ts"
+      ],
+      "routeFilesPresent": [
+        "app/boardroom/dossier/[dossierId]/page.tsx",
+        "app/boardroom/dossier/[dossierId]/BoardroomDossierClient.tsx",
+        "lib/boardroom/boardroom-dossier-service.ts"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": false,
+        "authorityContractVisible": false,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible",
+        "generic_ai_contrast_weak"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "global_market_reports",
+      "marketPain": "Leaders need market intelligence connected to decision consequences, not static commentary.",
+      "buyer": "Investor, CEO, strategy lead",
+      "user": "Strategy, research, commercial planning team",
+      "triggerEvent": "A macro or market shift changes strategic timing, exposure, or prioritisation.",
+      "currentAlternative": "Analyst report, newsletter, generic AI market summary.",
+      "whyCurrentAlternativeFails": "The output often stops at insight rather than decision implication, evidence state, and next action.",
+      "productResolution": "Turn market signals into decision lessons, constraints, limitations, and reuse value.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "Market intelligence that is governed by evidence and connected to decision action.",
+      "surfaceFiles": [
+        "pages/intelligence/market.tsx",
+        "pages/artifacts/global-market-outlook-q1-2026-public.tsx",
+        "lib/intelligence/market-intelligence-lifecycle.ts"
+      ],
+      "routeFilesPresent": [
+        "pages/intelligence/market.tsx",
+        "pages/artifacts/global-market-outlook-q1-2026-public.tsx",
+        "lib/intelligence/market-intelligence-lifecycle.ts"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": false,
+        "authorityContractVisible": false,
+        "limitationVisible": false,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible",
+        "limitations_not_visible",
+        "generic_ai_contrast_weak"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "control_room",
+      "marketPain": "Operators cannot prove which claims and products are externally supported versus internally asserted.",
+      "buyer": "Founder, product owner, governance lead",
+      "user": "Internal operator/admin",
+      "triggerEvent": "A product claim, launch, or sales page needs authority before going public.",
+      "currentAlternative": "Manual review, status spreadsheet, launch checklist.",
+      "whyCurrentAlternativeFails": "Manual state is easy to drift from the actual user-facing surface.",
+      "productResolution": "Expose product authority, evidence ledger state, and blocked claims in one admin surface.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path.",
+        "Surface appears to reference ProductAuthority components or resolver."
+      ],
+      "commercialWording": "A control room for keeping product claims inside their evidence authority.",
+      "surfaceFiles": [
+        "pages/admin/authority-center.tsx",
+        "pages/admin/index.tsx",
+        "components/product/ProductAuthorityPanel.tsx"
+      ],
+      "routeFilesPresent": [
+        "pages/admin/authority-center.tsx",
+        "pages/admin/index.tsx",
+        "components/product/ProductAuthorityPanel.tsx"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": false,
+        "authorityContractVisible": true,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "generic_ai_contrast_weak"
+      ],
+      "adoptionPosture": "strong_but_needs_clarity",
+      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
+    },
+    {
+      "productCode": "checkout_fulfilment",
+      "marketPain": "A buyer needs clear fulfilment after purchase and confidence that the delivered output matches the public promise.",
+      "buyer": "Paying customer",
+      "user": "Paying customer",
+      "triggerEvent": "A user is ready to buy or has paid for a decision product.",
+      "currentAlternative": "Consulting booking form or generic downloadable product.",
+      "whyCurrentAlternativeFails": "Payment, fulfilment, and evidence authority can be disconnected.",
+      "productResolution": "Tie product claims, checkout, output route, and fulfilment contract together.",
+      "evidenceOfResolution": [
+        "Product route or surface file exists.",
+        "Surface references evidence, authority, validation, proof, or limitations.",
+        "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
+        "Surface includes a visible product action or submission path."
+      ],
+      "commercialWording": "Purchase only the decision product whose output and evidence status are explicit.",
+      "surfaceFiles": [
+        "pages/checkout/personal-decision-audit.tsx",
+        "pages/api/checkout/decision-failure-brief.ts",
+        "lib/product/product-fulfilment-contract.ts"
+      ],
+      "routeFilesPresent": [
+        "pages/checkout/personal-decision-audit.tsx",
+        "pages/api/checkout/decision-failure-brief.ts",
+        "lib/product/product-fulfilment-contract.ts"
+      ],
+      "signals": {
+        "routeOrSurfaceExists": true,
+        "painVisible": true,
+        "buyerClear": true,
+        "productActionClear": true,
+        "evidenceVisible": true,
+        "judgementVisible": true,
+        "genericAiContrastVisible": false,
+        "authorityContractVisible": false,
+        "limitationVisible": true,
+        "fulfilmentOrNextActionVisible": true
+      },
+      "flags": [
+        "authority_contract_not_visible",
+        "generic_ai_contrast_weak"
+      ],
+      "adoptionPosture": "credible_but_too_complex",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    }
+  ],
+  "adoptionFindings": [
+    {
+      "productCode": "fast_diagnostic",
+      "adoptionPosture": "strong_but_needs_clarity",
+      "marketPain": "Leaders make expensive decisions from incomplete evidence and need a fast signal before committing.",
+      "currentAlternative": "Ask a senior colleague, consultant, or generic AI prompt for a second opinion.",
+      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
+    },
+    {
+      "productCode": "team_assessment",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "Teams hide disagreement behind consensus language until execution exposes the split.",
+      "currentAlternative": "Run a workshop, survey, or retrospective.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "Enterprise decisions pass through committees without a clear evidence state or authority owner.",
+      "currentAlternative": "Governance deck, steering committee pack, consultant assessment.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "A founder or leader needs a defensible decision record, not another reflective worksheet.",
+      "currentAlternative": "Coaching call, template, generic AI analysis, private notes.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "decision_centre",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "Organisations repeat the same decision failures because cases, evidence, and lessons are not retained in one operating surface.",
+      "currentAlternative": "Spreadsheets, PMO dashboards, Slack threads, board packs.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "boardroom_mode",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "Boards approve strategy without seeing what would falsify the case or where authority is unsupported.",
+      "currentAlternative": "Board paper or consultant deck.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "global_market_reports",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "Leaders need market intelligence connected to decision consequences, not static commentary.",
+      "currentAlternative": "Analyst report, newsletter, generic AI market summary.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    },
+    {
+      "productCode": "control_room",
+      "adoptionPosture": "strong_but_needs_clarity",
+      "marketPain": "Operators cannot prove which claims and products are externally supported versus internally asserted.",
+      "currentAlternative": "Manual review, status spreadsheet, launch checklist.",
+      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
+    },
+    {
+      "productCode": "checkout_fulfilment",
+      "adoptionPosture": "credible_but_too_complex",
+      "marketPain": "A buyer needs clear fulfilment after purchase and confidence that the delivered output matches the public promise.",
+      "currentAlternative": "Consulting booking form or generic downloadable product.",
+      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+    }
+  ],
+  "implementationReadyRecommendations": [
+    "Put the pain, the decision action, and the evidence state in the first viewport of every product entry route.",
+    "Replace abstract authority language on customer surfaces with visible evidence state, limitation, next evidence action, and blocked-claim state.",
+    "Wire the ProductAuthorityContract and evidence ledger into public product pages, result pages, checkout, and admin authority centre.",
+    "Turn static market and boardroom surfaces into decision outputs with consequence, falsification trigger, and reuse value.",
+    "Give every route a single next action that follows from the judgement state: test evidence, assign owner, escalate, reduce scope, or buy/submit."
+  ]
+}
