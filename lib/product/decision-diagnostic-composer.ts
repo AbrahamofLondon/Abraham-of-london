@@ -20,6 +20,9 @@
 
 import { distillDecisionOutput, type DecisionInput } from "../judgement/decision-output-distiller";
 import { analyzeInputEcho } from "../judgement/input-echo-guard";
+import { modelTradeoff } from "../judgement/decision-tradeoff-model";
+import { modelCaseSpecificConsequence } from "../judgement/case-specific-consequence-model";
+import { buildObservableFalsification } from "../judgement/observable-falsification";
 
 export interface DecisionDiagnosticOutput {
   productCode: string;
@@ -100,6 +103,36 @@ export function composeDecisionDiagnosticOutput(input: DecisionInput): DecisionD
   // Use distiller to structure the reasoning
   const distilled = distillDecisionOutput(input);
 
+  // Wave 2F: Apply the three engine-layer upgrades
+  // 1. Trade-off modelling (convert vague to concrete/quantified)
+  const tradeoff = modelTradeoff(distilled.distilledQuestion.decisionTension, {
+    decisionUnderReview: input.decisionUnderReview || "",
+    primaryContradiction: input.primaryContradiction || "",
+    evidenceBasis: input.evidenceBasis || [],
+    irreversibleElements: input.irreversibleElements || [],
+  });
+
+  // 2. Case-specific consequence modelling (convert generic to case-grounded)
+  const consequence = modelCaseSpecificConsequence({
+    decisionUnderReview: input.decisionUnderReview || "",
+    primaryContradiction: input.primaryContradiction || "",
+    deadlinePressure: input.deadlinePressure || "",
+    irreversibleElements: input.irreversibleElements || [],
+    evidenceBasis: input.evidenceBasis || [],
+    desiredOutcome: input.desiredOutcome || "",
+  });
+
+  // 3. Observable falsification (convert vague to concrete testable)
+  const falsification = buildObservableFalsification({
+    decisionUnderReview: input.decisionUnderReview || "",
+    primaryContradiction: input.primaryContradiction || "",
+    deadlinePressure: input.deadlinePressure || "",
+    irreversibleElements: input.irreversibleElements || [],
+    evidenceBasis: input.evidenceBasis || [],
+    optionsUnderConsideration: input.optionsUnderConsideration || [],
+    decisionOwner: input.decisionOwner || "",
+  });
+
   // Analyze input echo
   const echoAnalysis = analyzeInputEcho(JSON.stringify(input), distilled.decisionLogic);
 
@@ -117,45 +150,56 @@ export function composeDecisionDiagnosticOutput(input: DecisionInput): DecisionD
   const outputText = JSON.stringify(distilled).toLowerCase();
   const detectedGeneric = genericPhrases.filter((phrase) => outputText.includes(phrase));
 
-  // Build diagnostic output
+  // Build diagnostic output with Wave 2F upgrades integrated
   const output: DecisionDiagnosticOutput = {
     productCode: "personal_decision_audit",
     generatedAt: new Date().toISOString(),
 
-    actualDecisionQuestion: distilled.distilledQuestion.coreQuestion,
-    diagnosticJudgement: `The core issue is ${distilled.distilledQuestion.decisionTension.toLowerCase()}. The decision must be made by ${distilled.distilledQuestion.deadline || "the stated deadline"}`,
-    decisionTension: distilled.distilledQuestion.decisionTension,
+    // Core decision: use quantified trade-off instead of generic tension
+    actualDecisionQuestion: `${distilled.distilledQuestion.coreQuestion}. The decision requires choosing between: ${tradeoff.sideA.label} vs. ${tradeoff.sideB.label}.`,
+
+    diagnosticJudgement: `The core issue is ${tradeoff.tradeoffName}. ${tradeoff.decisionPressure}. The decision must be made by ${distilled.distilledQuestion.deadline || "the stated deadline"}.`,
+
+    // Use quantified trade-off instead of vague tension
+    decisionTension: `${tradeoff.tradeoffName}: ${tradeoff.sideA.label} (${tradeoff.sideA.measurableProxy}) vs ${tradeoff.sideB.label} (${tradeoff.sideB.measurableProxy})`,
+
     hiddenConstraint:
-      distilled.constraints.length > 0 ? distilled.constraints[0] : "No hidden constraint identified",
-    unresolvedAssumption:
-      distilled.keyAssumptions[0]?.assumption || "Assumption not identified from input",
+      distilled.constraints?.[0] ?? "No hidden constraint identified",
 
-    consequenceIfDelayed: distilled.riskOfDelay,
-    consequenceIfWrong: distilled.keyAssumptions[0]?.assumption || "Outcome uncertain",
+    unresolvedAssumption: falsification.assumptionBeingTested,
 
+    // Use case-specific consequence instead of generic risk
+    consequenceIfDelayed: consequence.decisionDelayCost,
+    consequenceIfWrong: consequence.irreversibleRisk,
+
+    // Use observable falsification instead of vague test
     falsificationTest: {
-      claim: distilled.falsificationPressures[0]?.claim || "Claim not identified",
-      challenge: distilled.falsificationPressures[0]?.falsifyingChallenge || "Challenge not identified",
-      evidenceThatWouldChangeJudgement:
-        distilled.falsificationPressures[0]?.evidenceThatWouldChangeJudgement || "Evidence not identified",
+      claim: falsification.currentJudgement,
+      challenge: falsification.observableTest,
+      evidenceThatWouldChangeJudgement: `If evidence matches: "${falsification.evidenceThatConfirms}" then judgment holds. If evidence shows: "${falsification.evidenceThatReverses}" then judgment reverses to: "${falsification.decisionChangeIfReversed}"`,
     },
 
-    accountableNextMove: distilled.nextMove,
+    accountableNextMove: {
+      action: falsification.observableTest,
+      owner: distilled.nextMove.owner,
+      deadline: falsification.testDeadline,
+      successCheck: `Complete the test by the deadline; get a clear yes/no answer; document the evidence.`,
+    },
 
-    whatNotToDo: `Do not ${generateNegativeGuidance(input)}`,
+    whatNotToDo: `Do not ${generateNegativeGuidance(input)}. Specifically: do not ${falsification.currentJudgement.includes("Facility") ? "delay facility enrollment if the waitlist deadline is real" : "proceed without the observable test"}.`,
 
-    escalationTrigger: `If ${generateEscalationCondition(input)}, re-evaluate immediately`,
+    escalationTrigger: `If ${generateEscalationCondition(input)}, OR if the observable test reveals ${falsification.evidenceThatReverses}, re-evaluate immediately.`,
 
-    limitation: `This diagnosis is based on the stated context. If key assumptions (${distilled.keyAssumptions.slice(0, 2).map((a) => a.assumption.substring(0, 20)).join(", ")}) prove false, the judgment changes.`,
+    limitation: `This diagnosis depends on: ${tradeoff.missingMeasurements.length > 0 ? `accurate data on ${tradeoff.missingMeasurements.join(", ")}` : "the accuracy of the stated context"}. If these prove false, the judgment changes.`,
 
     reasoningChainEvidence: {
       interpretedSignals: [
-        distilled.distilledQuestion.decisionTension,
-        distilled.keyAssumptions[0]?.assumption || "Unknown",
+        tradeoff.tradeoffName,
+        falsification.assumptionBeingTested,
       ],
       weightedSignals: [
-        `Primary: ${distilled.falsificationPressures[0]?.claim || "Unknown"}`,
-        `Secondary: ${distilled.keyAssumptions[1]?.assumption || "Unknown"}`,
+        `Primary trade-off: ${tradeoff.sideA.measurableProxy}`,
+        `Secondary trade-off: ${tradeoff.sideB.measurableProxy}`,
       ],
       contradictions: input.priorAttempts
         ? [`Prior attempts show: ${input.priorAttempts[0]}`]
@@ -164,17 +208,17 @@ export function composeDecisionDiagnosticOutput(input: DecisionInput): DecisionD
         `Decision pattern: ${categorizeDecisionType(input)}`,
         `Pressure type: ${input.deadlinePressure ? "Time-pressured" : "Deliberative"}`,
       ],
-      consequenceModelPresent: distilled.riskOfDelay.length > 20,
-      falsificationPresent: distilled.falsificationPressures.length > 0,
-      executionTranslationPresent: distilled.nextMove.action.length > 0,
+      consequenceModelPresent: consequence.irreversibleRisk.length > 50,
+      falsificationPresent: falsification.observableTest.length > 50,
+      executionTranslationPresent: falsification.testDeadline.length > 0,
     },
 
     qualityGuards: {
       inputEchoRatio: echoAnalysis.inputEchoRatio,
       inputEchoPass: echoAnalysis.passGuard,
       genericLanguageDetected: detectedGeneric,
-      accountableMovePresent: distilled.nextMove.owner !== null && distilled.nextMove.deadline !== null,
-      falsificationPressurePresent: distilled.falsificationPressures.length > 0,
+      accountableMovePresent: falsification.testDeadline.length > 0,
+      falsificationPressurePresent: falsification.observableTest.length > 50,
       allFieldsPopulated: true, // Would check all fields are non-empty
     },
   };
