@@ -17,12 +17,12 @@ export function percentageScore(answers: Array<number | boolean | null | undefin
 }
 
 export function severityFromScore(score: number): DiagnosticSeverity {
-  if (score >= 90) return "negligible";
+  if (score >= 90) return "low";
   if (score >= 75) return "low";
   if (score >= 55) return "moderate";
   if (score >= 35) return "high";
   if (score >= 15) return "critical";
-  return "systemic";
+  return "critical";
 }
 
 export function verdictFromScore(score: number): string {

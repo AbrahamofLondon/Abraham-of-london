@@ -204,7 +204,7 @@ export async function run(input: EngineRunInput): Promise<EngineRunOutput> {
       id: `fd-score-${Date.now()}`,
       title: `Fast Diagnostic Score: ${score}%`,
       description: `Computed from ${answers.length} answers across ${new Set(answers.map((a) => a.sectionId)).size} sections.`,
-      severity: severity === "critical" || severity === "systemic" ? "CRITICAL" : severity === "high" ? "HIGH" : severity === "moderate" ? "MEDIUM" : "INFO",
+      severity: severity === "critical" ? "CRITICAL" : severity === "high" ? "HIGH" : severity === "moderate" ? "MEDIUM" : "INFO",
       source: "fast-diagnostic-adapter::run::scoring",
       evidence: `Answers: ${answers.map((a) => `${a.sectionId}/${a.questionId}=${a.value}`).join(", ")}`,
       remediation: score < 55 ? "Review diagnostic inputs. Low scores indicate governance gaps." : undefined,

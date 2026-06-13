@@ -3,7 +3,7 @@
 
 import { prisma } from "@/lib/prisma";
 
-export type DiagnosticSeverity = "negligible" | "low" | "moderate" | "high" | "critical" | "systemic";
+export type DiagnosticSeverity = "low" | "moderate" | "high" | "critical";
 
 export type DiagnosticRecord = {
   id: string;
@@ -129,23 +129,23 @@ export async function createDiagnosticRecord(input: {
   const model = await resolveModel();
   const reference = makeDiagnosticReference(input.diagnosticType);
 
+  // Write only fields that exist in DiagnosticRecord schema
   const data: Record<string, unknown> = {
-    reference,
-    diagnosticRef: reference,
     diagnosticType: input.diagnosticType,
-    type: input.diagnosticType,
-    score: input.score,
-    severity: input.severity,
-    verdict: input.verdict,
+    score: input.score || 0,
+    severity: input.severity || "negligible",
+    verdict: input.verdict || "",
     status: input.status || "completed",
     reportStatus: "none",
     reportTier: null,
     userId: input.userId || null,
     userEmail: input.userEmail || null,
-    email: input.userEmail || null,
-    payload: input.payload || null,
-    metadata: input.payload || null,
-    responsesJson: input.payload || null,
+    // Store payload as JSON string in responsesJson field (schema-supported)
+    responsesJson: JSON.stringify({
+      reference,
+      answers: input.payload?.answers || [],
+      ...input.payload,
+    }),
   };
 
   const row = await model.create({ data });
