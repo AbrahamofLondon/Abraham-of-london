@@ -21,6 +21,7 @@ export type ProductAuthorityState =
   | "blocked_until_claim_evidenced"
   | "blocked_until_v2_revalidation"
   | "measurement_inconclusive"
+  | "pending_reconciliation"
   | "static_reference"
   | "internal_only"
   | "authority_contract_missing";
@@ -128,6 +129,8 @@ export function getPublicClaimLanguage(
       return `${productCode} requires v2 revalidation before authority can be restored.`;
     case "measurement_inconclusive":
       return `${productCode} validation is inconclusive; authority is not granted.`;
+    case "pending_reconciliation":
+      return `${productCode} authority is pending reconciliation between contract, ledger, runtime output, and route evidence.`;
     case "static_reference":
       return `${productCode} is a reference implementation for testing purposes only.`;
     case "internal_only":
@@ -175,7 +178,8 @@ export function validateContract(
       contract.currentAuthorityState !== "legacy_validated_pending_v2_revalidation" &&
       contract.currentAuthorityState !== "blocked_until_claim_evidenced" &&
       contract.currentAuthorityState !== "blocked_until_v2_revalidation" &&
-      contract.currentAuthorityState !== "measurement_inconclusive"
+      contract.currentAuthorityState !== "measurement_inconclusive" &&
+      contract.currentAuthorityState !== "pending_reconciliation"
     ) {
       errors.push(
         "Authority state should remain non-granting when measurement boundary is violated"

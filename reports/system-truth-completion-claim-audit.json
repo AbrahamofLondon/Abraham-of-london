@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-13T19:29:42.518Z",
-  "filesScanned": 4916,
+  "generatedAt": "2026-06-13T19:46:49.491Z",
+  "filesScanned": 4927,
   "summary": {
-    "totalClaims": 7944,
-    "questionableClaims": 6664,
+    "totalClaims": 7964,
+    "questionableClaims": 6674,
     "byStatus": {
-      "supported_scope_limited": 1280,
-      "requires_evidence_check": 6419,
+      "supported_scope_limited": 1290,
+      "requires_evidence_check": 6429,
       "unknown": 245
     }
   },

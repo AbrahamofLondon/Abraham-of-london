@@ -1,6 +1,6 @@
 # System Truth Runtime Wiring Matrix
 
-Generated: 2026-06-13T19:29:42.518Z
+Generated: 2026-06-13T19:46:49.491Z
 
 Products audited: 19
 
@@ -11,12 +11,12 @@ Products audited: 19
 - Guarded: 16
 - Tested: 19
 - Infrastructure-only: 2
-- Contract-only: 2
+- Contract-only: 1
 - Blocked correctly: 8
 
 | Product | Authority State | Primitive | Defined | Imported | Runtime Wired | Rendered | Guarded | Tested | Actual Status | Blocking Reasons |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| fast_diagnostic | externally_proven_gold_product | ProductAuthorityContract | yes | no | no | no | yes | yes | contract_only | Governance primitive is not imported by mapped runtime files.; Governance primitive is not wired into product generation/runtime path.; Authority/evidence boundary is not visibly rendered on mapped UI surface. |
+| fast_diagnostic | pending_reconciliation | ProductAuthorityContract | yes | no | no | no | yes | yes | defined_only | Governance primitive is not imported by mapped runtime files.; Governance primitive is not wired into product generation/runtime path.; Authority/evidence boundary is not visibly rendered on mapped UI surface. |
 | enterprise_assessment | legacy_validated_pending_v2_revalidation | ProductAuthorityContract | yes | no | no | no | yes | yes | contract_only | Governance primitive is not imported by mapped runtime files.; Governance primitive is not wired into product generation/runtime path.; Authority/evidence boundary is not visibly rendered on mapped UI surface. |
 | team_assessment | legacy_validated_pending_v2_revalidation | ProductAuthorityContract | yes | no | no | no | yes | yes | defined_only | Governance primitive is not imported by mapped runtime files.; Governance primitive is not wired into product generation/runtime path.; Authority/evidence boundary is not visibly rendered on mapped UI surface. |
 | executive_reporting | blocked_until_v2_revalidation | ProductAuthorityContract | yes | yes | yes | yes | yes | yes | blocked_correctly |  |

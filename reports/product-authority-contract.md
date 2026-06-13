@@ -48,7 +48,7 @@ Estate coverage complete: no
 
 | Product | Authority State | Evidence Source | Public Claim Allowed | Valid |
 | --- | --- | --- | ---: | ---: |
-| fast_diagnostic | externally_proven_gold_product | generated_evidence | yes | yes |
+| fast_diagnostic | pending_reconciliation | generated_evidence | no | yes |
 | team_assessment | legacy_validated_pending_v2_revalidation | legacy_evidence | no | yes |
 | enterprise_assessment | legacy_validated_pending_v2_revalidation | legacy_evidence | no | yes |
 | personal_decision_audit | blocked_until_claim_evidenced | reported_summary_only | no | yes |

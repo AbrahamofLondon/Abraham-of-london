@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-06-13T19:29:42.518Z",
-  "filesScanned": 5980,
+  "generatedAt": "2026-06-13T19:46:49.491Z",
+  "filesScanned": 5998,
   "summary": {
-    "totalFindings": 51642,
-    "highRiskFindings": 17245,
+    "totalFindings": 51852,
+    "highRiskFindings": 17306,
     "byStatus": {
-      "needs authority state check": 16622,
+      "needs authority state check": 16683,
       "unsupported": 623,
-      "bounded": 26996,
-      "stale": 7401
+      "bounded": 27095,
+      "stale": 7451
     }
   },
   "highRiskFindings": [

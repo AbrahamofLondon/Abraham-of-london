@@ -708,7 +708,7 @@ function classifyRuntimeStatus(product, facts) {
   if (/externally_proven_gold_product|legacy_validated/.test(facts.authorityState) && !ledgerMatchesProduct(product.productCode)) {
     return facts.isRuntimeWired ? "runtime_wired_but_evidence_mismatch" : "contract_only";
   }
-  if (/blocked|measurement_inconclusive|static_reference|internal_only/.test(facts.authorityState) && facts.isRendered) {
+  if (/blocked|measurement_inconclusive|pending_reconciliation|static_reference|internal_only/.test(facts.authorityState) && facts.isRendered) {
     return "blocked_correctly";
   }
   if (facts.isRuntimeWired && !ledgerMatchesProduct(product.productCode)) {
@@ -738,7 +738,7 @@ function runtimeBlockingReasons(product, facts) {
 
 function classifyAuthorityReality(row, contract, matrix, ledgerMatch) {
   if (!contract && !matrix) return "authority_unknown";
-  if (/blocked|measurement_inconclusive|static_reference|internal_only/.test(row.authorityState)) {
+  if (/blocked|measurement_inconclusive|pending_reconciliation|static_reference|internal_only/.test(row.authorityState)) {
     return row.isRendered || matrix?.limitationVisiblyRendered ? "authority_blocked_correctly" : "authority_partially_supported";
   }
   if (/externally_proven_gold_product/.test(row.authorityState)) {

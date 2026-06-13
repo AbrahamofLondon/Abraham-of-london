@@ -1,17 +1,17 @@
 # System Truth Completion Claim Audit
 
-Generated: 2026-06-13T19:29:42.518Z
+Generated: 2026-06-13T19:46:49.491Z
 
-Files scanned: 4916
+Files scanned: 4927
 
-Total completion claims: 7944
+Total completion claims: 7964
 
-Questionable claims: 6664
+Questionable claims: 6674
 
 ## Status Counts
 
-- supported_scope_limited: 1280
-- requires_evidence_check: 6419
+- supported_scope_limited: 1290
+- requires_evidence_check: 6429
 - unknown: 245
 
 ## Questionable Claims

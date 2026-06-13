@@ -81,14 +81,17 @@ const publicNonExemptBlockers = PUBLIC_NON_EXEMPT_PRODUCT_CODES
 const productContracts = [
   coreContract({
     productCode: "fast_diagnostic",
-    state: "externally_proven_gold_product",
+    state: "pending_reconciliation",
     sourceType: "generated_evidence",
-    canGrantAuthority: true,
-    evidenceSupportedClaim: "fast_diagnostic is externally proven under v2 evidence validation",
-    publicClaimLanguage: "fast_diagnostic is externally proven under v2 evidence validation.",
-    validationPassed: true,
-    blockingReasons: [],
-    nextEvidenceAction: "Monitor for evidence expiry; continue periodic validation",
+    canGrantAuthority: false,
+    evidenceSupportedClaim: "fast_diagnostic authority is pending reconciliation between contract, ledger, runtime output, and route evidence",
+    publicClaimLanguage: "fast_diagnostic authority is pending reconciliation; do not describe it as externally proven until artifacts match.",
+    validationPassed: false,
+    blockingReasons: [
+      "System Truth Audit found no product fully validated after runtime/ledger reconciliation",
+      "Rendered runtime output artifact and route evidence must be matched before external-proof claims are restored",
+    ],
+    nextEvidenceAction: "Reconcile ProductAuthorityContract, Evidence Ledger v2, rendered output capture, route proof, and surface propagation",
   }),
   coreContract({
     productCode: "team_assessment",

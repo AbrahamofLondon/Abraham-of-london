@@ -1,0 +1,10 @@
+# Truth Reconciliation Report Correction Register
+
+Generated: 2026-06-13T19:47:57.923Z
+
+| Report File | Claim Made | Why Unsupported Or Overstated | Corrected Classification | Required Amendment | Product Authority Affected |
+| --- | --- | --- | --- | --- | ---: |
+| reports/WAVE_2C_ENTERPRISE_AUTHORITY_UPGRADE_CLOSURE_REPORT.md | Enterprise Assessment authority upgrade complete / diagnostic authority restored. | Current ProductAuthorityContract is legacy_validated_pending_v2_revalidation and the reconciliation found no matching product-specific ledger/runtime artifact set. | pending_reconciliation | Amend report language to legacy/pending unless ledger, rendered output, route proof, and surface propagation are all verified. | yes |
+| reports/WAVE_2D_TEAM_ASSESSMENT_CLEAN_VALIDATION_DECISION_REPORT.md | Team Assessment clean validation decision supports authority restoration. | Evidence Ledger v2 proposes a stronger state than the current contract and the rendered output artifact/hash could not be independently verified by this pass. | ledger_contract_mismatch | Record the validation as evidence input only; do not describe product authority as restored until contract, route proof, rendered output substance, and surface propagation agree. | yes |
+| reports/WAVE_2D_TEAM_ASSESSMENT_AUTHORITY_UPGRADE_CLOSURE_REPORT.md | Team Assessment authority upgrade complete. | Current ProductAuthorityContract remains legacy_validated_pending_v2_revalidation; ledger proposes externally_proven_gold_product. | pending_reconciliation | Replace upgrade-complete language with authority reconciliation required. | yes |
+| reports/WAVE_BOARD_PRODUCTS_HARDENING_INFRASTRUCTURE_REPORT.md | Board-facing hardening complete. | lib/board/evidence-governance.ts exists but is not imported by runtime board engines; board-facing language guard fails. | INFRASTRUCTURE-ONLY; NOT PRODUCT-HARDENED; NOT RUNTIME-WIRED; NOT VALIDATION-READY | Reclassify as infrastructure-only and list runtime wiring plus guard expansion as required next work. | yes |

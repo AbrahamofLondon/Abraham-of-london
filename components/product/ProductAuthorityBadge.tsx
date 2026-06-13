@@ -58,6 +58,7 @@ function getBadgeStyle(state: ProductAuthorityState): {
         borderColor: "#dc2626",
       };
     case "measurement_inconclusive":
+    case "pending_reconciliation":
       return {
         backgroundColor: "#8b5cf6",
         textColor: "#ffffff",
@@ -93,6 +94,8 @@ function getBadgeLabel(state: ProductAuthorityState): string {
       return "Blocked";
     case "measurement_inconclusive":
       return "Inconclusive";
+    case "pending_reconciliation":
+      return "Pending Reconciliation";
     case "static_reference":
       return "Reference";
     case "internal_only":

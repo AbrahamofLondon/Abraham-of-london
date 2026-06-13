@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T19:29:42.518Z",
+  "generatedAt": "2026-06-13T19:46:49.491Z",
   "gateResult": "PASSED_AS_AUDIT_WITH_CRITICAL_FINDINGS",
   "commit": "not_committed_by_audit_script",
   "previousFalseCompletionReclassification": {
@@ -20,14 +20,13 @@
     "guarded": 16,
     "tested": 19,
     "infrastructureOnly": 2,
-    "contractOnly": 2,
+    "contractOnly": 1,
     "blockedCorrectly": 8
   },
   "authorityStateRealityResult": {
-    "authority_overstated": 1,
+    "authority_blocked_correctly": 12,
     "authority_supported_by_contract_only": 1,
     "authority_partially_supported": 1,
-    "authority_blocked_correctly": 11,
     "authority_unknown": 5
   },
   "gateMeaningfulnessResult": {
@@ -37,24 +36,24 @@
     "misleading_gate": 1
   },
   "claimLeakageResult": {
-    "totalFindings": 51642,
-    "highRiskFindings": 17245,
+    "totalFindings": 51852,
+    "highRiskFindings": 17306,
     "byStatus": {
-      "needs authority state check": 16622,
+      "needs authority state check": 16683,
       "unsupported": 623,
-      "bounded": 26996,
-      "stale": 7401
+      "bounded": 27095,
+      "stale": 7451
     }
   },
   "evidenceLedgerRealityResult": {
     "ledger_missing_runtime_output": 1
   },
   "completionClaimAuditResult": {
-    "totalClaims": 7944,
-    "questionableClaims": 6664,
+    "totalClaims": 7964,
+    "questionableClaims": 6674,
     "byStatus": {
-      "supported_scope_limited": 1280,
-      "requires_evidence_check": 6419,
+      "supported_scope_limited": 1290,
+      "requires_evidence_check": 6429,
       "unknown": 245
     }
   },
@@ -156,6 +155,7 @@
     "operator_console"
   ],
   "productsBlockedCorrectly": [
+    "fast_diagnostic",
     "executive_reporting",
     "board_brief_builder",
     "boardroom_brief",
@@ -178,7 +178,7 @@
   "worktreeStatus": "Run git status --short after this audit; pre-existing dirty files were present before audit generation.",
   "parts": {
     "reportIntegrity": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
+      "generatedAt": "2026-06-13T19:46:49.491Z",
       "reportsAudited": 11,
       "counts": {
         "partially accurate": 5,
@@ -451,7 +451,7 @@
       ]
     },
     "runtimeWiring": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
+      "generatedAt": "2026-06-13T19:46:49.491Z",
       "productsAudited": 19,
       "summary": {
         "runtimeWired": 11,
@@ -459,13 +459,13 @@
         "guarded": 16,
         "tested": 19,
         "infrastructureOnly": 2,
-        "contractOnly": 2,
+        "contractOnly": 1,
         "blockedCorrectly": 8
       },
       "rows": [
         {
           "productCode": "fast_diagnostic",
-          "authorityState": "externally_proven_gold_product",
+          "authorityState": "pending_reconciliation",
           "engineFile": "lib/product/fast-diagnostic-gold-composer.ts",
           "apiFile": "app/api/admin/intelligence-foundry/engines/fast-diagnostic/run/route.ts",
           "uiSurface": "pages/diagnostics/fast.tsx",
@@ -476,7 +476,7 @@
           "isRendered": false,
           "isGuarded": true,
           "isTested": true,
-          "actualStatus": "contract_only",
+          "actualStatus": "defined_only",
           "blockingReasons": [
             "Governance primitive is not imported by mapped runtime files.",
             "Governance primitive is not wired into product generation/runtime path.",
@@ -805,7 +805,7 @@
       ]
     },
     "gateMeaningfulness": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
+      "generatedAt": "2026-06-13T19:46:49.491Z",
       "gatesAudited": 8,
       "summary": {
         "medium_gate": 4,
@@ -1003,19 +1003,18 @@
       ]
     },
     "authorityReality": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
+      "generatedAt": "2026-06-13T19:46:49.491Z",
       "productsAudited": 19,
       "summary": {
-        "authority_overstated": 1,
+        "authority_blocked_correctly": 12,
         "authority_supported_by_contract_only": 1,
         "authority_partially_supported": 1,
-        "authority_blocked_correctly": 11,
         "authority_unknown": 5
       },
       "rows": [
         {
           "productCode": "fast_diagnostic",
-          "authorityState": "externally_proven_gold_product",
+          "authorityState": "pending_reconciliation",
           "contractPresent": true,
           "runtimeWired": false,
           "rendered": false,
@@ -1023,12 +1022,11 @@
           "ledgerMatch": false,
           "surfacePropagation": true,
           "claimBoundary": true,
-          "classification": "authority_overstated",
+          "classification": "authority_blocked_correctly",
           "reasons": [
             "Runtime wiring does not prove the authority state.",
             "Authority or claim boundary is not visibly rendered in mapped UI.",
-            "No matching current Evidence Ledger v2 entry found for this product.",
-            "Positive authority state exceeds verified ledger/runtime evidence found by this audit."
+            "No matching current Evidence Ledger v2 entry found for this product."
           ]
         },
         {
@@ -1344,16 +1342,16 @@
       ]
     },
     "claimLeakage": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
-      "filesScanned": 5980,
+      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "filesScanned": 5998,
       "summary": {
-        "totalFindings": 51642,
-        "highRiskFindings": 17245,
+        "totalFindings": 51852,
+        "highRiskFindings": 17306,
         "byStatus": {
-          "needs authority state check": 16622,
+          "needs authority state check": 16683,
           "unsupported": 623,
-          "bounded": 26996,
-          "stale": 7401
+          "bounded": 27095,
+          "stale": 7451
         }
       },
       "highRiskFindings": [
@@ -5212,7 +5210,7 @@
       ]
     },
     "evidenceLedger": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
+      "generatedAt": "2026-06-13T19:46:49.491Z",
       "entriesAudited": 1,
       "summary": {
         "ledger_missing_runtime_output": 1
@@ -5296,14 +5294,14 @@
       ]
     },
     "completionClaims": {
-      "generatedAt": "2026-06-13T19:29:42.518Z",
-      "filesScanned": 4916,
+      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "filesScanned": 4927,
       "summary": {
-        "totalClaims": 7944,
-        "questionableClaims": 6664,
+        "totalClaims": 7964,
+        "questionableClaims": 6674,
         "byStatus": {
-          "supported_scope_limited": 1280,
-          "requires_evidence_check": 6419,
+          "supported_scope_limited": 1290,
+          "requires_evidence_check": 6429,
           "unknown": 245
         }
       },

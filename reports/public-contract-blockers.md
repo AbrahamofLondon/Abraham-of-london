@@ -1,6 +1,6 @@
 # Public / Non-Exempt ProductAuthorityContract Blockers
 
-Generated: 2026-06-13T16:39:17.191Z
+Generated: 2026-06-13T19:47:03.144Z
 
 Products identified: 18
 

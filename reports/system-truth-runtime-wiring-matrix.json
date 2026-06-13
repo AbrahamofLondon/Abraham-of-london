@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T19:29:42.518Z",
+  "generatedAt": "2026-06-13T19:46:49.491Z",
   "productsAudited": 19,
   "summary": {
     "runtimeWired": 11,
@@ -7,13 +7,13 @@
     "guarded": 16,
     "tested": 19,
     "infrastructureOnly": 2,
-    "contractOnly": 2,
+    "contractOnly": 1,
     "blockedCorrectly": 8
   },
   "rows": [
     {
       "productCode": "fast_diagnostic",
-      "authorityState": "externally_proven_gold_product",
+      "authorityState": "pending_reconciliation",
       "engineFile": "lib/product/fast-diagnostic-gold-composer.ts",
       "apiFile": "app/api/admin/intelligence-foundry/engines/fast-diagnostic/run/route.ts",
       "uiSurface": "pages/diagnostics/fast.tsx",
@@ -24,7 +24,7 @@
       "isRendered": false,
       "isGuarded": true,
       "isTested": true,
-      "actualStatus": "contract_only",
+      "actualStatus": "defined_only",
       "blockingReasons": [
         "Governance primitive is not imported by mapped runtime files.",
         "Governance primitive is not wired into product generation/runtime path.",

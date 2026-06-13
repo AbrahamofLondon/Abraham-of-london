@@ -236,6 +236,8 @@ export function determineNextAction(
       return "Run v2 revalidation pass to resolve blocking conditions";
     case "measurement_inconclusive":
       return "Resolve measurement boundary violations (product/scorer/scenario changes)";
+    case "pending_reconciliation":
+      return "Reconcile ProductAuthorityContract, Evidence Ledger v2, runtime output, and route evidence before authority can be trusted";
     case "static_reference":
       return "Static reference; no action needed";
     case "internal_only":
@@ -267,6 +269,8 @@ export function resolveProductAuthority(
         ? `${input.productCode} is externally proven under v2 evidence validation`
         : state === "legacy_validated_pending_v2_revalidation"
           ? `${input.productCode} is legacy validated; pending v2 revalidation`
+          : state === "pending_reconciliation"
+            ? `${input.productCode} authority is pending reconciliation between contract, ledger, runtime output, and route evidence`
           : state === "static_reference"
             ? `${input.productCode} is static/reference only and cannot claim judgement authority`
             : state === "internal_only"

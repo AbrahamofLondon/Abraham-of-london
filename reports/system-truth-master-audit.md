@@ -1,6 +1,6 @@
 # System Truth Master Audit
 
-Generated: 2026-06-13T19:29:42.518Z
+Generated: 2026-06-13T19:46:49.491Z
 
 Gate result: PASSED_AS_AUDIT_WITH_CRITICAL_FINDINGS
 
@@ -24,7 +24,7 @@ The estate has meaningful authority infrastructure and several wired surfaces, b
 - Contract-only: enterprise_assessment
 - Infrastructure-only: board_brief_builder, boardroom_brief
 - Runtime-wired but not validated: decision_centre, control_room, operator_console
-- Blocked correctly: executive_reporting, board_brief_builder, boardroom_brief, boardroom_mode, personal_decision_audit, decision_exposure_instrument, mandate_clarity_framework, intervention_path_selector, escalation_readiness_scorecard, execution_risk_index, governance_drift_detector
+- Blocked correctly: fast_diagnostic, executive_reporting, board_brief_builder, boardroom_brief, boardroom_mode, personal_decision_audit, decision_exposure_instrument, mandate_clarity_framework, intervention_path_selector, escalation_readiness_scorecard, execution_risk_index, governance_drift_detector
 
 ## Immediate Repair Priorities
 

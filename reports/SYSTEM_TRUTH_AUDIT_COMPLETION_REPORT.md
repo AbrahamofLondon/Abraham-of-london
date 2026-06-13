@@ -16,22 +16,22 @@ INFRASTRUCTURE-ONLY; NOT PRODUCT-HARDENED; NOT RUNTIME-WIRED; NOT VALIDATION-REA
 11
 
 ## Runtime Wiring Result
-`{"runtimeWired":11,"rendered":14,"guarded":16,"tested":19,"infrastructureOnly":2,"contractOnly":2,"blockedCorrectly":8}`
+`{"runtimeWired":11,"rendered":14,"guarded":16,"tested":19,"infrastructureOnly":2,"contractOnly":1,"blockedCorrectly":8}`
 
 ## Authority State Reality Result
-`{"authority_overstated":1,"authority_supported_by_contract_only":1,"authority_partially_supported":1,"authority_blocked_correctly":11,"authority_unknown":5}`
+`{"authority_blocked_correctly":12,"authority_supported_by_contract_only":1,"authority_partially_supported":1,"authority_unknown":5}`
 
 ## Gate Meaningfulness Result
 `{"medium_gate":4,"narrow_gate":2,"failing_gate":1,"misleading_gate":1}`
 
 ## Claim Leakage Result
-`{"totalFindings":51642,"highRiskFindings":17245,"byStatus":{"needs authority state check":16622,"unsupported":623,"bounded":26996,"stale":7401}}`
+`{"totalFindings":51852,"highRiskFindings":17306,"byStatus":{"needs authority state check":16683,"unsupported":623,"bounded":27095,"stale":7451}}`
 
 ## Evidence Ledger Reality Result
 `{"ledger_missing_runtime_output":1}`
 
 ## Completion Claim Audit Result
-`{"totalClaims":7944,"questionableClaims":6664,"byStatus":{"supported_scope_limited":1280,"requires_evidence_check":6419,"unknown":245}}`
+`{"totalClaims":7964,"questionableClaims":6674,"byStatus":{"supported_scope_limited":1290,"requires_evidence_check":6429,"unknown":245}}`
 
 ## Board-Facing Guard Result
 failing_gate: Fix violations and expand scanned surface area before treating as protective.
@@ -68,6 +68,7 @@ The estate has meaningful authority infrastructure and several wired surfaces, b
 - operator_console
 
 ## Products Blocked Correctly
+- fast_diagnostic
 - executive_reporting
 - board_brief_builder
 - boardroom_brief

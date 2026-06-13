@@ -1,0 +1,365 @@
+{
+  "generatedAt": "2026-06-13T19:47:57.923Z",
+  "gateResult": "PASSED_AS_RECONCILIATION_WITH_HOLDS",
+  "productsReconciled": 19,
+  "positiveAuthorityProducts": [
+    {
+      "productCode": "fast_diagnostic",
+      "contractState": "pending_reconciliation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "contractState": "legacy_validated_pending_v2_revalidation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "contract_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+    },
+    {
+      "productCode": "team_assessment",
+      "contractState": "legacy_validated_pending_v2_revalidation",
+      "ledgerState": "externally_proven_gold_product",
+      "ledgerArtifactStatus": "authority_reconciliation_required",
+      "renderedOutputStatus": "rendered_output_hash_artifact_found",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+    }
+  ],
+  "summary": {
+    "validatedAndSupported": 0,
+    "pendingReconciliation": 5,
+    "contractOnly": 0,
+    "ledgerOnly": 0,
+    "runtimeOutputMissing": 0,
+    "authorityOverstated": 0,
+    "blockedCorrectly": 14
+  },
+  "reportCorrections": [
+    {
+      "reportFile": "reports/WAVE_2C_ENTERPRISE_AUTHORITY_UPGRADE_CLOSURE_REPORT.md",
+      "claimMade": "Enterprise Assessment authority upgrade complete / diagnostic authority restored.",
+      "whyUnsupportedOrOverstated": "Current ProductAuthorityContract is legacy_validated_pending_v2_revalidation and the reconciliation found no matching product-specific ledger/runtime artifact set.",
+      "correctedClassification": "pending_reconciliation",
+      "requiredAmendment": "Amend report language to legacy/pending unless ledger, rendered output, route proof, and surface propagation are all verified.",
+      "productAuthorityAffected": true
+    },
+    {
+      "reportFile": "reports/WAVE_2D_TEAM_ASSESSMENT_CLEAN_VALIDATION_DECISION_REPORT.md",
+      "claimMade": "Team Assessment clean validation decision supports authority restoration.",
+      "whyUnsupportedOrOverstated": "Evidence Ledger v2 proposes a stronger state than the current contract and the rendered output artifact/hash could not be independently verified by this pass.",
+      "correctedClassification": "ledger_contract_mismatch",
+      "requiredAmendment": "Record the validation as evidence input only; do not describe product authority as restored until contract, route proof, rendered output substance, and surface propagation agree.",
+      "productAuthorityAffected": true
+    },
+    {
+      "reportFile": "reports/WAVE_2D_TEAM_ASSESSMENT_AUTHORITY_UPGRADE_CLOSURE_REPORT.md",
+      "claimMade": "Team Assessment authority upgrade complete.",
+      "whyUnsupportedOrOverstated": "Current ProductAuthorityContract remains legacy_validated_pending_v2_revalidation; ledger proposes externally_proven_gold_product.",
+      "correctedClassification": "pending_reconciliation",
+      "requiredAmendment": "Replace upgrade-complete language with authority reconciliation required.",
+      "productAuthorityAffected": true
+    },
+    {
+      "reportFile": "reports/WAVE_BOARD_PRODUCTS_HARDENING_INFRASTRUCTURE_REPORT.md",
+      "claimMade": "Board-facing hardening complete.",
+      "whyUnsupportedOrOverstated": "lib/board/evidence-governance.ts exists but is not imported by runtime board engines; board-facing language guard fails.",
+      "correctedClassification": "INFRASTRUCTURE-ONLY; NOT PRODUCT-HARDENED; NOT RUNTIME-WIRED; NOT VALIDATION-READY",
+      "requiredAmendment": "Reclassify as infrastructure-only and list runtime wiring plus guard expansion as required next work.",
+      "productAuthorityAffected": true
+    }
+  ],
+  "gateTightening": [
+    {
+      "gate": "check-product-authority-contract.mjs",
+      "currentIssue": "Can pass with contract records alone and without proving rendered runtime artifacts.",
+      "requiredCheck": "Require each authority-granting state to point to matching ledger, rendered output artifact, route proof, and surface propagation evidence.",
+      "implementedThisPass": "fast_diagnostic contract output downgraded to pending_reconciliation until those artifacts agree."
+    },
+    {
+      "gate": "check-estate-authority-integrity.mjs",
+      "currentIssue": "Can pass from generated reports while local route proof still has scoped gaps.",
+      "requiredCheck": "Inspect runtime imports and rendered authority/evidence boundary for claim-bearing products, not only generated report counts.",
+      "implementedThisPass": "Recorded as tightening requirement; no product hardening attempted."
+    },
+    {
+      "gate": "check-board-facing-authority-language.mjs",
+      "currentIssue": "Fails currently and scans only a narrow board-facing subset.",
+      "requiredCheck": "Scan engines, runners, catalogues, checkout copy, admin delivery routes, dossier clients, and PDFs.",
+      "implementedThisPass": "Failure reported honestly; no hardening attempted."
+    },
+    {
+      "gate": "generate-v2-evidence-ledger.mjs",
+      "currentIssue": "Generates ledger metadata but is not independent proof that artifact hashes match runtime output.",
+      "requiredCheck": "Separate generation from verification and require file/hash existence before authority recommendation.",
+      "implementedThisPass": "Ledger/contract mismatch recorded as authority_reconciliation_required."
+    },
+    {
+      "gate": "check-surface-claim-authority.mjs",
+      "currentIssue": "Claims reviewed count is too narrow relative to estate-wide claim leakage.",
+      "requiredCheck": "Scan public catalogue, MDX, checkout, report, admin, comments, and generated report copy for strong claims.",
+      "implementedThisPass": "Claim leakage remains a repair priority."
+    }
+  ],
+  "authorityDowngradesOrHolds": [
+    {
+      "productCode": "fast_diagnostic",
+      "action": "downgraded/held from externally_proven_gold_product to pending_reconciliation in ProductAuthorityContract generation",
+      "reason": "Truth audit could not verify ledger + rendered output + route proof + surface propagation alignment."
+    },
+    {
+      "productCode": "team_assessment",
+      "action": "held at legacy_validated_pending_v2_revalidation",
+      "reason": "Evidence Ledger v2 proposes externally_proven_gold_product but current contract remains conservative pending artifact reconciliation."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "action": "held at legacy_validated_pending_v2_revalidation",
+      "reason": "No current matching ledger/runtime artifact set verified in this pass."
+    }
+  ],
+  "rows": [
+    {
+      "productCode": "fast_diagnostic",
+      "contractState": "pending_reconciliation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+    },
+    {
+      "productCode": "enterprise_assessment",
+      "contractState": "legacy_validated_pending_v2_revalidation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "contract_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+    },
+    {
+      "productCode": "team_assessment",
+      "contractState": "legacy_validated_pending_v2_revalidation",
+      "ledgerState": "externally_proven_gold_product",
+      "ledgerArtifactStatus": "authority_reconciliation_required",
+      "renderedOutputStatus": "rendered_output_hash_artifact_found",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+    },
+    {
+      "productCode": "executive_reporting",
+      "contractState": "blocked_until_v2_revalidation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "board_brief_builder",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "infrastructure_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Wire board evidence-governance into runtime engine and expand board-facing guard before validation."
+    },
+    {
+      "productCode": "boardroom_brief",
+      "contractState": "blocked_until_v2_revalidation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "infrastructure_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "pending_reconciliation",
+      "requiredAction": "Wire board evidence-governance into runtime engine and expand board-facing guard before validation."
+    },
+    {
+      "productCode": "boardroom_mode",
+      "contractState": "blocked_until_v2_revalidation",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "personal_decision_audit",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "decision_exposure_instrument",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "mandate_clarity_framework",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "intervention_path_selector",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "escalation_readiness_scorecard",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "execution_risk_index",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "governance_drift_detector",
+      "contractState": "blocked_until_claim_evidenced",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "blocked_correctly",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "decision_centre",
+      "contractState": "no_contract",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "runtime_wired_but_not_validated",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "control_room",
+      "contractState": "no_contract",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "runtime_wired_but_not_validated",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "operator_console",
+      "contractState": "no_contract",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "runtime_wired_but_not_validated",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "oversight_brief",
+      "contractState": "no_contract",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_authority_visible",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    },
+    {
+      "productCode": "return_brief",
+      "contractState": "no_contract",
+      "ledgerState": "no_ledger_entry",
+      "ledgerArtifactStatus": "ledger_missing",
+      "renderedOutputStatus": "rendered_output_missing",
+      "runtimeWiringStatus": "defined_only",
+      "surfacePropagationStatus": "surface_propagation_missing",
+      "claimBoundaryStatus": "bounded",
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Maintain blocked state until validation artifacts exist."
+    }
+  ]
+}
