@@ -173,7 +173,7 @@ export function buildGmiEditionProduct(entry: GmiEditionRegistryEntry): CatalogP
     hiddenReason: entry.hiddenReason,
     shortDescription: entry.shortDescription,
     pricingNote: entry.pricingNote,
-    primaryCta: entry.current ? "View intelligence report" : "Access archive",
+    primaryCta: entry.current ? "View report" : "Access archive",
     successPath: route,
     cancelPath: route,
     cookieName: null,
