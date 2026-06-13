@@ -2,33 +2,33 @@
 
 ## Gate Result
 
-Gate: FAILED_WITH_FINDINGS
+Gate: PASSED
 
 Products audited: 22
 
-Failures: 16
+Failures: 0
 
 ## Results
 
 | Product | Checkout | Authority | Limitation | Next Evidence | Result | Required Action |
 | --- | --- | ---: | ---: | ---: | --- | --- |
-| boardroom_brief | /api/checkout/boardroom-brief | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| decision_exposure_instrument | /api/checkout/decision-exposure-instrument | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| mandate_clarity_framework | /api/checkout/mandate-clarity-framework | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| intervention_path_selector | /api/checkout/intervention-path-selector | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| escalation_readiness_scorecard | /api/checkout/escalation-readiness-scorecard | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| structural_failure_diagnostic_canvas | /api/checkout/structural-failure-diagnostic-canvas | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| execution_risk_index | /api/checkout/execution-risk-index | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| team_alignment_gap_map | /api/checkout/team-alignment-gap-map | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| governance_drift_detector | /api/checkout/governance-drift-detector | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| strategic_priority_stack_builder | /api/checkout/strategic-priority-stack-builder | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| board_brief_builder | /api/checkout/board-brief-builder | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| execution_integrity_protocol | /api/checkout/execution-integrity-protocol | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| alignment_audit_playbook | /api/checkout/alignment-audit-playbook | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| drift_detection_framework | /api/checkout/drift-detection-framework | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
+| boardroom_brief | /api/checkout/boardroom-brief | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| decision_exposure_instrument | /api/checkout/decision-exposure-instrument | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| mandate_clarity_framework | /api/checkout/mandate-clarity-framework | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| intervention_path_selector | /api/checkout/intervention-path-selector | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| escalation_readiness_scorecard | /api/checkout/escalation-readiness-scorecard | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| structural_failure_diagnostic_canvas | /api/checkout/structural-failure-diagnostic-canvas | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| execution_risk_index | /api/checkout/execution-risk-index | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| team_alignment_gap_map | /api/checkout/team-alignment-gap-map | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| governance_drift_detector | /api/checkout/governance-drift-detector | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| strategic_priority_stack_builder | /api/checkout/strategic-priority-stack-builder | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| board_brief_builder | /api/checkout/board-brief-builder | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| execution_integrity_protocol | /api/checkout/execution-integrity-protocol | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| alignment_audit_playbook | /api/checkout/alignment-audit-playbook | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| drift_detection_framework | /api/checkout/drift-detection-framework | yes | yes | yes | PASS | Maintain checkout authority coverage. |
 | personal_decision_audit | /api/checkout/personal-decision-audit | yes | yes | yes | PASS | Maintain checkout authority coverage. |
-| operator_decision_pack | /api/checkout/operator-decision-pack | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
-| executive_reporting | /api/checkout/executive-reporting | no | yes | yes | FAIL | Render authority state, limitation, and next evidence action before purchase or disable checkout. |
+| operator_decision_pack | /api/checkout/operator-decision-pack | yes | yes | yes | PASS | Maintain checkout authority coverage. |
+| executive_reporting | /api/checkout/executive-reporting | yes | yes | yes | PASS | Maintain checkout authority coverage. |
 | strategy_room | /api/checkout/strategy-room | yes | yes | yes | PASS | Maintain checkout authority coverage. |
 | strategy_room_extended | /api/checkout/strategy-room-extended | yes | yes | yes | PASS | Maintain checkout authority coverage. |
 | professional | /api/billing/checkout | yes | yes | yes | PASS | Maintain checkout authority coverage. |

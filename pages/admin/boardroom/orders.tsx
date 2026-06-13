@@ -11,6 +11,10 @@ import Link from "next/link";
 import AdminLayout from "@/components/admin/AdminLayout";
 import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 import type { BoardroomOrderRow } from "@/pages/api/admin/boardroom/orders";
 
 type Props = {
@@ -233,6 +237,23 @@ export default function BoardroomOrdersPage({ orders, fetchError }: Props) {
             Live paid orders requiring review, generation, and delivery. Archive is for delivered/historical records only.
           </p>
         </div>
+
+        {/* Product Authority before Release */}
+        {(() => {
+          const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'boardroom_brief');
+          const contract = config ? resolveProductAuthority(config) : null;
+          return contract ? (
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
+              <ProductAuthorityPanel contract={contract} expanded={true} />
+              <div style={{ marginTop: '1rem' }}>
+                <ProductAuthorityNotice contract={contract} />
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                <ProductEvidenceStatus contract={contract} />
+              </div>
+            </div>
+          ) : null;
+        })()}
 
         {fetchError && (
           <div style={{ padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", ...MONO, fontSize: 12, marginBottom: 16 }}>

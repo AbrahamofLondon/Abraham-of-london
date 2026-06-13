@@ -1,23 +1,23 @@
 # Category Route Proof — Selected Route Pattern Audit
 
-**Audit Date:** 2026-06-13T14:48:22.280Z
+**Audit Date:** 2026-06-13T16:15:19.293Z
 
 ## Gate Status
 
 **Status:** ✓ PASSED LOCAL PATTERN ONLY
 
-**Readiness Scope:** `pattern_demonstrated_on_selected_routes`
+**Readiness Scope:** `product_group_demonstrated`
 
 This report proves selected-route pattern coverage only. It does not establish estate readiness.
 
 ## Route Audit Results
 
 **Routes Audited:** 7/7
-**Routes Demonstrating Authority Pattern:** 4
-**Routes With Authority Visible:** 4
-**Routes With Evidence Visible:** 4
-**Routes With Limitations Shown:** 6
-**Overclaim Risks Detected:** 1
+**Routes Demonstrating Authority Pattern:** 6
+**Routes With Authority Visible:** 5
+**Routes With Evidence Visible:** 6
+**Routes With Limitations Shown:** 7
+**Overclaim Risks Detected:** 0
 
 ## Routes Demonstrating Authority Pattern
 
@@ -98,19 +98,45 @@ This report proves selected-route pattern coverage only. It does not establish e
 - Evidence Source: ✓
 
 
-## Routes Needing Work
-
-
 ### Executive Reporting (`/diagnostics/executive-reporting/run`)
 
-**Status:** infrastructure_present_but_hidden
+**Status:** ✓ Authority pattern demonstrated on this route
 
-**What's Missing:**
-- Authority Rendered: ✗ Needs ProductAuthorityPanel or Badge
-- Evidence Visible: ✗ Show currentAuthorityState
-- Limitations Clear: ✓
-- Next Action: ✓
+**Rendered Components:**
+- ProductAuthorityBadge: ✗
+- ProductAuthorityPanel: ✓
+- ProductAuthorityNotice: ✓
+- ProductEvidenceStatus: ✓
 
+**Information Visible:**
+- Authority State: ✓
+- Public Claim Language: ✗
+- Blocking Reasons: ✓
+- Next Evidence Action: ✓
+- Limitations: ✓
+- Evidence Source: ✓
+
+
+### Test Your Decision (`/test-your-decision`)
+
+**Status:** ✓ Authority pattern demonstrated on this route
+
+**Rendered Components:**
+- ProductAuthorityBadge: ✗
+- ProductAuthorityPanel: ✗
+- ProductAuthorityNotice: ✓
+- ProductEvidenceStatus: ✓
+
+**Information Visible:**
+- Authority State: ✓
+- Public Claim Language: ✗
+- Blocking Reasons: ✓
+- Next Evidence Action: ✓
+- Limitations: ✓
+- Evidence Source: ✓
+
+
+## Routes Needing Work
 
 
 ### Library Index (`/library`)
@@ -123,18 +149,6 @@ This report proves selected-route pattern coverage only. It does not establish e
 - Limitations Clear: ✓
 - Next Action: ✓
 
-
-
-### Test Your Decision (`/test-your-decision`)
-
-**Status:** not_category_ready
-
-**What's Missing:**
-- Authority Rendered: ✗ Needs ProductAuthorityPanel or Badge
-- Evidence Visible: ✗ Show currentAuthorityState
-- Limitations Clear: ✗ Show limitations
-- Next Action: ✗ Show nextEvidenceAction
-- ⚠️  OVERCLAIM RISK: Claims authority without showing evidence
 
 
 ## Selected Route Pattern Requirements
@@ -152,9 +166,8 @@ Each route demonstrating the authority pattern must:
 
 ## Remaining Blockers
 
-- **Overclaim Risk:** 1 route(s) make claims without showing evidence support
 
-- **Hidden Infrastructure:** 3 route(s) have not yet wired ProductAuthorityContract into visible experience
+- **Hidden Infrastructure:** 1 route(s) have not yet wired ProductAuthorityContract into visible experience
 - **Target Gap:** Need 0 more routes demonstrating the selected-route authority pattern
 
 ## Estate Readiness Boundary
@@ -163,6 +176,6 @@ This route proof cannot imply estate readiness. Estate readiness requires the pr
 
 ---
 
-**Report Generated:** 2026-06-13T14:48:22.281Z
+**Report Generated:** 2026-06-13T16:15:19.294Z
 **Gate Status:** PASSED_LOCAL_PATTERN_ONLY
-**Readiness Scope:** pattern_demonstrated_on_selected_routes
+**Readiness Scope:** product_group_demonstrated

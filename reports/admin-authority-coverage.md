@@ -2,33 +2,33 @@
 
 ## Gate Result
 
-Gate: FAILED_WITH_FINDINGS
+Gate: PASSED
 
 Products audited: 33
 
-Failures: 2
+Failures: 0
 
 ## Results
 
 | Product | Admin Route | Release Surface | Authority | Evidence | Blocking | Result | Required Action |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| boardroom_brief | /admin/boardroom/orders | yes | no | no | yes | FAIL | Render authority, evidence, and blocking state before admin release/delivery. |
-| decision_exposure_instrument | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| mandate_clarity_framework | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| intervention_path_selector | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| escalation_readiness_scorecard | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| structural_failure_diagnostic_canvas | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| execution_risk_index | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| team_alignment_gap_map | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| governance_drift_detector | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| strategic_priority_stack_builder | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| board_brief_builder | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| execution_integrity_protocol | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| alignment_audit_playbook | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
-| drift_detection_framework | /admin/artifacts | no | no | no | yes | PASS | Maintain admin release coverage. |
+| boardroom_brief | /admin/boardroom/orders | yes | yes | yes | yes | PASS | Maintain admin release coverage. |
+| decision_exposure_instrument | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| mandate_clarity_framework | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| intervention_path_selector | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| escalation_readiness_scorecard | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| structural_failure_diagnostic_canvas | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| execution_risk_index | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| team_alignment_gap_map | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| governance_drift_detector | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| strategic_priority_stack_builder | /admin/artifacts | no | yes | no | yes | PASS | Maintain admin release coverage. |
+| board_brief_builder | /admin/artifacts | no | yes | yes | yes | PASS | Maintain admin release coverage. |
+| execution_integrity_protocol | /admin/artifacts | no | yes | yes | yes | PASS | Maintain admin release coverage. |
+| alignment_audit_playbook | /admin/artifacts | no | yes | yes | yes | PASS | Maintain admin release coverage. |
+| drift_detection_framework | /admin/artifacts | no | yes | yes | yes | PASS | Maintain admin release coverage. |
 | personal_decision_audit | /admin/artifacts | no | yes | yes | yes | PASS | Maintain admin release coverage. |
-| operator_decision_pack | /admin/billing | no | no | no | yes | PASS | Maintain admin release coverage. |
-| executive_reporting | /admin/reporting/executive | yes | no | no | yes | FAIL | Render authority, evidence, and blocking state before admin release/delivery. |
+| operator_decision_pack | /admin/billing | no | yes | yes | yes | PASS | Maintain admin release coverage. |
+| executive_reporting | /admin/reporting/executive | yes | yes | yes | yes | PASS | Maintain admin release coverage. |
 | strategy_room | /admin/operations | yes | yes | yes | yes | PASS | Maintain admin release coverage. |
 | strategy_room_extended | /admin/operations | yes | yes | yes | yes | PASS | Maintain admin release coverage. |
 | retainer_core | none | yes | no | yes | yes | PASS | Maintain admin release coverage. |

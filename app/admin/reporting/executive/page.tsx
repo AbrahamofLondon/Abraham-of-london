@@ -3,6 +3,10 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { ArrowRight, ExternalLink, FileText, Inbox, AlertCircle, BarChart2 } from "lucide-react";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 export const metadata = {
   title: "Executive Reporting — Admin",
@@ -60,6 +64,23 @@ export default function ExecutiveReportingAdminPage() {
             required. This is an admin view — not the product surface itself.
           </p>
         </div>
+
+        {/* Product Authority before Release */}
+        {(() => {
+          const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'executive_reporting');
+          const contract = config ? resolveProductAuthority(config) : null;
+          return contract ? (
+            <div className="rounded bg-white/4 p-6" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
+              <ProductAuthorityPanel contract={contract} expanded={true} />
+              <div style={{ marginTop: "1rem" }}>
+                <ProductAuthorityNotice contract={contract} />
+              </div>
+              <div style={{ marginTop: "1rem" }}>
+                <ProductEvidenceStatus contract={contract} />
+              </div>
+            </div>
+          ) : null;
+        })()}
 
         {/* Section 1 — Product Surface Preview */}
         <section>

@@ -15,6 +15,10 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, Zap, SlidersHorizontal, ScanSearch, Building2, Route } from "lucide-react";
 import Layout from "@/components/Layout";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 const GOLD = "#C9A96E";
 
@@ -34,6 +38,7 @@ interface RouteCard {
   href: string;
   icon: React.ReactNode;
   timeEstimate: string;
+  productCode?: string;
 }
 
 const ROUTE_CARDS: RouteCard[] = [
@@ -45,6 +50,7 @@ const ROUTE_CARDS: RouteCard[] = [
     href: "/decision-pressure",
     icon: <Zap className="h-4 w-4" />,
     timeEstimate: "45 seconds",
+    productCode: "fast_diagnostic",
   },
   {
     title: "Structured decision signal",
@@ -54,6 +60,7 @@ const ROUTE_CARDS: RouteCard[] = [
     href: "/decision-instruments/signal",
     icon: <SlidersHorizontal className="h-4 w-4" />,
     timeEstimate: "2 minutes",
+    productCode: "board_brief_builder",
   },
   {
     title: "Full diagnostic entry",
@@ -63,6 +70,7 @@ const ROUTE_CARDS: RouteCard[] = [
     href: "/diagnostics/fast",
     icon: <ScanSearch className="h-4 w-4" />,
     timeEstimate: "5 minutes",
+    productCode: "fast_diagnostic",
   },
   {
     title: "Organisational scan",
@@ -72,6 +80,7 @@ const ROUTE_CARDS: RouteCard[] = [
     href: "/enterprise-decision-scan",
     icon: <Building2 className="h-4 w-4" />,
     timeEstimate: "15 minutes",
+    productCode: "enterprise_assessment",
   },
 ];
 
@@ -138,71 +147,89 @@ export default function TestYourDecisionPage() {
         <section className="border-t px-6 py-12" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
           <div className="mx-auto max-w-[900px]">
             <div className="grid gap-4 md:grid-cols-2">
-              {ROUTE_CARDS.map((card) => (
-                <Link
-                  key={card.href}
-                  href={card.href}
-                  className="group flex flex-col border p-6 transition-all duration-200 hover:-translate-y-0.5"
-                  style={{
-                    borderColor: `${GOLD}25`,
-                    backgroundColor: "rgba(255,255,255,0.02)",
-                  }}
-                >
-                  {/* Icon + time */}
-                  <div className="flex items-center justify-between">
-                    <span style={{ color: `${GOLD}99` }}>{card.icon}</span>
-                    <span
+              {ROUTE_CARDS.map((card) => {
+                const config = card.productCode
+                  ? PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === card.productCode)
+                  : null;
+                const contract = config ? resolveProductAuthority(config) : null;
+
+                return (
+                  <div key={card.href} className="flex flex-col">
+                    <Link
+                      href={card.href}
+                      className="group flex flex-col border p-6 transition-all duration-200 hover:-translate-y-0.5 flex-1"
                       style={{
-                        ...mono,
-                        fontSize: "7px",
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.25)",
+                        borderColor: `${GOLD}25`,
+                        backgroundColor: "rgba(255,255,255,0.02)",
                       }}
                     >
-                      {card.timeEstimate}
-                    </span>
+                      {/* Icon + time */}
+                      <div className="flex items-center justify-between">
+                        <span style={{ color: `${GOLD}99` }}>{card.icon}</span>
+                        <span
+                          style={{
+                            ...mono,
+                            fontSize: "7px",
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.25)",
+                          }}
+                        >
+                          {card.timeEstimate}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3
+                        className="mt-4"
+                        style={{
+                          ...serif,
+                          fontSize: "1.3rem",
+                          lineHeight: 1.1,
+                          color: "rgba(255,255,255,0.85)",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {card.title}
+                      </h3>
+
+                      {/* Description */}
+                      <p
+                        className="mt-3 text-[14px] leading-[1.75]"
+                        style={{ color: "rgba(255,255,255,0.50)" }}
+                      >
+                        {card.description}
+                      </p>
+
+                      {/* CTA */}
+                      <div className="mt-5 flex items-center gap-2">
+                        <span
+                          style={{
+                            ...mono,
+                            fontSize: "9px",
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
+                            color: `${GOLD}CC`,
+                          }}
+                        >
+                          {card.cta}
+                        </span>
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" style={{ color: `${GOLD}AA` }} />
+                      </div>
+                    </Link>
+
+                    {/* Authority state for this route */}
+                    {contract && (
+                      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: `1px solid ${GOLD}22` }}>
+                        <ProductAuthorityNotice contract={contract} />
+                        <div style={{ marginTop: "0.75rem" }}>
+                          <ProductEvidenceStatus contract={contract} />
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Title */}
-                  <h3
-                    className="mt-4"
-                    style={{
-                      ...serif,
-                      fontSize: "1.3rem",
-                      lineHeight: 1.1,
-                      color: "rgba(255,255,255,0.85)",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {card.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p
-                    className="mt-3 text-[14px] leading-[1.75]"
-                    style={{ color: "rgba(255,255,255,0.50)" }}
-                  >
-                    {card.description}
-                  </p>
-
-                  {/* CTA */}
-                  <div className="mt-5 flex items-center gap-2">
-                    <span
-                      style={{
-                        ...mono,
-                        fontSize: "9px",
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                        color: `${GOLD}CC`,
-                      }}
-                    >
-                      {card.cta}
-                    </span>
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" style={{ color: `${GOLD}AA` }} />
-                  </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

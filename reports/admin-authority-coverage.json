@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-13T14:45:34.610Z",
-  "gate": "FAILED_WITH_FINDINGS",
+  "generatedAt": "2026-06-13T16:15:10.952Z",
+  "gate": "PASSED",
   "productsAudited": 33,
-  "failures": 2,
+  "failures": 0,
   "rows": [
     {
       "productCode": "boardroom_brief",
@@ -10,14 +10,14 @@
       "adminRoute": "/admin/boardroom/orders",
       "adminSurfaceExists": true,
       "requiresAdminRelease": true,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "pages/admin/boardroom/orders.tsx"
       ],
-      "result": "FAIL",
-      "requiredAction": "Render authority, evidence, and blocking state before admin release/delivery."
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
     },
     {
       "productCode": "decision_exposure_instrument",
@@ -25,7 +25,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -40,7 +40,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -55,7 +55,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -70,7 +70,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -85,7 +85,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -100,7 +100,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -115,7 +115,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -130,7 +130,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -145,7 +145,7 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
+      "authorityBeforeRelease": true,
       "evidenceBeforeRelease": false,
       "blockingBeforeRelease": true,
       "filesChecked": [
@@ -160,8 +160,8 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "pages/admin/artifacts.tsx"
@@ -175,8 +175,8 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "pages/admin/artifacts.tsx"
@@ -190,8 +190,8 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "pages/admin/artifacts.tsx"
@@ -205,8 +205,8 @@
       "adminRoute": "/admin/artifacts",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "pages/admin/artifacts.tsx"
@@ -235,8 +235,8 @@
       "adminRoute": "/admin/billing",
       "adminSurfaceExists": true,
       "requiresAdminRelease": false,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "pages/admin/billing.tsx"
@@ -250,14 +250,14 @@
       "adminRoute": "/admin/reporting/executive",
       "adminSurfaceExists": true,
       "requiresAdminRelease": true,
-      "authorityBeforeRelease": false,
-      "evidenceBeforeRelease": false,
+      "authorityBeforeRelease": true,
+      "evidenceBeforeRelease": true,
       "blockingBeforeRelease": true,
       "filesChecked": [
         "app/admin/reporting/executive/page.tsx"
       ],
-      "result": "FAIL",
-      "requiredAction": "Render authority, evidence, and blocking state before admin release/delivery."
+      "result": "PASS",
+      "requiredAction": "Maintain admin release coverage."
     },
     {
       "productCode": "strategy_room",

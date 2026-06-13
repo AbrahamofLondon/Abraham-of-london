@@ -7,6 +7,7 @@ import type { BoardBriefResult } from "@/lib/instruments/board-brief-template/en
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
 import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
 import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 const BoardBriefRun: NextPage = () => {
@@ -53,6 +54,9 @@ const BoardBriefRun: NextPage = () => {
           <ProductAuthorityPanel contract={contract} />
           <div style={{ marginTop: '0.75rem' }}>
             <ProductAuthorityNotice contract={contract} />
+          </div>
+          <div style={{ marginTop: '0.75rem' }}>
+            <ProductEvidenceStatus contract={contract} />
           </div>
         </div>
       )}

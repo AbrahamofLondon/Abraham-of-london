@@ -1,12 +1,12 @@
 {
   "routesAudited": 7,
-  "routesDemonstrating": 4,
-  "routesWithAuthority": 4,
-  "routesWithEvidence": 4,
-  "routesWithLimitations": 6,
-  "routesWithNextAction": 6,
-  "overclaim_risks": 1,
-  "readinessScope": "pattern_demonstrated_on_selected_routes",
+  "routesDemonstrating": 6,
+  "routesWithAuthority": 5,
+  "routesWithEvidence": 6,
+  "routesWithLimitations": 7,
+  "routesWithNextAction": 7,
+  "overclaim_risks": 0,
+  "readinessScope": "product_group_demonstrated",
   "gateStatus": "PASSED_LOCAL_PATTERN_ONLY",
   "routes": [
     {
@@ -100,18 +100,18 @@
     {
       "route": "/diagnostics/executive-reporting/run",
       "name": "Executive Reporting",
-      "readiness": "infrastructure_present_but_hidden",
-      "demonstrating": false,
+      "readiness": "authority_pattern_demonstrated_on_route",
+      "demonstrating": true,
       "renders": {
         "badge": false,
-        "panel": false,
-        "notice": false,
-        "evidenceStatus": false
+        "panel": true,
+        "notice": true,
+        "evidenceStatus": true
       },
       "shows": {
-        "authority": false,
+        "authority": true,
         "publicClaim": false,
-        "blocking": false,
+        "blocking": true,
         "nextAction": true,
         "limitations": true,
         "source": true
@@ -144,23 +144,23 @@
     {
       "route": "/test-your-decision",
       "name": "Test Your Decision",
-      "readiness": "not_category_ready",
-      "demonstrating": false,
+      "readiness": "authority_pattern_demonstrated_on_route",
+      "demonstrating": true,
       "renders": {
         "badge": false,
         "panel": false,
-        "notice": false,
-        "evidenceStatus": false
+        "notice": true,
+        "evidenceStatus": true
       },
       "shows": {
-        "authority": false,
+        "authority": true,
         "publicClaim": false,
-        "blocking": false,
-        "nextAction": false,
-        "limitations": false,
-        "source": false
+        "blocking": true,
+        "nextAction": true,
+        "limitations": true,
+        "source": true
       },
-      "overclaim_risk": true,
+      "overclaim_risk": false,
       "meetsStandard": false
     }
   ]

@@ -36,6 +36,7 @@ import { generateBoardroomDossier } from '@/lib/constitution/boardroom-mode'
 import type { BoardroomDossier } from '@/lib/constitution/boardroom-mode'
 import { ProductAuthorityPanel } from '@/components/product/ProductAuthorityPanel'
 import { ProductAuthorityNotice } from '@/components/product/ProductAuthorityNotice'
+import { ProductEvidenceStatus } from '@/components/product/ProductEvidenceStatus'
 import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from '@/lib/product/resolve-product-authority'
 
 const GOLD = '#C9A96E'
@@ -533,6 +534,9 @@ export default function BoardroomBriefPage() {
               <ProductAuthorityPanel contract={contract} />
               <div style={{ marginTop: '1rem' }}>
                 <ProductAuthorityNotice contract={contract} />
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                <ProductEvidenceStatus contract={contract} />
               </div>
             </div>
           )}

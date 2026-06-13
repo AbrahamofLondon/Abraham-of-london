@@ -15,6 +15,10 @@ import Head from "next/head";
 import Link from "next/link";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 import {
   isValidTransition,
   DELIVERY_STATUS_LABELS,
@@ -684,6 +688,23 @@ export default function BoardroomOrderDetailPage({
         </Section>
 
         <Section title="Actions">
+          {/* Product Authority before Release */}
+          {(() => {
+            const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'boardroom_brief');
+            const contract = config ? resolveProductAuthority(config) : null;
+            return contract ? (
+              <div style={{ backgroundColor: "rgba(255,255,255,0.04)", padding: "1.5rem", borderRadius: "0.5rem", marginBottom: "1.5rem" }}>
+                <ProductAuthorityPanel contract={contract} expanded={true} />
+                <div style={{ marginTop: "1rem" }}>
+                  <ProductAuthorityNotice contract={contract} />
+                </div>
+                <div style={{ marginTop: "1rem" }}>
+                  <ProductEvidenceStatus contract={contract} />
+                </div>
+              </div>
+            ) : null;
+          })()}
+
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {/* Start Review — moves paid → in_review */}
             <ActionButton

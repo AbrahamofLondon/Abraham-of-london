@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T15:00:48.354Z",
+  "generatedAt": "2026-06-13T16:15:10.502Z",
   "productsIdentified": 18,
   "blockers": [
     {
@@ -8,7 +8,7 @@
       "route": "/boardroom-brief",
       "checkoutPath": "/api/checkout/boardroom-brief",
       "reportSurface": true,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_demonstrated",
       "recommendedAuthorityState": "blocked_until_v2_revalidation",
       "blockingReason": "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted"
     },
@@ -18,7 +18,7 @@
       "route": "/decision-instruments/decision-exposure-instrument/run",
       "checkoutPath": "/api/checkout/decision-exposure-instrument",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -28,7 +28,7 @@
       "route": "/decision-instruments/mandate-clarity-framework/run",
       "checkoutPath": "/api/checkout/mandate-clarity-framework",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -38,7 +38,7 @@
       "route": "/decision-instruments/intervention-path-selector/run",
       "checkoutPath": "/api/checkout/intervention-path-selector",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -48,7 +48,7 @@
       "route": "/decision-instruments/escalation-readiness-scorecard/run",
       "checkoutPath": "/api/checkout/escalation-readiness-scorecard",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -58,7 +58,7 @@
       "route": "/decision-instruments/structural-failure-diagnostic-canvas/run",
       "checkoutPath": "/api/checkout/structural-failure-diagnostic-canvas",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -68,7 +68,7 @@
       "route": "/decision-instruments/execution-risk-index/run",
       "checkoutPath": "/api/checkout/execution-risk-index",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -78,7 +78,7 @@
       "route": "/decision-instruments/team-alignment-gap-map/run",
       "checkoutPath": "/api/checkout/team-alignment-gap-map",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -88,7 +88,7 @@
       "route": "/decision-instruments/governance-drift-detector/run",
       "checkoutPath": "/api/checkout/governance-drift-detector",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -98,7 +98,7 @@
       "route": "/decision-instruments/strategic-priority-stack-builder/run",
       "checkoutPath": "/api/checkout/strategic-priority-stack-builder",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_visible_but_thin",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -108,7 +108,7 @@
       "route": "/decision-instruments/board-brief-builder/run",
       "checkoutPath": "/api/checkout/board-brief-builder",
       "reportSurface": true,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_demonstrated",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -148,7 +148,7 @@
       "route": "/decision-instruments",
       "checkoutPath": "/api/checkout/operator-decision-pack",
       "reportSurface": false,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_demonstrated",
       "recommendedAuthorityState": "blocked_until_claim_evidenced",
       "blockingReason": "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted"
     },
@@ -158,7 +158,7 @@
       "route": "/diagnostics/executive-reporting/run",
       "checkoutPath": "/api/checkout/executive-reporting",
       "reportSurface": true,
-      "currentMatrixClassification": "checkout_or_fulfilment_risk",
+      "currentMatrixClassification": "authority_demonstrated",
       "recommendedAuthorityState": "blocked_until_v2_revalidation",
       "blockingReason": "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted"
     },
@@ -178,7 +178,7 @@
       "route": "/boardroom-mode",
       "checkoutPath": null,
       "reportSurface": false,
-      "currentMatrixClassification": "underwired",
+      "currentMatrixClassification": "authority_demonstrated",
       "recommendedAuthorityState": "blocked_until_v2_revalidation",
       "blockingReason": "Boardroom mode requires v2 evidence-gated route proof before authority can be restored"
     }

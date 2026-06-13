@@ -9,6 +9,7 @@
  * - Type-distinct cards with honest CTAs
  * - Navigable sections, not endless scroll
  * - No restricted/vault body content leakage
+ * - Items are classified by governance role (static reference, authority-bearing, etc.)
  */
 
 import * as React from "react";
@@ -387,6 +388,19 @@ const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }
               452+ indexed works across essays, canon, frameworks, intelligence, downloads,
               proof materials, and restricted vault records.
             </p>
+
+            {/* Governance classification notice */}
+            <div
+              className="mt-6 p-4 rounded"
+              style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${GOLD}18` }}
+            >
+              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+                Item Classification
+              </p>
+              <p className="text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                Each item in this library is classified by its governance role: <strong>static reference</strong> materials (canon, essays, frameworks) provide doctrine and method without claiming diagnostic authority. <strong>Market reports</strong> (intelligence, briefs) present analysis. <strong>Decision instruments</strong> may carry validated authority. <strong>Case materials</strong> are documented decisions. <strong>Internal-only</strong> records are restricted. Static reference artefacts do not constitute governed judgement or diagnostic authority unless explicitly marked otherwise.
+              </p>
+            </div>
 
             {/* ── Interactive access chips (Part 1) ── */}
             <div className="mt-6 flex flex-wrap gap-3" role="group" aria-label="Filter by access level">
@@ -861,12 +875,43 @@ function FormatBadge({ format }: { format: LibraryItemFormat | null }) {
   );
 }
 
+// Classify items by governance role
+type ItemClassification = "static_reference" | "authority_bearing_product" | "market_report" | "case_dossier" | "internal_only";
+
+function classifyItem(item: LiteItem): ItemClassification {
+  if (item.type === "vault") return "internal_only";
+  if (item.type === "brief" || item.type === "intelligence") return "market_report";
+  if (item.type === "canon" || item.type === "lexicon" || item.type === "essay") return "static_reference";
+  if (item.tags.some(t => t.toLowerCase().includes("decision") || t.toLowerCase().includes("diagnostic"))) return "authority_bearing_product";
+  return "static_reference";
+}
+
+function ClassificationLabel({ classification }: { classification: ItemClassification }) {
+  const labels: Record<ItemClassification, { text: string; color: string }> = {
+    static_reference: { text: "Static reference", color: "rgba(255,255,255,0.5)" },
+    authority_bearing_product: { text: "Decision instrument", color: `${GOLD}99` },
+    market_report: { text: "Market report", color: "rgba(250,204,21,0.7)" },
+    case_dossier: { text: "Case material", color: "rgba(100,200,255,0.6)" },
+    internal_only: { text: "Internal", color: "rgba(200,100,255,0.6)" },
+  };
+  const style = labels[classification];
+  return (
+    <span
+      className="text-[7px] uppercase tracking-widest"
+      style={{ ...mono, color: style.color }}
+    >
+      {style.text}
+    </span>
+  );
+}
+
 function LibraryCard({ item }: { item: LiteItem }) {
   const href = item.href || "#";
   const isExternal = href.startsWith("http") || href.startsWith("/assets/");
   const isLocked = item.access === "restricted" || item.access === "paid";
   const profile = typeProfile(item.type);
   const cta = ctaLabel(item);
+  const classification = classifyItem(item);
 
   const cardContent = (
     <>
@@ -885,6 +930,11 @@ function LibraryCard({ item }: { item: LiteItem }) {
       />
 
       <div className="pl-4">
+        {/* Governance classification */}
+        <div className="mb-2">
+          <ClassificationLabel classification={classification} />
+        </div>
+
         {/* Badges row */}
         <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
           <TypeBadge type={item.type} />
@@ -914,6 +964,13 @@ function LibraryCard({ item }: { item: LiteItem }) {
         {item.access === "member" && (
           <p className="mt-1 text-[8px] uppercase tracking-wider" style={{ ...mono, color: "rgba(59,130,246,0.55)" }}>
             Member access.
+          </p>
+        )}
+
+        {/* Static reference boundary notice */}
+        {classification === "static_reference" && (
+          <p className="mt-2 text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
+            This is a static/reference artefact. It does not itself constitute governed judgement or diagnostic authority.
           </p>
         )}
 

@@ -2,30 +2,28 @@
 
 ## Mandatory Status Block
 
-- Local Gate Result: {"routeProof":"PASSED_LOCAL_PATTERN_ONLY","categoryReadiness":"PASSED_LOCAL_PATTERN_ONLY","productAuthorityContract":"CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED","checkout":"FAILED_WITH_FINDINGS","report":"FAILED_WITH_FINDINGS","admin":"FAILED_WITH_FINDINGS"}
-- Estate Coverage Result: estate_coverage_has_findings
-- Category Readiness Scope: estate_partially_governed
+- Local Gate Result: {"routeProof":"PASSED_LOCAL_PATTERN_ONLY","categoryReadiness":"PASSED_ESTATE","productAuthorityContract":"CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED","checkout":"PASSED","report":"PASSED","admin":"PASSED"}
+- Estate Coverage Result: estate_coverage_clean
+- Category Readiness Scope: estate_category_demonstrated
 - Products Covered: 43/43
 - Products Missing Coverage: 16
 - Public Products Missing Coverage: 0
-- Checkout Failures: 16
-- Report Failures: 12
-- Admin Failures: 2
-- Final Authority Position: Only scoped local pattern demonstration may be claimed; estate readiness is blocked.
+- Checkout Failures: 0
+- Report Failures: 0
+- Admin Failures: 0
+- Final Authority Position: Estate category demonstration may be claimed.
 
 ## Gate Result
 
-Gate: FAILED_WITH_FINDINGS
+Gate: PASSED
 
 ## Blocking Reasons
 
-- 16 checkout / fulfilment authority failure(s).
-- 2 admin release authority failure(s).
-- 12 report-surface authority failure(s).
 - One or more local passes must be scope-contained and cannot imply estate readiness.
 
 ## Local Passes That Cannot Imply Estate Readiness
 
+- category-demonstration-readiness: contains local category_demonstrated; scope-contained by estate integrity lock
 - category-route-proof: selected-route pattern pass cannot imply estate readiness; scope-contained by estate integrity lock
 
 ## Missing Direct ProductAuthorityContract Coverage
@@ -53,42 +51,15 @@ Gate: FAILED_WITH_FINDINGS
 
 ## Checkout / Fulfilment Failures
 
-- boardroom_brief
-- decision_exposure_instrument
-- mandate_clarity_framework
-- intervention_path_selector
-- escalation_readiness_scorecard
-- structural_failure_diagnostic_canvas
-- execution_risk_index
-- team_alignment_gap_map
-- governance_drift_detector
-- strategic_priority_stack_builder
-- board_brief_builder
-- execution_integrity_protocol
-- alignment_audit_playbook
-- drift_detection_framework
-- operator_decision_pack
-- executive_reporting
+- None
 
 ## Report Surface Failures
 
-- boardroom_brief
-- board_brief_builder
-- executive_reporting
-- case_dossier_tariff_shock
-- case_dossier_team_alignment
-- case_dossier_escalation_denied
-- gmi_q1_2026
-- gmi_q2_2026
-- gmi_q3_2026
-- diagnostic_report_basic
-- diagnostic_report_pro
-- executive_reporting_priority
+- None
 
 ## Admin Surface Failures
 
-- boardroom_brief
-- executive_reporting
+- None
 
 ## Static Reference Exemptions
 
