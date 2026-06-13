@@ -21,8 +21,11 @@
 export interface AnalyzableOutput {
   /** Full rendered output text as the customer would read it. */
   fullText: string;
+  diagnosisText?: string;
   nextActionText: string;
   consequenceText: string;
+  falsificationText?: string;
+  executionSequenceText?: string[];
   limitsText: string;
   evidenceItems: string[];
 }
@@ -59,6 +62,7 @@ export const ANTI_TOY_RELEASE_MAXIMUM = 20;
 export interface OutputFeatureAnalysis {
   inputEchoRatio: number;
   crossInputSimilarity: number;
+  judgementDiversity: JudgementDiversityAnalysis;
   genericPhraseHits: string[];
   nextActionGroundedInInput: boolean;
   nextActionIdenticalAcrossInputs: boolean;
@@ -69,6 +73,25 @@ export interface OutputFeatureAnalysis {
   hasOwnerAndTimeframe: boolean;
   couldBeGenericAiOutput: boolean;
 }
+
+export interface JudgementDiversityAnalysis {
+  overallJudgementSimilarity: number;
+  diagnosisSimilarity: number;
+  consequenceSimilarity: number;
+  nextMoveSimilarity: number;
+  falsificationSimilarity: number;
+  executionSequenceSimilarity: number;
+  failures: string[];
+}
+
+export const JUDGEMENT_DIVERSITY_THRESHOLDS = {
+  overallJudgementSimilarity: 0.55,
+  diagnosisSimilarity: 0.5,
+  nextMoveSimilarity: 0.45,
+  consequenceSimilarity: 0.55,
+  falsificationSimilarity: 0.55,
+  executionSequenceSimilarity: 0.55,
+} as const;
 
 const GENERIC_PHRASES = [
   "best practice",
@@ -105,6 +128,7 @@ export function extractOutputFeatures(
 
   const fullLower = primary.output.fullText.toLowerCase();
   const genericPhraseHits = GENERIC_PHRASES.filter((phrase) => fullLower.includes(phrase));
+  const judgementDiversity = analyzeJudgementDiversity(primary.output, variant.output);
 
   const nextTokensA = tokenize(primary.output.nextActionText);
   const nextTokensB = tokenize(variant.output.nextActionText);
@@ -122,6 +146,7 @@ export function extractOutputFeatures(
   return {
     inputEchoRatio,
     crossInputSimilarity,
+    judgementDiversity,
     genericPhraseHits,
     nextActionGroundedInInput,
     nextActionIdenticalAcrossInputs,
@@ -152,6 +177,25 @@ export function runAntiToyTest(input: AntiToyTestInput): AntiToyTestResult {
     score += 12;
     reasons.push(`Moderate template share (${pct(features.crossInputSimilarity)} cross-input similarity).`);
     requiredCorrections.push("Reduce fixed framing text relative to case-specific judgement.");
+  }
+
+  if (features.judgementDiversity.overallJudgementSimilarity > JUDGEMENT_DIVERSITY_THRESHOLDS.overallJudgementSimilarity) {
+    score += 28;
+    reasons.push(`Overall judgement similarity is ${pct(features.judgementDiversity.overallJudgementSimilarity)} across materially different cases; threshold is ${pct(JUDGEMENT_DIVERSITY_THRESHOLDS.overallJudgementSimilarity)}.`);
+    requiredCorrections.push("Make diagnosis, consequence, next move, falsification, and execution sequence derive from the classified decision pattern.");
+  }
+  if (features.judgementDiversity.diagnosisSimilarity > JUDGEMENT_DIVERSITY_THRESHOLDS.diagnosisSimilarity) {
+    score += 16;
+    reasons.push(`Diagnosis similarity is ${pct(features.judgementDiversity.diagnosisSimilarity)} across materially different cases; threshold is ${pct(JUDGEMENT_DIVERSITY_THRESHOLDS.diagnosisSimilarity)}.`);
+    requiredCorrections.push("Diagnosis must name the case's actual decision pathology, not a reusable section frame.");
+  }
+  if (features.judgementDiversity.nextMoveSimilarity > JUDGEMENT_DIVERSITY_THRESHOLDS.nextMoveSimilarity) {
+    score += 16;
+    reasons.push(`Next-move similarity is ${pct(features.judgementDiversity.nextMoveSimilarity)} across materially different cases; threshold is ${pct(JUDGEMENT_DIVERSITY_THRESHOLDS.nextMoveSimilarity)}.`);
+    requiredCorrections.push("Next moves must change with the decision pattern; identical advice for different cases blocks gold output.");
+  }
+  if (features.judgementDiversity.failures.length > 0) {
+    reasons.push(...features.judgementDiversity.failures);
   }
 
   if (features.inputEchoRatio > 0.55) {
@@ -232,6 +276,65 @@ function tokenize(text: string): Set<string> {
       .split(/[^a-z0-9]+/)
       .filter((token) => token.length > 2 && !STOPWORDS.has(token)),
   );
+}
+
+function analyzeJudgementDiversity(
+  primary: AnalyzableOutput,
+  variant: AnalyzableOutput,
+): JudgementDiversityAnalysis {
+  const diagnosisSimilarity = textSimilarity(
+    primary.diagnosisText ?? firstUsefulLine(primary.fullText),
+    variant.diagnosisText ?? firstUsefulLine(variant.fullText),
+  );
+  const consequenceSimilarity = textSimilarity(primary.consequenceText, variant.consequenceText);
+  const nextMoveSimilarity = textSimilarity(primary.nextActionText, variant.nextActionText);
+  const falsificationSimilarity = textSimilarity(primary.falsificationText ?? "", variant.falsificationText ?? "");
+  const executionSequenceSimilarity = textSimilarity(
+    (primary.executionSequenceText ?? []).join(" "),
+    (variant.executionSequenceText ?? []).join(" "),
+  );
+
+  const overallJudgementSimilarity = average([
+    diagnosisSimilarity,
+    consequenceSimilarity,
+    nextMoveSimilarity,
+    falsificationSimilarity,
+    executionSequenceSimilarity,
+  ]);
+
+  const failures: string[] = [];
+  if (consequenceSimilarity > JUDGEMENT_DIVERSITY_THRESHOLDS.consequenceSimilarity) {
+    failures.push(`Consequence similarity is ${pct(consequenceSimilarity)}; materially different cases require materially different commercial consequence.`);
+  }
+  if (falsificationSimilarity > JUDGEMENT_DIVERSITY_THRESHOLDS.falsificationSimilarity) {
+    failures.push(`Falsification challenge similarity is ${pct(falsificationSimilarity)}; the challenge must test the case-specific diagnosis.`);
+  }
+  if (executionSequenceSimilarity > JUDGEMENT_DIVERSITY_THRESHOLDS.executionSequenceSimilarity) {
+    failures.push(`Execution-sequence similarity is ${pct(executionSequenceSimilarity)}; sequence should vary by decision pattern.`);
+  }
+
+  return {
+    overallJudgementSimilarity,
+    diagnosisSimilarity,
+    consequenceSimilarity,
+    nextMoveSimilarity,
+    falsificationSimilarity,
+    executionSequenceSimilarity,
+    failures,
+  };
+}
+
+function textSimilarity(a: string, b: string): number {
+  if (a.trim().length === 0 && b.trim().length === 0) return 0;
+  return jaccard(tokenize(a), tokenize(b));
+}
+
+function firstUsefulLine(text: string): string {
+  return text.split(/\r?\n/).find((line) => line.trim().length > 24) ?? text;
+}
+
+function average(values: number[]): number {
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 function intersect(a: Set<string>, b: Set<string>): Set<string> {

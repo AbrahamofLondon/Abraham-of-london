@@ -3,9 +3,10 @@
  *
  * Every free/public signal must give the user one clear signal, one useful
  * interpretation, one practical next action, one honest limitation, and one
- * escalation condition. A free result is blocked if it is generic, mostly
- * promotional, lacks a specific next action, or could be produced by a
- * normal AI prompt without the product's evidence basis.
+ * escalation condition — all derived from the judgement engine's pattern
+ * classification of the actual case, never from a shared template. A free
+ * result is blocked if it is generic, promotional, lacks a case-specific
+ * next action, or rests on insufficient pattern evidence.
  */
 
 import {
@@ -15,6 +16,8 @@ import {
   type WaveOneUniversalOutput,
   type WaveOneValidationResult,
 } from "@/lib/product/wave-one-gold-standard";
+import { composeCaseDerivedJudgement } from "@/lib/judgement/compose-case-derived-judgement";
+import type { DecisionPattern } from "@/lib/judgement/decision-pattern-model";
 
 export interface FreeSignalGoldInput {
   productCode: string;
@@ -23,15 +26,26 @@ export interface FreeSignalGoldInput {
   customerSituation: string;
   whatItPointsAt: string;
   minutesAskedOfUser: number;
+  consequenceOfInaction?: string;
+  stakeholders?: string[];
+  deadline?: string;
+  desiredOutcome?: string;
 }
 
 export interface FreeSignalGoldResult {
   productCode: string;
+  patternStatus: "judged" | "insufficient_pattern_evidence";
+  primaryPattern: DecisionPattern | null;
+  secondaryPatterns: DecisionPattern[];
+  patternEvidence: string[];
   oneClearSignal: string;
   oneUsefulInterpretation: string;
   onePracticalNextAction: string;
   oneHonestLimitation: string;
   oneEscalationCondition: string;
+  caseDerivedConsequence: string;
+  falsificationChallenge: string;
+  executionSequence: string[];
   timeValueSurplus: WaveOneTimeValueSurplus & { passes: boolean };
   validation: WaveOneValidationResult;
   releaseBlocked: boolean;
@@ -39,24 +53,47 @@ export interface FreeSignalGoldResult {
 }
 
 export function composeFreeSignalGoldResult(input: FreeSignalGoldInput): FreeSignalGoldResult {
-  const oneClearSignal = `Signal: ${input.observedSignal}, observed in ${input.signalSource} against your situation — ${input.customerSituation}.`;
-  const oneUsefulInterpretation = `What this points at: ${input.whatItPointsAt}. The signal matters because it appears where your situation and the evidence intersect, not as a general industry observation.`;
-  const onePracticalNextAction = `Practical next action: test the signal against your own case this week — take the single decision it touches, write down who owns it and what evidence would confirm or kill the signal, and review that note within seven days.`;
-  const oneHonestLimitation = `Honest limitation: this signal is drawn from ${input.signalSource} and your stated situation only. It does not prove causation, scale, or that your case matches the underlying pattern — it earns attention, not conviction.`;
-  const oneEscalationCondition = "Escalation condition: if the signal touches an irreversible commitment, live customer exposure, or a decision already under deadline pressure, move it from observation into a governed review before acting on it.";
+  const result = composeCaseDerivedJudgement({
+    decisionDescription: `${input.customerSituation}: ${input.observedSignal}`,
+    stakeholders: input.stakeholders ?? [],
+    deadline: input.deadline ?? "",
+    evidenceAvailable: [input.observedSignal, `Source: ${input.signalSource}`],
+    constraint: input.whatItPointsAt,
+    desiredOutcome: input.desiredOutcome ?? "",
+    priorAttempts: [],
+    consequenceOfDelay: input.consequenceOfInaction ?? "",
+    optionsUnderConsideration: [],
+  });
 
-  const universal = freeSignalToUniversalOutput(input.productCode, {
-    oneClearSignal,
-    oneUsefulInterpretation,
-    onePracticalNextAction,
-    oneHonestLimitation,
-    oneEscalationCondition,
-    evidence: [
+  if (result.status === "insufficient_pattern_evidence") {
+    return insufficientResult(input, result.missingSignals);
+  }
+
+  const { judgement, classification } = result;
+
+  const oneClearSignal = `Signal: ${input.observedSignal} — observed in ${input.signalSource}, read against your situation: ${input.customerSituation}.`;
+  const oneUsefulInterpretation = judgement.primaryDiagnosis;
+  const onePracticalNextAction = `${judgement.executionSequence[0]} ${judgement.recommendedNextMove}`;
+  const oneHonestLimitation = judgement.limitations.join(" ");
+  const oneEscalationCondition = judgement.escalationTrigger;
+  const caseDerivedConsequence = judgement.commercialConsequence;
+
+  const universal: WaveOneUniversalOutput = {
+    productCode: input.productCode,
+    signalOrDiagnosis: oneClearSignal,
+    whyThisMatters: oneUsefulInterpretation,
+    evidenceOrReasoningBasis: [
       `Observed signal: ${input.observedSignal}.`,
       `Source: ${input.signalSource}.`,
-      `Customer situation it was read against: ${input.customerSituation}.`,
+      ...classification.evidenceMatched,
     ],
-  });
+    decisionFrictionOrContradiction: judgement.decisionTension,
+    consequenceIfIgnored: caseDerivedConsequence,
+    oneSpecificNextMove: onePracticalNextAction,
+    whatThisDoesNotProve: oneHonestLimitation,
+    escalationTrigger: oneEscalationCondition,
+    optionalDeeperRoute: `Falsification check first: ${judgement.falsificationChallenge} Where the signal survives that test, the same case can continue into a governed diagnostic — this free result is complete on its own and carries no obligation.`,
+  };
 
   const validation = validateWaveOneUniversalOutput(universal);
   const timeValueSurplus = assessTimeValueSurplus(universal, input.minutesAskedOfUser);
@@ -64,11 +101,18 @@ export function composeFreeSignalGoldResult(input: FreeSignalGoldInput): FreeSig
 
   return {
     productCode: input.productCode,
+    patternStatus: "judged",
+    primaryPattern: classification.primaryPattern,
+    secondaryPatterns: classification.secondaryPatterns,
+    patternEvidence: classification.evidenceMatched,
     oneClearSignal,
     oneUsefulInterpretation,
     onePracticalNextAction,
     oneHonestLimitation,
     oneEscalationCondition,
+    caseDerivedConsequence,
+    falsificationChallenge: judgement.falsificationChallenge,
+    executionSequence: judgement.executionSequence,
     timeValueSurplus,
     validation,
     releaseBlocked: blockReasons.length > 0,
@@ -76,11 +120,6 @@ export function composeFreeSignalGoldResult(input: FreeSignalGoldInput): FreeSig
   };
 }
 
-/**
- * Block conditions for free signals: generic output, promotional output,
- * no specific next action, no clear customer win, or time cost exceeding
- * value returned.
- */
 function freeSignalBlockReasons(
   input: FreeSignalGoldInput,
   validationFailures: string[],
@@ -99,26 +138,31 @@ function freeSignalBlockReasons(
   return reasons;
 }
 
-interface FreeSignalSections {
-  oneClearSignal: string;
-  oneUsefulInterpretation: string;
-  onePracticalNextAction: string;
-  oneHonestLimitation: string;
-  oneEscalationCondition: string;
-  evidence: string[];
-}
-
-function freeSignalToUniversalOutput(productCode: string, sections: FreeSignalSections): WaveOneUniversalOutput {
+function insufficientResult(input: FreeSignalGoldInput, missingSignals: string[]): FreeSignalGoldResult {
+  const refusal = `No interpretation is issued: the supplied signal and situation do not carry enough evidence to classify the decision pattern honestly. ${missingSignals.join(" ")}`;
   return {
-    productCode,
-    signalOrDiagnosis: sections.oneClearSignal,
-    whyThisMatters: sections.oneUsefulInterpretation,
-    evidenceOrReasoningBasis: sections.evidence,
-    decisionFrictionOrContradiction: sections.oneUsefulInterpretation,
-    consequenceIfIgnored: "If the signal is ignored, the decision it touches is made without the one piece of evidence that flagged it — which is how avoidable surprises become expensive ones.",
-    oneSpecificNextMove: sections.onePracticalNextAction,
-    whatThisDoesNotProve: sections.oneHonestLimitation,
-    escalationTrigger: sections.oneEscalationCondition,
-    optionalDeeperRoute: "Where the signal survives your seven-day review, the same case can continue into a governed diagnostic — the free signal is complete on its own and carries no obligation.",
+    productCode: input.productCode,
+    patternStatus: "insufficient_pattern_evidence",
+    primaryPattern: null,
+    secondaryPatterns: [],
+    patternEvidence: [],
+    oneClearSignal: `Signal received: ${input.observedSignal || "(none)"} — insufficient to interpret responsibly.`,
+    oneUsefulInterpretation: refusal,
+    onePracticalNextAction: "Describe the situation concretely — who is blocked, what contradicts what, what expires when — and re-run the signal.",
+    oneHonestLimitation: refusal,
+    oneEscalationCondition: "Not applicable until a classifiable case is supplied.",
+    caseDerivedConsequence: "Acting on an uninterpretable signal costs more than acting on none.",
+    falsificationChallenge: "Not applicable: no interpretation was made.",
+    executionSequence: [],
+    timeValueSurplus: {
+      minutesAskedOfUser: input.minutesAskedOfUser,
+      clarityReturned: refusal,
+      nextMoveReturned: "Supply the missing case detail and re-run.",
+      surplusJustification: "The honest refusal protects the user's trust; no time-value surplus is claimed.",
+      passes: false,
+    },
+    validation: { productCode: input.productCode, passes: false, failures: ["insufficient_pattern_evidence — gold output blocked."] },
+    releaseBlocked: true,
+    blockReasons: ["insufficient_pattern_evidence — the input cannot support case-derived judgement."],
   };
 }

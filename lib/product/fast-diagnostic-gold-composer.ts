@@ -2,8 +2,11 @@
  * Fast Diagnostic Result — gold-standard composer.
  *
  * The fast diagnostic result is the benchmark for free-tier seriousness.
- * Gold condition: a user should be able to act within 10 minutes of
- * reading the result.
+ * Gold conditions: a user should be able to act within 10 minutes of
+ * reading the result, and materially different cases must produce
+ * materially different judgement. All judgement derives from the
+ * judgement engine's pattern classification of the actual case; if the
+ * input cannot support classification, no judgement is issued.
  */
 
 import {
@@ -13,6 +16,10 @@ import {
   type WaveOneUniversalOutput,
   type WaveOneValidationResult,
 } from "@/lib/product/wave-one-gold-standard";
+import {
+  composeCaseDerivedJudgement,
+} from "@/lib/judgement/compose-case-derived-judgement";
+import type { DecisionPattern } from "@/lib/judgement/decision-pattern-model";
 
 export interface FastDiagnosticAnswer {
   question: string;
@@ -26,10 +33,19 @@ export interface FastDiagnosticGoldInput {
   decisionContext: string;
   statedStake: string;
   minutesSpentByUser: number;
+  stakeholders?: string[];
+  deadline?: string;
+  desiredOutcome?: string;
+  priorAttempts?: string[];
+  optionsUnderConsideration?: string[];
 }
 
 export interface FastDiagnosticGoldResult {
   productCode: "fast_diagnostic";
+  patternStatus: "judged" | "insufficient_pattern_evidence";
+  primaryPattern: DecisionPattern | null;
+  secondaryPatterns: DecisionPattern[];
+  patternEvidence: string[];
   dominantDecisionFriction: string;
   whatYourAnswersSuggest: string;
   likelyCostOfIgnoringThis: string;
@@ -37,39 +53,69 @@ export interface FastDiagnosticGoldResult {
   whatThisResultDoesNotYetProve: string;
   whenToEscalate: string;
   recommendedNextStep: string;
+  falsificationChallenge: string;
+  executionSequence: string[];
   actionableWithinMinutes: number;
   timeValueSurplus: WaveOneTimeValueSurplus & { passes: boolean };
   validation: WaveOneValidationResult;
+  goldEligible: boolean;
 }
 
 const ACTIONABLE_WITHIN_MINUTES = 10;
 
 export function composeFastDiagnosticGoldResult(input: FastDiagnosticGoldInput): FastDiagnosticGoldResult {
-  const answerBasis = input.answers
-    .filter((entry) => entry.answer.trim().length > 0)
-    .map((entry) => `You answered "${entry.answer}" to "${entry.question}".`);
-
-  const dominantDecisionFriction = `The dominant decision friction in your situation is ${input.dominantFrictionSignal}, surfaced directly by your answers about ${input.decisionContext}.`;
-  const whatYourAnswersSuggest = `Taken together, your answers suggest the decision is stalling on ${input.dominantFrictionSignal} rather than on missing information: the pattern across your responses points at ${input.decisionContext} as the live pressure point.`;
-  const likelyCostOfIgnoringThis = `If this friction is left unaddressed, the stake you named — ${input.statedStake} — degrades by default: the decision gets made late, reactively, or by whoever feels the pressure first instead of whoever owns it.`;
-  const minimumViableCorrection = `The minimum viable correction is to name a single decision owner for ${input.decisionContext}, write the decision in one sentence, and set a 48-hour checkpoint to confirm whether the friction has moved.`;
-  const whatThisResultDoesNotYetProve = "This result reads the friction pattern in your answers only. It does not yet prove root cause, the size of the commercial exposure, or that the correction will hold under organisational pressure — that requires fuller evidence than a fast diagnostic collects.";
-  const whenToEscalate = "Escalate beyond this result when the decision involves irreversible spend, more than one accountable owner, customer or regulatory exposure, or when the 48-hour checkpoint shows the friction has not moved.";
-  const recommendedNextStep = `Within the next 10 minutes: write the one-sentence decision statement for ${input.decisionContext}, name its owner, and put the 48-hour checkpoint in the owner's calendar. That single act converts this diagnosis into a governed decision.`;
-
-  const universal = fastDiagnosticToUniversalOutput({
-    dominantDecisionFriction,
-    whatYourAnswersSuggest,
-    likelyCostOfIgnoringThis,
-    minimumViableCorrection,
-    whatThisResultDoesNotYetProve,
-    whenToEscalate,
-    recommendedNextStep,
-    answerBasis,
+  const result = composeCaseDerivedJudgement({
+    decisionDescription: `${input.decisionContext} — ${input.dominantFrictionSignal}`,
+    stakeholders: input.stakeholders ?? [],
+    deadline: input.deadline ?? "",
+    evidenceAvailable: input.answers
+      .filter((entry) => entry.answer.trim().length > 0)
+      .map((entry) => `${entry.question}: ${entry.answer}`),
+    constraint: input.dominantFrictionSignal,
+    desiredOutcome: input.desiredOutcome ?? "",
+    priorAttempts: input.priorAttempts ?? [],
+    consequenceOfDelay: input.statedStake,
+    optionsUnderConsideration: input.optionsUnderConsideration ?? [],
   });
+
+  if (result.status === "insufficient_pattern_evidence") {
+    return insufficientResult(input, result.missingSignals);
+  }
+
+  const { judgement, classification } = result;
+
+  const dominantDecisionFriction = judgement.primaryDiagnosis;
+  const whatYourAnswersSuggest = `${judgement.decisionTension} This reading rests on ${classification.evidenceMatched.length} signal${classification.evidenceMatched.length === 1 ? "" : "s"} in your answers, not on a generic playbook.`;
+  const likelyCostOfIgnoringThis = judgement.commercialConsequence;
+  const minimumViableCorrection = judgement.recommendedNextMove;
+  const whatThisResultDoesNotYetProve = judgement.limitations.join(" ");
+  const whenToEscalate = judgement.escalationTrigger;
+  const recommendedNextStep = `Within the next 10 minutes, start the first step: ${judgement.executionSequence[0]} Then continue: ${judgement.executionSequence[1]}`;
+
+  const universal: WaveOneUniversalOutput = {
+    productCode: input.productCode,
+    signalOrDiagnosis: dominantDecisionFriction,
+    whyThisMatters: whatYourAnswersSuggest,
+    evidenceOrReasoningBasis: [
+      ...input.answers.filter((entry) => entry.answer.trim().length > 0).map((entry) => `You answered "${entry.answer}" to "${entry.question}".`),
+      ...classification.evidenceMatched,
+    ],
+    decisionFrictionOrContradiction: judgement.decisionTension,
+    consequenceIfIgnored: likelyCostOfIgnoringThis,
+    oneSpecificNextMove: recommendedNextStep,
+    whatThisDoesNotProve: whatThisResultDoesNotYetProve,
+    escalationTrigger: whenToEscalate,
+    optionalDeeperRoute: `Falsification check before any deeper engagement: ${judgement.falsificationChallenge} If the diagnosis survives that test and the case warrants it, a Personal Decision Audit or Strategy Room session can take the same decision into governed review — this result stands on its own either way.`,
+  };
+
+  const validation = validateWaveOneUniversalOutput(universal);
 
   return {
     productCode: input.productCode,
+    patternStatus: "judged",
+    primaryPattern: classification.primaryPattern,
+    secondaryPatterns: classification.secondaryPatterns,
+    patternEvidence: classification.evidenceMatched,
     dominantDecisionFriction,
     whatYourAnswersSuggest,
     likelyCostOfIgnoringThis,
@@ -77,34 +123,44 @@ export function composeFastDiagnosticGoldResult(input: FastDiagnosticGoldInput):
     whatThisResultDoesNotYetProve,
     whenToEscalate,
     recommendedNextStep,
+    falsificationChallenge: judgement.falsificationChallenge,
+    executionSequence: judgement.executionSequence,
     actionableWithinMinutes: ACTIONABLE_WITHIN_MINUTES,
     timeValueSurplus: assessTimeValueSurplus(universal, input.minutesSpentByUser),
-    validation: validateWaveOneUniversalOutput(universal),
+    validation,
+    goldEligible: validation.passes,
   };
 }
 
-interface FastDiagnosticSections {
-  dominantDecisionFriction: string;
-  whatYourAnswersSuggest: string;
-  likelyCostOfIgnoringThis: string;
-  minimumViableCorrection: string;
-  whatThisResultDoesNotYetProve: string;
-  whenToEscalate: string;
-  recommendedNextStep: string;
-  answerBasis: string[];
-}
-
-function fastDiagnosticToUniversalOutput(sections: FastDiagnosticSections): WaveOneUniversalOutput {
+function insufficientResult(
+  input: FastDiagnosticGoldInput,
+  missingSignals: string[],
+): FastDiagnosticGoldResult {
+  const refusal = `No judgement is issued on this input: the answers provided do not carry enough signal to classify the decision pattern honestly. ${missingSignals.join(" ")}`;
   return {
-    productCode: "fast_diagnostic",
-    signalOrDiagnosis: sections.dominantDecisionFriction,
-    whyThisMatters: sections.whatYourAnswersSuggest,
-    evidenceOrReasoningBasis: sections.answerBasis,
-    decisionFrictionOrContradiction: sections.dominantDecisionFriction,
-    consequenceIfIgnored: sections.likelyCostOfIgnoringThis,
-    oneSpecificNextMove: sections.recommendedNextStep,
-    whatThisDoesNotProve: sections.whatThisResultDoesNotYetProve,
-    escalationTrigger: sections.whenToEscalate,
-    optionalDeeperRoute: "If the checkpoint shows the friction holding, a Personal Decision Audit or Strategy Room session can take the same decision into governed, evidence-backed review — the fast result stands on its own either way.",
+    productCode: input.productCode,
+    patternStatus: "insufficient_pattern_evidence",
+    primaryPattern: null,
+    secondaryPatterns: [],
+    patternEvidence: [],
+    dominantDecisionFriction: refusal,
+    whatYourAnswersSuggest: "Issuing a confident-sounding diagnosis on insufficient evidence would be theatre, not judgement — this product refuses to do that.",
+    likelyCostOfIgnoringThis: "Acting on an unfounded diagnosis costs more than acting on none.",
+    minimumViableCorrection: "Re-run the diagnostic with the decision described concretely: who is blocked, what contradicts what, and what expires when.",
+    whatThisResultDoesNotYetProve: refusal,
+    whenToEscalate: "Not applicable until a classifiable case is supplied.",
+    recommendedNextStep: "Add the missing case detail listed above and re-run the diagnostic; no judgement is issued on insufficient evidence.",
+    falsificationChallenge: "Not applicable: no diagnosis was made.",
+    executionSequence: [],
+    actionableWithinMinutes: ACTIONABLE_WITHIN_MINUTES,
+    timeValueSurplus: {
+      minutesAskedOfUser: input.minutesSpentByUser,
+      clarityReturned: refusal,
+      nextMoveReturned: "Supply the missing case detail and re-run.",
+      surplusJustification: "The honest refusal protects the user's trust; no time-value surplus is claimed.",
+      passes: false,
+    },
+    validation: { productCode: input.productCode, passes: false, failures: ["insufficient_pattern_evidence — gold output blocked."] },
+    goldEligible: false,
   };
 }

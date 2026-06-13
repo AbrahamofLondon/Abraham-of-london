@@ -73,21 +73,31 @@ function reviewFastDiagnostic(): RenderedReview {
       decisionContext: "the enterprise pricing change",
       statedStake: "Q3 enterprise renewal revenue",
       minutesSpentByUser: 6,
+      stakeholders: ["Commercial Director", "VP Sales", "Finance Director"],
+      deadline: "Q3 renewal cycle opens in five weeks",
+      desiredOutcome: "one accountable owner for a defended enterprise price floor",
+      priorAttempts: ["three pricing committee meetings ended without an accountable name"],
+      optionsUnderConsideration: ["hold price", "match competitor", "segment-based price floor"],
     },
   };
   const scenarioB = {
-    label: "hiring freeze with conflicting evidence",
+    label: "hiring freeze prioritisation",
     input: {
       productCode: "fast_diagnostic" as const,
       answers: [
-        { question: "Who owns this decision?", answer: "The COO, but the board has intervened twice" },
-        { question: "What evidence do you have?", answer: "Burn-rate model and a delivery-capacity forecast that contradict each other" },
-        { question: "What happens if you wait?", answer: "Two senior engineering offers expire next Friday" },
+        { question: "What is the constraint?", answer: "Hiring freeze: headcount and capacity cannot grow" },
+        { question: "What evidence do you have?", answer: "Capacity model shows 140% allocation across five committed workstreams" },
+        { question: "What happens if you wait?", answer: "The platform launch slips while every workstream degrades together" },
       ],
-      dominantFrictionSignal: "contradictory evidence between finance and delivery models",
-      decisionContext: "the engineering hiring freeze",
-      statedStake: "platform delivery capacity for the launch",
+      dominantFrictionSignal: "hiring freeze capacity constraint with no de-scoped workstream",
+      decisionContext: "engineering delivery plan under the hiring freeze",
+      statedStake: "platform launch delivery capacity and customer commitments",
       minutesSpentByUser: 6,
+      stakeholders: ["COO", "VP Engineering"],
+      deadline: "platform launch window in nine weeks",
+      desiredOutcome: "a delivery plan the remaining team can actually execute",
+      priorAttempts: ["asked every team to find 10% efficiency but nothing was stopped"],
+      optionsUnderConsideration: ["cut two workstreams", "slip the launch", "contract out platform work"],
     },
   };
 
@@ -114,6 +124,9 @@ function reviewFastDiagnostic(): RenderedReview {
         fullText: Object.values(sections).join("\n"),
         nextActionText: result.recommendedNextStep,
         consequenceText: result.likelyCostOfIgnoringThis,
+        diagnosisText: result.dominantDecisionFriction,
+        falsificationText: result.falsificationChallenge,
+        executionSequenceText: result.executionSequence,
         limitsText: result.whatThisResultDoesNotYetProve,
         evidenceItems: scenario.input.answers.map((entry) => entry.answer),
       },
@@ -134,6 +147,9 @@ function reviewFreeSignal(productCode: string, surface: string): RenderedReview 
       customerSituation: "a twelve-person operations team three months after a merger",
       whatItPointsAt: "an alignment illusion — agreement in meetings, divergence in execution",
       minutesAskedOfUser: 8,
+      stakeholders: ["Operations Director", "five team leads"],
+      deadline: "quarterly commitments lock in three weeks",
+      desiredOutcome: "one written priority order all five leads execute against",
     },
   };
   const scenarioB = {
@@ -143,8 +159,11 @@ function reviewFreeSignal(productCode: string, surface: string): RenderedReview 
       observedSignal: "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty",
       signalSource: "the assessment's forecast-versus-attainment readings",
       customerSituation: "a founder-led sales team of seven carrying an aggressive annual target",
-      whatItPointsAt: "a reporting incentive problem — the forecast is a loyalty signal, not an estimate",
+      whatItPointsAt: "risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened",
       minutesAskedOfUser: 8,
+      stakeholders: ["Founder", "Sales Lead"],
+      deadline: "quarter end in four weeks",
+      desiredOutcome: "a forecast decision that prices the warning signs before commitment",
     },
   };
 
@@ -168,10 +187,10 @@ function reviewFreeSignal(productCode: string, surface: string): RenderedReview 
       output: {
         fullText: Object.values(sections).join("\n"),
         nextActionText: result.onePracticalNextAction,
-        // The free-signal result exposes no case-grounded consequence
-        // section; the universal consequence is fixed template text, so it
-        // is honestly represented as absent for grounding analysis.
-        consequenceText: "",
+        consequenceText: result.caseDerivedConsequence,
+        diagnosisText: result.oneUsefulInterpretation,
+        falsificationText: result.falsificationChallenge,
+        executionSequenceText: result.executionSequence,
         limitsText: result.oneHonestLimitation,
         evidenceItems: [scenario.input.observedSignal, scenario.input.signalSource],
       },

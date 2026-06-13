@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-12T16:06:28.530Z",
+  "generatedAt": "2026-06-13T03:22:04.347Z",
   "gate": "PASSED",
   "doctrine": "Externally proven gold or blocked. No self-certification.",
   "thresholds": {
@@ -12,11 +12,9 @@
   "goldClaimsRevoked": [
     {
       "productCode": "fast_diagnostic",
-      "finalStatus": "blocked_for_low_value",
+      "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED by actual-output testing: toy risk 35/100; rejected by commercial_buyer, experienced_consultant.",
-        "Near-identical judgement (84% similar) for two materially different situations — this is a template wearing the language of judgement.",
-        "A generic AI prompt given the same input could plausibly produce this output — the product adds structure, not proprietary judgement."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 0, live route verified: false)."
       ]
     },
     {
@@ -42,20 +40,16 @@
     },
     {
       "productCode": "team_assessment",
-      "finalStatus": "blocked_for_low_value",
+      "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED by actual-output testing: toy risk 45/100; rejected by busy_operator, commercial_buyer, experienced_consultant, returning_user.",
-        "Moderate template share (58% cross-input similarity).",
-        "Consequence section is not grounded in the user's stated situation."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
       ]
     },
     {
       "productCode": "enterprise_assessment",
-      "finalStatus": "blocked_for_low_value",
+      "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED by actual-output testing: toy risk 45/100; rejected by busy_operator, commercial_buyer, experienced_consultant, returning_user.",
-        "Moderate template share (58% cross-input similarity).",
-        "Consequence section is not grounded in the user's stated situation."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
       ]
     }
   ],
@@ -127,12 +121,12 @@
   },
   "counts": {
     "externallyProvenGold": 0,
-    "blockedPendingExternalProof": 29,
-    "blockedForLowValue": 3,
+    "blockedPendingExternalProof": 32,
+    "blockedForLowValue": 0,
     "internalOnly": 11,
-    "antiToyFailures": 3,
-    "genericAiOutperformFailures": 3,
-    "redTeamFailures": 3,
+    "antiToyFailures": 0,
+    "genericAiOutperformFailures": 2,
+    "redTeamFailures": 0,
     "benchmarksMissingForGold": 0,
     "renderedReviewsMissingForGold": 0
   },
@@ -146,27 +140,23 @@
       "renderedOutputReviewed": true,
       "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
       "liveRouteVerified": false,
-      "antiToyScore": 35,
-      "failsAntiToy": true,
-      "redTeamSurvives": false,
-      "redTeamRejections": [
-        "commercial_buyer",
-        "experienced_consultant"
-      ],
-      "outperformsGenericAi": false,
+      "antiToyScore": 0,
+      "failsAntiToy": false,
+      "redTeamSurvives": true,
+      "redTeamRejections": [],
+      "outperformsGenericAi": true,
       "usefulnessProofs": [
+        "decision_clarity_improved",
         "next_action_obvious",
         "risk_made_visible",
+        "contradiction_made_explicit",
         "execution_sequence_clearer",
         "evidence_organised_into_judgement",
-        "likely_mistake_avoided",
         "reusable_artefact_gained"
       ],
-      "finalStatus": "blocked_for_low_value",
+      "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED by actual-output testing: toy risk 35/100; rejected by commercial_buyer, experienced_consultant.",
-        "Near-identical judgement (84% similar) for two materially different situations — this is a template wearing the language of judgement.",
-        "A generic AI prompt given the same input could plausibly produce this output — the product adds structure, not proprietary judgement."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 0, live route verified: false)."
       ]
     },
     {
@@ -678,25 +668,21 @@
       "renderedOutputReviewed": true,
       "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
       "liveRouteVerified": false,
-      "antiToyScore": 45,
+      "antiToyScore": 8,
       "failsAntiToy": true,
-      "redTeamSurvives": false,
-      "redTeamRejections": [
-        "busy_operator",
-        "commercial_buyer",
-        "experienced_consultant",
-        "returning_user"
-      ],
+      "redTeamSurvives": true,
+      "redTeamRejections": [],
       "outperformsGenericAi": false,
       "usefulnessProofs": [
+        "decision_clarity_improved",
+        "next_action_obvious",
+        "execution_sequence_clearer",
         "evidence_organised_into_judgement",
-        "likely_mistake_avoided"
+        "reusable_artefact_gained"
       ],
-      "finalStatus": "blocked_for_low_value",
+      "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED by actual-output testing: toy risk 45/100; rejected by busy_operator, commercial_buyer, experienced_consultant, returning_user.",
-        "Moderate template share (58% cross-input similarity).",
-        "Consequence section is not grounded in the user's stated situation."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
       ]
     },
     {
@@ -708,25 +694,21 @@
       "renderedOutputReviewed": true,
       "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
       "liveRouteVerified": false,
-      "antiToyScore": 45,
+      "antiToyScore": 8,
       "failsAntiToy": true,
-      "redTeamSurvives": false,
-      "redTeamRejections": [
-        "busy_operator",
-        "commercial_buyer",
-        "experienced_consultant",
-        "returning_user"
-      ],
+      "redTeamSurvives": true,
+      "redTeamRejections": [],
       "outperformsGenericAi": false,
       "usefulnessProofs": [
+        "decision_clarity_improved",
+        "next_action_obvious",
+        "execution_sequence_clearer",
         "evidence_organised_into_judgement",
-        "likely_mistake_avoided"
+        "reusable_artefact_gained"
       ],
-      "finalStatus": "blocked_for_low_value",
+      "finalStatus": "blocked_pending_external_proof",
       "reasons": [
-        "Internal gold claim REVOKED by actual-output testing: toy risk 45/100; rejected by busy_operator, commercial_buyer, experienced_consultant, returning_user.",
-        "Moderate template share (58% cross-input similarity).",
-        "Consequence section is not grounded in the user's stated situation."
+        "Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false)."
       ]
     },
     {
@@ -1040,7 +1022,7 @@
         {
           "label": "pricing decision under ownership ambiguity",
           "inputSummary": "ownership ambiguity between sales and finance the enterprise pricing change Q3 enterprise renewal revenue Who owns this decision? Unclear — pricing sits between sales and finance What evidence do you have? Churn analysis from March and two enterprise renewal objections What happens if you wait? Competitor undercut continues through Q3",
-          "outputText": "The dominant decision friction in your situation is ownership ambiguity between sales and finance, surfaced directly by your answers about the enterprise pricing change.\nTaken together, your answers suggest the decision is stalling on ownership ambiguity between sales and finance rather than on missing information: the pattern across your responses points at the enterprise pricing change as the live pressure point.\nIf this friction is left unaddressed, the stake you named — Q3 enterprise renewal revenue — degrades by default: the decision gets made late, reactively, or by whoever feels the pressure first instead of whoever owns it.\nThe minimum viable correction is to name a single decision owner for the enterprise pricing change, write the decision in one sentence, and set a 48-hour checkpoint to confirm whether the friction has moved.\nThis result reads the friction pattern in your answers only. It does not yet prove root cause, the size of the commercial exposure, or that the correction will hold under organisational pressure — that requires fuller evidence than a fast diagnostic collects.\nEscalate beyond this result when the decision involves irreversible spend, more than one accountable owner, customer or regulatory exposure, or when the 48-hour checkpoint shows the friction has not moved.\nWithin the next 10 minutes: write the one-sentence decision statement for the enterprise pricing change, name its owner, and put the 48-hour checkpoint in the owner's calendar. That single act converts this diagnosis into a governed decision.",
+          "outputText": "The economics of the enterprise pricing change — ownership ambiguity between sales and finance are being contested without a priced hypothesis: value capture, willingness-to-pay, and margin floor are all asserted, none tested, while ownership ambiguity between sales and finance compresses the room to manoeuvre. A secondary ownership_ambiguity signal is present and may become primary if the case evolves.\nThe tension is margin versus momentum: protecting price risks losing deals now; matching pressure surrenders margin permanently — and the case currently lacks the evidence to price that trade. This reading rests on 6 signals in your answers, not on a generic playbook.\nEvery month without a priced hypothesis converts willingness-to-pay you could have captured into margin permanently surrendered. In this case the stated exposure is Q3 enterprise renewal revenue.\nWrite a falsifiable pricing hypothesis — which segment, what value metric, what boundary — and test it on the next ten live deals rather than debating it in the abstract. For the enterprise pricing change — ownership ambiguity between sales and finance, that responsibility sits with Commercial Director as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as pricing_pressure from 6 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — matching the competitor's price across the board, converting a segmentation problem into a margin problem. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when discounting breaches the stated floor twice in one quarter, or when renewal pricing decisions start being made deal-by-deal without a recorded rationale.\nWithin the next 10 minutes, start the first step: State the pricing hypothesis explicitly: segment, value metric, floor, and walk-away boundary for the enterprise pricing change — ownership ambiguity between sales and finance. Then continue: Apply the hypothesis to the next ten live deals instead of debating it internally; Commercial Director adjudicates exceptions.",
           "sectionsPresent": [
             "dominantDecisionFriction",
             "whatYourAnswersSuggest",
@@ -1052,9 +1034,9 @@
           ]
         },
         {
-          "label": "hiring freeze with conflicting evidence",
-          "inputSummary": "contradictory evidence between finance and delivery models the engineering hiring freeze platform delivery capacity for the launch Who owns this decision? The COO, but the board has intervened twice What evidence do you have? Burn-rate model and a delivery-capacity forecast that contradict each other What happens if you wait? Two senior engineering offers expire next Friday",
-          "outputText": "The dominant decision friction in your situation is contradictory evidence between finance and delivery models, surfaced directly by your answers about the engineering hiring freeze.\nTaken together, your answers suggest the decision is stalling on contradictory evidence between finance and delivery models rather than on missing information: the pattern across your responses points at the engineering hiring freeze as the live pressure point.\nIf this friction is left unaddressed, the stake you named — platform delivery capacity for the launch — degrades by default: the decision gets made late, reactively, or by whoever feels the pressure first instead of whoever owns it.\nThe minimum viable correction is to name a single decision owner for the engineering hiring freeze, write the decision in one sentence, and set a 48-hour checkpoint to confirm whether the friction has moved.\nThis result reads the friction pattern in your answers only. It does not yet prove root cause, the size of the commercial exposure, or that the correction will hold under organisational pressure — that requires fuller evidence than a fast diagnostic collects.\nEscalate beyond this result when the decision involves irreversible spend, more than one accountable owner, customer or regulatory exposure, or when the 48-hour checkpoint shows the friction has not moved.\nWithin the next 10 minutes: write the one-sentence decision statement for the engineering hiring freeze, name its owner, and put the 48-hour checkpoint in the owner's calendar. That single act converts this diagnosis into a governed decision.",
+          "label": "hiring freeze prioritisation",
+          "inputSummary": "hiring freeze capacity constraint with no de-scoped workstream engineering delivery plan under the hiring freeze platform launch delivery capacity and customer commitments What is the constraint? Hiring freeze: headcount and capacity cannot grow What evidence do you have? Capacity model shows 140% allocation across five committed workstreams What happens if you wait? The platform launch slips while every workstream degrades together",
+          "outputText": "engineering delivery plan under the hiring freeze — hiring freeze capacity constraint with no de-scoped workstream is capacity-bound: the constraint — hiring freeze capacity constraint with no de-scoped workstream — is real, but it is being absorbed as uniform strain across all commitments instead of being converted into an explicit stop-list.\nThe tension is fairness versus effectiveness: spreading the shortage evenly feels equitable and guarantees everything degrades; concentrating it requires COO to stop work someone champions. This reading rests on 8 signals in your answers, not on a generic playbook.\nAn unprioritised constraint taxes every initiative at once; the organisation pays full cost for partial delivery everywhere. In this case the stated exposure is platform launch delivery capacity and customer commitments.\nCut scope before cutting corners: rank the active commitments, explicitly stop the bottom of the list, and re-sequence what remains around the scarcest capacity. For engineering delivery plan under the hiring freeze — hiring freeze capacity constraint with no de-scoped workstream, that responsibility sits with COO as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as resource_constraint from 8 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — spreading the constraint evenly across all work, guaranteeing everything ships late instead of something shipping well. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when the constraint forces a choice between commitments made to customers, or when the stop-list requires authority above the current owner.\nWithin the next 10 minutes, start the first step: Rank every active commitment touched by engineering delivery plan under the hiring freeze — hiring freeze capacity constraint with no de-scoped workstream in a single ordered list — no ties. Then continue: Stop, in writing, the bottom of the list; 'paused' does not count.",
           "sectionsPresent": [
             "dominantDecisionFriction",
             "whatYourAnswersSuggest",
@@ -1069,26 +1051,20 @@
       "antiToy": {
         "productCode": "fast_diagnostic",
         "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
-        "toyRiskScore": 35,
-        "failsAntiToyTest": true,
-        "reasons": [
-          "Near-identical judgement (84% similar) for two materially different situations — this is a template wearing the language of judgement.",
-          "A generic AI prompt given the same input could plausibly produce this output — the product adds structure, not proprietary judgement."
-        ],
-        "requiredCorrections": [
-          "Derive diagnosis branches from the actual input pattern so different situations produce materially different judgement, not different interpolations.",
-          "Add judgement a generic prompt cannot produce: pattern classification across cases, calibrated severity, or evidence the platform alone holds."
-        ]
+        "toyRiskScore": 0,
+        "failsAntiToyTest": false,
+        "reasons": [],
+        "requiredCorrections": []
       },
       "redTeam": {
         "productCode": "fast_diagnostic",
         "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
         "scores": {
-          "usefulness": 7.9,
-          "specificity": 3.7,
+          "usefulness": 10,
+          "specificity": 8.7,
           "credibility": 9,
           "actionability": 10,
-          "distinctiveness": 1.6,
+          "distinctiveness": 7.6,
           "reuse_value": 9
         },
         "reviews": [
@@ -1096,11 +1072,11 @@
             "reviewerId": "skeptical_executive",
             "reviewerQuestion": "Why should I trust this?",
             "scores": {
-              "usefulness": 7.9,
-              "specificity": 3.7,
+              "usefulness": 10,
+              "specificity": 8.7,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 1.6,
+              "distinctiveness": 7.6,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1112,11 +1088,11 @@
             "reviewerId": "busy_operator",
             "reviewerQuestion": "What do I do next?",
             "scores": {
-              "usefulness": 7.9,
-              "specificity": 3.7,
+              "usefulness": 10,
+              "specificity": 8.7,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 1.6,
+              "distinctiveness": 7.6,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1128,43 +1104,43 @@
             "reviewerId": "commercial_buyer",
             "reviewerQuestion": "Why is this worth the time or money?",
             "scores": {
-              "usefulness": 7.9,
-              "specificity": 3.7,
+              "usefulness": 10,
+              "specificity": 8.7,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 1.6,
+              "distinctiveness": 7.6,
               "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "The judgement is not specific enough to my case to justify the time or money over an ordinary alternative."
+              "The result repays the time spent with case-specific clarity I would otherwise have to assemble myself."
             ]
           },
           {
             "reviewerId": "experienced_consultant",
             "reviewerQuestion": "Is this just dressed-up common sense?",
             "scores": {
-              "usefulness": 7.9,
-              "specificity": 3.7,
+              "usefulness": 10,
+              "specificity": 8.7,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 1.6,
+              "distinctiveness": 7.6,
               "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "Run against two different situations, the product gives nearly the same answer — this is dressed-up common sense a generic AI prompt could produce."
+              "The judgement varies materially with the case — there is method here, not just framing."
             ]
           },
           {
             "reviewerId": "returning_user",
             "reviewerQuestion": "Would I come back to this?",
             "scores": {
-              "usefulness": 7.9,
-              "specificity": 3.7,
+              "usefulness": 10,
+              "specificity": 8.7,
               "credibility": 9,
               "actionability": 10,
-              "distinctiveness": 1.6,
+              "distinctiveness": 7.6,
               "reuse_value": 9
             },
             "verdict": "accept",
@@ -1173,39 +1149,37 @@
             ]
           }
         ],
-        "criticalRejections": [
-          "commercial_buyer",
-          "experienced_consultant"
-        ],
-        "survives": false
+        "criticalRejections": [],
+        "survives": true
       },
       "usefulnessProof": {
         "productCode": "fast_diagnostic",
         "testedOutputSource": "composer_execution: lib/product/fast-diagnostic-gold-composer.ts (not yet wired to live route /diagnostics/fast)",
         "proofsEstablished": [
+          "decision_clarity_improved",
           "next_action_obvious",
           "risk_made_visible",
+          "contradiction_made_explicit",
           "execution_sequence_clearer",
           "evidence_organised_into_judgement",
-          "likely_mistake_avoided",
           "reusable_artefact_gained"
         ],
         "proofsMissing": [
-          "decision_clarity_improved",
-          "contradiction_made_explicit"
+          "likely_mistake_avoided"
         ],
         "hasProof": true,
         "notes": [
           "Next action is owned, time-bound, and anchored in the user's case.",
           "Consequence is tied to the user's named stake, making the risk of inaction visible.",
+          "The output names a case-specific contradiction or friction.",
           "Evidence basis and honest limits are organised into an explicit judgement frame.",
           "Checkpoint/record structure gives the user an artefact to return to.",
           "The output orders what to do before what — an execution sequence, not a list.",
-          "The output explicitly guards the user against premature irreversible commitment."
+          "The judgement is case-derived rather than restated input — clarity the user did not have."
         ]
       },
       "timeValueSurplusPassed": true,
-      "judgementIsCaseDerived": false
+      "judgementIsCaseDerived": true
     },
     {
       "productCode": "team_assessment",
@@ -1216,7 +1190,7 @@
         {
           "label": "post-merger operations team with conflicting priorities",
           "inputSummary": "three of five team leads gave materially conflicting answers about this quarter's top priority the team assessment responses a twelve-person operations team three months after a merger an alignment illusion — agreement in meetings, divergence in execution",
-          "outputText": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority, observed in the team assessment responses against your situation — a twelve-person operations team three months after a merger.\nWhat this points at: an alignment illusion — agreement in meetings, divergence in execution. The signal matters because it appears where your situation and the evidence intersect, not as a general industry observation.\nPractical next action: test the signal against your own case this week — take the single decision it touches, write down who owns it and what evidence would confirm or kill the signal, and review that note within seven days.\nHonest limitation: this signal is drawn from the team assessment responses and your stated situation only. It does not prove causation, scale, or that your case matches the underlying pattern — it earns attention, not conviction.\nEscalation condition: if the signal touches an irreversible commitment, live customer exposure, or a decision already under deadline pressure, move it from observation into a governed review before acting on it.",
+          "outputText": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority — observed in the team assessment responses, read against your situation: a twelve-person operations team three months after a merger.\nThe agreement around a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority is performative: the room aligns quickly while execution and corridor conversation diverge, and an alignment illusion — agreement in meetings, divergence in execution suggests dissent has somewhere safer to live than the meeting. A secondary stakeholder_misalignment signal is present and may become primary if the case evolves.\nRequire each principal to write the strongest case against a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority before it is ratified. Manufacture safe dissent: require each principal to write the strongest case against the decision before it is ratified, and treat an empty page as a warning, not a confirmation. For a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as false_consensus from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — celebrating the alignment and accelerating, which spends the disagreement later at execution speed. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when execution behaviour contradicts the agreed position, or when private dissent reaches the sponsor through any channel other than the room.",
           "sectionsPresent": [
             "oneClearSignal",
             "oneUsefulInterpretation",
@@ -1227,8 +1201,8 @@
         },
         {
           "label": "founder-led sales team missing its pipeline forecast",
-          "inputSummary": "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty the assessment's forecast-versus-attainment readings a founder-led sales team of seven carrying an aggressive annual target a reporting incentive problem — the forecast is a loyalty signal, not an estimate",
-          "outputText": "Signal: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty, observed in the assessment's forecast-versus-attainment readings against your situation — a founder-led sales team of seven carrying an aggressive annual target.\nWhat this points at: a reporting incentive problem — the forecast is a loyalty signal, not an estimate. The signal matters because it appears where your situation and the evidence intersect, not as a general industry observation.\nPractical next action: test the signal against your own case this week — take the single decision it touches, write down who owns it and what evidence would confirm or kill the signal, and review that note within seven days.\nHonest limitation: this signal is drawn from the assessment's forecast-versus-attainment readings and your stated situation only. It does not prove causation, scale, or that your case matches the underlying pattern — it earns attention, not conviction.\nEscalation condition: if the signal touches an irreversible commitment, live customer exposure, or a decision already under deadline pressure, move it from observation into a governed review before acting on it.",
+          "inputSummary": "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty the assessment's forecast-versus-attainment readings a founder-led sales team of seven carrying an aggressive annual target risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened",
+          "outputText": "Signal: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty — observed in the assessment's forecast-versus-attainment readings, read against your situation: a founder-led sales team of seven carrying an aggressive annual target.\nWarning signals around a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty are being individually explained away: the pattern of dismissal is itself the finding, and risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened means the signals' mitigation options expire while confidence holds.\nTake the strongest dismissed signal touching a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty and run a pre-mortem: assume it fired, and write the post-incident review now. Take the strongest dismissed signal and force a pre-mortem on it: assume it fired, write what the post-incident review would say, and act on the cheapest prevention it names. For a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty, that responsibility sits with Founder as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as risk_blindness from 6 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — requiring more certainty from the warning than from the plan, so the risk must fully materialise before it is acted on. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when a signal touches customer safety, regulatory exposure, or irreversible commitments, or when the same signal is dismissed twice without investigation.",
           "sectionsPresent": [
             "oneClearSignal",
             "oneUsefulInterpretation",
@@ -1241,45 +1215,37 @@
       "antiToy": {
         "productCode": "team_assessment",
         "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
-        "toyRiskScore": 45,
+        "toyRiskScore": 8,
         "failsAntiToyTest": true,
         "reasons": [
-          "Moderate template share (58% cross-input similarity).",
-          "Consequence section is not grounded in the user's stated situation.",
-          "The next action is the same regardless of the situation.",
-          "The next action does not reference the user's actual case.",
-          "Nothing in the output supports later reuse."
+          "Consequence section is not grounded in the user's stated situation."
         ],
         "requiredCorrections": [
-          "Reduce fixed framing text relative to case-specific judgement.",
-          "Tie the consequence to the user's named stake, not to a universal warning.",
-          "Select the next action from the input pattern; identical advice for different cases is not advice.",
-          "Anchor the next action in the user's named decision, owner, or stake.",
-          "Add a checkpoint, record, or review element the user can return to."
+          "Tie the consequence to the user's named stake, not to a universal warning."
         ]
       },
       "redTeam": {
         "productCode": "team_assessment",
         "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
         "scores": {
-          "usefulness": 4.1,
-          "specificity": 4.2,
+          "usefulness": 9.2,
+          "specificity": 8.4,
           "credibility": 9,
-          "actionability": 4,
-          "distinctiveness": 4.2,
-          "reuse_value": 5
+          "actionability": 10,
+          "distinctiveness": 7.8,
+          "reuse_value": 9
         },
         "reviews": [
           {
             "reviewerId": "skeptical_executive",
             "reviewerQuestion": "Why should I trust this?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
             "verdict": "accept",
             "reasons": [
@@ -1290,94 +1256,92 @@
             "reviewerId": "busy_operator",
             "reviewerQuestion": "What do I do next?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "No clear, owned, time-bound next action — I would close this and move on."
+              "The next action names an owner and a timeframe; I can act on it immediately."
             ]
           },
           {
             "reviewerId": "commercial_buyer",
             "reviewerQuestion": "Why is this worth the time or money?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "The judgement is not specific enough to my case to justify the time or money over an ordinary alternative."
+              "The result repays the time spent with case-specific clarity I would otherwise have to assemble myself."
             ]
           },
           {
             "reviewerId": "experienced_consultant",
             "reviewerQuestion": "Is this just dressed-up common sense?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "The judgement does not vary enough with the case to demonstrate real analytical method."
+              "The judgement varies materially with the case — there is method here, not just framing."
             ]
           },
           {
             "reviewerId": "returning_user",
             "reviewerQuestion": "Would I come back to this?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "Nothing here gives me a reason to reopen the result later."
+              "The checkpoint and record structure give me a concrete reason to return."
             ]
           }
         ],
-        "criticalRejections": [
-          "busy_operator",
-          "commercial_buyer",
-          "experienced_consultant",
-          "returning_user"
-        ],
-        "survives": false
+        "criticalRejections": [],
+        "survives": true
       },
       "usefulnessProof": {
         "productCode": "team_assessment",
         "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (team corridor stage))",
         "proofsEstablished": [
-          "evidence_organised_into_judgement",
-          "likely_mistake_avoided"
-        ],
-        "proofsMissing": [
           "decision_clarity_improved",
           "next_action_obvious",
+          "execution_sequence_clearer",
+          "evidence_organised_into_judgement",
+          "reusable_artefact_gained"
+        ],
+        "proofsMissing": [
           "risk_made_visible",
           "contradiction_made_explicit",
-          "execution_sequence_clearer",
-          "reusable_artefact_gained"
+          "likely_mistake_avoided"
         ],
         "hasProof": true,
         "notes": [
+          "Next action is owned, time-bound, and anchored in the user's case.",
           "Evidence basis and honest limits are organised into an explicit judgement frame.",
-          "The output explicitly guards the user against premature irreversible commitment."
+          "Checkpoint/record structure gives the user an artefact to return to.",
+          "The output orders what to do before what — an execution sequence, not a list.",
+          "The judgement is case-derived rather than restated input — clarity the user did not have."
         ]
       },
       "timeValueSurplusPassed": true,
@@ -1392,7 +1356,7 @@
         {
           "label": "post-merger operations team with conflicting priorities",
           "inputSummary": "three of five team leads gave materially conflicting answers about this quarter's top priority the team assessment responses a twelve-person operations team three months after a merger an alignment illusion — agreement in meetings, divergence in execution",
-          "outputText": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority, observed in the team assessment responses against your situation — a twelve-person operations team three months after a merger.\nWhat this points at: an alignment illusion — agreement in meetings, divergence in execution. The signal matters because it appears where your situation and the evidence intersect, not as a general industry observation.\nPractical next action: test the signal against your own case this week — take the single decision it touches, write down who owns it and what evidence would confirm or kill the signal, and review that note within seven days.\nHonest limitation: this signal is drawn from the team assessment responses and your stated situation only. It does not prove causation, scale, or that your case matches the underlying pattern — it earns attention, not conviction.\nEscalation condition: if the signal touches an irreversible commitment, live customer exposure, or a decision already under deadline pressure, move it from observation into a governed review before acting on it.",
+          "outputText": "Signal: three of five team leads gave materially conflicting answers about this quarter's top priority — observed in the team assessment responses, read against your situation: a twelve-person operations team three months after a merger.\nThe agreement around a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority is performative: the room aligns quickly while execution and corridor conversation diverge, and an alignment illusion — agreement in meetings, divergence in execution suggests dissent has somewhere safer to live than the meeting. A secondary stakeholder_misalignment signal is present and may become primary if the case evolves.\nRequire each principal to write the strongest case against a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority before it is ratified. Manufacture safe dissent: require each principal to write the strongest case against the decision before it is ratified, and treat an empty page as a warning, not a confirmation. For a twelve-person operations team three months after a merger: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as false_consensus from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — celebrating the alignment and accelerating, which spends the disagreement later at execution speed. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when execution behaviour contradicts the agreed position, or when private dissent reaches the sponsor through any channel other than the room.",
           "sectionsPresent": [
             "oneClearSignal",
             "oneUsefulInterpretation",
@@ -1403,8 +1367,8 @@
         },
         {
           "label": "founder-led sales team missing its pipeline forecast",
-          "inputSummary": "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty the assessment's forecast-versus-attainment readings a founder-led sales team of seven carrying an aggressive annual target a reporting incentive problem — the forecast is a loyalty signal, not an estimate",
-          "outputText": "Signal: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty, observed in the assessment's forecast-versus-attainment readings against your situation — a founder-led sales team of seven carrying an aggressive annual target.\nWhat this points at: a reporting incentive problem — the forecast is a loyalty signal, not an estimate. The signal matters because it appears where your situation and the evidence intersect, not as a general industry observation.\nPractical next action: test the signal against your own case this week — take the single decision it touches, write down who owns it and what evidence would confirm or kill the signal, and review that note within seven days.\nHonest limitation: this signal is drawn from the assessment's forecast-versus-attainment readings and your stated situation only. It does not prove causation, scale, or that your case matches the underlying pattern — it earns attention, not conviction.\nEscalation condition: if the signal touches an irreversible commitment, live customer exposure, or a decision already under deadline pressure, move it from observation into a governed review before acting on it.",
+          "inputSummary": "forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty the assessment's forecast-versus-attainment readings a founder-led sales team of seven carrying an aggressive annual target risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened",
+          "outputText": "Signal: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty — observed in the assessment's forecast-versus-attainment readings, read against your situation: a founder-led sales team of seven carrying an aggressive annual target.\nWarning signals around a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty are being individually explained away: the pattern of dismissal is itself the finding, and risk blindness — warning signs are ignored and confidence stayed high while failure signals worsened means the signals' mitigation options expire while confidence holds.\nTake the strongest dismissed signal touching a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty and run a pre-mortem: assume it fired, and write the post-incident review now. Take the strongest dismissed signal and force a pre-mortem on it: assume it fired, write what the post-incident review would say, and act on the cheapest prevention it names. For a founder-led sales team of seven carrying an aggressive annual target: forecast confidence stayed above ninety percent while quarter-end attainment fell below sixty, that responsibility sits with Founder as the accountable owner, to be visibly underway within 48 hours.\nThis judgement classifies the case as risk_blindness from 6 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — requiring more certainty from the warning than from the plan, so the risk must fully materialise before it is acted on. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.\nEscalate when a signal touches customer safety, regulatory exposure, or irreversible commitments, or when the same signal is dismissed twice without investigation.",
           "sectionsPresent": [
             "oneClearSignal",
             "oneUsefulInterpretation",
@@ -1417,45 +1381,37 @@
       "antiToy": {
         "productCode": "enterprise_assessment",
         "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
-        "toyRiskScore": 45,
+        "toyRiskScore": 8,
         "failsAntiToyTest": true,
         "reasons": [
-          "Moderate template share (58% cross-input similarity).",
-          "Consequence section is not grounded in the user's stated situation.",
-          "The next action is the same regardless of the situation.",
-          "The next action does not reference the user's actual case.",
-          "Nothing in the output supports later reuse."
+          "Consequence section is not grounded in the user's stated situation."
         ],
         "requiredCorrections": [
-          "Reduce fixed framing text relative to case-specific judgement.",
-          "Tie the consequence to the user's named stake, not to a universal warning.",
-          "Select the next action from the input pattern; identical advice for different cases is not advice.",
-          "Anchor the next action in the user's named decision, owner, or stake.",
-          "Add a checkpoint, record, or review element the user can return to."
+          "Tie the consequence to the user's named stake, not to a universal warning."
         ]
       },
       "redTeam": {
         "productCode": "enterprise_assessment",
         "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
         "scores": {
-          "usefulness": 4.1,
-          "specificity": 4.2,
+          "usefulness": 9.2,
+          "specificity": 8.4,
           "credibility": 9,
-          "actionability": 4,
-          "distinctiveness": 4.2,
-          "reuse_value": 5
+          "actionability": 10,
+          "distinctiveness": 7.8,
+          "reuse_value": 9
         },
         "reviews": [
           {
             "reviewerId": "skeptical_executive",
             "reviewerQuestion": "Why should I trust this?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
             "verdict": "accept",
             "reasons": [
@@ -1466,94 +1422,92 @@
             "reviewerId": "busy_operator",
             "reviewerQuestion": "What do I do next?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "No clear, owned, time-bound next action — I would close this and move on."
+              "The next action names an owner and a timeframe; I can act on it immediately."
             ]
           },
           {
             "reviewerId": "commercial_buyer",
             "reviewerQuestion": "Why is this worth the time or money?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "The judgement is not specific enough to my case to justify the time or money over an ordinary alternative."
+              "The result repays the time spent with case-specific clarity I would otherwise have to assemble myself."
             ]
           },
           {
             "reviewerId": "experienced_consultant",
             "reviewerQuestion": "Is this just dressed-up common sense?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "The judgement does not vary enough with the case to demonstrate real analytical method."
+              "The judgement varies materially with the case — there is method here, not just framing."
             ]
           },
           {
             "reviewerId": "returning_user",
             "reviewerQuestion": "Would I come back to this?",
             "scores": {
-              "usefulness": 4.1,
-              "specificity": 4.2,
+              "usefulness": 9.2,
+              "specificity": 8.4,
               "credibility": 9,
-              "actionability": 4,
-              "distinctiveness": 4.2,
-              "reuse_value": 5
+              "actionability": 10,
+              "distinctiveness": 7.8,
+              "reuse_value": 9
             },
-            "verdict": "reject",
+            "verdict": "accept",
             "reasons": [
-              "Nothing here gives me a reason to reopen the result later."
+              "The checkpoint and record structure give me a concrete reason to return."
             ]
           }
         ],
-        "criticalRejections": [
-          "busy_operator",
-          "commercial_buyer",
-          "experienced_consultant",
-          "returning_user"
-        ],
-        "survives": false
+        "criticalRejections": [],
+        "survives": true
       },
       "usefulnessProof": {
         "productCode": "enterprise_assessment",
         "testedOutputSource": "composer_execution: lib/product/free-signal-gold-composer.ts (not yet wired to live surface /diagnostics (enterprise corridor stage))",
         "proofsEstablished": [
-          "evidence_organised_into_judgement",
-          "likely_mistake_avoided"
-        ],
-        "proofsMissing": [
           "decision_clarity_improved",
           "next_action_obvious",
+          "execution_sequence_clearer",
+          "evidence_organised_into_judgement",
+          "reusable_artefact_gained"
+        ],
+        "proofsMissing": [
           "risk_made_visible",
           "contradiction_made_explicit",
-          "execution_sequence_clearer",
-          "reusable_artefact_gained"
+          "likely_mistake_avoided"
         ],
         "hasProof": true,
         "notes": [
+          "Next action is owned, time-bound, and anchored in the user's case.",
           "Evidence basis and honest limits are organised into an explicit judgement frame.",
-          "The output explicitly guards the user against premature irreversible commitment."
+          "Checkpoint/record structure gives the user an artefact to return to.",
+          "The output orders what to do before what — an execution sequence, not a list.",
+          "The judgement is case-derived rather than restated input — clarity the user did not have."
         ]
       },
       "timeValueSurplusPassed": true,

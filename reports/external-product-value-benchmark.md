@@ -24,24 +24,24 @@ PASSED
 
 ## Gold Claims Revoked
 
-- **fast_diagnostic** → blocked_for_low_value
-  Internal gold claim REVOKED by actual-output testing: toy risk 35/100; rejected by commercial_buyer, experienced_consultant. Near-identical judgement (84% similar) for two materially different situations — this is a template wearing the language of judgement. A generic AI prompt given the same input could plausibly produce this output — the product adds structure, not proprietary judgement.
+- **fast_diagnostic** → blocked_pending_external_proof
+  Internal gold claim REVOKED: output quality is close but unproven (toy risk 0, live route verified: false).
 - **case_dossier_tariff_shock** → blocked_pending_external_proof
   Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.
 - **case_dossier_team_alignment** → blocked_pending_external_proof
   Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.
 - **case_dossier_escalation_denied** → blocked_pending_external_proof
   Internal gold claim REVOKED: Customer-facing artefact is a static evidence page; no machine-readable rendered output was captured in this pass, so external proof cannot be established.
-- **team_assessment** → blocked_for_low_value
-  Internal gold claim REVOKED by actual-output testing: toy risk 45/100; rejected by busy_operator, commercial_buyer, experienced_consultant, returning_user. Moderate template share (58% cross-input similarity). Consequence section is not grounded in the user's stated situation.
-- **enterprise_assessment** → blocked_for_low_value
-  Internal gold claim REVOKED by actual-output testing: toy risk 45/100; rejected by busy_operator, commercial_buyer, experienced_consultant, returning_user. Moderate template share (58% cross-input similarity). Consequence section is not grounded in the user's stated situation.
+- **team_assessment** → blocked_pending_external_proof
+  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false).
+- **enterprise_assessment** → blocked_pending_external_proof
+  Internal gold claim REVOKED: output quality is close but unproven (toy risk 8, live route verified: false).
 
 ## Product-by-Product Matrix
 
 | Product | Internal Score | External Benchmark | Anti-Toy Score | Red-Team Result | Market Comparison | Final Status |
 |---|---:|---|---:|---|---|---|
-| fast_diagnostic | 5.8 | defined | 35 | rejected_by: commercial_buyer, experienced_consultant | fails_generic_ai_outperform | blocked_for_low_value |
+| fast_diagnostic | 5.8 | defined | 0 | survives | outperforms_generic_ai | blocked_pending_external_proof |
 | boardroom_brief | 8.2 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | personal_decision_audit | 7.7 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | decision_exposure_instrument | 7.7 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
@@ -67,8 +67,8 @@ PASSED
 | gmi_q1_2026 | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q2_2026 | 7.9 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q3_2026 | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
-| team_assessment | 5.8 | defined | 45 | rejected_by: busy_operator, commercial_buyer, experienced_consultant, returning_user | fails_generic_ai_outperform | blocked_for_low_value |
-| enterprise_assessment | 5.8 | defined | 45 | rejected_by: busy_operator, commercial_buyer, experienced_consultant, returning_user | fails_generic_ai_outperform | blocked_for_low_value |
+| team_assessment | 5.8 | defined | 8 | survives | fails_generic_ai_outperform | blocked_pending_external_proof |
+| enterprise_assessment | 5.8 | defined | 8 | survives | fails_generic_ai_outperform | blocked_pending_external_proof |
 | boardroom_mode | 5.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | executive_reporting | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | diagnostic_report_basic | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
@@ -88,8 +88,8 @@ PASSED
 ## Counts
 
 - Externally proven gold: 0
-- Blocked pending external proof: 29
-- Blocked for low value: 3
+- Blocked pending external proof: 32
+- Blocked for low value: 0
 - Internal only: 11
 
 ## Final Recommendation

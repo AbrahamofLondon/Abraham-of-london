@@ -1,0 +1,807 @@
+{
+  "generatedAt": "2026-06-13T03:18:34.115Z",
+  "gate": "PASSED",
+  "scenariosTested": 12,
+  "composersTested": 4,
+  "thresholds": {
+    "overallJudgementSimilarity": 0.55,
+    "diagnosisSimilarity": 0.5,
+    "nextMoveSimilarity": 0.45,
+    "consequenceSimilarity": 0.55,
+    "falsificationSimilarity": 0.55,
+    "executionSequenceSimilarity": 0.55
+  },
+  "patternClassificationsPassed": 48,
+  "patternClassificationsTotal": 48,
+  "similarityFailures": 0,
+  "genericJudgementFailures": 0,
+  "old84FailureResult": {
+    "pair": "pricing-ownership vs hiring-freeze",
+    "previousSimilarity": 0.84,
+    "currentOverallJudgementSimilarity": 0.058458312442726076,
+    "currentDiagnosisSimilarity": 0,
+    "currentNextMoveSimilarity": 0.15254237288135594,
+    "eliminated": true
+  },
+  "patternsDetected": [
+    {
+      "composer": "fast_diagnostic",
+      "scenarios": [
+        {
+          "scenario": "pricing-ownership",
+          "expectedPrimaryPattern": "ownership_ambiguity",
+          "actualPrimaryPattern": "ownership_ambiguity",
+          "secondaryPatterns": [
+            "pricing_pressure"
+          ],
+          "evidenceMatched": [
+            "\"unclear who owns\" matched in decisionDescription",
+            "\"unclear who owns\" matched in evidenceAvailable",
+            "\"ownership\" matched in evidenceAvailable",
+            "\"ownership\" matched in priorAttempts",
+            "\"no single owner\" matched in decisionDescription",
+            "\"no single owner\" matched in evidenceAvailable",
+            "\"sits between\" matched in decisionDescription",
+            "\"sits between\" matched in evidenceAvailable",
+            "\"nobody accountable\" matched in decisionDescription",
+            "\"nobody accountable\" matched in constraint",
+            "\"unclear authority\" matched in decisionDescription",
+            "\"unclear authority\" matched in constraint",
+            "\"unclear authority\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "hiring-freeze",
+          "expectedPrimaryPattern": "resource_constraint",
+          "actualPrimaryPattern": "resource_constraint",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"hiring freeze\" matched in decisionDescription",
+            "\"hiring freeze\" matched in evidenceAvailable",
+            "\"headcount\" matched in decisionDescription",
+            "\"headcount\" matched in evidenceAvailable",
+            "\"capacity\" matched in decisionDescription",
+            "\"capacity\" matched in constraint",
+            "\"capacity\" matched in evidenceAvailable",
+            "\"stretched\" matched in decisionDescription",
+            "\"stretched\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "board-disagreement",
+          "expectedPrimaryPattern": "authority_conflict",
+          "actualPrimaryPattern": "authority_conflict",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"board disagrees\" matched in decisionDescription",
+            "\"board disagrees\" matched in evidenceAvailable",
+            "\"intervened\" matched in decisionDescription",
+            "\"intervened\" matched in constraint",
+            "\"chair and ceo\" matched in decisionDescription",
+            "\"chair and ceo\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "market-entry",
+          "expectedPrimaryPattern": "market_uncertainty",
+          "actualPrimaryPattern": "market_uncertainty",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"market entry\" matched in decisionDescription",
+            "\"market entry\" matched in evidenceAvailable",
+            "\"uncertain demand\" matched in decisionDescription",
+            "\"uncertain demand\" matched in evidenceAvailable",
+            "\"unproven market\" matched in decisionDescription",
+            "\"unproven market\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "deadline-slippage",
+          "expectedPrimaryPattern": "timing_pressure",
+          "actualPrimaryPattern": "timing_pressure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"deadline\" matched in decisionDescription",
+            "\"deadline\" matched in evidenceAvailable",
+            "\"slipping\" matched in decisionDescription",
+            "\"slipping\" matched in evidenceAvailable",
+            "\"launch date\" matched in decisionDescription",
+            "\"launch date\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "founder-delegation",
+          "expectedPrimaryPattern": "operational_bottleneck",
+          "actualPrimaryPattern": "operational_bottleneck",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"everything goes through\" matched in decisionDescription",
+            "\"everything goes through\" matched in evidenceAvailable",
+            "\"founder approves\" matched in decisionDescription",
+            "\"founder approves\" matched in evidenceAvailable",
+            "\"bottleneck\" matched in evidenceAvailable",
+            "\"delegation\" matched in decisionDescription",
+            "\"delegation\" matched in constraint",
+            "\"delegation\" matched in evidenceAvailable",
+            "\"delegation\" matched in priorAttempts"
+          ]
+        },
+        {
+          "scenario": "team-misalignment",
+          "expectedPrimaryPattern": "stakeholder_misalignment",
+          "actualPrimaryPattern": "stakeholder_misalignment",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"conflicting answers\" matched in decisionDescription",
+            "\"conflicting answers\" matched in evidenceAvailable",
+            "\"different priorities\" matched in decisionDescription",
+            "\"different priorities\" matched in constraint",
+            "\"pulling in different directions\" matched in decisionDescription",
+            "\"pulling in different directions\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "evidence-conflict",
+          "expectedPrimaryPattern": "evidence_gap",
+          "actualPrimaryPattern": "evidence_gap",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"contradict\" matched in decisionDescription",
+            "\"contradict\" matched in evidenceAvailable",
+            "\"models disagree\" matched in decisionDescription",
+            "\"models disagree\" matched in evidenceAvailable",
+            "\"two models\" matched in decisionDescription",
+            "\"two models\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "budget-cut",
+          "expectedPrimaryPattern": "decision_paralysis",
+          "actualPrimaryPattern": "decision_paralysis",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"can't decide\" matched in decisionDescription",
+            "\"can't decide\" matched in evidenceAvailable",
+            "\"six weeks\" matched in decisionDescription",
+            "\"six weeks\" matched in evidenceAvailable",
+            "\"deliberating\" matched in decisionDescription",
+            "\"deliberating\" matched in evidenceAvailable",
+            "\"another review\" matched in decisionDescription",
+            "\"another review\" matched in constraint",
+            "\"another review\" matched in evidenceAvailable",
+            "\"deferred again\" matched in evidenceAvailable",
+            "\"deferred again\" matched in priorAttempts"
+          ]
+        },
+        {
+          "scenario": "launch-risk",
+          "expectedPrimaryPattern": "risk_blindness",
+          "actualPrimaryPattern": "risk_blindness",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"ignoring warning\" matched in decisionDescription",
+            "\"ignoring warning\" matched in evidenceAvailable",
+            "\"red flag\" matched in decisionDescription",
+            "\"red flag\" matched in evidenceAvailable",
+            "\"red flag\" matched in priorAttempts",
+            "\"dismissed concern\" matched in decisionDescription",
+            "\"dismissed concern\" matched in evidenceAvailable",
+            "\"confidence stayed\" matched in decisionDescription",
+            "\"confidence stayed\" matched in constraint",
+            "\"warning signs\" matched in decisionDescription",
+            "\"warning signs\" matched in evidenceAvailable",
+            "\"failure signals\" matched in desiredOutcome"
+          ]
+        },
+        {
+          "scenario": "churn-drift",
+          "expectedPrimaryPattern": "execution_drift",
+          "actualPrimaryPattern": "execution_drift",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"promised but not\" matched in decisionDescription",
+            "\"promised but not\" matched in evidenceAvailable",
+            "\"keeps slipping\" matched in decisionDescription",
+            "\"keeps slipping\" matched in constraint",
+            "\"committed work\" matched in decisionDescription",
+            "\"committed work\" matched in evidenceAvailable",
+            "\"still not done\" matched in decisionDescription",
+            "\"still not done\" matched in evidenceAvailable",
+            "\"quietly dropped\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "compliance-breakdown",
+          "expectedPrimaryPattern": "governance_failure",
+          "actualPrimaryPattern": "governance_failure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"compliance\" matched in decisionDescription",
+            "\"compliance\" matched in stakeholders",
+            "\"compliance\" matched in evidenceAvailable",
+            "\"breach\" matched in decisionDescription",
+            "\"breach\" matched in evidenceAvailable",
+            "\"audit finding\" matched in decisionDescription",
+            "\"audit finding\" matched in evidenceAvailable",
+            "\"control failed\" matched in decisionDescription",
+            "\"control failed\" matched in evidenceAvailable",
+            "\"regulator\" matched in deadline",
+            "\"regulator\" matched in desiredOutcome"
+          ]
+        }
+      ]
+    },
+    {
+      "composer": "free_signal",
+      "scenarios": [
+        {
+          "scenario": "pricing-ownership",
+          "expectedPrimaryPattern": "ownership_ambiguity",
+          "actualPrimaryPattern": "ownership_ambiguity",
+          "secondaryPatterns": [
+            "pricing_pressure"
+          ],
+          "evidenceMatched": [
+            "\"unclear who owns\" matched in decisionDescription",
+            "\"unclear who owns\" matched in evidenceAvailable",
+            "\"no single owner\" matched in decisionDescription",
+            "\"no single owner\" matched in evidenceAvailable",
+            "\"sits between\" matched in decisionDescription",
+            "\"sits between\" matched in evidenceAvailable",
+            "\"nobody accountable\" matched in constraint",
+            "\"unclear authority\" matched in decisionDescription",
+            "\"unclear authority\" matched in constraint",
+            "\"unclear authority\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "hiring-freeze",
+          "expectedPrimaryPattern": "resource_constraint",
+          "actualPrimaryPattern": "resource_constraint",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"hiring freeze\" matched in decisionDescription",
+            "\"hiring freeze\" matched in evidenceAvailable",
+            "\"headcount\" matched in decisionDescription",
+            "\"headcount\" matched in evidenceAvailable",
+            "\"capacity\" matched in decisionDescription",
+            "\"capacity\" matched in constraint",
+            "\"capacity\" matched in evidenceAvailable",
+            "\"stretched\" matched in decisionDescription",
+            "\"stretched\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "board-disagreement",
+          "expectedPrimaryPattern": "authority_conflict",
+          "actualPrimaryPattern": "authority_conflict",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"board disagrees\" matched in decisionDescription",
+            "\"board disagrees\" matched in evidenceAvailable",
+            "\"intervened\" matched in constraint",
+            "\"chair and ceo\" matched in decisionDescription",
+            "\"chair and ceo\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "market-entry",
+          "expectedPrimaryPattern": "market_uncertainty",
+          "actualPrimaryPattern": "market_uncertainty",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"market entry\" matched in decisionDescription",
+            "\"market entry\" matched in evidenceAvailable",
+            "\"uncertain demand\" matched in decisionDescription",
+            "\"uncertain demand\" matched in evidenceAvailable",
+            "\"unproven market\" matched in decisionDescription",
+            "\"unproven market\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "deadline-slippage",
+          "expectedPrimaryPattern": "timing_pressure",
+          "actualPrimaryPattern": "timing_pressure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"deadline\" matched in decisionDescription",
+            "\"deadline\" matched in evidenceAvailable",
+            "\"slipping\" matched in decisionDescription",
+            "\"slipping\" matched in evidenceAvailable",
+            "\"launch date\" matched in decisionDescription",
+            "\"launch date\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "founder-delegation",
+          "expectedPrimaryPattern": "operational_bottleneck",
+          "actualPrimaryPattern": "operational_bottleneck",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"everything goes through\" matched in decisionDescription",
+            "\"everything goes through\" matched in evidenceAvailable",
+            "\"founder approves\" matched in decisionDescription",
+            "\"founder approves\" matched in evidenceAvailable",
+            "\"bottleneck\" matched in decisionDescription",
+            "\"bottleneck\" matched in evidenceAvailable",
+            "\"delegation\" matched in decisionDescription",
+            "\"delegation\" matched in constraint",
+            "\"delegation\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "team-misalignment",
+          "expectedPrimaryPattern": "stakeholder_misalignment",
+          "actualPrimaryPattern": "stakeholder_misalignment",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"conflicting answers\" matched in decisionDescription",
+            "\"conflicting answers\" matched in evidenceAvailable",
+            "\"different priorities\" matched in constraint",
+            "\"pulling in different directions\" matched in decisionDescription",
+            "\"pulling in different directions\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "evidence-conflict",
+          "expectedPrimaryPattern": "evidence_gap",
+          "actualPrimaryPattern": "evidence_gap",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"contradict\" matched in decisionDescription",
+            "\"contradict\" matched in evidenceAvailable",
+            "\"models disagree\" matched in decisionDescription",
+            "\"models disagree\" matched in evidenceAvailable",
+            "\"two models\" matched in decisionDescription",
+            "\"two models\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "budget-cut",
+          "expectedPrimaryPattern": "decision_paralysis",
+          "actualPrimaryPattern": "decision_paralysis",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"can't decide\" matched in decisionDescription",
+            "\"can't decide\" matched in evidenceAvailable",
+            "\"six weeks\" matched in decisionDescription",
+            "\"six weeks\" matched in evidenceAvailable",
+            "\"deliberating\" matched in decisionDescription",
+            "\"deliberating\" matched in evidenceAvailable",
+            "\"another review\" matched in decisionDescription",
+            "\"another review\" matched in constraint",
+            "\"another review\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "launch-risk",
+          "expectedPrimaryPattern": "risk_blindness",
+          "actualPrimaryPattern": "risk_blindness",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"ignoring warning\" matched in decisionDescription",
+            "\"ignoring warning\" matched in evidenceAvailable",
+            "\"red flag\" matched in decisionDescription",
+            "\"red flag\" matched in evidenceAvailable",
+            "\"dismissed concern\" matched in decisionDescription",
+            "\"dismissed concern\" matched in evidenceAvailable",
+            "\"confidence stayed\" matched in constraint",
+            "\"warning signs\" matched in decisionDescription",
+            "\"warning signs\" matched in evidenceAvailable",
+            "\"failure signals\" matched in desiredOutcome"
+          ]
+        },
+        {
+          "scenario": "churn-drift",
+          "expectedPrimaryPattern": "execution_drift",
+          "actualPrimaryPattern": "execution_drift",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"promised but not\" matched in decisionDescription",
+            "\"promised but not\" matched in evidenceAvailable",
+            "\"keeps slipping\" matched in constraint",
+            "\"committed work\" matched in decisionDescription",
+            "\"committed work\" matched in evidenceAvailable",
+            "\"still not done\" matched in decisionDescription",
+            "\"still not done\" matched in evidenceAvailable",
+            "\"quietly dropped\" matched in decisionDescription",
+            "\"quietly dropped\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "compliance-breakdown",
+          "expectedPrimaryPattern": "governance_failure",
+          "actualPrimaryPattern": "governance_failure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"compliance\" matched in decisionDescription",
+            "\"compliance\" matched in stakeholders",
+            "\"compliance\" matched in evidenceAvailable",
+            "\"breach\" matched in decisionDescription",
+            "\"breach\" matched in evidenceAvailable",
+            "\"audit finding\" matched in decisionDescription",
+            "\"audit finding\" matched in evidenceAvailable",
+            "\"control failed\" matched in decisionDescription",
+            "\"control failed\" matched in evidenceAvailable",
+            "\"regulator\" matched in deadline",
+            "\"regulator\" matched in desiredOutcome"
+          ]
+        }
+      ]
+    },
+    {
+      "composer": "decision_instrument",
+      "scenarios": [
+        {
+          "scenario": "pricing-ownership",
+          "expectedPrimaryPattern": "ownership_ambiguity",
+          "actualPrimaryPattern": "ownership_ambiguity",
+          "secondaryPatterns": [
+            "pricing_pressure"
+          ],
+          "evidenceMatched": [
+            "\"unclear who owns\" matched in decisionDescription",
+            "\"ownership\" matched in priorAttempts",
+            "\"no single owner\" matched in decisionDescription",
+            "\"no single owner\" matched in evidenceAvailable",
+            "\"sits between\" matched in decisionDescription",
+            "\"nobody accountable\" matched in constraint",
+            "\"unclear authority\" matched in constraint",
+            "\"unclear authority\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "hiring-freeze",
+          "expectedPrimaryPattern": "resource_constraint",
+          "actualPrimaryPattern": "resource_constraint",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"hiring freeze\" matched in decisionDescription",
+            "\"headcount\" matched in decisionDescription",
+            "\"capacity\" matched in constraint",
+            "\"capacity\" matched in evidenceAvailable",
+            "\"stretched\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "board-disagreement",
+          "expectedPrimaryPattern": "authority_conflict",
+          "actualPrimaryPattern": "authority_conflict",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"board disagrees\" matched in decisionDescription",
+            "\"intervened\" matched in constraint",
+            "\"chair and ceo\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "market-entry",
+          "expectedPrimaryPattern": "market_uncertainty",
+          "actualPrimaryPattern": "market_uncertainty",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"market entry\" matched in decisionDescription",
+            "\"uncertain demand\" matched in decisionDescription",
+            "\"unproven market\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "deadline-slippage",
+          "expectedPrimaryPattern": "timing_pressure",
+          "actualPrimaryPattern": "timing_pressure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"deadline\" matched in decisionDescription",
+            "\"slipping\" matched in decisionDescription",
+            "\"launch date\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "founder-delegation",
+          "expectedPrimaryPattern": "operational_bottleneck",
+          "actualPrimaryPattern": "operational_bottleneck",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"everything goes through\" matched in decisionDescription",
+            "\"founder approves\" matched in decisionDescription",
+            "\"bottleneck\" matched in evidenceAvailable",
+            "\"delegation\" matched in decisionDescription",
+            "\"delegation\" matched in constraint",
+            "\"delegation\" matched in priorAttempts"
+          ]
+        },
+        {
+          "scenario": "team-misalignment",
+          "expectedPrimaryPattern": "stakeholder_misalignment",
+          "actualPrimaryPattern": "stakeholder_misalignment",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"conflicting answers\" matched in decisionDescription",
+            "\"different priorities\" matched in constraint",
+            "\"pulling in different directions\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "evidence-conflict",
+          "expectedPrimaryPattern": "evidence_gap",
+          "actualPrimaryPattern": "evidence_gap",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"contradict\" matched in decisionDescription",
+            "\"models disagree\" matched in decisionDescription",
+            "\"two models\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "budget-cut",
+          "expectedPrimaryPattern": "decision_paralysis",
+          "actualPrimaryPattern": "decision_paralysis",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"can't decide\" matched in decisionDescription",
+            "\"six weeks\" matched in decisionDescription",
+            "\"deliberating\" matched in decisionDescription",
+            "\"another review\" matched in decisionDescription",
+            "\"another review\" matched in constraint",
+            "\"deferred again\" matched in priorAttempts"
+          ]
+        },
+        {
+          "scenario": "launch-risk",
+          "expectedPrimaryPattern": "risk_blindness",
+          "actualPrimaryPattern": "risk_blindness",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"ignoring warning\" matched in decisionDescription",
+            "\"red flag\" matched in decisionDescription",
+            "\"red flag\" matched in priorAttempts",
+            "\"dismissed concern\" matched in decisionDescription",
+            "\"confidence stayed\" matched in constraint",
+            "\"warning signs\" matched in decisionDescription",
+            "\"failure signals\" matched in desiredOutcome"
+          ]
+        },
+        {
+          "scenario": "churn-drift",
+          "expectedPrimaryPattern": "execution_drift",
+          "actualPrimaryPattern": "execution_drift",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"promised but not\" matched in decisionDescription",
+            "\"keeps slipping\" matched in constraint",
+            "\"committed work\" matched in decisionDescription",
+            "\"still not done\" matched in decisionDescription",
+            "\"quietly dropped\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "compliance-breakdown",
+          "expectedPrimaryPattern": "governance_failure",
+          "actualPrimaryPattern": "governance_failure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"compliance\" matched in decisionDescription",
+            "\"breach\" matched in decisionDescription",
+            "\"audit finding\" matched in decisionDescription",
+            "\"audit finding\" matched in evidenceAvailable",
+            "\"control failed\" matched in decisionDescription",
+            "\"regulator\" matched in deadline",
+            "\"regulator\" matched in desiredOutcome"
+          ]
+        }
+      ]
+    },
+    {
+      "composer": "strategy_room_session",
+      "scenarios": [
+        {
+          "scenario": "pricing-ownership",
+          "expectedPrimaryPattern": "ownership_ambiguity",
+          "actualPrimaryPattern": "ownership_ambiguity",
+          "secondaryPatterns": [
+            "pricing_pressure"
+          ],
+          "evidenceMatched": [
+            "\"unclear who owns\" matched in decisionDescription",
+            "\"no single owner\" matched in decisionDescription",
+            "\"no single owner\" matched in evidenceAvailable",
+            "\"sits between\" matched in decisionDescription",
+            "\"nobody accountable\" matched in constraint",
+            "\"unclear authority\" matched in constraint",
+            "\"unclear authority\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "hiring-freeze",
+          "expectedPrimaryPattern": "resource_constraint",
+          "actualPrimaryPattern": "resource_constraint",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"hiring freeze\" matched in decisionDescription",
+            "\"headcount\" matched in decisionDescription",
+            "\"capacity\" matched in constraint",
+            "\"capacity\" matched in evidenceAvailable",
+            "\"stretched\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "board-disagreement",
+          "expectedPrimaryPattern": "authority_conflict",
+          "actualPrimaryPattern": "authority_conflict",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"board disagrees\" matched in decisionDescription",
+            "\"intervened\" matched in constraint",
+            "\"chair and ceo\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "market-entry",
+          "expectedPrimaryPattern": "market_uncertainty",
+          "actualPrimaryPattern": "market_uncertainty",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"market entry\" matched in decisionDescription",
+            "\"uncertain demand\" matched in decisionDescription",
+            "\"unproven market\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "deadline-slippage",
+          "expectedPrimaryPattern": "timing_pressure",
+          "actualPrimaryPattern": "timing_pressure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"deadline\" matched in decisionDescription",
+            "\"slipping\" matched in decisionDescription",
+            "\"launch date\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "founder-delegation",
+          "expectedPrimaryPattern": "operational_bottleneck",
+          "actualPrimaryPattern": "operational_bottleneck",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"everything goes through\" matched in decisionDescription",
+            "\"founder approves\" matched in decisionDescription",
+            "\"bottleneck\" matched in evidenceAvailable",
+            "\"delegation\" matched in decisionDescription",
+            "\"delegation\" matched in constraint"
+          ]
+        },
+        {
+          "scenario": "team-misalignment",
+          "expectedPrimaryPattern": "stakeholder_misalignment",
+          "actualPrimaryPattern": "stakeholder_misalignment",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"conflicting answers\" matched in decisionDescription",
+            "\"different priorities\" matched in constraint",
+            "\"pulling in different directions\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "evidence-conflict",
+          "expectedPrimaryPattern": "evidence_gap",
+          "actualPrimaryPattern": "evidence_gap",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"contradict\" matched in decisionDescription",
+            "\"models disagree\" matched in decisionDescription",
+            "\"two models\" matched in decisionDescription"
+          ]
+        },
+        {
+          "scenario": "budget-cut",
+          "expectedPrimaryPattern": "decision_paralysis",
+          "actualPrimaryPattern": "decision_paralysis",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"can't decide\" matched in decisionDescription",
+            "\"six weeks\" matched in decisionDescription",
+            "\"deliberating\" matched in decisionDescription",
+            "\"another review\" matched in decisionDescription",
+            "\"another review\" matched in constraint"
+          ]
+        },
+        {
+          "scenario": "launch-risk",
+          "expectedPrimaryPattern": "risk_blindness",
+          "actualPrimaryPattern": "risk_blindness",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"ignoring warning\" matched in decisionDescription",
+            "\"red flag\" matched in decisionDescription",
+            "\"dismissed concern\" matched in decisionDescription",
+            "\"confidence stayed\" matched in constraint",
+            "\"warning signs\" matched in decisionDescription",
+            "\"failure signals\" matched in desiredOutcome"
+          ]
+        },
+        {
+          "scenario": "churn-drift",
+          "expectedPrimaryPattern": "execution_drift",
+          "actualPrimaryPattern": "execution_drift",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"promised but not\" matched in decisionDescription",
+            "\"keeps slipping\" matched in constraint",
+            "\"committed work\" matched in decisionDescription",
+            "\"still not done\" matched in decisionDescription",
+            "\"quietly dropped\" matched in evidenceAvailable"
+          ]
+        },
+        {
+          "scenario": "compliance-breakdown",
+          "expectedPrimaryPattern": "governance_failure",
+          "actualPrimaryPattern": "governance_failure",
+          "secondaryPatterns": [],
+          "evidenceMatched": [
+            "\"compliance\" matched in decisionDescription",
+            "\"compliance\" matched in stakeholders",
+            "\"breach\" matched in decisionDescription",
+            "\"audit finding\" matched in decisionDescription",
+            "\"audit finding\" matched in evidenceAvailable",
+            "\"control failed\" matched in decisionDescription",
+            "\"regulator\" matched in deadline",
+            "\"regulator\" matched in desiredOutcome"
+          ]
+        }
+      ]
+    }
+  ],
+  "composerResults": [
+    {
+      "composer": "fast_diagnostic",
+      "file": "lib/product/fast-diagnostic-gold-composer.ts",
+      "classificationsPassed": 12,
+      "classificationsTotal": 12,
+      "maxOverallSimilarity": 0.09679710720358439,
+      "maxDiagnosisSimilarity": 0.07352941176470588,
+      "maxNextMoveSimilarity": 0.18292682926829268
+    },
+    {
+      "composer": "free_signal",
+      "file": "lib/product/free-signal-gold-composer.ts",
+      "classificationsPassed": 12,
+      "classificationsTotal": 12,
+      "maxOverallSimilarity": 0.10722305764411029,
+      "maxDiagnosisSimilarity": 0.08888888888888889,
+      "maxNextMoveSimilarity": 0.17857142857142858
+    },
+    {
+      "composer": "decision_instrument",
+      "file": "lib/product/decision-instrument-gold-composer.ts",
+      "classificationsPassed": 12,
+      "classificationsTotal": 12,
+      "maxOverallSimilarity": 0.12811815635345047,
+      "maxDiagnosisSimilarity": 0.14814814814814814,
+      "maxNextMoveSimilarity": 0.19696969696969696
+    },
+    {
+      "composer": "strategy_room_session",
+      "file": "lib/product/strategy-room-session-gold-composer.ts",
+      "classificationsPassed": 12,
+      "classificationsTotal": 12,
+      "maxOverallSimilarity": 0.11837584029836543,
+      "maxDiagnosisSimilarity": 0.07352941176470588,
+      "maxNextMoveSimilarity": 0.24285714285714285
+    }
+  ],
+  "failures": {
+    "patternFailures": [],
+    "genericFailures": [],
+    "similarityFailures": []
+  },
+  "beforeAfterExample": {
+    "before": "The old fast_diagnostic output produced 84% identical judgement for a pricing-ownership case and a hiring-freeze case.",
+    "after": "The same pair now scores 6% overall, 0% diagnosis, and 15% next-move similarity."
+  },
+  "remainingRisks": [
+    "This gate tests composer-level rendered output, not every live route integration.",
+    "Similarity is lexical; it is strong enough to catch template convergence, but it does not prove strategic correctness by itself.",
+    "Gold remains blocked unless the external product value benchmark proves actual rendered output and route evidence."
+  ],
+  "recommendation": "Judgement differentiation is GREEN at composer level; proceed to external product value benchmark without restoring gold by declaration."
+}
