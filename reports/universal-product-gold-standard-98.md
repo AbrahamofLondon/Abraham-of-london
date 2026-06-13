@@ -2,24 +2,23 @@
 
 ## Gate Result
 
-FAILED
+PASSED
 
 ## Products Reviewed
 
 - Products reviewed: 43
-- Gold standard: 3
-- Blocked from release: 40
+- Gold standard: 0
+- Blocked from release: 43
 - Internal only: 0
 - Below 9.8 but public: 0
 
 ## Gold Standard Products
 
-- fast_diagnostic: Fast Diagnostic (9.8/10)
-- team_assessment: Team Assessment (9.8/10)
-- enterprise_assessment: Enterprise Assessment (9.8/10)
+- None
 
 ## Blocked Products
 
+- fast_diagnostic: Fast Diagnostic (5.8/10)
 - boardroom_brief: Boardroom Brief (8.2/10)
 - personal_decision_audit: Personal Decision Audit (7.7/10)
 - decision_exposure_instrument: Decision Exposure Instrument (7.7/10)
@@ -42,6 +41,8 @@ FAILED
 - case_dossier_tariff_shock: Case Dossier — Tariff Shock (7.7/10)
 - case_dossier_team_alignment: Case Dossier — Team Alignment (7.7/10)
 - case_dossier_escalation_denied: Case Dossier — Escalation Denied (7.7/10)
+- team_assessment: Team Assessment (5.8/10)
+- enterprise_assessment: Enterprise Assessment (5.8/10)
 - boardroom_mode: Boardroom Mode (5.4/10)
 - executive_reporting: Executive Reporting (7.4/10)
 - diagnostic_report_basic: Diagnostic Report — Basic (4.8/10)
@@ -67,6 +68,7 @@ FAILED
 
 ## Products Removed From Public/Sellable State
 
+- fast_diagnostic: Fast Diagnostic
 - boardroom_brief: Boardroom Brief
 - personal_decision_audit: Personal Decision Audit
 - decision_exposure_instrument: Decision Exposure Instrument
@@ -86,6 +88,8 @@ FAILED
 - case_dossier_tariff_shock: Case Dossier — Tariff Shock
 - case_dossier_team_alignment: Case Dossier — Team Alignment
 - case_dossier_escalation_denied: Case Dossier — Escalation Denied
+- team_assessment: Team Assessment
+- enterprise_assessment: Enterprise Assessment
 - executive_reporting: Executive Reporting
 - strategy_room: Strategy Room — Entry
 - strategy_room_extended: Strategy Room — Active / Multi-Decision
@@ -98,12 +102,12 @@ FAILED
 
 ## Free Product Time-Value Review
 
-- fast_diagnostic: passed (9.8/10)
+- fast_diagnostic: blocked (5.8/10)
 - case_dossier_tariff_shock: blocked (7.7/10)
 - case_dossier_team_alignment: blocked (7.7/10)
 - case_dossier_escalation_denied: blocked (7.7/10)
-- team_assessment: passed (9.8/10)
-- enterprise_assessment: passed (9.8/10)
+- team_assessment: blocked (5.8/10)
+- enterprise_assessment: blocked (5.8/10)
 
 ## Paid Product Price-Value Review
 
@@ -167,7 +171,7 @@ FAILED
 
 | Product | Current Status | 9.8 Score | New Release Status | Blocking Reason | Required Upgrade |
 |---|---:|---:|---|---|---|
-| Fast Diagnostic | legacy_weak | 9.8 | gold_standard | None | Maintain release block until 98/100 evidence is supplied. |
+| Fast Diagnostic | legacy_weak | 5.8 | blocked_from_release | Previously below-market or owned-upgrade product; externally proven 9.8 evidence has not been supplied. | Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost. |
 | Boardroom Brief | legacy_above_market | 8.2 | blocked_from_release | 9.8 score is 82/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 | Personal Decision Audit | legacy_public | 7.7 | blocked_from_release | 9.8 score is 77/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 | Decision Exposure Instrument | legacy_public | 7.7 | blocked_from_release | 9.8 score is 77/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
@@ -190,8 +194,8 @@ FAILED
 | Case Dossier — Tariff Shock | legacy_public | 7.7 | blocked_from_release | Internally certified by Wave 1 but revoked or unproven by the external value benchmark; externally proven gold or blocked. | Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost. |
 | Case Dossier — Team Alignment | legacy_public | 7.7 | blocked_from_release | Internally certified by Wave 1 but revoked or unproven by the external value benchmark; externally proven gold or blocked. | Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost. |
 | Case Dossier — Escalation Denied | legacy_public | 7.7 | blocked_from_release | Internally certified by Wave 1 but revoked or unproven by the external value benchmark; externally proven gold or blocked. | Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost. |
-| Team Assessment | legacy_weak | 9.8 | gold_standard | None | Maintain release block until 98/100 evidence is supplied. |
-| Enterprise Assessment | legacy_weak | 9.8 | gold_standard | None | Maintain release block until 98/100 evidence is supplied. |
+| Team Assessment | legacy_weak | 5.8 | blocked_from_release | Previously below-market or owned-upgrade product; externally proven 9.8 evidence has not been supplied. | Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost. |
+| Enterprise Assessment | legacy_weak | 5.8 | blocked_from_release | Previously below-market or owned-upgrade product; externally proven 9.8 evidence has not been supplied. | Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost. |
 | Boardroom Mode | legacy_weak | 5.4 | blocked_from_release | Previously below-market or owned-upgrade product; externally proven 9.8 evidence has not been supplied. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 | Executive Reporting | legacy_above_market | 7.4 | blocked_from_release | 9.8 score is 74/100, below the 98/100 release threshold. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
 | Diagnostic Report — Basic | legacy_blocked | 4.8 | blocked_from_release | Product is already inactive, future-dated, duplicate, or structurally blocked. | Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. |
@@ -213,6 +217,7 @@ FAILED
 
 ## Required Upgrade Backlog
 
+- fast_diagnostic: Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost.
 - boardroom_brief: Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. Prove serious input basis, diagnosis, options, falsification, consequence, execution sequence, and reusable judgement. Confirm Stripe/webhook authority and live-cycle fulfilment proof before sale.
 - personal_decision_audit: Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. Confirm Stripe/webhook authority and live-cycle fulfilment proof before sale.
 - decision_exposure_instrument: Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. Confirm Stripe/webhook authority and live-cycle fulfilment proof before sale.
@@ -235,6 +240,8 @@ FAILED
 - case_dossier_tariff_shock: Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost.
 - case_dossier_team_alignment: Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost.
 - case_dossier_escalation_denied: Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost.
+- team_assessment: Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost.
+- enterprise_assessment: Replace weak lead-magnet output with one diagnosis, one reason it matters, and one next action within the promised time cost.
 - boardroom_mode: Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable.
 - executive_reporting: Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. Prove serious input basis, diagnosis, options, falsification, consequence, execution sequence, and reusable judgement. Confirm Stripe/webhook authority and live-cycle fulfilment proof before sale.
 - diagnostic_report_basic: Document why the artefact is worth more than the price, what it helps avoid, and why it is reusable. Prove serious input basis, diagnosis, options, falsification, consequence, execution sequence, and reusable judgement.
@@ -264,4 +271,4 @@ FAILED
 
 ## Final Recommendation
 
-RED
+GREEN

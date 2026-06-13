@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T10:08:08.182Z",
+  "generatedAt": "2026-06-13T13:11:54.236Z",
   "goldClaimsSource": "reports/wave-one-gold-standard.json (Wave 1 internal certification)",
   "goldClaims": [
     "fast_diagnostic",
@@ -114,7 +114,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "api_response",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "team_assessment",
@@ -163,7 +163,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "enterprise_assessment",
@@ -213,7 +213,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "case_dossier_tariff_shock",
@@ -255,7 +255,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "case_dossier_team_alignment",
@@ -297,7 +297,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "case_dossier_escalation_denied",
@@ -339,7 +339,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "personal_decision_audit",
@@ -388,7 +388,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     },
     {
       "productCode": "strategy_room",
@@ -438,7 +438,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T10:08:08.099Z"
+      "capturedAt": "2026-06-13T13:11:54.215Z"
     }
   ],
   "benchmarks": [
@@ -1582,7 +1582,7 @@
       "productCode": "gmi_q3_2026",
       "productFamily": "internal_or_inactive",
       "customerExpectation": {
-        "expectedUseCase": "A customer uses Global Market Intelligence Report — Q3 2026 on a live decision problem expecting specific judgement.",
+        "expectedUseCase": "A customer uses Global Market Report — Q3 2026 on a live decision problem expecting specific judgement.",
         "expectedCustomerSophistication": "high",
         "expectedOutcome": "A specific diagnosis, consequence view, and practical next move.",
         "minimumUsefulResult": "More useful clarity than the time and money spent.",
@@ -4727,21 +4727,21 @@
     {
       "productCode": "gmi_q1_2026",
       "productFamily": "global_market_intelligence",
-      "displayName": "Global Market Intelligence Report — Q1 2026",
+      "displayName": "Global Market Report — Q1 2026",
       "isPaid": true,
       "priceLabel": "£59"
     },
     {
       "productCode": "gmi_q2_2026",
       "productFamily": "global_market_intelligence",
-      "displayName": "Global Market Intelligence Report — Q2 2026",
+      "displayName": "Global Market Report — Q2 2026",
       "isPaid": true,
       "priceLabel": "£59"
     },
     {
       "productCode": "gmi_q3_2026",
       "productFamily": "internal_or_inactive",
-      "displayName": "Global Market Intelligence Report — Q3 2026",
+      "displayName": "Global Market Report — Q3 2026",
       "isPaid": true,
       "priceLabel": "£59"
     },

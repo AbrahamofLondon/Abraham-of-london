@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T13:44:49.935Z",
+  "generatedAt": "2026-06-13T14:20:07.410Z",
   "category": "Evidence-Governed Decision Infrastructure",
   "categoryReadinessState": "category_infrastructure_present_but_not_visible",
   "visibleSignals": {
@@ -16,7 +16,10 @@
       "oversight_brief",
       "return_brief"
     ],
-    "authorityState": [],
+    "authorityState": [
+      "fast_diagnostic",
+      "decision_centre"
+    ],
     "decisionRisk": [],
     "falsificationTrigger": [
       "fast_diagnostic",

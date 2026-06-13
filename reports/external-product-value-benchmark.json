@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-13T10:08:08.436Z",
-  "gate": "PASSED",
+  "generatedAt": "2026-06-13T13:11:54.328Z",
+  "gate": "FAILED",
   "doctrine": "Externally proven gold or blocked. No self-certification.",
   "thresholds": {
     "antiToyGoldMaximum": 5,
@@ -122,7 +122,7 @@
     {
       "productCode": "fast_diagnostic",
       "productFamily": "free_public_signal",
-      "internalScoreOutOf10": 9.8,
+      "internalScoreOutOf10": 5.8,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
@@ -699,7 +699,7 @@
     {
       "productCode": "team_assessment",
       "productFamily": "free_public_signal",
-      "internalScoreOutOf10": 9.8,
+      "internalScoreOutOf10": 5.8,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
@@ -728,7 +728,7 @@
     {
       "productCode": "enterprise_assessment",
       "productFamily": "free_public_signal",
-      "internalScoreOutOf10": 9.8,
+      "internalScoreOutOf10": 5.8,
       "wasInternalGoldClaim": true,
       "hasExternalBenchmark": true,
       "renderedOutputReviewed": true,
@@ -2093,6 +2093,10 @@
       "judgementIsCaseDerived": false
     }
   ],
-  "failures": [],
-  "finalRecommendation": "GREEN"
+  "failures": [
+    "[CONSTITUTION] fast_diagnostic: Product fast_diagnostic requires Evidence Ledger v2 for externally_proven_gold_product but v2 evidence not present",
+    "[CONSTITUTION] team_assessment: Product team_assessment requires Evidence Ledger v2 for externally_proven_gold_product but v2 evidence not present",
+    "[CONSTITUTION] enterprise_assessment: Product enterprise_assessment requires Evidence Ledger v2 for externally_proven_gold_product but v2 evidence not present"
+  ],
+  "finalRecommendation": "RED"
 }

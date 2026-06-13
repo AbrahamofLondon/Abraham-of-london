@@ -13,12 +13,12 @@ Market adoption state: credible_but_too_complex
 | fast_diagnostic | Founder, operator, functional executive | Decision owner under time pressure | strong_but_needs_clarity | generic_ai_contrast_weak |
 | team_assessment | CEO, COO, chief of staff, people/operations lead | Team lead or facilitator | credible_but_too_complex | authority_contract_not_visible |
 | enterprise_assessment | Executive sponsor, transformation leader, risk/governance lead | Programme owner, PMO, strategy/operations team | credible_but_too_complex | authority_contract_not_visible |
-| personal_decision_audit | Founder, executive, advisor, operator | Individual decision owner | credible_but_too_complex | authority_contract_not_visible, limitations_not_visible |
-| decision_centre | COO, chief of staff, transformation leader | Decision operations team | credible_but_too_complex | authority_contract_not_visible |
+| personal_decision_audit | Founder, executive, advisor, operator | Individual decision owner | strong_but_needs_clarity | limitations_not_visible |
+| decision_centre | COO, chief of staff, transformation leader | Decision operations team | dominant | none |
 | boardroom_mode | Chair, board member, CEO, investor | Board secretary, strategy lead, executive sponsor | credible_but_too_complex | authority_contract_not_visible, generic_ai_contrast_weak |
 | global_market_reports | Investor, CEO, strategy lead | Strategy, research, commercial planning team | credible_but_too_complex | authority_contract_not_visible, limitations_not_visible, generic_ai_contrast_weak |
 | control_room | Founder, product owner, governance lead | Internal operator/admin | strong_but_needs_clarity | generic_ai_contrast_weak |
-| checkout_fulfilment | Paying customer | Paying customer | credible_but_too_complex | authority_contract_not_visible, generic_ai_contrast_weak |
+| checkout_fulfilment | Paying customer | Paying customer | strong_but_needs_clarity | generic_ai_contrast_weak |
 
 ## Market Pain Mapping
 
@@ -56,15 +56,15 @@ Market adoption state: credible_but_too_complex
 
 ### personal_decision_audit
 
-- Posture: credible_but_too_complex
+- Posture: strong_but_needs_clarity
 - Current alternative: Coaching call, template, generic AI analysis, private notes.
-- Recommended action: Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority.
+- Recommended action: Clarify personal_decision_audit around one buyer pain, one product action, and one evidence-backed next step.
 
 ### decision_centre
 
-- Posture: credible_but_too_complex
+- Posture: dominant
 - Current alternative: Spreadsheets, PMO dashboards, Slack threads, board packs.
-- Recommended action: Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority.
+- Recommended action: Keep language strong and bind it to visible proof.
 
 ### boardroom_mode
 
@@ -86,9 +86,9 @@ Market adoption state: credible_but_too_complex
 
 ### checkout_fulfilment
 
-- Posture: credible_but_too_complex
+- Posture: strong_but_needs_clarity
 - Current alternative: Consulting booking form or generic downloadable product.
-- Recommended action: Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority.
+- Recommended action: State why this product is accountable decision infrastructure rather than generic AI advice.
 
 ## Implementation-Ready Recommendations
 

@@ -15,7 +15,7 @@ The category infrastructure is materially present, but too much of it remains in
 ## Visible Signals
 
 - Evidence state visible: fast_diagnostic, team_assessment, enterprise_assessment, personal_decision_audit, boardroom_brief, global_market_reports, decision_centre, control_room, operator_console, oversight_brief, return_brief
-- Authority state visible: none
+- Authority state visible: fast_diagnostic, decision_centre
 - Decision risk visible: none
 - Falsification trigger visible: fast_diagnostic, team_assessment, enterprise_assessment, boardroom_brief
 - Unsupported claim blocking visible: team_assessment, enterprise_assessment

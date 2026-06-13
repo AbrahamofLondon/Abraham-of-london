@@ -10,13 +10,13 @@ credible_but_too_complex
 
 ## Summary
 
-- Claims scanned: 13941
-- Public overclaim count: 1808
+- Claims scanned: 14058
+- Public overclaim count: 1790
 
 ## Recommendation Counts
 
-- keep: 8560
-- soften: 1799
+- keep: 8695
+- soften: 1781
 - make customer-clearer: 3573
 - make evidence-conditional: 9
 

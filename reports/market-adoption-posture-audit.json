@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-06-13T13:45:20.032Z",
+  "generatedAt": "2026-06-13T14:31:52.875Z",
   "gate": "PASSED_WITH_FINDINGS",
   "marketAdoptionState": "credible_but_too_complex",
   "productsAudited": 9,
   "postureCounts": {
-    "strong_but_needs_clarity": 2,
-    "credible_but_too_complex": 7
+    "strong_but_needs_clarity": 4,
+    "credible_but_too_complex": 4,
+    "dominant": 1
   },
   "marketPainUnclearCount": 0,
   "rows": [
@@ -22,7 +23,8 @@
         "Product route or surface file exists.",
         "Surface references evidence, authority, validation, proof, or limitations.",
         "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
-        "Surface includes a visible product action or submission path."
+        "Surface includes a visible product action or submission path.",
+        "Surface appears to reference ProductAuthority components or resolver."
       ],
       "commercialWording": "A fast evidence-governed decision signal that shows what would make the decision safer before you commit.",
       "surfaceFiles": [
@@ -154,7 +156,8 @@
         "Product route or surface file exists.",
         "Surface references evidence, authority, validation, proof, or limitations.",
         "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
-        "Surface includes a visible product action or submission path."
+        "Surface includes a visible product action or submission path.",
+        "Surface appears to reference ProductAuthority components or resolver."
       ],
       "commercialWording": "A decision audit that turns one live choice into a traceable judgement and next evidence action.",
       "surfaceFiles": [
@@ -175,16 +178,15 @@
         "evidenceVisible": true,
         "judgementVisible": true,
         "genericAiContrastVisible": true,
-        "authorityContractVisible": false,
+        "authorityContractVisible": true,
         "limitationVisible": false,
         "fulfilmentOrNextActionVisible": true
       },
       "flags": [
-        "authority_contract_not_visible",
         "limitations_not_visible"
       ],
-      "adoptionPosture": "credible_but_too_complex",
-      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+      "adoptionPosture": "strong_but_needs_clarity",
+      "recommendedAction": "Clarify personal_decision_audit around one buyer pain, one product action, and one evidence-backed next step."
     },
     {
       "productCode": "decision_centre",
@@ -199,7 +201,8 @@
         "Product route or surface file exists.",
         "Surface references evidence, authority, validation, proof, or limitations.",
         "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
-        "Surface includes a visible product action or submission path."
+        "Surface includes a visible product action or submission path.",
+        "Surface appears to reference ProductAuthority components or resolver."
       ],
       "commercialWording": "A decision operating surface for tracking which choices are supported, exposed, or blocked.",
       "surfaceFiles": [
@@ -220,15 +223,13 @@
         "evidenceVisible": true,
         "judgementVisible": true,
         "genericAiContrastVisible": true,
-        "authorityContractVisible": false,
+        "authorityContractVisible": true,
         "limitationVisible": true,
         "fulfilmentOrNextActionVisible": true
       },
-      "flags": [
-        "authority_contract_not_visible"
-      ],
-      "adoptionPosture": "credible_but_too_complex",
-      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+      "flags": [],
+      "adoptionPosture": "dominant",
+      "recommendedAction": "Keep language strong and bind it to visible proof."
     },
     {
       "productCode": "boardroom_mode",
@@ -379,7 +380,8 @@
         "Product route or surface file exists.",
         "Surface references evidence, authority, validation, proof, or limitations.",
         "Surface references judgement output such as diagnosis, consequence, next move, falsification, or escalation.",
-        "Surface includes a visible product action or submission path."
+        "Surface includes a visible product action or submission path.",
+        "Surface appears to reference ProductAuthority components or resolver."
       ],
       "commercialWording": "Purchase only the decision product whose output and evidence status are explicit.",
       "surfaceFiles": [
@@ -400,16 +402,15 @@
         "evidenceVisible": true,
         "judgementVisible": true,
         "genericAiContrastVisible": false,
-        "authorityContractVisible": false,
+        "authorityContractVisible": true,
         "limitationVisible": true,
         "fulfilmentOrNextActionVisible": true
       },
       "flags": [
-        "authority_contract_not_visible",
         "generic_ai_contrast_weak"
       ],
-      "adoptionPosture": "credible_but_too_complex",
-      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+      "adoptionPosture": "strong_but_needs_clarity",
+      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
     }
   ],
   "adoptionFindings": [
@@ -436,17 +437,17 @@
     },
     {
       "productCode": "personal_decision_audit",
-      "adoptionPosture": "credible_but_too_complex",
+      "adoptionPosture": "strong_but_needs_clarity",
       "marketPain": "A founder or leader needs a defensible decision record, not another reflective worksheet.",
       "currentAlternative": "Coaching call, template, generic AI analysis, private notes.",
-      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+      "recommendedAction": "Clarify personal_decision_audit around one buyer pain, one product action, and one evidence-backed next step."
     },
     {
       "productCode": "decision_centre",
-      "adoptionPosture": "credible_but_too_complex",
+      "adoptionPosture": "dominant",
       "marketPain": "Organisations repeat the same decision failures because cases, evidence, and lessons are not retained in one operating surface.",
       "currentAlternative": "Spreadsheets, PMO dashboards, Slack threads, board packs.",
-      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+      "recommendedAction": "Keep language strong and bind it to visible proof."
     },
     {
       "productCode": "boardroom_mode",
@@ -471,10 +472,10 @@
     },
     {
       "productCode": "checkout_fulfilment",
-      "adoptionPosture": "credible_but_too_complex",
+      "adoptionPosture": "strong_but_needs_clarity",
       "marketPain": "A buyer needs clear fulfilment after purchase and confidence that the delivered output matches the public promise.",
       "currentAlternative": "Consulting booking form or generic downloadable product.",
-      "recommendedAction": "Wire ProductAuthorityContract state into the customer-visible surface before claiming governed authority."
+      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
     }
   ],
   "implementationReadyRecommendations": [

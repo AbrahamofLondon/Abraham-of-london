@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T13:44:57.669Z",
+  "generatedAt": "2026-06-13T14:20:04.893Z",
   "gate": "PASSED_WITH_FINDINGS",
   "wiringState": "fragmented",
   "journeys": [
@@ -9,8 +9,8 @@
       "routeExists": true,
       "routeRenders": false,
       "usesRealProductLogic": true,
-      "usesProductAuthorityContract": false,
-      "displaysCorrectAuthorityState": false,
+      "usesProductAuthorityContract": true,
+      "displaysCorrectAuthorityState": true,
       "capturesOrReferencesEvidence": true,
       "preventsUnsupportedClaim": true,
       "producesUsefulOutput": true,
@@ -34,11 +34,8 @@
           "exists": true
         }
       ],
-      "flags": [
-        "authority_bypass",
-        "surface_overclaim"
-      ],
-      "recommendedAction": "Wire ProductAuthorityContract into fast_diagnostic surface before relying on authority language."
+      "flags": [],
+      "recommendedAction": "Keep route under observation; no immediate blocker detected by static audit."
     },
     {
       "journey": "team_assessment",
@@ -112,8 +109,8 @@
       "routeExists": true,
       "routeRenders": true,
       "usesRealProductLogic": true,
-      "usesProductAuthorityContract": false,
-      "displaysCorrectAuthorityState": false,
+      "usesProductAuthorityContract": true,
+      "displaysCorrectAuthorityState": true,
       "capturesOrReferencesEvidence": true,
       "preventsUnsupportedClaim": true,
       "producesUsefulOutput": true,
@@ -137,11 +134,8 @@
           "exists": true
         }
       ],
-      "flags": [
-        "authority_bypass",
-        "surface_overclaim"
-      ],
-      "recommendedAction": "Wire ProductAuthorityContract into personal_decision_audit surface before relying on authority language."
+      "flags": [],
+      "recommendedAction": "Keep route under observation; no immediate blocker detected by static audit."
     },
     {
       "journey": "decision_centre",
@@ -149,8 +143,8 @@
       "routeExists": true,
       "routeRenders": false,
       "usesRealProductLogic": true,
-      "usesProductAuthorityContract": false,
-      "displaysCorrectAuthorityState": false,
+      "usesProductAuthorityContract": true,
+      "displaysCorrectAuthorityState": true,
       "capturesOrReferencesEvidence": true,
       "preventsUnsupportedClaim": true,
       "producesUsefulOutput": true,
@@ -170,11 +164,8 @@
           "exists": true
         }
       ],
-      "flags": [
-        "authority_bypass",
-        "surface_overclaim"
-      ],
-      "recommendedAction": "Wire ProductAuthorityContract into decision_centre surface before relying on authority language."
+      "flags": [],
+      "recommendedAction": "Keep route under observation; no immediate blocker detected by static audit."
     },
     {
       "journey": "boardroom_mode",
@@ -283,8 +274,8 @@
       "routeExists": true,
       "routeRenders": true,
       "usesRealProductLogic": true,
-      "usesProductAuthorityContract": false,
-      "displaysCorrectAuthorityState": false,
+      "usesProductAuthorityContract": true,
+      "displaysCorrectAuthorityState": true,
       "capturesOrReferencesEvidence": true,
       "preventsUnsupportedClaim": true,
       "producesUsefulOutput": true,
@@ -308,11 +299,8 @@
           "exists": true
         }
       ],
-      "flags": [
-        "authority_bypass",
-        "surface_overclaim"
-      ],
-      "recommendedAction": "Wire ProductAuthorityContract into checkout_fulfilment surface before relying on authority language."
+      "flags": [],
+      "recommendedAction": "Keep route under observation; no immediate blocker detected by static audit."
     },
     {
       "journey": "public_product_pages",
@@ -353,19 +341,15 @@
     }
   ],
   "flagCounts": {
-    "authority_bypass": 9,
-    "surface_overclaim": 9,
+    "authority_bypass": 5,
+    "surface_overclaim": 5,
     "static_route_pretending_to_be_product": 1
   },
   "topRisks": [
-    "fast_diagnostic: authority_bypass, surface_overclaim",
     "team_assessment: authority_bypass, surface_overclaim",
     "enterprise_assessment: authority_bypass, surface_overclaim",
-    "personal_decision_audit: authority_bypass, surface_overclaim",
-    "decision_centre: authority_bypass, surface_overclaim",
     "boardroom_mode: authority_bypass, surface_overclaim",
     "global_market_reports: static_route_pretending_to_be_product, authority_bypass, surface_overclaim",
-    "checkout_fulfilment: authority_bypass, surface_overclaim",
     "public_product_pages: authority_bypass, surface_overclaim"
   ],
   "recommendations": [

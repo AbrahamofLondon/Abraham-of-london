@@ -8,7 +8,7 @@ A product is gold-standard only if the actual output is useful, the customer get
 
 ## Gate Result
 
-PASSED
+FAILED
 
 ## Classification
 
@@ -35,7 +35,7 @@ PASSED
 
 | Product | Internal Score | External Benchmark | Anti-Toy Score | Red-Team Result | Market Comparison | Final Status |
 |---|---:|---|---:|---|---|---|
-| fast_diagnostic | 9.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
+| fast_diagnostic | 5.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
 | boardroom_brief | 8.2 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | personal_decision_audit | 7.7 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | decision_exposure_instrument | 7.7 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
@@ -61,8 +61,8 @@ PASSED
 | gmi_q1_2026 | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q2_2026 | 7.9 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | gmi_q3_2026 | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
-| team_assessment | 9.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
-| enterprise_assessment | 9.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
+| team_assessment | 5.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
+| enterprise_assessment | 5.8 | defined | 0 | survives | outperforms_generic_ai | externally_proven_gold |
 | boardroom_mode | 5.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | executive_reporting | 7.4 | defined | not_tested | not_run | outperform_unproven | blocked_pending_external_proof |
 | diagnostic_report_basic | 4.8 | defined | not_tested | not_run | outperform_unproven | internal_only |
@@ -88,4 +88,4 @@ PASSED
 
 ## Final Recommendation
 
-GREEN
+RED
