@@ -131,6 +131,8 @@ const findings = {
   routesWithLimitations: 0,
   routesWithNextAction: 0,
   overclaim_risks: 0,
+  readinessScope: "not_category_ready",
+  gateStatus: "FAILED",
   routes: [],
 };
 
@@ -177,9 +179,13 @@ for (const routeConfig of ROUTES_TO_AUDIT) {
     routeConfig
   );
   const proofStatus = getProofStatus(analysis);
+  const demonstratesAuthorityPattern = analysis.readiness === "category_demonstrated";
+  const scopedReadiness = demonstratesAuthorityPattern
+    ? "authority_pattern_demonstrated_on_route"
+    : analysis.readiness;
 
   // Count features
-  if (analysis.readiness === "category_demonstrated") {
+  if (demonstratesAuthorityPattern) {
     findings.routesDemonstrating++;
   }
   if (
@@ -204,8 +210,8 @@ for (const routeConfig of ROUTES_TO_AUDIT) {
   findings.routes.push({
     route: routeConfig.route,
     name: routeConfig.name,
-    readiness: analysis.readiness,
-    demonstrating: analysis.readiness === "category_demonstrated",
+    readiness: scopedReadiness,
+    demonstrating: demonstratesAuthorityPattern,
     renders: {
       badge: analysis.rendersEvidence.ProductAuthorityBadge,
       panel: analysis.rendersEvidence.ProductAuthorityPanel,
@@ -228,7 +234,7 @@ for (const routeConfig of ROUTES_TO_AUDIT) {
   });
 
   console.log(`\n${routeConfig.name} (${routeConfig.route})`);
-  console.log(`  Readiness: ${analysis.readiness}`);
+  console.log(`  Readiness: ${scopedReadiness}`);
   console.log(
     `  Authority rendered: ${analysis.rendersEvidence.ProductAuthorityPanel || analysis.rendersEvidence.ProductAuthorityBadge ? "✓" : "✗"}`
   );
@@ -248,10 +254,10 @@ for (const routeConfig of ROUTES_TO_AUDIT) {
 
 // Summary
 console.log(`\n${"=".repeat(70)}`);
-console.log("CATEGORY ROUTE PROOF — SUMMARY");
+console.log("CATEGORY ROUTE PROOF — SELECTED ROUTE SUMMARY");
 console.log(`${"=".repeat(70)}`);
 console.log(`\nRoutes audited: ${findings.routesAudited}/${ROUTES_TO_AUDIT.length}`);
-console.log(`Routes demonstrating category: ${findings.routesDemonstrating}`);
+console.log(`Routes demonstrating authority pattern: ${findings.routesDemonstrating}`);
 console.log(`Routes with authority visible: ${findings.routesWithAuthority}`);
 console.log(`Routes with evidence visible: ${findings.routesWithEvidence}`);
 console.log(`Routes with limitations shown: ${findings.routesWithLimitations}`);
@@ -259,7 +265,7 @@ console.log(`Routes with next action clear: ${findings.routesWithNextAction}`);
 console.log(`Overclaim risks detected: ${findings.overclaim_risks}`);
 
 console.log(`\n${"=".repeat(70)}`);
-console.log("ROUTES DEMONSTRATING CATEGORY");
+console.log("ROUTES DEMONSTRATING AUTHORITY PATTERN");
 console.log(`${"=".repeat(70)}`);
 findings.routes
   .filter((r) => r.demonstrating)
@@ -286,20 +292,26 @@ findings.routes
     }
   });
 
-// Determine overall gate status
-const categoryDemonstrated = findings.routesDemonstrating >= 3;
-const gateStatus = categoryDemonstrated ? "PASSED" : "FAILED";
+// Determine local pattern status. This never implies estate readiness.
+findings.readinessScope = findings.routesDemonstrating >= 6
+  ? "product_group_demonstrated"
+  : findings.routesDemonstrating >= 3
+    ? "pattern_demonstrated_on_selected_routes"
+    : "not_category_ready";
+const gateStatus = findings.routesDemonstrating >= 3 ? "PASSED_LOCAL_PATTERN_ONLY" : "FAILED";
+findings.gateStatus = gateStatus;
 
 console.log(`\n${"=".repeat(70)}`);
-console.log("CATEGORY DEMONSTRATION STATUS");
+console.log("SELECTED ROUTE PATTERN STATUS");
 console.log(`${"=".repeat(70)}`);
 console.log(
-  `\nTarget: At least 3 routes demonstrating category`
+  `\nTarget: At least 3 routes demonstrating authority pattern`
 );
 console.log(
-  `Current: ${findings.routesDemonstrating} routes demonstrating category`
+  `Current: ${findings.routesDemonstrating} routes demonstrating authority pattern`
 );
-console.log(`\nGate Status: ${gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
+console.log(`Readiness Scope: ${findings.readinessScope}`);
+console.log(`\nGate Status: ${gateStatus === "PASSED_LOCAL_PATTERN_ONLY" ? "✓ PASSED LOCAL PATTERN ONLY" : "✗ FAILED"}`);
 
 // Write reports
 mkdirSync(REPORTS_DIR, { recursive: true });
@@ -309,24 +321,28 @@ writeFileSync(
   JSON.stringify(findings, null, 2) + "\n"
 );
 
-const markdownReport = `# Category Route Proof — Live Audit Report
+const markdownReport = `# Category Route Proof — Selected Route Pattern Audit
 
 **Audit Date:** ${new Date().toISOString()}
 
 ## Gate Status
 
-**Status:** ${gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}
+**Status:** ${gateStatus === "PASSED_LOCAL_PATTERN_ONLY" ? "✓ PASSED LOCAL PATTERN ONLY" : "✗ FAILED"}
+
+**Readiness Scope:** \`${findings.readinessScope}\`
+
+This report proves selected-route pattern coverage only. It does not establish estate readiness.
 
 ## Route Audit Results
 
 **Routes Audited:** ${findings.routesAudited}/${ROUTES_TO_AUDIT.length}
-**Routes Demonstrating Category:** ${findings.routesDemonstrating}
+**Routes Demonstrating Authority Pattern:** ${findings.routesDemonstrating}
 **Routes With Authority Visible:** ${findings.routesWithAuthority}
 **Routes With Evidence Visible:** ${findings.routesWithEvidence}
 **Routes With Limitations Shown:** ${findings.routesWithLimitations}
 **Overclaim Risks Detected:** ${findings.overclaim_risks}
 
-## Routes Demonstrating Category Experience
+## Routes Demonstrating Authority Pattern
 
 ${findings.routes
   .filter((r) => r.demonstrating)
@@ -334,7 +350,7 @@ ${findings.routes
     (r) => `
 ### ${r.name} (\`${r.route}\`)
 
-**Status:** ✓ Category Demonstrated
+**Status:** ✓ Authority pattern demonstrated on this route
 
 **Rendered Components:**
 - ProductAuthorityBadge: ${r.renders.badge ? "✓" : "✗"}
@@ -373,9 +389,9 @@ ${r.overclaim_risk ? "- ⚠️  OVERCLAIM RISK: Claims authority without showing
   )
   .join("\n")}
 
-## Category Demonstration Requirements
+## Selected Route Pattern Requirements
 
-Each route demonstrating the category must:
+Each route demonstrating the authority pattern must:
 
 1. ✓ Render a ProductAuthorityContract component (Badge, Panel, or Notice)
 2. ✓ Show current authority state (not just claim it)
@@ -394,20 +410,25 @@ ${
     : ""
 }
 - **Hidden Infrastructure:** ${findings.routesAudited - findings.routesDemonstrating} route(s) have not yet wired ProductAuthorityContract into visible experience
-- **Target Gap:** Need ${Math.max(0, 3 - findings.routesDemonstrating)} more routes demonstrating category
+- **Target Gap:** Need ${Math.max(0, 3 - findings.routesDemonstrating)} more routes demonstrating the selected-route authority pattern
+
+## Estate Readiness Boundary
+
+This route proof cannot imply estate readiness. Estate readiness requires the product authority coverage matrix, checkout coverage, report coverage, admin coverage, and public claim coverage to pass without findings.
 
 ---
 
 **Report Generated:** ${new Date().toISOString()}
 **Gate Status:** ${gateStatus}
+**Readiness Scope:** ${findings.readinessScope}
 `;
 
 writeFileSync(
   join(REPORTS_DIR, "category-route-proof.md"),
-  markdownReport + "\n"
+  markdownReport
 );
 
 console.log(`\nWritten: ${join(REPORTS_DIR, "category-route-proof.json")}`);
 console.log(`Written: ${join(REPORTS_DIR, "category-route-proof.md")}`);
 
-process.exit(gateStatus === "PASSED" ? 0 : 1);
+process.exit(gateStatus === "PASSED_LOCAL_PATTERN_ONLY" ? 0 : 1);

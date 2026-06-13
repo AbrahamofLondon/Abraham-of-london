@@ -1,0 +1,167 @@
+{
+  "routesAudited": 7,
+  "routesDemonstrating": 4,
+  "routesWithAuthority": 4,
+  "routesWithEvidence": 4,
+  "routesWithLimitations": 6,
+  "routesWithNextAction": 6,
+  "overclaim_risks": 1,
+  "readinessScope": "pattern_demonstrated_on_selected_routes",
+  "gateStatus": "PASSED_LOCAL_PATTERN_ONLY",
+  "routes": [
+    {
+      "route": "/foundry/decision-test",
+      "name": "Fast Diagnostic — Decision Test",
+      "readiness": "authority_pattern_demonstrated_on_route",
+      "demonstrating": true,
+      "renders": {
+        "badge": true,
+        "panel": true,
+        "notice": true,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": true,
+        "publicClaim": true,
+        "blocking": true,
+        "nextAction": true,
+        "limitations": true,
+        "source": true
+      },
+      "overclaim_risk": false,
+      "meetsStandard": false
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "name": "Enterprise Assessment — Decision Scan",
+      "readiness": "authority_pattern_demonstrated_on_route",
+      "demonstrating": true,
+      "renders": {
+        "badge": false,
+        "panel": true,
+        "notice": true,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": true,
+        "publicClaim": false,
+        "blocking": true,
+        "nextAction": true,
+        "limitations": true,
+        "source": true
+      },
+      "overclaim_risk": false,
+      "meetsStandard": false
+    },
+    {
+      "route": "/decision-centre",
+      "name": "Decision Centre — Authority Overview",
+      "readiness": "authority_pattern_demonstrated_on_route",
+      "demonstrating": true,
+      "renders": {
+        "badge": false,
+        "panel": true,
+        "notice": true,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": true,
+        "publicClaim": false,
+        "blocking": true,
+        "nextAction": true,
+        "limitations": true,
+        "source": true
+      },
+      "overclaim_risk": false,
+      "meetsStandard": false
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "name": "Checkout — Personal Decision Audit",
+      "readiness": "authority_pattern_demonstrated_on_route",
+      "demonstrating": true,
+      "renders": {
+        "badge": false,
+        "panel": true,
+        "notice": true,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": true,
+        "publicClaim": false,
+        "blocking": true,
+        "nextAction": true,
+        "limitations": true,
+        "source": true
+      },
+      "overclaim_risk": false,
+      "meetsStandard": false
+    },
+    {
+      "route": "/diagnostics/executive-reporting/run",
+      "name": "Executive Reporting",
+      "readiness": "infrastructure_present_but_hidden",
+      "demonstrating": false,
+      "renders": {
+        "badge": false,
+        "panel": false,
+        "notice": false,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": false,
+        "publicClaim": false,
+        "blocking": false,
+        "nextAction": true,
+        "limitations": true,
+        "source": true
+      },
+      "overclaim_risk": false,
+      "meetsStandard": false
+    },
+    {
+      "route": "/library",
+      "name": "Library Index",
+      "readiness": "infrastructure_present_but_hidden",
+      "demonstrating": false,
+      "renders": {
+        "badge": false,
+        "panel": false,
+        "notice": false,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": false,
+        "publicClaim": false,
+        "blocking": false,
+        "nextAction": true,
+        "limitations": true,
+        "source": false
+      },
+      "overclaim_risk": false,
+      "meetsStandard": false
+    },
+    {
+      "route": "/test-your-decision",
+      "name": "Test Your Decision",
+      "readiness": "not_category_ready",
+      "demonstrating": false,
+      "renders": {
+        "badge": false,
+        "panel": false,
+        "notice": false,
+        "evidenceStatus": false
+      },
+      "shows": {
+        "authority": false,
+        "publicClaim": false,
+        "blocking": false,
+        "nextAction": false,
+        "limitations": false,
+        "source": false
+      },
+      "overclaim_risk": true,
+      "meetsStandard": false
+    }
+  ]
+}

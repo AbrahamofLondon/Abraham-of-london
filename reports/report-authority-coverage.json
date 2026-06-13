@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-13T14:31:26.118Z",
+  "generatedAt": "2026-06-13T14:45:34.359Z",
   "gate": "FAILED_WITH_FINDINGS",
   "productsAudited": 12,
-  "failures": 3,
+  "failures": 12,
   "rows": [
     {
       "productCode": "boardroom_brief",
@@ -14,6 +14,10 @@
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
       "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": false,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/boardroom-brief.tsx",
         "pages/admin/boardroom/orders.tsx",
@@ -21,7 +25,7 @@
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
       "result": "FAIL",
-      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output."
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "board_brief_builder",
@@ -33,6 +37,10 @@
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
       "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": false,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/decision-instruments/board-brief-builder/run.tsx",
         "pages/admin/artifacts.tsx",
@@ -40,7 +48,7 @@
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
       "result": "FAIL",
-      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output."
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "executive_reporting",
@@ -52,6 +60,10 @@
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
       "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": false,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": true,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/diagnostics/executive-reporting/run.tsx",
         "app/admin/reporting/executive/page.tsx",
@@ -59,7 +71,7 @@
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
       "result": "FAIL",
-      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output."
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "case_dossier_tariff_shock",
@@ -70,13 +82,17 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "case_dossier_team_alignment",
@@ -87,13 +103,17 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "case_dossier_escalation_denied",
@@ -104,13 +124,17 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "gmi_q1_2026",
@@ -121,14 +145,18 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/admin/intelligence/gmi-control-plane.tsx",
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "gmi_q2_2026",
@@ -139,14 +167,18 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/admin/intelligence/gmi-control-plane.tsx",
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "gmi_q3_2026",
@@ -157,14 +189,18 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/admin/intelligence/gmi-control-plane.tsx",
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "diagnostic_report_basic",
@@ -175,13 +211,17 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "diagnostic_report_pro",
@@ -192,13 +232,17 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     },
     {
       "productCode": "executive_reporting_priority",
@@ -209,13 +253,17 @@
       "evidenceStateVisible": false,
       "limitationVisible": true,
       "nextEvidenceActionVisible": true,
-      "staticLabelVisible": true,
+      "staticLabelVisible": false,
+      "exemptionConfirmedByMatrix": true,
+      "exemptionShowsBoundary": false,
+      "authorityClaimLanguagePresent": false,
+      "exemptionPass": false,
       "filesChecked": [
         "pages/report/[reportId].tsx",
         "app/client/reports/[reportId]/ClientReportClient.tsx"
       ],
-      "result": "PASS",
-      "requiredAction": "Maintain report authority coverage."
+      "result": "FAIL",
+      "requiredAction": "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language."
     }
   ]
 }

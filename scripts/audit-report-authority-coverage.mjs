@@ -51,16 +51,25 @@ const rows = matrix.products
       "next evidence",
       "next action",
     ]);
-    const staticLabelVisible = Boolean(product.staticReferenceInternalExemption) && hasExact(text, [
-      "static",
-      "reference",
-      "case dossier",
-      "archived",
-      "draft",
-      "inactive",
-      "manual",
+    const exemptionConfirmedByMatrix = Boolean(product.staticReferenceInternalExemption) &&
+      ["static_reference_correctly_labelled", "internal_only_exempt"].includes(product.currentCoverageClassification);
+    const productSpecificExemptionVisible = exemptionConfirmedByMatrix &&
+      hasExact(text, [product.productCode, product.productName, product.productCode.replaceAll("_", "-")]) &&
+      hasExact(text, ["static", "reference", "case dossier", "archived", "draft", "inactive", "manual", "internal-only", "internal only"]);
+    const authorityClaimLanguagePresent = hasExact(text, [
+      "board-grade",
+      "diagnostic authority",
+      "judgement product",
+      "evidence-governed intelligence",
+      "externally proven",
+      "market-ready intelligence",
     ]);
-    const pass = (product.staticReferenceInternalExemption && staticLabelVisible) ||
+    const exemptionShowsBoundary = productSpecificExemptionVisible && limitationVisible;
+    const exemptionPass = exemptionConfirmedByMatrix &&
+      productSpecificExemptionVisible &&
+      exemptionShowsBoundary &&
+      !authorityClaimLanguagePresent;
+    const pass = exemptionPass ||
       (authorityStatusVisible && evidenceStateVisible && limitationVisible && nextEvidenceActionVisible);
     return {
       productCode: product.productCode,
@@ -71,12 +80,16 @@ const rows = matrix.products
       evidenceStateVisible,
       limitationVisible,
       nextEvidenceActionVisible,
-      staticLabelVisible,
+      staticLabelVisible: productSpecificExemptionVisible,
+      exemptionConfirmedByMatrix,
+      exemptionShowsBoundary,
+      authorityClaimLanguagePresent,
+      exemptionPass,
       filesChecked: [...new Set(files)],
       result: pass ? "PASS" : "FAIL",
       requiredAction: pass
         ? "Maintain report authority coverage."
-        : "Add authority status, evidence state, limitation, and next evidence action to report/dossier output.",
+        : "Add authority status, evidence state, limitation, and next evidence action to report/dossier output, or record a product-specific static/internal exemption with explicit boundary language.",
     };
   });
 
@@ -149,9 +162,9 @@ Failures: ${report.failures}
 
 ## Results
 
-| Product | Fulfilment Type | Authority | Evidence | Limitation | Next Evidence | Static Label | Result | Required Action |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-${report.rows.map((row) => `| ${row.productCode} | ${row.fulfilmentType} | ${yes(row.authorityStatusVisible)} | ${yes(row.evidenceStateVisible)} | ${yes(row.limitationVisible)} | ${yes(row.nextEvidenceActionVisible)} | ${yes(row.staticLabelVisible)} | ${row.result} | ${row.requiredAction} |`).join("\n")}
+| Product | Fulfilment Type | Authority | Evidence | Limitation | Next Evidence | Matrix Exemption | Product-Specific Label | Claim Conflict | Result | Required Action |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+${report.rows.map((row) => `| ${row.productCode} | ${row.fulfilmentType} | ${yes(row.authorityStatusVisible)} | ${yes(row.evidenceStateVisible)} | ${yes(row.limitationVisible)} | ${yes(row.nextEvidenceActionVisible)} | ${yes(row.exemptionConfirmedByMatrix)} | ${yes(row.staticLabelVisible)} | ${yes(row.authorityClaimLanguagePresent)} | ${row.result} | ${row.requiredAction} |`).join("\n")}
 `;
 }
 

@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-06-13T14:46:12.532Z",
+  "gateStatus": "PASSED_LOCAL_PATTERN_ONLY",
+  "readinessScope": "estate_partially_governed",
+  "estateReadinessAchieved": false,
+  "localPatternDemonstrated": true,
+  "mandatoryStatusBlock": {
+    "localGateResult": "PASSED_LOCAL_PATTERN_ONLY",
+    "estateCoverageResult": "estate_coverage_has_findings",
+    "categoryReadinessScope": "estate_partially_governed",
+    "productsCovered": "43/43",
+    "productsMissingCoverage": 18,
+    "checkoutFailures": 16,
+    "reportFailures": 12,
+    "adminFailures": 2,
+    "finalAuthorityPosition": "Only selected-route pattern demonstration may be claimed."
+  },
+  "routeProofSummary": {
+    "routesAudited": 7,
+    "routesDemonstratingAuthority": 4,
+    "routesWithAuthority": 4,
+    "routesWithEvidence": 4,
+    "routesWithLimitations": 6,
+    "routesWithNextAction": 6,
+    "overclaimRisks": 1
+  },
+  "estateSummary": {
+    "productsClassified": 43,
+    "directContractsValidated": 4,
+    "productsMissingAuthorityContract": [
+      "boardroom_brief",
+      "decision_exposure_instrument",
+      "mandate_clarity_framework",
+      "intervention_path_selector",
+      "escalation_readiness_scorecard",
+      "structural_failure_diagnostic_canvas",
+      "execution_risk_index",
+      "team_alignment_gap_map",
+      "governance_drift_detector",
+      "strategic_priority_stack_builder",
+      "board_brief_builder",
+      "execution_integrity_protocol",
+      "alignment_audit_playbook",
+      "drift_detection_framework",
+      "operator_decision_pack",
+      "executive_reporting",
+      "strategy_room",
+      "boardroom_mode"
+    ],
+    "checkoutFailures": [
+      "boardroom_brief",
+      "decision_exposure_instrument",
+      "mandate_clarity_framework",
+      "intervention_path_selector",
+      "escalation_readiness_scorecard",
+      "structural_failure_diagnostic_canvas",
+      "execution_risk_index",
+      "team_alignment_gap_map",
+      "governance_drift_detector",
+      "strategic_priority_stack_builder",
+      "board_brief_builder",
+      "execution_integrity_protocol",
+      "alignment_audit_playbook",
+      "drift_detection_framework",
+      "operator_decision_pack",
+      "executive_reporting"
+    ],
+    "reportFailures": [
+      "boardroom_brief",
+      "board_brief_builder",
+      "executive_reporting",
+      "case_dossier_tariff_shock",
+      "case_dossier_team_alignment",
+      "case_dossier_escalation_denied",
+      "gmi_q1_2026",
+      "gmi_q2_2026",
+      "gmi_q3_2026",
+      "diagnostic_report_basic",
+      "diagnostic_report_pro",
+      "executive_reporting_priority"
+    ],
+    "adminFailures": [
+      "boardroom_brief",
+      "executive_reporting"
+    ],
+    "publicClaimFailures": []
+  },
+  "blockingReasons": [
+    "18 public/non-exempt product(s) missing ProductAuthorityContract coverage.",
+    "16 checkout / fulfilment authority failure(s).",
+    "12 report-surface authority failure(s).",
+    "2 admin release authority failure(s)."
+  ]
+}

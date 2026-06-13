@@ -25,7 +25,7 @@ const ROOT = process.cwd();
 const REPORTS_DIR = join(ROOT, "reports");
 
 console.log("PRODUCT AUTHORITY CONTRACT VALIDATION GATE");
-console.log("Validating ProductAuthorityContract for all products\n");
+console.log("Validating core ProductAuthorityContract coverage; estate coverage is reported separately\n");
 
 // Generate contracts for known products based on validation evidence
 const productContracts = [
@@ -194,8 +194,23 @@ const productContracts = [
 ];
 
 // Validate contracts
+const estateCoverageMatrix = readJson("product-authority-coverage-matrix.json", null);
+const estateProducts = estateCoverageMatrix?.products ?? [];
+const productsMissingDirectContract = estateProducts.length > 0
+  ? estateProducts
+      .filter((product) => !product.productAuthorityContractExists)
+      .map((product) => product.productCode)
+  : [];
+
 const auditResult = {
   auditDate: new Date().toISOString(),
+  directContractsValidated: productContracts.length,
+  estateProductsReviewed: estateProducts.length || 43,
+  productsMissingDirectContract,
+  productsMissingDirectContractCount: productsMissingDirectContract.length || Math.max(0, 43 - productContracts.length),
+  estateCoverageComplete: estateProducts.length > 0
+    ? productsMissingDirectContract.length === 0 && estateProducts.length === 43
+    : false,
   productsReviewed: productContracts.length,
   contractsValid: 0,
   contractsInvalid: 0,
@@ -292,7 +307,10 @@ console.log(`\n${"=".repeat(70)}`);
 console.log("PRODUCT AUTHORITY CONTRACT VALIDATION GATE RESULT");
 console.log(`${"=".repeat(70)}`);
 console.log(`\nAudit date: ${auditResult.auditDate}`);
-console.log(`Products reviewed: ${auditResult.productsReviewed}`);
+console.log(`Direct contracts validated: ${auditResult.directContractsValidated}`);
+console.log(`Estate products reviewed: ${auditResult.estateProductsReviewed}`);
+console.log(`Products missing direct contract: ${auditResult.productsMissingDirectContractCount}`);
+console.log(`Estate coverage complete: ${auditResult.estateCoverageComplete ? "yes" : "no"}`);
 console.log(`Contracts valid: ${auditResult.contractsValid}`);
 console.log(`Contracts invalid: ${auditResult.contractsInvalid}`);
 console.log(`\nGate Status: ${auditResult.gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
@@ -324,6 +342,11 @@ writeFileSync(
     {
       auditDate: auditResult.auditDate,
       gateStatus: auditResult.gateStatus,
+      directContractsValidated: auditResult.directContractsValidated,
+      estateProductsReviewed: auditResult.estateProductsReviewed,
+      productsMissingDirectContract: auditResult.productsMissingDirectContract,
+      productsMissingDirectContractCount: auditResult.productsMissingDirectContractCount,
+      estateCoverageComplete: auditResult.estateCoverageComplete,
       productsReviewed: auditResult.productsReviewed,
       contractsValid: auditResult.contractsValid,
       contractsInvalid: auditResult.contractsInvalid,
@@ -343,11 +366,22 @@ writeFileSync(
 
 ## Gate Result
 
-**Status:** ${auditResult.gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}
+**Status:** ${auditResult.gateStatus === "PASSED" ? "✓ PASSED — core contract validity only" : "✗ FAILED"}
 
-**Products Reviewed:** ${auditResult.productsReviewed}
+**Direct Contracts Validated:** ${auditResult.directContractsValidated}
+**Estate Products Reviewed:** ${auditResult.estateProductsReviewed}
+**Products Missing Direct Contract:** ${auditResult.productsMissingDirectContractCount}
+**Estate Coverage Complete:** ${auditResult.estateCoverageComplete ? "✓ Yes" : "✗ No"}
 **Contracts Valid:** ${auditResult.contractsValid}
 **Contracts Invalid:** ${auditResult.contractsInvalid}
+
+## Scope Boundary
+
+This gate validates the core ProductAuthorityContract records currently present. It does not establish estate-wide authority coverage unless \`estateCoverageComplete\` is true.
+
+## Products Missing Direct Contract
+
+${auditResult.productsMissingDirectContract.length ? auditResult.productsMissingDirectContract.map((product) => `- ${product}`).join("\n") : "- Unknown until product authority coverage matrix is generated"}
 
 ${
   auditResult.findings.length > 0
@@ -393,7 +427,7 @@ ${auditResult.contractSummary
 
 ${
   auditResult.gateStatus === "PASSED"
-    ? "✓ All contracts valid\n✓ All authority states correct\n✓ All public claims aligned with evidence"
+    ? "✓ Core contracts valid\n✓ Core authority states correct\n✓ Core public claims aligned with evidence\n⚠ Estate contract coverage remains incomplete unless estateCoverageComplete is true"
     : "⚠️  See findings above"
 }
 
@@ -401,10 +435,18 @@ ${
 
 **Report Generated:** ${new Date().toISOString()}
 **Gate Status:** ${auditResult.gateStatus}
-` + "\n"
+`
 );
 
 console.log(`\nWritten: ${join(REPORTS_DIR, "product-authority-contract.json")}`);
 console.log(`Written: ${join(REPORTS_DIR, "product-authority-contract.md")}`);
 
 process.exit(auditResult.gateStatus === "PASSED" ? 0 : 1);
+
+function readJson(file, fallback) {
+  try {
+    return JSON.parse(readFileSync(join(REPORTS_DIR, file), "utf8"));
+  } catch {
+    return fallback;
+  }
+}

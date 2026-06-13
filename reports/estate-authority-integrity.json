@@ -1,0 +1,226 @@
+{
+  "totalProducts": 43,
+  "productsClassified": 43,
+  "directAuthorityContracts": 9,
+  "productsMissingAuthorityContract": [
+    "boardroom_brief",
+    "decision_exposure_instrument",
+    "mandate_clarity_framework",
+    "intervention_path_selector",
+    "escalation_readiness_scorecard",
+    "structural_failure_diagnostic_canvas",
+    "execution_risk_index",
+    "team_alignment_gap_map",
+    "governance_drift_detector",
+    "strategic_priority_stack_builder",
+    "board_brief_builder",
+    "execution_integrity_protocol",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "operator_decision_pack",
+    "executive_reporting",
+    "strategy_room",
+    "boardroom_mode",
+    "case_dossier_tariff_shock",
+    "case_dossier_team_alignment",
+    "case_dossier_escalation_denied",
+    "retainer_core",
+    "retainer_operational",
+    "retainer_institutional",
+    "gmi_q1_2026",
+    "gmi_q2_2026",
+    "gmi_q3_2026",
+    "operator_essentials_pack",
+    "command_pack",
+    "governance_suite",
+    "inner_circle",
+    "diagnostic_report_basic",
+    "diagnostic_report_pro",
+    "executive_reporting_priority"
+  ],
+  "publicProductsMissingAuthorityContract": [
+    "boardroom_brief",
+    "decision_exposure_instrument",
+    "mandate_clarity_framework",
+    "intervention_path_selector",
+    "escalation_readiness_scorecard",
+    "structural_failure_diagnostic_canvas",
+    "execution_risk_index",
+    "team_alignment_gap_map",
+    "governance_drift_detector",
+    "strategic_priority_stack_builder",
+    "board_brief_builder",
+    "execution_integrity_protocol",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "operator_decision_pack",
+    "executive_reporting",
+    "strategy_room",
+    "boardroom_mode"
+  ],
+  "routesAudited": 7,
+  "routesDemonstratingAuthority": 4,
+  "checkoutFailures": [
+    "boardroom_brief",
+    "decision_exposure_instrument",
+    "mandate_clarity_framework",
+    "intervention_path_selector",
+    "escalation_readiness_scorecard",
+    "structural_failure_diagnostic_canvas",
+    "execution_risk_index",
+    "team_alignment_gap_map",
+    "governance_drift_detector",
+    "strategic_priority_stack_builder",
+    "board_brief_builder",
+    "execution_integrity_protocol",
+    "alignment_audit_playbook",
+    "drift_detection_framework",
+    "operator_decision_pack",
+    "executive_reporting"
+  ],
+  "adminSurfaceFailures": [
+    "boardroom_brief",
+    "executive_reporting"
+  ],
+  "reportSurfaceFailures": [
+    "boardroom_brief",
+    "board_brief_builder",
+    "executive_reporting",
+    "case_dossier_tariff_shock",
+    "case_dossier_team_alignment",
+    "case_dossier_escalation_denied",
+    "gmi_q1_2026",
+    "gmi_q2_2026",
+    "gmi_q3_2026",
+    "diagnostic_report_basic",
+    "diagnostic_report_pro",
+    "executive_reporting_priority"
+  ],
+  "publicClaimFailures": [],
+  "staticReferenceExemptions": [
+    {
+      "productCode": "case_dossier_tariff_shock",
+      "explicit": true,
+      "reason": "Case Dossier — Tariff Shock is a static/reference product unless evidence-governed logic is visible.",
+      "canClaimIntelligence": false,
+      "canClaimJudgement": false
+    },
+    {
+      "productCode": "case_dossier_team_alignment",
+      "explicit": true,
+      "reason": "Case Dossier — Team Alignment is a static/reference product unless evidence-governed logic is visible.",
+      "canClaimIntelligence": false,
+      "canClaimJudgement": false
+    },
+    {
+      "productCode": "case_dossier_escalation_denied",
+      "explicit": true,
+      "reason": "Case Dossier — Escalation Denied is a static/reference product unless evidence-governed logic is visible.",
+      "canClaimIntelligence": false,
+      "canClaimJudgement": false
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "explicit": true,
+      "reason": "Global Market Intelligence Report — Q1 2026 is a static/reference product unless evidence-governed logic is visible.",
+      "canClaimIntelligence": false,
+      "canClaimJudgement": false
+    }
+  ],
+  "internalOnlyExemptions": [
+    {
+      "productCode": "retainer_core",
+      "explicit": true,
+      "reason": "Decision Authority Retainer — Core is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "retainer_operational",
+      "explicit": true,
+      "reason": "Decision Authority Retainer — Operational is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "retainer_institutional",
+      "explicit": true,
+      "reason": "Decision Authority Retainer — Institutional is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "explicit": true,
+      "reason": "Global Market Intelligence Report — Q2 2026 is a static/reference product unless evidence-governed logic is visible."
+    },
+    {
+      "productCode": "gmi_q3_2026",
+      "explicit": true,
+      "reason": "Global Market Intelligence Report — Q3 2026 is a static/reference product unless evidence-governed logic is visible."
+    },
+    {
+      "productCode": "enterprise",
+      "explicit": true,
+      "reason": "Enterprise is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "additional_collaborator",
+      "explicit": true,
+      "reason": "Additional Collaborator is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "operator_essentials_pack",
+      "explicit": true,
+      "reason": "Operator Essentials is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "command_pack",
+      "explicit": true,
+      "reason": "Command Pack is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "governance_suite",
+      "explicit": true,
+      "reason": "Governance Suite is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "inner_circle",
+      "explicit": true,
+      "reason": "Inner Circle is internal-only or manually governed by design."
+    },
+    {
+      "productCode": "diagnostic_report_basic",
+      "explicit": true,
+      "reason": "Diagnostic Report — Basic is a static/reference product unless evidence-governed logic is visible."
+    },
+    {
+      "productCode": "diagnostic_report_pro",
+      "explicit": true,
+      "reason": "Diagnostic Report — Pro is a static/reference product unless evidence-governed logic is visible."
+    },
+    {
+      "productCode": "executive_reporting_priority",
+      "explicit": true,
+      "reason": "Executive Reporting — Advanced is a static/reference product unless evidence-governed logic is visible."
+    }
+  ],
+  "localPassesThatCannotImplyEstateReadiness": [
+    "category-route-proof: selected-route pattern pass cannot imply estate readiness; scope-contained by estate integrity lock",
+    "product-authority-contract: core contract validity pass cannot imply estate contract coverage; scope-contained by estate integrity lock"
+  ],
+  "readinessScope": "estate_partially_governed",
+  "gatePassed": false,
+  "localPassContainmentPassed": true,
+  "blockingReasons": [
+    "16 checkout / fulfilment authority failure(s).",
+    "2 admin release authority failure(s).",
+    "12 report-surface authority failure(s).",
+    "18 public/non-exempt product(s) missing direct ProductAuthorityContract coverage.",
+    "One or more local passes must be scope-contained and cannot imply estate readiness."
+  ],
+  "localGateResult": {
+    "routeProof": "PASSED_LOCAL_PATTERN_ONLY",
+    "categoryReadiness": "PASSED_LOCAL_PATTERN_ONLY",
+    "productAuthorityContract": "PASSED",
+    "checkout": "FAILED_WITH_FINDINGS",
+    "report": "FAILED_WITH_FINDINGS",
+    "admin": "FAILED_WITH_FINDINGS"
+  },
+  "estateCoverageResult": "estate_coverage_has_findings",
+  "finalAuthorityPosition": "Only scoped local pattern demonstration may be claimed; estate readiness is blocked."
+}

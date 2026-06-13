@@ -1,336 +1,196 @@
 #!/usr/bin/env node
-
 /**
- * scripts/check-category-demonstration-readiness.mjs
+ * Scope-aware category demonstration readiness gate.
  *
- * Category Demonstration Readiness Gate
- *
- * Verifies that the evidence-governed decision infrastructure is:
- * 1. Visible in major product surfaces
- * 2. Demonstrates value through user journeys
- * 3. Shows authority state (not just claims it)
- * 4. Shows limitations (not hides them)
- * 5. Shows market pain
- * 6. Shows contrast vs generic AI
- * 7. Free of unsupported overclaims
- *
- * Gate passes only if infrastructure is demonstrated, not just present.
+ * Selected route proof can demonstrate the pattern. It cannot declare estate,
+ * market, production, or category readiness unless the 43-product coverage
+ * matrix and dependent checkout/report/admin gates are clean.
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const ROOT = process.cwd();
-const REPORTS_DIR = join(ROOT, "reports");
+const REPORTS = join(ROOT, "reports");
 
-console.log("CATEGORY DEMONSTRATION READINESS GATE");
-console.log("Evaluating category readiness for market demonstration\n");
+const routeProof = readJson("category-route-proof.json", { routes: [] });
+const matrix = readJson("product-authority-coverage-matrix.json", { products: [] });
+const checkout = readJson("checkout-authority-coverage.json", { rows: [] });
+const report = readJson("report-authority-coverage.json", { rows: [] });
+const admin = readJson("admin-authority-coverage.json", { rows: [] });
+const contract = readJson("product-authority-contract.json", { contracts: [] });
+const surfaceClaims = readJson("surface-claim-authority.json", readJson("surface-claim-authority-gate.json", {}));
 
-// Load the route proof audit
-let routeProof = { routes: [], routesDemonstrating: 0, overclaim_risks: 0 };
-try {
-  const content = readFileSync(
-    join(REPORTS_DIR, "category-route-proof.json"),
-    "utf-8"
-  );
-  routeProof = JSON.parse(content);
-} catch (e) {
-  console.log("Note: Category route proof not yet generated; using default state");
-}
+const routesAudited = routeProof.routesAudited ?? routeProof.routes?.length ?? 0;
+const routesDemonstratingAuthority = routeProof.routesDemonstrating ?? routeProof.routes?.filter((route) => route.demonstrating).length ?? 0;
+const productsClassified = matrix.products?.length ?? 0;
+const checkoutFailures = failuresFrom(checkout);
+const reportFailures = failuresFrom(report);
+const adminFailures = failuresFrom(admin);
+const publicClaimFailures = publicClaimFailuresFrom(surfaceClaims);
+const productsMissingAuthorityContract = (matrix.products ?? [])
+  .filter((product) => !product.productAuthorityContractExists && !product.staticReferenceInternalExemption)
+  .map((product) => product.productCode);
 
-// Load product authority contracts
-let contracts = [];
-try {
-  const content = readFileSync(
-    join(REPORTS_DIR, "product-authority-contract.json"),
-    "utf-8"
-  );
-  const contractData = JSON.parse(content);
-  contracts = contractData.contracts || [];
-} catch (e) {
-  console.log("Note: Product authority contracts not yet loaded");
-}
+const estateCoverageClean = productsClassified === 43 &&
+  checkoutFailures.length === 0 &&
+  reportFailures.length === 0 &&
+  adminFailures.length === 0 &&
+  publicClaimFailures.length === 0 &&
+  productsMissingAuthorityContract.length === 0;
 
-const assessment = {
-  auditDate: new Date().toISOString(),
-  categories: {
-    infrastructure: {
-      name: "Infrastructure Completeness",
-      checks: {
-        contractsExist: contracts.length >= 4,
-        allContractsValid: contracts.length >= 4 && contracts.every(c => !c.blockingReasons || c.blockingReasons.length > 0 || c.currentAuthorityState === "externally_proven_gold_product"),
-        componentsExist: true, // We created them
-        gatesImplemented: true,
-      },
-      result: null,
-    },
-    visibility: {
-      name: "Surface Visibility",
-      checks: {
-        routesAudited: routeProof.routesAudited >= 5,
-        routesDemonstrating: routeProof.routesDemonstrating >= 3,
-        authorityRendered: routeProof.routesWithAuthority >= 3,
-        evidenceVisible: routeProof.routesWithEvidence >= 3,
-        limitationsShown: routeProof.routesWithLimitations >= 2,
-        nextActionClear: routeProof.routesWithNextAction >= 2,
-      },
-      result: null,
-    },
-    productExperience: {
-      name: "Product Experience",
-      checks: {
-        fastDiagnosticDemonstrates: routeProof.routes.some(
-          (r) =>
-            r.route.includes("fast") &&
-            r.readiness === "category_demonstrated"
-        ),
-        teamAssessmentShowsLegacy: routeProof.routes.some(
-          (r) =>
-            r.route.includes("team") &&
-            (r.readiness === "category_demonstrated" ||
-              r.readiness === "authority_visible_but_value_unclear")
-        ),
-        enterpriseAssessmentShowsLegacy: routeProof.routes.some(
-          (r) =>
-            r.route.includes("enterprise") &&
-            (r.readiness === "category_demonstrated" ||
-              r.readiness === "authority_visible_but_value_unclear")
-        ),
-        blockedProductsVisiblyBlocked: routeProof.routes.some(
-          (r) =>
-            r.route.includes("personal") &&
-            r.shows.blocking === true
-        ),
-      },
-      result: null,
-    },
-    safety: {
-      name: "Safety & Compliance",
-      checks: {
-        noOverclaims: routeProof.overclaim_risks === 0,
-        noUnsupportedLanguage: true, // Verified by other gates
-        allBlockingReasonsVisible: routeProof.routesWithLimitations >= 2,
-        noMockAuthorityInSurfaces: true, // Verified by other gates
-      },
-      result: null,
-    },
+const readinessScope = deriveScope({
+  routesDemonstratingAuthority,
+  productsClassified,
+  estateCoverageClean,
+});
+const localPatternPassed = routesDemonstratingAuthority >= 3;
+const gateStatus = estateCoverageClean
+  ? "PASSED_ESTATE"
+  : localPatternPassed
+    ? "PASSED_LOCAL_PATTERN_ONLY"
+    : "FAILED";
+
+const result = {
+  generatedAt: new Date().toISOString(),
+  gateStatus,
+  readinessScope,
+  estateReadinessAchieved: estateCoverageClean,
+  localPatternDemonstrated: localPatternPassed,
+  mandatoryStatusBlock: {
+    localGateResult: gateStatus,
+    estateCoverageResult: estateCoverageClean ? "estate_coverage_clean" : "estate_coverage_has_findings",
+    categoryReadinessScope: readinessScope,
+    productsCovered: `${productsClassified}/43`,
+    productsMissingCoverage: productsMissingAuthorityContract.length,
+    checkoutFailures: checkoutFailures.length,
+    reportFailures: reportFailures.length,
+    adminFailures: adminFailures.length,
+    finalAuthorityPosition: estateCoverageClean
+      ? "Estate category demonstration may be claimed."
+      : "Only selected-route pattern demonstration may be claimed.",
   },
+  routeProofSummary: {
+    routesAudited,
+    routesDemonstratingAuthority,
+    routesWithAuthority: routeProof.routesWithAuthority ?? 0,
+    routesWithEvidence: routeProof.routesWithEvidence ?? 0,
+    routesWithLimitations: routeProof.routesWithLimitations ?? 0,
+    routesWithNextAction: routeProof.routesWithNextAction ?? 0,
+    overclaimRisks: routeProof.overclaim_risks ?? 0,
+  },
+  estateSummary: {
+    productsClassified,
+    directContractsValidated: contract.contracts?.length ?? 0,
+    productsMissingAuthorityContract,
+    checkoutFailures,
+    reportFailures,
+    adminFailures,
+    publicClaimFailures,
+  },
+  blockingReasons: blockingReasons({
+    productsClassified,
+    checkoutFailures,
+    reportFailures,
+    adminFailures,
+    publicClaimFailures,
+    productsMissingAuthorityContract,
+  }),
 };
 
-// Compute results
-for (const [key, category] of Object.entries(assessment.categories)) {
-  const checks = Object.values(category.checks);
-  const passed = checks.filter((c) => c).length;
-  const total = checks.length;
-  category.passed = passed;
-  category.total = total;
-  category.result = passed === total ? "PASSED" : "FAILED";
+mkdirSync(REPORTS, { recursive: true });
+writeFileSync(join(REPORTS, "category-demonstration-readiness.json"), `${JSON.stringify(result, null, 2)}\n`);
+writeFileSync(join(REPORTS, "category-demonstration-readiness.md"), renderMarkdown(result));
+
+console.log("CATEGORY DEMONSTRATION READINESS GATE");
+console.log(`Local gate result: ${result.mandatoryStatusBlock.localGateResult}`);
+console.log(`Estate coverage result: ${result.mandatoryStatusBlock.estateCoverageResult}`);
+console.log(`Category readiness scope: ${result.readinessScope}`);
+console.log(`Products covered: ${result.mandatoryStatusBlock.productsCovered}`);
+console.log(`Checkout failures: ${checkoutFailures.length}`);
+console.log(`Report failures: ${reportFailures.length}`);
+console.log(`Admin failures: ${adminFailures.length}`);
+console.log(`Final authority position: ${result.mandatoryStatusBlock.finalAuthorityPosition}`);
+
+process.exit(gateStatus === "FAILED" ? 1 : 0);
+
+function deriveScope({ routesDemonstratingAuthority, productsClassified, estateCoverageClean }) {
+  if (estateCoverageClean) return "estate_category_demonstrated";
+  if (productsClassified === 43 && routesDemonstratingAuthority >= 8) return "estate_authority_visible_with_findings";
+  if (productsClassified === 43) return "estate_partially_governed";
+  if (routesDemonstratingAuthority >= 6) return "product_group_demonstrated";
+  if (routesDemonstratingAuthority >= 3) return "pattern_demonstrated_on_selected_routes";
+  return "not_category_ready";
 }
 
-// Overall readiness
-const allCategoriesPassed = Object.values(assessment.categories).every(
-  (c) => c.result === "PASSED"
-);
-
-const overallReadiness = routeProof.routesDemonstrating >= 3
-  ? "category_demonstrated"
-  : routeProof.routesDemonstrating >= 2
-    ? "category_foundation_ready"
-    : routeProof.routesDemonstrating >= 1
-      ? "infrastructure_wired_but_incomplete"
-      : "category_infrastructure_present_but_not_visible";
-
-const gateStatus = overallReadiness === "category_demonstrated" ? "PASSED" : "FAILED";
-
-// Summary
-console.log("ASSESSMENT RESULTS\n");
-
-for (const [key, category] of Object.entries(assessment.categories)) {
-  const checks = Object.entries(category.checks);
-  const passedCount = checks.filter(([_, v]) => v).length;
-  const totalCount = checks.length;
-
-  console.log(
-    `${category.name}: ${category.result} (${passedCount}/${totalCount})`
-  );
-  checks
-    .filter(([_, v]) => !v)
-    .forEach(([checkName]) => {
-      console.log(`  ✗ ${checkName}`);
-    });
+function blockingReasons(input) {
+  const reasons = [];
+  if (input.productsClassified !== 43) reasons.push("43/43 products are not classified.");
+  if (input.productsMissingAuthorityContract.length > 0) reasons.push(`${input.productsMissingAuthorityContract.length} public/non-exempt product(s) missing ProductAuthorityContract coverage.`);
+  if (input.checkoutFailures.length > 0) reasons.push(`${input.checkoutFailures.length} checkout / fulfilment authority failure(s).`);
+  if (input.reportFailures.length > 0) reasons.push(`${input.reportFailures.length} report-surface authority failure(s).`);
+  if (input.adminFailures.length > 0) reasons.push(`${input.adminFailures.length} admin release authority failure(s).`);
+  if (input.publicClaimFailures.length > 0) reasons.push(`${input.publicClaimFailures.length} unsupported public claim failure(s).`);
+  return reasons;
 }
 
-console.log(`\n${"=".repeat(70)}`);
-console.log("CATEGORY DEMONSTRATION READINESS");
-console.log(`${"=".repeat(70)}`);
-console.log(
-  `\nOverall Status: ${overallReadiness.toUpperCase().replace(/_/g, " ")}`
-);
-console.log(`Gate Status: ${gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
-
-console.log(`\nRoute Proof Summary:`);
-console.log(`  Routes Audited: ${routeProof.routesAudited}`);
-console.log(
-  `  Routes Demonstrating: ${routeProof.routesDemonstrating}`
-);
-console.log(
-  `  Overclaim Risks: ${routeProof.overclaim_risks}`
-);
-
-console.log(`\nProduct Authority States:`);
-console.log(`  Externally Proven: ${contracts.filter((c) => c.currentAuthorityState === "externally_proven_gold_product").length}`);
-console.log(`  Legacy Pending v2: ${contracts.filter((c) => c.currentAuthorityState === "legacy_validated_pending_v2_revalidation").length}`);
-console.log(`  Blocked: ${contracts.filter((c) => c.currentAuthorityState.includes("blocked")).length}`);
-
-console.log(`\n${"=".repeat(70)}`);
-console.log("REQUIREMENTS FOR CATEGORY_DEMONSTRATED");
-console.log(`${"=".repeat(70)}`);
-console.log(`\n1. Infrastructure Completeness`);
-console.log(`   ${assessment.categories.infrastructure.result === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
-if (assessment.categories.infrastructure.result !== "PASSED") {
-  const failed = Object.entries(assessment.categories.infrastructure.checks)
-    .filter(([_, v]) => !v)
-    .map(([name]) => name);
-  failed.forEach((f) => console.log(`     Missing: ${f}`));
+function failuresFrom(report) {
+  return (report.rows ?? [])
+    .filter((row) => row.result === "FAIL")
+    .map((row) => row.productCode ?? row.route ?? row.name)
+    .filter(Boolean);
 }
 
-console.log(`\n2. Surface Visibility`);
-console.log(`   ${assessment.categories.visibility.result === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
-if (assessment.categories.visibility.result !== "PASSED") {
-  const failed = Object.entries(assessment.categories.visibility.checks)
-    .filter(([_, v]) => !v)
-    .map(([name]) => name);
-  failed.forEach((f) => console.log(`     Needed: ${f}`));
+function publicClaimFailuresFrom(report) {
+  if (Array.isArray(report.unsupportedClaims)) return report.unsupportedClaims;
+  if (typeof report.unsupportedClaims === "number" && report.unsupportedClaims > 0) return [`${report.unsupportedClaims} unsupported claims`];
+  if (Array.isArray(report.findings)) {
+    return report.findings.filter((finding) => /unsupported|overclaim|exceeds/i.test(JSON.stringify(finding)));
+  }
+  return [];
 }
 
-console.log(`\n3. Product Experience`);
-console.log(`   ${assessment.categories.productExperience.result === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
-if (assessment.categories.productExperience.result !== "PASSED") {
-  const failed = Object.entries(assessment.categories.productExperience.checks)
-    .filter(([_, v]) => !v)
-    .map(([name]) => name);
-  failed.forEach((f) => console.log(`     Missing: ${f}`));
+function readJson(file, fallback) {
+  try {
+    return JSON.parse(readFileSync(join(REPORTS, file), "utf8"));
+  } catch {
+    return fallback;
+  }
 }
 
-console.log(`\n4. Safety & Compliance`);
-console.log(`   ${assessment.categories.safety.result === "PASSED" ? "✓ PASSED" : "✗ FAILED"}`);
-if (assessment.categories.safety.result !== "PASSED") {
-  const failed = Object.entries(assessment.categories.safety.checks)
-    .filter(([_, v]) => !v)
-    .map(([name]) => name);
-  failed.forEach((f) => console.log(`     Issue: ${f}`));
-}
+function renderMarkdown(data) {
+  return `# Category Demonstration Readiness
 
-// Write reports
-mkdirSync(REPORTS_DIR, { recursive: true });
+## Mandatory Status Block
 
-writeFileSync(
-  join(REPORTS_DIR, "category-demonstration-readiness.json"),
-  JSON.stringify({ assessment, overallReadiness, gateStatus }, null, 2) + "\n"
-);
+- Local Gate Result: ${data.mandatoryStatusBlock.localGateResult}
+- Estate Coverage Result: ${data.mandatoryStatusBlock.estateCoverageResult}
+- Category Readiness Scope: ${data.mandatoryStatusBlock.categoryReadinessScope}
+- Products Covered: ${data.mandatoryStatusBlock.productsCovered}
+- Products Missing Coverage: ${data.mandatoryStatusBlock.productsMissingCoverage}
+- Checkout Failures: ${data.mandatoryStatusBlock.checkoutFailures}
+- Report Failures: ${data.mandatoryStatusBlock.reportFailures}
+- Admin Failures: ${data.mandatoryStatusBlock.adminFailures}
+- Final Authority Position: ${data.mandatoryStatusBlock.finalAuthorityPosition}
 
-const markdownReport = `# Category Demonstration Readiness — Assessment Report
+## Route Pattern Proof
 
-**Assessment Date:** ${new Date().toISOString()}
+- Routes audited: ${data.routeProofSummary.routesAudited}
+- Routes demonstrating authority pattern: ${data.routeProofSummary.routesDemonstratingAuthority}
+- Routes with authority visible: ${data.routeProofSummary.routesWithAuthority}
+- Routes with evidence visible: ${data.routeProofSummary.routesWithEvidence}
+- Routes with limitations shown: ${data.routeProofSummary.routesWithLimitations}
+- Routes with next action clear: ${data.routeProofSummary.routesWithNextAction}
+- Overclaim risks: ${data.routeProofSummary.overclaimRisks}
 
-## Overall Status
+## Estate Blockers
 
-**Readiness Level:** \`${overallReadiness}\`
+${data.blockingReasons.length ? data.blockingReasons.map((reason) => `- ${reason}`).join("\n") : "- None"}
 
-**Gate Status:** ${gateStatus === "PASSED" ? "✓ PASSED" : "✗ FAILED"}
+## Interpretation
 
-## Readiness Levels
-
-- **category_demonstrated** — Evidence-governed infrastructure is visible in product surfaces and demonstrates value
-- **category_foundation_ready** — Foundation is in place; needs more surface integration
-- **infrastructure_wired_but_incomplete** — Some routes demonstrate; needs more coverage
-- **category_infrastructure_present_but_not_visible** — Infrastructure exists but is not yet visible to users
-
-## Assessment Results
-
-### Infrastructure Completeness
-
-${
-  assessment.categories.infrastructure.result === "PASSED"
-    ? "✓ PASSED\n\nAll required infrastructure components are in place."
-    : `✗ FAILED\n\nMissing components:\n${Object.entries(assessment.categories.infrastructure.checks)
-        .filter(([_, v]) => !v)
-        .map(([name]) => `- ${name}`)
-        .join("\n")}`
-}
-
-### Surface Visibility
-
-${
-  assessment.categories.visibility.result === "PASSED"
-    ? "✓ PASSED\n\nProductAuthorityContract is visible across major product surfaces."
-    : `✗ FAILED\n\nNeeded:\n${Object.entries(assessment.categories.visibility.checks)
-        .filter(([_, v]) => !v)
-        .map(([name]) => `- ${name}`)
-        .join("\n")}`
-}
-
-**Route Audit Summary:**
-- Routes Audited: ${routeProof.routesAudited}
-- Routes Demonstrating Category: ${routeProof.routesDemonstrating}
-- Routes With Authority Visible: ${routeProof.routesWithAuthority}
-- Routes With Evidence Visible: ${routeProof.routesWithEvidence}
-- Routes With Limitations Shown: ${routeProof.routesWithLimitations}
-
-### Product Experience
-
-${
-  assessment.categories.productExperience.result === "PASSED"
-    ? "✓ PASSED\n\nAll major products show appropriate authority state."
-    : `✗ FAILED\n\nMissing:\n${Object.entries(assessment.categories.productExperience.checks)
-        .filter(([_, v]) => !v)
-        .map(([name]) => `- ${name}`)
-        .join("\n")}`
-}
-
-**Product Authority States:**
-- Externally Proven (fast_diagnostic): ${contracts.filter((c) => c.currentAuthorityState === "externally_proven_gold_product").length > 0 ? "✓" : "✗"}
-- Legacy Pending v2 (team_assessment, enterprise_assessment): ${contracts.filter((c) => c.currentAuthorityState === "legacy_validated_pending_v2_revalidation").length >= 2 ? "✓" : "✗"}
-- Blocked (personal_decision_audit): ${contracts.filter((c) => c.currentAuthorityState.includes("blocked")).length > 0 ? "✓" : "✗"}
-
-### Safety & Compliance
-
-${
-  assessment.categories.safety.result === "PASSED"
-    ? "✓ PASSED\n\nNo overclaims or unsafe authority patterns detected."
-    : `✗ FAILED\n\nIssues:\n${Object.entries(assessment.categories.safety.checks)
-        .filter(([_, v]) => !v)
-        .map(([name]) => `- ${name}`)
-        .join("\n")}`
-}
-
-**Overclaim Risk:** ${routeProof.overclaim_risks === 0 ? "✓ None detected" : `✗ ${routeProof.overclaim_risks} routes need attention`}
-
-## Path to Category_Demonstrated
-
-${
-  gateStatus === "PASSED"
-    ? "✓ Category is ready for market demonstration."
-    : `Infrastructure exists but needs surface integration:\n\n1. Wire ProductAuthorityContract into ${Math.max(0, 3 - routeProof.routesDemonstrating)} more major routes\n2. Ensure each route shows: authority state, evidence status, limitations, next action\n3. Verify fast_diagnostic demonstrates the category experience\n4. Ensure blocked/legacy products show their status visibly\n5. Remove any overclaims (${routeProof.overclaim_risks} detected)`
-}
-
----
-
-**Assessment Generated:** ${new Date().toISOString()}
-**Gate Status:** ${gateStatus}
-**Next Action:** ${
-  gateStatus === "PASSED"
-    ? "Category demonstration infrastructure is ready for market deployment."
-    : "Integrate ProductAuthorityContract into priority routes and re-assess."
-}
+${data.estateReadinessAchieved
+  ? "Estate coverage is clean; estate category demonstration may be claimed."
+  : "Selected routes demonstrate the pattern only. Estate readiness remains blocked until coverage failures are cleared."}
 `;
-
-writeFileSync(
-  join(REPORTS_DIR, "category-demonstration-readiness.md"),
-  markdownReport + "\n"
-);
-
-console.log(`\nWritten: ${join(REPORTS_DIR, "category-demonstration-readiness.json")}`);
-console.log(`Written: ${join(REPORTS_DIR, "category-demonstration-readiness.md")}`);
-
-process.exit(gateStatus === "PASSED" ? 0 : 1);
+}
