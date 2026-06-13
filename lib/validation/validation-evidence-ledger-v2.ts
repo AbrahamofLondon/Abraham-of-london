@@ -81,7 +81,7 @@ export interface ValidationEvidenceRecord {
   blockingReasons: string[];
 
   // Ledger Integrity
-  ledgerEntry CreatedAt: string;
+  ledgerEntryCreatedAt: string;
   ledgerEntryHash: string;
   ledgerEntrySignatory: string; // operator or system that created this
   ledgerPreviousEntryHash?: string; // for chain validation
@@ -180,6 +180,12 @@ export function validateLedgerChain(
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
 
+    if (!entry) {
+      errors.push(`Entry ${i} is missing or undefined`);
+      brokenLinks.push(i);
+      continue;
+    }
+
     // Validate entry itself
     const entryValidation = validateLedgerEntry(entry);
     if (!entryValidation.valid) {
@@ -190,7 +196,10 @@ export function validateLedgerChain(
     // Validate chain link
     if (i > 0) {
       const prevEntry = entries[i - 1];
-      if (entry.ledgerPreviousEntryHash !== prevEntry.ledgerEntryHash) {
+      if (!prevEntry) {
+        errors.push(`Entry ${i} chain link broken: previous entry is missing`);
+        brokenLinks.push(i);
+      } else if (entry.ledgerPreviousEntryHash !== prevEntry.ledgerEntryHash) {
         errors.push(`Entry ${i} chain link broken: hash mismatch with entry ${i - 1}`);
         brokenLinks.push(i);
       }

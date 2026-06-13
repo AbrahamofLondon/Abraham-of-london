@@ -76,7 +76,7 @@ export function initializeFrozenScenarioRegistry(scenarios: Record<string, any>[
     registryDate: new Date().toISOString(),
     scenarios: PERSONAL_DECISION_AUDIT_SCENARIOS.map((scenario, idx) => ({
       ...scenario,
-      scenarioHash: idx < scenarios.length ? hashScenario(scenarios[idx]) : scenario.scenarioHash,
+      scenarioHash: idx < scenarios.length && scenarios[idx] ? hashScenario(scenarios[idx]) : scenario.scenarioHash,
     })),
   };
 
@@ -97,8 +97,16 @@ export function verifyScenariosMatch(
   }
 
   for (let i = 0; i < Math.min(currentScenarios.length, frozenRegistry.scenarios.length); i++) {
-    const currentHash = hashScenario(currentScenarios[i]);
-    const frozenHash = frozenRegistry.scenarios[i]?.scenarioHash;
+    const current = currentScenarios[i];
+    const frozen = frozenRegistry.scenarios[i];
+
+    if (!current || !frozen) {
+      mismatches.push(`Scenario ${i} is missing or undefined`);
+      continue;
+    }
+
+    const currentHash = hashScenario(current);
+    const frozenHash = frozen.scenarioHash;
 
     if (currentHash !== frozenHash) {
       mismatches.push(

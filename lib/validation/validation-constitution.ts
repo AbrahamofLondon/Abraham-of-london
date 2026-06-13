@@ -64,7 +64,7 @@ export const VALIDATION_CONSTITUTION: ValidationConstitutionRule[] = [
     priority: 98,
     name: "No Scorer/Product Coupling",
     principle: "Scorer changes and product changes must not occur in the same validation pass.",
-    appliesTo: ["product", "benchmark", "validation_ledger"],
+    appliesTo: ["product", "benchmark", "evidence_ledger"],
     violationCondition: "Scorer changed AND product changed in same pass, result marked as product upgrade",
     requiredResponse: "mark_measurement_inconclusive",
     severity: "critical",
@@ -88,6 +88,7 @@ export const VALIDATION_CONSTITUTION: ValidationConstitutionRule[] = [
 
   {
     id: "rule_4_reasoning_chain_required",
+    name: "Reasoning Chain Required",
     principle: "No product may claim judgement without reasoning-chain evidence.",
     priority: 90,
     appliesTo: ["product", "artifact", "report"],
@@ -227,13 +228,15 @@ export function validateAgainstConstitution(
 
   // Rule 1: No single metric upgrade
   if (validationResult.decisionForcePassed === true && validationResult.fullValidationChainPassed !== true) {
-    violatedRules.push(VALIDATION_CONSTITUTION[0]); // rule_1
+    const rule1 = VALIDATION_CONSTITUTION.find((r) => r.id === "rule_1_no_single_metric_upgrade");
+    if (rule1) violatedRules.push(rule1);
     blockingReasons.push("Decision-force passed but full validation chain not complete (Rule 1)");
   }
 
   // Rule 2: No scorer/product coupling
   if (validationResult.scorerChangedThisPass && validationResult.productChangedThisPass) {
-    violatedRules.push(VALIDATION_CONSTITUTION[1]); // rule_2
+    const rule2 = VALIDATION_CONSTITUTION.find((r) => r.id === "rule_2_no_scorer_product_coupling");
+    if (rule2) violatedRules.push(rule2);
     blockingReasons.push("Scorer AND product both changed in same pass (Rule 2)");
   }
 
@@ -244,19 +247,22 @@ export function validateAgainstConstitution(
     validationResult.genericAiComparisonPassed !== true ||
     validationResult.marketComparisonPassed !== true
   ) {
-    violatedRules.push(VALIDATION_CONSTITUTION[2]); // rule_3
+    const rule3 = VALIDATION_CONSTITUTION.find((r) => r.id === "rule_3_full_validation_chain");
+    if (rule3) violatedRules.push(rule3);
     blockingReasons.push("Full validation chain not complete (Rule 3)");
   }
 
   // Rule 8: No manual override
   if (validationResult.manualClassificationOverride === true) {
-    violatedRules.push(VALIDATION_CONSTITUTION[7]); // rule_8
+    const rule8 = VALIDATION_CONSTITUTION.find((r) => r.id === "rule_8_no_manual_override");
+    if (rule8) violatedRules.push(rule8);
     blockingReasons.push("Manual classification override detected (Rule 8)");
   }
 
   // Rule 9: Frozen scenarios
   if (validationResult.scenarioChangedThisPass && validationResult.productChangedThisPass) {
-    violatedRules.push(VALIDATION_CONSTITUTION[8]); // rule_9
+    const rule9 = VALIDATION_CONSTITUTION.find((r) => r.id === "rule_9_frozen_scenarios");
+    if (rule9) violatedRules.push(rule9);
     blockingReasons.push("Scenario set AND product both changed in same pass (Rule 9)");
   }
 
