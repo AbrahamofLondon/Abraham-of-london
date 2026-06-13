@@ -5,9 +5,14 @@ import BoardBriefBuilderRunner from "@/components/instruments/BoardBriefBuilderR
 import { track } from "@/lib/analytics/track";
 import type { BoardBriefResult } from "@/lib/instruments/board-brief-template/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 const BoardBriefRun: NextPage = () => {
   const [result, setResult] = React.useState<BoardBriefResult | null>(null);
+  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'board_brief_builder');
+  const contract = config ? resolveProductAuthority(config) : null;
   const [resultKey, setResultKey] = React.useState<string | null>(null);
 
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "board-brief-builder" }); }, []);
@@ -43,6 +48,14 @@ const BoardBriefRun: NextPage = () => {
         { label: "Dossier", value: resultKey ? "PDF dossier available" : "Complete to unlock dossier" },
       ] : undefined}
     >
+      {!result && contract && (
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
+          <ProductAuthorityPanel contract={contract} />
+          <div style={{ marginTop: '0.75rem' }}>
+            <ProductAuthorityNotice contract={contract} />
+          </div>
+        </div>
+      )}
       {!result ? (
         <BoardBriefBuilderRunner onComplete={handleComplete} />
       ) : (
