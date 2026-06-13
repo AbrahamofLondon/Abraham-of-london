@@ -19,6 +19,7 @@ import {
   enforceConstitutionRequirement,
   getConstitutionalClassification,
 } from "./lib/require-validation-constitution.mjs";
+import { hasValidV2Evidence } from "./lib/read-evidence-ledger-v2.mjs";
 
 const ROOT = process.cwd();
 const REPORTS_DIR = join(ROOT, "reports");
@@ -47,21 +48,24 @@ const legacyPending = [
     currentClassification: "legacy_validated_pending_v2_revalidation",
     priorEvidence: "externally_proven_gold_product",
     recoveryPath: "v2_evidence_revalidation",
-    recoveryStatus: "pending",
+    recoveryStatus: hasValidV2Evidence("fast_diagnostic").valid ? "v2_evidence_ready" : "pending",
+    v2EvidenceValid: hasValidV2Evidence("fast_diagnostic").valid,
   },
   {
     productCode: "team_assessment",
     currentClassification: "legacy_validated_pending_v2_revalidation",
     priorEvidence: "externally_proven_gold_product",
     recoveryPath: "v2_evidence_revalidation",
-    recoveryStatus: "pending",
+    recoveryStatus: hasValidV2Evidence("team_assessment").valid ? "v2_evidence_ready" : "pending",
+    v2EvidenceValid: hasValidV2Evidence("team_assessment").valid,
   },
   {
     productCode: "enterprise_assessment",
     currentClassification: "legacy_validated_pending_v2_revalidation",
     priorEvidence: "externally_proven_gold_product",
     recoveryPath: "v2_evidence_revalidation",
-    recoveryStatus: "pending",
+    recoveryStatus: hasValidV2Evidence("enterprise_assessment").valid ? "v2_evidence_ready" : "pending",
+    v2EvidenceValid: hasValidV2Evidence("enterprise_assessment").valid,
   },
 ];
 
@@ -107,6 +111,8 @@ for (const legacy of legacyPending) {
       `${legacy.productCode}: ${legacy.currentClassification}, pending v2 revalidation`
     );
     console.log(`  ⏸️  Awaiting v2 revalidation`);
+  } else if (legacy.recoveryStatus === "v2_evidence_ready") {
+    console.log(`  ✓ V2 evidence ready, awaiting gate authorization`);
   }
 }
 

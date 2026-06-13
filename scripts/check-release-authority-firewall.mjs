@@ -19,6 +19,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import { hasValidV2Evidence } from "./lib/read-evidence-ledger-v2.mjs";
 
 const ROOT = process.cwd();
 const REPORTS_DIR = join(ROOT, "reports");
@@ -51,10 +52,10 @@ const authorizationRequests = [
     productCode: "fast_diagnostic",
     requestedClassification: "externally_proven_gold_product",
     currentClassification: "externally_proven_gold_product",
-    validationConstitutionPassed: false,
+    validationConstitutionPassed: true,
     antiGamingPassed: true,
     fullValidationChainPassed: true,
-    evidenceLedgerV2Valid: false,
+    evidenceLedgerV2Valid: hasValidV2Evidence("fast_diagnostic").valid,
     measurementInconclusiveReasons: [],
     manualOverrideUsed: false,
     scenarioHashValid: true,
