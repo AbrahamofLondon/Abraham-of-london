@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T19:46:49.491Z",
+  "generatedAt": "2026-06-13T19:59:56.760Z",
   "gateResult": "PASSED_AS_AUDIT_WITH_CRITICAL_FINDINGS",
   "commit": "not_committed_by_audit_script",
   "previousFalseCompletionReclassification": {
@@ -36,24 +36,24 @@
     "misleading_gate": 1
   },
   "claimLeakageResult": {
-    "totalFindings": 51852,
-    "highRiskFindings": 17306,
+    "totalFindings": 53741,
+    "highRiskFindings": 17594,
     "byStatus": {
-      "needs authority state check": 16683,
-      "unsupported": 623,
-      "bounded": 27095,
-      "stale": 7451
+      "needs authority state check": 16962,
+      "unsupported": 632,
+      "bounded": 28209,
+      "stale": 7938
     }
   },
   "evidenceLedgerRealityResult": {
-    "ledger_missing_runtime_output": 1
+    "ledger_report_only": 1
   },
   "completionClaimAuditResult": {
-    "totalClaims": 7964,
-    "questionableClaims": 6674,
+    "totalClaims": 8009,
+    "questionableClaims": 6694,
     "byStatus": {
-      "supported_scope_limited": 1290,
-      "requires_evidence_check": 6429,
+      "supported_scope_limited": 1315,
+      "requires_evidence_check": 6449,
       "unknown": 245
     }
   },
@@ -178,7 +178,7 @@
   "worktreeStatus": "Run git status --short after this audit; pre-existing dirty files were present before audit generation.",
   "parts": {
     "reportIntegrity": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "generatedAt": "2026-06-13T19:59:56.760Z",
       "reportsAudited": 11,
       "counts": {
         "partially accurate": 5,
@@ -451,7 +451,7 @@
       ]
     },
     "runtimeWiring": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "generatedAt": "2026-06-13T19:59:56.760Z",
       "productsAudited": 19,
       "summary": {
         "runtimeWired": 11,
@@ -805,7 +805,7 @@
       ]
     },
     "gateMeaningfulness": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "generatedAt": "2026-06-13T19:59:56.760Z",
       "gatesAudited": 8,
       "summary": {
         "medium_gate": 4,
@@ -1003,7 +1003,7 @@
       ]
     },
     "authorityReality": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "generatedAt": "2026-06-13T19:59:56.760Z",
       "productsAudited": 19,
       "summary": {
         "authority_blocked_correctly": 12,
@@ -1342,16 +1342,16 @@
       ]
     },
     "claimLeakage": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
-      "filesScanned": 5998,
+      "generatedAt": "2026-06-13T19:59:56.760Z",
+      "filesScanned": 6013,
       "summary": {
-        "totalFindings": 51852,
-        "highRiskFindings": 17306,
+        "totalFindings": 53741,
+        "highRiskFindings": 17594,
         "byStatus": {
-          "needs authority state check": 16683,
-          "unsupported": 623,
-          "bounded": 27095,
-          "stale": 7451
+          "needs authority state check": 16962,
+          "unsupported": 632,
+          "bounded": 28209,
+          "stale": 7938
         }
       },
       "highRiskFindings": [
@@ -5210,10 +5210,10 @@
       ]
     },
     "evidenceLedger": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
+      "generatedAt": "2026-06-13T19:59:56.760Z",
       "entriesAudited": 1,
       "summary": {
-        "ledger_missing_runtime_output": 1
+        "ledger_report_only": 1
       },
       "rows": [
         {
@@ -5224,7 +5224,7 @@
           "scenarioFileExists": true,
           "renderedOutputCaptured": true,
           "outputHashPresent": true,
-          "renderedOutputFileExists": false,
+          "renderedOutputFileExists": true,
           "validationRunHashExists": true,
           "qualityTests": [
             {
@@ -5285,23 +5285,22 @@
             "authorityDenied": [],
             "matchesCurrentContract": false
           },
-          "classification": "ledger_missing_runtime_output",
+          "classification": "ledger_report_only",
           "blockingReasons": [
-            "Rendered output artifact matching output hash was not found outside the ledger report.",
             "Ledger authority decision does not match current ProductAuthorityContract state."
           ]
         }
       ]
     },
     "completionClaims": {
-      "generatedAt": "2026-06-13T19:46:49.491Z",
-      "filesScanned": 4927,
+      "generatedAt": "2026-06-13T19:59:56.760Z",
+      "filesScanned": 4937,
       "summary": {
-        "totalClaims": 7964,
-        "questionableClaims": 6674,
+        "totalClaims": 8009,
+        "questionableClaims": 6694,
         "byStatus": {
-          "supported_scope_limited": 1290,
-          "requires_evidence_check": 6429,
+          "supported_scope_limited": 1315,
+          "requires_evidence_check": 6449,
           "unknown": 245
         }
       },
@@ -5361,6 +5360,13 @@
           "term": "complete",
           "supportStatus": "requires_evidence_check",
           "context": "**Status**: Anti-Gaming Hardening COMPLETE"
+        },
+        {
+          "file": "reports/authority-grant-firewall-results.md",
+          "line": 5,
+          "term": "verified",
+          "supportStatus": "requires_evidence_check",
+          "context": "Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY"
         },
         {
           "file": "reports/authority-surface-integration.md",
@@ -7048,13 +7054,6 @@
           "term": "ready",
           "supportStatus": "requires_evidence_check",
           "context": "Context: \"\"SIMULATION_ONLY→PILOT_READY\": [\""
-        },
-        {
-          "file": "reports/product-surface-claims.md",
-          "line": 8857,
-          "term": "ready",
-          "supportStatus": "requires_evidence_check",
-          "context": "Context: \"\"PILOT_READY→LIVE_GOVERNED\": [\""
         }
       ],
       "sampleClaims": [
@@ -7141,6 +7140,20 @@
           "term": "complete",
           "supportStatus": "requires_evidence_check",
           "context": "**Status**: Anti-Gaming Hardening COMPLETE"
+        },
+        {
+          "file": "reports/authority-fraud-scenario-results.md",
+          "line": 16,
+          "term": "complete",
+          "supportStatus": "supported_scope_limited",
+          "context": "| report_complete_contract_pending | report says complete but contract still pending | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | BLOCKED |  |"
+        },
+        {
+          "file": "reports/authority-grant-firewall-results.md",
+          "line": 5,
+          "term": "verified",
+          "supportStatus": "requires_evidence_check",
+          "context": "Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY"
         },
         {
           "file": "reports/authority-surface-integration.md",
@@ -9143,20 +9156,6 @@
           "term": "ready",
           "supportStatus": "requires_evidence_check",
           "context": "- Customer access banner updated: \"Strategy Room access is active. The execution tool is ready.\""
-        },
-        {
-          "file": "reports/product-live-proof-closeout.md",
-          "line": 87,
-          "term": "complete",
-          "supportStatus": "supported_scope_limited",
-          "context": "**Next action:** Complete a real Stripe checkout for strategy_room and confirm entitlement record in DB"
-        },
-        {
-          "file": "reports/product-live-proof-closeout.md",
-          "line": 102,
-          "term": "complete",
-          "supportStatus": "supported_scope_limited",
-          "context": "**Next action:** Complete a live Professional subscription checkout; confirm `ClientEntitlement` with `entitlementSlug: \"tier.professional\"` is created; confirm subscription renewal cycle does not break access"
         }
       ]
     }

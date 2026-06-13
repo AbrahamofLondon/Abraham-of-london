@@ -1,17 +1,17 @@
 # System Truth Completion Claim Audit
 
-Generated: 2026-06-13T19:46:49.491Z
+Generated: 2026-06-13T19:59:56.760Z
 
-Files scanned: 4927
+Files scanned: 4937
 
-Total completion claims: 7964
+Total completion claims: 8009
 
-Questionable claims: 6674
+Questionable claims: 6694
 
 ## Status Counts
 
-- supported_scope_limited: 1290
-- requires_evidence_check: 6429
+- supported_scope_limited: 1315
+- requires_evidence_check: 6449
 - unknown: 245
 
 ## Questionable Claims
@@ -26,6 +26,7 @@ Questionable claims: 6674
 | reports/anti-gaming-validation-hardening.md | 111 | complete | requires_evidence_check | - ✓ Evidence ledger complete |
 | reports/anti-gaming-validation-hardening.md | 189 | complete | requires_evidence_check | - Validation chain incomplete |
 | reports/anti-gaming-validation-hardening.md | 359 | complete | requires_evidence_check | **Status**: Anti-Gaming Hardening COMPLETE |
+| reports/authority-grant-firewall-results.md | 5 | verified | requires_evidence_check | Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY |
 | reports/authority-surface-integration.md | 29 | complete | requires_evidence_check | - **ProductAuthorityPanel** — Shows complete authority details and evidence |
 | reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 4 | complete | requires_evidence_check | **Status:** COMPLETE ✓ |
 | reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 43 | complete | requires_evidence_check | Displays complete authority details with expandable detail section. |
@@ -267,4 +268,3 @@ Questionable claims: 6674
 | reports/product-surface-claims.md | 8236 | ready | requires_evidence_check | Context: "* Compiles registry data into a board-ready intelligence brief." |
 | reports/product-surface-claims.md | 8494 | complete | requires_evidence_check | Context: ""boardroom-mode":               "The executive brief for this surface is incomplete or contradictory" |
 | reports/product-surface-claims.md | 8851 | ready | requires_evidence_check | Context: ""SIMULATION_ONLY→PILOT_READY": [" |
-| reports/product-surface-claims.md | 8857 | ready | requires_evidence_check | Context: ""PILOT_READY→LIVE_GOVERNED": [" |

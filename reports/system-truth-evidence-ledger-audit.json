@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-13T19:46:49.491Z",
+  "generatedAt": "2026-06-13T19:59:56.760Z",
   "entriesAudited": 1,
   "summary": {
-    "ledger_missing_runtime_output": 1
+    "ledger_report_only": 1
   },
   "rows": [
     {
@@ -13,7 +13,7 @@
       "scenarioFileExists": true,
       "renderedOutputCaptured": true,
       "outputHashPresent": true,
-      "renderedOutputFileExists": false,
+      "renderedOutputFileExists": true,
       "validationRunHashExists": true,
       "qualityTests": [
         {
@@ -74,9 +74,8 @@
         "authorityDenied": [],
         "matchesCurrentContract": false
       },
-      "classification": "ledger_missing_runtime_output",
+      "classification": "ledger_report_only",
       "blockingReasons": [
-        "Rendered output artifact matching output hash was not found outside the ledger report.",
         "Ledger authority decision does not match current ProductAuthorityContract state."
       ]
     }

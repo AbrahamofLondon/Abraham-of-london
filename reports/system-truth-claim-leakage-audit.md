@@ -1,19 +1,19 @@
 # System Truth Claim Leakage Audit
 
-Generated: 2026-06-13T19:46:49.491Z
+Generated: 2026-06-13T19:59:56.760Z
 
-Files scanned: 5998
+Files scanned: 6013
 
-Total findings: 51852
+Total findings: 53741
 
-High-risk findings: 17306
+High-risk findings: 17594
 
 ## Status Counts
 
-- needs authority state check: 16683
-- unsupported: 623
-- bounded: 27095
-- stale: 7451
+- needs authority state check: 16962
+- unsupported: 632
+- bounded: 28209
+- stale: 7938
 
 ## High-Risk Findings
 

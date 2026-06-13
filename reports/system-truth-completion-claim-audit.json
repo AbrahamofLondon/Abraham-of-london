@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-13T19:46:49.491Z",
-  "filesScanned": 4927,
+  "generatedAt": "2026-06-13T19:59:56.760Z",
+  "filesScanned": 4937,
   "summary": {
-    "totalClaims": 7964,
-    "questionableClaims": 6674,
+    "totalClaims": 8009,
+    "questionableClaims": 6694,
     "byStatus": {
-      "supported_scope_limited": 1290,
-      "requires_evidence_check": 6429,
+      "supported_scope_limited": 1315,
+      "requires_evidence_check": 6449,
       "unknown": 245
     }
   },
@@ -66,6 +66,13 @@
       "term": "complete",
       "supportStatus": "requires_evidence_check",
       "context": "**Status**: Anti-Gaming Hardening COMPLETE"
+    },
+    {
+      "file": "reports/authority-grant-firewall-results.md",
+      "line": 5,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY"
     },
     {
       "file": "reports/authority-surface-integration.md",
@@ -1753,13 +1760,6 @@
       "term": "ready",
       "supportStatus": "requires_evidence_check",
       "context": "Context: \"\"SIMULATION_ONLY→PILOT_READY\": [\""
-    },
-    {
-      "file": "reports/product-surface-claims.md",
-      "line": 8857,
-      "term": "ready",
-      "supportStatus": "requires_evidence_check",
-      "context": "Context: \"\"PILOT_READY→LIVE_GOVERNED\": [\""
     }
   ],
   "sampleClaims": [
@@ -1846,6 +1846,20 @@
       "term": "complete",
       "supportStatus": "requires_evidence_check",
       "context": "**Status**: Anti-Gaming Hardening COMPLETE"
+    },
+    {
+      "file": "reports/authority-fraud-scenario-results.md",
+      "line": 16,
+      "term": "complete",
+      "supportStatus": "supported_scope_limited",
+      "context": "| report_complete_contract_pending | report says complete but contract still pending | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | BLOCKED |  |"
+    },
+    {
+      "file": "reports/authority-grant-firewall-results.md",
+      "line": 5,
+      "term": "verified",
+      "supportStatus": "requires_evidence_check",
+      "context": "Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY"
     },
     {
       "file": "reports/authority-surface-integration.md",
@@ -3848,20 +3862,6 @@
       "term": "ready",
       "supportStatus": "requires_evidence_check",
       "context": "- Customer access banner updated: \"Strategy Room access is active. The execution tool is ready.\""
-    },
-    {
-      "file": "reports/product-live-proof-closeout.md",
-      "line": 87,
-      "term": "complete",
-      "supportStatus": "supported_scope_limited",
-      "context": "**Next action:** Complete a real Stripe checkout for strategy_room and confirm entitlement record in DB"
-    },
-    {
-      "file": "reports/product-live-proof-closeout.md",
-      "line": 102,
-      "term": "complete",
-      "supportStatus": "supported_scope_limited",
-      "context": "**Next action:** Complete a live Professional subscription checkout; confirm `ClientEntitlement` with `entitlementSlug: \"tier.professional\"` is created; confirm subscription renewal cycle does not break access"
     }
   ]
 }

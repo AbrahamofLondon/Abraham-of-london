@@ -1,0 +1,3599 @@
+{
+  "generatedAt": "2026-06-13T19:59:44.414Z",
+  "gate": "FAILED_REPORT_AS_EVIDENCE_VIOLATIONS",
+  "scriptsScanned": 3837,
+  "violations": [
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 381,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 382,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "function deriveCategoryReadiness(rows) {"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 383,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (rows.length !== REQUIRED_PRODUCT_COUNT) return \"not_category_ready\";"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 384,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (rows.some((row) => [\"authority_contract_missing\", \"checkout_or_fulfilment_risk\", \"report_surface_risk\", \"overclaimed\", \"not_market_ready\"].includes(row.currentCoverageClassification))) {"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 385,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "return \"category_infrastructure_present_but_not_visible\";"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 386,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "}"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 387,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (rows.some((row) => row.currentCoverageClassification === \"authority_visible_but_thin\" || row.currentCoverageClassification === \"underwired\")) {"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 589,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"\","
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 590,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"| Product | Name | Authority State | Route | Checkout | Report | Admin | Contract | Authority | Evidence | Limitation | Next Evidence | Blocking | Risk | Falsification | Classification | Required Next Action |\","
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 591,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |\","
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 592,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "...report.products.map((row) => `| ${row.productCode} | ${escapeMd(row.productName)} | ${row.currentAuthorityState} | ${yes(row.routeExists)} | ${yes(row.checkoutPathExists)} | ${yes(row.reportSurfaceExists)} | ${yes(row.adminSurfaceExists)} | ${yes(row.productAuthorityContractExists)} | ${yes(row.authorityVisiblyRendered)} | ${yes(row.evidenceStateVisiblyRendered)} | ${yes(row.limitationVisiblyRendered)} | ${yes(row.nextEvidenceActionVisiblyRendered)} | ${yes(row.unsupportedClaimBlockingVisible)} | ${yes(row.decisionRiskVisible)} | ${yes(row.falsificationTriggerVisible)} | ${row.currentCoverageClassification} | ${escapeMd(row.requiredNextAction)} |`),"
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 593,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"\","
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 594,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"## Implementation Priorities\","
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 595,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"\","
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 45,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "intervention_path_selector: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 46,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "escalation_readiness_scorecard: { target: \"signal_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 47,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "boardroom_mode: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 48,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "diagnostic_report_basic: { target: \"signal_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 49,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 50,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// Tier 2 (9 products)"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 51,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "structural_failure_diagnostic_canvas: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 53,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "team_alignment_gap_map: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 54,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "governance_drift_detector: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 55,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "strategic_priority_stack_builder: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 56,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "executive_reporting: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 57,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "diagnostic_report_pro: { target: \"signal_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 58,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "operator_decision_pack: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 59,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "command_pack: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 86,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 87,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// Other products"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 88,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "board_brief_builder: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 89,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "executive_reporting_priority: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 90,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "governance_suite: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 91,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "operator_essentials_pack: { target: \"diagnostic_product\", evidence: \"blocked_until_claim_evidenced\" },"
+    },
+    {
+      "file": "scripts/audit-product-claim-recovery.ts",
+      "line": 92,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "};"
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 164,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 165,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| Product | Fulfilment Type | Authority | Evidence | Limitation | Next Evidence | Matrix Exemption | Product-Specific Label | Claim Conflict | Result | Required Action |"
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 166,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |"
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 167,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "${report.rows.map((row) => `| ${row.productCode} | ${row.fulfilmentType} | ${yes(row.authorityStatusVisible)} | ${yes(row.evidenceStateVisible)} | ${yes(row.limitationVisible)} | ${yes(row.nextEvidenceActionVisible)} | ${yes(row.exemptionConfirmedByMatrix)} | ${yes(row.staticLabelVisible)} | ${yes(row.authorityClaimLanguagePresent)} | ${row.result} | ${row.requiredAction} |`).join(\"\\n\")}"
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 168,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`;"
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 169,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "}"
+    },
+    {
+      "file": "scripts/audit-report-authority-coverage.mjs",
+      "line": 170,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 22,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"WAVE_2B-1_CONTEXT_BOUND_VALIDATION_PROTOCOL_REPORT.md\","
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 31,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const PRODUCTS = ["
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 639,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const boardGuard = parts.gateMeaningfulness.rows.find((row) => row.script.includes(\"check-board-facing\"));"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 641,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "gatePassed: Boolean(ESTATE_REPORT.gatePassed),"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 642,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessScope: ESTATE_REPORT.readinessScope ?? \"unknown\","
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 643,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "blockingReasons: ESTATE_REPORT.blockingReasons ?? [],"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 856,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 857,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "function inferGateClaim(script) {"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 858,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (script.includes(\"product-authority-contract\")) return \"ProductAuthorityContract consistency and public/non-exempt coverage.\";"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 859,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (script.includes(\"estate-authority-integrity\")) return \"Estate-level authority readiness from generated coverage reports.\";"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 860,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (script.includes(\"no-mock-authority\")) return \"No mock/fixture/placeholder authority grants.\";"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 861,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (script.includes(\"surface-claim-authority\")) return \"Public claim language does not exceed authority.\";"
+    },
+    {
+      "file": "scripts/audit-system-truth-state.mjs",
+      "line": 862,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (script.includes(\"market-adoption\")) return \"Market adoption posture and pain clarity.\";"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 197,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "mkdirSync(REPORTS_DIR, { recursive: true });"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 198,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 199,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "writeFileSync("
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 200,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "join(REPORTS_DIR, \"universal-claim-authority.json\"),"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 201,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "JSON.stringify("
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 202,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 203,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "generatedAt: new Date().toISOString(),"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 209,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ") + \"\\n\""
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 210,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ");"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 211,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 212,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`\\nReport written: ${join(REPORTS_DIR, \"universal-claim-authority.json\")}`);"
+    },
+    {
+      "file": "scripts/audit-universal-claim-authority.ts",
+      "line": 213,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/capture-category-route-proof.mjs",
+      "line": 416,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/capture-category-route-proof.mjs",
+      "line": 417,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "This route proof cannot imply estate readiness. Estate readiness requires the product authority coverage matrix, checkout coverage, report coverage, admin coverage, and public claim coverage to pass without findings."
+    },
+    {
+      "file": "scripts/capture-category-route-proof.mjs",
+      "line": 418,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/capture-category-route-proof.mjs",
+      "line": 419,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "---"
+    },
+    {
+      "file": "scripts/capture-category-route-proof.mjs",
+      "line": 420,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 42,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "generatedAt,"
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 43,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "gate: capturesWithRenderedOutput.length > 0 && capturesWithRequiredFields.length > 0 ? \"PASSED\" : \"FAILED\","
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 44,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "doctrine: \"Live route output must be captured before any product can be externally proven gold.\","
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 45,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "routesDiscovered: WAVE_ONE_ROUTE_DISCOVERY,"
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 46,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "captures,"
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 47,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "counts: {"
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 56,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ".map((route) => `${route.productCode}: route not found for ${route.requiredRoute}`),"
+    },
+    {
+      "file": "scripts/capture-live-route-product-output.mjs",
+      "line": 57,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "};"
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 28,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const ledgerReport = readJson(\"reports/evidence-ledger-artifact-verification.json\", { rows: [] });"
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 29,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const routeProof = readJson(\"reports/category-route-proof.json\", { routes: [] });"
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 30,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const matrix = readJson(\"reports/product-authority-coverage-matrix.json\", { products: [] });"
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 31,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const surfaceClaim = readJson(\"reports/surface-claim-authority-gate.json\", readJson(\"reports/surface-claim-authority.json\", {}));"
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 32,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const noMock = readJson(\"reports/no-mock-authority.json\", {});"
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 33,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 34,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const ledgerByProduct = new Map((ledgerReport.rows ?? []).map((row) => [row.productCode, row]));"
+    },
+    {
+      "file": "scripts/check-estate-authority-integrity.mjs",
+      "line": 172,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const serialized = {"
+    },
+    {
+      "file": "scripts/check-estate-authority-integrity.mjs",
+      "line": 173,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"category-route-proof\": JSON.stringify(reports.routeProof),"
+    },
+    {
+      "file": "scripts/check-estate-authority-integrity.mjs",
+      "line": 174,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"category-demonstration-readiness\": JSON.stringify(reports.categoryReadiness),"
+    },
+    {
+      "file": "scripts/check-estate-authority-integrity.mjs",
+      "line": 175,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"product-authority-contract\": JSON.stringify(reports.contract),"
+    },
+    {
+      "file": "scripts/check-estate-authority-integrity.mjs",
+      "line": 176,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "};"
+    },
+    {
+      "file": "scripts/check-estate-authority-integrity.mjs",
+      "line": 177,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "for (const [name, text] of Object.entries(serialized)) {"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 143,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (result.usefulnessProofs.length === 0) failures.push(`${result.productCode}: gold without customer usefulness proof.`);"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 144,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "}"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 145,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 146,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// The internal 9.8 report may not claim gold beyond external proof once regenerated."
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 147,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const provenSet = new Set(confirmedGold.map((result) => result.productCode));"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 148,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const evidenceCounts = {"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 149,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "antiToyFailures: results.filter((result) => result.failsAntiToy === true && (result.antiToyScore ?? 0) > ANTI_TOY_RELEASE_MAXIMUM).length,"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 212,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 213,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(\"EXTERNAL PRODUCT VALUE BENCHMARK CHECK\");"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 214,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`Products reviewed: ${report.productsReviewed}`);"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 215,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`Gold-standard claims reviewed: ${report.goldClaimsReviewed}`);"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 216,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`External benchmarks missing: ${evidenceCounts.benchmarksMissingForGold}`);"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 217,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`Rendered-output reviews missing: ${evidenceCounts.renderedReviewsMissingForGold}`);"
+    },
+    {
+      "file": "scripts/check-external-product-value-benchmark.mjs",
+      "line": 218,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`Live-route proof missing for gold: ${evidenceCounts.liveRouteProofMissingForGold}`);"
+    },
+    {
+      "file": "scripts/check-report-as-evidence-violations.mjs",
+      "line": 30,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "reason: \"Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.\","
+    },
+    {
+      "file": "scripts/check-report-as-evidence-violations.mjs",
+      "line": 31,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "context: line.trim(),"
+    },
+    {
+      "file": "scripts/check-report-as-evidence-violations.mjs",
+      "line": 32,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "});"
+    },
+    {
+      "file": "scripts/check-report-as-evidence-violations.mjs",
+      "line": 118,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| File | Line | Context |"
+    },
+    {
+      "file": "scripts/check-report-as-evidence-violations.mjs",
+      "line": 119,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| --- | ---: | --- |"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 28,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "}"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 29,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 30,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const surfaceClaimsData = loadJson(join(REPORTS_DIR, \"product-surface-claims-focused.json\"));"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 31,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const claimAuthorityData = loadJson(join(REPORTS_DIR, \"universal-claim-authority-gate.json\"));"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 32,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 33,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (!surfaceClaimsData) {"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 34,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.error(\"FAILED: Could not load surface claims data\");"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 118,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// Write report"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 119,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "mkdirSync(REPORTS_DIR, { recursive: true });"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 120,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "writeFileSync("
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 121,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "join(REPORTS_DIR, \"surface-claim-authority-gate.json\"),"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 122,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "JSON.stringify(result, null, 2) + \"\\n\""
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 123,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ");"
+    },
+    {
+      "file": "scripts/check-surface-claim-authority.mjs",
+      "line": 124,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 144,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// Write report"
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 145,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "mkdirSync(REPORTS_DIR, { recursive: true });"
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 146,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "writeFileSync("
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 147,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "join(REPORTS_DIR, \"universal-claim-authority-gate.json\"),"
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 148,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "JSON.stringify(result, null, 2) + \"\\n\""
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 149,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ");"
+    },
+    {
+      "file": "scripts/check-universal-claim-authority.mjs",
+      "line": 150,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 206,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "})),"
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 207,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "scoreDistribution: scoreDistribution(results),"
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 208,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "remainingRisks: ["
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 209,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"Report experience remains AMBER, so paid report-like products cannot claim 9.8 gold-standard release.\","
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 210,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"Live-cycle proof remains pending across delivery classes.\","
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 211,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"Stripe/webhook authority remains unresolved for paid checkout-dependent products.\","
+    },
+    {
+      "file": "scripts/check-universal-product-gold-standard-98.mjs",
+      "line": 212,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"Most product contracts now function as blocking authorities until actual artefact, journey, and delivery proof reaches 98/100.\","
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 42,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "* roadmap), before Wave 1. Kept static so \"before\" remains a historical"
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 43,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "* fact across re-runs."
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 44,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "*/"
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 125,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 126,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const ENGINE_PATH = \"lib/product/wave-one-gold-standard.ts\";"
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 127,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const ENGINE_REQUIRED_MARKERS = ["
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 128,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"WAVE_ONE_PRODUCTS\","
+    },
+    {
+      "file": "scripts/check-wave-one-gold-standard.mjs",
+      "line": 129,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"WaveOneUniversalOutput\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 45,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "whyUnsupportedOrOverstated: \"Current ProductAuthorityContract is legacy_validated_pending_v2_revalidation and the reconciliation found no matching product-specific ledger/runtime artifact set.\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 46,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "correctedClassification: \"pending_reconciliation\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 48,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "productAuthorityAffected: true,"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 49,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 50,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 51,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "reportFile: \"reports/WAVE_2D_TEAM_ASSESSMENT_CLEAN_VALIDATION_DECISION_REPORT.md\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 52,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "claimMade: \"Team Assessment clean validation decision supports authority restoration.\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 53,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "whyUnsupportedOrOverstated: \"Evidence Ledger v2 proposes a stronger state than the current contract and the rendered output artifact/hash could not be independently verified by this pass.\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 54,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "correctedClassification: \"ledger_contract_mismatch\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 56,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "productAuthorityAffected: true,"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 57,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 58,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 59,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "reportFile: \"reports/WAVE_2D_TEAM_ASSESSMENT_AUTHORITY_UPGRADE_CLOSURE_REPORT.md\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 60,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "claimMade: \"Team Assessment authority upgrade complete.\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 61,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "whyUnsupportedOrOverstated: \"Current ProductAuthorityContract remains legacy_validated_pending_v2_revalidation; ledger proposes externally_proven_gold_product.\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 62,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "correctedClassification: \"pending_reconciliation\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 64,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "productAuthorityAffected: true,"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 65,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 66,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 67,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "reportFile: \"reports/WAVE_BOARD_PRODUCTS_HARDENING_INFRASTRUCTURE_REPORT.md\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 69,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "whyUnsupportedOrOverstated: \"lib/board/evidence-governance.ts exists but is not imported by runtime board engines; board-facing language guard fails.\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 70,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "correctedClassification: \"INFRASTRUCTURE-ONLY; NOT PRODUCT-HARDENED; NOT RUNTIME-WIRED; NOT VALIDATION-READY\","
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 167,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "console.log(`Products reconciled: ${result.productsReconciled}`);"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 372,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| Report File | Claim Made | Why Unsupported Or Overstated | Corrected Classification | Required Amendment | Product Authority Affected |"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 373,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| --- | --- | --- | --- | --- | ---: |"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 374,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "${rows.map((row) => `| ${row.reportFile} | ${escapeMd(row.claimMade)} | ${escapeMd(row.whyUnsupportedOrOverstated)} | ${row.correctedClassification} | ${escapeMd(row.requiredAmendment)} | ${row.productAuthorityAffected ? \"yes\" : \"no\"} |`).join(\"\\n\")}"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 375,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`;"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 376,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "}"
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 377,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 33,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "import { composeEnterpriseAssessmentGoldResult } from \"../lib/product/enterprise-assessment-gold-composer\";"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 34,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "import {"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 35,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "captureRequiredWaveOneLiveRouteOutputs,"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 36,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "WAVE_ONE_ROUTE_DISCOVERY,"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 39,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 40,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const ROOT = join(__dirname, \"..\");"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 41,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const EVIDENCE_PATH = join(ROOT, \"reports\", \"external-product-value-evidence.json\");"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 42,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const WAVE_ONE_REPORT = join(ROOT, \"reports\", \"wave-one-gold-standard.json\");"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 43,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 44,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// ── Gold claims under re-test (internal certifications from Wave 1) ──"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 45,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const waveOne = existsSync(WAVE_ONE_REPORT)"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 46,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "? JSON.parse(readFileSync(WAVE_ONE_REPORT, \"utf-8\"))"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 47,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ": null;"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 48,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const goldClaims: string[] = (waveOne?.results ?? [])"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 49,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ".filter((result: { releaseStatus: string }) =>"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 519,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "goldClaimsSource: \"reports/wave-one-gold-standard.json (Wave 1 internal certification)\","
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 520,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "goldClaims,"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 521,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "productsReviewed: descriptors.length,"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 522,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "liveRouteDiscovery: WAVE_ONE_ROUTE_DISCOVERY,"
+    },
+    {
+      "file": "scripts/run-external-product-value-benchmark.ts",
+      "line": 523,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "liveRouteCaptures,"
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 62,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 63,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// Get claim authority"
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 64,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const claimAuthorityReport = readFileSync("
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 65,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "join(REPORTS_DIR, \"universal-claim-authority-gate.json\"),"
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 66,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"utf-8\""
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 67,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ");"
+    },
+    {
+      "file": "scripts/scan-product-surface-claims.ts",
+      "line": 68,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const authorityData = JSON.parse(claimAuthorityReport);"
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 45,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "id: \"report_complete_contract_pending\","
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 46,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "description: \"report says complete but contract still pending\","
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 47,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "declaredAuthorityState: \"legacy_validated_pending_v2_revalidation\","
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 48,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "reportClaimsComplete: true,"
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 49,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "checks: checksExcept([]),"
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 50,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 51,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{"
+    },
+    {
+      "file": "scripts/update-executive-reporting-grade.mjs",
+      "line": 20,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "er.knownBlockers = [];"
+    },
+    {
+      "file": "scripts/update-executive-reporting-grade.mjs",
+      "line": 21,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (!er.testsCoveringIt) er.testsCoveringIt = [];"
+    },
+    {
+      "file": "scripts/update-executive-reporting-grade.mjs",
+      "line": 22,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "er.testsCoveringIt.push("
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 189,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "systemOfRecord: \"DECISION_CENTRE\","
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 190,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "provenanceCapable: true,"
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 191,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 192,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "description: \"Tests governance readiness and authority structure before pricing consequences. Intermediate step between Fast Diagnostic and Executive Reporting.\","
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 193,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 194,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/admin/product-surface-registry.ts",
+      "line": 195,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// ── ASSESSMENTS ──────────────────────────────────────────────────────────"
+    },
+    {
+      "file": "lib/admin/reporting/canonical-report-contract.ts",
+      "line": 186,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "safeString(constitution?.orgState, \"DRIFTING\"),"
+    },
+    {
+      "file": "lib/admin/reporting/canonical-report-contract.ts",
+      "line": 187,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ") as ExecutiveReportState,"
+    },
+    {
+      "file": "lib/admin/reporting/canonical-report-contract.ts",
+      "line": 188,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: safeString(constitution?.readinessTier, \"EMERGING\") as ExecutiveReportReadinessTier,"
+    },
+    {
+      "file": "lib/admin/reporting/canonical-report-contract.ts",
+      "line": 189,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: safeString(constitution?.authorityType, \"UNCLEAR\") as ExecutiveReportAuthorityType,"
+    },
+    {
+      "file": "lib/admin/reporting/canonical-report-contract.ts",
+      "line": 190,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "revenueBand: safeString(constitution?.revenueBand, \"SMB\") as ExecutiveReportRevenueBand,"
+    },
+    {
+      "file": "lib/admin/reporting/canonical-report-contract.ts",
+      "line": 191,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "marketRiskBand: safeString(constitution?.marketRiskBand, \"MEDIUM\") as ExecutiveReportMarketRiskBand,"
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-serializer.ts",
+      "line": 163,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "guidanceConstitution.readinessTier ||"
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-serializer.ts",
+      "line": 164,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "reportConstitution.readinessTier"
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-service.ts",
+      "line": 209,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: safeString(report?.state, \"DRIFTING\") as any,"
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-service.ts",
+      "line": 210,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "confidence: clamp(certainty, 0, 100),"
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-service.ts",
+      "line": 211,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report?.state === \"ORDERED\" ? \"EXECUTION_READY\" : report?.state === \"DISORDERED\" ? \"FRAGILE\" : \"STABILIZING\","
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-service.ts",
+      "line": 212,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: args.participantCount >= 12 ? \"DIRECT\" : args.participantCount >= 7 ? \"PROXY\" : \"UNCLEAR\","
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-service.ts",
+      "line": 213,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "revenueBand:"
+    },
+    {
+      "file": "lib/admin/reporting/executive-report-service.ts",
+      "line": 214,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "totalExposure >= 1_000_000"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 76,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "orgState: ExecutiveReportState;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 77,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: ExecutiveReportState;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 78,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: ExecutiveReportReadinessTier;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 79,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: ExecutiveReportAuthorityType;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 80,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "revenueBand: ExecutiveReportRevenueBand;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 81,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "marketRiskBand: ExecutiveReportMarketRiskBand;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 123,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "orgState: ExecutiveReportState;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 124,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: ExecutiveReportState;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 125,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: ExecutiveReportReadinessTier;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 126,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: ExecutiveReportAuthorityType;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 127,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "revenueBand: ExecutiveReportRevenueBand;"
+    },
+    {
+      "file": "lib/admin/reporting/types.ts",
+      "line": 128,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "marketRiskBand: ExecutiveReportMarketRiskBand;"
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 833,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "includes: [],"
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 834,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "shortDescription: \"Tests organisational dependencies, exposure, authority, evidence, and scenario stress.\","
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 835,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "userPromise: \"Produces a structural organisational reading: authority, evidence, dependency, and escalation exposure.\","
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 836,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "pricingNote: \"Free organisational assessment — qualifies readiness, authority gaps, dependencies, and oversight potential. Next: Executive Reporting, Strategy Room, or Retainer Review.\","
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 837,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "primaryCta: \"Start Enterprise Assessment\","
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 838,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "upgradePath: [\"executive_reporting\", \"strategy_room\"],"
+    },
+    {
+      "file": "lib/commercial/catalog.ts",
+      "line": 839,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "hiddenFromPricing: true,"
+    },
+    {
+      "file": "lib/decision/constitutional-guidance-assembler.ts",
+      "line": 373,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "orgState: safeString(derived.orgState, \"DRIFTING\") as import(\"@/lib/admin/reporting/types\").ExecutiveReportState,"
+    },
+    {
+      "file": "lib/decision/constitutional-guidance-assembler.ts",
+      "line": 374,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: safeString(derived.orgState, \"DRIFTING\") as import(\"@/lib/admin/reporting/types\").ExecutiveReportState,"
+    },
+    {
+      "file": "lib/decision/constitutional-guidance-assembler.ts",
+      "line": 375,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: safeString(derived.readinessTier, \"EMERGING\") as import(\"@/lib/admin/reporting/types\").ExecutiveReportReadinessTier,"
+    },
+    {
+      "file": "lib/decision/constitutional-guidance-assembler.ts",
+      "line": 376,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: safeString(derived.authorityType, \"UNCLEAR\") as import(\"@/lib/admin/reporting/types\").ExecutiveReportAuthorityType,"
+    },
+    {
+      "file": "lib/decision/constitutional-guidance-assembler.ts",
+      "line": 377,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "revenueBand: safeString(derived.revenueBand, \"SMB\") as import(\"@/lib/admin/reporting/types\").ExecutiveReportRevenueBand,"
+    },
+    {
+      "file": "lib/decision/constitutional-guidance-assembler.ts",
+      "line": 378,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "marketRiskBand: safeString(derived.marketRiskBand, \"MODERATE\") as import(\"@/lib/admin/reporting/types\").ExecutiveReportMarketRiskBand,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 204,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`We are facing a ${severity} structural issue.`,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 205,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`Current posture reads as ${report.posture}.`,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 206,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`Authority type reads as ${report.authorityType}.`,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 207,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`Readiness tier reads as ${report.readinessTier}.`,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 208,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`The constitutional route currently resolves to ${decision.route}.`,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 209,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "`We need disciplined interpretation of friction, authority, and decision sequence before proceeding further.`,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 210,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "].join(\" \");"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 228,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "frictionScore: report.frictionScore,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 229,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "trustScore: report.trustScore,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 230,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 231,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 232,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 233,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "seriousnessScore: report.seriousnessScore,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 234,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 244,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "constitutionalRoute: decision.route,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 245,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 246,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 247,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 248,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "principalRisks,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 249,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "priorityInterventions,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 257,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "confidence: decision.confidence,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 258,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 259,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 260,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 261,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "escalationAllowed: decision.escalationAllowed,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-bridge.ts",
+      "line": 262,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-diagnostic-derivation.ts",
+      "line": 450,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "return {"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-diagnostic-derivation.ts",
+      "line": 451,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "clarityScore: report.coherenceScore,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-diagnostic-derivation.ts",
+      "line": 452,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-diagnostic-derivation.ts",
+      "line": 453,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-diagnostic-derivation.ts",
+      "line": 454,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-diagnostic-derivation.ts",
+      "line": 455,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "failureModeCount: report.failureModeCount,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 386,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "source: \"constitutional_diagnostic\","
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 387,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "route: decision.route,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 388,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 389,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 390,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 391,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 402,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "},"
+    },
+    {
+      "file": "lib/diagnostics/constitutional-evidence-bridge.ts",
+      "line": 403,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/intelligence/constitutional-orchestrator-adapter.ts",
+      "line": 57,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "// Extract posture from report"
+    },
+    {
+      "file": "lib/intelligence/constitutional-orchestrator-adapter.ts",
+      "line": 58,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const posture = derivePosture(report)"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 124,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "currentSessionSignals: ["
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 125,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{ signal: `Authority type: ${report.authorityType}` },"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 126,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{ signal: `Posture: ${report.posture}` },"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 127,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{ signal: `Readiness: ${report.readinessTier}` },"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 128,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "...report.keyFindings.map(f => ({ signal: f })),"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 329,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 330,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "entries.push({"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 331,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "label: 'Constitutional Diagnostic completed',"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 332,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "summary: `Route: ${decision.route}. Authority: ${report.authorityType}. Posture: ${report.posture}. Readiness: ${report.readinessTier}.`,"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 333,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "timestamp: '',"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 334,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "})"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 335,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 373,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 374,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "newEvidence.push(`Authority type: ${report.authorityType}`)"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 375,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "newEvidence.push(`Posture: ${report.posture}`)"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 376,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "newEvidence.push(`Readiness: ${report.readinessTier}`)"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 377,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 378,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "if (constitutionalStructural?.approvingAuthority) {"
+    },
+    {
+      "file": "lib/product/constitutional-living-adapter.ts",
+      "line": 379,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "newEvidence.push(`Approving authority: ${constitutionalStructural.approvingAuthority}`)"
+    },
+    {
+      "file": "lib/product/live-route-output-capture.ts",
+      "line": 48,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/live-route-output-capture.ts",
+      "line": 49,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "const SCENARIOS_BY_ID = new Map(GOLDEN_DECISION_SCENARIOS.map((scenario) => [scenario.id, scenario]));"
+    },
+    {
+      "file": "lib/product/live-route-output-capture.ts",
+      "line": 50,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/live-route-output-capture.ts",
+      "line": 51,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "export const WAVE_ONE_ROUTE_DISCOVERY: WaveOneRouteDiscovery[] = ["
+    },
+    {
+      "file": "lib/product/live-route-output-capture.ts",
+      "line": 52,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "{"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 37,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "* The explicit Wave 1 product list. Membership is deliberate: these are the"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 146,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| \"time_value_surplus\""
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 147,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "| \"reuse_value\";"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 159,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "\"reuse_value\","
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 160,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "];"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 161,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 162,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "export const WAVE_ONE_GOLD_THRESHOLD = 9.8;"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 163,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "export const WAVE_ONE_CRITICAL_DIMENSION_MINIMUM = 9.5;"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 164,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 165,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "/**"
+    },
+    {
+      "file": "lib/product/wave-one-gold-standard.ts",
+      "line": 166,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "* Wave 1 can certify internally only. Internal certification is necessary"
+    },
+    {
+      "file": "lib/reporting/report-experience-gold-standard.ts",
+      "line": 58,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "visualAuthority: ReportExperienceScore;"
+    },
+    {
+      "file": "lib/reporting/report-experience-gold-standard.ts",
+      "line": 59,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "mobileReadability: ReportExperienceScore;"
+    },
+    {
+      "file": "lib/reporting/report-experience-gold-standard.ts",
+      "line": 60,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "pdfReadability: ReportExperienceScore;"
+    },
+    {
+      "file": "lib/reporting/report-experience-gold-standard.ts",
+      "line": 61,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "archiveReadiness: ReportExperienceScore;"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 158,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "inputs: {"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 159,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 160,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 161,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 162,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "failureModeCount: report.failureModeCount,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 264,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "confidence: decision.confidence,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 265,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: report.posture,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 266,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 267,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 268,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityScore: report.authorityScore,"
+    },
+    {
+      "file": "lib/research/engines/constitutional-diagnostic-adapter.ts",
+      "line": 269,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "coherenceScore: report.coherenceScore,"
+    },
+    {
+      "file": "lib/server/strategy-room/access.server.ts",
+      "line": 106,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "email: normalizeEmail(report.email),"
+    },
+    {
+      "file": "lib/server/strategy-room/access.server.ts",
+      "line": 107,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "route: report.route ?? null,"
+    },
+    {
+      "file": "lib/server/strategy-room/access.server.ts",
+      "line": 108,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: report.readinessTier ?? null,"
+    },
+    {
+      "file": "lib/server/strategy-room/access.server.ts",
+      "line": 109,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: report.authorityType ?? null,"
+    },
+    {
+      "file": "lib/server/strategy-room/access.server.ts",
+      "line": 110,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "};"
+    },
+    {
+      "file": "lib/server/strategy-room/access.server.ts",
+      "line": 111,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "}"
+    },
+    {
+      "file": "pages/api/diagnostics/constitutional-intake/report.ts",
+      "line": 255,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "confidence: result.bundle.decision.confidence,"
+    },
+    {
+      "file": "pages/api/diagnostics/constitutional-intake/report.ts",
+      "line": 256,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "posture: result.bundle.report.posture,"
+    },
+    {
+      "file": "pages/api/diagnostics/constitutional-intake/report.ts",
+      "line": 257,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "readinessTier: result.bundle.report.readinessTier,"
+    },
+    {
+      "file": "pages/api/diagnostics/constitutional-intake/report.ts",
+      "line": 258,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "authorityType: result.bundle.report.authorityType,"
+    },
+    {
+      "file": "pages/api/diagnostics/constitutional-intake/report.ts",
+      "line": 259,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "seriousnessScore: result.bundle.report.seriousnessScore,"
+    },
+    {
+      "file": "pages/api/diagnostics/constitutional-intake/report.ts",
+      "line": 260,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "completionPercent: result.bundle.report.completionPercent,"
+    },
+    {
+      "file": "pages/changelog.tsx",
+      "line": 49,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "date: \"2025-05-16\","
+    },
+    {
+      "file": "pages/decision-instruments/[slug].tsx",
+      "line": 283,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "guidedChecklist: [\"Assess evidence depth.\", \"Rate consequence severity.\", \"Evaluate authority clarity.\", \"Identify execution blockage.\", \"Check for recurrence signals.\"],"
+    },
+    {
+      "file": "pages/decision-instruments/[slug].tsx",
+      "line": 284,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "completionPrompt: \"Mark complete after escalation readiness and recommended path are classified.\","
+    },
+    {
+      "file": "pages/decision-instruments/[slug].tsx",
+      "line": 285,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "consequenceIfSkipped: [\"Escalation may be attempted without evidence — reducing credibility\", \"Premature escalation wastes executive attention\", \"Overdue escalation allows conditions to worsen\"],"
+    },
+    {
+      "file": "pages/decision-instruments/[slug].tsx",
+      "line": 286,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": "transition: { state: \"STRUCTURAL_CONDITION\", label: \"Escalation readiness classified.\", body: \"Use Executive Reporting to price the full institutional consequence.\", cta: `Executive Reporting`, href: \"/diagnostics/executive-reporting\" },"
+    },
+    {
+      "file": "pages/verification.tsx",
+      "line": 174,
+      "severity": "HIGH",
+      "reason": "Authority-related logic references completion/readiness/WAVE report context; reports must not constitute evidence.",
+      "context": ""
+    }
+  ],
+  "generatedReportClaims": [
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 1,
+      "context": "# Authority Surface Integration — Completion Report"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 4,
+      "context": "**Status:** COMPLETE ✓"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 10,
+      "context": "**Objective:** Make evidence-governed authority visible and binding across all user-facing surfaces"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 12,
+      "context": "**Result:** Authority UI components deployed and integrated"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 14,
+      "context": "All surfaces can now consume ProductAuthorityContract to display authority state. No surface may claim authority except through the contract."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 20,
+      "context": "### 1. ProductAuthorityBadge.tsx"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 21,
+      "context": "**Location:** `components/product/ProductAuthorityBadge.tsx`"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 23,
+      "context": "Displays product authority state as a colored badge."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 26,
+      "context": "- `ProductAuthorityState` from contract"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 29,
+      "context": "- Green badge for `externally_proven_gold_product`"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 31,
+      "context": "- Orange badge for `legacy_validated_pending_v2_revalidation`"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 36,
+      "context": "**Does NOT accept hardcoded strings** like \"gold\", \"proven\", \"validated\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 40,
+      "context": "### 2. ProductAuthorityPanel.tsx"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 41,
+      "context": "**Location:** `components/product/ProductAuthorityPanel.tsx`"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 43,
+      "context": "Displays complete authority details with expandable detail section."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 46,
+      "context": "- Authority state (with title)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 76,
+      "context": "### 4. ProductAuthorityNotice.tsx"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 77,
+      "context": "**Location:** `components/product/ProductAuthorityNotice.tsx`"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 79,
+      "context": "Displays notices about authority limitations and required actions."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 82,
+      "context": "- Authority is limited or blocked"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 89,
+      "context": "- Info style (blue) for limited authority"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 101,
+      "context": "**File:** `scripts/check-authority-surface-integration.mjs`"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 111,
+      "context": "- Hardcoded authority claims (paired with product name + authority language)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 112,
+      "context": "- Unsupported authority terms in descriptions (board-grade, market-leading, etc.)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 127,
+      "context": "## Product Authority States — Display Ready"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 132,
+      "context": "Badge:  Externally Proven"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 134,
+      "context": "Panel:  Authority State: externally_proven_gold_product"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 137,
+      "context": "Language: \"fast_diagnostic is externally proven under v2 evidence validation.\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 146,
+      "context": "Panel:  Authority State: legacy_validated_pending_v2_revalidation"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 149,
+      "context": "Language: \"team_assessment is legacy validated; pending v2 revalidation.\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 150,
+      "context": "Notice:   \"Legacy Authority — Requires v2 revalidation for continued claims\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 152,
+      "context": "Action:   Run v2 revalidation to upgrade from legacy status"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 160,
+      "context": "Panel:  Authority State: legacy_validated_pending_v2_revalidation"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 163,
+      "context": "Language: \"enterprise_assessment is legacy validated; pending v2 revalidation.\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 164,
+      "context": "Notice:   \"Legacy Authority — Requires v2 revalidation for continued claims\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 166,
+      "context": "Action:   Run v2 revalidation to upgrade from legacy status"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 174,
+      "context": "Panel:  Authority State: blocked_until_claim_evidenced"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 179,
+      "context": "Notice:   \"Authority Blocked — No authority to make diagnostic/intelligence claims\""
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 192,
+      "context": "import { ProductAuthorityPanel } from \"@/components/product/ProductAuthorityPanel\";"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 193,
+      "context": "import { resolveProductAuthority } from \"@/lib/product/resolve-product-authority\";"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 196,
+      "context": "const contract = resolveProductAuthority({"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 205,
+      "context": "<ProductAuthorityPanel contract={contract} />"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 207,
+      "context": "<ProductAuthorityNotice contract={contract} />"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 212,
+      "context": "// ✗ INCORRECT: Hardcoded authority"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 214,
+      "context": "return <div>Fast Diagnostic is proven</div>; // BLOCKED by integration gate"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 222,
+      "context": "### ✓ Product Authority Contract Gate"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 230,
+      "context": "### ✓ Authority Surface Integration Gate"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 239,
+      "context": "### ✓ No-Mock Authority Gate"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 241,
+      "context": "Mock authority patterns: 0 found in library code"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 242,
+      "context": "Hardcoded authority: 0 in library code"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 246,
+      "context": "### ✓ Surface Claim Authority Gate"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 277,
+      "context": "1. **components/product/ProductAuthorityBadge.tsx** (65 lines)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 278,
+      "context": "- Authority state badge component"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 279,
+      "context": "- Color-coded by authority state"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 282,
+      "context": "2. **components/product/ProductAuthorityPanel.tsx** (200+ lines)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 283,
+      "context": "- Detailed authority information display"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 292,
+      "context": "4. **components/product/ProductAuthorityNotice.tsx** (180+ lines)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 293,
+      "context": "- Authority limitation notices"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 297,
+      "context": "5. **scripts/check-authority-surface-integration.mjs** (230+ lines)"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 304,
+      "context": "1. **scripts/check-no-mock-authority.mjs**"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 310,
+      "context": "## Authority Display Rules"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 313,
+      "context": "All authority language must come from `ProductAuthorityContract.publicClaimLanguage` or `ProductAuthorityContract.currentAuthorityState`."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 319,
+      "context": "When `contract.blockingReasons.length > 0`, display `ProductAuthorityNotice`."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 322,
+      "context": "When showing authority state, include evidence source and validation status."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 332,
+      "context": "1. ✓ Authority UI components exist"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 333,
+      "context": "2. ✓ Product surfaces can consume ProductAuthorityContract"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 334,
+      "context": "3. ✓ Components do not accept arbitrary authority strings"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 335,
+      "context": "4. ✓ fast_diagnostic can display v2-proven authority"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 339,
+      "context": "8. ✓ Admin/dashboard surfaces can expose authority state"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 340,
+      "context": "9. ✓ Authority surface integration gate passes"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 341,
+      "context": "10. ✓ No critical violations of authority display rules"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 348,
+      "context": "- Add ProductAuthorityPanel to admin product detail pages"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 353,
+      "context": "- Add Authority Status block to all generated reports"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 358,
+      "context": "- Update product cards to use ProductAuthorityBadge"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 360,
+      "context": "- Add ProductAuthorityNotice for limited authority products"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 368,
+      "context": "- Alert when product authority changes"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 376,
+      "context": "**No surface may independently decide a product's authority.**"
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 378,
+      "context": "Every claim about product validation, proof, diagnostic capability, or intelligence must derive from and be accountable to the ProductAuthorityContract."
+    },
+    {
+      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
+      "line": 380,
+      "context": "The user, buyer, operator, admin, and reader now encounter evidence-governed authority wherever they see a product, claim, report, or diagnostic artifact."
+    },
+    {
+      "file": "reports/category-demonstration-readiness.md",
+      "line": 13,
+      "context": "- Final Authority Position: Estate category demonstration may be claimed."
+    },
+    {
+      "file": "reports/category-demonstration-readiness.md",
+      "line": 18,
+      "context": "- Routes demonstrating authority pattern: 4"
+    },
+    {
+      "file": "reports/category-demonstration-readiness.md",
+      "line": 19,
+      "context": "- Routes with authority visible: 4"
+    },
+    {
+      "file": "reports/category-dominance-readiness.md",
+      "line": 13,
+      "context": "The category infrastructure is materially present, but too much of it remains internal, report-bound, or admin-only. The market cannot yet see enough weak-evidence authority being made impossible in the core journeys."
+    },
+    {
+      "file": "reports/category-dominance-readiness.md",
+      "line": 18,
+      "context": "- Authority state visible: fast_diagnostic, decision_centre"
+    },
+    {
+      "file": "reports/category-dominance-readiness.md",
+      "line": 25,
+      "context": "- Wire ProductAuthorityContract components into every customer-facing product route before making authority claims visible in copy."
+    },
+    {
+      "file": "reports/category-dominance-readiness.md",
+      "line": 29,
+      "context": "- Reduce duplication between validation reports and actual authority resolvers; gates should read the same source of truth routes consume."
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 20,
+      "context": "**Can Grant Authority from Synthetic Context:** NO"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 30,
+      "context": "- Isolated testing cannot establish authority"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 33,
+      "context": "**Authority Grant Eligible:** blocked_until_full_flow_complete"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 41,
+      "context": "**Can Grant Authority from Synthetic Context:** YES"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 43,
+      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 51,
+      "context": "**Can Grant Authority from Synthetic Context:** YES"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 53,
+      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 61,
+      "context": "**Can Grant Authority from Synthetic Context:** YES"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 63,
+      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 71,
+      "context": "**Can Grant Authority from Synthetic Context:** YES"
+    },
+    {
+      "file": "reports/context-bound-validation-readiness.md",
+      "line": 73,
+      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
+    },
+    {
+      "file": "reports/living-case-admin-fulfilment-readiness.md",
+      "line": 53,
+      "context": "The fulfilment workflow has been proven through tests:"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 5,
+      "context": "**Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 7,
+      "context": "**Authority Preservation:** All product states unchanged"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 16,
+      "context": "**Scope:** Messaging and language improvements only. No component refactoring, no authority upgrades."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 18,
+      "context": "**Result:** Two high-impact surfaces improved; blockers identified and documented for future work; all authority gates remain passing."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 38,
+      "context": "| team_assessment | credible_but_too_complex | authority_contract_not_visible | /diagnostics/team-assessment |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 39,
+      "context": "| enterprise_assessment | credible_but_too_complex | authority_contract_not_visible | /diagnostics/enterprise-assessment, /enterprise-decision-scan |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 42,
+      "context": "| boardroom_mode | credible_but_too_complex | authority_contract_not_visible, generic_ai_contrast_weak | Boardroom Brief |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 43,
+      "context": "| global_market_reports | credible_but_too_complex | authority_contract_not_visible, limitations_not_visible, generic_ai_contrast_weak | /artifacts, /intelligence/market |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 63,
+      "context": "a decision has enough evidence, authority, and"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 73,
+      "context": "- Maintains authority visibility (already present from Stage 2E)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 75,
+      "context": "**Entry Point Status:** Now shows pain (implicit), proof (authority panel), and action (test your decision)."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 81,
+      "context": "**Current Issue:** authority_contract_not_visible (and missing next-action clarity)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 82,
+      "context": "**Fix Applied:** Added authority context section after ProductAuthorityPanel"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 88,
+      "context": "This scan surfaces risks and dependencies. Authority"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 91,
+      "context": "(externally proven) for governed decisions."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 95,
+      "context": "- Makes authority state explicit and actionable"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 96,
+      "context": "- Shows what the assessment does (surfaces risks) vs what it doesn't do (prove authority)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 97,
+      "context": "- Links users to v2-proven product (fast_diagnostic) for authority-based decisions"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 98,
+      "context": "- Prevents overclaiming: \"authority depends on v2 validation\""
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 100,
+      "context": "**Entry Point Status:** Now shows pain (enterprise risks), proof (authority state visible), action (use with fast_diagnostic)."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 110,
+      "context": "| /diagnostics/team-assessment | authority_contract_not_visible | Medium | Diagnostic page restructure (Wave 2) |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 113,
+      "context": "| /boardroom-brief | authority_contract + AI contrast | Medium | Multiple issues, requires Wave 2 |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 114,
+      "context": "| /artifacts/GMI | authority + limitations + AI contrast | High | Complex multi-surface issue |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 137,
+      "context": "- Authority boundary constraints (what NOT to claim)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 142,
+      "context": "- Ensures future work preserves authority boundaries"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 147,
+      "context": "## AUTHORITY PRESERVATION VERIFICATION"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 149,
+      "context": "### Product Authority States (All Unchanged)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 153,
+      "context": "| fast_diagnostic | externally_proven_gold_product | externally_proven_gold_product | ✓ UNCHANGED |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 154,
+      "context": "| foundry_decision_test | externally_proven_gold_product | externally_proven_gold_product | ✓ UNCHANGED |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 155,
+      "context": "| team_assessment | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | ✓ UNCHANGED |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 156,
+      "context": "| enterprise_assessment | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | ✓ UNCHANGED |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 157,
+      "context": "| personal_decision_audit | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | ✓ UNCHANGED |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 164,
+      "context": "- ✓ \"externally proven\""
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 165,
+      "context": "- ✓ \"legacy validated, pending v2 revalidation\""
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 168,
+      "context": "- ✗ No claims that legacy products are v2-proven"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 169,
+      "context": "- ✗ No false authority upgrades"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 175,
+      "context": "### All Gates Passing"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 181,
+      "context": "✓ Estate Authority Integrity Lock      PASSED (estate_category_demonstrated)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 182,
+      "context": "✓ Checkout Authority Coverage          PASSED (0 failures, 22 products audited)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 183,
+      "context": "✓ Report Authority Coverage            PASSED (0 failures, 12 products audited)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 184,
+      "context": "✓ Admin Authority Coverage             PASSED (0 failures, 33 products audited)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 185,
+      "context": "✓ No Mock Authority Validation         PASSED (0 mock sources)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 186,
+      "context": "✓ Surface Claim Authority              PASSED (0 unsupported claims)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 199,
+      "context": "| Mock authority sources | 0 | 0 | — |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 212,
+      "context": "2. `/enterprise-decision-scan` — Added authority context note (addresses authority_contract_not_visible)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 218,
+      "context": "- `/test-your-decision` — Per-route authority visible"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 231,
+      "context": "| Enterprise entry | credible_but_too_complex | ✓ Improved (authority context added) |"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 246,
+      "context": "- ProductAuthorityContract integration into diagnostic flows"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 252,
+      "context": "- Admin authority visibility improvements"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 255,
+      "context": "3. **Product Authority Upgrades** (Intentionally unchanged)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 258,
+      "context": "- No unearned authority claims"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 274,
+      "context": "- `/enterprise-decision-scan`: authority state visible with context"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 275,
+      "context": "- `/test-your-decision`: per-route authority shown"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 280,
+      "context": "- Clear language: \"Generic AI gives answers. This tests whether a decision deserves authority.\""
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 282,
+      "context": "✓ **Authority transparency maintained:**"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 285,
+      "context": "- No false authority upgrades"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 292,
+      "context": "- Assessment entry points still need authority wiring"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 295,
+      "context": "- Marketing language improvements incomplete"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 311,
+      "context": "1. Wire ProductAuthorityContract into team_assessment and enterprise_assessment diagnostics"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 313,
+      "context": "3. Improve authority visibility in boardroom_mode surfaces"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 318,
+      "context": "3. Global Market Reports: add authority state and limitations"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 333,
+      "context": "- `/enterprise-decision-scan`: Authority context clarification added"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 341,
+      "context": "3. **Authority infrastructure integrity maintained**"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 343,
+      "context": "- No false authority upgrades"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 347,
+      "context": "- All authority gates passing"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 349,
+      "context": "- Surface claim authority clean"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 355,
+      "context": "**Estate Authority Status:** `estate_category_demonstrated` (maintained)"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 357,
+      "context": "Market Clarity Passes 1-2 have improved buyer-facing clarity without changing authority infrastructure:"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 361,
+      "context": "✓ Authority state transparent where visible"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 367,
+      "context": "**What Did NOT Change:** Authority states, product validation status, governance model."
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 381,
+      "context": "✓ node scripts/check-estate-authority-integrity.mjs         PASSED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 382,
+      "context": "✓ node scripts/audit-checkout-authority-coverage.mjs        PASSED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 383,
+      "context": "✓ node scripts/audit-report-authority-coverage.mjs          PASSED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 384,
+      "context": "✓ node scripts/audit-admin-authority-coverage.mjs           PASSED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 385,
+      "context": "✓ node scripts/check-no-mock-authority.mjs                  PASSED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 386,
+      "context": "✓ node scripts/check-surface-claim-authority.mjs            PASSED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 405,
+      "context": "**Market Clarity Pass 2:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 407,
+      "context": "**Result:** Two high-impact surfaces enhanced with targeted buyer-facing clarity. Comprehensive blockers documentation created for Wave 2. All authority gates remain passing. Estate readiness maintained at estate_categor"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 414,
+      "context": "**Pass Status:** ✓ COMPLETE"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 415,
+      "context": "**Authority Preservation:** ✓ ALL STATES UNCHANGED"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 422,
+      "context": "**Authority Gates:** 9 of 9 passing"
+    },
+    {
+      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "line": 424,
+      "context": "**Recommendation:** Market clarity improvements complete and honest. Estate authority infrastructure intact. Ready for independent Wave 2 validation and/or market positioning work."
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 27,
+      "context": "- ⚠ \"boardroom_brief\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 28,
+      "context": "- ℹ Proof run not yet completed end-to-end in production (paid → review → dossier_generated → delivered)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 151,
+      "context": "- ⚠ \"operator_decision_pack\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 161,
+      "context": "- ⚠ \"executive_reporting\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 172,
+      "context": "- ⚠ \"strategy_room\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 184,
+      "context": "- ⚠ \"strategy_room_extended\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 251,
+      "context": "- ⚠ \"professional\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 263,
+      "context": "- ⚠ \"professional_annual\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 274,
+      "context": "- ⚠ \"gmi_q1_2026\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 297,
+      "context": "### Decision Authority Retainer — Core (`retainer_core`)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 305,
+      "context": "### Decision Authority Retainer — Operational (`retainer_operational`)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 313,
+      "context": "### Decision Authority Retainer — Institutional (`retainer_institutional`)"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 1,
+      "context": "# Product Authority Contract Implementation — Completion Report"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 4,
+      "context": "**Status:** COMPLETE ✓"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 12,
+      "context": "**Result:** ProductAuthorityContract infrastructure deployed and operational"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 14,
+      "context": "All 4 products now expose their authority state through a machine-readable contract derived from validation evidence."
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 20,
+      "context": "### ✓ 1. ProductAuthorityContract Type Definition"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 21,
+      "context": "**File:** `lib/product/product-authority-contract.ts`"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 24,
+      "context": "- `ProductAuthorityState` type (9 states)"
+    },
+    {
+      "file": "reports/PRODUCT_AUTHORITY_CONTRACT_COMPLETION.md",
+      "line": 25,
+      "context": "- `ProductAuthorityContract` interface"
+    }
+  ]
+}

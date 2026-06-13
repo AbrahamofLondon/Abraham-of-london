@@ -25,13 +25,13 @@ INFRASTRUCTURE-ONLY; NOT PRODUCT-HARDENED; NOT RUNTIME-WIRED; NOT VALIDATION-REA
 `{"medium_gate":4,"narrow_gate":2,"failing_gate":1,"misleading_gate":1}`
 
 ## Claim Leakage Result
-`{"totalFindings":51852,"highRiskFindings":17306,"byStatus":{"needs authority state check":16683,"unsupported":623,"bounded":27095,"stale":7451}}`
+`{"totalFindings":53741,"highRiskFindings":17594,"byStatus":{"needs authority state check":16962,"unsupported":632,"bounded":28209,"stale":7938}}`
 
 ## Evidence Ledger Reality Result
-`{"ledger_missing_runtime_output":1}`
+`{"ledger_report_only":1}`
 
 ## Completion Claim Audit Result
-`{"totalClaims":7964,"questionableClaims":6674,"byStatus":{"supported_scope_limited":1290,"requires_evidence_check":6429,"unknown":245}}`
+`{"totalClaims":8009,"questionableClaims":6694,"byStatus":{"supported_scope_limited":1315,"requires_evidence_check":6449,"unknown":245}}`
 
 ## Board-Facing Guard Result
 failing_gate: Fix violations and expand scanned surface area before treating as protective.

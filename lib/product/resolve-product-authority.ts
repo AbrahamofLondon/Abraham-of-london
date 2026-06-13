@@ -26,6 +26,11 @@ import {
   canMakePublicClaim,
   getPublicClaimLanguage,
 } from "./product-authority-contract";
+import {
+  resolveEffectiveAuthorityState,
+  type AuthorityProofCheck,
+  type EffectiveAuthorityStateResult,
+} from "./authority-grant-firewall";
 
 export interface ProductAuthorityResolverInput {
   productCode: string;
@@ -61,6 +66,17 @@ export interface ProductAuthorityResolverInput {
     gateLogicChangedThisPass?: boolean;
     mockAuthorityUsed?: boolean;
   };
+}
+
+export interface EffectiveProductAuthorityResolution {
+  contract: ProductAuthorityContract;
+  declaredAuthorityState: ProductAuthorityState;
+  effectiveAuthorityState: ProductAuthorityState;
+  authoritySuppressionReason: string | null;
+  evidenceProofStatus: EffectiveAuthorityStateResult["evidenceProofStatus"];
+  missingChecks: AuthorityProofCheck[];
+  canMakePublicClaims: boolean;
+  publicLanguage: string;
 }
 
 /**
@@ -325,6 +341,31 @@ export function resolveProductAuthority(
   };
 }
 
+export function resolveEffectiveProductAuthority(
+  input: ProductAuthorityResolverInput,
+  proofChecks: Partial<Record<AuthorityProofCheck, boolean>>,
+  options: { boardFacingProduct?: boolean } = {}
+): EffectiveProductAuthorityResolution {
+  const contract = resolveProductAuthority(input);
+  const effective = resolveEffectiveAuthorityState({
+    productCode: contract.productCode,
+    declaredAuthorityState: contract.currentAuthorityState,
+    requiredChecks: proofChecks,
+    boardFacingProduct: options.boardFacingProduct,
+  });
+
+  return {
+    contract,
+    declaredAuthorityState: effective.declaredAuthorityState,
+    effectiveAuthorityState: effective.effectiveAuthorityState,
+    authoritySuppressionReason: effective.authoritySuppressionReason,
+    evidenceProofStatus: effective.evidenceProofStatus,
+    missingChecks: effective.missingChecks,
+    canMakePublicClaims: canMakePublicClaim(effective.effectiveAuthorityState),
+    publicLanguage: getPublicClaimLanguage(effective.effectiveAuthorityState, contract.productCode),
+  };
+}
+
 /**
  * Default product configurations based on current state
  */
@@ -332,18 +373,20 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
   return [
     {
       productCode: "fast_diagnostic",
-      hasValidV2Evidence: true,
+      hasValidV2Evidence: false,
+      policyState: "pending_reconciliation",
+      policyReason: "Authority restoration is frozen until contract, ledger, rendered output, route proof, and surface propagation agree",
       v2EvidencePath: "reports/product-value-evidence-ledger-v2.json",
       validationResults: {
-        antiToyPassed: true,
-        redTeamPassed: true,
-        genericAiComparisonPassed: true,
-        marketComparisonPassed: true,
-        releaseFirewallPassed: true,
-        constitutionPassed: true,
-        noMockAuthorityPassed: true,
-        antiGamingPassed: true,
-        adversarialValidationPassed: true,
+        antiToyPassed: false,
+        redTeamPassed: false,
+        genericAiComparisonPassed: false,
+        marketComparisonPassed: false,
+        releaseFirewallPassed: false,
+        constitutionPassed: false,
+        noMockAuthorityPassed: false,
+        antiGamingPassed: false,
+        adversarialValidationPassed: false,
       },
       boundary: {
         productChangedThisPass: false,

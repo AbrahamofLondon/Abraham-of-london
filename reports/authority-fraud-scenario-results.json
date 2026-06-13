@@ -1,0 +1,193 @@
+{
+  "generatedAt": "2026-06-13T19:59:42.512Z",
+  "gate": "PASSED_ALL_FRAUDULENT_AUTHORITY_SCENARIOS_BLOCKED",
+  "scenariosTested": 7,
+  "fraudulentScenariosBlocked": 7,
+  "failures": [],
+  "rows": [
+    {
+      "id": "contract_positive_ledger_missing",
+      "description": "contract says diagnostic_product but ledger missing",
+      "declaredAuthorityState": "diagnostic_product",
+      "checks": {
+        "contract_state_exists": true
+      },
+      "effectiveAuthorityState": "pending_reconciliation",
+      "missingChecks": [
+        "ledger_entry_exists",
+        "scenario_artifact_exists",
+        "rendered_output_artifact_exists",
+        "scenario_hash_matches",
+        "rendered_output_hash_matches",
+        "validation_run_hash_exists",
+        "quality_tests_exist",
+        "boundary_flags_clean",
+        "route_proof_exists",
+        "surface_propagation_exists",
+        "claim_boundary_scan_passes",
+        "no_mock_scan_passes"
+      ],
+      "blocked": true,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "ledger_passed_rendered_output_missing",
+      "description": "ledger says passed but rendered output missing",
+      "declaredAuthorityState": "externally_proven_gold_product",
+      "checks": {
+        "contract_state_exists": true,
+        "ledger_entry_exists": true,
+        "scenario_artifact_exists": true,
+        "rendered_output_artifact_exists": false,
+        "scenario_hash_matches": true,
+        "rendered_output_hash_matches": false,
+        "validation_run_hash_exists": true,
+        "quality_tests_exist": true,
+        "boundary_flags_clean": true,
+        "route_proof_exists": true,
+        "surface_propagation_exists": true,
+        "claim_boundary_scan_passes": true,
+        "no_mock_scan_passes": true
+      },
+      "effectiveAuthorityState": "pending_reconciliation",
+      "missingChecks": [
+        "rendered_output_artifact_exists",
+        "rendered_output_hash_matches"
+      ],
+      "blocked": true,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "rendered_output_hash_mismatch",
+      "description": "rendered output exists but hash mismatch",
+      "declaredAuthorityState": "diagnostic_product",
+      "checks": {
+        "contract_state_exists": true,
+        "ledger_entry_exists": true,
+        "scenario_artifact_exists": true,
+        "rendered_output_artifact_exists": true,
+        "scenario_hash_matches": true,
+        "rendered_output_hash_matches": false,
+        "validation_run_hash_exists": true,
+        "quality_tests_exist": true,
+        "boundary_flags_clean": true,
+        "route_proof_exists": true,
+        "surface_propagation_exists": true,
+        "claim_boundary_scan_passes": true,
+        "no_mock_scan_passes": true
+      },
+      "effectiveAuthorityState": "pending_reconciliation",
+      "missingChecks": [
+        "rendered_output_hash_matches"
+      ],
+      "blocked": true,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "report_complete_contract_pending",
+      "description": "report says complete but contract still pending",
+      "declaredAuthorityState": "legacy_validated_pending_v2_revalidation",
+      "reportClaimsComplete": true,
+      "checks": {
+        "contract_state_exists": true,
+        "ledger_entry_exists": true,
+        "scenario_artifact_exists": true,
+        "rendered_output_artifact_exists": true,
+        "scenario_hash_matches": true,
+        "rendered_output_hash_matches": true,
+        "validation_run_hash_exists": true,
+        "quality_tests_exist": true,
+        "boundary_flags_clean": true,
+        "route_proof_exists": true,
+        "surface_propagation_exists": true,
+        "claim_boundary_scan_passes": true,
+        "no_mock_scan_passes": true
+      },
+      "effectiveAuthorityState": "legacy_validated_pending_v2_revalidation",
+      "missingChecks": [],
+      "blocked": true,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "surface_proven_effective_pending",
+      "description": "surface says proven but effective state pending",
+      "declaredAuthorityState": "externally_proven_gold_product",
+      "checks": {
+        "contract_state_exists": true,
+        "ledger_entry_exists": true,
+        "scenario_artifact_exists": true,
+        "rendered_output_artifact_exists": true,
+        "scenario_hash_matches": true,
+        "rendered_output_hash_matches": true,
+        "validation_run_hash_exists": true,
+        "quality_tests_exist": true,
+        "boundary_flags_clean": true,
+        "route_proof_exists": true,
+        "surface_propagation_exists": false,
+        "claim_boundary_scan_passes": false,
+        "no_mock_scan_passes": true
+      },
+      "effectiveAuthorityState": "pending_reconciliation",
+      "missingChecks": [
+        "surface_propagation_exists",
+        "claim_boundary_scan_passes"
+      ],
+      "blocked": true,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "board_guard_fails_estate_passes",
+      "description": "board-facing guard fails but estate gate passes",
+      "declaredAuthorityState": "judgement_product",
+      "boardFacingProduct": true,
+      "checks": {
+        "contract_state_exists": true,
+        "ledger_entry_exists": true,
+        "scenario_artifact_exists": true,
+        "rendered_output_artifact_exists": true,
+        "scenario_hash_matches": true,
+        "rendered_output_hash_matches": true,
+        "validation_run_hash_exists": true,
+        "quality_tests_exist": true,
+        "boundary_flags_clean": true,
+        "route_proof_exists": true,
+        "surface_propagation_exists": true,
+        "claim_boundary_scan_passes": true,
+        "no_mock_scan_passes": true,
+        "board_facing_guard_passes": false
+      },
+      "effectiveAuthorityState": "pending_reconciliation",
+      "missingChecks": [
+        "board_facing_guard_passes"
+      ],
+      "blocked": true,
+      "result": "BLOCKED"
+    },
+    {
+      "id": "no_mock_high_findings_authority_restore",
+      "description": "no-mock scan reports high findings but authority tries to restore",
+      "declaredAuthorityState": "diagnostic_product",
+      "checks": {
+        "contract_state_exists": true,
+        "ledger_entry_exists": true,
+        "scenario_artifact_exists": true,
+        "rendered_output_artifact_exists": true,
+        "scenario_hash_matches": true,
+        "rendered_output_hash_matches": true,
+        "validation_run_hash_exists": true,
+        "quality_tests_exist": true,
+        "boundary_flags_clean": true,
+        "route_proof_exists": true,
+        "surface_propagation_exists": true,
+        "claim_boundary_scan_passes": true,
+        "no_mock_scan_passes": false
+      },
+      "effectiveAuthorityState": "pending_reconciliation",
+      "missingChecks": [
+        "no_mock_scan_passes"
+      ],
+      "blocked": true,
+      "result": "BLOCKED"
+    }
+  ]
+}
