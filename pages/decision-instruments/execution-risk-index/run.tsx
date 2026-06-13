@@ -5,10 +5,16 @@ import ExecutionRiskIndexRunner from "@/components/instruments/ExecutionRiskInde
 import { track } from "@/lib/analytics/track";
 import type { ExecutionRiskResult } from "@/lib/instruments/execution-risk-index/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
+import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
+import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 const ExecutionRiskRun: NextPage = () => {
   const [result, setResult] = React.useState<ExecutionRiskResult | null>(null);
   const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'execution_risk_index');
+  const contract = config ? resolveProductAuthority(config) : null;
 
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "execution-risk-index" }); }, []);
 
@@ -47,6 +53,14 @@ const ExecutionRiskRun: NextPage = () => {
         { label: "Dossier", value: "PDF dossier available" },
       ] : undefined}
     >
+      {!result && contract && (
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
+          <ProductAuthorityPanel contract={contract} />
+          <div style={{ marginTop: '0.75rem' }}>
+            <ProductAuthorityNotice contract={contract} />
+          </div>
+        </div>
+      )}
       {!result ? (
         <ExecutionRiskIndexRunner onComplete={handleComplete} />
       ) : (
