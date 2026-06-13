@@ -107,6 +107,16 @@ export default function DecisionTestPage() {
             </div>
           )}
 
+          {/* AI Contrast Section */}
+          <div style={{ marginTop: "20px", marginBottom: "20px", padding: "16px", border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}08`, borderRadius: "4px" }}>
+            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
+              Not Generic AI
+            </p>
+            <p className="text-[13px] leading-[1.6] text-white/55">
+              Generic AI gives answers. This system tests whether a decision has enough evidence, authority, and ownership before it moves forward. It derives judgement by pattern, exposes consequence, and identifies what would falsify your case.
+            </p>
+          </div>
+
           <p className="mt-4 max-w-[54ch] text-[15px] leading-[1.85] text-white/55">
             Describe a real situation you are facing. The system will return a free
             perception check — what kind of decision this is, where it is most likely

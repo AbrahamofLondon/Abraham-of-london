@@ -44,7 +44,7 @@
       },
       "shows": {
         "authority": true,
-        "publicClaim": false,
+        "publicClaim": true,
         "blocking": true,
         "nextAction": true,
         "limitations": true,

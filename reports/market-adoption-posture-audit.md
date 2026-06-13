@@ -10,7 +10,7 @@ Market adoption state: credible_but_too_complex
 
 | Product | Buyer | User | Adoption Posture | Flags |
 | --- | --- | --- | --- | --- |
-| fast_diagnostic | Founder, operator, functional executive | Decision owner under time pressure | strong_but_needs_clarity | generic_ai_contrast_weak |
+| fast_diagnostic | Founder, operator, functional executive | Decision owner under time pressure | dominant | none |
 | team_assessment | CEO, COO, chief of staff, people/operations lead | Team lead or facilitator | credible_but_too_complex | authority_contract_not_visible |
 | enterprise_assessment | Executive sponsor, transformation leader, risk/governance lead | Programme owner, PMO, strategy/operations team | credible_but_too_complex | authority_contract_not_visible |
 | personal_decision_audit | Founder, executive, advisor, operator | Individual decision owner | strong_but_needs_clarity | limitations_not_visible |
@@ -38,9 +38,9 @@ Market adoption state: credible_but_too_complex
 
 ### fast_diagnostic
 
-- Posture: strong_but_needs_clarity
+- Posture: dominant
 - Current alternative: Ask a senior colleague, consultant, or generic AI prompt for a second opinion.
-- Recommended action: State why this product is accountable decision infrastructure rather than generic AI advice.
+- Recommended action: Keep language strong and bind it to visible proof.
 
 ### team_assessment
 

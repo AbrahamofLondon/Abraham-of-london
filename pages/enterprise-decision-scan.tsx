@@ -274,6 +274,15 @@ export default function EnterpriseDecisionScanPage() {
                 <div style={{ marginTop: '16px' }}>
                   <ProductAuthorityNotice contract={contract} />
                 </div>
+                {/* Authority context */}
+                <div style={{ marginTop: '12px', padding: '12px', backgroundColor: `${GOLD}08`, border: `1px solid ${GOLD}22`, borderRadius: '4px' }}>
+                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '6px' }}>
+                    What This Means
+                  </p>
+                  <p style={{ fontSize: '13px', lineHeight: '1.5', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                    This scan surfaces risks and dependencies. Authority for decisions depends on v2 evidence validation (in progress). Use alongside fast_diagnostic (externally proven) for governed decisions.
+                  </p>
+                </div>
               </div>
             )}
           </div>

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-13T16:25:05.876Z",
+  "generatedAt": "2026-06-13T16:33:17.797Z",
   "gate": "PASSED_WITH_FINDINGS",
   "marketAdoptionState": "credible_but_too_complex",
   "productsAudited": 9,
   "postureCounts": {
-    "strong_but_needs_clarity": 4,
+    "dominant": 2,
     "credible_but_too_complex": 4,
-    "dominant": 1
+    "strong_but_needs_clarity": 3
   },
   "marketPainUnclearCount": 0,
   "rows": [
@@ -44,16 +44,14 @@
         "productActionClear": true,
         "evidenceVisible": true,
         "judgementVisible": true,
-        "genericAiContrastVisible": false,
+        "genericAiContrastVisible": true,
         "authorityContractVisible": true,
         "limitationVisible": true,
         "fulfilmentOrNextActionVisible": true
       },
-      "flags": [
-        "generic_ai_contrast_weak"
-      ],
-      "adoptionPosture": "strong_but_needs_clarity",
-      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
+      "flags": [],
+      "adoptionPosture": "dominant",
+      "recommendedAction": "Keep language strong and bind it to visible proof."
     },
     {
       "productCode": "team_assessment",
@@ -416,10 +414,10 @@
   "adoptionFindings": [
     {
       "productCode": "fast_diagnostic",
-      "adoptionPosture": "strong_but_needs_clarity",
+      "adoptionPosture": "dominant",
       "marketPain": "Leaders make expensive decisions from incomplete evidence and need a fast signal before committing.",
       "currentAlternative": "Ask a senior colleague, consultant, or generic AI prompt for a second opinion.",
-      "recommendedAction": "State why this product is accountable decision infrastructure rather than generic AI advice."
+      "recommendedAction": "Keep language strong and bind it to visible proof."
     },
     {
       "productCode": "team_assessment",
