@@ -32,14 +32,22 @@ function toBareBlogSlug(input) {
   let s = String(input ?? "").trim().replace(/\\\\/g, "/").replace(/\/{2,}/g, "/");
   s = normalizePath(s);
 
+  const PREFIXES = [
+    "blog/", "posts/", "articles/", "library/", "content/", "public/", "restricted/",
+    "/blog/", "/posts/", "/articles/", "/library/", "/content/", "/public/", "/restricted/",
+  ];
+
   let changed = true;
   while (changed) {
     changed = false;
     const lower = s.toLowerCase();
-    if (lower.startsWith("blog/")) { s = normalizePath(s.slice("blog/".length)); changed = true; }
-    else if (lower.startsWith("posts/")) { s = normalizePath(s.slice("posts/".length)); changed = true; }
-    else if (lower.startsWith("/blog/")) { s = normalizePath(s.slice("/blog/".length)); changed = true; }
-    else if (lower.startsWith("/posts/")) { s = normalizePath(s.slice("/posts/".length)); changed = true; }
+    for (const prefix of PREFIXES) {
+      if (lower.startsWith(prefix)) {
+        s = normalizePath(s.slice(prefix.length));
+        changed = true;
+        break;
+      }
+    }
   }
 
   s = normalizePath(s);
@@ -128,19 +136,36 @@ for (const p of standalonePosts) {
     continue;
   }
 
-  const wantBlog = `blog/${bare}`;
-  const wantPosts = `posts/${bare}`;
+  // Build candidates matching the enhanced getStaticProps
+  const candidates = [
+    `blog/${bare}`,
+    `posts/${bare}`,
+    bare,
+    `articles/${bare}`,
+    `library/${bare}`,
+    `content/${bare}`,
+    `public/${bare}`,
+    `restricted/${bare}`,
+  ].filter(Boolean);
 
-  // Simulate the exact lookup from getStaticProps
-  const found =
-    allPosts.find((d) => normalizePath(d?.collectionSlug || "") === wantBlog) ||
-    allPosts.find((d) => normalizePath(d?.collectionSlug || "") === wantPosts) ||
-    allPosts.find((d) => normalizePath(d?.slug || "") === wantBlog) ||
-    allPosts.find((d) => normalizePath(d?._raw?.flattenedPath || "") === wantBlog) ||
-    allPosts.find((d) => normalizePath(d?.slug || "") === wantPosts) ||
-    allPosts.find((d) => normalizePath(d?._raw?.flattenedPath || "") === wantPosts) ||
-    allPosts.find((d) => normalizePath(d?.urlSlug || "") === bare) ||
-    null;
+  const found = allPosts.find((d) => {
+    const fields = [
+      d?.collectionSlug,
+      d?.urlSlug,
+      d?.slug,
+      d?.href,
+      d?.path,
+      d?._raw?.flattenedPath,
+      d?._raw?.sourceFilePath,
+      d?._raw?.sourceFileName,
+    ];
+    return fields.some((field) => {
+      if (!field) return false;
+      const normalised = normalizePath(String(field));
+      const withoutExt = normalised.replace(/\.(md|mdx)$/i, "");
+      return candidates.includes(normalised) || candidates.includes(withoutExt);
+    });
+  }) || null;
 
   if (found) {
     results.push({ title: p.title, slug: p.slug, bare, status: "OK" });
@@ -192,6 +217,74 @@ for (const p of seriesPosts) {
 }
 console.log("");
 
+// ── Classic blog slug verification ───────────────────────────────────────
+// Verify that well-known classic blog URLs resolve correctly through the
+// catch-all route, simulating the exact lookup used in getStaticProps.
+
+console.log("─".repeat(60));
+console.log("  CLASSIC BLOG SLUG VERIFICATION");
+console.log("─".repeat(60));
+
+const classicSlugs = [
+  "the-meeting-was-never-the-problem",
+  "the-second-phone",
+  "when-the-foundation-is-destroyed",
+  "when-the-system-breaks-you",
+  "surrender-not-submission",
+  "ultimate-purpose-of-man",
+  "the-brotherhood-code",
+  "reclaiming-the-narrative",
+  "fathering-principles",
+  "out-of-context-truth",
+  "leadership-begins-at-home",
+  "christianity-not-extremism",
+];
+
+let classicPassed = 0;
+let classicFailed = 0;
+
+for (const slug of classicSlugs) {
+  const candidates = [
+    `blog/${slug}`,
+    `posts/${slug}`,
+    slug,
+    `articles/${slug}`,
+    `library/${slug}`,
+    `content/${slug}`,
+    `public/${slug}`,
+    `restricted/${slug}`,
+  ].filter(Boolean);
+
+  const found = allPosts.find((d) => {
+    const fields = [
+      d?.collectionSlug,
+      d?.urlSlug,
+      d?.slug,
+      d?.href,
+      d?.path,
+      d?._raw?.flattenedPath,
+      d?._raw?.sourceFilePath,
+      d?._raw?.sourceFileName,
+    ];
+    return fields.some((field) => {
+      if (!field) return false;
+      const normalised = normalizePath(String(field));
+      const withoutExt = normalised.replace(/\.(md|mdx)$/i, "");
+      return candidates.includes(normalised) || candidates.includes(withoutExt);
+    });
+  }) || null;
+
+  if (found) {
+    console.log(`   ✅ /blog/${slug} → resolves to "${found.title}"`);
+    classicPassed++;
+  } else {
+    console.log(`   ❌ /blog/${slug} → NOT FOUND`);
+    classicFailed++;
+  }
+}
+
+console.log(`\n   Classic slug results: ${classicPassed} passed, ${classicFailed} failed\n`);
+
 // ── Write JSON report ────────────────────────────────────────────────────
 
 if (!existsSync(REPORTS_DIR)) {
@@ -226,10 +319,16 @@ console.log(`📄 JSON report written to reports/blog-post-route-audit.json`);
 
 // ── Exit with code ───────────────────────────────────────────────────────
 
-if (failures.length > 0) {
-  console.error(`\n❌ Audit FAILED: ${failures.length} post(s) cannot be resolved by the catch-all route.`);
+const totalFailures = failures.length + classicFailed;
+if (totalFailures > 0) {
+  if (failures.length > 0) {
+    console.error(`❌ ${failures.length} post(s) cannot be resolved by the catch-all route.`);
+  }
+  if (classicFailed > 0) {
+    console.error(`❌ ${classicFailed} classic blog slug(s) failed verification.`);
+  }
   process.exit(1);
 } else {
-  console.log(`\n✅ Audit PASSED: All standalone posts resolve correctly.`);
+  console.log(`\n✅ Audit PASSED: All standalone posts and classic slugs resolve correctly.`);
   process.exit(0);
 }

@@ -41,23 +41,34 @@ function toBareBlogSlug(input: unknown): string {
   let s = collapseSlashes(String(input ?? "")).trim();
   s = normalizeSlug(s);
 
+  const PREFIXES = [
+    "blog/",
+    "posts/",
+    "articles/",
+    "library/",
+    "content/",
+    "public/",
+    "restricted/",
+    "/blog/",
+    "/posts/",
+    "/articles/",
+    "/library/",
+    "/content/",
+    "/public/",
+    "/restricted/",
+  ];
+
   let changed = true;
   while (changed) {
     changed = false;
     const lower = s.toLowerCase();
 
-    if (lower.startsWith("blog/")) {
-      s = normalizeSlug(s.slice("blog/".length));
-      changed = true;
-    } else if (lower.startsWith("posts/")) {
-      s = normalizeSlug(s.slice("posts/".length));
-      changed = true;
-    } else if (lower.startsWith("/blog/")) {
-      s = normalizeSlug(s.slice("/blog/".length));
-      changed = true;
-    } else if (lower.startsWith("/posts/")) {
-      s = normalizeSlug(s.slice("/posts/".length));
-      changed = true;
+    for (const prefix of PREFIXES) {
+      if (lower.startsWith(prefix)) {
+        s = normalizeSlug(s.slice(prefix.length));
+        changed = true;
+        break;
+      }
     }
   }
 
@@ -237,7 +248,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
     .filter((p: any) => !p?.series)
     .map((p: any) => {
       const raw = normalizeSlug(
-        p?.urlSlug || p?.collectionSlug || p?.slug || p?._raw?.flattenedPath || ""
+        p?.urlSlug ||
+          p?.collectionSlug ||
+          p?.slug ||
+          p?.href ||
+          p?.path ||
+          p?._raw?.flattenedPath ||
+          p?._raw?.sourceFilePath ||
+          p?._raw?.sourceFileName ||
+          ""
       );
 
       const bare = toBareBlogSlug(raw);
@@ -263,15 +282,41 @@ export const getStaticProps: GetStaticProps<BlogSlugProps> = async ({ params }) 
     const wantBlog = `blog/${bare}`;
     const wantPosts = `posts/${bare}`;
 
-    const rawDoc =
-      posts.find((p: any) => normalizeSlug(p?.collectionSlug || "") === wantBlog) ||
-      posts.find((p: any) => normalizeSlug(p?.collectionSlug || "") === wantPosts) ||
-      posts.find((p: any) => normalizeSlug(p?.slug || "") === wantBlog) ||
-      posts.find((p: any) => normalizeSlug(p?._raw?.flattenedPath || "") === wantBlog) ||
-      posts.find((p: any) => normalizeSlug(p?.slug || "") === wantPosts) ||
-      posts.find((p: any) => normalizeSlug(p?._raw?.flattenedPath || "") === wantPosts) ||
-      posts.find((p: any) => normalizeSlug(p?.urlSlug || "") === bare) ||
-      null;
+    // Build a set of candidate patterns to match against every slug field on every post.
+    // This ensures that regardless of which field carries the canonical path, we find it.
+    const candidates = [
+      wantBlog,                    // blog/the-meeting-was-never-the-problem
+      wantPosts,                   // posts/the-meeting-was-never-the-problem
+      bare,                        // the-meeting-was-never-the-problem
+      `blog/${bare}`,              // (redundant with wantBlog but explicit)
+      `posts/${bare}`,             // (redundant with wantPosts but explicit)
+      `articles/${bare}`,
+      `library/${bare}`,
+      `content/${bare}`,
+      `public/${bare}`,
+      `restricted/${bare}`,
+    ].filter(Boolean);
+
+    const rawDoc = posts.find((p: any) => {
+      const fields = [
+        p?.collectionSlug,
+        p?.urlSlug,
+        p?.slug,
+        p?.href,
+        p?.path,
+        p?._raw?.flattenedPath,
+        p?._raw?.sourceFilePath,
+        p?._raw?.sourceFileName,
+      ];
+
+      return fields.some((field) => {
+        if (!field) return false;
+        const normalised = normalizeSlug(String(field));
+        // Strip .md / .mdx extension if present
+        const withoutExt = normalised.replace(/\.(md|mdx)$/i, "");
+        return candidates.includes(normalised) || candidates.includes(withoutExt);
+      });
+    }) || null;
 
     if (!rawDoc || rawDoc?.draft) {
       return { notFound: true };
