@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-06-14T08:31:25.951Z",
+  "generatedAt": "2026-06-14T11:58:07.920Z",
   "gate": "PASSED_NO_HARDCODED_EVIDENCE_TRUTH",
   "auditType": "hardcoded_evidence_state_audit",
-  "totalOccurrences": 102,
+  "totalOccurrences": 115,
   "classifications": {
     "authority_path_hardcoded": 0,
     "derived_from_verifier": 27,
     "display_only": 0,
     "test_fixture": 2,
     "historical_report": 0,
-    "safe_constant": 73,
+    "safe_constant": 86,
     "needs_refactor": 0
   },
   "failingOccurrences": [],
@@ -747,6 +747,110 @@
       "line": 58,
       "term": "hasValidV2Evidence",
       "symbol": "evidenceLedgerV2Valid: hasValidV2Evidence(\"fast_diagnostic\").valid,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 41,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed = false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 47,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "if (validation.evidenceLedgerV2Present) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 48,
+      "term": "trusted_artifact_supported",
+      "symbol": "derivedEvidenceState = \"trusted_artifact_supported\";",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 59,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "if (validation.evidenceLedgerV2Present) ledgerStatus = \"present_and_verified\";",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 110,
+      "term": "canGrantAuthority",
+      "symbol": "evidenceSource.canGrantAuthority === true &&",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 111,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed === true",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 118,
+      "term": "trusted_artifact_supported",
+      "symbol": "derivedEvidenceState === \"trusted_artifact_supported\" &&",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 121,
+      "term": "publicClaimAllowed",
+      "symbol": "!publicClaimAllowed &&",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 252,
+      "term": "publicClaimAllowed",
+      "symbol": "effectiveAuthorityState: publicClaimAllowed ? \"granted\" : \"suppressed\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 253,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: evidenceSource.canGrantAuthority || false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 254,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed: publicClaimAllowed || false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 278,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/classify-authority-estate-lanes.mjs",
+      "line": 279,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed: false,",
       "classification": "safe_constant",
       "detail": "No authority-path evidence assertion detected."
     },

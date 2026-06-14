@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-14T08:16:19.432Z",
+  "generatedAt": "2026-06-14T11:58:15.433Z",
   "gate": "passed_with_descriptive_report_references",
-  "scriptsScanned": 3846,
+  "scriptsScanned": 3849,
   "trueViolationCount": 0,
   "blockingCount": 0,
-  "totalFindings": 459,
+  "totalFindings": 471,
   "blockingFindings": [],
   "findings": [
     {
@@ -862,6 +862,102 @@
       "blocking": false,
       "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
       "context": "const ledgerByProduct = new Map((ledgerReport.rows ?? []).map((row) => [row.productCode, row]));"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 63,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script generates report output — descriptive only",
+      "context": "const GENERATED_AUDIT_FILES = ["
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 64,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "/reports[\\\\/]+system-truth-/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 65,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "/reports[\\\\/]+report-as-evidence-violations\\.json$/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 66,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "/reports[\\\\/]+unsafe-operational-authority-claims\\.(json|md)$/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 67,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": "/reports[\\\\/]+authority-safe-language-remaining-findings\\.(json|md)$/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 68,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": "];"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 69,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": ""
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 70,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": "const HISTORICAL_REPORT_PATTERNS = ["
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 71,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": "/reports[\\\\/]+WAVE_/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 72,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": "/reports[\\\\/]+BLOCKING_GATE_REMEDIATION_/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 73,
+      "classification": "correction_notice",
+      "blocking": false,
+      "reason": "Correction or superseded notice",
+      "context": "/reports[\\\\/]+AUTHORITY_BLOCKING_GATE_ENFORCEMENT/i,"
+    },
+    {
+      "file": "scripts/check-authority-safe-language.mjs",
+      "line": 74,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "/reports[\\\\/]+AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT/i,"
     },
     {
       "file": "scripts/check-estate-authority-integrity.mjs",
@@ -3681,9 +3777,9 @@
     }
   ],
   "classificationSummary": {
-    "guard_pattern_or_test_fixture": 187,
-    "report_descriptive_only": 237,
-    "correction_notice": 26,
+    "guard_pattern_or_test_fixture": 191,
+    "report_descriptive_only": 238,
+    "correction_notice": 33,
     "historical_report_reference": 9
   },
   "generatedReportClaims": [

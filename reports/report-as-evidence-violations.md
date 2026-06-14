@@ -1,14 +1,14 @@
 # Report-As-Evidence Violations
 
-Generated: 2026-06-14T08:16:19.432Z
+Generated: 2026-06-14T11:58:15.433Z
 
 Gate: passed_with_descriptive_report_references
 
-Scripts scanned: 3846
+Scripts scanned: 3849
 
 True violations (report-as-evidence): 0
 Blocking findings: 0
-Total findings (all categories): 459
+Total findings (all categories): 471
 
 ## Evidence Source Policy
 
@@ -32,9 +32,9 @@ Authority-supporting types (may support authority only when verified):
 
 | Classification | Count | Blocks Authority? |
 |---|---|---|
-| report_descriptive_only | 237 | No |
-| guard_pattern_or_test_fixture | 187 | No |
-| correction_notice | 26 | No |
+| report_descriptive_only | 238 | No |
+| guard_pattern_or_test_fixture | 191 | No |
+| correction_notice | 33 | No |
 | historical_report_reference | 9 | No |
 
 ## Blocking Findings
@@ -154,6 +154,18 @@ Authority-supporting types (may support authority only when verified):
 | scripts/check-authority-grant-firewall.mjs | 32 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | const noMock = readJson("reports/no-mock-authority.json", {}); |
 | scripts/check-authority-grant-firewall.mjs | 33 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. |  |
 | scripts/check-authority-grant-firewall.mjs | 34 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const ledgerByProduct = new Map((ledgerReport.rows ?? []).map((row) => [row.productCode, row])); |
+| scripts/check-authority-safe-language.mjs | 63 | report_descriptive_only | Script generates report output — descriptive only | const GENERATED_AUDIT_FILES = [ |
+| scripts/check-authority-safe-language.mjs | 64 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | /reports[\\/]+system-truth-/i, |
+| scripts/check-authority-safe-language.mjs | 65 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | /reports[\\/]+report-as-evidence-violations\.json$/i, |
+| scripts/check-authority-safe-language.mjs | 66 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | /reports[\\/]+unsafe-operational-authority-claims\.(json\|md)$/i, |
+| scripts/check-authority-safe-language.mjs | 67 | correction_notice | Correction or superseded notice | /reports[\\/]+authority-safe-language-remaining-findings\.(json\|md)$/i, |
+| scripts/check-authority-safe-language.mjs | 68 | correction_notice | Correction or superseded notice | ]; |
+| scripts/check-authority-safe-language.mjs | 69 | correction_notice | Correction or superseded notice |  |
+| scripts/check-authority-safe-language.mjs | 70 | correction_notice | Correction or superseded notice | const HISTORICAL_REPORT_PATTERNS = [ |
+| scripts/check-authority-safe-language.mjs | 71 | correction_notice | Correction or superseded notice | /reports[\\/]+WAVE_/i, |
+| scripts/check-authority-safe-language.mjs | 72 | correction_notice | Correction or superseded notice | /reports[\\/]+BLOCKING_GATE_REMEDIATION_/i, |
+| scripts/check-authority-safe-language.mjs | 73 | correction_notice | Correction or superseded notice | /reports[\\/]+AUTHORITY_BLOCKING_GATE_ENFORCEMENT/i, |
+| scripts/check-authority-safe-language.mjs | 74 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | /reports[\\/]+AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT/i, |
 | scripts/check-estate-authority-integrity.mjs | 172 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const serialized = { |
 | scripts/check-estate-authority-integrity.mjs | 173 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | "category-route-proof": JSON.stringify(reports.routeProof), |
 | scripts/check-estate-authority-integrity.mjs | 174 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | "category-demonstration-readiness": JSON.stringify(reports.categoryReadiness), |

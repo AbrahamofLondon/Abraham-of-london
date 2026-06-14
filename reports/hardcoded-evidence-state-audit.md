@@ -1,10 +1,10 @@
 # Hardcoded Evidence State Audit
 
-Generated: 2026-06-14T08:31:25.951Z
+Generated: 2026-06-14T11:58:07.920Z
 
 Gate: PASSED_NO_HARDCODED_EVIDENCE_TRUTH
 
-Total occurrences: 102
+Total occurrences: 115
 
 ## Classifications
 
@@ -13,7 +13,7 @@ Total occurrences: 102
 - display_only: 0
 - test_fixture: 2
 - historical_report: 0
-- safe_constant: 73
+- safe_constant: 86
 - needs_refactor: 0
 
 ## Failing Occurrences
@@ -116,6 +116,19 @@ Total occurrences: 102
 | scripts/check-product-claim-recovery.mjs | 68 | hasValidV2Evidence | safe_constant | No authority-path evidence assertion detected. |
 | scripts/check-release-authority-firewall.mjs | 22 | hasValidV2Evidence | safe_constant | No authority-path evidence assertion detected. |
 | scripts/check-release-authority-firewall.mjs | 58 | hasValidV2Evidence | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 41 | publicClaimAllowed | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 47 | evidenceLedgerV2Present | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 48 | trusted_artifact_supported | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 59 | evidenceLedgerV2Present | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 110 | canGrantAuthority | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 111 | publicClaimAllowed | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 118 | trusted_artifact_supported | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 121 | publicClaimAllowed | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 252 | publicClaimAllowed | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 253 | canGrantAuthority | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 254 | publicClaimAllowed | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 278 | canGrantAuthority | safe_constant | No authority-path evidence assertion detected. |
+| scripts/classify-authority-estate-lanes.mjs | 279 | publicClaimAllowed | safe_constant | No authority-path evidence assertion detected. |
 | scripts/lib/read-evidence-ledger-v2.mjs | 46 | hasValidV2Evidence | safe_constant | No authority-path evidence assertion detected. |
 | scripts/lib/read-evidence-ledger-v2.mjs | 142 | hasValidV2Evidence | safe_constant | No authority-path evidence assertion detected. |
 | scripts/reconcile-product-authority-truth.mjs | 222 | trusted_artifact_supported | derived_from_verifier | Reconciliation reads artifact verifier output. |

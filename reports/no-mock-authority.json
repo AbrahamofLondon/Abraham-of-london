@@ -1,5 +1,5 @@
 {
-  "auditDate": "2026-06-14T08:16:07.365Z",
+  "auditDate": "2026-06-14T08:46:23.968Z",
   "gateStatus": "passed_with_non_authority_findings",
   "pathsScanned": 22,
   "findingsTotal": 104,
@@ -880,34 +880,25 @@
     },
     {
       "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 15,
+      "line": 8,
       "pattern": "fixture_reference",
       "severity": "INFO",
       "classification": "false_positive",
-      "content": "*   test_fixture                 — Test or example showing old/new patterns",
+      "content": "* references, test fixtures, false positives, and bounded claims are reported",
       "reason": "Comment or docstring"
     },
     {
       "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 37,
+      "line": 54,
       "pattern": "fixture_reference",
-      "severity": "INFO",
-      "classification": "false_positive",
-      "content": "// Patterns that indicate a line is inside a guard definition or test fixture",
-      "reason": "Comment or docstring"
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "const TEST_FIXTURE_PATTERNS = [",
+      "reason": "Check script describing patterns it detects"
     },
     {
       "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 62,
-      "pattern": "fixture_reference",
-      "severity": "INFO",
-      "classification": "false_positive",
-      "content": "// Patterns that indicate test fixtures or examples",
-      "reason": "Comment or docstring"
-    },
-    {
-      "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 81,
+      "line": 87,
       "pattern": "fixture_reference",
       "severity": "MEDIUM",
       "classification": "report_generator_safe",
@@ -916,38 +907,47 @@
     },
     {
       "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 122,
-      "pattern": "fixture_reference",
-      "severity": "INFO",
-      "classification": "false_positive",
-      "content": "// 3. Check if this is a test fixture or example",
-      "reason": "Comment or docstring"
-    },
-    {
-      "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 124,
-      "pattern": "fixture_reference",
-      "severity": "MEDIUM",
-      "classification": "report_generator_safe",
-      "content": "classification = \"test_fixture\";",
-      "reason": "Check script describing patterns it detects"
-    },
-    {
-      "file": "scripts\\check-authority-safe-language.mjs",
-      "line": 187,
+      "line": 184,
       "pattern": "fixture_reference",
       "severity": "MEDIUM",
       "classification": "report_generator_safe",
       "content": "console.log(`Total test fixtures (informational): ${findings.test_fixture.length}`);",
       "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 208,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "if (TEST_FIXTURE_PATTERNS.some((pattern) => pattern.test(line))) return \"test_fixture\";",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 236,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "case \"test_fixture\":",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 259,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "case \"test_fixture\":",
+      "reason": "Check script describing patterns it detects"
     }
   ],
   "classificationSummary": {
-    "false_positive": 75,
+    "false_positive": 72,
     "validation_artifact_mock": 13,
     "demo_content_safe": 1,
     "historical_reference": 2,
-    "report_generator_safe": 13
+    "report_generator_safe": 16
   },
   "doctrine": "No hardcoded mock data may grant authority. Mock-like material may exist in tests, fixtures, or demos, but must not be reachable from authority-critical paths."
 }
