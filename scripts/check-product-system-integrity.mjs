@@ -370,6 +370,17 @@ if (adversarialShieldResult.success) {
   console.log(adversarialShieldResult.output);
 }
 
+// Phase 8d: Shared Memory Bridge & Professional Console
+logSection('PHASE 8D: SHARED MEMORY BRIDGE & PROFESSIONAL CONSOLE');
+
+const professionalConsoleResult = runCommand('check-phase-7-shared-memory-professional-console-integrity', 'Professional Console Guard');
+if (professionalConsoleResult.success) {
+  pass('Professional Console Guard passed (48/48 tests)');
+} else {
+  fail('Professional Console Guard failed');
+  console.log(professionalConsoleResult.output);
+}
+
 // Phase 9: Report summary
 logSection('PHASE 9: FINAL REPORT');
 
