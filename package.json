@@ -264,11 +264,14 @@
     "outbound:style": "node scripts/check-editorial-style.mjs --roots content/outbound",
     "outbound:style:strict": "node scripts/check-editorial-style.mjs --roots content/outbound --strict",
     "outbound:content": "node scripts/validate-outbound-content.mjs",
-    "outbound:content:strict": "node scripts/validate-outbound-content.mjs --strict"
+    "outbound:content:strict": "node scripts/validate-outbound-content.mjs --strict",
+    "check:product-system": "node scripts/check-product-system-integrity.mjs",
+    "test:product-system-negative": "node scripts/test-product-system-integrity-negative-cases.mjs",
+    "verify:predeploy": "pnpm exec tsc --noEmit --pretty false --incremental false && node scripts/check-product-system-integrity.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
-    "@auth/core": "^0.41.1",
+    "@auth/core": "^0.34.3",
     "@aws-sdk/client-s3": "^3.1023.0",
     "@aws-sdk/s3-request-presigner": "^3.1023.0",
     "@babel/runtime": "^7.28.6",
@@ -358,7 +361,7 @@
     "micro": "^10.0.1",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.1",
-    "next": "^16.2.2",
+    "next": "16.2.0",
     "next-auth": "4.24.13",
     "next-contentlayer2": "^0.5.8",
     "next-seo": "^7.1.0",
