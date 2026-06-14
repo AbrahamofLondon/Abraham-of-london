@@ -1,0 +1,663 @@
+{
+  "decision_pressure_signal": {
+    "productCode": "decision_pressure_signal",
+    "productName": "Pressure Signal",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor for evidence-limited commercial pathway"
+  },
+  "boardroom_brief": {
+    "productCode": "boardroom_brief",
+    "productName": "Boardroom Brief",
+    "currentAuthorityState": "blocked_until_claim_evidenced",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Product claims board certification without evidence"
+    ],
+    "nextEvidenceAction": "Require Evidence Ledger v2 before board claims permitted"
+  },
+  "strategy_room": {
+    "productCode": "strategy_room",
+    "productName": "Strategy Room",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Authority state unconfirmed"
+    ],
+    "nextEvidenceAction": "Define authority state via contract or Evidence Ledger v2"
+  },
+  "executive_reporting": {
+    "productCode": "executive_reporting",
+    "productName": "Executive Reporting",
+    "currentAuthorityState": "blocked_until_claim_evidenced",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Executive positioning requires authority proof"
+    ],
+    "nextEvidenceAction": "Require Evidence Ledger v2 validation"
+  },
+  "decision_instruments": {
+    "productCode": "decision_instruments",
+    "productName": "Decision Instruments",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Define commercial pathway or keep internal-only"
+  },
+  "professional": {
+    "productCode": "professional",
+    "productName": "Professional Subscription",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor subscription metrics"
+  },
+  "retainer_oversight": {
+    "productCode": "retainer_oversight",
+    "productName": "Retainer / Oversight",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires governance scope definition"
+    ],
+    "nextEvidenceAction": "Define retainer authority and oversight model"
+  },
+  "inner_circle": {
+    "productCode": "inner_circle",
+    "productName": "Inner Circle",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor member outcomes"
+  },
+  "gmi_quarterly": {
+    "productCode": "gmi_quarterly",
+    "productName": "Global Market Intelligence (Quarterly)",
+    "currentAuthorityState": "diagnostic_product_pending_evidence_validation",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [
+      "Evidence package exists and validated"
+    ],
+    "nextEvidenceAction": "Monitor for false claims, maintain falsification register, prepare Q3 workflow",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "evidence-limited quarterly intelligence",
+      "market research summary",
+      "prior-quarter call verification",
+      "forward scenario calibration",
+      "decision-support material"
+    ],
+    "forbiddenClaims": [
+      "AI predicts markets",
+      "guaranteed forecast",
+      "investment advice",
+      "certified market intelligence",
+      "externally verified prediction"
+    ],
+    "evidencePackagePath": "artifacts/validation/market_intelligence_q2/evidence-package.json",
+    "methodologyBoundaryPath": "artifacts/validation/market_intelligence_q2/methodology-boundary.md",
+    "allowedClaimsPath": "artifacts/validation/market_intelligence_q2/allowed-claims.txt",
+    "forbiddenClaimsPath": "artifacts/validation/market_intelligence_q2/forbidden-claims.txt",
+    "commercialClaimBounded": "evidence-limited-only",
+    "manualFulfilmentAllowed": true,
+    "checkoutAllowed": false,
+    "requiredBoundaryVariant": "advisory_review",
+    "priorQuarterReviewRequired": true,
+    "humanReviewRequired": true,
+    "positiveAuthorityGranted": false
+  },
+  "briefs_vault_editorial": {
+    "productCode": "briefs_vault_editorial",
+    "productName": "Briefs / Vault / Editorial",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Continue editorial publication"
+  },
+  "market_intelligence_q1": {
+    "productCode": "market_intelligence_q1",
+    "productName": "Market Intelligence Q1",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires Q1 intelligence scope definition"
+    ],
+    "nextEvidenceAction": "Define Q1 intelligence scope, evidence boundary, then advance",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "evidence-limited quarterly intelligence",
+      "market research summary"
+    ],
+    "forbiddenClaims": [
+      "AI predicts",
+      "guaranteed forecast",
+      "certified intelligence"
+    ]
+  },
+  "market_intelligence_q2": {
+    "productCode": "market_intelligence_q2",
+    "productName": "Market Intelligence Q2",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires Q2 intelligence scope definition"
+    ],
+    "nextEvidenceAction": "Define Q2 intelligence scope, evidence boundary, then advance",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "evidence-limited quarterly intelligence",
+      "market research summary"
+    ],
+    "forbiddenClaims": [
+      "AI predicts",
+      "guaranteed forecast",
+      "certified intelligence"
+    ]
+  },
+  "market_intelligence_q3": {
+    "productCode": "market_intelligence_q3",
+    "productName": "Market Intelligence Q3",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires Q3 intelligence scope definition"
+    ],
+    "nextEvidenceAction": "Define Q3 intelligence scope, evidence boundary, then advance",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "evidence-limited quarterly intelligence",
+      "market research summary"
+    ],
+    "forbiddenClaims": [
+      "AI predicts",
+      "guaranteed forecast",
+      "certified intelligence"
+    ]
+  },
+  "competitor_tracker": {
+    "productCode": "competitor_tracker",
+    "productName": "Competitor Tracker",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires methodology boundary (observed moves, not predictions)",
+      "Requires source-type declaration (public sources only)",
+      "Requires confidence language policy"
+    ],
+    "nextEvidenceAction": "Define methodology boundary, source-type declaration, confidence language policy, human-review process, then advance as evidence-limited tracking",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "competitive intelligence support",
+      "reported move tracking",
+      "observed pattern alerts"
+    ],
+    "forbiddenClaims": [
+      "market prediction",
+      "certified intelligence",
+      "investment signals"
+    ]
+  },
+  "trend_monitor": {
+    "productCode": "trend_monitor",
+    "productName": "Trend Monitor",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires methodology boundary (pattern observation, not prediction)",
+      "Requires source-type declaration (public sources only)",
+      "Requires confidence language policy"
+    ],
+    "nextEvidenceAction": "Define methodology boundary, source-type declaration, confidence language policy, human-review process, then advance as evidence-limited monitoring",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "trend pattern observation",
+      "market signal alerts",
+      "pattern-based insights"
+    ],
+    "forbiddenClaims": [
+      "trend prediction",
+      "certified signals",
+      "investment advice"
+    ]
+  },
+  "signal_watch": {
+    "productCode": "signal_watch",
+    "productName": "Signal Watch",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires methodology boundary (alert system, not prediction)",
+      "Requires source-type declaration (public sources only)",
+      "Requires confidence language policy"
+    ],
+    "nextEvidenceAction": "Define methodology boundary, source-type declaration, confidence language policy, human-review process, then advance as evidence-limited alert system",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "market signal alerts",
+      "pattern-based notifications",
+      "monitoring service"
+    ],
+    "forbiddenClaims": [
+      "signal prediction",
+      "investment signals",
+      "guaranteed alerts"
+    ]
+  },
+  "diagnostic_extended": {
+    "productCode": "diagnostic_extended",
+    "productName": "Diagnostic (Extended)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires Evidence Ledger v2 scenarios",
+      "Requires rendered output artifacts",
+      "Requires anti-toy, red-team, market validation tests",
+      "Requires authority boundary definition",
+      "Requires fraud scenario testing"
+    ],
+    "nextEvidenceAction": "Generate Evidence Ledger v2, render sample outputs, run quality tests, define authority boundary, then schedule authority restoration review",
+    "targetReleaseLane": "prepare_for_authority_restoration_review",
+    "allowedClaims": [
+      "extended-scope decision-support",
+      "premium diagnostic tier"
+    ],
+    "forbiddenClaims": [
+      "validated authority",
+      "external proof",
+      "guaranteed outcome"
+    ]
+  },
+  "diagnostic_rapid": {
+    "productCode": "diagnostic_rapid",
+    "productName": "Diagnostic (Rapid)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires differentiation from fast_diagnostic"
+    ],
+    "nextEvidenceAction": "Define rapid diagnostic scope"
+  },
+  "diagnostic_deep": {
+    "productCode": "diagnostic_deep",
+    "productName": "Diagnostic (Deep)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires differentiation from enterprise_assessment"
+    ],
+    "nextEvidenceAction": "Define deep diagnostic scope"
+  },
+  "assessment_light": {
+    "productCode": "assessment_light",
+    "productName": "Assessment (Light)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires differentiation from enterprise_assessment"
+    ],
+    "nextEvidenceAction": "Define light assessment scope"
+  },
+  "assessment_standard": {
+    "productCode": "assessment_standard",
+    "productName": "Assessment (Standard)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires Evidence Ledger v2 scenarios",
+      "Requires rendered output artifacts",
+      "Requires team/enterprise distinction validation",
+      "Requires authority boundary definition",
+      "Requires manual review process documentation"
+    ],
+    "nextEvidenceAction": "Generate Evidence Ledger v2, render sample outputs, run quality tests, define team/enterprise distinction, then schedule authority restoration review",
+    "targetReleaseLane": "prepare_for_authority_restoration_review",
+    "allowedClaims": [
+      "standard-scope organizational assessment",
+      "mid-market assessment tier"
+    ],
+    "forbiddenClaims": [
+      "validated authority",
+      "certified audit",
+      "external proof"
+    ]
+  },
+  "assessment_premium": {
+    "productCode": "assessment_premium",
+    "productName": "Assessment (Premium)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires differentiation from enterprise_assessment"
+    ],
+    "nextEvidenceAction": "Define premium assessment scope"
+  },
+  "strategy_workshop": {
+    "productCode": "strategy_workshop",
+    "productName": "Strategy Workshop",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires product definition"
+    ],
+    "nextEvidenceAction": "Define workshop authority scope"
+  },
+  "strategy_intensive": {
+    "productCode": "strategy_intensive",
+    "productName": "Strategy Intensive",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires product definition"
+    ],
+    "nextEvidenceAction": "Define intensive strategy scope"
+  },
+  "strategy_retainer": {
+    "productCode": "strategy_retainer",
+    "productName": "Strategy Retainer",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Overlaps with retainer_oversight"
+    ],
+    "nextEvidenceAction": "Clarify relationship or consolidate"
+  },
+  "reporting_monthly": {
+    "productCode": "reporting_monthly",
+    "productName": "Reporting (Monthly)",
+    "currentAuthorityState": "diagnostic_product_pending_evidence_validation",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Reporting output layer evidence package created and validated"
+    ],
+    "nextEvidenceAction": "Monitor for evidence-limited reporting activation",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "structured analysis",
+      "decision-support synthesis",
+      "organized evidence summary",
+      "delivery artifact",
+      "advisory review"
+    ],
+    "forbiddenClaims": [
+      "validates decision",
+      "proves fact",
+      "report-as-evidence",
+      "certified reporting",
+      "validated authority",
+      "guaranteed outcome",
+      "investment advice"
+    ],
+    "evidencePackagePath": "artifacts/validation/reporting_output_layer/evidence-package.json",
+    "methodologyBoundaryPath": "artifacts/validation/reporting_output_layer/methodology-boundary.md",
+    "allowedClaimsPath": "artifacts/validation/reporting_output_layer/allowed-claims.txt",
+    "forbiddenClaimsPath": "artifacts/validation/reporting_output_layer/forbidden-claims.txt",
+    "commercialClaimBounded": "evidence_limited_only",
+    "manualFulfilmentAllowed": false,
+    "checkoutAllowed": false,
+    "requiredBoundaryVariant": "advisory_review",
+    "humanReviewRequired": true,
+    "priorQuarterReviewRequired": false,
+    "positiveAuthorityGranted": false
+  },
+  "reporting_custom": {
+    "productCode": "reporting_custom",
+    "productName": "Reporting (Custom)",
+    "currentAuthorityState": "diagnostic_product_pending_evidence_validation",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Reporting output layer evidence package created and validated"
+    ],
+    "nextEvidenceAction": "Monitor for evidence-limited reporting activation",
+    "targetReleaseLane": "evidence_limited_commercial_product",
+    "allowedClaims": [
+      "structured analysis",
+      "decision-support synthesis",
+      "organized evidence summary",
+      "delivery artifact",
+      "advisory review"
+    ],
+    "forbiddenClaims": [
+      "validates decision",
+      "proves fact",
+      "report-as-evidence",
+      "certified reporting",
+      "validated authority",
+      "guaranteed outcome",
+      "investment advice"
+    ],
+    "evidencePackagePath": "artifacts/validation/reporting_output_layer/evidence-package.json",
+    "methodologyBoundaryPath": "artifacts/validation/reporting_output_layer/methodology-boundary.md",
+    "allowedClaimsPath": "artifacts/validation/reporting_output_layer/allowed-claims.txt",
+    "forbiddenClaimsPath": "artifacts/validation/reporting_output_layer/forbidden-claims.txt",
+    "commercialClaimBounded": "evidence_limited_only",
+    "manualFulfilmentAllowed": false,
+    "checkoutAllowed": false,
+    "requiredBoundaryVariant": "advisory_review",
+    "humanReviewRequired": true,
+    "priorQuarterReviewRequired": false,
+    "positiveAuthorityGranted": false
+  },
+  "reporting_archive": {
+    "productCode": "reporting_archive",
+    "productName": "Reporting (Archive)",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Maintain archive integrity"
+  },
+  "tools_suite_basic": {
+    "productCode": "tools_suite_basic",
+    "productName": "Tools Suite (Basic)",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor tool adoption"
+  },
+  "tools_suite_pro": {
+    "productCode": "tools_suite_pro",
+    "productName": "Tools Suite (Pro)",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor pro tool adoption"
+  },
+  "tools_suite_enterprise": {
+    "productCode": "tools_suite_enterprise",
+    "productName": "Tools Suite (Enterprise)",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor enterprise deployment"
+  },
+  "research_library": {
+    "productCode": "research_library",
+    "productName": "Research Library",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Continue research publication"
+  },
+  "research_custom": {
+    "productCode": "research_custom",
+    "productName": "Research (Custom)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires custom research scope"
+    ],
+    "nextEvidenceAction": "Define custom research offerings"
+  },
+  "research_archive": {
+    "productCode": "research_archive",
+    "productName": "Research (Archive)",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Maintain archive integrity"
+  },
+  "content_editorial": {
+    "productCode": "content_editorial",
+    "productName": "Content (Editorial)",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Continue editorial publication"
+  },
+  "content_research": {
+    "productCode": "content_research",
+    "productName": "Content (Research)",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Continue research content publication"
+  },
+  "content_thought_leadership": {
+    "productCode": "content_thought_leadership",
+    "productName": "Content (Thought Leadership)",
+    "currentAuthorityState": "static_reference",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Continue thought leadership publication"
+  },
+  "training_workshop": {
+    "productCode": "training_workshop",
+    "productName": "Training (Workshop)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires training program definition"
+    ],
+    "nextEvidenceAction": "Define workshop scope and validation"
+  },
+  "training_certification": {
+    "productCode": "training_certification",
+    "productName": "Training (Certification)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Certification requires explicit authority"
+    ],
+    "nextEvidenceAction": "Define certification scope"
+  },
+  "training_ongoing": {
+    "productCode": "training_ongoing",
+    "productName": "Training (Ongoing)",
+    "currentAuthorityState": "insufficient_information_requires_review",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [
+      "Requires ongoing program definition"
+    ],
+    "nextEvidenceAction": "Define ongoing training scope"
+  },
+  "support_basic": {
+    "productCode": "support_basic",
+    "productName": "Support (Basic)",
+    "currentAuthorityState": "internal_only",
+    "publicClaimAllowed": false,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": false,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor support quality"
+  },
+  "fast_diagnostic": {
+    "productCode": "fast_diagnostic",
+    "productName": "Fast Diagnostic Decision Support",
+    "currentAuthorityState": "diagnostic_product",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor for authority restoration eligibility"
+  },
+  "enterprise_assessment": {
+    "productCode": "enterprise_assessment",
+    "productName": "Enterprise Assessment Advisory Review",
+    "currentAuthorityState": "diagnostic_product",
+    "publicClaimAllowed": true,
+    "canGrantAuthority": false,
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Monitor for authority restoration eligibility"
+  }
+}
