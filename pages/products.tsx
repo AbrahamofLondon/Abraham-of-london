@@ -38,7 +38,7 @@ import {
 
 import Layout from "@/components/Layout";
 import { CATALOG } from "@/lib/commercial/catalog";
-import { trackLaunch } from "@/lib/analytics/client-launch-events";
+// trackLaunch removed — using CustomEvent dispatch instead
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -118,10 +118,16 @@ function catalogPath(code: keyof typeof CATALOG, fallback: string): string {
 }
 
 function trackProductClick(surface: string): void {
-  trackLaunch("products_directory_click", {
-    surface,
-    timestamp: new Date().toISOString(),
-  });
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(
+    new CustomEvent("aol:product-directory-click", {
+      detail: {
+        surface,
+        timestamp: new Date().toISOString(),
+      },
+    }),
+  );
 }
 
 // ─── Status styles ────────────────────────────────────────────────────────────
@@ -1387,7 +1393,13 @@ function RoutingSection() {
 }
 
 function StartHereSection() {
-  const primaryItem = marketActivationItems[0];
+  const primaryItem = marketActivationItems.find(
+    (item) => item.name === "Decision Pressure Signal",
+  );
+
+  if (!primaryItem) {
+    return null;
+  }
 
   return (
     <section
@@ -1745,9 +1757,15 @@ function CollapsibleCatalogues() {
 
 export default function ProductsPage() {
   React.useEffect(() => {
-    trackLaunch("products_directory_view", {
-      timestamp: new Date().toISOString(),
-    });
+    if (typeof window === "undefined") return;
+
+    window.dispatchEvent(
+      new CustomEvent("aol:product-directory-view", {
+        detail: {
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    );
   }, []);
 
   return (
