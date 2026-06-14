@@ -1,0 +1,53 @@
+REPORTING OUTPUT LAYER — ALLOWED PUBLIC CLAIMS
+
+These claims are permitted in report content, marketing, and deliverables:
+
+Delivery & Interpretation
+- "Delivery artifact"
+- "Interpretation of findings"
+- "Structured summary"
+- "Analysis of available evidence"
+- "Describes sources and methodology"
+
+Decision Support
+- "Decision-support material"
+- "Advisory review"
+- "Supporting analysis"
+- "Informed perspective"
+- "Analysis to support judgment"
+
+Evidence Description (Bounded)
+- "References published evidence"
+- "Based on disclosed sources"
+- "Interprets available data"
+- "Synthesizes market research"
+- "Describes market structure"
+
+Human Review Status
+- "Human-reviewed findings"
+- "Professional analysis"
+- "Expert interpretation"
+- "Qualified reviewer attestation"
+
+Confidence Language (Bounded Only)
+- "May indicate"
+- "Suggests"
+- "Consistent with"
+- "Implied by evidence"
+- "Could reflect"
+- "Risk scenario if"
+- "Observed pattern"
+- "Likely scenario given evidence"
+
+NOT ALLOWED IN SAME MATERIAL:
+- ❌ Any authority-granting language
+- ❌ Any certification claims
+- ❌ Any prediction certainty
+- ❌ Any "guaranteed" language
+- ❌ Any investment/legal/medical advice
+- ❌ Any "AI predicts" language
+- ❌ Any externally-validated claims
+- ❌ Board approval claims
+
+If ANY forbidden claim appears in a report, the report cannot be delivered.
+The boundary statement must be visible and complete.

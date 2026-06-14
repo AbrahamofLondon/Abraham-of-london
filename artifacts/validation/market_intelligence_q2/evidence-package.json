@@ -1,0 +1,103 @@
+{
+  "productCode": "market_intelligence_q2",
+  "productName": "Global Market Intelligence Report — Q2 2026",
+  "targetReleaseLane": "evidence_limited_commercial_product",
+  "currentAuthorityState": "diagnostic_product_pending_evidence_validation",
+  "evidenceType": "quarterly_market_intelligence_with_prior_call_review",
+  "evidenceGeneratedDate": "2026-06-14T00:00:00Z",
+  "evidenceValidUntil": "2026-09-30T23:59:59Z",
+  "methodologySummary": "Quarterly market analysis reviewing prior quarter material calls against actual market outcomes, then issuing forward-looking market intelligence for the next quarter.",
+  "priorQuarterReviewRequired": true,
+  "priorQuarterCalls": {
+    "quarterReviewed": "Q1 2026",
+    "archiveLocation": "content/downloads/global-market-intelligence-report-q1-2026.mdx",
+    "materialCallsReviewPath": "lib/intelligence/generate-gmi-digest.ts::getCallsPendingReview"
+  },
+  "sourceTypesAllowed": [
+    "INSTITUTIONAL_SOURCE",
+    "PRIMARY_DATA",
+    "MARKET_IMPLIED_SIGNAL",
+    "PUBLISHED_RESEARCH",
+    "POLICY_DOCUMENT"
+  ],
+  "sourceTypesExcluded": [
+    "PROPRIETARY_HEDGE_FUND_DATA",
+    "CONFIDENTIAL_CLIENT_DATA",
+    "INSIDER_TRADING_SIGNALS",
+    "PURCHASED_PRIVATE_DATA",
+    "UNPUBLISHED_GOVERNMENT_INTELLIGENCE"
+  ],
+  "humanReviewRequired": true,
+  "humanReviewProcess": {
+    "stage1_evidence_collection": "Evidence watchlist sourced and verified against primary data",
+    "stage2_thesis_validation": "Working thesis tested against evidence; materially contradicted theses rejected",
+    "stage3_scenario_calibration": "Forward-looking scenarios calibrated against evidence base, not speculation",
+    "stage4_falsification_register": "Claims tested for falsifiability; non-falsifiable claims rejected",
+    "stage5_boundary_compliance": "Language audit ensures no investment advice, no price prediction certainty",
+    "stage6_authority_gate": "All 7 authority gates must pass before commercial release"
+  },
+  "forbiddenClaims": [
+    "AI predicts markets",
+    "guaranteed forecast",
+    "investment advice",
+    "certified market intelligence",
+    "externally verified prediction",
+    "investment-grade certainty",
+    "this will happen",
+    "markets will move",
+    "guaranteed outcome"
+  ],
+  "allowedClaims": [
+    "evidence-limited quarterly intelligence",
+    "market research summary",
+    "structural pattern analysis",
+    "prior-quarter call verification",
+    "forward scenario calibration",
+    "decision-support material",
+    "advisory intelligence",
+    "may indicate",
+    "suggests",
+    "consistent with"
+  ],
+  "evidenceBoundary": "This is evidence-limited quarterly market intelligence. It is not investment advice, financial advice, or a prediction guarantee. It is designed to structure market judgement and maintain verification discipline through quarterly call review.",
+  "authorityState": "evidence_limited_commercial_product",
+  "positiveAuthorityGranted": false,
+  "reportAsEvidenceAllowed": false,
+  "authorityGrantAllowed": false,
+  "commercialClaimAllowed": true,
+  "commercialClaimBounded": "evidence-limited-only",
+  "manualFulfillmentAllowed": true,
+  "checkoutAllowed": false,
+  "requiredBoundaryVariant": "advisory_review",
+  "deliveryFormat": "PDF + Web + Board Deck",
+  "priceRange": "£15,000 - £25,000 per quarter",
+  "customerAcknowledgement": "Customer must acknowledge evidence boundary before delivery",
+  "revocationCondition": "if_market_prediction_language_detected",
+  "qualityTests": {
+    "anti_toy_test": "Outputs are not trivial/generic",
+    "red_team_test": "No hidden investment-advice language",
+    "generic_ai_test": "Not interchangeable with generic market summarization",
+    "market_comparison_test": "Thesis differentiation from published research",
+    "product_specific_test": "Prior-quarter call review requirement verified",
+    "falsification_register": "All material claims are falsifiable",
+    "no_mock_authority": "No mock validation, all evidence real",
+    "adversarial_validation": "Can withstand challenge on evidence basis"
+  },
+  "artifacts": {
+    "q1_baseline": "content/downloads/global-market-intelligence-report-q1-2026.mdx",
+    "q2_draft": "content/intelligence/global-market-intelligence-report-q2-2026-draft.mdx",
+    "preparation_dossier": "docs/intelligence/gmi-q2-2026-preparation-dossier.md",
+    "evidence_watchlist": "docs/intelligence/gmi-q2-2026-monitoring-register.md",
+    "product_boundaries": "docs/intelligence/gmi-product-boundaries.md",
+    "call_review_code": "lib/intelligence/generate-gmi-digest.ts",
+    "gold_standard_composer": "lib/gmi/gmi-gold-standard-composer.ts"
+  },
+  "complianceChecks": {
+    "no_proprietary_data": "Verified — only published sources allowed",
+    "no_prediction_certainty": "Verified — confidence language bounded",
+    "no_investment_advice": "Verified — advisory language only",
+    "prior_quarter_review": "Verified — Q1 2026 calls reviewed against outcomes",
+    "falsification_register_active": "Verified — false calls documented",
+    "human_review_required": "Verified — not automated"
+  }
+}

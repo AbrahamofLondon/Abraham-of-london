@@ -1,0 +1,87 @@
+REPORTING OUTPUT LAYER — FORBIDDEN PUBLIC CLAIMS
+
+These claims must be REMOVED from ALL reports before delivery:
+
+Authority & Validation Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Validated authority"
+- ❌ "Certified finding"
+- ❌ "Externally proven"
+- ❌ "Independently verified"
+- ❌ "Third-party certified"
+- ❌ "Audit opinion"
+- ❌ "Assurance opinion"
+- ❌ "External proof"
+- ❌ "Verified conclusion"
+
+Certainty & Guarantee Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Guaranteed outcome"
+- ❌ "Guaranteed result"
+- ❌ "Guaranteed return"
+- ❌ "Guaranteed accuracy"
+- ❌ "Guaranteed forecast"
+- ❌ "Will happen"
+- ❌ "Will definitely"
+- ❌ "Inevitable"
+- ❌ "100% probability"
+- ❌ "Certain to"
+
+Professional Advice Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Investment advice"
+- ❌ "Investment recommendation"
+- ❌ "Financial advice"
+- ❌ "Financial guidance"
+- ❌ "Legal advice"
+- ❌ "Legal opinion"
+- ❌ "Medical advice"
+- ❌ "Medical recommendation"
+- ❌ "Tax advice"
+- ❌ "Compliance opinion"
+
+Algorithmic Prediction Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "AI predicts"
+- ❌ "AI-powered prediction"
+- ❌ "Machine learning forecast"
+- ❌ "Algorithmic analysis shows"
+- ❌ "Proprietary algorithm"
+- ❌ "Automated signal"
+- ❌ "Algorithmic certainty"
+- ❌ "AI-generated forecast"
+
+Board & Management Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Board-approved"
+- ❌ "Board-certified"
+- ❌ "Board-endorsed"
+- ❌ "Management-approved"
+- ❌ "Executive-endorsed"
+- ❌ "Leadership-validated"
+
+Authority Restoration Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Restores authority"
+- ❌ "Grants authority"
+- ❌ "Upgrades state"
+- ❌ "Proves claim"
+- ❌ "Validates product"
+- ❌ "Certifies product"
+
+ENFORCEMENT
+
+If ANY forbidden claim appears in:
+- Report content
+- Executive summary
+- Marketing materials
+- Deliverable cover pages
+- Public descriptions
+- Customer communications
+
+The governance guard will:
+1. Detect the forbidden language
+2. Block report delivery
+3. Flag for human review
+4. Require removal before republication
+5. Require re-attestation before release
+
+This is a hard block. No exceptions, no context override.
+
+The guard scans all report content before publication.
+Every report must pass forbidden-claims check before delivery.
+Human reviewer attests that check is complete.

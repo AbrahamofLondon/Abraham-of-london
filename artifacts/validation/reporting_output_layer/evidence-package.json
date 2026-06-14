@@ -1,0 +1,146 @@
+{
+  "productCode": "reporting_output_layer",
+  "productName": "Governed Reporting Output Layer",
+  "targetReleaseLane": "evidence_limited_commercial_product",
+  "currentAuthorityState": "diagnostic_product_pending_evidence_validation",
+  "evidenceType": "reporting_governance_framework",
+  "evidenceGeneratedDate": "2026-06-14T00:00:00Z",
+  "evidenceValidUntil": "2026-12-31T23:59:59Z",
+  "methodologySummary": "Unified governance framework for report generation across product families. Reports are delivery artifacts that describe findings without granting authority.",
+  "purpose": "Provide shared reporting infrastructure for multiple product families while maintaining non-authority status for all report artifacts.",
+  "evidenceBoundary": "Reports are delivery artifacts that describe findings without granting authority or validating claims.",
+  "positiveAuthorityGranted": false,
+  "reportAsEvidenceAllowed": false,
+  "authorityGrantAllowed": false,
+  "supportedOutputTypes": [
+    "monthly_report",
+    "custom_report",
+    "quarterly_intelligence_report",
+    "diagnostic_report",
+    "assessment_report",
+    "retainer_oversight_brief",
+    "board_facing_draft"
+  ],
+  "sourceProductFamilies": [
+    "reporting_monthly",
+    "reporting_custom",
+    "gmi_quarterly",
+    "fast_diagnostic",
+    "enterprise_assessment",
+    "team_assessment",
+    "diagnostic_extended",
+    "assessment_standard",
+    "retainer_oversight",
+    "strategy_room"
+  ],
+  "inputSourceRules": {
+    "allowed": [
+      "INSTITUTIONAL_SOURCE",
+      "PRIMARY_DATA",
+      "MARKET_IMPLIED_SIGNAL",
+      "PUBLISHED_RESEARCH",
+      "POLICY_DOCUMENT",
+      "INTERNAL_ANALYSIS",
+      "EXPERT_REVIEW"
+    ],
+    "excluded": [
+      "PROPRIETARY_HEDGE_FUND_DATA",
+      "CONFIDENTIAL_CLIENT_DATA",
+      "INSIDER_TRADING_SIGNALS",
+      "UNPUBLISHED_GOVERNMENT_INTELLIGENCE",
+      "UNDISCLOSED_SOURCES"
+    ]
+  },
+  "humanReviewRules": {
+    "required": true,
+    "mustReview": [
+      "Final claim language",
+      "Evidence source declarations",
+      "Boundary statement completeness",
+      "Forbidden claim absence",
+      "Confidence language appropriateness"
+    ]
+  },
+  "reportAsEvidenceProhibition": {
+    "enforced": true,
+    "rationale": "Reports describe findings but do not constitute authority-granting evidence. They may reference evidence but do not validate claims.",
+    "implications": [
+      "Reports cannot be cited as independent proof",
+      "Reports cannot restore product authority",
+      "Reports must declare non-authority status",
+      "Reports cannot make certification claims"
+    ]
+  },
+  "authorityBoundary": "Reports are delivery artifacts. They may interpret and present evidence but do not grant authority, validate claims, or certify findings.",
+  "allowedClaims": [
+    "delivery artifact",
+    "interpretation of findings",
+    "structured summary",
+    "decision-support material",
+    "advisory review",
+    "analysis of available evidence",
+    "describes sources and methodology",
+    "human-reviewed findings"
+  ],
+  "forbiddenClaims": [
+    "validated authority",
+    "certified finding",
+    "externally proven conclusion",
+    "investment advice",
+    "financial advice",
+    "legal advice",
+    "medical advice",
+    "guaranteed outcome",
+    "certified analysis",
+    "independently verified",
+    "third-party certified",
+    "externally validated",
+    "audit opinion",
+    "assurance opinion",
+    "AI-powered prediction",
+    "algorithmic certainty",
+    "board-approved",
+    "board-certified"
+  ],
+  "revocationConditions": [
+    "if_report_cited_as_authority_evidence",
+    "if_forbidden_claims_introduced",
+    "if_human_review_bypassed",
+    "if_sources_undeclared",
+    "if_authority_restoration_claimed"
+  ],
+  "qualityTests": {
+    "anti_toy_test": "Reports are not generic or trivial",
+    "red_team_test": "No hidden authority-claiming language",
+    "generic_ai_test": "Not interchangeable with generic report templates",
+    "source_declaration_test": "All sources explicitly declared",
+    "boundary_declaration_test": "Evidence boundary statement present",
+    "forbidden_claims_scan": "Zero forbidden claims in final report",
+    "human_review_attestation": "Signed review from qualified reviewer",
+    "authority_reference_test": "Does not restore or grant authority"
+  },
+  "artifacts": {
+    "reporting_output_contract": "lib/product/reporting-output-contract.ts",
+    "report_boundary_component": "components/reporting/ReportEvidenceBoundaryNotice.tsx",
+    "reporting_artifact_schema": "lib/product/reporting-artifact-schema.ts",
+    "methodology_boundary": "artifacts/validation/reporting_output_layer/methodology-boundary.md",
+    "allowed_claims": "artifacts/validation/reporting_output_layer/allowed-claims.txt",
+    "forbidden_claims": "artifacts/validation/reporting_output_layer/forbidden-claims.txt"
+  },
+  "complianceChecks": {
+    "no_authority_granting": "Verified — reports explicitly non-authority",
+    "no_certification_claims": "Verified — reports cannot certify",
+    "human_review_required": "Verified — all reports require human review",
+    "source_declaration_required": "Verified — sources must be declared",
+    "boundary_declaration_required": "Verified — evidence boundary required",
+    "forbidden_claims_prohibited": "Verified — governed by scanning and review"
+  },
+  "positiveAuthorityGranted": false,
+  "commercialClaimAllowed": false,
+  "commercialClaimBounded": "evidence_limited_only",
+  "manualFulfilmentAllowed": false,
+  "checkoutAllowed": false,
+  "requiredBoundaryVariant": "advisory_review",
+  "humanReviewRequired": true,
+  "priorQuarterReviewRequired": false
+}

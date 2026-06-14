@@ -1,0 +1,73 @@
+MARKET INTELLIGENCE Q2 — FORBIDDEN PUBLIC CLAIMS
+
+These claims must be removed from ALL commercial materials, marketing copy, and deliverables:
+
+Investment Advice Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "This report is investment advice"
+- ❌ "This is financial guidance"
+- ❌ "Recommended actions for investors"
+- ❌ "This indicates a buying opportunity"
+- ❌ "Market will move in this direction"
+- ❌ "This signals a trading opportunity"
+- ❌ "Take this position in response to"
+
+Prediction Certainty Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Markets will definitely"
+- ❌ "This will happen"
+- ❌ "Markets are guaranteed to"
+- ❌ "Certain to result in"
+- ❌ "Inevitably leads to"
+- ❌ "100% probability of"
+- ❌ "Guaranteed forecast"
+
+AI Prediction Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "AI predicts markets"
+- ❌ "Algorithmic analysis shows"
+- ❌ "Machine learning model predicts"
+- ❌ "Automated system forecast"
+- ❌ "Proprietary prediction engine"
+- ❌ "AI-powered market forecast"
+
+Certification/Validation Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Certified market intelligence"
+- ❌ "Validated market analysis"
+- ❌ "Independently verified forecast"
+- ❌ "Externally proven market signal"
+- ❌ "Third-party certified analysis"
+- ❌ "Verified investment recommendation"
+
+Price/Outcome Guarantee Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Price target of X"
+- ❌ "Guaranteed return of Y%"
+- ❌ "Assured market movement"
+- ❌ "Outcomes will be"
+- ❌ "Performance will match"
+- ❌ "Results will reflect"
+
+Exclusivity/Authority Claims (ABSOLUTELY FORBIDDEN)
+- ❌ "Only analysis showing"
+- ❌ "We alone predict"
+- ❌ "Exclusive market intelligence"
+- ❌ "Authority on market direction"
+- ❌ "The definitive forecast"
+- ❌ "Market truth we've discovered"
+
+ENFORCEMENT
+
+If ANY forbidden claim appears in:
+- Marketing materials
+- Offer pages
+- Commercial copy
+- Public deliverables
+- Board materials
+- Investor communications
+
+The governance guard will:
+1. Detect the forbidden language
+2. Block commercial release
+3. Report violation
+4. Require removal before re-release
+
+This is a hard block. No exceptions, no context override.
+
+The guard searches for these patterns in all commercial surfaces before publication.

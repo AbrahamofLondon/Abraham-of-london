@@ -1,0 +1,265 @@
+{
+  "sampleCaseId": "CASE-2025-007-RELEASE-READY-FLOW",
+  "description": "End-to-end flow showing fast_diagnostic memory recording and Strategic Twin update",
+  "caseMetadata": {
+    "subjectType": "team",
+    "subjectName": "Sales Enablement Team",
+    "createdAt": "2025-06-20T08:00:00Z",
+    "releaseLane": "commercial_growth",
+    "releaseMode": "decision_support",
+    "authorityState": "review_in_progress",
+    "readinessStatus": "release_ready_now"
+  },
+  "phase1_intake": {
+    "surface": "fast_diagnostic",
+    "timestamp": "2025-06-20T08:15:00Z",
+    "eventType": "intake_submitted",
+    "governanceContext": {
+      "productCode": "fast_diagnostic",
+      "productAuthorityState": "review_in_progress",
+      "productReadiness": "release_ready_now",
+      "mayWriteMemory": true,
+      "memoryWriteBoundary": "Standard governance boundary applies"
+    },
+    "memoryEventRecorded": {
+      "eventId": "evt-001-intake",
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "productCode": "fast_diagnostic",
+      "eventType": "intake_submitted",
+      "timestamp": "2025-06-20T08:15:00Z",
+      "authorityStateAtEvent": "review_in_progress",
+      "readinessStatusAtEvent": "release_ready_now",
+      "contradictionKeys": [],
+      "evidenceGapKeys": [],
+      "commitmentKeys": [],
+      "consequenceKeys": []
+    }
+  },
+  "phase2_pattern_detection": {
+    "surface": "fast_diagnostic",
+    "timestamp": "2025-06-20T09:30:00Z",
+    "eventType": "contradiction_detected",
+    "detected": {
+      "contradictions": [
+        "sales_target_without_supporting_capability",
+        "authority_claim_without_market_validation"
+      ],
+      "evidenceGaps": [
+        "customer_capability_readiness",
+        "market_adoption_data"
+      ]
+    },
+    "memoryEventRecorded": {
+      "eventId": "evt-002-pattern",
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "productCode": "fast_diagnostic",
+      "eventType": "contradiction_detected",
+      "timestamp": "2025-06-20T09:30:00Z",
+      "authorityStateAtEvent": "review_in_progress",
+      "readinessStatusAtEvent": "release_ready_now",
+      "contradictionKeys": [
+        "sales_target_without_supporting_capability",
+        "authority_claim_without_market_validation"
+      ],
+      "evidenceGapKeys": [
+        "customer_capability_readiness",
+        "market_adoption_data"
+      ],
+      "commitmentKeys": [],
+      "consequenceKeys": []
+    },
+    "strategicTwinUpdateTriggered": true,
+    "twinUpdateApplied": {
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "previousInterventionReadiness": "signal_detected",
+      "newInterventionReadiness": "evidence_needed",
+      "contradictionsAdded": [
+        "sales_target_without_supporting_capability",
+        "authority_claim_without_market_validation"
+      ],
+      "evidenceGapsAdded": [
+        "customer_capability_readiness",
+        "market_adoption_data"
+      ],
+      "updateAt": "2025-06-20T09:30:00Z",
+      "updatingProductCode": "fast_diagnostic",
+      "updateType": "pattern_detected"
+    }
+  },
+  "phase3_recommendation": {
+    "surface": "fast_diagnostic",
+    "timestamp": "2025-06-20T10:00:00Z",
+    "eventType": "decision_path_recommended",
+    "calibrationContext": {
+      "productCode": "fast_diagnostic",
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "decisionPressure": "high",
+      "evidenceAvailability": 0.45,
+      "patternRecurrenceCount": 1,
+      "consequenceRisk": "high"
+    },
+    "interventionCalibration": {
+      "calibratedAt": "2025-06-20T10:00:00Z",
+      "recommendedLevel": "evidence_limited_review",
+      "reason": "Partial evidence available with significant gaps; adequate for structured review",
+      "evidenceNeeded": [
+        "customer_capability_readiness",
+        "market_adoption_data",
+        "go_live_risk_assessment"
+      ],
+      "estimatedTimeToEvidence": "2–4 weeks for team-focused evidence collection",
+      "nextBestProductCode": "reporting_custom",
+      "nextProductReason": "Evidence-limited review; reporting product suitable for structured analysis",
+      "unsuitableInterventions": [
+        "free_signal",
+        "blocked_until_evidence"
+      ],
+      "riskIfDelayed": "Moderate deferral cost; window of 4–8 weeks available",
+      "recommendedFollowupAt": "2025-07-04"
+    },
+    "memoryEventRecorded": {
+      "eventId": "evt-003-recommendation",
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "productCode": "fast_diagnostic",
+      "eventType": "decision_path_recommended",
+      "timestamp": "2025-06-20T10:00:00Z",
+      "authorityStateAtEvent": "review_in_progress",
+      "readinessStatusAtEvent": "release_ready_now",
+      "contradictionKeys": [
+        "sales_target_without_supporting_capability"
+      ],
+      "evidenceGapKeys": [
+        "customer_capability_readiness",
+        "market_adoption_data"
+      ],
+      "commitmentKeys": [],
+      "consequenceKeys": []
+    }
+  },
+  "phase4_handoff_to_reporting": {
+    "surface": "reporting_custom",
+    "timestamp": "2025-06-21T09:00:00Z",
+    "eventType": "evidence_gap_identified",
+    "handoffContext": {
+      "fromProduct": "fast_diagnostic",
+      "toProduct": "reporting_custom",
+      "fromReadiness": "release_ready_now",
+      "toReadiness": "release_ready_now",
+      "fromAuthority": "review_in_progress",
+      "toAuthority": "review_in_progress"
+    },
+    "memoryEventRecorded": {
+      "eventId": "evt-004-handoff",
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "productCode": "reporting_custom",
+      "eventType": "evidence_gap_identified",
+      "timestamp": "2025-06-21T09:00:00Z",
+      "authorityStateAtEvent": "review_in_progress",
+      "readinessStatusAtEvent": "release_ready_now",
+      "contradictionKeys": [],
+      "evidenceGapKeys": [
+        "customer_capability_readiness",
+        "market_adoption_data"
+      ],
+      "commitmentKeys": [],
+      "consequenceKeys": []
+    },
+    "strategicTwinUpdated": true,
+    "twinStateNow": {
+      "currentInterventionReadiness": "evidence_needed",
+      "dominantContradictions": [
+        "sales_target_without_supporting_capability",
+        "authority_claim_without_market_validation"
+      ],
+      "activeEvidenceGaps": [
+        "customer_capability_readiness",
+        "market_adoption_data"
+      ],
+      "stateConfidence": "medium",
+      "lastUpdatedByProductCode": "reporting_custom"
+    }
+  },
+  "phase5_commitment_recording": {
+    "surface": "reporting_custom",
+    "timestamp": "2025-06-21T11:00:00Z",
+    "eventType": "commitment_recorded",
+    "commitment": {
+      "id": "commit-005",
+      "description": "Complete market adoption study by June 28",
+      "committedBy": "Sales Enablement Team",
+      "verificationDueAt": "2025-06-28T17:00:00Z"
+    },
+    "memoryEventRecorded": {
+      "eventId": "evt-005-commitment",
+      "caseId": "CASE-2025-007-RELEASE-READY-FLOW",
+      "productCode": "reporting_custom",
+      "eventType": "commitment_recorded",
+      "timestamp": "2025-06-21T11:00:00Z",
+      "authorityStateAtEvent": "review_in_progress",
+      "readinessStatusAtEvent": "release_ready_now",
+      "contradictionKeys": [],
+      "evidenceGapKeys": [],
+      "commitmentKeys": ["commit-005"],
+      "consequenceKeys": []
+    },
+    "strategicTwinUpdated": true,
+    "twinStateNow": {
+      "unresolvedCommitments": ["commit-005"],
+      "currentInterventionReadiness": "intervention_ready",
+      "stateConfidence": "medium-high"
+    }
+  },
+  "authorityStateVerification": {
+    "authorityRestorationAttempted": false,
+    "positiveAuthorityGranted": false,
+    "authorityStateChanges": "NONE",
+    "authorityRemains": "review_in_progress",
+    "readinessRemains": "release_ready_now",
+    "releaseAuthority": "ProductReleaseGovernance",
+    "memoryUsedForWhat": [
+      "Pattern recognition",
+      "Decision context",
+      "Commitment tracking",
+      "Intervention calibration recommendation"
+    ],
+    "memoryDidNotDo": [
+      "Grant authority",
+      "Bypass governance",
+      "Modify release lane",
+      "Change readiness state",
+      "Restore authority"
+    ]
+  },
+  "systemIntegrityChecks": [
+    {
+      "check": "Memory write had governance context",
+      "result": "PASS",
+      "details": "All memory events included authorityStateAtEvent and readinessStatusAtEvent"
+    },
+    {
+      "check": "Twin updates from governed memory only",
+      "result": "PASS",
+      "details": "Strategic Twin updates triggered only by validated memory events"
+    },
+    {
+      "check": "No blocked product recommendation",
+      "result": "PASS",
+      "details": "Recommended product (reporting_custom) is release_ready_now"
+    },
+    {
+      "check": "Authority state unchanged",
+      "result": "PASS",
+      "details": "Authority remains review_in_progress; no restoration attempted"
+    },
+    {
+      "check": "Positive authority not granted",
+      "result": "PASS",
+      "details": "No product advanced to positive_authority"
+    },
+    {
+      "check": "Release readiness not modified",
+      "result": "PASS",
+      "details": "Readiness remained release_ready_now; memory did not change it"
+    }
+  ]
+}

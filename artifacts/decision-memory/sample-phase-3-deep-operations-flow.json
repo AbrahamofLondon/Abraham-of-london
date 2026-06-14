@@ -1,0 +1,173 @@
+{
+  "sampleCaseId": "CASE-2025-PHASE-3-PROOF",
+  "title": "Phase 3 Deep Operations End-To-End Flow",
+  "description": "Demonstrates decision debt pricing, consequence verification scheduling, falsification on contradiction, and authority preservation",
+  "phase_1_governed_memory_write": {
+    "timestamp": "2025-06-20T09:00:00Z",
+    "surface": "fast_diagnostic",
+    "product": "fast_diagnostic",
+    "productReadiness": "release_ready_now",
+    "eventType": "contradiction_detected",
+    "summary": "Commitment made to deliver Q3 roadmap without execution owner identified",
+    "contradictionKeys": ["mandate_without_execution_owner", "commitment_without_verification"],
+    "governance": {
+      "authorityStateAtEvent": "diagnostic_product",
+      "readinessStatusAtEvent": "release_ready_now"
+    },
+    "result": "✓ Memory recorded with governance context"
+  },
+  "phase_2_decision_debt_creation": {
+    "timestamp": "2025-06-20T10:30:00Z",
+    "debtId": "debt-CASE-2025-PHASE-3-001",
+    "debtCategory": "mandate_fracture",
+    "alignedFrameworks": [
+      "COSO_ERM_GOVERNANCE_AND_CULTURE",
+      "COSO_ERM_STRATEGY_AND_OBJECTIVE_SETTING"
+    ],
+    "decisionDebtScore": 68,
+    "confidence": "medium",
+    "calculationBasis": [
+      "execution owner not assigned (Q3 roadmap)",
+      "3 weekly syncs skipped without rescheduling",
+      "mandate issued but no verification checkpoint",
+      "prior similar case took 8 weeks to resolve"
+    ],
+    "estimatedFinancialRange": {
+      "low": 45000,
+      "high": 80000,
+      "currency": "GBP",
+      "basis": "£2500/week × 18-32 weeks delay, based on historical execution fractures"
+    },
+    "sourceEventIds": [
+      "evt-contradiction-001",
+      "evt-commitment-001"
+    ],
+    "auditLockIds": [
+      "lock-evt-contradiction-001",
+      "lock-evt-commitment-001"
+    ],
+    "result": "✓ Decision debt recorded with framework alignment and audit locks",
+    "governance": {
+      "debtInformsRisk": true,
+      "debtGrantsAuthority": false
+    }
+  },
+  "phase_3_audit_lock_applied": {
+    "timestamp": "2025-06-20T10:30:00Z",
+    "sourceEvents": [
+      "evt-contradiction-001",
+      "evt-commitment-001"
+    ],
+    "lockReasons": [
+      "linked_to_decision_debt"
+    ],
+    "result": "✓ Source events audit-locked (decay-protected, cannot be mutated)",
+    "decayPolicy": "Source event will not be compressed or deleted while linked to debt"
+  },
+  "phase_4_consequence_verification_scheduled": {
+    "timestamp": "2025-06-20T10:35:00Z",
+    "verificationId": "ver-CASE-2025-PHASE-3-001",
+    "sourceEventId": "evt-commitment-001",
+    "originalWarning": "Q3 roadmap commitment without execution owner is at critical risk",
+    "expectedOutcome": "Q3 roadmap delivery will slip OR execution owner will be assigned within 2 weeks",
+    "scheduledVerificationDueBy": "2025-07-20T17:00:00Z",
+    "verificationState": "not_due",
+    "auditLockIds": [
+      "lock-evt-commitment-001",
+      "lock-ver-CASE-2025-PHASE-3-001"
+    ],
+    "result": "✓ Verification scheduled (original warning audit-locked, append-only outcome ready)"
+  },
+  "phase_5_outcome_verification_later": {
+    "timestamp": "2025-07-25T14:00:00Z",
+    "verificationId": "ver-CASE-2025-PHASE-3-001",
+    "verificationPerformedAt": "2025-07-25T14:00:00Z",
+    "expectedOutcome": "Q3 roadmap delivery will slip OR execution owner will be assigned within 2 weeks",
+    "actualOutcome": "Q3 roadmap was delayed 12 weeks; execution owner still not assigned at verification date",
+    "verificationState": "verified_deteriorated",
+    "outcomeSummary": "Warning proved accurate. No action taken to assign owner. Situation deteriorated.",
+    "contradictedByOutcome": false,
+    "result": "✓ Outcome APPENDED (original warning PRESERVED, not mutated)"
+  },
+  "phase_6_falsification_not_triggered_here": {
+    "note": "In this case, outcome matched warning (verified_deteriorated, not contradicted). Falsification would be triggered if outcome contradicted warning.",
+    "example_falsification": {
+      "timestamp": "2025-07-25T14:30:00Z",
+      "falsificationId": "false-CASE-2025-ALT-001",
+      "sourceEventId": "evt-warning-contradicted",
+      "originalWarning": "Board will reject proposal if not approved by Q3",
+      "expectedOutcome": "Board rejects proposal",
+      "actualOutcome": "Board approved proposal with minor modifications in Q4",
+      "falsificationType": "warning_did_not_materialise",
+      "severity": "medium",
+      "calibrationChangeRequired": true,
+      "calibrationNotes": "Underestimated board flexibility on timeline. Will increase timeline buffer 3-4 weeks in similar scenarios.",
+      "auditLockIds": [
+        "lock-false-CASE-2025-ALT-001"
+      ],
+      "result": "✓ Falsification RECORDED (original warning PRESERVED)"
+    }
+  },
+  "phase_7_original_warning_preserved": {
+    "timestamp": "2025-07-25T14:30:00Z",
+    "sourceEventId": "evt-commitment-001",
+    "originalWarning": "Q3 roadmap commitment without execution owner is at critical risk",
+    "status": "IMMUTABLE (audit-locked)",
+    "mutationAttempts": 0,
+    "deletionAttempts": 0,
+    "result": "✓ Original warning preserved in audit trail (cannot be erased or rewritten)"
+  },
+  "phase_8_decision_debt_flagged_for_review": {
+    "timestamp": "2025-07-25T15:00:00Z",
+    "debtId": "debt-CASE-2025-PHASE-3-001",
+    "originalScore": 68,
+    "updatedScore": 78,
+    "reason": "Verification confirmed deterioration. Decision debt increased due to prolonged non-resolution.",
+    "nextAction": "Review execution owner assignment process. Increase escalation triggers.",
+    "result": "✓ Decision debt UPDATED (not deleted, append recorded)"
+  },
+  "phase_9_system_integrity_checks": {
+    "authority_state_unchanged": {
+      "positiveAuthorityBefore": 0,
+      "positiveAuthorityAfter": 0,
+      "authorityRestorationPerformed": false,
+      "result": "✓ PASS"
+    },
+    "debt_did_not_grant_authority": {
+      "debtInformsRisk": true,
+      "debtBypassesGovernance": false,
+      "result": "✓ PASS"
+    },
+    "verification_did_not_mutate_source": {
+      "sourceEventMutated": false,
+      "sourceEventDeleted": false,
+      "outcomesAppended": true,
+      "result": "✓ PASS"
+    },
+    "falsification_preserved_evidence": {
+      "originalWarningPreserved": true,
+      "falsificationRecorded": true,
+      "falsificationCanBeDeleted": false,
+      "result": "✓ PASS"
+    },
+    "audit_locks_protected_evidence": {
+      "sourceEventsDecayProtected": true,
+      "verificationRecordsDecayProtected": true,
+      "falsificationRecordsDecayProtected": true,
+      "result": "✓ PASS"
+    }
+  },
+  "summary": {
+    "system_proved": [
+      "Decision debt prices unresolved contradictions (£45k–£80k estimated cost)",
+      "Decision debt requires framework alignment and calculation basis",
+      "Consequence verification scheduled warnings for later testing",
+      "Falsification path records system errors (if contradiction detected)",
+      "Original warnings are preserved under audit lock",
+      "No mutation or deletion of source evidence",
+      "Positive authority remains 0",
+      "Authority restoration not performed"
+    ],
+    "conclusion": "Phase 3 deep operations system successfully records, prices, verifies, falsifies, and preserves evidence without granting authority."
+  }
+}

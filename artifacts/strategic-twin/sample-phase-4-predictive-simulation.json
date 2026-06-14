@@ -1,0 +1,388 @@
+{
+  "sampleCaseId": "CASE-2025-PHASE-4-PREDICTIVE-PROOF",
+  "title": "Phase 4 Predictive Strategic Twin Simulation",
+  "description": "Demonstrates bounded predictive simulation using debt, verification, falsification history without claiming certainty or granting authority",
+
+  "case_context": {
+    "caseId": "CASE-2025-PHASE-4-PREDICTIVE-PROOF",
+    "product": "fast_diagnostic",
+    "readiness": "release_ready_now",
+    "decisionType": "Q3 roadmap commitment authority",
+    "unresolved_contradiction": "Commitment made without execution owner identified",
+    "status": "Unresolved for 6 weeks"
+  },
+
+  "evidence_available": {
+    "decision_debt": {
+      "debtId": "debt-CASE-2025-PHASE-3-001",
+      "score": 68,
+      "confidence": "low",
+      "frameworks": ["COSO_ERM_GOVERNANCE_AND_CULTURE", "COSO_ERM_STRATEGY_AND_OBJECTIVE_SETTING"],
+      "basis": ["Execution owner not assigned", "3 weekly syncs skipped", "Prior 8-week delay on similar issue"],
+      "financial_range": "£45,000–£80,000",
+      "operationalSeverity": "high"
+    },
+
+    "consequence_verification_scheduled": {
+      "verificationId": "ver-CASE-2025-PHASE-3-001",
+      "sourceEvent": "Q3 roadmap commitment warning",
+      "dueDate": "2025-07-20T17:00:00Z",
+      "status": "not_due",
+      "expectedOutcome": "Q3 roadmap will slip OR execution owner assigned within 2 weeks"
+    },
+
+    "falsification_history": {
+      "similarCase": "CASE-2024-VENDOR-SELECTION",
+      "falsificationId": "false-2024-VENDOR-001",
+      "originalWarning": "Vendor selection will be blocked by procurement policy",
+      "expectedOutcome": "Procurement blocks vendor",
+      "actualOutcome": "Procurement approved with conditions",
+      "falsificationType": "warning_did_not_materialise",
+      "learningPoint": "Similar escalation path may have broader exceptions than assumed",
+      "impact_on_prediction": "Reduces confidence in escalation-only paths"
+    },
+
+    "memory_pattern_count": 2,
+    "memory_events": "3 events over 6 weeks",
+    "authority_state": "Positive authority = 0"
+  },
+
+  "phase_4_scenario_1_no_action": {
+    "simulationId": "sim-NO-ACTION-001",
+    "scenario": "no_action",
+    "horizonDays": 30,
+
+    "prediction_band": {
+      "recurrenceRiskBand": "high",
+      "decisionDebtMovement": "likely_increased",
+      "confidence": "medium"
+    },
+
+    "consequence_path": [
+      "Scenario: no_action",
+      "Decision debt likely accumulates",
+      "Unresolved contradictions persist",
+      "Risk escalates within 30 days",
+      "Verification due at 2025-07-20 will show outcome"
+    ],
+
+    "evidence_basis": [
+      "Debt: Execution owner not assigned",
+      "Debt: 3 weekly syncs skipped",
+      "Debt: Prior 8-week delay on similar issue",
+      "Memory: Commitment made without owner clarity",
+      "Memory: 6 weeks unresolved"
+    ],
+
+    "active_evidence_gaps": [
+      "Subject type not determined (board/executive/product?)",
+      "Current execution readiness level unknown",
+      "No consequence verification completed yet"
+    ],
+
+    "confidence": "medium",
+    "confidence_basis": [
+      "Pattern recurrence: 2 prior similar cases",
+      "Decision debt: Score 68 indicates real risk",
+      "BUT: Similar falsification history (vendor case) reduces certainty"
+    ],
+
+    "limitations": [
+      "This simulation shows plausible consequence paths, NOT guaranteed outcomes",
+      "Simulation is advice for human decision-making, not autonomous authority",
+      "Active evidence gaps: Subject type unknown, execution readiness unknown",
+      "Falsification history (vendor case) shows prior assumptions proved wrong",
+      "No-action scenario inherently uncertain with unresolved debt"
+    ],
+
+    "recommended_move": "NOT recommended",
+    "recommended_move_reason": "Rising decision debt with no resolution mechanism",
+    "unsuitable_moves": ["no_action"],
+
+    "authority_boundary": {
+      "positiveAuthorityGranted": false,
+      "authorityRestorationPerformed": false,
+      "simulationGrantsAuthority": false,
+      "requiresHumanDecision": true
+    }
+  },
+
+  "phase_4_scenario_2_evidence_deepening": {
+    "simulationId": "sim-EVIDENCE-001",
+    "scenario": "evidence_deepening",
+    "horizonDays": 30,
+
+    "prediction_band": {
+      "recurrenceRiskBand": "medium",
+      "decisionDebtMovement": "likely_flat",
+      "confidence": "low"
+    },
+
+    "consequence_path": [
+      "Scenario: evidence_deepening",
+      "Collect additional evidence about subject type and decision pressure",
+      "Reduce active evidence gaps",
+      "Enable higher-confidence decision later",
+      "Lower immediate escalation risk"
+    ],
+
+    "evidence_basis": [
+      "Evidence gap: Subject type unknown",
+      "Evidence gap: Current decision pressure unknown",
+      "Strategy: Resolve gaps before escalating authority decisions"
+    ],
+
+    "active_evidence_gaps": [
+      "Subject type (board? executive? product?) not determined",
+      "Current decision pressure level unknown",
+      "Consequence verification due 2025-07-20 will provide outcome data"
+    ],
+
+    "confidence": "low",
+    "confidence_basis": [
+      "This scenario depends on evidence gathering",
+      "Outcome depends on what evidence is found",
+      "Cannot predict with certainty until gaps filled"
+    ],
+
+    "limitations": [
+      "Evidence-deepening may take 2-4 weeks",
+      "May discover escalation is still needed after evidence collected",
+      "Similar falsification history shows prior evidence assumptions proved wrong",
+      "Consequence verification completion (2025-07-20) will inform next action"
+    ],
+
+    "recommended_move": "Consider if verification outcome is due first",
+    "recommended_move_reason": "Consequence verification (2025-07-20) may provide needed evidence without separate deepening",
+    "suitable_when": "Current evidence gaps are root cause of indecision",
+
+    "authority_boundary": {
+      "positiveAuthorityGranted": false,
+      "authorityRestorationPerformed": false,
+      "simulationGrantsAuthority": false,
+      "requiresHumanDecision": true
+    }
+  },
+
+  "phase_4_scenario_3_governance_intervention": {
+    "simulationId": "sim-GOVERNANCE-001",
+    "scenario": "governance_intervention",
+    "horizonDays": 30,
+
+    "prediction_band": {
+      "recurrenceRiskBand": "high",
+      "decisionDebtMovement": "likely_reduced",
+      "confidence": "medium"
+    },
+
+    "consequence_path": [
+      "Scenario: governance_intervention",
+      "Escalate to governance layer for decision framework",
+      "Apply precedent or policy boundary",
+      "Establish authority clearly",
+      "Reduce decision debt by resolving contradiction"
+    ],
+
+    "evidence_basis": [
+      "Debt: Mandate issued without execution owner",
+      "Pattern: Similar cases resolved via governance escalation",
+      "Recurrence: 2 prior cases of commitment-without-owner pattern"
+    ],
+
+    "active_evidence_gaps": [
+      "Subject type affects governance path chosen",
+      "Prior falsification (vendor case) shows exceptions may exist"
+    ],
+
+    "confidence": "medium",
+    "confidence_basis": [
+      "Strong pattern: Multiple prior cases resolved via governance",
+      "BUT: Falsification history (vendor case) shows governance assumptions may have exceptions",
+      "Uncertainty about board vs executive vs product decision type"
+    ],
+
+    "limitations": [
+      "Governance escalation may take 1-2 weeks",
+      "Outcome depends on precedent/policy interpretation",
+      "Similar falsification (vendor case) proves prior governance assumptions were wrong",
+      "Escalation does not guarantee execution owner assignment",
+      "This is advice, not an instruction; human judgment required"
+    ],
+
+    "recommended_move": "Prioritize IF consequence verification due date has passed",
+    "recommended_move_reason": "Governance intervention + verification outcome = informed decision",
+    "suitable_when": "Pattern is clear but governance boundary needs definition",
+
+    "authority_boundary": {
+      "positiveAuthorityGranted": false,
+      "authorityRestorationPerformed": false,
+      "simulationGrantsAuthority": false,
+      "requiresHumanDecision": true
+    }
+  },
+
+  "phase_4_scenario_4_verification_followup": {
+    "simulationId": "sim-VERIFICATION-001",
+    "scenario": "verification_followup",
+    "horizonDays": 30,
+
+    "prediction_band": {
+      "recurrenceRiskBand": "unknown",
+      "decisionDebtMovement": "unknown",
+      "confidence": "low"
+    },
+
+    "consequence_path": [
+      "Scenario: verification_followup",
+      "Complete scheduled consequence verification (due 2025-07-20)",
+      "Verify actual outcome: Did Q3 roadmap slip? Was owner assigned?",
+      "Outcome will determine next action",
+      "Prevents premature escalation based on wrong assumption"
+    ],
+
+    "evidence_basis": [
+      "Verification scheduled: 2025-07-20T17:00:00Z",
+      "Expected outcome: Slip OR owner assignment within 2 weeks"
+    ],
+
+    "active_evidence_gaps": [
+      "Actual outcome unknown until verification date",
+      "Outcome will determine whether escalation is still needed"
+    ],
+
+    "confidence": "low",
+    "confidence_basis": [
+      "Outcome is unknown; this is data collection, not prediction",
+      "Will provide ground truth for next decision"
+    ],
+
+    "limitations": [
+      "Waiting until 2025-07-20 delays other actions for 6 days",
+      "But provides definitive evidence for better decision later",
+      "Falsification history shows prior assumptions about escalation paths were incomplete"
+    ],
+
+    "recommended_move": "PRIORITY if verification due date has not passed",
+    "recommended_move_reason": "Consequence verification provides ground truth; other decisions should wait for outcome",
+    "suitable_when": "Verification is due within horizon days",
+
+    "authority_boundary": {
+      "positiveAuthorityGranted": false,
+      "authorityRestorationPerformed": false,
+      "simulationGrantsAuthority": false,
+      "requiresHumanDecision": true
+    }
+  },
+
+  "phase_4_counterfactual_comparison": {
+    "comparisonId": "cmp-CASE-2025-PHASE-4-001",
+    "horizonDays": 30,
+
+    "scenarios_compared": [
+      "no_action",
+      "evidence_deepening",
+      "governance_intervention",
+      "verification_followup"
+    ],
+
+    "preferred_scenario": "verification_followup",
+    "preferred_scenario_reason": "Consequence verification is due within horizon days. Outcome will inform whether escalation is still needed.",
+
+    "preferred_scenario_basis": [
+      "Scheduled verification date: 2025-07-20T17:00:00Z (6 days from horizon start)",
+      "Expected outcome will show: Did Q3 roadmap slip? Was owner assigned?",
+      "Ground truth from verification beats speculative escalation",
+      "Falsification history proves prior assumptions about escalation were incomplete"
+    ],
+
+    "no_action_risk_summary": "No-action trajectory shows escalating risk. Debt accumulates. Contradiction unresolved. Falsification history suggests governance escalation may have exceptions not accounted for.",
+
+    "evidence_needed_before_higher_confidence": [
+      "Complete consequence verification scheduled for 2025-07-20",
+      "Determine subject type (board? executive? product decision?)",
+      "Clarify current execution readiness level"
+    ],
+
+    "authority_boundary": {
+      "comparisonGrantsAuthority": false,
+      "requiresHumanDecision": true
+    }
+  },
+
+  "phase_4_system_integrity_checks": {
+    "no_exact_probability_claimed": {
+      "check": "Simulations use probability bands only (not_enough_evidence, low, medium, high)",
+      "result": "✓ PASS"
+    },
+
+    "limitations_mandatory": {
+      "check": "Every simulation discloses active evidence gaps and known limits",
+      "result": "✓ PASS",
+      "example": "Scenario 1 limitations include: Falsification history reduces certainty, no-action inherently uncertain with unresolved debt"
+    },
+
+    "authority_boundary_present": {
+      "check": "All simulations declare positive authority = false, requires human decision = true",
+      "result": "✓ PASS"
+    },
+
+    "authority_not_granted": {
+      "check": "Simulation cannot grant authority; remains advice",
+      "result": "✓ PASS"
+    },
+
+    "blocked_products_not_recommended": {
+      "check": "No recommendation to commercialize boardroom_brief or executive_reporting",
+      "result": "✓ PASS"
+    },
+
+    "high_confidence_has_basis": {
+      "check": "No scenario produces high confidence without evidence basis",
+      "result": "✓ PASS",
+      "note": "Max confidence is medium, due to evidence gaps and falsification history"
+    },
+
+    "falsification_history_integrated": {
+      "check": "Vendor case falsification (warning_did_not_materialise) reduces confidence in escalation-only paths",
+      "result": "✓ PASS"
+    },
+
+    "no_action_reflects_debt": {
+      "check": "No-action scenario shows likely_increased debt movement with high recurrence risk",
+      "result": "✓ PASS"
+    },
+
+    "scenario_selection_basis": {
+      "check": "Preferred scenario selected for risk reduction and verification need, not product revenue",
+      "result": "✓ PASS",
+      "reason": "verification_followup chosen because verification is due, not because of commercial pressure"
+    },
+
+    "no_certainty_claims": {
+      "check": "No scenario claims guaranteed outcome; all show plausible paths",
+      "result": "✓ PASS"
+    },
+
+    "positive_authority_unchanged": {
+      "before": 0,
+      "after": 0,
+      "result": "✓ PASS"
+    }
+  },
+
+  "summary": {
+    "system_proved": [
+      "Strategic Twin can simulate multiple consequence paths",
+      "Predictions use probability bands (not fake precision)",
+      "Confidence reduced where evidence gaps exist",
+      "Confidence reduced where falsification history exists",
+      "System recommends neutral intervention logic (verification, evidence-deepening, governance)",
+      "No authority granted by simulation",
+      "No blocked products recommended",
+      "Limitations disclosed in all scenarios",
+      "Positive authority remains 0"
+    ],
+
+    "conclusion": "Phase 4 predictive system successfully demonstrates bounded simulation without certainty, authority escalation, or product-push bias."
+  }
+}
