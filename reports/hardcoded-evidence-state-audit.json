@@ -1,0 +1,834 @@
+{
+  "generatedAt": "2026-06-14T07:54:48.692Z",
+  "gate": "PASSED_NO_HARDCODED_EVIDENCE_TRUTH",
+  "auditType": "hardcoded_evidence_state_audit",
+  "totalOccurrences": 102,
+  "classifications": {
+    "authority_path_hardcoded": 0,
+    "derived_from_verifier": 27,
+    "display_only": 0,
+    "test_fixture": 2,
+    "historical_report": 0,
+    "safe_constant": 73,
+    "needs_refactor": 0
+  },
+  "failingOccurrences": [],
+  "occurrences": [
+    {
+      "file": "lib/product/authority-grant-firewall.ts",
+      "line": 10,
+      "term": "ledger_entry_exists",
+      "symbol": "| \"ledger_entry_exists\"",
+      "classification": "safe_constant",
+      "detail": "Firewall proof-check identifier/type; no evidence truth asserted."
+    },
+    {
+      "file": "lib/product/authority-grant-firewall.ts",
+      "line": 48,
+      "term": "ledger_entry_exists",
+      "symbol": "\"ledger_entry_exists\",",
+      "classification": "safe_constant",
+      "detail": "Firewall proof-check identifier/type; no evidence truth asserted."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 13,
+      "term": "canGrantAuthority",
+      "symbol": "* - canGrantAuthority must remain false unless a separate authority",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 17,
+      "term": "hasValidV2Evidence",
+      "symbol": "* This replaces the manual hasValidV2Evidence flag in",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 36,
+      "term": "trusted_artifact_supported",
+      "symbol": "| \"trusted_artifact_supported\"",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 43,
+      "term": "hasValidV2Evidence",
+      "symbol": "hasValidV2Evidence: boolean;",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 45,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false;",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 82,
+      "term": "trusted_artifact_supported",
+      "symbol": "| \"trusted_artifact_supported\"",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 152,
+      "term": "hasValidV2Evidence",
+      "symbol": "* hasValidV2Evidence flag should be used in authority paths.",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 166,
+      "term": "hasValidV2Evidence",
+      "symbol": "hasValidV2Evidence: false,",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 168,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 185,
+      "term": "trusted_artifact_supported",
+      "symbol": ": status === \"trusted_artifact_supported\"",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 186,
+      "term": "trusted_artifact_supported",
+      "symbol": "? [\"Artifact verifier reports trusted_artifact_supported\"]",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 188,
+      "term": "hasValidV2Evidence",
+      "symbol": "const hasValidV2Evidence = status === \"trusted_artifact_supported\";",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 188,
+      "term": "trusted_artifact_supported",
+      "symbol": "const hasValidV2Evidence = status === \"trusted_artifact_supported\";",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 190,
+      "term": "trusted_artifact_supported",
+      "symbol": "status === \"trusted_artifact_supported\" || status === \"pending_contract_mismatch\";",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 196,
+      "term": "hasValidV2Evidence",
+      "symbol": "hasValidV2Evidence,",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 198,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false, // NEVER true from derivation alone",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 211,
+      "term": "trusted_artifact_supported",
+      "symbol": "case \"trusted_artifact_supported\":",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/derived-evidence-state.ts",
+      "line": 212,
+      "term": "trusted_artifact_supported",
+      "symbol": "return \"trusted_artifact_supported\";",
+      "classification": "derived_from_verifier",
+      "detail": "Derived evidence loader reads verifier output and exposes derived state."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 39,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: boolean;",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 44,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "evidenceLedgerV2Present: boolean;",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 92,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed: boolean;",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 155,
+      "term": "canGrantAuthority",
+      "symbol": "if (contract.evidenceSource.canGrantAuthority && !canMakePublicClaim(contract.currentAuthorityState)) {",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 162,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "if (contract.publicClaimAllowed && contract.validation.evidenceLedgerV2Present !== true) {",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 162,
+      "term": "publicClaimAllowed",
+      "symbol": "if (contract.publicClaimAllowed && contract.validation.evidenceLedgerV2Present !== true) {",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/product-authority-contract.ts",
+      "line": 169,
+      "term": "publicClaimAllowed",
+      "symbol": "if (contract.blockingReasons.length > 0 && contract.publicClaimAllowed) {",
+      "classification": "safe_constant",
+      "detail": "Contract type/validation reads contract fields; no artifact truth asserted."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 96,
+      "term": "hasValidV2Evidence",
+      "symbol": "const hasDerivedV2Evidence = derivedEvidence?.hasValidV2Evidence === true;",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 153,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: boolean;",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 160,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 169,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 174,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 192,
+      "term": "Evidence Ledger v2 not present",
+      "symbol": "reasons.push(\"Evidence Ledger v2 not present\");",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 288,
+      "term": "publicClaimAllowed",
+      "symbol": "const publicClaimAllowed = canMakePublicClaim(state);",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 312,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: evidenceSource.canGrantAuthority,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 317,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "evidenceLedgerV2Present: derivedEvidence?.ledgerEntryExists ?? false,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "lib/product/resolve-product-authority.ts",
+      "line": 351,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/audit-admin-authority-coverage.mjs",
+      "line": 35,
+      "term": "publicClaimAllowed",
+      "symbol": "\"publicClaimAllowed\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/audit-context-bound-validation-readiness.mjs",
+      "line": 43,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthorityFromSyntheticContext: !isLadderTerminal || upstreamDeps.length === 0,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/audit-context-bound-validation-readiness.mjs",
+      "line": 132,
+      "term": "canGrantAuthority",
+      "symbol": "mdReport += `**Can Grant Authority from Synthetic Context:** ${classification.canGrantAuthorityFromSyntheticContext ? 'YES' : 'NO'}\\n\\n`;",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/audit-product-authority-coverage.mjs",
+      "line": 184,
+      "term": "publicClaimAllowed",
+      "symbol": "\"publicClaimAllowed\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 11,
+      "term": "ledger_entry_exists",
+      "symbol": "\"ledger_entry_exists\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-authority-grant-firewall.mjs",
+      "line": 43,
+      "term": "ledger_entry_exists",
+      "symbol": "ledger_entry_exists: Boolean(ledger),",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-authority-safety-gate.mjs",
+      "line": 166,
+      "term": "trusted_artifact_supported",
+      "symbol": "const allNonGranting = data.rows.every((r) => r.ledgerTrustState !== \"trusted_artifact_supported\");",
+      "classification": "safe_constant",
+      "detail": "Safety gate reads generated gate reports and does not grant authority."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 10,
+      "term": "hasValidV2Evidence",
+      "symbol": "\"hasValidV2Evidence\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 11,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "\"evidenceLedgerV2Present\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 12,
+      "term": "ledger_entry_exists",
+      "symbol": "\"ledger_entry_exists\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 13,
+      "term": "trusted_artifact_supported",
+      "symbol": "\"trusted_artifact_supported\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 14,
+      "term": "Evidence Ledger v2 not present",
+      "symbol": "\"Evidence Ledger v2 not present\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 15,
+      "term": "canGrantAuthority",
+      "symbol": "\"canGrantAuthority\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 16,
+      "term": "publicClaimAllowed",
+      "symbol": "\"publicClaimAllowed\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 107,
+      "term": "canGrantAuthority",
+      "symbol": "if (/canGrantAuthority:\\s*false|publicClaimAllowed:\\s*false|input\\.state === \"externally_proven_gold_product\"/.test(text)) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 107,
+      "term": "publicClaimAllowed",
+      "symbol": "if (/canGrantAuthority:\\s*false|publicClaimAllowed:\\s*false|input\\.state === \"externally_proven_gold_product\"/.test(text)) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 110,
+      "term": "Evidence Ledger v2 not present",
+      "symbol": "if (/Evidence Ledger v2 not present/.test(text)) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 116,
+      "term": "trusted_artifact_supported",
+      "symbol": "if (/verifierRow|ledgerVerification|trusted_artifact_supported/.test(text)) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 141,
+      "term": "hasValidV2Evidence",
+      "symbol": "if (inAuthorityPath && /hasValidV2Evidence:\\s*(true|false)|input\\.hasValidV2Evidence/.test(text)) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-hardcoded-evidence-truth.mjs",
+      "line": 145,
+      "term": "canGrantAuthority",
+      "symbol": "if (inAuthorityPath && /canGrantAuthority:\\s*true/.test(text)) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-no-mock-authority.mjs",
+      "line": 122,
+      "term": "canGrantAuthority",
+      "symbol": "if (normalizedFile.includes(\"data-source-authority.ts\") && (content.includes(\"sourceKind:\") || content.includes(\"allowedContexts:\") || content.includes(\"forbiddenContexts:\") || content.includes(\"canGrantAuthority:\"))) {",
+      "classification": "test_fixture",
+      "detail": "Test or fraud simulation fixture."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 88,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 103,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 107,
+      "term": "trusted_artifact_supported",
+      "symbol": "\"Derived evidence state is trusted_artifact_supported, but authority remains non-restored pending contract and reconciliation review\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 117,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 121,
+      "term": "Evidence Ledger v2 not present",
+      "symbol": "blockingReasons: [\"Evidence Ledger v2 not present\"],",
+      "classification": "safe_constant",
+      "detail": "Non-granting missing-evidence blocking language."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 129,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 134,
+      "term": "Evidence Ledger v2 not present",
+      "symbol": "\"Evidence Ledger v2 not present\",",
+      "classification": "safe_constant",
+      "detail": "Non-granting missing-evidence blocking language."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 170,
+      "term": "publicClaimAllowed",
+      "symbol": "console.log(`  Public Claim Allowed: ${contract.publicClaimAllowed}`);",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 182,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed: contract.publicClaimAllowed,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 247,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: input.canGrantAuthority,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 248,
+      "term": "canGrantAuthority",
+      "symbol": "canonicalLocation: input.canGrantAuthority ? \"reports/product-value-evidence-ledger-v2.json\" : undefined,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 254,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed: input.state === \"externally_proven_gold_product\",",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 269,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 273,
+      "term": "Evidence Ledger v2 not present",
+      "symbol": "blockingReasons: [\"Evidence Ledger v2 not present\", blocker.blockingReason],",
+      "classification": "safe_constant",
+      "detail": "Non-granting missing-evidence blocking language."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 277,
+      "term": "publicClaimAllowed",
+      "symbol": "publicClaimAllowed: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 287,
+      "term": "hasValidV2Evidence",
+      "symbol": "const verified = derivedEvidence?.hasValidV2Evidence ?? passed;",
+      "classification": "derived_from_verifier",
+      "detail": "Contract gate reads verifier-derived evidence."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 289,
+      "term": "evidenceLedgerV2Present",
+      "symbol": "evidenceLedgerV2Present: evidencePresent,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 319,
+      "term": "canGrantAuthority",
+      "symbol": "if (contract.publicClaimAllowed && !contract.evidenceSource.canGrantAuthority) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 319,
+      "term": "publicClaimAllowed",
+      "symbol": "if (contract.publicClaimAllowed && !contract.evidenceSource.canGrantAuthority) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 342,
+      "term": "publicClaimAllowed",
+      "symbol": "if (contract.publicClaimAllowed && contract.blockingReasons.length > 0) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 372,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 376,
+      "term": "trusted_artifact_supported",
+      "symbol": "const trusted = row.ledgerTrustState === \"trusted_artifact_supported\";",
+      "classification": "derived_from_verifier",
+      "detail": "Contract gate reads verifier-derived evidence."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 381,
+      "term": "hasValidV2Evidence",
+      "symbol": "hasValidV2Evidence: trusted,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 383,
+      "term": "canGrantAuthority",
+      "symbol": "canGrantAuthority: false,",
+      "classification": "safe_constant",
+      "detail": "Non-granting contract constant or positive-state guard."
+    },
+    {
+      "file": "scripts/check-product-authority-contract.mjs",
+      "line": 424,
+      "term": "publicClaimAllowed",
+      "symbol": "${result.contractSummary.map((row) => `| ${row.productCode} | ${row.currentAuthorityState} | ${row.evidenceSourceType} | ${yes(row.publicClaimAllowed)} | ${yes(row.contractValid)} |`).join(\"\\n\")}",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 22,
+      "term": "hasValidV2Evidence",
+      "symbol": "import { hasValidV2Evidence } from \"./lib/read-evidence-ledger-v2.mjs\";",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 51,
+      "term": "hasValidV2Evidence",
+      "symbol": "recoveryStatus: hasValidV2Evidence(\"fast_diagnostic\").valid ? \"v2_evidence_ready\" : \"pending\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 52,
+      "term": "hasValidV2Evidence",
+      "symbol": "v2EvidenceValid: hasValidV2Evidence(\"fast_diagnostic\").valid,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 59,
+      "term": "hasValidV2Evidence",
+      "symbol": "recoveryStatus: hasValidV2Evidence(\"team_assessment\").valid ? \"v2_evidence_ready\" : \"pending\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 60,
+      "term": "hasValidV2Evidence",
+      "symbol": "v2EvidenceValid: hasValidV2Evidence(\"team_assessment\").valid,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 67,
+      "term": "hasValidV2Evidence",
+      "symbol": "recoveryStatus: hasValidV2Evidence(\"enterprise_assessment\").valid ? \"v2_evidence_ready\" : \"pending\",",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-product-claim-recovery.mjs",
+      "line": 68,
+      "term": "hasValidV2Evidence",
+      "symbol": "v2EvidenceValid: hasValidV2Evidence(\"enterprise_assessment\").valid,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-release-authority-firewall.mjs",
+      "line": 22,
+      "term": "hasValidV2Evidence",
+      "symbol": "import { hasValidV2Evidence } from \"./lib/read-evidence-ledger-v2.mjs\";",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/check-release-authority-firewall.mjs",
+      "line": 58,
+      "term": "hasValidV2Evidence",
+      "symbol": "evidenceLedgerV2Valid: hasValidV2Evidence(\"fast_diagnostic\").valid,",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/lib/read-evidence-ledger-v2.mjs",
+      "line": 46,
+      "term": "hasValidV2Evidence",
+      "symbol": "export function hasValidV2Evidence(productCode) {",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/lib/read-evidence-ledger-v2.mjs",
+      "line": 142,
+      "term": "hasValidV2Evidence",
+      "symbol": "const validation = hasValidV2Evidence(productCode);",
+      "classification": "safe_constant",
+      "detail": "No authority-path evidence assertion detected."
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 222,
+      "term": "trusted_artifact_supported",
+      "symbol": "if (verifierRow.ledgerTrustState === \"trusted_artifact_supported\") return \"ledger_artifacts_present\";",
+      "classification": "derived_from_verifier",
+      "detail": "Reconciliation reads artifact verifier output."
+    },
+    {
+      "file": "scripts/reconcile-product-authority-truth.mjs",
+      "line": 246,
+      "term": "trusted_artifact_supported",
+      "symbol": "if (verifierRow.ledgerTrustState === \"trusted_artifact_supported\") return \"rendered_output_hash_artifact_found\";",
+      "classification": "derived_from_verifier",
+      "detail": "Reconciliation reads artifact verifier output."
+    },
+    {
+      "file": "scripts/test-authority-fraud-scenarios.mjs",
+      "line": 11,
+      "term": "ledger_entry_exists",
+      "symbol": "\"ledger_entry_exists\",",
+      "classification": "test_fixture",
+      "detail": "Test or fraud simulation fixture."
+    },
+    {
+      "file": "scripts/verify-evidence-ledger-artifacts.mjs",
+      "line": 9,
+      "term": "trusted_artifact_supported",
+      "symbol": "*   trusted_artifact_supported       — All checks pass; may support authority",
+      "classification": "derived_from_verifier",
+      "detail": "Artifact verifier produces the trusted ledger state."
+    },
+    {
+      "file": "scripts/verify-evidence-ledger-artifacts.mjs",
+      "line": 65,
+      "term": "trusted_artifact_supported",
+      "symbol": "const untrusted = rows.filter((row) => row.ledgerTrustState !== \"trusted_artifact_supported\");",
+      "classification": "derived_from_verifier",
+      "detail": "Artifact verifier produces the trusted ledger state."
+    },
+    {
+      "file": "scripts/verify-evidence-ledger-artifacts.mjs",
+      "line": 72,
+      "term": "trusted_artifact_supported",
+      "symbol": "trustedEntries: rows.filter((r) => r.ledgerTrustState === \"trusted_artifact_supported\").length,",
+      "classification": "derived_from_verifier",
+      "detail": "Artifact verifier produces the trusted ledger state."
+    },
+    {
+      "file": "scripts/verify-evidence-ledger-artifacts.mjs",
+      "line": 200,
+      "term": "trusted_artifact_supported",
+      "symbol": "return makeResult(productCode, entry, contract, \"trusted_artifact_supported\", [], {});",
+      "classification": "derived_from_verifier",
+      "detail": "Artifact verifier produces the trusted ledger state."
+    },
+    {
+      "file": "scripts/verify-evidence-ledger-artifacts.mjs",
+      "line": 329,
+      "term": "trusted_artifact_supported",
+      "symbol": "md += \"| \" + k + \" | \" + v + \" | \" + (k === \"trusted_artifact_supported\" ? \"Yes\" : \"No\") + \" |\\n\";",
+      "classification": "derived_from_verifier",
+      "detail": "Artifact verifier produces the trusted ledger state."
+    }
+  ]
+}

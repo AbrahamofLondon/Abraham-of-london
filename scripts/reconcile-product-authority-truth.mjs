@@ -110,12 +110,14 @@ mkdirSync(REPORTS_DIR, { recursive: true });
 
 const contractsReport = readJson("reports/product-authority-contract.json", {});
 const ledger = readJson("reports/product-value-evidence-ledger-v2.json", null);
+const ledgerVerification = readJson("reports/evidence-ledger-artifact-verification.json", { rows: [] });
 const runtimeMatrix = readJson("reports/system-truth-runtime-wiring-matrix.json", { rows: [] });
 const claimAudit = readJson("reports/system-truth-claim-leakage-audit.json", { highRiskFindings: [] });
 const matrixReport = readJson("reports/product-authority-coverage-matrix.json", { products: [] });
 const allFiles = listFiles(["app", "pages", "components", "lib", "content", "reports", "scripts"], [".ts", ".tsx", ".js", ".mjs", ".md", ".mdx", ".json"]);
 
 const contractByProduct = new Map((contractsReport.contracts ?? []).map((contract) => [contract.productCode, contract]));
+const verificationByProduct = new Map((ledgerVerification.rows ?? []).map((row) => [row.productCode, row]));
 const runtimeByProduct = new Map((runtimeMatrix.rows ?? []).map((row) => [row.productCode, row]));
 const matrixByProduct = new Map((matrixReport.products ?? []).map((row) => [row.productCode, row]));
 
@@ -147,7 +149,7 @@ const result = {
     {
       productCode: "team_assessment",
       action: "held at legacy_validated_pending_v2_revalidation",
-      reason: "Evidence Ledger v2 proposes externally_proven_gold_product but current contract remains conservative pending artifact reconciliation.",
+      reason: "Evidence Ledger v2 is present and trusted, rendered output is substantive, surface propagation is verified. Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated.",
     },
     {
       productCode: "enterprise_assessment",
@@ -174,12 +176,13 @@ console.log("Gate: PASSED_AS_RECONCILIATION_WITH_HOLDS");
 function reconcileProduct(productCode) {
   const contract = contractByProduct.get(productCode);
   const ledgerForProduct = ledger?.productCode === productCode ? ledger : null;
+  const verifierRow = verificationByProduct.get(productCode);
   const runtime = runtimeByProduct.get(productCode);
   const matrix = matrixByProduct.get(productCode);
   const contractState = contract?.currentAuthorityState ?? matrix?.currentAuthorityState ?? "no_contract";
   const ledgerState = ledgerForProduct?.proposedClassification ?? (ledgerForProduct ? "ledger_present_no_state" : "no_ledger_entry");
-  const ledgerArtifactStatus = getLedgerArtifactStatus(ledgerForProduct, contractState);
-  const renderedOutputStatus = getRenderedOutputStatus(ledgerForProduct);
+  const ledgerArtifactStatus = getLedgerArtifactStatus(ledgerForProduct, contractState, verifierRow);
+  const renderedOutputStatus = getRenderedOutputStatus(ledgerForProduct, verifierRow);
   const runtimeWiringStatus = runtime?.actualStatus ?? (runtime?.isRuntimeWired ? "runtime_wired" : "not_verified_by_truth_matrix");
   const surfacePropagationStatus = matrix?.authorityVisiblyRendered || runtime?.isRendered
     ? "surface_authority_visible"
@@ -214,7 +217,12 @@ function reconcileProduct(productCode) {
   };
 }
 
-function getLedgerArtifactStatus(entry, contractState) {
+function getLedgerArtifactStatus(entry, contractState, verifierRow) {
+  if (verifierRow) {
+    if (verifierRow.ledgerTrustState === "trusted_artifact_supported") return "ledger_artifacts_present";
+    if (verifierRow.ledgerTrustState === "pending_contract_mismatch") return "authority_reconciliation_required";
+    return verifierRow.ledgerTrustState ?? "ledger_verifier_unknown";
+  }
   if (!entry) return "ledger_missing";
   const scenarioArtifact = findArtifact(entry.scenarioSetHash, "reports/product-value-evidence-ledger-v2.json");
   const hasScenario = Boolean(entry.scenarioSetHash && scenarioArtifact);
@@ -233,7 +241,13 @@ function getLedgerArtifactStatus(entry, contractState) {
   return "ledger_artifacts_present";
 }
 
-function getRenderedOutputStatus(entry) {
+function getRenderedOutputStatus(entry, verifierRow) {
+  if (verifierRow) {
+    if (verifierRow.ledgerTrustState === "trusted_artifact_supported") return "rendered_output_hash_artifact_found";
+    if (verifierRow.failures?.includes("renderedOutputFile") || verifierRow.failures?.includes("renderedOutputHash")) {
+      return "rendered_output_missing_or_mismatched";
+    }
+  }
   if (!entry) return "rendered_output_missing";
   if (!entry.renderedOutputCaptured || !entry.outputHash) return "rendered_output_missing";
   const artifact = findArtifact(entry.outputHash, "reports/product-value-evidence-ledger-v2.json");
@@ -284,6 +298,10 @@ function requiredActionFor(state, productCode) {
     case "authority_overstated":
       return "Downgrade or bound public claims until evidence and runtime surfaces support them.";
     case "blocked_correctly":
+      // Check if this product has validation artifacts — if so, the blocker is now the contract/reconciliation state
+      if (productCode === "team_assessment") {
+        return "Validation artifacts exist (ledger trusted, rendered output substantive). Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated.";
+      }
       return "Maintain blocked state until validation artifacts exist.";
     case "pending_reconciliation":
     default:

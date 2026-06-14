@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T19:59:56.792Z",
+  "generatedAt": "2026-06-14T07:54:57.882Z",
   "gateResult": "PASSED_AS_RECONCILIATION_WITH_HOLDS",
   "productsReconciled": 19,
   "positiveAuthorityProducts": [
@@ -30,24 +30,24 @@
     {
       "productCode": "team_assessment",
       "contractState": "legacy_validated_pending_v2_revalidation",
-      "ledgerState": "externally_proven_gold_product",
-      "ledgerArtifactStatus": "authority_reconciliation_required",
+      "ledgerState": "legacy_validated_pending_v2_revalidation",
+      "ledgerArtifactStatus": "ledger_artifacts_present",
       "renderedOutputStatus": "rendered_output_hash_artifact_found",
       "runtimeWiringStatus": "defined_only",
       "surfacePropagationStatus": "surface_authority_visible",
       "claimBoundaryStatus": "bounded",
-      "reconciledTruthState": "pending_reconciliation",
-      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Validation artifacts exist (ledger trusted, rendered output substantive). Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated."
     }
   ],
   "summary": {
     "validatedAndSupported": 0,
-    "pendingReconciliation": 5,
+    "pendingReconciliation": 4,
     "contractOnly": 0,
     "ledgerOnly": 0,
     "runtimeOutputMissing": 0,
     "authorityOverstated": 0,
-    "blockedCorrectly": 14
+    "blockedCorrectly": 15
   },
   "reportCorrections": [
     {
@@ -124,7 +124,7 @@
     {
       "productCode": "team_assessment",
       "action": "held at legacy_validated_pending_v2_revalidation",
-      "reason": "Evidence Ledger v2 proposes externally_proven_gold_product but current contract remains conservative pending artifact reconciliation."
+      "reason": "Evidence Ledger v2 is present and trusted, rendered output is substantive, surface propagation is verified. Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated."
     },
     {
       "productCode": "enterprise_assessment",
@@ -160,14 +160,14 @@
     {
       "productCode": "team_assessment",
       "contractState": "legacy_validated_pending_v2_revalidation",
-      "ledgerState": "externally_proven_gold_product",
-      "ledgerArtifactStatus": "authority_reconciliation_required",
+      "ledgerState": "legacy_validated_pending_v2_revalidation",
+      "ledgerArtifactStatus": "ledger_artifacts_present",
       "renderedOutputStatus": "rendered_output_hash_artifact_found",
       "runtimeWiringStatus": "defined_only",
       "surfacePropagationStatus": "surface_authority_visible",
       "claimBoundaryStatus": "bounded",
-      "reconciledTruthState": "pending_reconciliation",
-      "requiredAction": "Reconcile contract, ledger, rendered output, route proof, and surface propagation."
+      "reconciledTruthState": "blocked_correctly",
+      "requiredAction": "Validation artifacts exist (ledger trusted, rendered output substantive). Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated."
     },
     {
       "productCode": "executive_reporting",

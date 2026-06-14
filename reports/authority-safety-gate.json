@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-06-14T07:54:57.898Z",
+  "overallState": "authority_pending_reconciliation",
+  "productsAllowedPositiveAuthority": 0,
+  "productsBlockedFromRestoration": 43,
+  "failingBlockingGates": [],
+  "passingGates": [
+    "Evidence Ledger Artifact Verification",
+    "Authority Grant Firewall",
+    "Surface Claim Authority",
+    "No-Hardcoded Evidence Truth"
+  ],
+  "gatesWithFindings": [
+    "Report-As-Evidence Violations",
+    "Board-Facing Authority Language Guard",
+    "No-Mock Authority (Critical Paths)",
+    "ProductAuthorityContract Consistency"
+  ],
+  "blockingReasons": [],
+  "recommendedAction": "Do not restore authority. Fix blocking gates first."
+}

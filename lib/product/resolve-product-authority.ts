@@ -31,11 +31,12 @@ import {
   type AuthorityProofCheck,
   type EffectiveAuthorityStateResult,
 } from "./authority-grant-firewall";
+import type { DerivedEvidenceState } from "./derived-evidence-state";
 
 export interface ProductAuthorityResolverInput {
   productCode: string;
   currentClassification?: string;
-  hasValidV2Evidence: boolean;
+  derivedEvidenceState?: DerivedEvidenceState;
   policyState?: Exclude<
     ProductAuthorityState,
     "externally_proven_gold_product" | "diagnostic_product" | "judgement_product"
@@ -86,12 +87,13 @@ export function deriveAuthorityState(
   input: ProductAuthorityResolverInput
 ): ProductAuthorityState {
   const {
-    hasValidV2Evidence,
     priorV1Evidence,
     validationResults,
     boundary,
     policyState,
   } = input;
+  const derivedEvidence = input.derivedEvidenceState;
+  const hasDerivedV2Evidence = derivedEvidence?.hasValidV2Evidence === true;
 
   if (policyState) {
     return policyState;
@@ -115,17 +117,9 @@ export function deriveAuthorityState(
       validationResults.adversarialValidationPassed
     : false;
 
-  // Determine state based on evidence and validation
-  if (hasValidV2Evidence && allGatesPassed && !boundaryViolated) {
-    // All conditions met for gold product status
-    return "externally_proven_gold_product";
-  } else if (hasValidV2Evidence && allGatesPassed) {
-    // Valid v2 evidence and gates passed but boundary violated
-    return "measurement_inconclusive";
-  } else if (hasValidV2Evidence) {
-    // Has v2 evidence but gates did not pass
-    return "blocked_until_v2_revalidation";
-  } else if (priorV1Evidence?.sourceType === "wave2g") {
+  // Existing legacy evidence remains non-granting unless a later authority
+  // restoration pass explicitly changes the contract.
+  if (priorV1Evidence?.sourceType === "wave2g") {
     // Prior v1 evidence from Wave 2G measurement
     if (priorV1Evidence.status === "measurement_inconclusive") {
       return "blocked_until_claim_evidenced";
@@ -134,6 +128,15 @@ export function deriveAuthorityState(
   } else if (priorV1Evidence?.sourceType === "historical") {
     // Prior v1 evidence from historical validation
     return "legacy_validated_pending_v2_revalidation";
+  } else if (!derivedEvidence) {
+    return "pending_reconciliation";
+  } else if (hasDerivedV2Evidence && allGatesPassed && boundaryViolated) {
+    return "measurement_inconclusive";
+  } else if (hasDerivedV2Evidence) {
+    // Verified evidence can support review, but cannot grant authority here.
+    return "pending_reconciliation";
+  } else if (derivedEvidence.ledgerEntryExists) {
+    return "blocked_until_v2_revalidation";
   } else {
     // No evidence at all
     return "blocked_until_claim_evidenced";
@@ -150,11 +153,12 @@ export function determineEvidenceSource(
   canGrantAuthority: boolean;
   canonicalLocation?: string;
 } {
-  if (input.hasValidV2Evidence) {
+  const derivedEvidence = input.derivedEvidenceState;
+  if (derivedEvidence?.ledgerEntryExists) {
     return {
       sourceType: "generated_evidence",
-      canGrantAuthority: true,
-      canonicalLocation: input.v2EvidencePath,
+      canGrantAuthority: false,
+      canonicalLocation: derivedEvidence.artifactRefs.ledger ?? input.v2EvidencePath,
     };
   } else if (
     input.priorV1Evidence?.sourceType === "historical" ||
@@ -180,9 +184,17 @@ export function determineBlockingReasons(
   input: ProductAuthorityResolverInput
 ): string[] {
   const reasons: string[] = [];
+  const derivedEvidence = input.derivedEvidenceState;
 
-  if (!input.hasValidV2Evidence) {
+  if (!derivedEvidence) {
+    reasons.push("Derived evidence state unavailable (evidence_state_unknown)");
+  } else if (!derivedEvidence.ledgerEntryExists) {
     reasons.push("Evidence Ledger v2 not present");
+  } else {
+    reasons.push(...derivedEvidence.evidenceReasons);
+    if (derivedEvidence.canSupportAuthorityReview) {
+      reasons.push("Verified artifacts may support authority review, but authority remains non-restored without a separate restoration pass");
+    }
   }
 
   if (input.policyReason) {
@@ -275,6 +287,7 @@ export function resolveProductAuthority(
   const nextAction = determineNextAction(state);
   const publicClaimAllowed = canMakePublicClaim(state);
   const publicClaimLanguage = getPublicClaimLanguage(state, input.productCode);
+  const derivedEvidence = input.derivedEvidenceState;
 
   return {
     productCode: input.productCode,
@@ -301,8 +314,10 @@ export function resolveProductAuthority(
     },
 
     validation: {
-      evidenceLedgerV2Present: input.hasValidV2Evidence,
-      evidenceLedgerHash: input.v2EvidencePath,
+      evidenceLedgerV2Present: derivedEvidence?.ledgerEntryExists ?? false,
+      evidenceLedgerHash: derivedEvidence?.artifactRefs.ledger ?? input.v2EvidencePath,
+      scenarioSetHash: derivedEvidence?.artifactRefs.scenarioSet,
+      outputHash: derivedEvidence?.artifactRefs.renderedOutput,
       renderedOutputCaptured: input.validationResults?.antiToyPassed ?? false,
       antiToyPassed: input.validationResults?.antiToyPassed ?? false,
       redTeamPassed: input.validationResults?.redTeamPassed ?? false,
@@ -373,7 +388,6 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
   return [
     {
       productCode: "fast_diagnostic",
-      hasValidV2Evidence: false,
       policyState: "pending_reconciliation",
       policyReason: "Authority restoration is frozen until contract, ledger, rendered output, route proof, and surface propagation agree",
       v2EvidencePath: "reports/product-value-evidence-ledger-v2.json",
@@ -400,7 +414,6 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
     },
     {
       productCode: "team_assessment",
-      hasValidV2Evidence: false,
       priorV1Evidence: {
         sourceType: "historical",
         status: "externally_proven",
@@ -408,7 +421,6 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
     },
     {
       productCode: "enterprise_assessment",
-      hasValidV2Evidence: false,
       priorV1Evidence: {
         sourceType: "historical",
         status: "externally_proven",
@@ -416,7 +428,6 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
     },
     {
       productCode: "personal_decision_audit",
-      hasValidV2Evidence: false,
       priorV1Evidence: {
         sourceType: "wave2g",
         status: "measurement_inconclusive",
@@ -429,7 +440,6 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
 export const PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS: ProductAuthorityResolverInput[] = [
   {
     productCode: "boardroom_brief",
-    hasValidV2Evidence: false,
     policyState: "blocked_until_v2_revalidation",
     policyReason: "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted",
   },
@@ -450,25 +460,21 @@ export const PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS: ProductAuthorityResolv
     "operator_decision_pack",
   ].map((productCode) => ({
     productCode,
-    hasValidV2Evidence: false,
     policyState: "blocked_until_claim_evidenced" as const,
     policyReason: "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted",
   })),
   {
     productCode: "executive_reporting",
-    hasValidV2Evidence: false,
     policyState: "blocked_until_v2_revalidation",
     policyReason: "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted",
   },
   {
     productCode: "strategy_room",
-    hasValidV2Evidence: false,
     policyState: "blocked_until_claim_evidenced",
     policyReason: "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted",
   },
   {
     productCode: "boardroom_mode",
-    hasValidV2Evidence: false,
     policyState: "blocked_until_v2_revalidation",
     policyReason: "Boardroom mode requires v2 evidence-gated route proof before authority can be restored",
   },

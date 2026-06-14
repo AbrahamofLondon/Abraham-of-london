@@ -63,8 +63,10 @@ console.log("PRODUCT AUTHORITY CONTRACT VALIDATION GATE");
 console.log("Validating core and public/non-exempt ProductAuthorityContract coverage\n");
 
 const matrix = readJson("product-authority-coverage-matrix.json", { products: [] });
+const ledgerVerification = readJson("evidence-ledger-artifact-verification.json", { rows: [] });
 const estateProducts = matrix.products ?? [];
 const productByCode = new Map(estateProducts.map((product) => [product.productCode, product]));
+const verifiedEvidenceByProduct = new Map((ledgerVerification.rows ?? []).map((row) => [row.productCode, row]));
 const publicNonExemptBlockers = PUBLIC_NON_EXEMPT_PRODUCT_CODES
   .map((productCode) => productByCode.get(productCode) ?? { productCode })
   .map((product) => ({
@@ -82,7 +84,7 @@ const productContracts = [
   coreContract({
     productCode: "fast_diagnostic",
     state: "pending_reconciliation",
-    sourceType: "generated_evidence",
+    sourceType: derivedEvidenceFor("fast_diagnostic").ledgerEntryExists ? "generated_evidence" : "reported_summary_only",
     canGrantAuthority: false,
     evidenceSupportedClaim: "fast_diagnostic authority is pending reconciliation between contract, ledger, runtime output, and route evidence",
     publicClaimLanguage: "fast_diagnostic authority is pending reconciliation; do not describe it as externally proven until artifacts match.",
@@ -92,17 +94,21 @@ const productContracts = [
       "Rendered runtime output artifact and route evidence must be matched before external-proof claims are restored",
     ],
     nextEvidenceAction: "Reconcile ProductAuthorityContract, Evidence Ledger v2, rendered output capture, route proof, and surface propagation",
+    derivedEvidence: derivedEvidenceFor("fast_diagnostic"),
   }),
   coreContract({
     productCode: "team_assessment",
     state: "legacy_validated_pending_v2_revalidation",
-    sourceType: "legacy_evidence",
+    sourceType: derivedEvidenceFor("team_assessment").ledgerEntryExists ? "generated_evidence" : "legacy_evidence",
     canGrantAuthority: false,
     evidenceSupportedClaim: "team_assessment is legacy validated; pending v2 revalidation",
     publicClaimLanguage: "team_assessment is legacy validated; pending v2 revalidation.",
-    validationPassed: false,
-    blockingReasons: ["Evidence Ledger v2 not present"],
-    nextEvidenceAction: "Run v2 revalidation to upgrade from legacy status",
+    blockingReasons: [
+      "Derived evidence state is trusted_artifact_supported, but authority remains non-restored pending contract and reconciliation review",
+      "ProductAuthorityContract has not granted restored authority",
+    ],
+    nextEvidenceAction: "Update contract and reconciliation to reflect trusted ledger state, then conduct controlled restoration review",
+    derivedEvidence: derivedEvidenceFor("team_assessment"),
   }),
   coreContract({
     productCode: "enterprise_assessment",
@@ -114,6 +120,7 @@ const productContracts = [
     validationPassed: false,
     blockingReasons: ["Evidence Ledger v2 not present"],
     nextEvidenceAction: "Run v2 revalidation to upgrade from legacy status",
+    derivedEvidence: derivedEvidenceFor("enterprise_assessment"),
   }),
   coreContract({
     productCode: "personal_decision_audit",
@@ -128,6 +135,7 @@ const productContracts = [
       "Measurement boundary violated: scorer change in Wave 2G",
     ],
     nextEvidenceAction: "Generate Evidence Ledger v2 with frozen scenarios and validation tests",
+    derivedEvidence: derivedEvidenceFor("personal_decision_audit"),
   }),
 ];
 
@@ -228,6 +236,7 @@ console.log(`Written: ${join(REPORTS_DIR, "public-contract-blockers.json")}`);
 process.exit(gateStatus === "FAILED" ? 1 : 0);
 
 function coreContract(input) {
+  const derivedEvidence = input.derivedEvidence ?? null;
   return {
     productCode: input.productCode,
     targetClaim: `${input.productCode} is a validated diagnostic product`,
@@ -238,7 +247,7 @@ function coreContract(input) {
       canGrantAuthority: input.canGrantAuthority,
       canonicalLocation: input.canGrantAuthority ? "reports/product-value-evidence-ledger-v2.json" : undefined,
     },
-    validation: validation(input.validationPassed),
+    validation: validation(input.validationPassed, derivedEvidence),
     boundary: boundary(false),
     blockingReasons: input.blockingReasons,
     nextEvidenceAction: input.nextEvidenceAction,
@@ -273,19 +282,23 @@ function blockerContract(blocker) {
   };
 }
 
-function validation(passed) {
+function validation(passed, derivedEvidence = null) {
+  const evidencePresent = derivedEvidence?.ledgerEntryExists ?? passed;
+  const verified = derivedEvidence?.hasValidV2Evidence ?? passed;
   return {
-    evidenceLedgerV2Present: passed,
-    renderedOutputCaptured: passed,
-    antiToyPassed: passed,
-    redTeamPassed: passed,
-    genericAiComparisonPassed: passed,
-    marketComparisonPassed: passed,
-    releaseFirewallPassed: passed,
-    constitutionPassed: passed,
-    noMockAuthorityPassed: passed,
-    antiGamingPassed: passed,
-    adversarialValidationPassed: passed,
+    evidenceLedgerV2Present: evidencePresent,
+    scenarioSetHash: derivedEvidence?.scenarioPath,
+    outputHash: derivedEvidence?.outputPath,
+    renderedOutputCaptured: verified,
+    antiToyPassed: verified,
+    redTeamPassed: verified,
+    genericAiComparisonPassed: verified,
+    marketComparisonPassed: verified,
+    releaseFirewallPassed: verified,
+    constitutionPassed: verified,
+    noMockAuthorityPassed: verified,
+    antiGamingPassed: verified,
+    adversarialValidationPassed: verified,
   };
 }
 
@@ -346,6 +359,35 @@ function readJson(file, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function derivedEvidenceFor(productCode) {
+  const row = verifiedEvidenceByProduct.get(productCode);
+  if (!row) {
+    return {
+      productCode,
+      ledgerEntryExists: false,
+      ledgerStatus: "missing",
+      canSupportAuthorityReview: false,
+      canGrantAuthority: false,
+      evidenceReasons: ["No artifact verifier row found for product"],
+    };
+  }
+  const trusted = row.ledgerTrustState === "trusted_artifact_supported";
+  return {
+    productCode,
+    ledgerEntryExists: true,
+    ledgerStatus: row.ledgerTrustState,
+    hasValidV2Evidence: trusted,
+    canSupportAuthorityReview: trusted || row.ledgerTrustState === "pending_contract_mismatch",
+    canGrantAuthority: false,
+    scenarioPath: row.scenarioPath,
+    outputPath: row.outputPath,
+    validationPath: row.validationPath,
+    evidenceReasons: row.failures?.length
+      ? row.failures.map((failure) => `Verifier failure: ${failure}`)
+      : [`Artifact verifier reports ${row.ledgerTrustState}`],
+  };
 }
 
 function renderContractMarkdown(result) {

@@ -1,5 +1,5 @@
 {
-  "auditDate": "2026-06-13T19:59:56.851Z",
+  "auditDate": "2026-06-14T07:54:48.649Z",
   "gateStatus": "CORE_AND_PUBLIC_CONTRACT_COVERAGE_PASSED",
   "directContractsValidated": 22,
   "estateProductsReviewed": 43,
@@ -41,7 +41,7 @@
       "evidenceSupportedClaim": "fast_diagnostic authority is pending reconciliation between contract, ledger, runtime output, and route evidence",
       "currentAuthorityState": "pending_reconciliation",
       "evidenceSource": {
-        "sourceType": "generated_evidence",
+        "sourceType": "reported_summary_only",
         "canGrantAuthority": false
       },
       "validation": {
@@ -81,21 +81,23 @@
       "evidenceSupportedClaim": "team_assessment is legacy validated; pending v2 revalidation",
       "currentAuthorityState": "legacy_validated_pending_v2_revalidation",
       "evidenceSource": {
-        "sourceType": "legacy_evidence",
+        "sourceType": "generated_evidence",
         "canGrantAuthority": false
       },
       "validation": {
-        "evidenceLedgerV2Present": false,
-        "renderedOutputCaptured": false,
-        "antiToyPassed": false,
-        "redTeamPassed": false,
-        "genericAiComparisonPassed": false,
-        "marketComparisonPassed": false,
-        "releaseFirewallPassed": false,
-        "constitutionPassed": false,
-        "noMockAuthorityPassed": false,
-        "antiGamingPassed": false,
-        "adversarialValidationPassed": false
+        "evidenceLedgerV2Present": true,
+        "scenarioSetHash": "reports/validation/team-assessment/scenarios.json",
+        "outputHash": "reports/validation/team-assessment/rendered-output.json",
+        "renderedOutputCaptured": true,
+        "antiToyPassed": true,
+        "redTeamPassed": true,
+        "genericAiComparisonPassed": true,
+        "marketComparisonPassed": true,
+        "releaseFirewallPassed": true,
+        "constitutionPassed": true,
+        "noMockAuthorityPassed": true,
+        "antiGamingPassed": true,
+        "adversarialValidationPassed": true
       },
       "boundary": {
         "productChangedThisPass": false,
@@ -107,9 +109,10 @@
         "mockAuthorityUsed": false
       },
       "blockingReasons": [
-        "Evidence Ledger v2 not present"
+        "Derived evidence state is trusted_artifact_supported, but authority remains non-restored pending contract and reconciliation review",
+        "ProductAuthorityContract has not granted restored authority"
       ],
-      "nextEvidenceAction": "Run v2 revalidation to upgrade from legacy status",
+      "nextEvidenceAction": "Update contract and reconciliation to reflect trusted ledger state, then conduct controlled restoration review",
       "publicClaimAllowed": false,
       "publicClaimLanguage": "team_assessment is legacy validated; pending v2 revalidation.",
       "contractVersion": "v2"
@@ -918,7 +921,7 @@
     {
       "productCode": "fast_diagnostic",
       "currentAuthorityState": "pending_reconciliation",
-      "evidenceSourceType": "generated_evidence",
+      "evidenceSourceType": "reported_summary_only",
       "publicClaimAllowed": false,
       "publicClaimLanguage": "fast_diagnostic authority is pending reconciliation; do not describe it as externally proven until artifacts match.",
       "contractValid": true
@@ -926,7 +929,7 @@
     {
       "productCode": "team_assessment",
       "currentAuthorityState": "legacy_validated_pending_v2_revalidation",
-      "evidenceSourceType": "legacy_evidence",
+      "evidenceSourceType": "generated_evidence",
       "publicClaimAllowed": false,
       "publicClaimLanguage": "team_assessment is legacy validated; pending v2 revalidation.",
       "contractValid": true

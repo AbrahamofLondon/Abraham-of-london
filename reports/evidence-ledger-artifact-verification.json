@@ -1,38 +1,23 @@
 {
-  "generatedAt": "2026-06-13T19:59:21.829Z",
-  "gate": "FAILED_LEDGER_UNTRUSTED",
+  "generatedAt": "2026-06-14T07:50:25.357Z",
+  "gate": "PASSED_LEDGER_ARTIFACTS_VERIFIED",
   "entriesAudited": 1,
-  "untrustedEntries": 1,
+  "untrustedEntries": 0,
+  "trustedEntries": 1,
   "rows": [
     {
       "productCode": "team_assessment",
-      "proposedClassification": "externally_proven_gold_product",
+      "proposedClassification": "legacy_validated_pending_v2_revalidation",
       "currentContractState": "legacy_validated_pending_v2_revalidation",
+      "ledgerTrustState": "trusted_artifact_supported",
+      "failures": [],
+      "checks": {},
       "scenarioPath": "reports/validation/team-assessment/scenarios.json",
       "outputPath": "reports/validation/team-assessment/rendered-output.json",
-      "validationPath": "reports/validation/team-assessment/validation-results.json",
-      "scenarioHash": "489735a8c391c3afb78c8be3ee4ed542bf56a3705ec3949999af3b8776c5d0d8",
-      "expectedScenarioHash": "489735a8c391c3afb78c8be3ee4ed542bf56a3705ec3949999af3b8776c5d0d8",
-      "renderedOutputHash": "e14a9a6b03366277d4d9c74f0c4221f8d785d5f1cc1066260f8a64311fc6dc8c",
-      "expectedRenderedOutputHash": "e14a9a6b03366277d4d9c74f0c4221f8d785d5f1cc1066260f8a64311fc6dc8c",
-      "checks": {
-        "scenarioFileExists": true,
-        "scenarioHashMatches": true,
-        "renderedOutputFileExists": true,
-        "renderedOutputHashMatches": true,
-        "validationRunHashExists": true,
-        "qualityTestArtifactExists": true,
-        "boundaryFlagsPresent": false,
-        "mockAuthorityUsedFalse": true,
-        "authorityRecommendationMatchesContract": false,
-        "renderedOutputHasSubstance": false
-      },
-      "ledgerTrustState": "ledger_untrusted",
-      "failures": [
-        "boundaryFlagsPresent",
-        "authorityRecommendationMatchesContract",
-        "renderedOutputHasSubstance"
-      ]
+      "validationPath": "reports/validation/team-assessment/validation-results.json"
     }
-  ]
+  ],
+  "classificationSummary": {
+    "trusted_artifact_supported": 1
+  }
 }

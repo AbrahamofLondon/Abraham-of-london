@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T19:59:31.128Z",
+  "generatedAt": "2026-06-14T07:54:57.864Z",
   "rows": [
     {
       "productCode": "fast_diagnostic",
@@ -21,7 +21,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -36,17 +36,17 @@
       "checks": {
         "contract_state_exists": true,
         "ledger_entry_exists": true,
-        "scenario_artifact_exists": true,
-        "rendered_output_artifact_exists": true,
-        "scenario_hash_matches": true,
-        "rendered_output_hash_matches": true,
-        "validation_run_hash_exists": true,
-        "quality_tests_exist": true,
+        "scenario_artifact_exists": false,
+        "rendered_output_artifact_exists": false,
+        "scenario_hash_matches": false,
+        "rendered_output_hash_matches": false,
+        "validation_run_hash_exists": false,
+        "quality_tests_exist": false,
         "boundary_flags_clean": false,
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -71,7 +71,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -96,7 +96,7 @@
         "route_proof_exists": true,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -121,7 +121,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": false
       },
       "positiveAuthorityAllowed": false
@@ -146,7 +146,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -171,7 +171,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -196,7 +196,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -221,7 +221,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -246,7 +246,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -271,7 +271,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -296,7 +296,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -321,7 +321,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -346,7 +346,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -371,7 +371,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": false
       },
       "positiveAuthorityAllowed": false
@@ -396,7 +396,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -421,7 +421,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -446,7 +446,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -471,7 +471,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -496,7 +496,7 @@
         "route_proof_exists": true,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -521,7 +521,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": true
       },
       "positiveAuthorityAllowed": false
@@ -546,7 +546,7 @@
         "route_proof_exists": false,
         "surface_propagation_exists": true,
         "claim_boundary_scan_passes": true,
-        "no_mock_scan_passes": true,
+        "no_mock_scan_passes": false,
         "board_facing_guard_passes": false
       },
       "positiveAuthorityAllowed": false

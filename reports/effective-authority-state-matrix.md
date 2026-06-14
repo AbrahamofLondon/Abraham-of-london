@@ -1,6 +1,6 @@
 # Effective Authority State Matrix
 
-Generated: 2026-06-13T19:59:31.128Z
+Generated: 2026-06-14T07:54:57.864Z
 
 | Product | Declared State | Effective State | Proof Status | Suppression Reason |
 | --- | --- | --- | --- | --- |
