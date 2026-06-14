@@ -1,9 +1,21 @@
+import { useMemo } from "react";
 import EvidenceLimitedOfferPage, {
   type EvidenceLimitedOffer,
 } from "@/components/commercial/EvidenceLimitedOfferPage";
+import {
+  type ProductReleaseGovernance,
+  getRequiredEvidenceBoundary,
+  canReleaseCommercially,
+  canUseCheckout,
+  canUseManualFulfilment,
+} from "@/lib/product/product-release-governance";
+import { useProductReleaseGovernance } from "@/hooks/useProductReleaseGovernance";
 
-const OFFER: EvidenceLimitedOffer = {
-  code: "enterprise_assessment_advisory_review",
+const PRODUCT_CODE = "enterprise_assessment";
+
+// Fallback offer configuration for initial page load
+const DEFAULT_OFFER: EvidenceLimitedOffer = {
+  code: PRODUCT_CODE,
   slug: "enterprise-assessment-advisory-review",
   title: "Enterprise Assessment Advisory Review",
   eyebrow: "Evidence-limited offer",
@@ -78,5 +90,39 @@ const OFFER: EvidenceLimitedOffer = {
 };
 
 export default function EnterpriseAssessmentAdvisoryReviewOffer() {
-  return <EvidenceLimitedOfferPage offer={OFFER} />;
+  const governance = useProductReleaseGovernance(PRODUCT_CODE);
+
+  // If governance prevents commercial release, do not render the CTA
+  const offer = useMemo(() => {
+    if (!governance) {
+      return DEFAULT_OFFER;
+    }
+
+    const commercial = canReleaseCommercially(governance);
+    const checkout = canUseCheckout(governance);
+    const manualFulfilment = canUseManualFulfilment(governance);
+
+    if (!commercial.allowed) {
+      // Product is not commercially releasable according to governance
+      return {
+        ...DEFAULT_OFFER,
+        ctas: [], // No CTAs if governance blocks commercial release
+      };
+    }
+
+    // Use governance-derived values where applicable
+    return {
+      ...DEFAULT_OFFER,
+      cannotClaim: governance.forbiddenClaims,
+      ctas: DEFAULT_OFFER.ctas.filter((cta) => {
+        // Filter out "Buy now" CTA if checkout is not allowed
+        if (cta.label === "Buy now" && !checkout.allowed) {
+          return false;
+        }
+        return true;
+      }),
+    };
+  }, [governance]);
+
+  return <EvidenceLimitedOfferPage offer={offer} governance={governance} />;
 }

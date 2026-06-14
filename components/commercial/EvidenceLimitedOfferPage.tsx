@@ -6,6 +6,7 @@ import Layout from "@/components/Layout";
 import EvidenceBoundaryNotice, {
   type EvidenceBoundaryVariant,
 } from "@/components/commercial/EvidenceBoundaryNotice";
+import type { ProductReleaseGovernance } from "@/lib/product/product-release-governance";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
@@ -137,7 +138,43 @@ function BulletPanel({
   );
 }
 
-export default function EvidenceLimitedOfferPage({ offer }: { offer: EvidenceLimitedOffer }) {
+export default function EvidenceLimitedOfferPage({
+  offer,
+  governance,
+}: {
+  offer: EvidenceLimitedOffer;
+  governance?: ProductReleaseGovernance | null;
+}) {
+  // If governance is loaded and blocks commercial release, show blocked state
+  if (governance && !governance.commercialClaimAllowed && governance.releaseMode === "blocked") {
+    return (
+      <Layout
+        title={`${offer.title} | Abraham of London`}
+        description={offer.summary}
+        canonicalUrl={`/offers/${offer.slug}`}
+        fullWidth
+      >
+        <div style={{ background: "rgb(3 3 5)", minHeight: "100vh", padding: "40px 20px" }}>
+          <div className="mx-auto max-w-2xl text-center">
+            <p style={{ color: "rgba(255, 255, 255, 0.5)", marginBottom: "16px" }}>
+              This offer is not currently available
+            </p>
+            <h1 style={{ fontSize: "28px", color: "white", marginBottom: "20px" }}>
+              {offer.title}
+            </h1>
+            <p style={{ color: "rgba(255, 255, 255, 0.6)", marginBottom: "24px" }}>
+              This product is temporarily unavailable due to authority governance constraints. Please contact
+              us for updates.
+            </p>
+            <Link href="/" style={{ color: "#C9A96E", textDecoration: "underline" }}>
+              Return to home
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout
       title={`${offer.title} | Abraham of London`}
