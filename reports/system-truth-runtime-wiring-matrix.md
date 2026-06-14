@@ -1,6 +1,6 @@
 # System Truth Runtime Wiring Matrix
 
-Generated: 2026-06-13T19:59:56.760Z
+Generated: 2026-06-13T21:48:11.371Z
 
 Products audited: 19
 

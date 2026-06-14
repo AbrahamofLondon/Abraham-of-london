@@ -191,7 +191,9 @@ export function generateBoardroomDossier(
   ];
 
   return {
-    title: `Board Decision Dossier — ${condition.toUpperCase()} condition`,
+    // Note: This is a board-facing format based on user-supplied assessment.
+    // It does not constitute verified board evidence.
+    title: `Board-Facing Draft — ${condition.toUpperCase()} condition (user-supplied, not independently verified)`,
     classification: "BOARD_RESTRICTED",
     generatedAt: new Date().toISOString(),
     qualifiedForBoard: true,

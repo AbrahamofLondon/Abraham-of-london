@@ -1,6 +1,6 @@
 /* lib/admin/reporting/report-pdf.tsx
    ---------------------------------------------------------------------------
-   BOARD-READY PDF DOCUMENT
+   BOARD-FACING PDF DOCUMENT (user-supplied, not independently verified)
    React PDF template for executive institutional diagnostics.
    --------------------------------------------------------------------------- */
 

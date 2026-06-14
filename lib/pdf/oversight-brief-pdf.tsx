@@ -237,7 +237,7 @@ export function OversightBriefPdfDocument({ clientSafeBrief, generatedAt }: Prop
             <Text style={styles.smallBody}>
               {brief.costOfInaction
                 ? `Estimated cost increased to £${brief.costOfInaction.totalEstimated.toLocaleString()}.`
-                : "No verified cost basis was published in this cycle."}
+                : "No independently verified cost basis was published in this cycle (cost figures are user-supplied estimates)."}
             </Text>
           </View>
         </View>

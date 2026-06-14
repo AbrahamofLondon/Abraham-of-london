@@ -1,6 +1,6 @@
 # Authority Fraud Scenario Results
 
-Generated: 2026-06-13T19:59:42.512Z
+Generated: 2026-06-14T08:16:16.992Z
 
 Gate: PASSED_ALL_FRAUDULENT_AUTHORITY_SCENARIOS_BLOCKED
 

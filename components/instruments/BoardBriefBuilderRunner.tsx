@@ -29,7 +29,7 @@ export default function BoardBriefBuilderRunner({ onComplete }: { onComplete: (r
   function addObjection() { setInput((p) => ({ ...p, knownObjections: [...p.knownObjections, ""] })); }
   function updateObjection(i: number, value: string) { setInput((p) => ({ ...p, knownObjections: p.knownObjections.map((o, idx) => idx === i ? value : o) })); }
 
-  const readinessColor = result?.briefReadiness === "BOARD_READY" ? "rgba(110,231,183,0.70)" : result?.briefReadiness === "REVIEW_READY" ? `${GOLD}CC` : result?.briefReadiness === "DRAFT" ? "rgba(253,186,116,0.70)" : "rgba(252,165,165,0.60)";
+  const readinessColor = result?.briefReadiness === "EVIDENCE_LIMITED_BOARD_DRAFT" ? "rgba(110,231,183,0.70)" : result?.briefReadiness === "REVIEW_READY" ? `${GOLD}CC` : result?.briefReadiness === "DRAFT" ? "rgba(253,186,116,0.70)" : "rgba(252,165,165,0.60)";
 
   const sliders: Array<{ key: keyof Pick<BoardBriefInput, "financialExposure" | "consequenceExposure" | "evidenceAvailable" | "authorityClarity" | "urgency">; label: string; helper: string }> = [
     { key: "financialExposure", label: "Financial Exposure", helper: "How significant is the financial impact of this decision?" },

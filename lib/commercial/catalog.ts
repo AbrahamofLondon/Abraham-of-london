@@ -487,7 +487,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cancelPath: "/decision-instruments",
     cookieName: null,
     includes: [],
-    shortDescription: "Turn a decision record into a board-ready structured brief with objection handling.",
+    shortDescription: "Turn a decision record into a board-facing structured brief with objection handling (user-supplied inputs; does not constitute verified board evidence).",
     deliveryFormat: "interactive_instrument",
     estimatedCompletionMinutes: 20,
     writesToDecisionMemory: true,

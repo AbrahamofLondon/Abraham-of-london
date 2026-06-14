@@ -398,7 +398,7 @@ export const PREMIUM_DECISION_ASSETS: PremiumDecisionAsset[] = [
     upsellPath: "If source findings are incomplete, proceed to Executive Reporting before briefing the board.",
     instrument: {
       context:
-        "Used when diagnostic findings must become a board-ready decision brief.",
+        "Used when diagnostic findings must become a board-facing decision brief (user-supplied inputs; does not constitute verified board evidence).",
       decisionFrame:
         "Forces INFORM, SEEK DECISION, or REQUEST AUTHORITY.",
       input: [

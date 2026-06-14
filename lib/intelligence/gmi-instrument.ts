@@ -309,7 +309,7 @@ export const GMI_ESTATE_INTEGRATION_MAP = [
   },
   {
     route: "/boardroom-brief",
-    role: "Board-ready challenge dossier when the dashboard identifies board-level action.",
+    role: "Board-facing challenge dossier (user-supplied inputs; does not constitute verified board evidence) when the dashboard identifies board-level action.",
   },
   {
     route: "/strategy-room",

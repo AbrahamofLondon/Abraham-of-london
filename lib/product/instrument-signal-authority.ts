@@ -409,7 +409,7 @@ const INSTRUMENT_CONFIG: Record<string, InstrumentConfig> = {
     conditionName: (band) => `Board Readiness — ${band.replace(/_/g, " ").toLowerCase()}`,
     patternTag: (band) => {
       const upper = band.toUpperCase();
-      if (upper === "BOARD_READY") return "Brief is board-ready — decision record meets escalation threshold";
+      if (upper === "BOARD_READY") return "Brief is at board-facing draft level (user-supplied inputs; does not constitute verified board evidence)";
       if (upper === "NEAR_READY") return "Brief is approaching board readiness — targeted strengthening will qualify it";
       if (upper === "DEVELOPING") return "Brief requires structural development before board presentation";
       return "Brief is early-stage — evidence and decision record require significant development";

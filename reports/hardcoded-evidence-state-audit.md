@@ -1,6 +1,6 @@
 # Hardcoded Evidence State Audit
 
-Generated: 2026-06-14T07:54:48.692Z
+Generated: 2026-06-14T08:15:45.882Z
 
 Gate: PASSED_NO_HARDCODED_EVIDENCE_TRUTH
 

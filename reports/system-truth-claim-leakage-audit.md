@@ -1,19 +1,19 @@
 # System Truth Claim Leakage Audit
 
-Generated: 2026-06-13T19:59:56.760Z
+Generated: 2026-06-13T21:48:11.371Z
 
-Files scanned: 6013
+Files scanned: 6050
 
-Total findings: 53741
+Total findings: 56435
 
-High-risk findings: 17594
+High-risk findings: 17949
 
 ## Status Counts
 
-- needs authority state check: 16962
-- unsupported: 632
-- bounded: 28209
-- stale: 7938
+- needs authority state check: 17272
+- unsupported: 677
+- bounded: 28938
+- stale: 9548
 
 ## High-Risk Findings
 
@@ -134,7 +134,6 @@ High-risk findings: 17594
 | app/api/admin/boardroom-delivery/generate/route.ts | 283 | board-ready | unsupported | const forcedAction = String(meta.forcedAction ?? "Produce a board-ready brief and confirm the next admissible move."); |
 | app/api/admin/boardroom-delivery/generate/route.ts | 312 | authority | needs authority state check | const signal = SIGNALS.AUTHORITY_LEAKAGE; |
 | app/api/admin/boardroom-delivery/generate/route.ts | 326 | authority | needs authority state check | blockerClass: "boardroom_delivery_authority", |
-| app/api/admin/boardroom-delivery/generate/route.ts | 331 | board-ready | unsupported | avoidedDecision: "Avoiding a board-ready commitment on the paid decision record.", |
 | app/api/admin/boardroom-delivery/generate/route.ts | 362 | verified | needs authority state check | contribution: "Verified paid Boardroom Brief order converted into boardroom delivery spine.", |
 | app/api/admin/campaigns/[id]/report/pdf/route.ts | 125 | authority | needs authority state check | authorityType: constitution.authorityType as any, |
 | app/api/admin/campaigns/[id]/report/route.ts | 44 | authority | needs authority state check | "authorityType", |
@@ -269,3 +268,4 @@ High-risk findings: 17594
 | app/api/downloads/[slug]/route.ts | 7 | authority | needs authority state check | import { resolveCanonicalEntitlement } from "@/lib/commercial/entitlement-authority"; |
 | app/api/enterprise-foundation/dependencies/route.ts | 3 | authority | needs authority state check | import { createDecisionDependency, getDecisionImpactView } from "@/lib/enterprise-foundation/authority-foundation"; |
 | app/api/enterprise-foundation/playbooks/route.ts | 4 | authority | needs authority state check | import { applyEnforcementPlaybook, createEnforcementPlaybook } from "@/lib/enterprise-foundation/authority-foundation"; |
+| app/api/enterprise-foundation/stakeholders/route.ts | 4 | authority | needs authority state check | import { createDecisionStakeholder } from "@/lib/enterprise-foundation/authority-foundation"; |

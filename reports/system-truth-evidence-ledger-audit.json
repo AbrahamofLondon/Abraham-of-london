@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-13T19:59:56.760Z",
+  "generatedAt": "2026-06-13T21:48:11.371Z",
   "entriesAudited": 1,
   "summary": {
-    "ledger_report_only": 1
+    "ledger_missing_runtime_output": 1
   },
   "rows": [
     {
@@ -13,7 +13,7 @@
       "scenarioFileExists": true,
       "renderedOutputCaptured": true,
       "outputHashPresent": true,
-      "renderedOutputFileExists": true,
+      "renderedOutputFileExists": false,
       "validationRunHashExists": true,
       "qualityTests": [
         {
@@ -66,17 +66,17 @@
       "boundaryFlagsPresent": true,
       "authorityDecision": {
         "currentContractState": "legacy_validated_pending_v2_revalidation",
-        "proposedClassification": "externally_proven_gold_product",
+        "proposedClassification": "legacy_validated_pending_v2_revalidation",
         "authorityGranted": [
           "externally_proven_gold_product",
           "diagnostic_product"
         ],
         "authorityDenied": [],
-        "matchesCurrentContract": false
+        "matchesCurrentContract": true
       },
-      "classification": "ledger_report_only",
+      "classification": "ledger_missing_runtime_output",
       "blockingReasons": [
-        "Ledger authority decision does not match current ProductAuthorityContract state."
+        "Rendered output artifact matching output hash was not found outside the ledger report."
       ]
     }
   ]

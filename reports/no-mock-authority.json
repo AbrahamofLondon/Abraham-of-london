@@ -1,0 +1,953 @@
+{
+  "auditDate": "2026-06-14T08:16:07.365Z",
+  "gateStatus": "passed_with_non_authority_findings",
+  "pathsScanned": 22,
+  "findingsTotal": 104,
+  "blockingCount": 0,
+  "findings": [
+    {
+      "file": "lib\\product\\product-authority-contract.ts",
+      "line": 8,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* hardcoded registry labels, or surface copy.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 8,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   2. runtime_truth — DB-derived state, no fixture data in production paths",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 14,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   8. market_authority — claims are provable; no fixture data in paid output",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 46,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "runtime_truth:    'All state DB-derived; no fixtures or static files in production paths',",
+      "reason": "Guard statement preventing fixture data in authority path"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 52,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "market_authority: 'Product claims provable; no fixture data in paid deliverables',",
+      "reason": "Guard statement preventing fixture data in authority path"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 98,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "runtime_truth:    { result: 'PASS',    note: 'Admin delivery route now loads real BoardroomBriefOrder from DB; QUALIFYIN",
+      "reason": "Gate assessment result documenting fixture/mock blocking — not mock data itself"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 101,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "evidence_input:   { result: 'PASS',    note: 'inputSnapshotHash computed and persisted before generation; assertPaidDeli",
+      "reason": "Gate assessment result documenting fixture/mock blocking — not mock data itself"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 103,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "test:             { result: 'PARTIAL', note: 'boardroom-delivery-route.test.ts covers fixture rejection, sourceType enfo",
+      "reason": "Gate assessment result documenting fixture/mock blocking — not mock data itself"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 104,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "market_authority: { result: 'PARTIAL', note: 'Paid delivery route requires paymentStatus=paid + real orderId and bans fi",
+      "reason": "Gate assessment result documenting fixture/mock blocking — not mock data itself"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 115,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "market_authority: { result: 'PASS',    note: 'No fixture data in production execution path' },",
+      "reason": "Guard statement preventing fixture data in authority path"
+    },
+    {
+      "file": "lib\\product\\product-authority-gate.ts",
+      "line": 181,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "market_authority: { result: 'PARTIAL', note: 'Legacy admin views still import static GMI registries; secondary consoles ",
+      "reason": "Gate assessment result documenting fixture/mock blocking — not mock data itself"
+    },
+    {
+      "file": "lib\\product\\evidence-classification.ts",
+      "line": 50,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* - STATIC_PROOF_ASSET: hardcoded evidence dossier (e.g., /evidence/[slug] pages)",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\evidence-classification.ts",
+      "line": 99,
+      "pattern": "sample_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "minimumSample = 5,",
+      "reason": "Configuration constant, not mock data"
+    },
+    {
+      "file": "lib\\product\\authority-critical-paths.ts",
+      "line": 5,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* in tests, fixtures, or demos, but must not be reachable from these paths.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\authority-critical-paths.ts",
+      "line": 7,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Rule: No mock, demo, fixture, report, or placeholder may support authority.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\authority-critical-paths.ts",
+      "line": 7,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Rule: No mock, demo, fixture, report, or placeholder may support authority.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\authority-critical-paths.ts",
+      "line": 106,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Non-authority paths that are safe for mock/fixture/placeholder content.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\authority-critical-paths.ts",
+      "line": 106,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Non-authority paths that are safe for mock/fixture/placeholder content.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\product\\authority-critical-paths.ts",
+      "line": 121,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// UI form placeholders (not authority-bearing)",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 9,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* No hardcoded mock data may grant authority.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 10,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* No static fixture may classify a product.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 11,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* No placeholder may satisfy a validation gate.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 25,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "| \"placeholder\"",
+      "reason": "Type union literal defining valid source kinds — not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 26,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "| \"fixture\"",
+      "reason": "Type union literal defining valid source kinds — not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 154,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "allowedContexts: [\"test\", \"fixture\", \"demo\"],",
+      "reason": "Data source authority classification definition — defines rules, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 166,
+      "pattern": "placeholder_reference",
+      "severity": "MEDIUM",
+      "classification": "demo_content_safe",
+      "content": "placeholder: {",
+      "reason": "UI form placeholder text"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 167,
+      "pattern": "placeholder_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "sourceKind: \"placeholder\",",
+      "reason": "Data source authority classification definition — defines rules, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 181,
+      "pattern": "placeholder_reference",
+      "severity": "MEDIUM",
+      "classification": "historical_reference",
+      "content": "blockingReason: \"Placeholder data cannot grant authority\",",
+      "reason": "Doctrine or rule statement, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 184,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "fixture: {",
+      "reason": "Data source authority fixture block definition — defines rules, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 185,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "sourceKind: \"fixture\",",
+      "reason": "Data source authority classification definition — defines rules, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 191,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "validation_artifact_mock",
+      "content": "allowedContexts: [\"test\", \"fixture\"],",
+      "reason": "Data source authority classification definition — defines rules, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 199,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "historical_reference",
+      "content": "blockingReason: \"Fixture data cannot grant authority\",",
+      "reason": "Doctrine or rule statement, not mock data"
+    },
+    {
+      "file": "lib\\validation\\data-source-authority.ts",
+      "line": 301,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "purpose: \"test\" | \"fixture\" | \"demo\" | \"local_dev\";",
+      "reason": "Type union literal defining valid source kinds — not mock data"
+    },
+    {
+      "file": "scripts\\generate-v2-evidence-ledger.mjs",
+      "line": 122,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// Fall back to hardcoded for fast_diagnostic",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\generate-v2-evidence-ledger.mjs",
+      "line": 447,
+      "pattern": "mock_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "nonMock: true,",
+      "reason": "Boundary flag value, not mock data"
+    },
+    {
+      "file": "scripts\\verify-evidence-ledger-artifacts.mjs",
+      "line": 17,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   blocked_mock_or_fixture          - Entry uses mock/fixture data",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\verify-evidence-ledger-artifacts.mjs",
+      "line": 180,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "return makeResult(productCode, entry, contract, \"blocked_mock_or_fixture\", [\"mockAuthorityUsed\"], { mockAuthorityUsed })",
+      "reason": "Classification label, not mock data"
+    },
+    {
+      "file": "scripts\\verify-evidence-ledger-artifacts.mjs",
+      "line": 271,
+      "pattern": "mock_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "detail: \"Non-mock: \" + (outStr.includes(\"non-mock\") ? \"declared\" : \"not declared\"),",
+      "reason": "Status message about non-mock status, not mock data"
+    },
+    {
+      "file": "scripts\\verify-evidence-ledger-artifacts.mjs",
+      "line": 286,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (thinOnlyCount === scenarioResults.length && scenarioResults.length > 0) return { classification: \"failed_placeholder",
+      "reason": "Classification label, not mock data"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 8,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Scans for hardcoded mock data, placeholders, and static fixtures in",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 8,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Scans for hardcoded mock data, placeholders, and static fixtures in",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 8,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "* Scans for hardcoded mock data, placeholders, and static fixtures in",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 15,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   failed_authority_path_mock            — Mock/fixture/placeholder in authority path",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 15,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   failed_authority_path_mock            — Mock/fixture/placeholder in authority path",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 23,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   test_fixture_safe → informational",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 37,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// These are the only paths where mock/fixture/placeholder findings block authority.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 37,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// These are the only paths where mock/fixture/placeholder findings block authority.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 66,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /fixture/gi, label: \"fixture_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 67,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /placeholder/gi, label: \"placeholder_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 70,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /hardcoded/gi, label: \"hardcoded_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 71,
+      "pattern": "test_data_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /testData/gi, label: \"test_data_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 72,
+      "pattern": "example_data_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /exampleData/gi, label: \"example_data_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 73,
+      "pattern": "fake_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /FAKE/g, label: \"fake_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 74,
+      "pattern": "default_gold_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /defaultGold/gi, label: \"default_gold_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 75,
+      "pattern": "static_pass_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /staticPass/gi, label: \"static_pass_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 76,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /hardcodedAuthority/gi, label: \"hardcoded_authority_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 76,
+      "pattern": "hardcoded_authority_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /hardcodedAuthority/gi, label: \"hardcoded_authority_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 77,
+      "pattern": "default_authority_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "{ pattern: /defaultAuthority/gi, label: \"default_authority_reference\" },",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 83,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "const SAFE_DOCTRINE_PATTERN = /No (hardcoded|placeholder|mock)|doctrine|cannot grant authority/i;",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 83,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "const SAFE_DOCTRINE_PATTERN = /No (hardcoded|placeholder|mock)|doctrine|cannot grant authority/i;",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 94,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (SAFE_NOT_HARDCODED_PATTERN.test(content)) return { classification: \"false_positive\", reason: \"Explicitly states valu",
+      "reason": "Explicitly states value is not hardcoded"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 103,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 4. Validation artifact mock (guard statements preventing fixture data)",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 104,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (content.includes(\"NO FIXTURE DATA\") || (content.includes(\"fixture\") && (content.includes(\"no fixture\") || content.in",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 106,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "classification: isCriticalPath ? \"validation_artifact_mock\" : \"test_fixture_safe\",",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 111,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 5. Demo content safe (UI placeholders)",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 112,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (content.includes(\"placeholder:\") || content.includes(\"placeholder :\")) {",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 128,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "return { classification: \"validation_artifact_mock\", reason: \"Gate assessment result documenting fixture/mock blocking —",
+      "reason": "Explicitly states value is not hardcoded"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 136,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 10. Data source authority type union literals (e.g., | \"placeholder\" | \"fixture\")",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 136,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 10. Data source authority type union literals (e.g., | \"placeholder\" | \"fixture\")",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 137,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (normalizedFile.includes(\"data-source-authority.ts\") && (content.trim().startsWith('| \"') || content.includes('purpos",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 141,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 11. Data source authority fixture/placeholder block definitions",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 141,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 11. Data source authority fixture/placeholder block definitions",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 142,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (normalizedFile.includes(\"data-source-authority.ts\") && (content.trim() === \"fixture:\" || content.trim().startsWith(\"",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 147,
+      "pattern": "mock_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if ((content.includes(\"nonMock:\") || content.includes(\"non_mock\")) && (content.includes(\"true\") || content.includes(\"fal",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 150,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (content.includes(\"blocked_mock_or_fixture\") || content.includes(\"failed_placeholder_output\") || content.includes(\"fa",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 150,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (content.includes(\"blocked_mock_or_fixture\") || content.includes(\"failed_placeholder_output\") || content.includes(\"fa",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 153,
+      "pattern": "mock_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "if (content.includes('\"Non-mock:') || content.includes(\"Non-mock:\")) {",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 159,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "classification: isCriticalPath ? \"needs_manual_review\" : \"test_fixture_safe\",",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 166,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "console.log(\"Scanning authority-critical paths for mock/fixture/placeholder data\\n\");",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 166,
+      "pattern": "placeholder_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "console.log(\"Scanning authority-critical paths for mock/fixture/placeholder data\\n\");",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 205,
+      "pattern": "mock_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// authority_path_mock: actual mock data in authority path → BLOCKING",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 209,
+      "pattern": "mock_assignment",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// validation_artifact_mock: guard definitions that ENFORCE the no-mock rule → NON-BLOCKING",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 211,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// fixture/mock data from entering authority paths.",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 216,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "!f.content.includes(\"cannot grant\") && !f.content.includes(\"No fixture\") &&",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 218,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "!f.content.includes(\"rejects all fixture\") && !f.content.includes(\"bans fixture\") &&",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 243,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "doctrine: \"No hardcoded mock data may grant authority. Mock-like material may exist in tests, fixtures, or demos, but mu",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-no-mock-authority.mjs",
+      "line": 243,
+      "pattern": "hardcoded_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "doctrine: \"No hardcoded mock data may grant authority. Mock-like material may exist in tests, fixtures, or demos, but mu",
+      "reason": "Scanner matching its own source code"
+    },
+    {
+      "file": "scripts\\check-authority-grant-firewall.mjs",
+      "line": 32,
+      "pattern": "mock_assignment",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "const noMock = readJson(\"reports/no-mock-authority.json\", {});",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 64,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "name: \"No-Hardcoded Evidence Truth\",",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 66,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "status: determineNoHardcodedEvidenceStatus(),",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 71,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "function determineNoHardcodedEvidenceStatus() {",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 73,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "const data = JSON.parse(readFileSync(join(ROOT, \"reports/hardcoded-evidence-state-audit.json\"), \"utf8\"));",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 75,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "if ((data.classifications?.needs_refactor ?? 0) > 0 || (data.classifications?.authority_path_hardcoded ?? 0) > 0) return",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 82,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "function determineNoHardcodedEvidenceReason() {",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 84,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "const data = JSON.parse(readFileSync(join(ROOT, \"reports/hardcoded-evidence-state-audit.json\"), \"utf8\"));",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 85,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "if (data.gate === \"PASSED_NO_HARDCODED_EVIDENCE_TRUTH\") return \"NO_HARDCODED_EVIDENCE_TRUTH_PASSED\";",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safety-gate.mjs",
+      "line": 88,
+      "pattern": "hardcoded_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "return \"NO_HARDCODED_EVIDENCE_TRUTH_NOT_RUN\";",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 15,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "*   test_fixture                 — Test or example showing old/new patterns",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 37,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// Patterns that indicate a line is inside a guard definition or test fixture",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 62,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// Patterns that indicate test fixtures or examples",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 81,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "test_fixture: [],",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 122,
+      "pattern": "fixture_reference",
+      "severity": "INFO",
+      "classification": "false_positive",
+      "content": "// 3. Check if this is a test fixture or example",
+      "reason": "Comment or docstring"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 124,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "classification = \"test_fixture\";",
+      "reason": "Check script describing patterns it detects"
+    },
+    {
+      "file": "scripts\\check-authority-safe-language.mjs",
+      "line": 187,
+      "pattern": "fixture_reference",
+      "severity": "MEDIUM",
+      "classification": "report_generator_safe",
+      "content": "console.log(`Total test fixtures (informational): ${findings.test_fixture.length}`);",
+      "reason": "Check script describing patterns it detects"
+    }
+  ],
+  "classificationSummary": {
+    "false_positive": 75,
+    "validation_artifact_mock": 13,
+    "demo_content_safe": 1,
+    "historical_reference": 2,
+    "report_generator_safe": 13
+  },
+  "doctrine": "No hardcoded mock data may grant authority. Mock-like material may exist in tests, fixtures, or demos, but must not be reachable from authority-critical paths."
+}

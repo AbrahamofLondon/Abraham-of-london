@@ -1,8 +1,10 @@
 /**
  * Board Brief Builder — governed instrument engine.
  *
- * Turns a decision record into a board-ready structured brief with
+ * Turns a decision record into a board-facing structured brief with
  * risks, objections, evidence posture, and recommended decision posture.
+ * Note: Output is based on user-supplied inputs and does not constitute
+ * verified board evidence. Requires evidence review before board reliance.
  *
  * This is a premium instrument. Output must be board-presentation grade.
  *
@@ -23,7 +25,7 @@ export type BoardBriefInput = {
 };
 
 export type BoardBriefResult = {
-  briefReadiness: "NOT_READY" | "DRAFT" | "REVIEW_READY" | "BOARD_READY";
+  briefReadiness: "NOT_READY" | "DRAFT" | "REVIEW_READY" | "EVIDENCE_LIMITED_BOARD_DRAFT";
   readinessScore: number; // 0-100
   decisionPosture: "APPROVE" | "DEFER" | "REJECT" | "ESCALATE" | "INSUFFICIENT_EVIDENCE";
   objectionHandling: Array<{ objection: string; response: string; evidenceBasis: string }>;
@@ -52,8 +54,10 @@ export function buildBoardBrief(input: BoardBriefInput): BoardBriefResult {
     evidence * 0.30 * 10 + authority * 0.25 * 10 + (10 - financial) * 0.15 * 10 + urgency * 0.15 * 10 + consequence * 0.15 * 10,
   );
 
+  // Readiness based on user-supplied inputs (0-10 sliders), not verified evidence.
+  // This is a board-facing draft — does not constitute verified board evidence.
   const briefReadiness: BoardBriefResult["briefReadiness"] =
-    readinessScore >= 75 ? "BOARD_READY"
+    readinessScore >= 75 ? "EVIDENCE_LIMITED_BOARD_DRAFT"
     : readinessScore >= 55 ? "REVIEW_READY"
     : readinessScore >= 35 ? "DRAFT"
     : "NOT_READY";
@@ -85,8 +89,10 @@ export function buildBoardBrief(input: BoardBriefInput): BoardBriefResult {
   if (financial >= 7 && evidence < 6) evidenceGaps.push("High financial exposure without proportionate evidence. The board will question the basis.");
   if (input.knownObjections.length === 0) evidenceGaps.push("No objections have been anticipated. The board will raise them — prepare responses.");
 
-  const boardroomReadinessSignal = briefReadiness === "BOARD_READY"
-    ? "This brief is ready for board presentation. Evidence and authority support the recommended posture."
+  // Note: Readiness signal is based on user-supplied inputs, not verified evidence.
+  // This is a board-facing draft — does not constitute verified board evidence.
+  const boardroomReadinessSignal = briefReadiness === "EVIDENCE_LIMITED_BOARD_DRAFT"
+    ? "This is a board-facing draft based on user-supplied inputs. It does not constitute verified board evidence and requires evidence review before board reliance."
     : briefReadiness === "REVIEW_READY"
       ? "This brief requires one more review cycle before board presentation. Key gaps have been identified."
       : briefReadiness === "DRAFT"
@@ -99,8 +105,8 @@ export function buildBoardBrief(input: BoardBriefInput): BoardBriefResult {
     + `Financial exposure: ${financial}/10. `
     + (evidenceGaps.length > 0 ? `${evidenceGaps.length} evidence gap${evidenceGaps.length !== 1 ? "s" : ""} identified.` : "No material evidence gaps.");
 
-  const recommendation = briefReadiness === "BOARD_READY"
-    ? `Board brief is ready. ${decisionPosture === "APPROVE" ? "Recommend approval" : decisionPosture === "DEFER" ? "Recommend deferral pending additional evidence" : "Recommend escalation"}. Present with objection responses prepared.`
+  const recommendation = briefReadiness === "EVIDENCE_LIMITED_BOARD_DRAFT"
+    ? `Board-facing draft is at evidence-limited level (user-supplied inputs). ${decisionPosture === "APPROVE" ? "Recommend approval with evidence review" : decisionPosture === "DEFER" ? "Recommend deferral pending additional evidence" : "Recommend escalation"}. Does not constitute verified board evidence.`
     : `Board brief is ${briefReadiness.replace(/_/g, " ").toLowerCase()}. ${evidenceGaps[0] ?? "Address identified gaps before presentation."}`;
 
   const decisionKernel = evaluateDecision({

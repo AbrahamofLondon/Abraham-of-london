@@ -300,7 +300,7 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
       systemOfRecord: "DECISION_CENTRE",
       provenanceCapable: true,
     },
-    description: "Consequence interpretation layer. Prices cost of delay, identifies governance correction, sequences first intervention, and prepares board-ready decision object. Paid product.",
+    description: "Consequence interpretation layer. Prices cost of delay, identifies governance correction, sequences first intervention, and prepares board-facing decision object (user-supplied inputs; does not constitute verified board evidence). Paid product.",
   },
   {
     id: "executive-reporting-run",
@@ -537,7 +537,7 @@ export const PRODUCT_SURFACE_REGISTRY: AdminProductSurface[] = [
     ],
     outputs: [
       "Boardroom archive summary",
-      "Board-ready decision dossier",
+      "Board-facing decision dossier (user-supplied, not independently verified)",
       "Signal exposure report",
     ],
     downstream: [

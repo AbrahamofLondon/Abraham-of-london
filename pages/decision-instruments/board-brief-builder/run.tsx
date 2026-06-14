@@ -64,10 +64,10 @@ const BoardBriefRun: NextPage = () => {
         <BoardBriefBuilderRunner onComplete={handleComplete} />
       ) : (
         <div className="space-y-4">
-          <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.briefReadiness === "BOARD_READY" ? "rgba(110,231,183,0.70)" : "#C9A96ECC" }}>
-            Board Readiness: {result.readinessScore}/100
+          <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.briefReadiness === "EVIDENCE_LIMITED_BOARD_DRAFT" ? "rgba(110,231,183,0.70)" : "#C9A96ECC" }}>
+            Brief Readiness: {result.readinessScore}/100 (user-supplied, not verified)
           </div>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: result.briefReadiness === "BOARD_READY" ? "rgba(110,231,183,0.60)" : "rgba(253,186,116,0.60)" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: result.briefReadiness === "EVIDENCE_LIMITED_BOARD_DRAFT" ? "rgba(110,231,183,0.60)" : "rgba(253,186,116,0.60)" }}>
             {result.briefReadiness.replace(/_/g, " ")} · Posture: {result.decisionPosture.replace(/_/g, " ").toLowerCase()}
           </p>
           <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>{result.executiveSummary}</p>

@@ -15,13 +15,13 @@ PASSED_AS_AUDIT_WITH_CRITICAL_FINDINGS
 ## Positive Authority Product Result
 - fast_diagnostic: pending_reconciliation / pending_reconciliation / Reconcile contract, ledger, rendered output, route proof, and surface propagation.
 - enterprise_assessment: legacy_validated_pending_v2_revalidation / pending_reconciliation / Reconcile contract, ledger, rendered output, route proof, and surface propagation.
-- team_assessment: legacy_validated_pending_v2_revalidation / pending_reconciliation / Reconcile contract, ledger, rendered output, route proof, and surface propagation.
+- team_assessment: legacy_validated_pending_v2_revalidation / blocked_correctly / Validation artifacts exist (ledger trusted, rendered output substantive). Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated.
 
 ## ProductAuthorityContract Result
 fast_diagnostic is held as pending_reconciliation. team_assessment and enterprise_assessment remain legacy_validated_pending_v2_revalidation.
 
 ## Evidence Ledger v2 Result
-{"validatedAndSupported":0,"pendingReconciliation":5,"contractOnly":0,"ledgerOnly":0,"runtimeOutputMissing":0,"authorityOverstated":0,"blockedCorrectly":14}
+{"validatedAndSupported":0,"pendingReconciliation":4,"contractOnly":0,"ledgerOnly":0,"runtimeOutputMissing":0,"authorityOverstated":0,"blockedCorrectly":15}
 
 ## Runtime Output Result
 Runtime output remains missing or unreconciled for products without verified rendered-output hash artifacts.
@@ -44,7 +44,7 @@ Board-facing guard: FAILING
 
 ## Authority Downgrades Or Holds
 - fast_diagnostic: downgraded/held from externally_proven_gold_product to pending_reconciliation in ProductAuthorityContract generation. Truth audit could not verify ledger + rendered output + route proof + surface propagation alignment.
-- team_assessment: held at legacy_validated_pending_v2_revalidation. Evidence Ledger v2 proposes externally_proven_gold_product but current contract remains conservative pending artifact reconciliation.
+- team_assessment: held at legacy_validated_pending_v2_revalidation. Evidence Ledger v2 is present and trusted, rendered output is substantive, surface propagation is verified. Authority remains non-restored because ProductAuthorityContract has not granted restored authority and reconciliation has not been updated.
 - enterprise_assessment: held at legacy_validated_pending_v2_revalidation. No current matching ledger/runtime artifact set verified in this pass.
 
 ## Products Truly Validated After Reconciliation
@@ -53,11 +53,11 @@ Board-facing guard: FAILING
 ## Products Pending Reconciliation
 - fast_diagnostic
 - enterprise_assessment
-- team_assessment
 - board_brief_builder
 - boardroom_brief
 
 ## Products Correctly Blocked
+- team_assessment
 - executive_reporting
 - boardroom_mode
 - personal_decision_audit

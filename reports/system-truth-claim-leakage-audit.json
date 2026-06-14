@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-06-13T19:59:56.760Z",
-  "filesScanned": 6013,
+  "generatedAt": "2026-06-13T21:48:11.371Z",
+  "filesScanned": 6050,
   "summary": {
-    "totalFindings": 53741,
-    "highRiskFindings": 17594,
+    "totalFindings": 56435,
+    "highRiskFindings": 17949,
     "byStatus": {
-      "needs authority state check": 16962,
-      "unsupported": 632,
-      "bounded": 28209,
-      "stale": 7938
+      "needs authority state check": 17272,
+      "unsupported": 677,
+      "bounded": 28938,
+      "stale": 9548
     }
   },
   "highRiskFindings": [
@@ -816,13 +816,6 @@
       "term": "authority",
       "status": "needs authority state check",
       "context": "blockerClass: \"boardroom_delivery_authority\","
-    },
-    {
-      "file": "app/api/admin/boardroom-delivery/generate/route.ts",
-      "line": 331,
-      "term": "board-ready",
-      "status": "unsupported",
-      "context": "avoidedDecision: \"Avoiding a board-ready commitment on the paid decision record.\","
     },
     {
       "file": "app/api/admin/boardroom-delivery/generate/route.ts",
@@ -1761,6 +1754,13 @@
       "term": "authority",
       "status": "needs authority state check",
       "context": "import { applyEnforcementPlaybook, createEnforcementPlaybook } from \"@/lib/enterprise-foundation/authority-foundation\";"
+    },
+    {
+      "file": "app/api/enterprise-foundation/stakeholders/route.ts",
+      "line": 4,
+      "term": "authority",
+      "status": "needs authority state check",
+      "context": "import { createDecisionStakeholder } from \"@/lib/enterprise-foundation/authority-foundation\";"
     }
   ],
   "sampleFindings": [
@@ -2726,9 +2726,9 @@
     {
       "file": "app/api/admin/boardroom-delivery/generate/route.ts",
       "line": 331,
-      "term": "board-ready",
-      "status": "unsupported",
-      "context": "avoidedDecision: \"Avoiding a board-ready commitment on the paid decision record.\","
+      "term": "verified",
+      "status": "bounded",
+      "context": "avoidedDecision: \"Avoiding a board-facing commitment (user-supplied, not independently verified) on the paid decision record.\","
     },
     {
       "file": "app/api/admin/boardroom-delivery/generate/route.ts",

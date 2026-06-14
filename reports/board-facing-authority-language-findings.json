@@ -1,0 +1,215 @@
+{
+  "generatedAt": "2026-06-14T08:16:07.430Z",
+  "filesScanned": 62,
+  "filesNotFound": 2,
+  "runtimeUnsafeClaims": 0,
+  "boundedClaims": 25,
+  "violations": [],
+  "warnings": [
+    {
+      "file": "app\\api\\admin\\boardroom-delivery\\generate\\route.ts",
+      "line": 282,
+      "phrase": "board-ready",
+      "context": "const blocker = String(meta.blocker ?? \"The decision needs board-ready challenge, objection handling, and consequence fr",
+      "severity": "LOW",
+      "classification": "bounded_claim"
+    },
+    {
+      "file": "app\\api\\admin\\boardroom-delivery\\generate\\route.ts",
+      "line": 283,
+      "phrase": "board-ready",
+      "context": "const forcedAction = String(meta.forcedAction ?? \"Produce a board-ready brief and confirm the next admissible move.\");",
+      "severity": "LOW",
+      "classification": "bounded_claim"
+    },
+    {
+      "file": "lib/pdf/oversight-brief-pdf.tsx",
+      "line": 240,
+      "phrase": "verified cost",
+      "context": ": \"No independently verified cost basis was published in this cycle (cost figures are user-supplied estimates).\"}",
+      "severity": "LOW",
+      "classification": "bounded_claim"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 114,
+      "phrase": "board-ready",
+      "context": "\"board-ready\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 115,
+      "phrase": "board approved",
+      "context": "\"board approved\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 116,
+      "phrase": "investment-ready",
+      "context": "\"investment-ready\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 117,
+      "phrase": "governance assured",
+      "context": "\"governance assured\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 118,
+      "phrase": "executive certainty",
+      "context": "\"executive certainty\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 119,
+      "phrase": "decision approved",
+      "context": "\"decision approved\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 120,
+      "phrase": "guaranteed",
+      "context": "\"guaranteed\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 121,
+      "phrase": "verified cost",
+      "context": "\"verified cost\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 122,
+      "phrase": "proven board case",
+      "context": "\"proven board case\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 141,
+      "phrase": "board-ready",
+      "context": "boardyPhrases.find((p) => claimLower.includes(p)) || \"board-ready\"",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 157,
+      "phrase": "board-ready",
+      "context": "\"board-ready\": \"board-facing draft\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 158,
+      "phrase": "board approved",
+      "context": "\"board approved\": \"board-review material\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 159,
+      "phrase": "investment-ready",
+      "context": "\"investment-ready\": \"requires investment review\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 160,
+      "phrase": "governance assured",
+      "context": "\"governance assured\": \"governance-eligible\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 161,
+      "phrase": "executive certainty",
+      "context": "\"executive certainty\": \"evidence-limited assessment\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 162,
+      "phrase": "decision approved",
+      "context": "\"decision approved\": \"decision-eligible\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 163,
+      "phrase": "guaranteed",
+      "context": "guaranteed: \"subject to verification\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 164,
+      "phrase": "verified cost",
+      "context": "\"verified cost\": \"estimated cost\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 165,
+      "phrase": "proven board case",
+      "context": "\"proven board case\": \"preliminary board case\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 278,
+      "phrase": "board-ready",
+      "context": "\"board-ready\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/board/evidence-governance.ts",
+      "line": 279,
+      "phrase": "governance assured",
+      "context": "\"governance assured\",",
+      "severity": "LOW",
+      "classification": "guard_pattern"
+    },
+    {
+      "file": "lib/commercial/premium-decision-assets.ts",
+      "line": 422,
+      "phrase": "board-ready",
+      "context": "\"board-ready brief\",",
+      "severity": "LOW",
+      "classification": "bounded_claim"
+    }
+  ],
+  "notFoundFiles": [
+    "components/admin/reporting/boardroom-mode.tsx",
+    "components/reporting/boardroom/BoardroomMode.tsx"
+  ],
+  "gateResult": "PASSED"
+}

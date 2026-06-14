@@ -328,7 +328,7 @@ export function buildSpineFromOrder(
     synthesis: {
       verdict: signal.verdict,
       primaryContradiction: scoredCase.contradiction ?? signal.contradiction,
-      avoidedDecision: "Avoiding a board-ready commitment on the paid decision record.",
+      avoidedDecision: "Avoiding a board-facing commitment (user-supplied, not independently verified) on the paid decision record.",
       whyPriorAttemptsFailed: "Prior handling did not produce a durable board challenge artifact tied to payment and delivery state.",
       concreteMove: signal.move,
       defaultPathForecast: "Without delivery proof, the paid Boardroom Brief remains commercially incomplete and operationally unauditable.",

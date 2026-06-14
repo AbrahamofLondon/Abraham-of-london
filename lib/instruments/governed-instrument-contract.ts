@@ -233,7 +233,7 @@ export const INSTRUMENT_REGISTRY: Record<InstrumentSlug, {
     category: "board_execution",
     timeEstimate: "20 min",
     whatItTests: "Whether a decision is ready for board-level presentation with objection handling",
-    whatItProduces: "Board-ready brief, objection responses, evidence gaps, readiness signal",
+    whatItProduces: "Board-facing brief (user-supplied, not independently verified), objection responses, evidence gaps, readiness signal",
     feedsCorridorSurface: "Boardroom / Proof Pack",
   },
 };

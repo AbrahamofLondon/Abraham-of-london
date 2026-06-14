@@ -1,17 +1,17 @@
 # System Truth Completion Claim Audit
 
-Generated: 2026-06-13T19:59:56.760Z
+Generated: 2026-06-13T21:48:11.371Z
 
-Files scanned: 4937
+Files scanned: 4967
 
-Total completion claims: 8009
+Total completion claims: 8270
 
-Questionable claims: 6694
+Questionable claims: 6821
 
 ## Status Counts
 
-- supported_scope_limited: 1315
-- requires_evidence_check: 6449
+- supported_scope_limited: 1449
+- requires_evidence_check: 6576
 - unknown: 245
 
 ## Questionable Claims
@@ -28,9 +28,141 @@ Questionable claims: 6694
 | reports/anti-gaming-validation-hardening.md | 359 | complete | requires_evidence_check | **Status**: Anti-Gaming Hardening COMPLETE |
 | reports/authority-grant-firewall-results.md | 5 | verified | requires_evidence_check | Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY |
 | reports/authority-surface-integration.md | 29 | complete | requires_evidence_check | - **ProductAuthorityPanel** — Shows complete authority details and evidence |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 9 | complete | requires_evidence_check | **Status:** ✓ ENFORCEMENT INFRASTRUCTURE COMPLETE |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 81 | complete | requires_evidence_check | **Purpose:** Prevent reports from claiming authority restoration is complete or authority is safe when gates fail. |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 85 | ready | requires_evidence_check | - "market ready" (without acknowledging remaining blockers) |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 90 | complete | requires_evidence_check | - "authority restoration complete" (without acknowledging remaining blockers) |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 189 | all gates passing | requires_evidence_check | "All gates passing" language: sanitized/rejected |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 214 | ready | requires_evidence_check | **Authority Language:** ✓ SANITIZER READY |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 293 | complete | requires_evidence_check | **Authority Blocking Gate Enforcement:** ✓ COMPLETE |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 309 | complete | requires_evidence_check | **Enforcement Status:** ✓ Complete and Operational |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 9 | complete | requires_evidence_check | **Status:** ✓ VERIFICATION COMPLETE |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 16 | verified | requires_evidence_check | **STATUS: ENFORCEMENT INFRASTRUCTURE VERIFIED AND OPERATIONAL** |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 18 | complete | requires_evidence_check | All verification layers complete. |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 26 | verified | requires_evidence_check | ## Core Infrastructure Verified |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 106 | all gates passing | requires_evidence_check | - "all gates passing" (without acknowledging remaining blockers) |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 173 | verified | requires_evidence_check | ## Blocking Gate Failures (Expected and Verified) |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 212 | verified | requires_evidence_check | - ✓ Estate integrity gates verified |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 228 | verified | requires_evidence_check | \| 4 blocking gates fail \| ✓ \| Verified in gate output \| |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 254 | complete | requires_evidence_check | ### Enforcement Infrastructure: ✓ COMPLETE |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 291 | complete | requires_evidence_check | ✓ **ENFORCEMENT INFRASTRUCTURE VERIFIED AND COMPLETE** |
+| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 305 | complete | requires_evidence_check | **Verification Status:** ✓ Complete |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 4 | complete | requires_evidence_check | **Challenge Status:** ✓ COMPLETE WITH PROOF |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 11 | ready | requires_evidence_check | This report documents **adversarial verification** of the authority blocking gate enforcement layer. Rather than claiming "scripts exist" and "reports are ready," this challenge proves gates **actually block** through actual command execution, exit codes, and  |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 23 | complete | requires_evidence_check | \| Surface scan proves migration status \| ✓ \| Migration complete, surfaces use effective resolver \| |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 101 | all gates passing | requires_evidence_check | - "all gates passing" — 40 violations |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 103 | ready | requires_evidence_check | - "market ready" — 10 violations |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 104 | ready | requires_evidence_check | - "estate ready" — 8 violations |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 105 | fully operational | requires_evidence_check | - "fully operational" — 4 violations |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 111 | all gates passing | requires_evidence_check | ❌ reports\AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md:101 — Unsafe phrase: "all gates passing" |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 113 | all gates passing | requires_evidence_check | ❌ reports\WAVE_2C_ENTERPRISE_AUTHORITY_UPGRADE_CLOSURE_REPORT.md:42 — Unsafe phrase: "all gates passing" |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 114 | all gates passing | requires_evidence_check | ❌ reports\WAVE_2D_TEAM_ASSESSMENT_AUTHORITY_UPGRADE_CLOSURE_REPORT.md:43 — Unsafe phrase: "all gates passing" |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 144 | complete | requires_evidence_check | Migration Status: COMPLETE |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 286 | ready | requires_evidence_check | Line 4: "board-ready" without evidence context |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 287 | ready | requires_evidence_check | * Turns a decision record into a board-ready structured brief with |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 301 | ready | requires_evidence_check | - Detects unsupported authority language ("board-ready") |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 346 | ready | requires_evidence_check | \| Board-Facing Authority Language Guard \| FAILED \| "board-ready" claim unsupported \| BOARD_FACING_GUARD_FAILING \| |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 384 | verified | requires_evidence_check | **Worktree Integrity:** ✓ Verified |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 395 | complete | requires_evidence_check | \| `check-effective-authority-surfaces.mjs` \| 0 \| ℹ INFO \| Surface migration complete \| |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 406 | verified | requires_evidence_check | **Current (Verified):** |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 429 | verified | requires_evidence_check | ## Enforcement Mechanisms Verified |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 471 | complete | requires_evidence_check | - ✓ Migration from declared to effective authority complete |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 498 | complete | requires_evidence_check | - Migration complete: all surfaces use resolver |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 562 | verified | requires_evidence_check | ### Authority Enforcement Infrastructure: ✓ VERIFIED AND OPERATIONAL |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 568 | complete | requires_evidence_check | 3. ✓ **Surface Scan** — Migration complete, effective resolver in place |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 582 | verified | requires_evidence_check | ✓ Products allowed positive authority: 0 (VERIFIED) |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 600 | verified | requires_evidence_check | ✓ **ENFORCEMENT INFRASTRUCTURE VERIFIED AND OPERATIONAL** |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 617 | complete | requires_evidence_check | **Challenge Status:** ✓ COMPLETE WITH PROOF |
+| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 619 | verified | requires_evidence_check | **Authority Safety:** ✓ Gate Enforcement Verified Through Adversarial Testing |
+| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 36 | verified | requires_evidence_check | Result: `PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY`. |
+| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 131 | ready | requires_evidence_check | - `lib/instruments/board-brief-template/engine.ts:4` contains `board-ready` without sufficient evidence context. |
+| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 153 | ready | requires_evidence_check | No currently declared positive-authority products required suppression, because the current contracts already avoid positive authority grants. |
+| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 155 | complete | requires_evidence_check | Fraud simulation confirms positive authority would be suppressed if declared without complete proof. |
+| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 174 | complete | requires_evidence_check | 6. No product has complete agreement across contract, ledger, rendered output, scenario artifact, hashes, route proof, surface propagation, guard coverage, claim boundary scan, and no-mock scan. |
+| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 214 | ready | requires_evidence_check | 3. Expand board-facing guard coverage and fix the current unsupported `board-ready` leakage. |
 | reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 4 | complete | requires_evidence_check | **Status:** COMPLETE ✓ |
 | reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 43 | complete | requires_evidence_check | Displays complete authority details with expandable detail section. |
 | reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 127 | ready | requires_evidence_check | ## Product Authority States — Display Ready |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1B_REPORT.md | 244 | complete | requires_evidence_check | **Phase 1B remediation is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1B_REPORT.md | 246 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1B_REPORT.md | 268 | complete | requires_evidence_check | **Execution Status:** Phase 1B complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 5 | complete | requires_evidence_check | **Status:** CLOSE COMPLETE |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 187 | complete | requires_evidence_check | **Phase 1C Close is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 189 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 199 | complete | requires_evidence_check | **Governance Hygiene Complete (Phases 1A, 1B, 1C):** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 219 | complete | requires_evidence_check | **Execution Status:** Phase 1C Close complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 220 | complete | requires_evidence_check | **Governance Hygiene:** Complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 113 | ready | requires_evidence_check | 1. `scripts/reconcile-product-authority-truth.mjs` (24 findings) — Already correctly treats reports as descriptive |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 204 | complete | requires_evidence_check | **Phase 1C remediation is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 206 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 227 | complete | requires_evidence_check | **Execution Status:** Phase 1C complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_EXECUTION_REPORT.md | 157 | complete | requires_evidence_check | Phase 1 remediation is **partially complete**: |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_EXECUTION_REPORT.md | 159 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_REPORT.md | 25 | verified | requires_evidence_check | ## Starting Blocking Gates (Verified via Adversarial Testing) |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_REPORT.md | 107 | ready | requires_evidence_check | OLD (unsafe): "All gates passing. System ready." |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_REPORT.md | 250 | ready | requires_evidence_check | **Status:** Ready for modification (no destructive changes planned) |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_REPORT.md | 256 | complete | requires_evidence_check | Phase 1 is complete when: |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 238 | complete | requires_evidence_check | **Phase 2 is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 240 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 262 | complete | requires_evidence_check | **Execution Status:** Phase 2 complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 24 | ready | requires_evidence_check | 3. Replaced BOARD_READY with EVIDENCE_LIMITED_BOARD_DRAFT in engine.ts and all consumers |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 75 | ready | requires_evidence_check | \| `lib/instruments/board-brief-template/engine.ts` \| 4 \| "board-ready" \| "board-facing" with evidence boundary note \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 76 | ready | requires_evidence_check | \| `lib/instruments/board-brief-template/engine.ts` \| 26 \| "BOARD_READY" type \| "EVIDENCE_LIMITED_BOARD_DRAFT" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 77 | ready | requires_evidence_check | \| `lib/instruments/board-brief-template/engine.ts` \| 56 \| "BOARD_READY" assignment \| "EVIDENCE_LIMITED_BOARD_DRAFT" with evidence note \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 78 | ready | requires_evidence_check | \| `lib/instruments/board-brief-template/engine.ts` \| 88 \| "BOARD_READY" signal \| "EVIDENCE_LIMITED_BOARD_DRAFT" with evidence note \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 81 | ready | requires_evidence_check | \| `lib/commercial/catalog.ts` \| 490 \| "board-ready" \| "board-facing (user-supplied inputs)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 82 | ready | requires_evidence_check | \| `lib/commercial/premium-decision-assets.ts` \| 401 \| "board-ready" \| "board-facing (user-supplied inputs)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 83 | ready | requires_evidence_check | \| `lib/admin/product-surface-registry.ts` \| 303 \| "board-ready" \| "board-facing (user-supplied inputs)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 84 | ready | requires_evidence_check | \| `lib/admin/product-surface-registry.ts` \| 540 \| "Board-ready decision dossier" \| "Board-facing decision dossier (user-supplied)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 85 | ready | requires_evidence_check | \| `lib/admin/reporting/report-pdf.tsx` \| 3 \| "BOARD-READY PDF" \| "BOARD-FACING PDF (user-supplied)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 87 | ready | requires_evidence_check | \| `lib/intelligence/gmi-instrument.ts` \| 312 \| "Board-ready challenge dossier" \| "Board-facing challenge dossier (user-supplied inputs)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 88 | ready | requires_evidence_check | \| `app/api/admin/boardroom-delivery/generate/route.ts` \| 331 \| "board-ready commitment" \| "board-facing commitment (user-supplied)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 89 | verified | requires_evidence_check | \| `lib/pdf/oversight-brief-pdf.tsx` \| 240 \| "verified cost" \| "independently verified cost (user-supplied estimates)" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 91 | ready | requires_evidence_check | \| `components/instruments/BoardBriefBuilderRunner.tsx` \| 32 \| "BOARD_READY" \| "EVIDENCE_LIMITED_BOARD_DRAFT" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 92 | ready | requires_evidence_check | \| `pages/decision-instruments/board-brief-builder/run.tsx` \| 67,70 \| "BOARD_READY" (x2) \| "EVIDENCE_LIMITED_BOARD_DRAFT" \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 103 | ready | requires_evidence_check | - `app/api/admin/boardroom-delivery/generate/route.ts` — "board-ready" in bounded context |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 104 | verified | requires_evidence_check | - `lib/pdf/oversight-brief-pdf.tsx` — "verified cost" in bounded context |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 105 | ready | requires_evidence_check | - `lib/commercial/premium-decision-assets.ts` — "board-ready" in bounded context |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 186 | ready | requires_evidence_check | - `lib/instruments/board-brief-template/engine.ts` — BOARD_READY → EVIDENCE_LIMITED_BOARD_DRAFT |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 226 | complete | requires_evidence_check | **Phase 3 is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 228 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 231 | ready | requires_evidence_check | - ✅ BOARD_READY replaced with EVIDENCE_LIMITED_BOARD_DRAFT throughout |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 250 | complete | requires_evidence_check | **Execution Status:** Phase 3 complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 74 | verified | requires_evidence_check | **Authority-supporting types (may support authority only when verified):** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 208 | complete | requires_evidence_check | **Phase 4 is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 210 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 238 | complete | requires_evidence_check | **Execution Status:** Phase 4 complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 28 | verified | requires_evidence_check | 7. Evidence Ledger Gate: PASSED_LEDGER_ARTIFACTS_VERIFIED |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 44 | ready | requires_evidence_check | - Each output: `{ok, diagnosticId, diagnosticRef, reportReady}` — 117 chars |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 58 | ready | requires_evidence_check | \| Output fields per scenario \| 4 (ok, diagnosticId, diagnosticRef, reportReady) \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 134 | verified | requires_evidence_check | **Gate Status:** `PASSED_LEDGER_ARTIFACTS_VERIFIED` |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 180 | verified | requires_evidence_check | node scripts/verify-evidence-ledger-artifacts.mjs  # PASSED_LEDGER_ARTIFACTS_VERIFIED |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 228 | complete | requires_evidence_check | **Phase 5B is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 230 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 268 | complete | requires_evidence_check | **Execution Status:** Phase 5B complete |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 86 | complete | requires_evidence_check | 1. Complete rewrite with strict classification (10 levels) |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 109 | ready | requires_evidence_check | The rendered output file exists at `reports/validation/team-assessment/rendered-output.json` with 3 scenario results. Each output is a valid API response with `ok: true`, `diagnosticId`, `diagnosticRef`, and `reportReady: true` — but only ~117 characters per o |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 224 | verified | requires_evidence_check | \| 5 \| Boundary flags are verified \| ✅ All 6 required flags present \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 225 | verified | requires_evidence_check | \| 6 \| Contract alignment is verified \| ✅ Proposed matches contract \| |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 236 | complete | requires_evidence_check | **Phase 5 is complete.** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 238 | complete | requires_evidence_check | **Completed:** |
+| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 268 | complete | requires_evidence_check | **Execution Status:** Phase 5 complete |
+| reports/board-facing-authority-language-findings.md | 24 | ready | requires_evidence_check | \| `lib/instruments/board-brief-template/engine.ts` \| "board-ready" → "board-facing"; "BOARD_READY" → "EVIDENCE_LIMITED_BOARD_DRAFT"; added evidence boundary notes \| |
+| reports/board-facing-authority-language-findings.md | 26 | ready | requires_evidence_check | \| `lib/commercial/catalog.ts` \| "board-ready structured brief" → "board-facing structured brief (user-supplied inputs)" \| |
+| reports/board-facing-authority-language-findings.md | 27 | ready | requires_evidence_check | \| `lib/commercial/premium-decision-assets.ts` \| "board-ready decision brief" → "board-facing decision brief (user-supplied inputs)" \| |
+| reports/board-facing-authority-language-findings.md | 29 | ready | requires_evidence_check | \| `lib/admin/reporting/report-pdf.tsx` \| "BOARD-READY PDF DOCUMENT" → "BOARD-FACING PDF DOCUMENT (user-supplied)" \| |
+| reports/board-facing-authority-language-findings.md | 31 | ready | requires_evidence_check | \| `lib/intelligence/gmi-instrument.ts` \| "Board-ready challenge dossier" → "Board-facing challenge dossier (user-supplied inputs)" \| |
+| reports/board-facing-authority-language-findings.md | 32 | ready | requires_evidence_check | \| `app/api/admin/boardroom-delivery/generate/route.ts` \| "board-ready commitment" → "board-facing commitment (user-supplied)" \| |
+| reports/board-facing-authority-language-findings.md | 33 | verified | requires_evidence_check | \| `lib/pdf/oversight-brief-pdf.tsx` \| "verified cost" → "independently verified cost (user-supplied estimates)" \| |
+| reports/board-facing-authority-language-findings.md | 35 | ready | requires_evidence_check | \| `components/instruments/BoardBriefBuilderRunner.tsx` \| "BOARD_READY" → "EVIDENCE_LIMITED_BOARD_DRAFT" \| |
+| reports/board-facing-authority-language-findings.md | 66 | ready | requires_evidence_check | - `app/api/admin/boardroom-delivery/generate/route.ts` — "board-ready" in bounded context |
+| reports/board-facing-authority-language-findings.md | 67 | verified | requires_evidence_check | - `lib/pdf/oversight-brief-pdf.tsx` — "verified cost" in bounded context |
+| reports/board-facing-authority-language-findings.md | 68 | ready | requires_evidence_check | - `lib/commercial/premium-decision-assets.ts` — "board-ready" in bounded context |
 | reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 4 | complete | requires_evidence_check | **Status:** INFRASTRUCTURE COMPLETE, VISIBILITY GAP IDENTIFIED |
 | reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 10 | complete | requires_evidence_check | The Evidence-Governed Decision Infrastructure is **complete and operational** at the code and validation level. |
 | reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 33 | complete | requires_evidence_check | ## Infrastructure Assessment — ✓ COMPLETE |
@@ -65,8 +197,19 @@ Questionable claims: 6694
 | reports/CATEGORY_SURFACE_ROUTE_INTEGRATION_COMPLETE.md | 268 | complete | requires_evidence_check | **Category Surface Route Integration: ✓ COMPLETE** |
 | reports/commerce-architecture-consolidation-audit.md | 16 | ready | requires_evidence_check | **Verdict:** READY_FOR_STRIPE_TEST_SMOKE — with the caveat that legacy code should be reserved/retired to prevent confusion. |
 | reports/commerce-architecture-consolidation-audit.md | 147 | ready | requires_evidence_check | **READY_FOR_STRIPE_TEST_SMOKE** |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 23 | complete | requires_evidence_check | 1. Gathered complete evidence inventory (12 evidence sources) |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 27 | complete | requires_evidence_check | 5. Surface propagation: INCOMPLETE (checkout=false, report=false, admin=false) |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 42 | complete | requires_evidence_check | **Reason for selection:** Only product with a complete Evidence Ledger artifact chain (scenarios, rendered output, validation results, hashes, boundary flags). |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 87 | verified | requires_evidence_check | \| Hash matches ledger \| ✅ Verified \| |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 173 | verified | requires_evidence_check | \| Hashes match \| ✅ PASS \| Both hashes verified \| |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 174 | complete | requires_evidence_check | \| Scenario coverage is complete \| ✅ PASS \| 3/3 scenarios \| |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 182 | complete | requires_evidence_check | 1. Surface propagation incomplete (checkout, report, admin surfaces) |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 219 | verified | requires_evidence_check | node scripts/verify-evidence-ledger-artifacts.mjs  # PASSED_LEDGER_ARTIFACTS_VERIFIED |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 264 | complete | requires_evidence_check | **Controlled authority restoration review complete.** |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 271 | verified | requires_evidence_check | - ✅ Hashes: verified |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 272 | complete | requires_evidence_check | - ✅ Scenarios: complete |
+| reports/CONTROLLED_AUTHORITY_RESTORATION_REVIEW_TEAM_ASSESSMENT.md | 276 | complete | requires_evidence_check | But surface propagation is incomplete: |
 | reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md | 4 | complete | requires_evidence_check | **Status:** ✓ COMPLETE |
-| reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md | 72 | all gates passing | requires_evidence_check | ## Validation Results — All Gates Passing |
 | reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md | 131 | complete | requires_evidence_check | Infrastructure Completeness: PASSED (4/4) |
 | reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md | 147 | complete | requires_evidence_check | - `reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md` — Complete route inventory with exemptions and justifications |
 | reports/ESTATE_WIDE_CATEGORY_DEMONSTRATION_EXPANSION_COMPLETE.md | 209 | verified | requires_evidence_check | ## Safety Guarantees Verified |
@@ -76,6 +219,8 @@ Questionable claims: 6694
 | reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md | 105 | ready | requires_evidence_check | - Authority state was already demonstrated at `/foundry/decision-test`, `/enterprise-decision-scan`, or checkout routes |
 | reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md | 108 | ready | requires_evidence_check | - **Safety Note:** This route is already gated by entitlement verification (enforceExecutiveReportingAccess) |
 | reports/ESTATE_WIDE_ROUTE_CLASSIFICATION.md | 188 | complete | requires_evidence_check | **Status:** ✓ COMPLETE |
+| reports/evidence-ledger-artifact-classification.md | 78 | verified | requires_evidence_check | **Authority-supporting types (may support authority only when verified):** |
+| reports/evidence-ledger-artifact-verification.md | 5 | verified | requires_evidence_check | Gate: PASSED_LEDGER_ARTIFACTS_VERIFIED |
 | reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md | 4 | complete | requires_evidence_check | **Status:** COMPLETE |
 | reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md | 64 | verified | requires_evidence_check | "liveRouteVerified": true, |
 | reports/EVIDENCE_LEDGER_V2_GENERATION_INFRASTRUCTURE_PASS.md | 112 | verified | requires_evidence_check | - ✓ **Live Route Verified:** Yes |
@@ -95,7 +240,6 @@ Questionable claims: 6694
 | reports/INFRASTRUCTURE_REPAIR_PASS.md | 83 | complete | requires_evidence_check | - Validation chain incomplete |
 | reports/INFRASTRUCTURE_REPAIR_PASS.md | 114 | complete | requires_evidence_check | This infrastructure repair pass is complete. The validation infrastructure is now: |
 | reports/INFRASTRUCTURE_REPAIR_PASS.md | 117 | ready | requires_evidence_check | - ✓ Ready for clean `fast_diagnostic` v2 validation |
-| reports/INFRASTRUCTURE_REPAIR_PASS.md | 125 | all gates passing | requires_evidence_check | - Authority restoration depends on all gates passing |
 | reports/INFRASTRUCTURE_REPAIR_PASS.md | 130 | complete | requires_evidence_check | **Infrastructure Repair Status:** COMPLETE |
 | reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md | 4 | complete | requires_evidence_check | **Kernel Status:** COMPLETED |
 | reports/kernel-reality-proof/scenario-01-hmrc-filing-rescue.md | 447 | complete | requires_evidence_check | "action": "Ignore the filing deadline or treat a placeholder submission as a completed obligation", |
@@ -124,147 +268,3 @@ Questionable claims: 6694
 | reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md | 123 | verified | requires_evidence_check | - **Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data** (CRITICAL): Misrepresentation to investors carries both legal and regulatory risk. Projections presented as results is a known |
 | reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md | 365 | verified | requires_evidence_check | "action": "Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data", |
 | reports/kernel-reality-proof/scenario-09-cash-constrained-survival.md | 456 | complete | requires_evidence_check | **Status:** COMPLETED |
-| reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md | 4 | complete | requires_evidence_check | **Kernel Status:** COMPLETED |
-| reports/kernel-reality-proof/scenario-10-strategic-asymmetric-partnership.md | 564 | complete | requires_evidence_check | **Status:** COMPLETED |
-| reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md | 4 | complete | requires_evidence_check | **Kernel Status:** COMPLETED |
-| reports/kernel-reality-proof/scenario-11-executive-reputational-exposure.md | 520 | complete | requires_evidence_check | **Status:** COMPLETED |
-| reports/kernel-reality-proof/scenario-12-low-stakes-preference.md | 4 | complete | requires_evidence_check | **Kernel Status:** COMPLETED |
-| reports/kernel-reality-proof/scenario-12-low-stakes-preference.md | 181 | complete | requires_evidence_check | **Status:** COMPLETED |
-| reports/kernel-reality-proof/summary.md | 17 | ready | requires_evidence_check | \| Readiness verdict \| NOT_READY \| |
-| reports/kernel-reality-proof/summary.md | 68 | ready | requires_evidence_check | **NOT_READY** |
-| reports/kernel-reality-proof/summary.md | 78 | ready | requires_evidence_check | 5. If all scenarios pass manual review, update readiness to READY_FOR_PUBLIC_APERTURE_REWIRE |
-| reports/live-commercial-authority-closeout.md | 42 | complete | requires_evidence_check | - Two handler instances receive each `checkout.session.completed` event |
-| reports/live-commercial-authority-closeout.md | 66 | complete | requires_evidence_check | Events enabled on primary endpoint:      checkout.session.completed, customer.subscription.* |
-| reports/live-commercial-authority-closeout.md | 81 | ready | requires_evidence_check | - Customer access banner updated to: "Strategy Room access is active. The execution tool is ready." |
-| reports/live-commercial-authority-closeout.md | 85 | complete | requires_evidence_check | **Required operator action:** Complete one live/test Stripe checkout for strategy_room; confirm `ClientEntitlement` record created with `entitlementSlug: "strategy-room.entry"` |
-| reports/live-commercial-authority-closeout.md | 95 | complete | requires_evidence_check | - Canonical webhook creates order on `checkout.session.completed` |
-| reports/live-commercial-authority-closeout.md | 111 | complete | requires_evidence_check | - `checkout.session.completed` → `ensureEntitlementAfterPayment` → `ClientEntitlement(entitlementSlug: "tier.professional")` |
-| reports/live-commercial-authority-closeout.md | 123 | complete | requires_evidence_check | - Canonical webhook at line 469: `generatePaidExecutiveReport` called on `checkout.session.completed` for `executive_reporting` |
-| reports/live-commercial-authority-closeout.md | 143 | complete | requires_evidence_check | 2. Complete one live/test purchase of `operator_decision_pack` |
-| reports/live-commercial-authority-closeout.md | 201 | ready | requires_evidence_check | - Controlled access products already structurally proven |
-| reports/live-commercial-authority-closeout.md | 212 | complete | requires_evidence_check | Complete the **Boardroom Brief live order**. |
-| reports/living-case-admin-fulfilment-readiness.md | 71 | ready | requires_evidence_check | **READY_FOR_STRIPE_TEST_SMOKE** |
-| reports/market-adoption-posture-audit.md | 35 | ready | requires_evidence_check | \| checkout_fulfilment \| A buyer needs clear fulfilment after purchase and confidence that the delivered output matches the public promise. \| A user is ready to buy or has paid for a decision product. \| Consulting booking form or generic downloadable product. \| |
-| reports/market-clarity-blockers.md | 29 | done | unknown | - /pressure (DONE in Pass 1 ✓) |
-| reports/market-clarity-blockers.md | 34 | complete | requires_evidence_check | **Pain (Clear):** Leaders make expensive decisions from incomplete evidence. |
-| reports/market-clarity-blockers.md | 201 | ready | requires_evidence_check | **Status:** Posture already strong. No action needed for Market Clarity Pass 2. |
-| reports/market-clarity-blockers.md | 222 | ready | requires_evidence_check | ### /test-your-decision (Already improved in 2E) |
-| reports/market-clarity-blockers.md | 224 | complete | requires_evidence_check | **Status:** ✓ Per-route authority visible (completed in Stage 2E) |
-| reports/market-clarity-blockers.md | 257 | ready | requires_evidence_check | ### /library (Already improved in 2E) |
-| reports/market-clarity-blockers.md | 259 | complete | requires_evidence_check | **Status:** ✓ Governance classification visible (completed in Stage 2E) |
-| reports/market-clarity-blockers.md | 291 | done | requires_evidence_check | \| /pressure \| DONE ✓ \| Low \| Already improved \| fast_diagnostic AI contrast \| |
-| reports/market-clarity-blockers.md | 301 | ready | requires_evidence_check | \| /decision-centre \| — \| — \| No change \| Already dominant \| |
-| reports/market-clarity-blockers.md | 337 | ready | requires_evidence_check | **Analysis:** 8 surfaces need clarity work; 1 is already dominant |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 5 | complete | requires_evidence_check | **Status:** ✓ COMPLETE |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 73 | ready | requires_evidence_check | - Maintains authority visibility (already present from Stage 2E) |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 175 | all gates passing | requires_evidence_check | ### All Gates Passing |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 222 | ready | requires_evidence_check | - `/why-not-ai` — Already has clear AI differentiation |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 223 | ready | requires_evidence_check | - `/method` — Already explains proof/mechanism |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 224 | ready | requires_evidence_check | - `/decision-centre` — Already dominant (no work needed) |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 295 | complete | requires_evidence_check | - Marketing language improvements incomplete |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 303 | ready | requires_evidence_check | ### Immediate (Ready Now) |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 405 | complete | requires_evidence_check | **Market Clarity Pass 2:** ✓ COMPLETE |
-| reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md | 414 | complete | requires_evidence_check | **Pass Status:** ✓ COMPLETE |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 5 | complete | requires_evidence_check | **Status:** ✓ COMPLETE |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 22 | ready | requires_evidence_check | **Result:** Framework applied to critical entry points; authority infrastructure unchanged; estate ready for market positioning. |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 58 | complete | requires_evidence_check | Leaders make expensive decisions from incomplete evidence. |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 93 | ready | requires_evidence_check | - `/why-not-ai` - Explicit AI differentiation (already strong) |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 94 | ready | requires_evidence_check | - `/method` - Proof/mechanism layer (already clear) |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 98 | ready | requires_evidence_check | **Status:** Framework layer already in place; Market Clarity Pass reinforces and extends. |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 108 | verified | requires_evidence_check | \| Product \| Before State \| After State \| Delta \| Verified \| |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 153 | no regressions | requires_evidence_check | **Result:** ✓ No regressions. All prior achievements maintained. |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 248 | complete | requires_evidence_check | - Examples: "Leaders make expensive decisions from incomplete evidence" |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 283 | verified | requires_evidence_check | ✓ Authority infrastructure verified and intact |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 288 | no regressions | requires_evidence_check | ✓ No regressions detected |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 295 | ready | requires_evidence_check | - Estate remains ready for Wave 2 work |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 307 | ready | requires_evidence_check | ### Immediate (Ready Now) |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 344 | ready | requires_evidence_check | - Estate ready for Wave 2 validation and market work |
-| reports/MARKET_CLARITY_PASS_REPORT.md | 349 | complete | requires_evidence_check | **Pass Status:** ✓ COMPLETE |
-| reports/paid-dossier-fulfilment-proof/scenario-01-hmrc-filing-rescue.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-01-hmrc-filing-rescue.md | 74 | complete | requires_evidence_check | - [CRITICAL] Ignore the filing deadline or treat a placeholder submission as a completed obligation |
-| reports/paid-dossier-fulfilment-proof/scenario-02-board-political-pressure.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-03-market-claim-weak-proof.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-04-product-launch-revenue-pressure.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-05-procurement-supplier-risk.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-06-investor-pitch-unsupported-traction.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-06-investor-pitch-unsupported-traction.md | 73 | verified | requires_evidence_check | - [CRITICAL] Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data |
-| reports/paid-dossier-fulfilment-proof/scenario-07-operational-failure-unclear-owner.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-08-legal-admin-deadline.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-09-cash-constrained-survival.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-09-cash-constrained-survival.md | 75 | verified | requires_evidence_check | - [CRITICAL] Make growth or traction claims to investors without disclosing they are based on internal projections rather than verified data |
-| reports/paid-dossier-fulfilment-proof/scenario-10-strategic-asymmetric-partnership.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-11-executive-reputational-exposure.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/scenario-12-low-stakes-preference.md | 33 | ready | requires_evidence_check | ## Delivery-Ready Artefact |
-| reports/paid-dossier-fulfilment-proof/summary.md | 16 | ready | requires_evidence_check | \| Readiness verdict \| READY_FOR_CHECKOUT_REWIRE \| |
-| reports/paid-dossier-fulfilment-proof/summary.md | 55 | ready | requires_evidence_check | **READY_FOR_CHECKOUT_REWIRE** |
-| reports/paid-dossier-fulfilment-proof/summary.md | 57 | ready | requires_evidence_check | All cases are deliverable. The admin fulfilment workflow is ready for checkout rewiring. |
-| reports/paid-dossier-reality-proof/summary.md | 17 | ready | requires_evidence_check | \| Readiness verdict \| READY_FOR_PAID_DOSSIER_REWIRE \| |
-| reports/paid-dossier-reality-proof/summary.md | 72 | ready | requires_evidence_check | **READY_FOR_PAID_DOSSIER_REWIRE** |
-| reports/paid-dossier-reality-proof/summary.md | 74 | ready | requires_evidence_check | The Full Dossier passes all 12 scenarios with no embarrassment risk. It is ready for paid dossier rewiring. |
-| reports/paid-dossier-reality-proof/summary.md | 80 | ready | requires_evidence_check | 3. If all pass manual review, readiness may advance to READY_FOR_PAID_DOSSIER_REWIRE |
-| reports/premium-artefact-generation-proof.md | 51 | complete | requires_evidence_check | Option 2: delay until every open item is complete. This protects control quality but may damage the account relationship and the quarter's commercial position. |
-| reports/premium-artefact-generation-proof.md | 62 | complete | requires_evidence_check | Primary risk: contractual exposure from an incomplete data-processing variation. Dependency: General Counsel sign-off. |
-| reports/product-authority-contract.md | 17 | complete | requires_evidence_check | Estate coverage complete: no |
-| reports/product-authority-coverage-matrix.md | 9 | ready | requires_evidence_check | Category readiness state: category_foundation_ready |
-| reports/product-estate-canonical.md | 14 | ready | requires_evidence_check | \| 🟡 Proof Ready \| 8 \| |
-| reports/product-estate-canonical.md | 43 | ready | requires_evidence_check | \| `operator_decision_pack` \| Operator Decision Pack \| paid £129 \| bundle_grant \| Y \| PROOF READY \| N — bundle grant path unverified \| |
-| reports/product-estate-canonical.md | 50 | ready | requires_evidence_check | \| `gmi_q1_2026` \| GMI Report — Q1 2026 \| paid £59 (archived) \| executive_report_artifact \| Y \| PROOF READY \| N — post-purchase delivery email missing \| |
-| reports/product-estate-canonical.md | 56 | ready | requires_evidence_check | \| `executive_reporting` \| Executive Reporting \| paid £295 \| executive_report_artifact \| Y \| PROOF READY \| N — AI gen pipeline unverified \| |
-| reports/product-estate-canonical.md | 60 | ready | requires_evidence_check | \| `strategy_room` \| Strategy Room — Entry \| paid £750 \| scheduled_session \| Y \| PROOF READY \| N — no scheduling system \| |
-| reports/product-estate-canonical.md | 61 | ready | requires_evidence_check | \| `strategy_room_extended` \| Strategy Room — Active \| paid £1,250 \| scheduled_session \| Y \| PROOF READY \| N — no scheduling system \| |
-| reports/product-estate-canonical.md | 66 | ready | requires_evidence_check | \| `professional` \| Professional \| paid £59/mo \| retainer_cycle \| Y \| PROOF READY \| N — no admin queue for subscriptions \| |
-| reports/product-estate-canonical.md | 67 | ready | requires_evidence_check | \| `professional_annual` \| Professional Annual \| paid £590/yr \| retainer_cycle \| Y \| PROOF READY \| N — renewal path unverified \| |
-| reports/product-estate-canonical.md | 75 | ready | requires_evidence_check | ### Products at PROOF READY — what blocks confirmation |
-| reports/product-estate-canonical.md | 86 | verified | requires_evidence_check | \| `professional_annual` \| Annual renewal cadence unverified. Shares entitlementSlug with monthly. \| |
-| reports/product-fulfilment-readiness.md | 10 | ready | requires_evidence_check | \| 🟡 Proof Ready \| 8 \| |
-| reports/product-fulfilment-readiness.md | 25 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `human_reviewed_dossier` |
-| reports/product-fulfilment-readiness.md | 148 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `bundle_grant` |
-| reports/product-fulfilment-readiness.md | 159 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `executive_report_artifact` |
-| reports/product-fulfilment-readiness.md | 169 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `scheduled_session` |
-| reports/product-fulfilment-readiness.md | 181 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `scheduled_session` |
-| reports/product-fulfilment-readiness.md | 248 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `retainer_cycle` |
-| reports/product-fulfilment-readiness.md | 260 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `retainer_cycle` |
-| reports/product-fulfilment-readiness.md | 271 | ready | requires_evidence_check | **Status:** 🟡 PROOF READY  \|  **Type:** `executive_report_artifact` |
-| reports/product-ladder-canonical-map.md | 43 | complete | requires_evidence_check | - Complete option comparison |
-| reports/product-ladder-canonical-map.md | 68 | verified | requires_evidence_check | - Evidence graph (verified / assumed / absent / stale) |
-| reports/product-ladder-canonical-map.md | 81 | complete | requires_evidence_check | - Regulated boundary check completed |
-| reports/product-ladder-canonical-map.md | 97 | ready | requires_evidence_check | - Board-ready summary (1 page) |
-| reports/product-live-proof-closeout.md | 10 | ready | requires_evidence_check | Phase 3 established structural proof (code-path verification) for all 8 proof-ready products. |
-| reports/product-live-proof-closeout.md | 56 | complete | requires_evidence_check | - `BoardroomBriefOrder` created by canonical webhook on `checkout.session.completed` |
-| reports/product-live-proof-closeout.md | 62 | complete | requires_evidence_check | **What the operator must do to complete live proof:** |
-| reports/product-live-proof-closeout.md | 81 | verified | requires_evidence_check | **What was verified (structural):** |
-| reports/product-live-proof-closeout.md | 84 | ready | requires_evidence_check | - Customer access banner updated: "Strategy Room access is active. The execution tool is ready." |
-| reports/product-live-proof-closeout.md | 165 | complete | requires_evidence_check | 2. ⏳ At minimum one live boardroom_brief order completed end-to-end (payment → delivered → customer access confirmed) |
-| reports/product-proof-run-phase-3.md | 20 | ready | requires_evidence_check | \| Proof-ready products \| 8 \| |
-| reports/product-proof-run-phase-3.md | 21 | complete | requires_evidence_check | \| Passed (live cycle complete) \| 0 \| |
-| reports/product-proof-run-phase-3.md | 55 | complete | requires_evidence_check | 7. Update contract: `proofRunCompleted: true`, `readinessStatus: "sellable"` |
-| reports/product-proof-run-phase-3.md | 119 | ready | requires_evidence_check | - Before: `"Access granted. Execution environment ready."` |
-| reports/product-proof-run-phase-3.md | 120 | ready | requires_evidence_check | - After: `"Strategy Room access is active. The execution tool is ready. Begin with the first intervention below. Supplementary counsel or review may follow where applicable."` |
-| reports/product-proof-run-phase-3.md | 137 | complete | requires_evidence_check | 1. Complete the live `boardroom_brief` proof run (order is in queue now) |
-| reports/product-surface-claims-focused.md | 32 | ready | requires_evidence_check | These claims are already authorized by evidence. No action needed. |
-| reports/product-surface-claims.md | 31 | ready | requires_evidence_check | Context: "I watched capable people defer decisions they already understood, in environments where delay carrie" |
-| reports/product-surface-claims.md | 1345 | ready | requires_evidence_check | Context: "message: "No legacy contradictions detected. Order is already in a governed state."," |
-| reports/product-surface-claims.md | 1660 | complete | requires_evidence_check | Context: ""boardroom_checkout_completed"," |
-| reports/product-surface-claims.md | 1723 | complete | requires_evidence_check | Context: "trackServerLaunch("boardroom_checkout_completed", "/api/billing/webhook", {" |
-| reports/product-surface-claims.md | 1966 | ready | requires_evidence_check | Context: "// All data already exists in PressureSignalEvent, BoardroomBriefOrder," |
-| reports/product-surface-claims.md | 2497 | complete | requires_evidence_check | Context: "content: 'Complete competitive intelligence methodology...'," |
-| reports/product-surface-claims.md | 2524 | complete | requires_evidence_check | Context: "* Generates a governed PDF dossier for a completed instrument result." |
-| reports/product-surface-claims.md | 2923 | complete | requires_evidence_check | Context: "COMPLETED: "The governed record is marked complete. A Return Brief is available if the condition has" |
-| reports/product-surface-claims.md | 3337 | ready | requires_evidence_check | Context: "/* pages/blog/index.tsx — EDITORIAL ARCHIVE (Premium, editorial, scan-ready) */" |
-| reports/product-surface-claims.md | 3637 | ready | requires_evidence_check | Context: "Adversarial scrutiny for a judgement already built through Executive" |
-| reports/product-surface-claims.md | 4030 | verified | requires_evidence_check | Context: "A governed case is a decision record that can be returned to, compared, and verified" |
-| reports/product-surface-claims.md | 4501 | complete | requires_evidence_check | Context: "<CommitmentRow text="Complete at least two governed instruments or sessions during the engagement pe" |
-| reports/product-surface-claims.md | 5308 | ready | requires_evidence_check | Context: "body="Use this when the buyer already understands the value of governed continuity and needs sponsor" |
-| reports/product-surface-claims.md | 5311 | ready | requires_evidence_check | Context: "body="Use this when the buyer already understands the value of governed continuity and needs sponsor" |
-| reports/product-surface-claims.md | 5365 | ready | requires_evidence_check | Context: "Current honest classification: selective high-value ready. This pathway exists where the buyer alrea" |
-| reports/product-surface-claims.md | 5368 | ready | requires_evidence_check | Context: "Sponsors, owners, and serious operators who already understand the value of governed continuity and " |
-| reports/product-surface-claims.md | 5416 | ready | requires_evidence_check | Context: "output: 'Boardroom-ready dossier with full provenance chain'," |
-| reports/product-surface-claims.md | 5527 | complete | requires_evidence_check | Context: "to see the complete governed progression." |
-| reports/product-surface-claims.md | 5719 | verified | requires_evidence_check | Context: "A governed case is a decision record that can be returned to, compared, verified," |
-| reports/product-surface-claims.md | 7210 | complete | requires_evidence_check | Context: "The Strategy Room exists for situations where the diagnosis is complete" |
-| reports/product-surface-claims.md | 7690 | verified | requires_evidence_check | Context: "A governed case gives your decision a verified provenance record —" |
-| reports/product-surface-claims.md | 7822 | ready | requires_evidence_check | Context: "* is ready for retainer oversight. No auth required." |
-| reports/product-surface-claims.md | 8053 | ready | requires_evidence_check | Context: ""For users ready to begin the governed product pathway and generate a fuller decision record."," |
-| reports/product-surface-claims.md | 8236 | ready | requires_evidence_check | Context: "* Compiles registry data into a board-ready intelligence brief." |
-| reports/product-surface-claims.md | 8494 | complete | requires_evidence_check | Context: ""boardroom-mode":               "The executive brief for this surface is incomplete or contradictory" |
-| reports/product-surface-claims.md | 8851 | ready | requires_evidence_check | Context: ""SIMULATION_ONLY→PILOT_READY": [" |
