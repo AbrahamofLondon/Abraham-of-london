@@ -9,6 +9,24 @@ import { fileURLToPath } from "url";
 import { withContentlayer } from "next-contentlayer2";
 
 // ─────────────────────────────────────────────────────────────────────────────
+// NEXTAUTH_URL GUARD
+//
+// next-auth/react calls parseUrl(process.env.NEXTAUTH_URL) at module level.
+// parseUrl uses `url !== null && url !== undefined ? url : defaultUrl` which
+// passes an empty string through (nullish check, not falsy check), causing
+// new URL("") → TypeError: Invalid URL in page-data worker processes.
+//
+// This runs before workers are spawned so all worker subprocesses inherit
+// the corrected value.
+// ─────────────────────────────────────────────────────────────────────────────
+if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.trim() === "") {
+  process.env.NEXTAUTH_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    "https://www.abrahamoflondon.org";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BUILD DIAGNOSTIC — capture silent failures during `next build`.
 //
 // When Next's page data collection phase crashes with no visible stack, the
