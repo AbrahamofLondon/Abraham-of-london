@@ -37,27 +37,47 @@ const serif: React.CSSProperties = {
 };
 const BG = "#0A0A0A";
 
-// ─── Data helpers ─────────────────────────────────────────────────────────────
+// ─── Safe href helpers ───────────────────────────────────────────────────────
 
-/** Free entry tools shown on pricing page */
+function safeHref(value: string | undefined | null, fallback: string): string {
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
+function hasSafeHref(value: string | undefined | null): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isSelfServeProduct(product: CatalogProduct | undefined): product is CatalogProduct {
+  return Boolean(product?.active && product.amount >= 0);
+}
+
+// ─── Data helpers with safe filters ─────────────────────────────────────────
+
 const FREE_ENTRY_PRODUCTS: CatalogProduct[] = [
   CATALOG.fast_diagnostic,
-].filter((p): p is CatalogProduct => Boolean(p));
+].filter(isSelfServeProduct);
 
-/** Global Market Intelligence — quarterly intelligence line */
 const INTELLIGENCE_PRODUCTS: CatalogProduct[] = [
+  CATALOG.gmi_q2_2026,
   CATALOG.gmi_q1_2026,
-].filter((p): p is CatalogProduct => Boolean(p?.active));
+].filter(isSelfServeProduct);
 
-/** Primary paid decision support ladder */
 const PAID_DECISION_SUPPORT_PRODUCTS: CatalogProduct[] = [
-  CATALOG.boardroom_brief,
   CATALOG.strategy_room,
   CATALOG.strategy_room_extended,
-  CATALOG.executive_reporting,
-].filter((p): p is CatalogProduct => Boolean(p?.active));
+].filter(isSelfServeProduct);
 
-/** Specialist instruments — not headline offers */
+/**
+ * Executive Reporting and Boardroom Brief remain review/evidence-gated
+ * if the ProductAuthorityContract classifies them as unsafe for direct release.
+ * Do not expose them as checkout products here.
+ */
+const REVIEW_GATED_PRODUCTS: CatalogProduct[] = [
+  CATALOG.boardroom_brief,
+  CATALOG.executive_reporting,
+].filter((p): p is CatalogProduct => Boolean(p));
+
 const SPECIALIST_INSTRUMENT_PRODUCTS: CatalogProduct[] = [
   CATALOG.personal_decision_audit,
   CATALOG.decision_exposure_instrument,
@@ -71,16 +91,14 @@ const SPECIALIST_INSTRUMENT_PRODUCTS: CatalogProduct[] = [
   CATALOG.strategic_priority_stack_builder,
   CATALOG.board_brief_builder,
   CATALOG.operator_decision_pack,
-].filter((p): p is CatalogProduct => Boolean(p?.active));
+].filter(isSelfServeProduct);
 
-/** Active governed playbooks */
 const PLAYBOOK_PRODUCTS: CatalogProduct[] = [
   CATALOG.execution_integrity_protocol,
   CATALOG.alignment_audit_playbook,
   CATALOG.drift_detection_framework,
-].filter((p): p is CatalogProduct => Boolean(p?.active));
+].filter(isSelfServeProduct);
 
-/** Retainer products — enquiry only */
 const RETAINER_PRODUCTS: CatalogProduct[] = [
   CATALOG.retainer_core,
   CATALOG.retainer_operational,
@@ -160,7 +178,10 @@ function FreePill() {
 
 function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.ReactNode }) {
   const action = resolvePricingAction(product);
+  const actionHref = safeHref(action.href, product.successPath || "/pricing");
+  const canShowAction = product.active && hasSafeHref(actionHref);
   const isBoardBriefBuilder = product.code === "board_brief_builder";
+
   return (
     <div
       style={{
@@ -172,7 +193,6 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         gap: "10px",
       }}
     >
-      {/* Header row */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
         <p
           style={{
@@ -185,13 +205,9 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         >
           {product.displayName}
         </p>
-        {product.amount > 0
-          ? <PricePill displayPrice={product.displayPrice} />
-          : <FreePill />
-        }
+        {product.amount > 0 ? <PricePill displayPrice={product.displayPrice} /> : <FreePill />}
       </div>
 
-      {/* Description */}
       {product.shortDescription && (
         <p
           style={{
@@ -205,7 +221,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         </p>
       )}
 
-      {isBoardBriefBuilder ? (
+      {isBoardBriefBuilder && (
         <p
           style={{
             ...mono,
@@ -216,7 +232,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         >
           Distinction: Boardroom Brief is the outcome-led paid brief. Board Brief Builder is the self-serve instrument for preparing your own board-facing decision pack.
         </p>
-      ) : null}
+      )}
 
       {action.type === "request_access" && (
         <p
@@ -246,7 +262,6 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         </p>
       )}
 
-      {/* Delivery metadata */}
       {product.estimatedCompletionMinutes && (
         <p
           style={{
@@ -262,36 +277,46 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         </p>
       )}
 
-      {/* CTA */}
-      {cta ?? (
-        product.active && (
-          <Link
-            href={action.href}
-            style={{
-              ...mono,
-              fontSize: "8px",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: `${GOLD}CC`,
-              textDecoration: "none",
-              marginTop: "4px",
-              alignSelf: "flex-start",
-              borderBottom: `1px solid ${GOLD}40`,
-              paddingBottom: "1px",
-            }}
-          >
-            {action.type === "checkout"
-              ? "View & access →"
-              : action.type === "request_access"
-                ? "Request access →"
-                : action.type === "contact_sales"
-                  ? "Discuss access →"
-                  : action.type === "archive_reference_only"
-                    ? "Archive reference →"
-                    : "Start free →"}
-          </Link>
-        )
-      )}
+      {cta ?? (canShowAction ? (
+        <Link
+          href={actionHref}
+          style={{
+            ...mono,
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: `${GOLD}CC`,
+            textDecoration: "none",
+            marginTop: "4px",
+            alignSelf: "flex-start",
+            borderBottom: `1px solid ${GOLD}40`,
+            paddingBottom: "1px",
+          }}
+        >
+          {action.type === "checkout"
+            ? "View & access →"
+            : action.type === "request_access"
+              ? "Request access →"
+              : action.type === "contact_sales"
+                ? "Discuss access →"
+                : action.type === "archive_reference_only"
+                  ? "Archive reference →"
+                  : "Start free →"}
+        </Link>
+      ) : (
+        <span
+          style={{
+            ...mono,
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.32)",
+            marginTop: "4px",
+          }}
+        >
+          Access gated
+        </span>
+      ))}
     </div>
   );
 }
@@ -455,7 +480,7 @@ export default function PricingPage() {
             </p>
             <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "14px" }}>
               {[
-                { label: "Run Pressure Signal", href: "/pressure" },
+                { label: "Run Pressure Signal", href: "/decision-pressure" },
                 { label: "Boardroom Brief", href: "/boardroom-brief" },
                 { label: "Strategy Room", href: "/strategy-room" },
               ].map(({ label, href }) => (
@@ -641,7 +666,7 @@ export default function PricingPage() {
                   Public entry point for one decision, pressure, or governance concern. Returns Green, Amber, or Red and routes to the next correct product.
                 </p>
                 <Link
-                  href="/pressure"
+                  href="/decision-pressure"
                   style={{
                     ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
                     color: `${GOLD}CC`, textDecoration: "none", marginTop: "4px", alignSelf: "flex-start",
@@ -651,7 +676,6 @@ export default function PricingPage() {
                   Run signal →
                 </Link>
               </div>
-              {/* Decision Delay Exposure and Provenance demo are free tools */}
               <div
                 style={{
                   border: "none",
@@ -737,6 +761,128 @@ export default function PricingPage() {
               <p style={{ ...mono, fontSize: "8px", color: "rgba(201,169,110,0.68)", lineHeight: 1.7, marginTop: "14px" }}>
                 Boardroom Brief is not Board Brief Builder. Boardroom Brief is an outcome-led paid brief; Board Brief Builder is a specialist self-serve instrument listed below.
               </p>
+            </section>
+          )}
+
+          {/* Review-gated section (Boardroom Brief, Executive Reporting) */}
+          {REVIEW_GATED_PRODUCTS.length > 0 && (
+            <section style={{ marginBottom: "48px" }}>
+              <SectionLabel>Review-gated decision products</SectionLabel>
+              <h2
+                style={{
+                  ...serif,
+                  fontSize: "22px",
+                  color: "rgba(255,255,255,0.80)",
+                  marginBottom: "6px",
+                }}
+              >
+                Available only when evidence and governance conditions are satisfied
+              </h2>
+              <p
+                style={{
+                  ...mono,
+                  fontSize: "9px",
+                  color: "rgba(255,255,255,0.48)",
+                  lineHeight: 1.6,
+                  marginBottom: "24px",
+                  maxWidth: "540px",
+                }}
+              >
+                These products are not exposed as ordinary checkout items. They require review, evidence readiness,
+                and governance eligibility before access is opened.
+              </p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                  gap: "1px",
+                  background: "rgba(255,255,255,0.04)",
+                }}
+              >
+                {REVIEW_GATED_PRODUCTS.map((p) => (
+                  <div
+                    key={p.code}
+                    style={{
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      background: "rgba(255,255,255,0.012)",
+                      padding: "20px 22px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+                      <p
+                        style={{
+                          ...serif,
+                          fontSize: "16px",
+                          color: "rgba(255,255,255,0.78)",
+                          lineHeight: 1.3,
+                          flex: 1,
+                        }}
+                      >
+                        {p.displayName}
+                      </p>
+                      <span
+                        style={{
+                          ...mono,
+                          fontSize: "9px",
+                          letterSpacing: "0.14em",
+                          color: "rgba(255,255,255,0.42)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          padding: "4px 10px",
+                          flexShrink: 0,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Review-gated
+                      </span>
+                    </div>
+
+                    {p.shortDescription && (
+                      <p
+                        style={{
+                          ...mono,
+                          fontSize: "9px",
+                          color: "rgba(255,255,255,0.48)",
+                          lineHeight: 1.65,
+                        }}
+                      >
+                        {p.shortDescription}
+                      </p>
+                    )}
+
+                    <p
+                      style={{
+                        ...mono,
+                        fontSize: "8px",
+                        color: "rgba(201,169,110,0.70)",
+                        lineHeight: 1.65,
+                      }}
+                    >
+                      Access opens only after the case has sufficient evidence, consent, and review eligibility.
+                    </p>
+
+                    <Link
+                      href="/decision-pressure"
+                      style={{
+                        ...mono,
+                        fontSize: "8px",
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                        color: `${GOLD}CC`,
+                        textDecoration: "none",
+                        marginTop: "4px",
+                        alignSelf: "flex-start",
+                        borderBottom: `1px solid ${GOLD}40`,
+                        paddingBottom: "1px",
+                      }}
+                    >
+                      Start with pressure signal →
+                    </Link>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
 
@@ -1008,10 +1154,9 @@ export default function PricingPage() {
                 background: "rgba(255,255,255,0.04)",
               }}
             >
-              {SPECIALIST_INSTRUMENT_PRODUCTS
-                .map((p) => (
-                  <ProductCard key={p.code} product={p} />
-                ))}
+              {SPECIALIST_INSTRUMENT_PRODUCTS.map((p) => (
+                <ProductCard key={p.code} product={p} />
+              ))}
             </div>
           </section>
 
@@ -1062,15 +1207,16 @@ export default function PricingPage() {
                 style={{
                   ...mono,
                   fontSize: "9px",
-                                  color: "rgba(255,255,255,0.48)",
-                                  lineHeight: 1.6,
-                                  marginBottom: "24px",
-                                  maxWidth: "500px",
-                                }}
-                              >
-                                  Facilitated decision frameworks. Each run produces a governed
-                                  commitment record and writes conclusions to Decision Centre.
-                                  Controlled-release access is assisted while self-serve checkout is not enabled.              </p>
+                  color: "rgba(255,255,255,0.48)",
+                  lineHeight: 1.6,
+                  marginBottom: "24px",
+                  maxWidth: "500px",
+                }}
+              >
+                Facilitated decision frameworks. Each run produces a governed commitment record and writes conclusions
+                to Decision Centre where the access tier permits it. Controlled-release access is assisted while
+                self-serve checkout is not enabled.
+              </p>
               <div
                 style={{
                   display: "grid",
