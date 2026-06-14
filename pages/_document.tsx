@@ -1,12 +1,11 @@
 // pages/_document.tsx — Pages Router only
-import Document, {
-  Html,
-  Head,
-  Main,
-  NextScript,
-  type DocumentContext,
-  type DocumentInitialProps,
-} from "next/document";
+// Using named import for Document to avoid webpack __esModule interop issue
+import { Html, Head, Main, NextScript } from "next/document";
+import type { DocumentContext, DocumentInitialProps } from "next/document";
+
+// Import Document class directly via require to avoid webpack interop
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Document = require("next/document").default;
 
 const BUILD_FINGERPRINT =
   process.env.NEXT_PUBLIC_BUILD_FINGERPRINT ||
@@ -23,14 +22,14 @@ const BUILD_CHANNEL = process.env.VERCEL
   : "local";
 
 export default class MyDocument extends Document {
-  static override async getInitialProps(
+  static async getInitialProps(
     ctx: DocumentContext
   ): Promise<DocumentInitialProps> {
     const initialProps = await Document.getInitialProps(ctx);
     return { ...initialProps };
   }
 
-  override render() {
+  render() {
     return (
       <Html
         lang="en"
@@ -46,11 +45,6 @@ export default class MyDocument extends Document {
           <link rel="manifest" href="/manifest.json" />
           <link rel="icon" href="/favicon.ico" />
 
-          {/* ── PREMIUM TYPOGRAPHY ────────────────────────────────────────
-              Cormorant Garamond — institutional serif with genuine character
-              JetBrains Mono     — precision mono for labels and data
-              Both loaded from Google Fonts with display=swap for performance
-          ─────────────────────────────────────────────────────────────── */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link
             rel="preconnect"
