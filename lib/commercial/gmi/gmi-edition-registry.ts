@@ -109,7 +109,7 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     displayPrice: "£59",
     releaseDate: "2026-06-01",
     shortDescription: "Q2 2026 market report — current published edition. Market context and analysis for the current decision window.",
-    pricingNote: "Coverage period: Q2 2026. Current decision window: Q2 2026. Published June 2026.",
+    pricingNote: "Coverage period: Q2 2026. Current decision window: Q3 2026. Published June 2026.",
   },
 
   // ── Q3 2026 — draft (blocked) ───────────────────────────────────────────────

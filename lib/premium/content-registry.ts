@@ -35,7 +35,7 @@ export type PremiumContentItem = {
     allowedTiers?: string[];
     coverImage?: string;
     productLine?: string;
-    editionType?: "public-surface" | "institutional-pdf" | "board-deck";
+    editionType?: "public-surface" | "institutional-pdf" | "board-deck" | "institutional-briefing";
     surfaceHref?: string;
     directDownloadHref?: string;
     relatedIds?: string[];
@@ -68,6 +68,7 @@ const GMI_RELATED_IDS = [
   "global-market-outlook-q1-2026-public",
   "global-market-intelligence-report-q1-2026",
   "global-market-intelligence-board-deck-q1-2026",
+  "global-market-intelligence-report-q2-2026",
 ] as const;
 
 const PREMIUM_CONTENT: PremiumContentItem[] = [
@@ -275,6 +276,62 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       directDownloadHref: "/api/premium/content/download/global-market-intelligence-board-deck-q1-2026",
       coverImage:
         "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg",
+      relatedIds: [...GMI_RELATED_IDS],
+    },
+  },
+
+  {
+    id: "global-market-intelligence-report-q2-2026",
+    title: "Global Market Intelligence Report — Q2 2026",
+    subtitle: "Institutional Briefing Edition",
+    description:
+      "Primary institutional briefing for Q2 2026 covering fragmentation, tariff persistence, capital selectivity, liquidity defensiveness, and Q3 decision implications for strategic operators.",
+    category: "market-intelligence",
+    categorySlug: "market-intel",
+    confidentialLevel: "high",
+    featured: true,
+    fileSize: "6.2 MB",
+    fileSizeBytes: 6_200_000,
+    expiresAt: "2027-06-30",
+    tags: [
+      "global",
+      "quarterly",
+      "report",
+      "macro",
+      "capital-flows",
+      "institutional",
+      "market-intelligence",
+      "fragmentation",
+      "tariffs",
+    ],
+    asset: {
+      relativePath: "reports/intel-2026-q2.mdx",
+      mimeType: "text/markdown",
+      filename: "intel-2026-q2.mdx",
+      pageCount: 42,
+    },
+    metadata: {
+      author: "Abraham of London Intelligence",
+      createdAt: "2026-06-01",
+      updatedAt: "2026-06-14",
+      version: "1.0.0-rc",
+      docId: "GMI-Q2-2026",
+      classification: "RESTRICTED",
+      watermarkRequired: true,
+      maxDownloads: 5,
+      allowedTiers: ["architect", "owner", "inner-circle"],
+      productLine: "Institutional Briefing Edition",
+      editionType: "institutional-briefing",
+      coveragePeriod: "Q2 2026",
+      currentDecisionWindow: "Q3 2026",
+      statusLabel: "Production release candidate — pending final data-lock review",
+      nextScheduledReport: "Q3 2026 report in preparation",
+      freshnessNote:
+        "This report covers Q2 2026 conditions and the Q3 2026 decision window. It remains current until superseded by the Q3 2026 Market Intelligence Report.",
+      surfaceHref: "/artifacts/global-market-intelligence-report-q2-2026",
+      directDownloadHref: "/api/premium/content/download/global-market-intelligence-report-q2-2026",
+      coverImage:
+        "/assets/images/artifacts/global-market-intelligence-q2-2026-cover.jpg",
       relatedIds: [...GMI_RELATED_IDS],
     },
   },
