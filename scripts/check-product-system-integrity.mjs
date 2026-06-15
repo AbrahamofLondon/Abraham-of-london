@@ -381,6 +381,17 @@ if (professionalConsoleResult.success) {
   console.log(professionalConsoleResult.output);
 }
 
+// Phase 8e: Living Action Feedback Guard
+logSection('PHASE 8E: LIVING ACTION FEEDBACK GUARD');
+
+const feedbackGuardResult = runCommand('check-living-action-feedback-guards', 'Living Action Feedback Guard');
+if (feedbackGuardResult.success) {
+  pass('Living Action Feedback Guard passed (40/40 tests)');
+} else {
+  fail('Living Action Feedback Guard failed');
+  console.log(feedbackGuardResult.output);
+}
+
 // Phase 9: Report summary
 logSection('PHASE 9: FINAL REPORT');
 
