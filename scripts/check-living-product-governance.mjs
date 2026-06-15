@@ -192,9 +192,79 @@ function runBehaviourProbes() {
 
 // ─── 4. Drift memory (with file hashing for regression detection) ────────────
 
+/**
+ * Normalise a potentially corrupt or schema-drifted memory store into a
+ * guaranteed-valid shape.  This prevents `store.entries is not iterable`
+ * crashes when the persisted JSON has been written by a different version,
+ * manually edited, or partially corrupted.
+ *
+ * @param {unknown} raw  The raw value parsed from the memory JSON file.
+ * @returns {{ version: number, createdAt: string, updatedAt: string, entries: Array<Record<string, unknown>>, schemaRecovered?: boolean, recoveryReason?: string, fileHashes?: Record<string,string>, criticalFileChanges?: number }}
+ */
+function normaliseProductGovernanceMemory(raw) {
+  const now = new Date().toISOString();
+
+  // Root-level corruption — return a fresh empty store.
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return {
+      version: 2,
+      createdAt: now,
+      updatedAt: now,
+      entries: [],
+      fileHashes: {},
+      schemaRecovered: true,
+      recoveryReason: "memory root was missing, invalid, or array",
+    };
+  }
+
+  // Recover entries from whatever shape they arrived in.
+  let entries = [];
+
+  if (Array.isArray(raw.entries)) {
+    entries = raw.entries;
+  } else if (raw.entries && typeof raw.entries === "object") {
+    // entries was stored as an object (e.g. { "key": {...}, ... })
+    entries = Object.values(raw.entries);
+  } else if (Array.isArray(raw.issueSignatures)) {
+    entries = raw.issueSignatures;
+  } else if (Array.isArray(raw.findings)) {
+    entries = raw.findings;
+  } else if (raw.findings && typeof raw.findings === "object") {
+    // findings was stored as an object keyed by signature hash (legacy format)
+    entries = Object.values(raw.findings).map((f) => ({
+      id: f.signature || f.id,
+      title: f.title || "",
+      firstSeen: f.firstSeen || now,
+      lastSeen: f.lastSeen || now,
+      recurrenceCount: f.recurrenceCount || 1,
+      previousSeverity: f.previousSeverity || "none",
+      currentSeverity: f.currentSeverity || "informational_note",
+      status: f.status || "new",
+      affectedFiles: f.affectedItems || f.affectedFiles || [],
+      evidence: f.evidence || [],
+      doctrineClaimId: f.doctrineClaimId || null,
+    }));
+  }
+
+  return {
+    ...raw,
+    version: raw.version || 2,
+    createdAt: raw.createdAt || now,
+    updatedAt: now,
+    entries,
+    fileHashes: raw.fileHashes || {},
+    schemaRecovered: Array.isArray(raw.entries) ? raw.schemaRecovered === true : true,
+  };
+}
+
 function loadMemory() {
-  try { const raw = readText("reports/living-product-memory.json"); return raw ? JSON.parse(raw) : { version: 1, updatedAt: new Date().toISOString(), entries: [], fileHashes: {} }; }
-  catch { return { version: 1, updatedAt: new Date().toISOString(), entries: [], fileHashes: {} }; }
+  const MEMORY_FILE = "reports/living-product-memory.json";
+  try {
+    const raw = readJson(MEMORY_FILE);
+    return normaliseProductGovernanceMemory(raw);
+  } catch {
+    return normaliseProductGovernanceMemory(null);
+  }
 }
 
 function saveMemory(store) { store.updatedAt = new Date().toISOString(); writeJson("reports/living-product-memory.json", store); }
@@ -221,6 +291,12 @@ function computeCriticalFileHashes() {
 
 function mergeIntoMemory(findings) {
   const store = loadMemory();
+  // Defensive guard: ensure store.entries is always iterable
+  store.entries = Array.isArray(store.entries)
+    ? store.entries
+    : store.entries && typeof store.entries === "object"
+      ? Object.values(store.entries)
+      : [];
   const now = new Date().toISOString();
   const currentHashes = computeCriticalFileHashes();
   let criticalFileChanges = 0;
