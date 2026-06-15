@@ -134,6 +134,18 @@ export {
   LIVING_ACTION_FEEDBACK_UNRESOLVED_STATUSES,
 } from "./living-action-feedback-contract";
 
+export {
+  canUserSetFeedbackStatus,
+  canOperatorSetFeedbackStatus,
+  requiresEvidenceVerification,
+  assertFeedbackUpdateIsSafe,
+  isKnownObjectId,
+  isKnownActionId,
+  getUserSafeStatuses,
+  getOperatorSafeStatuses,
+  isTerminalStatus,
+} from "./living-action-feedback-guards";
+
 export { boardroomAdapter } from "./adapters/boardroom-adapter";
 export { assessmentAdapter } from "./adapters/assessment-adapter";
 export { commercialAdapter } from "./adapters/commercial-adapter";
