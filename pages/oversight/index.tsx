@@ -83,11 +83,37 @@ function formatDate(value?: string | null) {
 const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role, blockedByRole, cadencePosture, cadenceHistory, institutionalCaseSummary }) => {
   if (!authenticated) {
     return (
-      <Layout title="Retained Oversight Command" description="Sponsor-safe retained oversight visibility." fullWidth>
+      <Layout title="Retained Oversight" description="Retained oversight is a contracted, review-gated continuity engagement — not a self-serve product." fullWidth>
         <Head><meta name="robots" content="noindex,nofollow" /></Head>
-        <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
-          <div className="mx-auto max-w-4xl">
-            <p className="text-white/65">Sign in to view retained oversight command visibility.</p>
+        <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
+          <div className="mx-auto max-w-3xl">
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+              Retained oversight
+            </p>
+            <h1 className="mt-4 text-3xl text-white" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontStyle: "italic" }}>
+              A contracted continuity engagement — not a self-serve product.
+            </h1>
+            <p className="mt-5 text-sm leading-7 text-white/60">
+              Retained oversight preserves cadence, delivery control, outcome verification, and durable
+              memory across cycles. It is a governed continuity relationship, available only after a case
+              record demonstrates sufficient durable memory, recurrence evidence, and outcome history —
+              and only after review approval.
+            </p>
+            <ul className="mt-6 space-y-2 text-sm leading-7 text-white/55">
+              <li>· Available only after durable memory, recurrence evidence, and outcome history justify it.</li>
+              <li>· Not self-serve, and never activated by checkout.</li>
+              <li>· Requires human review and organisational context.</li>
+              <li>· Contracted engagement only.</li>
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/enterprise" className="border px-5 py-3" style={{ ...mono, borderColor: "rgba(201,169,110,0.5)", backgroundColor: "rgba(201,169,110,0.12)", color: "#F5F5F5", fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}>
+                Enterprise pathway
+              </Link>
+              <Link href="/contact?type=retained-oversight" className="border border-white/[0.12] px-5 py-3 text-white/60" style={{ ...mono, fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}>
+                Enquire about retained oversight
+              </Link>
+            </div>
+            <p className="mt-8 text-xs text-white/35">Already retained? Sign in to view retained oversight command visibility.</p>
           </div>
         </main>
       </Layout>

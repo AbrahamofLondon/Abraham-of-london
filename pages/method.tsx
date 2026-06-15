@@ -210,6 +210,39 @@ const MethodPage: NextPage = () => {
 
           <Rule />
 
+          <section className="max-w-3xl">
+            <Eyebrow>Evidence discipline</Eyebrow>
+            <h2 className="mt-4" style={{ ...serif, color: "rgba(255,255,255,0.92)", fontSize: "clamp(1.7rem, 4vw, 2.6rem)", lineHeight: 1.05, fontStyle: "italic" }}>
+              The method is designed to make strategic contradiction harder to hide.
+            </h2>
+            <p className="mt-4 text-[14px] leading-[1.85] text-white/[0.58]">
+              Claims are carried with confidence posture, evidence class, and falsification condition.
+              Unsupported evidence can inform a question but cannot become a trusted conclusion.
+              Continuity allows the system to remember unresolved contradictions across sessions and reports.
+            </p>
+
+            <div className="mt-7 grid gap-2 md:grid-cols-2">
+              {[
+                { title: "Evidence tiers", body: "Every claim carries a confidence posture and an evidence class, so strength is explicit rather than implied." },
+                { title: "Falsification register", body: "Each claim records the condition that would falsify it. The disconfirming test is kept visible, not hidden." },
+                { title: "Decision debt", body: "Unresolved contradictions accrue as decision debt and remain on the record until they are addressed." },
+                { title: "Consequence verification", body: "Stated consequences are checked against the supplied evidence rather than asserted as certainty." },
+                { title: "Memory governance", body: "Surface records are ephemeral by default. Durable memory is created only through the governed consent path." },
+                { title: "Strategic twin", body: "A bounded simulation for testing moves under stated assumptions — not a prediction engine and not a forecast of certainty." },
+                { title: "Adversarial evidence shield", body: "Quarantined or unknown-risk evidence is held back. It can inform a question but cannot promote to a trusted conclusion." },
+                { title: "Tamper-evident ledger", body: "An audit chain that makes changes visible and reviewable — an evidence trail, not tamper-proof finality." },
+                { title: "Authority delta = 0", body: "The method never grants authority. It compounds context; the decision-maker keeps the decision." },
+              ].map((item) => (
+                <div key={item.title} className="border border-white/[0.07] bg-white/[0.015] p-4">
+                  <p style={{ ...mono, fontSize: "8.5px", letterSpacing: "0.14em", color: `${GOLD}CC` }}>{item.title}</p>
+                  <p className="mt-2 text-[12.5px] leading-[1.72] text-white/[0.50]">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <Rule />
+
           <section>
             <Eyebrow>Escalation of consequence</Eyebrow>
 
