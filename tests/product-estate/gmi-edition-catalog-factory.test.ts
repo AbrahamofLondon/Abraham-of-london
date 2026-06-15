@@ -58,46 +58,56 @@ describe("GMI-2 — Q1 2026 Stripe product ID is prod_UNnSL8r6DMedEH", () => {
   });
 });
 
-// ─── 3. Q1 is archived/hidden and not current ─────────────────────────────────
+// ─── 3. Q1 is the current published issue (lifecycle authority) ────────────────
+// Per lifecycle reconciliation: GMI-Q1-2026 is ACTIVE_UNTIL_SUPERSEDED — the
+// current published, purchasable, public-visible issue until Q2 actually publishes.
+// It is NOT hidden from pricing. It becomes archive only after Q2 publishes.
 
-describe("GMI-3 — Q1 2026 is archived and not current", () => {
-  it("gmi_q1_2026 is hidden from pricing", () => {
-    expect(CATALOG["gmi_q1_2026"]?.hiddenFromPricing).toBe(true);
+describe("GMI-3 — Q1 2026 is the current published issue", () => {
+  it("gmi_q1_2026 is visible on pricing (current published issue)", () => {
+    expect(CATALOG["gmi_q1_2026"]?.hiddenFromPricing).toBe(false);
   });
 
-  it("gmi_q1_2026 is not the current edition", () => {
+  it("gmi_q1_2026 is not the admin in-focus edition", () => {
     const q1Entry = GMI_EDITION_REGISTRY.find((e) => e.productCode === "gmi_q1_2026");
     expect(q1Entry?.current).toBe(false);
   });
 
-  it("gmi_q1_2026 has hiddenReason set", () => {
-    expect(CATALOG["gmi_q1_2026"]?.hiddenReason).toBeTruthy();
+  it("gmi_q1_2026 is active (purchasable, current published)", () => {
+    expect(CATALOG["gmi_q1_2026"]?.active).toBe(true);
+  });
+
+  it("gmi_q1_2026 has no hiddenReason (it is the current published issue)", () => {
+    expect(CATALOG["gmi_q1_2026"]?.hiddenReason).toBeUndefined();
   });
 });
 
-// ─── 4. Q2 is current ────────────────────────────────────────────────────────
+// ─── 4. Q2 is the admin in-focus edition (release candidate, lifecycle DRAFT) ──
+// Per lifecycle reconciliation: GMI-Q2-2026 is DRAFT — a release candidate,
+// not yet published. `current: true` here is the ADMIN in-preparation focus flag
+// only. Public/commercial "current published issue" is Q1 until Q2 publishes.
 
-describe("GMI-4 — Q2 2026 is the current edition", () => {
-  it("gmi_q2_2026 is the current edition in the registry", () => {
+describe("GMI-4 — Q2 2026 is the admin in-focus edition (release candidate)", () => {
+  it("gmi_q2_2026 is the admin in-focus edition in the registry", () => {
     const q2Entry = GMI_EDITION_REGISTRY.find((e) => e.productCode === "gmi_q2_2026");
     expect(q2Entry?.current).toBe(true);
   });
 
-  it("getCurrentGmiEditionCode returns gmi_q2_2026", () => {
+  it("getCurrentGmiEditionCode returns gmi_q2_2026 (admin focus)", () => {
     expect(getCurrentGmiEditionCode(GMI_EDITION_REGISTRY)).toBe("gmi_q2_2026");
   });
 
-  it("getCurrentGmiEditionProduct returns gmi_q2_2026 product", () => {
+  it("getCurrentGmiEditionProduct returns gmi_q2_2026 product (admin focus)", () => {
     const product = getCurrentGmiEditionProduct(GMI_EDITION_REGISTRY);
     expect(product?.code).toBe("gmi_q2_2026");
   });
 
-  it("gmi_q2_2026 is not hidden from pricing", () => {
-    expect(CATALOG["gmi_q2_2026"]?.hiddenFromPricing).toBe(false);
+  it("gmi_q2_2026 is hidden from pricing (draft/release-candidate)", () => {
+    expect(CATALOG["gmi_q2_2026"]?.hiddenFromPricing).toBe(true);
   });
 
-  it("gmi_q2_2026 is active", () => {
-    expect(CATALOG["gmi_q2_2026"]?.active).toBe(true);
+  it("gmi_q2_2026 is not active (draft — not yet published)", () => {
+    expect(CATALOG["gmi_q2_2026"]?.active).toBe(false);
   });
 });
 
@@ -308,10 +318,9 @@ describe("GMI-13 — access resolver returns correct routes", () => {
     expect(link.href).toContain("q1-2026");
   });
 
-  it("gmi_q2_2026 resolver returns /contact (manual_billing)", () => {
+  it("gmi_q2_2026 resolver returns dormant (draft — not yet published)", () => {
     const link = resolveProductAccessLink("gmi_q2_2026");
-    expect(link.accessMode).toBe("manual_billing");
-    expect(link.href).toBe("/contact");
+    expect(link.accessMode).toBe("dormant");
   });
 
   it("gmi_q3_2026 resolver does not return paid_checkout", () => {

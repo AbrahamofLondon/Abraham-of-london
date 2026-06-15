@@ -3,24 +3,32 @@
  *
  * Canonical registry of GMI quarterly editions.
  *
- * This is the ONLY file that needs to change when a new GMI edition is released.
- * The factory derives all catalog fields (routes, entitlement slugs, display names,
- * access mode, pricing visibility) from the registry entry.
+ * This is the commercial/catalog view of GMI editions. It is NOT the publication
+ * authority. The single source of publication truth is the lifecycle module:
+ *   lib/intelligence/market-intelligence-lifecycle.ts
+ * The factory cross-checks this registry against that lifecycle at build/import
+ * time (assertGmiRegistryAgreesWithLifecycle) and fails closed on contradiction.
+ *
+ * `current` here is an ADMIN in-preparation focus flag only — it does NOT mean
+ * "current published". Public/commercial "current published issue" is computed
+ * from the lifecycle via getCurrentPublishedMarketIntelligenceReport(). Never
+ * read `current: true` as publication truth.
  *
  * Rules enforced at build/import time by the factory:
- *   - Exactly one edition may be current: true
+ *   - Exactly one edition may be current: true (admin focus)
  *   - Active paid_checkout editions require stripeProductId + stripePriceId
  *   - Draft editions must have hiddenFromPricing: true
  *   - Archived/retired editions must not be current
  *   - manual_billing editions do not require Stripe IDs
+ *   - Commercial status/visibility must agree with the lifecycle record
  *
- * To release a new quarter:
- *   1. Add a new entry to GMI_EDITION_REGISTRY below
- *   2. Set current: false on the outgoing edition
- *   3. Set current: true on the incoming edition
- *   4. Set status: "archived" on the outgoing edition
- *   5. Add Stripe IDs when the edition is ready for paid_checkout
- *   6. Run pnpm exec vitest run tests/product-estate/gmi-edition-catalog-factory.test.ts
+ * To release a new quarter (see project_gmi_q2_release_workflow):
+ *   1. Promote lifecycle state in market-intelligence-lifecycle.ts first
+ *      (DRAFT → ACTIVE_UNTIL_SUPERSEDED; supersede the outgoing edition).
+ *   2. Reconcile this registry to match: incoming → status "active"/"manual_billing"
+ *      + visible; outgoing → status "archived" + hiddenFromPricing.
+ *   3. Add Stripe IDs when the edition is ready for paid_checkout.
+ *   4. Run pnpm exec vitest run tests/product-estate/gmi-edition-catalog-factory.test.ts
  */
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -67,9 +75,11 @@ export type GmiEditionRegistryEntry = {
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
-  // ── Q1 2026 — archived ──────────────────────────────────────────────────────
-  // Superseded by Q2. Still purchasable for historical reference.
-  // Stripe IDs confirmed: prod_UNnSL8r6DMedEH
+  // ── Q1 2026 — CURRENT PUBLISHED issue ────────────────────────────────────────
+  // Reconciled to the authoritative lifecycle (market-intelligence-lifecycle.ts):
+  // GMI-Q1-2026 is ACTIVE_UNTIL_SUPERSEDED — the current published, purchasable,
+  // public-visible issue until Q2 actually publishes. It only becomes archived
+  // after Q2 is published. Stripe IDs confirmed: prod_UNnSL8r6DMedEH.
   {
     editionId: "GMI-Q1-2026",
     productCode: "gmi_q1_2026",
@@ -77,22 +87,25 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     year: 2026,
     title: "Global Market Report — Q1 2026",
     slug: "q1-2026",
-    status: "archived",
-    current: false,
-    hiddenFromPricing: true,
-    hiddenReason: "superseded_by_q2",
+    status: "active",
+    current: false, // admin in-focus flag only (Q2 is in preparation); NOT commercial truth
+    hiddenFromPricing: false,
     stripeProductId: "prod_UNnSL8r6DMedEH",
     stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
     amountGbp: 5900,
     displayPrice: "£59",
     releaseDate: "2026-04-08",
-    shortDescription: "Q1 2026 market report — archived edition. Available for historical reference.",
-    pricingNote: "Coverage period: Q1 2026. Superseded by Q2 2026 edition. Updated 8 April 2026.",
+    shortDescription: "Q1 2026 market report — the current published issue. Remains active for Q2 2026 operating decisions until superseded.",
+    pricingNote: "Coverage period: Q1 2026. Current decision window: Q2 2026. Remains active until superseded by Q2 2026.",
   },
 
-  // ── Q2 2026 — current (manual_billing) ─────────────────────────────────────
-  // Current published edition. No self-serve checkout yet — access via enquiry.
-  // To move to paid_checkout: add stripeProductId + stripePriceId and change status to "active".
+  // ── Q2 2026 — release candidate (DRAFT, not yet published) ────────────────────
+  // Reconciled to the authoritative lifecycle: GMI-Q2-2026 is DRAFT — a production
+  // release candidate, publication target 2026-07-08. Not purchasable, not public,
+  // hidden from pricing. `current: true` here is the ADMIN in-preparation focus
+  // flag only — it does NOT mean "current published". Public/commercial "current"
+  // is computed from the lifecycle (getCurrentPublishedMarketIntelligenceReport).
+  // To release: complete the Q2 workflow, then set status "active"/"manual_billing".
   {
     editionId: "GMI-Q2-2026",
     productCode: "gmi_q2_2026",
@@ -100,16 +113,17 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     year: 2026,
     title: "Global Market Report — Q2 2026",
     slug: "q2-2026",
-    status: "manual_billing",
-    current: true,
-    hiddenFromPricing: false,
+    status: "draft",
+    current: true, // admin in-preparation focus only; NOT commercial/publication truth
+    hiddenFromPricing: true,
+    hiddenReason: "release_candidate_publication_target_2026_07_08",
     stripeProductId: null,
     stripePriceId: null,
     amountGbp: 5900,
     displayPrice: "£59",
-    releaseDate: "2026-06-01",
-    shortDescription: "Q2 2026 market report — current published edition. Market context and analysis for the current decision window.",
-    pricingNote: "Coverage period: Q2 2026. Current decision window: Q3 2026. Published June 2026.",
+    releaseDate: "2026-07-08",
+    shortDescription: "Q2 2026 market report — release candidate, in preparation. Scheduled publication 8 July 2026.",
+    pricingNote: "Coverage period: Q2 2026. Release candidate — scheduled publication 8 July 2026. Not yet the current published issue.",
   },
 
   // ── Q3 2026 — draft (blocked) ───────────────────────────────────────────────

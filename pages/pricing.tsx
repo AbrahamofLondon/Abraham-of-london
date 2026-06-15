@@ -49,7 +49,13 @@ function hasSafeHref(value: string | undefined | null): value is string {
 }
 
 function isSelfServeProduct(product: CatalogProduct | undefined): product is CatalogProduct {
-  return Boolean(product?.active && product.amount >= 0);
+  // Resolver is the authority: a product is self-serve only when the governed
+  // resolver returns a directly offerable action (checkout or free surface).
+  // Governance-gated products (review_gated / blocked / manual / contracted)
+  // never qualify, so page arrays cannot bypass resolver gating.
+  if (!product?.active) return false;
+  const action = resolvePricingAction(product);
+  return action.type === "checkout" || action.type === "view_free_surface";
 }
 
 // ─── Data helpers with safe filters ─────────────────────────────────────────
@@ -64,7 +70,9 @@ const INTELLIGENCE_PRODUCTS: CatalogProduct[] = [
 ].filter(isSelfServeProduct);
 
 const PAID_DECISION_SUPPORT_PRODUCTS: CatalogProduct[] = [
-  CATALOG.strategy_room,
+  // strategy_room is governance-uncleared (commercialSafe=false / internal_only)
+  // and is surfaced via REVIEW_GATED_PRODUCTS instead. The resolver-aware
+  // isSelfServeProduct filter would exclude it here regardless.
   CATALOG.strategy_room_extended,
 ].filter(isSelfServeProduct);
 
@@ -76,6 +84,10 @@ const PAID_DECISION_SUPPORT_PRODUCTS: CatalogProduct[] = [
 const REVIEW_GATED_PRODUCTS: CatalogProduct[] = [
   CATALOG.boardroom_brief,
   CATALOG.executive_reporting,
+  // Governance-uncleared flagship surface (commercialSafe=false / internal_only):
+  // kept visible as review-gated rather than sold. Moves to a self-serve section
+  // only when governance clears it.
+  CATALOG.strategy_room,
 ].filter((p): p is CatalogProduct => Boolean(p));
 
 const SPECIALIST_INSTRUMENT_PRODUCTS: CatalogProduct[] = [
@@ -182,6 +194,17 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
   const canShowAction = product.active && hasSafeHref(actionHref);
   const isBoardBriefBuilder = product.code === "board_brief_builder";
 
+  // Resolver-governed gating: these states are never purchasable and must not
+  // render a buy/checkout link, regardless of Stripe metadata on the product.
+  // Hard-gated states have no actionable buy/request path; soft-gated states
+  // remain visible with a non-checkout "request access / review" CTA.
+  const HARD_GATED = ["blocked", "unavailable"];
+  const SOFT_GATED = ["review_gated", "evidence_gated"];
+  const isHardGated = HARD_GATED.includes(action.type);
+  const isSoftGated = SOFT_GATED.includes(action.type);
+  const hardGatedLabel = action.type === "blocked" ? "Not currently purchasable" : "Currently unavailable";
+  const softGatedLabel = action.type === "evidence_gated" ? "Request review →" : "Request access →";
+
   return (
     <div
       style={{
@@ -277,7 +300,38 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         </p>
       )}
 
-      {cta ?? (canShowAction ? (
+      {cta ?? (isHardGated ? (
+        <span
+          style={{
+            ...mono,
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.32)",
+            marginTop: "4px",
+          }}
+        >
+          {hardGatedLabel}
+        </span>
+      ) : isSoftGated && canShowAction ? (
+        <Link
+          href={actionHref}
+          style={{
+            ...mono,
+            fontSize: "8px",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "rgba(253,186,116,0.85)",
+            textDecoration: "none",
+            marginTop: "4px",
+            alignSelf: "flex-start",
+            borderBottom: "1px solid rgba(253,186,116,0.35)",
+            paddingBottom: "1px",
+          }}
+        >
+          {softGatedLabel}
+        </Link>
+      ) : canShowAction ? (
         <Link
           href={actionHref}
           style={{
@@ -966,27 +1020,44 @@ export default function PricingPage() {
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
                     {CATALOG.professional.shortDescription}
                   </p>
-                  <CheckoutButton
-                    productCode="professional"
-                    originPath="/pricing"
-                    onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
-                    style={{
-                      ...mono,
-                      fontSize: "8px",
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                      color: "#0A0A0A",
-                      backgroundColor: GOLD,
-                      padding: "12px 20px",
-                      textDecoration: "none",
-                      display: "inline-block",
-                      alignSelf: "flex-start",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {CATALOG.professional.primaryCta}
-                  </CheckoutButton>
+                  {resolvePricingAction(CATALOG.professional).purchasable ? (
+                    <CheckoutButton
+                      productCode="professional"
+                      originPath="/pricing"
+                      onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
+                      style={{
+                        ...mono,
+                        fontSize: "8px",
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        color: "#0A0A0A",
+                        backgroundColor: GOLD,
+                        padding: "12px 20px",
+                        textDecoration: "none",
+                        display: "inline-block",
+                        alignSelf: "flex-start",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {CATALOG.professional.primaryCta}
+                    </CheckoutButton>
+                  ) : (
+                    // Governance-gated (internal_only): not a public commercial
+                    // surface. No checkout and no automatic public request-access.
+                    <span
+                      style={{
+                        ...mono,
+                        fontSize: "8px",
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.32)",
+                        alignSelf: "flex-start",
+                      }}
+                    >
+                      Not currently available
+                    </span>
+                  )}
                 </div>
               )}
 

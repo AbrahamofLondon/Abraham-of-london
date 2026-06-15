@@ -3,15 +3,29 @@ import { CATALOG } from "./catalog";
 import { resolvePricingAction } from "./pricing-actions";
 
 describe("pricing actions", () => {
-  it("renders live self-serve products as checkout actions", () => {
-    expect(resolvePricingAction(CATALOG.professional!)).toMatchObject({
-      type: "checkout",
-      href: "/pricing",
-    });
+  it("renders governance-cleared self-serve products as checkout actions", () => {
+    // professional_annual is not in the governance matrix → catalog-driven checkout.
     expect(resolvePricingAction(CATALOG.professional_annual!)).toMatchObject({
       type: "checkout",
       href: "/pricing",
     });
+  });
+
+  it("blocks internal_only products from public checkout AND public request-access", () => {
+    // professional is releaseMode=internal_only. Internal-only products must not
+    // auto-become public "request access" surfaces (no public-intake rule), and
+    // must never resolve to checkout — regardless of Stripe metadata.
+    const action = resolvePricingAction(CATALOG.professional!);
+    expect(action.purchasable).toBe(false);
+    expect(action.type).toBe("blocked");
+  });
+
+  it("never resolves governance-blocked products to checkout", () => {
+    for (const code of ["boardroom_brief", "executive_reporting"]) {
+      const action = resolvePricingAction(CATALOG[code]!);
+      expect(action.purchasable).toBe(false);
+      expect(action.type).not.toBe("checkout");
+    }
   });
 
   it("routes contracted products to enterprise enquiry", () => {
@@ -27,10 +41,14 @@ describe("pricing actions", () => {
       type: "request_access",
       href: "/contact",
     });
+  });
+
+  it("renders checkout-cleared paid products (e.g. playbooks) as checkout", () => {
+    // execution_integrity_protocol is a paid, checkout-safe playbook
+    // (requiresCheckout=true, valid Stripe price) and is not governance-gated.
     expect(resolvePricingAction(CATALOG.execution_integrity_protocol!)).toMatchObject({
-      type: "request_access",
-      label: "Request access",
-      href: "/contact",
+      type: "checkout",
+      purchasable: true,
     });
   });
 

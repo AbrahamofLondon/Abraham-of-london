@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { getProduct } from "@/lib/commercial/catalog";
+import { getGovernanceState } from "@/lib/commercial/commercial-governance";
+import { resolveCommercialAction } from "@/lib/commercial/commercial-action-resolver";
 
 type Props = {
   productCode: string;
@@ -31,8 +34,21 @@ export default function CheckoutButton({
     if (emailProp) setEmail(emailProp);
   }, [emailProp]);
 
+  // Resolver-governed gate: a checkout button may only fire when the single
+  // commercial action resolver grants `checkout`. This holds even if the
+  // product carries valid Stripe IDs (checkout-ready data is not permission).
+  const governedProduct = getProduct(productCode);
+  const governedAction = governedProduct
+    ? resolveCommercialAction(governedProduct, getGovernanceState(productCode))
+    : null;
+  const checkoutPermitted = governedProduct ? Boolean(governedAction?.purchasable) : true;
+
   const handleCheckout = async () => {
     if (loading || disabled) return;
+    if (!checkoutPermitted) {
+      setError("This product is not currently available for checkout.");
+      return;
+    }
     setError("");
 
     const resolvedEmail = email.trim();
@@ -117,11 +133,13 @@ export default function CheckoutButton({
       <button
         type="button"
         onClick={handleCheckout}
-        disabled={disabled || loading}
+        disabled={disabled || loading || !checkoutPermitted}
         className={className}
         style={style}
+        aria-disabled={!checkoutPermitted}
+        title={!checkoutPermitted ? "Not currently available for checkout" : undefined}
       >
-        {loading ? "Preparing checkout..." : children}
+        {loading ? "Preparing checkout..." : !checkoutPermitted ? "Not currently available" : children}
       </button>
     </div>
   );

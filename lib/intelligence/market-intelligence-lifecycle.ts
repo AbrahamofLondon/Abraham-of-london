@@ -22,6 +22,8 @@ export type MarketIntelligenceLifecycleRecord = {
   coveragePeriod: string;
   decisionWindow: string;
   publishedAt?: string;
+  /** For drafts/release candidates: the scheduled publication date (ISO). */
+  publicationTarget?: string;
   updatedAt?: string;
   version?: string;
   lifecycleState: MarketIntelligenceLifecycleState;
@@ -72,6 +74,7 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     year: 2026,
     coveragePeriod: "Q2 2026",
     decisionWindow: "Q3 2026",
+    publicationTarget: "2026-07-08",
     lifecycleState: "DRAFT",
     supersededBy: null,
     replaces: "GMI-Q1-2026",
@@ -107,6 +110,105 @@ export function canPurchaseMarketIntelligenceReport(record: MarketIntelligenceLi
     record.purchasable &&
     (record.lifecycleState === "ACTIVE" || record.lifecycleState === "ACTIVE_UNTIL_SUPERSEDED")
   );
+}
+
+// ─── Computed commercial/publication state (the single authority) ─────────────
+// These derive "current published / upcoming / archive" from lifecycle state and
+// dates. The public/commercial surface MUST use these — never a hand-maintained
+// `current` boolean — so commercial truth always agrees with the lifecycle.
+
+function isPublishedState(state: MarketIntelligenceLifecycleState): boolean {
+  return state === "ACTIVE" || state === "ACTIVE_UNTIL_SUPERSEDED";
+}
+
+/**
+ * The current published GMI report: a published/active edition whose publish date
+ * has passed and which has not been superseded. Release candidates and drafts are
+ * never returned. Returns the most recently published when several qualify.
+ */
+export function getCurrentPublishedMarketIntelligenceReport(
+  asOf: Date = new Date(),
+): MarketIntelligenceLifecycleRecord | null {
+  const candidates = MARKET_INTELLIGENCE_LIFECYCLE.filter(
+    (r) =>
+      isPublishedState(r.lifecycleState) &&
+      !r.supersededBy &&
+      (!r.publishedAt || new Date(r.publishedAt) <= asOf),
+  );
+  return (
+    [...candidates].sort(
+      (a, b) =>
+        new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime(),
+    )[0] ?? null
+  );
+}
+
+/**
+ * The forthcoming GMI report: a draft/scheduled edition, or a published edition
+ * whose publish date is still in the future (a release candidate before its date).
+ */
+export function getUpcomingMarketIntelligenceReport(
+  asOf: Date = new Date(),
+): MarketIntelligenceLifecycleRecord | null {
+  const candidates = MARKET_INTELLIGENCE_LIFECYCLE.filter(
+    (r) =>
+      r.lifecycleState === "DRAFT" ||
+      r.lifecycleState === "SCHEDULED" ||
+      (isPublishedState(r.lifecycleState) && !!r.publishedAt && new Date(r.publishedAt) > asOf),
+  );
+  return candidates[0] ?? null;
+}
+
+/** Published archive editions (superseded/archived, still visible), excluding the current published issue. */
+export function getPublishedArchiveMarketIntelligenceReports(
+  asOf: Date = new Date(),
+): MarketIntelligenceLifecycleRecord[] {
+  const current = getCurrentPublishedMarketIntelligenceReport(asOf);
+  return MARKET_INTELLIGENCE_LIFECYCLE.filter(
+    (r) =>
+      (r.lifecycleState === "SUPERSEDED" || r.lifecycleState === "ARCHIVED") &&
+      r.archiveVisible &&
+      r.id !== current?.id,
+  );
+}
+
+/** The decision window of the current published issue (e.g. "Q2 2026"). */
+export function getCurrentDecisionWindow(asOf: Date = new Date()): string | null {
+  return getCurrentPublishedMarketIntelligenceReport(asOf)?.decisionWindow ?? null;
+}
+
+export type MarketIntelligenceCommercialState = {
+  isCurrentPublished: boolean;
+  isReleaseCandidate: boolean;
+  isArchive: boolean;
+  purchasable: boolean;
+  publicVisible: boolean;
+};
+
+/**
+ * Lifecycle-derived commercial state for one edition. This is the authority the
+ * commercial registry must agree with — see assertGmiRegistryAgreesWithLifecycle.
+ */
+export function getMarketIntelligenceCommercialState(
+  id: string,
+  asOf: Date = new Date(),
+): MarketIntelligenceCommercialState | null {
+  const record = getMarketIntelligenceRecord(id);
+  if (!record) return null;
+  const current = getCurrentPublishedMarketIntelligenceReport(asOf);
+  const upcoming = getUpcomingMarketIntelligenceReport(asOf);
+  const isCurrentPublished = current?.id === id;
+  const isReleaseCandidate = upcoming?.id === id && !isCurrentPublished;
+  const isArchive =
+    (record.lifecycleState === "SUPERSEDED" || record.lifecycleState === "ARCHIVED") &&
+    !isCurrentPublished;
+  return {
+    isCurrentPublished,
+    isReleaseCandidate,
+    isArchive,
+    purchasable: record.purchasable,
+    publicVisible: record.publicVisible,
+  };
 }
 
 export function getMarketIntelligenceLifecycleBadge(record: MarketIntelligenceLifecycleRecord): {

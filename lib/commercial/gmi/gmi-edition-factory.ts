@@ -22,6 +22,9 @@
 // These type-only imports are erased by TypeScript at compile time.
 import type { CatalogProduct, CommercialStatus, PricingFamily } from "../catalog";
 import type { GmiEditionRegistryEntry } from "./gmi-edition-registry";
+// Runtime import: the lifecycle module is the publication authority. The registry
+// must AGREE with it — enforced at build/import time below (fail-closed).
+import { getMarketIntelligenceCommercialState } from "@/lib/intelligence/market-intelligence-lifecycle";
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
@@ -108,6 +111,46 @@ export function validateGmiEditionRegistry(
   return errors;
 }
 
+// ─── Lifecycle reconciliation guard ───────────────────────────────────────────
+// Fails closed if the commercial registry contradicts the authoritative lifecycle
+// (market-intelligence-lifecycle.ts). Editions with no lifecycle record (e.g. a
+// far-future draft) are skipped — there is nothing to reconcile yet.
+export function assertGmiRegistryAgreesWithLifecycle(
+  entries: GmiEditionRegistryEntry[],
+): GmiEditionValidationError[] {
+  const errors: GmiEditionValidationError[] = [];
+  for (const e of entries) {
+    const state = getMarketIntelligenceCommercialState(e.editionId);
+    if (!state) continue;
+
+    // Public visibility must be the inverse of hiddenFromPricing.
+    if (state.publicVisible === e.hiddenFromPricing) {
+      errors.push({
+        editionId: e.editionId,
+        error: `lifecycle publicVisible=${state.publicVisible} contradicts registry hiddenFromPricing=${e.hiddenFromPricing}`,
+      });
+    }
+
+    const sellable = e.status === "active" || e.status === "manual_billing" || e.status === "archived";
+    if (state.purchasable && !sellable) {
+      errors.push({ editionId: e.editionId, error: `lifecycle purchasable=true but registry status="${e.status}" is not sellable` });
+    }
+    if (!state.purchasable && sellable) {
+      errors.push({ editionId: e.editionId, error: `lifecycle purchasable=false but registry status="${e.status}" is sellable` });
+    }
+
+    // The current published issue must be a live edition (active/manual_billing), never draft/archived.
+    if (state.isCurrentPublished && !(e.status === "active" || e.status === "manual_billing")) {
+      errors.push({ editionId: e.editionId, error: `lifecycle current-published but registry status="${e.status}" (expected active/manual_billing)` });
+    }
+    // A not-yet-published release candidate must be draft.
+    if (state.isReleaseCandidate && e.status !== "draft") {
+      errors.push({ editionId: e.editionId, error: `lifecycle release-candidate but registry status="${e.status}" (expected draft)` });
+    }
+  }
+  return errors;
+}
+
 // ─── Derivation helpers ───────────────────────────────────────────────────────
 
 function deriveEntitlementSlug(slug: string): string {
@@ -144,6 +187,18 @@ function deriveDisplayPrice(entry: GmiEditionRegistryEntry): string {
   return "£59";
 }
 
+// CTA is derived from commercial status — NOT the admin `current` flag, which is
+// in-preparation focus only and must not drive public/commercial copy.
+function derivePrimaryCta(status: GmiEditionRegistryEntry["status"]): string {
+  switch (status) {
+    case "active":         return "View report";
+    case "manual_billing": return "Access by enquiry";
+    case "archived":       return "Access archive";
+    case "draft":          return "Coming soon";
+    case "retired":        return "Unavailable";
+  }
+}
+
 // ─── Single-entry builder ─────────────────────────────────────────────────────
 
 export function buildGmiEditionProduct(entry: GmiEditionRegistryEntry): CatalogProduct {
@@ -173,7 +228,7 @@ export function buildGmiEditionProduct(entry: GmiEditionRegistryEntry): CatalogP
     hiddenReason: entry.hiddenReason,
     shortDescription: entry.shortDescription,
     pricingNote: entry.pricingNote,
-    primaryCta: entry.current ? "View report" : "Access archive",
+    primaryCta: derivePrimaryCta(entry.status),
     successPath: route,
     cancelPath: route,
     cookieName: null,
@@ -188,7 +243,10 @@ export function buildGmiEditionProducts(
   entries: GmiEditionRegistryEntry[],
 ): Record<string, CatalogProduct> {
   // Validate before building — any error throws immediately
-  const errors = validateGmiEditionRegistry(entries);
+  const errors = [
+    ...validateGmiEditionRegistry(entries),
+    ...assertGmiRegistryAgreesWithLifecycle(entries),
+  ];
   if (errors.length > 0) {
     const msg = errors.map((e) => `  [${e.editionId}] ${e.error}`).join("\n");
     throw new Error(`GMI Edition Registry validation failed:\n${msg}`);

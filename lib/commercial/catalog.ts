@@ -960,6 +960,111 @@ export const CATALOG: Record<string, CatalogProduct> = {
 
   // ═��═ E. EXECUTION LAYER ��═══════════��════════════════════════════════��════
 
+  // ═══ REPORTING SUBSCRIPTIONS (governance: manual fulfilment only) ═══════════
+  // Checkout-ready schema with NO fabricated Stripe IDs. The commercial action
+  // resolver gates these to manual fulfilment / request access until real
+  // Stripe metadata is supplied and governance clears them for checkout.
+
+  reporting_monthly: {
+    code: "reporting_monthly",
+    displayName: "Reporting — Monthly",
+    marketName: "Monthly Reporting",
+    publicLabel: "Monthly Reporting",
+    amount: 0,
+    displayPrice: "By enquiry",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "reporting-monthly",
+    tier: "reporting-monthly",
+    category: "reporting",
+    accessType: "subscription",
+    duration: "monthly",
+    active: true,
+    commercialStatus: "manual_billing",
+    pricingFamily: "intelligence_reports",
+    requiresCheckout: false,
+    requiresContract: false,
+    futurePaidCandidate: true,
+    hiddenFromPricing: true,
+    hiddenReason: "manual_fulfilment_pending_stripe_metadata",
+    successPath: "/contact",
+    cancelPath: "/contact",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Recurring monthly decision-reporting engagement, fulfilled manually pending commercial activation.",
+    pricingNote: "Pricing and checkout pending Stripe metadata and governance clearance.",
+    primaryCta: "Request monthly reporting",
+  },
+
+  reporting_custom: {
+    code: "reporting_custom",
+    displayName: "Reporting — Custom",
+    marketName: "Custom Reporting",
+    publicLabel: "Custom Reporting",
+    amount: 0,
+    displayPrice: "By enquiry",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "reporting-custom",
+    tier: "reporting-custom",
+    category: "reporting",
+    accessType: "one_time",
+    duration: "lifetime",
+    active: true,
+    commercialStatus: "manual_billing",
+    pricingFamily: "intelligence_reports",
+    requiresCheckout: false,
+    requiresContract: false,
+    futurePaidCandidate: true,
+    hiddenFromPricing: true,
+    hiddenReason: "manual_fulfilment_pending_stripe_metadata",
+    successPath: "/contact",
+    cancelPath: "/contact",
+    cookieName: null,
+    includes: [],
+    shortDescription: "Bespoke reporting scope agreed per engagement, fulfilled manually pending commercial activation.",
+    pricingNote: "Scope and pricing agreed per engagement; checkout pending Stripe metadata.",
+    primaryCta: "Discuss custom reporting",
+  },
+
+  // GMI family wrapper (Option A). Resolves to the current active quarter
+  // (gmi_q2_2026) for fulfilment; not a standalone artifact. Manual fulfilment
+  // per governance until checkout is cleared.
+  gmi_quarterly: {
+    code: "gmi_quarterly",
+    displayName: "Global Market Intelligence — Quarterly",
+    marketName: "Global Market Intelligence (Quarterly)",
+    publicLabel: "Global Market Intelligence — Quarterly",
+    amount: 0,
+    displayPrice: "Current quarter access",
+    stripeProductId: null,
+    stripePriceId: null,
+    entitlementSlug: "gmi-quarterly",
+    tier: "gmi-quarterly",
+    category: "reporting",
+    accessType: "one_time",
+    duration: "lifetime",
+    active: true,
+    commercialStatus: "manual_billing",
+    pricingFamily: "intelligence_reports",
+    requiresCheckout: false,
+    requiresContract: false,
+    futurePaidCandidate: true,
+    hiddenFromPricing: true,
+    hiddenReason: "family_product_surfaced_via_dedicated_gmi_page",
+    // gmi_quarterly resolves to the dedicated GMI product-family page, NOT to a
+    // single issue artifact. The family page surfaces the current issue, the
+    // archive, methodology, and access logic. It is never silently aliased to
+    // gmi_q2_2026.
+    successPath: "/intelligence/gmi",
+    cancelPath: "/intelligence/gmi",
+    cookieName: null,
+    includes: [],
+    shortDescription: "The quarterly Global Market Intelligence product line. Fulfilment grants entitlement to the current issue and the verified archive, governed by access rules.",
+    pricingNote: "Product family. Resolves to the dedicated GMI page; current issue is gmi_q2_2026. Checkout pending Stripe metadata and governance clearance.",
+    primaryCta: "Open Global Market Intelligence",
+  },
+
   strategy_room: {
     code: "strategy_room",
     displayName: "Strategy Room \u2014 Entry",

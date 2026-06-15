@@ -7,8 +7,11 @@ import Stripe from "stripe";
 import {
   checkCheckoutEligibility,
   resolveEntitlementSlugs,
+  getProduct,
 } from "@/lib/commercial/catalog";
 import { resolveProductIdentity } from "@/lib/commercial/product-identity";
+import { getGovernanceState } from "@/lib/commercial/commercial-governance";
+import { resolveCommercialAction } from "@/lib/commercial/commercial-action-resolver";
 import { hubspotSync } from "@/lib/hubspot/sync";
 import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
 import { evaluateERAdmission } from "@/lib/diagnostics/executive-reporting/admission";
@@ -112,6 +115,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           returnPath: erAdmission.returnPath,
         },
       });
+    }
+  }
+
+  // ── Governance gate (authoritative): checkout-ready data is not permission ──
+  // A product may carry valid Stripe IDs and still be governance-blocked. The
+  // commercial action resolver is the single authority — only `purchasable`
+  // (state === "checkout") may proceed to a Stripe session.
+  {
+    const govProduct = getProduct(code);
+    if (govProduct) {
+      const action = resolveCommercialAction(govProduct, getGovernanceState(code));
+      if (!action.purchasable) {
+        return res.status(403).json({
+          ok: false,
+          reason: "CHECKOUT_BLOCKED_BY_GOVERNANCE",
+          state: action.state,
+          detail: action.reason,
+          code,
+        });
+      }
     }
   }
 

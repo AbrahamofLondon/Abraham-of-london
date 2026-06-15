@@ -84,16 +84,33 @@ describe("catalog integrity", () => {
       expect(CATALOG.additional_collaborator!.stripePriceId).toBeNull();
     });
 
-    it("keeps GMI Q1 archived and hidden after Q2 supersedes it", () => {
-      // Q2 is now the current edition. Q1 is archived: still purchasable but hidden from pricing.
-      expect(CATALOG.gmi_q1_2026!.active).toBe(true);            // archived + Stripe IDs → active
-      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid"); // archived editions remain "paid"
-      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);  // has Stripe IDs
-      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(true); // superseded_by_q2
-      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Superseded by Q2 2026 edition");
-      // Q2 is now the visible current edition
-      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(false);
-      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Current decision window: Q2 2026");
+    it("reconciles GMI editions to lifecycle authority: Q1 current published, Q2 draft/release-candidate", () => {
+      // Q1 2026 — current published issue per lifecycle (ACTIVE_UNTIL_SUPERSEDED).
+      // Retains Stripe IDs, visible on pricing, purchasable. NOT hidden.
+      expect(CATALOG.gmi_q1_2026!.active).toBe(true);
+      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid");
+      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
+      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false); // current published, not hidden
+      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Coverage period: Q1 2026");
+
+      // Q2 2026 — release candidate (lifecycle DRAFT). Hidden from pricing.
+      // No Stripe metadata. Not active. Admin in-focus only.
+      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(true);  // draft, hidden
+      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("internal_only"); // draft → internal_only
+      expect(CATALOG.gmi_q2_2026!.active).toBe(false);            // draft → not active
+      expect(CATALOG.gmi_q2_2026!.stripePriceId).toBeNull();
+      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Coverage period: Q2 2026");
+    });
+
+    it("resolves gmi_quarterly to the dedicated GMI family page, not an issue artifact", () => {
+      // gmi_quarterly is the canonical product family. It resolves to the
+      // dedicated GMI page — never to a single issue artifact, and is never
+      // silently aliased to gmi_q2_2026.
+      expect(CATALOG.gmi_quarterly!.active).toBe(true);
+      expect(CATALOG.gmi_quarterly!.successPath).toBe("/intelligence/gmi");
+      // Issue artifacts resolve independently and are NOT the family route.
+      expect(CATALOG.gmi_q2_2026!.successPath).not.toBe("/intelligence/gmi");
+      expect(CATALOG.gmi_q1_2026!.successPath).not.toBe("/intelligence/gmi");
     });
 
     it("keeps Boardroom Brief as the active first paid proof-of-value product", () => {
