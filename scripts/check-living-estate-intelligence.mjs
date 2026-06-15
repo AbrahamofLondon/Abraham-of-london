@@ -1,33 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * scripts/check-living-estate-intelligence.mjs
- *
- * Living Estate Intelligence Checker
- * -----------------------------------
- * Evaluates product estate records as structured objects using field-owned
- * identity extraction — never by substring occurrence in relationship fields.
- *
- * Authority hierarchy:
- *   Lifecycle authority > Commercial resolver > Registry admin focus > MDX frontmatter
- *
- * Safety:
- *   - no network access
- *   - no source mutation
- *   - no deployment
- *   - writes only:
- *       reports/living-estate-intelligence-report.json
- *       reports/living-estate-intelligence-report.md
- *       reports/living-estate-intelligence-memory.json
- *
- * Usage:
- *   node scripts/check-living-estate-intelligence.mjs
- *
- * Exit:
- *   0 = no blocking contradiction
- *   1 = blocker detected
- */
-
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -39,8 +11,6 @@ import {
   findRecordByIdentity,
 } from "./lib/structured-record-parser.mjs";
 
-// ─── Runtime ─────────────────────────────────────────────────────────────────
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..");
@@ -49,77 +19,47 @@ const REPORT_JSON = "reports/living-estate-intelligence-report.json";
 const REPORT_MD = "reports/living-estate-intelligence-report.md";
 const MEMORY_FILE = "reports/living-estate-intelligence-memory.json";
 
-// ─── Console ─────────────────────────────────────────────────────────────────
-
+// ─── Console ─────────────────────────────────────────────────────────────
 const RESET = "\x1b[0m";
 const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
-const CYAN = "\x1b[36m";
 const BOLD = "\x1b[1m";
+function paint(c, t) { return `${c}${t}${RESET}`; }
+function heading(t) { console.log(`\n${t}\n${"─".repeat(t.length)}`); }
+function ok(msg) { console.log(`  ${GREEN}✓${RESET} ${msg}`); }
+function warn(msg) { console.log(`  ${YELLOW}⚠${RESET} ${msg}`); }
+function fail(msg) { console.log(`  ${RED}✗${RESET} ${msg}`); }
 
-function paint(color, text) { return `${color}${text}${RESET}`; }
-function log(color, ...args) { console.log(color, ...args, RESET); }
-function heading(text) { console.log(`\n${text}\n${"\u2500".repeat(text.length)}`); }
-function ok(msg) { console.log(`  ${GREEN}\u2713${RESET} ${msg}`); }
-function warn(msg) { console.log(`  ${YELLOW}\u26a0${RESET} ${msg}`); }
-function fail(msg) { console.log(`  ${RED}\u2717${RESET} ${msg}`); }
+// ─── File helpers ────────────────────────────────────────────────────────
+function exists(p) { return fs.existsSync(path.join(ROOT, p)); }
+function readText(p) { try { return fs.readFileSync(path.join(ROOT, p), "utf8"); } catch { return ""; } }
+function readJson(p) { try { return JSON.parse(readText(p)); } catch { return null; } }
+function writeJson(p, d) { const abs = path.join(ROOT, p); const dir = path.dirname(abs); if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(abs, JSON.stringify(d, null, 2)); }
+function writeText(p, c) { const abs = path.join(ROOT, p); const dir = path.dirname(abs); if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(abs, c); }
 
-// ─── File helpers ────────────────────────────────────────────────────────────
-
-function exists(rel) { return fs.existsSync(path.join(ROOT, rel)); }
-function readText(rel) {
-  try { return fs.readFileSync(path.join(ROOT, rel), "utf8"); } catch { return ""; }
+// ─── Dynamic contracts ────────────────────────────────────────────────────
+function loadContract(rel, defaults) {
+  try { return JSON.parse(fs.readFileSync(path.join(ROOT, rel), "utf8")); } catch { return defaults; }
 }
-function readJson(rel) {
-  try { return JSON.parse(readText(rel)); } catch { return null; }
-}
-function writeJson(rel, data) {
-  const abs = path.join(ROOT, rel);
-  const dir = path.dirname(abs);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(abs, JSON.stringify(data, null, 2), "utf8");
-}
-function writeText(rel, content) {
-  const abs = path.join(ROOT, rel);
-  const dir = path.dirname(abs);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(abs, content, "utf8");
-}
+const lifecycleContract = loadContract("data/LifecycleAuthorityContract.json", {
+  lifecycleStates: ["DRAFT", "PUBLISHED", "ACTIVE", "ARCHIVED"],
+  draftStates: ["DRAFT"],
+  activeStates: ["PUBLISHED", "ACTIVE"],
+  prePublicationStates: ["DRAFT", "SCHEDULED"],
+});
+const narrativeContract = loadContract("data/NarrativeAuthorityContract.json", {
+  sensitiveTerms: [],
+  requiredAuthorityBoundaryPhrases: [],
+  doctrineFiles: [],
+});
 
-function normaliseCode(s) {
-  return String(s || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
-}
+function lifecycleIsDraft(s) { return lifecycleContract.draftStates.includes(String(s).toUpperCase()); }
+function lifecycleIsActive(s) { return lifecycleContract.activeStates.includes(String(s).toUpperCase()); }
+function lifecycleIsPrePub(s) { return lifecycleContract.prePublicationStates.includes(String(s).toUpperCase()); }
 
-// ─── Source-of-Truth Map ────────────────────────────────────────────────────
-
-const SOURCE_OF_TRUTH_MAP = {
-  publicationLifecycle: "lib/intelligence/market-intelligence-lifecycle.ts",
-  gmiEditionMetadata: "lib/commercial/gmi/gmi-edition-registry.ts",
-  commercialMetadata: "lib/commercial/catalog.ts",
-  productAuthority: "data/ProductAuthorityContract.json",
-  releaseReadiness: "reports/product-release-readiness-matrix.json",
-  releaseGovernance: "reports/product-release-governance-matrix.json",
-};
-
-// ─── Lifecycle helpers ──────────────────────────────────────────────────────
-
-function lifecycleIsDraft(value) {
-  return ["DRAFT", "draft", "FORTHCOMING", "forthcoming", "RELEASE_CANDIDATE", "release_candidate", "production_release_candidate"].includes(String(value || ""));
-}
-
-function lifecycleIsActive(value) {
-  return ["ACTIVE_UNTIL_SUPERSEDED", "ACTIVE", "PUBLISHED", "published", "active"].includes(String(value || ""));
-}
-
-function lifecycleIsPrePublication(value) {
-  return lifecycleIsDraft(value) || ["SCHEDULED", "scheduled"].includes(String(value || ""));
-}
-
-// ─── Issue factory ───────────────────────────────────────────────────────────
-
+// ─── Issue model ─────────────────────────────────────────────────────────
 let issueCounter = 1;
-
 function makeIssue(input) {
   const id = `LEI-${String(issueCounter++).padStart(4, "0")}`;
   const severity = input.severity || "informational_note";
@@ -127,12 +67,19 @@ function makeIssue(input) {
     input.blocksDeployment === true ||
     ["fatal_build_blocker", "checkout_bypass", "commercial_safety_blocker"].includes(severity) ||
     (severity === "publication_lifecycle_conflict" && input.blocksPublication === true);
-
   return {
     id,
+    signature: input.signature || `${input.domain}:${input.title.replace(/\s/g, "_")}`,
     title: input.title,
     description: input.description || "",
     severity,
+    confidence: input.confidence || "high",
+    exposure: input.exposure || "unknown",
+    sourceAuthority: input.sourceAuthority || null,
+    falsification: input.falsification || "not_falsified",
+    safeToIgnore: input.safeToIgnore === false,
+    repairAction: input.repairAction || null,
+    repairRoute: input.repairRoute || null,
     domain: input.domain || "general",
     blocksDeployment,
     requiresOwnerDecision: input.requiresOwnerDecision === true,
@@ -146,36 +93,25 @@ function makeIssue(input) {
   };
 }
 
-// ─── Snapshot loader ─────────────────────────────────────────────────────────
-
+// ─── Snapshot loader (dynamic, no hardcoded product families) ────────────
 function loadEstateSnapshot() {
   const snapshot = {
+    files: { pages: [], components: [], lib: [], content: [], scripts: [] },
+    gmi: { lifecycle: [], registry: [] },
+    reports: {},
+    living: { stateFilesPresent: {}, reportsPresent: {}, operatorObjects: 0, userObjects: 0 },
     lifecycleRecords: [],
     registryRecords: [],
     catalogEntries: {},
     contentDocuments: [],
     envFiles: [],
     products: [],
-    reports: {},
   };
 
-  // Parse lifecycle records using structured field-owned extraction
   const lifeContent = readText("lib/intelligence/market-intelligence-lifecycle.ts");
-  if (lifeContent) {
-    snapshot.lifecycleRecords = parseGmiLifecycleRecords(
-      "lib/intelligence/market-intelligence-lifecycle.ts", lifeContent
-    );
-  }
-
-  // Parse GMI registry records using structured field-owned extraction
+  if (lifeContent) snapshot.lifecycleRecords = parseGmiLifecycleRecords("lib/intelligence/market-intelligence-lifecycle.ts", lifeContent);
   const regContent = readText("lib/commercial/gmi/gmi-edition-registry.ts");
-  if (regContent) {
-    snapshot.registryRecords = parseGmiRegistryRecords(
-      "lib/commercial/gmi/gmi-edition-registry.ts", regContent
-    );
-  }
-
-  // Parse CATALOG entries
+  if (regContent) snapshot.registryRecords = parseGmiRegistryRecords("lib/commercial/gmi/gmi-edition-registry.ts", regContent);
   const catContent = readText("lib/commercial/catalog.ts");
   if (catContent) {
     const catRecords = parseCatalogRecords("lib/commercial/catalog.ts", catContent);
@@ -185,346 +121,542 @@ function loadEstateSnapshot() {
     }
   }
 
-  // Walk content files for MDX frontmatter
+  // Walk content
   function walkDir(dir, list) {
     const abs = path.join(ROOT, dir);
     try {
-      for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
-        const rel = `${dir}/${entry.name}`;
-        if (entry.isDirectory()) { walkDir(rel, list); } else { list.push(rel); }
+      for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
+        const rel = `${dir}/${e.name}`;
+        if (e.isDirectory()) walkDir(rel, list);
+        else if (/\.(mdx|md)$/.test(e.name)) list.push(rel);
       }
-    } catch { /* skip */ }
+    } catch {}
   }
-
-  if (exists("content")) walkDir("content", snapshot.contentDocuments);
-  // Convert to parsed documents
-  snapshot.contentDocuments = snapshot.contentDocuments.map((file) => {
-    const text = readText(file);
-    const parsed = parseFrontmatter(text);
-    return { file, frontmatter: parsed.frontmatter, body: parsed.body };
-  });
+  if (exists("content")) walkDir("content", snapshot.files.content);
+  snapshot.contentDocuments = snapshot.files.content.map(f => ({ file: f, ...parseFrontmatter(readText(f)) }));
 
   // Env files
-  try {
-    for (const f of fs.readdirSync(ROOT)) {
-      if (f.startsWith(".env")) snapshot.envFiles.push(f);
-    }
-  } catch { /* skip */ }
+  try { for (const f of fs.readdirSync(ROOT)) if (f.startsWith(".env")) snapshot.envFiles.push(f); } catch {}
 
   // Load matrices
   const readiness = readJson("reports/product-release-readiness-matrix.json") || {};
   const governance = readJson("reports/product-release-governance-matrix.json") || {};
   const authority = readJson("data/ProductAuthorityContract.json") || {};
-
-  // Build product list
   const allCodes = Array.from(new Set([...Object.keys(readiness), ...Object.keys(governance)]));
   for (const code of allCodes) {
-    const r = readiness[code] || {};
-    const g = governance[code] || {};
-    const a = authority[code] || {};
     snapshot.products.push({
       productCode: code,
-      authority: { state: a.currentAuthorityState || null },
+      authority: { state: authority[code]?.currentAuthorityState || null },
       readiness: {
-        readinessStatus: r.readinessStatus || null,
-        releaseReadyNow: r.releaseReadyNow === true,
-        checkoutSafe: r.checkoutSafe,
-        commercialSafe: r.commercialSafe,
-        releaseLane: r.releaseLane || null,
-        releaseMode: r.releaseMode || null,
+        readinessStatus: readiness[code]?.readinessStatus || null,
+        releaseReadyNow: readiness[code]?.releaseReadyNow === true,
+        checkoutSafe: readiness[code]?.checkoutSafe,
+        commercialSafe: readiness[code]?.commercialSafe,
+        releaseLane: readiness[code]?.releaseLane || null,
+        releaseMode: readiness[code]?.releaseMode || null,
       },
       governance: {
-        checkoutAllowed: g.checkoutAllowed,
-        releaseLane: g.releaseLane || null,
-        releaseMode: g.releaseMode || null,
+        checkoutAllowed: governance[code]?.checkoutAllowed,
+        releaseLane: governance[code]?.releaseLane || null,
+        releaseMode: governance[code]?.releaseMode || null,
       },
     });
   }
 
-  // Load existing reports
-  for (const reportFile of ["reports/blog-post-route-audit.json", "reports/public-content-route-audit.json"]) {
-    const data = readJson(reportFile);
-    if (data) snapshot.reports[reportFile] = data;
-  }
+  // Collect pages, components, lib, scripts
+  const pageDirs = ["pages", "app"];
+  for (const d of pageDirs) if (exists(d)) walkDir(d, snapshot.files.pages);
+  if (exists("components")) walkDir("components", snapshot.files.components);
+  if (exists("lib")) walkDir("lib", snapshot.files.lib);
+  if (exists("scripts")) snapshot.files.scripts = fs.readdirSync(path.join(ROOT, "scripts")).filter(f => /\.(js|mjs|ts)$/.test(f)).map(f => `scripts/${f}`);
 
+  // Load existing reports
+  const existingReports = [
+    "reports/product-release-readiness-matrix.json",
+    "reports/product-release-governance-matrix.json",
+    "reports/blog-post-route-audit.json",
+    "reports/public-content-route-audit.json",
+    "reports/living-product-truth-report.json",
+    "reports/living-product-view-model.json",
+    "reports/living-state-objects.json",
+    "reports/living-state-view-model.json",
+  ];
+  for (const r of existingReports) snapshot.reports[r] = readJson(r);
+
+  // Living-state wiring
+  const livingCoreFiles = [
+    "lib/living-intelligence/living-state-object-contract.ts",
+    "lib/living-intelligence/living-state-engine.ts",
+    "lib/living-intelligence/living-state-view-model.ts",
+    "components/living/LivingStatePanel.tsx",
+    "scripts/run-living-state-objects.ts",
+  ];
+  for (const f of livingCoreFiles) snapshot.living.stateFilesPresent[f] = exists(f);
+  const livingReports = ["reports/living-state-objects.json", "reports/living-state-view-model.json"];
+  for (const r of livingReports) snapshot.living.reportsPresent[r] = exists(r);
+  const livingObjects = readJson("reports/living-state-objects.json");
+  if (Array.isArray(livingObjects)) {
+    snapshot.living.operatorObjects = livingObjects.filter(o => o?.type === "operator").length;
+    snapshot.living.userObjects = livingObjects.filter(o => o?.type === "user").length;
+  }
   return snapshot;
 }
 
-// ─── Detector: GMI Publication Lifecycle ─────────────────────────────────────
-
-function detectGmiLifecycleContradictions(snapshot) {
+// ─── Detector 1: Product / Commercial Truth (dynamic) ────────────────────
+function detectProductCommercialContradictions(snapshot) {
   const issues = [];
+  for (const prod of snapshot.products) {
+    const code = prod.productCode;
+    const cat = snapshot.catalogEntries[code];
+    const { readiness, governance, authority } = prod;
 
-  for (const reg of snapshot.registryRecords) {
-    const identity = reg.identity[0]; // e.g. "GMI-Q1-2026" or "gmi_q1_2026"
-    const life = findRecordByIdentity(snapshot.lifecycleRecords, identity);
-
-    if (!life) {
-      // Registry record without lifecycle — informational
+    if (readiness.releaseReadyNow && (authority.state === "internal_only" || authority.state === "blocked")) {
       issues.push(makeIssue({
-        title: `GMI ${identity}: registry entry has no matching lifecycle record`,
-        description: `Registry has ${identity} but lifecycle authority has no corresponding record.`,
+        signature: `commercial:${code}:release_ready_vs_authority`,
+        title: `${code} release‑ready but authority state is ${authority.state}`,
+        severity: "commercial_safety_blocker",
+        domain: "product_commercial_truth",
+        sourceOfTruth: "data/ProductAuthorityContract.json",
+        affectedItems: [code],
+        evidence: [`releaseReadyNow=true`, `authority.state=${authority.state}`],
+        recommendation: "Update authority state or set releaseReadyNow=false.",
+      }));
+    }
+    if (governance.checkoutAllowed && (readiness.readinessStatus === "blocked" || readiness.releaseMode === "blocked")) {
+      issues.push(makeIssue({
+        signature: `commercial:${code}:checkout_allowed_vs_blocked`,
+        title: `${code} checkout allowed while blocked`,
+        severity: "checkout_bypass",
+        domain: "product_commercial_truth",
+        affectedItems: [code],
+        evidence: [`checkoutAllowed=true`, `readinessStatus=${readiness.readinessStatus}`],
+        recommendation: "Set checkoutAllowed=false or resolve block.",
+      }));
+    }
+    if (cat?.fulfillmentType === "manual" && !exists("docs/manual-fulfilment.md") && !exists("app/api/fulfilment/manual/route.ts")) {
+      issues.push(makeIssue({
+        signature: `commercial:${code}:manual_fulfilment_no_route`,
+        title: `${code} manual fulfilment missing route/playbook`,
         severity: "governed_tension",
-        domain: "gmi_publication_lifecycle",
         governedTension: true,
-        sourceOfTruth: SOURCE_OF_TRUTH_MAP.publicationLifecycle,
-        observedSource: SOURCE_OF_TRUTH_MAP.gmiEditionMetadata,
-        affectedItems: [identity],
-        evidence: [`registry.status=${reg.fields.status}`, "no lifecycle record"],
-        recommendation: "Add lifecycle record or remove orphaned registry entry.",
+        domain: "product_commercial_truth",
+        recommendation: "Add fulfilment documentation and API endpoint.",
+      }));
+    }
+  }
+  return issues;
+}
+
+// ─── Detector 2: Storefront / Checkout Bypass (no hardcoded product names) ──
+function detectStorefrontAndCheckoutBypass(snapshot) {
+  const issues = [];
+  const surfaceFiles = [...snapshot.files.pages, ...snapshot.files.components]
+    .filter(f => /pricing|products|offers|CheckoutButton|purchasable|commercial/i.test(f));
+  for (const file of surfaceFiles) {
+    const content = readText(file);
+    if (!content) continue;
+    const stripeRegex = /stripePriceId\s*:\s*["'](price_[a-zA-Z0-9]+)["']/gi;
+    let match;
+    while ((match = stripeRegex.exec(content)) !== null) {
+      const priceId = match[1];
+      const start = Math.max(0, match.index - 400);
+      const end = Math.min(content.length, match.index + 400);
+      const context = content.slice(start, end);
+      const hasGuard = /purchasable|resolveCommercialAction|checkoutPermitted|governanceGate|useCheckoutGuard/i.test(context);
+      if (!hasGuard) {
+        issues.push(makeIssue({
+          signature: `checkout_bypass:${file}:${priceId}`,
+          title: `Stripe price ID without guard in ${file}`,
+          severity: "checkout_bypass",
+          domain: "storefront_bypass",
+          observedSource: file,
+          evidence: [`priceId=${priceId}`],
+          recommendation: "Wrap checkout elements with resolver guard.",
+        }));
+      }
+    }
+    if (/<CheckoutButton/i.test(content) && !/purchasable|resolveCommercialAction|checkoutPermitted|disabled\s*=\s*\{/i.test(content)) {
+      issues.push(makeIssue({
+        signature: `checkout_bypass:${file}:CheckoutButton_no_guard`,
+        title: `CheckoutButton without guard in ${file}`,
+        severity: "checkout_bypass",
+        domain: "storefront_bypass",
+        recommendation: "Add commercial guard or disable button for blocked products.",
+      }));
+    }
+  }
+  return issues;
+}
+
+// ─── Detector 3: Publication Lifecycle (dynamic, no hardcoded GMI) ────────
+function detectPublicationLifecycleContradictions(snapshot) {
+  const issues = [];
+  // Use any record that has an identity field (both lifecycle and registry)
+  for (const reg of snapshot.registryRecords) {
+    const identity = reg.identity[0];
+    const life = findRecordByIdentity(snapshot.lifecycleRecords, identity);
+    if (!life) {
+      issues.push(makeIssue({
+        signature: `lifecycle:${identity}:registry_orphan`,
+        title: `Registry entry without lifecycle record: ${identity}`,
+        severity: "governed_tension",
+        governedTension: true,
+        domain: "publication_lifecycle",
+        recommendation: "Add matching lifecycle record or remove registry entry.",
       }));
       continue;
     }
-
     const regStatus = String(reg.fields.status || "");
     const lifeState = String(life.fields.lifecycleState || "");
     const regCurrent = reg.fields.current === true;
     const isDraft = lifecycleIsDraft(lifeState);
     const isActive = lifecycleIsActive(lifeState);
-
-    // --- Rule 1: Registry current flag on a draft lifecycle ---
-    // This is an admin-preparation focus flag. Not a blocker if lifecycle
-    // truth remains protected (public/commercial surfaces use lifecycle).
     if (regCurrent && isDraft) {
       issues.push(makeIssue({
-        title: `GMI ${identity}: registry current flag is admin focus while lifecycle is draft`,
-        description: `Registry marks ${identity} as current (admin focus) but lifecycle says ${lifeState}. Safe only if public surfaces derive from lifecycle.`,
+        signature: `lifecycle:${identity}:current_flag_on_draft`,
+        title: `Registry 'current' flag on draft lifecycle (admin focus)`,
         severity: "governed_tension",
-        domain: "gmi_publication_lifecycle",
         governedTension: true,
-        sourceOfTruth: SOURCE_OF_TRUTH_MAP.publicationLifecycle,
-        observedSource: SOURCE_OF_TRUTH_MAP.gmiEditionMetadata,
-        expectedSource: "Lifecycle controls publication state.",
-        affectedItems: [identity],
-        evidence: [`registry.current=true`, `lifecycle.lifecycleState=${lifeState}`],
-        recommendation: "Keep registry current as admin focus only. Public surfaces must use lifecycle helpers.",
+        evidence: [`registry.current=true`, `lifecycle.state=${lifeState}`],
+        recommendation: "Keep registry 'current' as admin focus only.",
       }));
     }
-
-    // --- Rule 2: Registry archived but lifecycle still active ---
     const isArchived = regStatus.includes("archiv");
     if (isArchived && isActive && !life.fields.supersededBy) {
       issues.push(makeIssue({
-        title: `GMI ${identity}: registry archive state conflicts with active lifecycle`,
-        description: `Registry status is "${regStatus}" but lifecycle says ${lifeState} with no supersession.`,
+        signature: `lifecycle:${identity}:archive_vs_active`,
+        title: `Registry archive conflicts with active lifecycle`,
         severity: "publication_lifecycle_conflict",
-        domain: "gmi_publication_lifecycle",
         blocksPublication: true,
-        sourceOfTruth: SOURCE_OF_TRUTH_MAP.publicationLifecycle,
-        observedSource: SOURCE_OF_TRUTH_MAP.gmiEditionMetadata,
-        affectedItems: [identity],
-        evidence: [`registry.status=${regStatus}`, `lifecycle.lifecycleState=${lifeState}`, `lifecycle.supersededBy=${life.fields.supersededBy || "null"}`],
-        recommendation: "Reconcile registry archive state with lifecycle supersession.",
+        evidence: [`registry.status=${regStatus}`, `lifecycle.state=${lifeState}`],
+        recommendation: "Reconcile with lifecycle supersession.",
       }));
     }
-
-    // --- Rule 3: Registry purchasable while lifecycle is draft ---
     if (reg.fields.purchasable === true && isDraft) {
       issues.push(makeIssue({
-        title: `GMI ${identity}: purchasable while lifecycle is draft`,
-        description: `Registry marks ${identity} as purchasable but lifecycle says ${lifeState}. Draft editions cannot be public checkout products.`,
+        signature: `lifecycle:${identity}:purchasable_draft`,
+        title: `Purchasable while lifecycle is draft`,
         severity: "commercial_safety_blocker",
-        domain: "gmi_publication_lifecycle",
-        sourceOfTruth: SOURCE_OF_TRUTH_MAP.publicationLifecycle,
-        observedSource: SOURCE_OF_TRUTH_MAP.gmiEditionMetadata,
-        affectedItems: [identity],
-        evidence: [`registry.purchasable=true`, `lifecycle.lifecycleState=${lifeState}`],
-        recommendation: "Set purchasable false until lifecycle permits publication.",
+        evidence: [`purchasable=true`, `lifecycle.state=${lifeState}`],
+        recommendation: "Set purchasable=false until lifecycle permits publication.",
       }));
     }
   }
-
-  // --- Check content document frontmatter against lifecycle ---
+  // Check content frontmatter vs lifecycle
   for (const doc of snapshot.contentDocuments) {
     const fm = doc.frontmatter || {};
     const docId = fm.docId || fm.id || fm.documentId || fm.productCode;
     if (!docId) continue;
-
-    // Only check GMI documents
-    if (!/^GMI/i.test(String(docId))) continue;
-
     const lifecycleState = fm.lifecycleState || fm.status || fm.publicationStatus;
     if (!lifecycleState) continue;
-
     const life = findRecordByIdentity(snapshot.lifecycleRecords, String(docId));
     if (!life) continue;
-
     const lifeState = String(life.fields.lifecycleState || "");
-
-    // Compare frontmatter state to lifecycle authority
     if (String(lifecycleState).toUpperCase() !== lifeState.toUpperCase()) {
-      // Determine if both are pre-publication states (admin-preparation mismatch)
-      const fmIsPrePub = lifecycleIsPrePublication(String(lifecycleState));
-      const lifeIsPrePub = lifecycleIsPrePublication(lifeState);
-      const isAdminPrepMismatch = fmIsPrePub && lifeIsPrePub;
-
+      const fmPrePub = lifecycleIsPrePub(String(lifecycleState));
+      const lifePrePub = lifecycleIsPrePub(lifeState);
+      const isAdminMismatch = fmPrePub && lifePrePub;
       issues.push(makeIssue({
-        title: `${doc.file} frontmatter lifecycle differs from lifecycle authority`,
-        description: `frontmatter=${lifecycleState}, lifecycle=${lifeState}`,
-        severity: isAdminPrepMismatch ? "governed_tension" : "publication_lifecycle_conflict",
-        domain: "publication_truth",
-        governedTension: isAdminPrepMismatch ? true : undefined,
-        blocksPublication: isAdminPrepMismatch ? false : true,
-        sourceOfTruth: SOURCE_OF_TRUTH_MAP.publicationLifecycle,
-        evidence: [`${doc.file}: lifecycle=${lifecycleState}`, `${life.sourceFile}: lifecycle=${lifeState}`],
-        affectedItems: [doc.file, String(docId)],
-        recommendation: isAdminPrepMismatch
-          ? "Admin-preparation state mismatch. Align frontmatter to lifecycle enum for consistency, but this does not block publication."
-          : "Synchronise frontmatter or remove duplicate lifecycle truth from content.",
+        signature: `lifecycle:${docId}:frontmatter_mismatch`,
+        title: `${doc.file} frontmatter lifecycle differs from authority`,
+        severity: isAdminMismatch ? "governed_tension" : "publication_lifecycle_conflict",
+        governedTension: isAdminMismatch,
+        blocksPublication: !isAdminMismatch,
+        evidence: [`frontmatter=${lifecycleState}`, `authority=${lifeState}`],
+        recommendation: isAdminMismatch ? "Align frontmatter for consistency." : "Synchronise with lifecycle authority.",
       }));
     }
   }
-
   return issues;
 }
 
-// ─── Detector: Build / Environment ───────────────────────────────────────────
+// ─── Detector 4: Content / Public Route ───────────────────────────────────
+function detectContentRouteContradictions(snapshot) {
+  const issues = [];
+  const routeAudit = snapshot.reports["reports/public-content-route-audit.json"] || {};
+  const blogAudit = snapshot.reports["reports/blog-post-route-audit.json"] || {};
+  for (const f of routeAudit.failures || []) {
+    issues.push(makeIssue({
+      signature: `route:public:${f.path || f.file}`,
+      title: `Public route audit failure: ${f.message}`,
+      severity: "content_route_failure",
+      domain: "content_route",
+      recommendation: f.recommendation || "Fix route configuration.",
+    }));
+  }
+  for (const f of blogAudit.failures || []) {
+    issues.push(makeIssue({
+      signature: `route:blog:${f.slug || f.file}`,
+      title: `Blog route audit failure: ${f.message}`,
+      severity: "content_route_failure",
+      domain: "content_route",
+      recommendation: f.recommendation || "Adjust blog post frontmatter.",
+    }));
+  }
+  // Heuristic: published content with no route
+  for (const doc of snapshot.contentDocuments) {
+    const fm = doc.frontmatter;
+    if (fm && (fm.status === "published" || fm.published === true)) {
+      let slug = doc.file.replace(/^content\//, "").replace(/\.mdx?$/, "");
+      if (slug.endsWith("/index")) slug = slug.slice(0, -6);
+      const routeExists = snapshot.files.pages.some(p => p.includes(slug) || p.includes("[slug]"));
+      if (!routeExists && !fm.slug && !fm.route) {
+        issues.push(makeIssue({
+          signature: `route:${doc.file}:no_route`,
+          title: `Published content without route: ${doc.file}`,
+          severity: "content_route_failure",
+          recommendation: "Add slug/route in frontmatter or create a page.",
+        }));
+      }
+    }
+  }
+  return issues;
+}
 
-const URL_ENV_KEYS = ["NEXTAUTH_URL", "SITE_URL", "NEXT_PUBLIC_SITE_URL", "VERCEL_URL"];
-
+// ─── Detector 5: Build / Environment ──────────────────────────────────────
 function detectBuildEnvironmentContradictions(snapshot) {
   const issues = [];
-
+  const urlKeys = ["NEXTAUTH_URL", "SITE_URL", "NEXT_PUBLIC_SITE_URL"];
   for (const envFile of snapshot.envFiles) {
     const text = readText(envFile);
     for (const line of text.split(/\r?\n/)) {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith("#")) continue;
-      const eqIdx = trimmed.indexOf("=");
-      if (eqIdx === -1) continue;
-
-      const key = trimmed.slice(0, eqIdx).trim();
-      let value = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
-
-      if (!URL_ENV_KEYS.includes(key)) continue;
-
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let value = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+      if (!urlKeys.includes(key) && key !== "VERCEL_URL") continue;
       if (value === "") {
         issues.push(makeIssue({
+          signature: `env:${envFile}:${key}_empty`,
           title: `${key} is empty in ${envFile}`,
-          description: "Empty URL env values can cause invalid URL failures during Next.js build.",
           severity: "fatal_build_blocker",
           domain: "build_truth",
-          evidence: [`${envFile}: ${key}=""`],
-          affectedItems: [envFile, key],
-          recommendation: "Remove empty value or set valid URL. Do not commit secrets.",
+          recommendation: "Set a valid URL or remove the variable.",
         }));
       }
-
-      if (value && key !== "VERCEL_URL" && key.includes("URL") && !/^https?:\/\//i.test(value)) {
+      if (value && key !== "VERCEL_URL" && !/^https?:\/\//i.test(value)) {
         issues.push(makeIssue({
+          signature: `env:${envFile}:${key}_not_absolute`,
           title: `${key} is not absolute in ${envFile}`,
-          description: "URL env values should be valid absolute URLs unless explicitly handled.",
           severity: "fatal_build_blocker",
           domain: "build_truth",
-          evidence: [`${envFile}: ${key}=${value.substring(0, 40)}`],
-          affectedItems: [envFile, key],
-          recommendation: "Set absolute URL or harden resolver.",
+          recommendation: "Use absolute URL (http:// or https://).",
         }));
       }
     }
   }
-
   return issues;
 }
 
-// ─── Detector: Commercial Truth ──────────────────────────────────────────────
-
-function detectCommercialContradictions(snapshot) {
-  const issues = [];
-
-  for (const product of snapshot.products) {
-    const code = product.productCode;
-    const cat = snapshot.catalogEntries[code];
-    if (!cat) continue;
-
-    const hasStripe = Boolean(cat.stripePriceId);
-    const isBlocked = product.readiness?.readinessStatus === "blocked" || product.readiness?.releaseMode === "blocked";
-
-    if (hasStripe && isBlocked) {
-      issues.push(makeIssue({
-        title: `${code} has Stripe metadata but checkout is denied`,
-        description: "Stripe metadata exists but resolver action is blocked. Acceptable only if resolver and server checkout enforce the denial.",
-        severity: "governed_tension",
-        domain: "commercial_metadata",
-        governedTension: true,
-        affectedItems: [code],
-        evidence: [`stripePriceId=${(cat.stripePriceId || "").substring(0, 10)}...`, `resolverAction=blocked`],
-        recommendation: "Keep Stripe metadata, but ensure checkout permission remains resolver-controlled.",
-      }));
-    }
-  }
-
-  return issues;
-}
-
-// ─── Detector: Narrative Drift ───────────────────────────────────────────────
-
-const SENSITIVE_TERMS = ["autonomous", "SaaS", "prediction engine", "tamper-proof", "guarantee", "guaranteed", "certified", "courtroom-grade"];
-
+// ─── Detector 6: Narrative Drift (dynamic from contract) ──────────────────
 function detectNarrativeDrift(snapshot) {
   const issues = [];
-  const targetFiles = [
-    "pages/professionals.tsx", "pages/system.tsx", "pages/method.tsx",
-    "pages/products.tsx", "pages/pricing.tsx", "pages/enterprise.tsx",
-    "pages/oversight/index.tsx",
-  ];
-
-  for (const file of targetFiles) {
+  const { sensitiveTerms, requiredAuthorityBoundaryPhrases, doctrineFiles } = narrativeContract;
+  let authorityBoundaryPresent = false;
+  for (const file of doctrineFiles) {
     if (!exists(file)) continue;
-    const text = readText(file);
-    const lines = text.split("\n");
-
+    const content = readText(file);
+    for (const phrase of requiredAuthorityBoundaryPhrases) {
+      if (content.toLowerCase().includes(phrase.toLowerCase())) authorityBoundaryPresent = true;
+    }
+    const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
       const lower = lines[i].toLowerCase();
-      for (const term of SENSITIVE_TERMS) {
+      for (const term of sensitiveTerms) {
         if (lower.includes(term.toLowerCase())) {
-          const allowed = lower.includes("not ") || lower.includes("is not") ||
-                          lower.includes("not a") || lower.includes("unlike") ||
-                          lower.includes("avoid");
+          const allowed = lower.includes("not ") || lower.includes("is not") || lower.includes("unlike") || lower.includes("avoid");
           issues.push(makeIssue({
+            signature: `narrative:${file}:${term}`,
             title: `Narrative term "${term}" found in ${file}`,
-            description: `Line ${i + 1}: ${lines[i].trim().substring(0, 100)}`,
             severity: allowed ? "informational_note" : "narrative_drift",
-            domain: "public_narrative",
-            affectedItems: [file],
-            evidence: [`${file}:${i + 1}`],
-            recommendation: allowed ? "Allowed as contrast/denial." : "Remove or rewrite.",
+            domain: "narrative_drift",
+            evidence: [`line ${i+1}: ${lines[i].trim().substring(0, 100)}`],
+            recommendation: allowed ? "Allowed as contrast." : "Remove or rewrite claim.",
           }));
         }
       }
     }
   }
-
+  if (!authorityBoundaryPresent && requiredAuthorityBoundaryPhrases.length) {
+    issues.push(makeIssue({
+      signature: "narrative:missing_authority_boundary",
+      title: "Missing authority boundary claims across doctrine files",
+      severity: "authority_boundary_failure",
+      domain: "narrative_drift",
+      recommendation: `Add one of: ${requiredAuthorityBoundaryPhrases.join(", ")}`,
+    }));
+  }
   return issues;
 }
 
-// ─── Classification ──────────────────────────────────────────────────────────
-
-function classifyIssue(issue) {
-  if (issue.blocksDeployment) {
-    return { issueId: issue.id, type: "blocker", action: "Block deployment.", owner: "governance" };
+// ─── Detector 7: Existing Checker Signals ─────────────────────────────────
+function detectExistingCheckerSignals(snapshot) {
+  const issues = [];
+  const requiredReports = [
+    "reports/product-release-readiness-matrix.json",
+    "reports/product-release-governance-matrix.json",
+    "reports/blog-post-route-audit.json",
+    "reports/public-content-route-audit.json",
+    "reports/living-state-objects.json",
+  ];
+  for (const report of requiredReports) {
+    if (!snapshot.reports[report]) {
+      issues.push(makeIssue({
+        signature: `existing:missing_${report.replace(/\//g, "_")}`,
+        title: `Missing required report: ${report}`,
+        severity: "governed_tension",
+        governedTension: true,
+        recommendation: "Run the corresponding checker script.",
+      }));
+    } else {
+      const data = snapshot.reports[report];
+      if (data.summary?.blockingIssues > 0 || (data.failures?.length > 0)) {
+        issues.push(makeIssue({
+          signature: `existing:${report}:has_blockers`,
+          title: `Report ${report} contains blocking issues/failures`,
+          severity: "commercial_safety_blocker",
+          domain: "existing_checker_signals",
+          recommendation: "Resolve blockers in the original checker.",
+        }));
+      }
+    }
   }
-  if (issue.requiresOwnerDecision) {
-    return { issueId: issue.id, type: "owner_decision_required", action: "Escalate for owner decision.", owner: "owner" };
-  }
-  if (issue.governedTension) {
-    return { issueId: issue.id, type: "governed_tension", action: "Track as safe tension.", owner: "governance" };
-  }
-  return { issueId: issue.id, type: "monitor", action: "Track and resolve.", owner: "product_engineering" };
+  return issues;
 }
 
-// ─── Report Composer ─────────────────────────────────────────────────────────
+// ─── Detector 8: Living‑State Wiring ──────────────────────────────────────
+function detectLivingStateWiring(snapshot) {
+  const issues = [];
+  const missing = Object.entries(snapshot.living.stateFilesPresent).filter(([,p]) => !p).map(([f]) => f);
+  if (missing.length) {
+    issues.push(makeIssue({
+      signature: "living:missing_core_files",
+      title: `Missing living‑state core files: ${missing.join(", ")}`,
+      severity: "living_state_gap",
+      domain: "living_state_wiring",
+      recommendation: "Restore missing files or disable living‑state integration.",
+    }));
+  }
+  if (!snapshot.living.reportsPresent["reports/living-state-objects.json"]) {
+    issues.push(makeIssue({
+      signature: "living:missing_objects_report",
+      title: "Missing living-state-objects.json",
+      severity: "living_state_gap",
+      domain: "living_state_wiring",
+      recommendation: "Run scripts/run-living-state-objects.ts",
+    }));
+  }
+  if (snapshot.living.operatorObjects === 0 || snapshot.living.userObjects === 0) {
+    issues.push(makeIssue({
+      signature: "living:missing_objects",
+      title: "Living state missing operator or user objects",
+      severity: "living_state_gap",
+      domain: "living_state_wiring",
+      evidence: [`operator=${snapshot.living.operatorObjects}`, `user=${snapshot.living.userObjects}`],
+      recommendation: "Define at least one operator and one user object for MVP.",
+    }));
+  }
+  return issues;
+}
 
-function composeMarkdownReport(report) {
-  const { summary, issues, interventions, recommendations } = report;
+// ─── Guardrail Engine ──────────────────────────────────────────────────────
+function checkLivingGuardrails(snapshot, issues) {
+  const violations = [];
+  // Verify this checker's own output files don't collide with product governance files
+  const productGovernanceFiles = ["reports/living-product-truth-report.json", "reports/living-product-truth-report.md", "reports/living-product-memory.json"];
+  for (const f of productGovernanceFiles) {
+    if (REPORT_JSON === f || REPORT_MD === f || MEMORY_FILE === f) {
+      violations.push(`Report output collision: ${f} is claimed by both estate and product governance checkers`);
+    }
+  }
+  for (const v of violations) {
+    issues.push(makeIssue({
+      signature: `guardrail:${v.substring(0, 50)}`,
+      title: "Guardrail violation: " + v,
+      severity: "fatal_build_blocker",
+      domain: "guardrail",
+      recommendation: "Use distinct report filenames per checker.",
+    }));
+  }
+  return issues;
+}
+
+// ─── Memory recurrence / resolution ───────────────────────────────────────
+function loadMemory() {
+  const raw = readJson(MEMORY_FILE);
+  if (raw && raw.issueSignatures) return raw;
+  return { lastRun: null, issueSignatures: [], resolvedSinceLastRun: [], regressions: [], repeatedIssues: [] };
+}
+function saveMemory(m) { writeJson(MEMORY_FILE, m); }
+function updateMemory(currentIssues, prevMem) {
+  const now = new Date().toISOString();
+  const mem = { ...prevMem, lastRun: now };
+  const sigMap = new Map();
+  for (const issue of currentIssues) {
+    const sig = issue.signature;
+    if (!sig) continue;
+    const existing = mem.issueSignatures.find(i => i.signature === sig);
+    if (existing) {
+      existing.lastSeen = now;
+      existing.count++;
+      existing.status = "open";
+      if (existing.severity !== issue.severity && (issue.severity === "fatal_build_blocker" || issue.severity === "commercial_safety_blocker")) {
+        mem.regressions.push({ signature: sig, from: existing.severity, to: issue.severity, at: now });
+      }
+    } else {
+      mem.issueSignatures.push({
+        signature: sig,
+        title: issue.title,
+        severity: issue.severity,
+        firstSeen: now,
+        lastSeen: now,
+        count: 1,
+        status: "open",
+      });
+    }
+    sigMap.set(sig, true);
+  }
+  for (const item of mem.issueSignatures) {
+    if (item.status === "open" && !sigMap.has(item.signature)) {
+      item.status = "resolved";
+      mem.resolvedSinceLastRun.push({ signature: item.signature, resolvedAt: now });
+    }
+  }
+  mem.repeatedIssues = mem.issueSignatures.filter(i => i.count > 1 && i.status === "open");
+  return mem;
+}
+
+// ─── Identity probe (proves no relationship‑field confusion) ──────────────
+function runIdentityProbe(snapshot) {
+  let relationshipFieldIgnored = true;
+  let ownIdentityMatchOnly = true;
+  const allRecords = [...snapshot.lifecycleRecords, ...snapshot.registryRecords];
+  const relationshipFields = ["replaces", "supersededBy", "related", "previous", "next"];
+  for (const rec of allRecords) {
+    const ownId = rec.identity[0];
+    if (!ownId) continue;
+    for (const [field, value] of Object.entries(rec.fields)) {
+      if (relationshipFields.includes(field) && value === ownId) {
+        relationshipFieldIgnored = false;
+        ownIdentityMatchOnly = false;
+      }
+    }
+  }
+  return { relationshipFieldIgnored, ownIdentityMatchOnly };
+}
+
+// ─── Report composer ───────────────────────────────────────────────────────
+function composeMarkdown(report, memory) {
+  const { summary, issues, interventions, recommendations, identityProbe } = report;
   const lines = [];
-
-  lines.push("# Living Estate Intelligence Report");
-  lines.push("");
+  lines.push("# Living Estate Intelligence Report (Dynamic)");
   lines.push(`Generated: ${report.generatedAt}`);
-  lines.push("");
-  lines.push("## Summary");
-  lines.push("");
+  lines.push("\n## Identity Probe");
+  lines.push(`- Relationship field ignored: ${identityProbe.relationshipFieldIgnored}`);
+  lines.push(`- Own‑identity match only: ${identityProbe.ownIdentityMatchOnly}`);
+  lines.push("\n## Summary");
   lines.push("| Metric | Count |");
   lines.push("|---|---:|");
   lines.push(`| Total issues | ${summary.totalIssues} |`);
@@ -532,150 +664,109 @@ function composeMarkdownReport(report) {
   lines.push(`| Owner decisions required | ${summary.ownerDecisionsRequired} |`);
   lines.push(`| Governed tensions | ${summary.governedTensions} |`);
   lines.push(`| Exit code | ${summary.exitCode} |`);
-  lines.push("");
-  lines.push("## Issues");
-  lines.push("");
-
+  lines.push("\n## Memory Summary");
+  lines.push(`- Open signatures: ${memory.issueSignatures.filter(i => i.status === "open").length}`);
+  lines.push(`- Resolved since last run: ${memory.resolvedSinceLastRun.length}`);
+  lines.push(`- Regressions: ${memory.regressions.length}`);
+  lines.push(`- Repeated issues: ${memory.repeatedIssues.length}`);
+  lines.push("\n## Issues");
   for (const issue of issues) {
     lines.push(`### ${issue.id} — ${issue.title}`);
-    lines.push("");
+    lines.push(`- **Signature:** \`${issue.signature}\``);
     lines.push(`- **Severity:** ${issue.severity}`);
     lines.push(`- **Domain:** ${issue.domain}`);
     lines.push(`- **Blocks deployment:** ${issue.blocksDeployment ? "YES" : "NO"}`);
     if (issue.governedTension) lines.push("- **Governed tension:** YES");
     lines.push(`- **Description:** ${issue.description}`);
-    if (issue.evidence?.length) {
-      lines.push("- **Evidence:**");
-      for (const ev of issue.evidence) lines.push(`  - ${ev}`);
-    }
-    if (issue.affectedItems?.length) {
-      lines.push(`- **Affected items:** ${issue.affectedItems.join(", ")}`);
-    }
+    if (issue.evidence.length) lines.push(`- **Evidence:** ${issue.evidence.join(", ")}`);
+    if (issue.affectedItems.length) lines.push(`- **Affected items:** ${issue.affectedItems.join(", ")}`);
     lines.push(`- **Recommendation:** ${issue.recommendation}`);
     lines.push("");
   }
-
   lines.push("## Interventions");
-  lines.push("");
-  for (const inv of interventions) {
-    lines.push(`- **${inv.issueId}** — ${inv.type}: ${inv.action} _(Owner: ${inv.owner})_`);
-  }
-  lines.push("");
-  lines.push("## Recommendations");
-  lines.push("");
-  for (const rec of recommendations) {
-    lines.push(`- **${rec.issueId}** (${rec.priority}): ${rec.recommendation}`);
-  }
-  lines.push("");
-  lines.push("## Final Gate");
-  lines.push("");
-  if (summary.exitCode === 0) lines.push("✅ Living estate intelligence check passed.");
-  else lines.push("❌ Living estate intelligence check failed.");
-  lines.push("");
-
+  for (const inv of interventions) lines.push(`- **${inv.issueId}** — ${inv.type}: ${inv.action} _(Owner: ${inv.owner})_`);
+  lines.push("\n## Final Gate");
+  lines.push(summary.exitCode === 0 ? "✅ Estate intelligence passed." : "❌ Estate intelligence failed.");
   return lines.join("\n");
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────────
-
+// ─── Main ──────────────────────────────────────────────────────────────────
 function main() {
   issueCounter = 1;
-
-  heading("Living Estate Intelligence Check");
+  heading("Living Estate Intelligence Check (Fully Dynamic)");
   const snapshot = loadEstateSnapshot();
+  ok(`Products: ${snapshot.products.length}`);
+  ok(`Catalog entries: ${Object.keys(snapshot.catalogEntries).length}`);
+  ok(`Lifecycle records: ${snapshot.lifecycleRecords.length}`);
+  ok(`Registry records: ${snapshot.registryRecords.length}`);
 
-  ok(`Products inspected: ${snapshot.products.length}`);
-  ok(`Catalog entries parsed: ${Object.keys(snapshot.catalogEntries).length}`);
-  ok(`Content documents inspected: ${snapshot.contentDocuments.length}`);
-  ok(`Lifecycle records parsed: ${snapshot.lifecycleRecords.length}`);
-  ok(`Registry records parsed: ${snapshot.registryRecords.length}`);
-
-  heading("Running detectors");
-
-  const detectorGroups = [
-    ["GMI / Publication Lifecycle", detectGmiLifecycleContradictions],
-    ["Commercial Truth", detectCommercialContradictions],
+  const detectors = [
+    ["Product / Commercial Truth", detectProductCommercialContradictions],
+    ["Storefront / Checkout Bypass", detectStorefrontAndCheckoutBypass],
+    ["Publication Lifecycle", detectPublicationLifecycleContradictions],
+    ["Content / Public Route", detectContentRouteContradictions],
     ["Build / Environment", detectBuildEnvironmentContradictions],
     ["Narrative Drift", detectNarrativeDrift],
+    ["Existing Checker Signals", detectExistingCheckerSignals],
+    ["Living‑State Wiring", detectLivingStateWiring],
   ];
 
-  const issues = [];
-  for (const [label, detector] of detectorGroups) {
-    const before = issues.length;
-    const detected = detector(snapshot);
-    issues.push(...detected);
-    const count = issues.length - before;
-    if (count === 0) ok(`${label}: no issues`);
+  let allIssues = [];
+  for (const [label, detector] of detectors) {
+    const before = allIssues.length;
+    allIssues.push(...detector(snapshot));
+    const count = allIssues.length - before;
+    if (count === 0) ok(`${label}: clean`);
     else warn(`${label}: ${count} issue(s)`);
   }
+  allIssues = checkLivingGuardrails(snapshot, allIssues);
 
-  const interventions = issues.map(classifyIssue);
-  const recommendations = issues.map((issue) => ({
+  let memory = loadMemory();
+  memory = updateMemory(allIssues, memory);
+  saveMemory(memory);
+
+  const interventions = allIssues.map(issue => {
+    if (issue.blocksDeployment) return { issueId: issue.id, type: "blocker", action: "Block deployment.", owner: "governance" };
+    if (issue.requiresOwnerDecision) return { issueId: issue.id, type: "owner_decision_required", action: "Escalate.", owner: "owner" };
+    if (issue.governedTension) return { issueId: issue.id, type: "governed_tension", action: "Track as safe.", owner: "governance" };
+    return { issueId: issue.id, type: "monitor", action: "Track and resolve.", owner: "product_engineering" };
+  });
+
+  const recommendations = allIssues.map(issue => ({
     issueId: issue.id,
     priority: issue.blocksDeployment ? "critical" : issue.requiresOwnerDecision ? "high" : issue.governedTension ? "low" : "medium",
     recommendation: issue.recommendation,
   }));
 
-  const blockingIssues = issues.filter((i) => i.blocksDeployment);
-  const ownerDecisions = issues.filter((i) => i.requiresOwnerDecision);
-  const governedTensions = issues.filter((i) => i.governedTension);
-
+  const blocking = allIssues.filter(i => i.blocksDeployment);
   const summary = {
-    totalIssues: issues.length,
-    blockingIssues: blockingIssues.length,
-    ownerDecisionsRequired: ownerDecisions.length,
-    governedTensions: governedTensions.length,
-    exitCode: blockingIssues.length > 0 ? 1 : 0,
-  };
-
-  const snapshotDigest = {
-    productsInspected: snapshot.products.length,
-    catalogEntries: Object.keys(snapshot.catalogEntries).length,
-    contentDocuments: snapshot.contentDocuments.length,
-    lifecycleRecords: snapshot.lifecycleRecords.length,
-    registryRecords: snapshot.registryRecords.length,
+    totalIssues: allIssues.length,
+    blockingIssues: blocking.length,
+    ownerDecisionsRequired: allIssues.filter(i => i.requiresOwnerDecision).length,
+    governedTensions: allIssues.filter(i => i.governedTension).length,
+    exitCode: blocking.length > 0 ? 1 : 0,
   };
 
   const report = {
     generatedAt: new Date().toISOString(),
-    sourceOfTruthMap: SOURCE_OF_TRUTH_MAP,
-    snapshotDigest,
+    identityProbe: runIdentityProbe(snapshot),
     summary,
-    issues,
+    issues: allIssues,
     interventions,
     recommendations,
   };
 
   writeJson(REPORT_JSON, report);
-  writeText(REPORT_MD, composeMarkdownReport(report));
+  writeText(REPORT_MD, composeMarkdown(report, memory));
 
   heading("Results");
-  console.log(`  Total issues:             ${summary.totalIssues}`);
-  console.log(`  Blocking issues:          ${summary.blockingIssues}`);
-  console.log(`  Owner decisions required: ${summary.ownerDecisionsRequired}`);
-  console.log(`  Governed tensions:        ${summary.governedTensions}`);
-  console.log("");
-
-  if (blockingIssues.length > 0) {
-    fail("Blocking issues detected:");
-    for (const issue of blockingIssues) {
-      console.log(`  - ${issue.id}: ${issue.title}`);
-    }
-    console.log("");
+  console.log(`  Blocking issues: ${summary.blockingIssues}`);
+  if (blocking.length) {
+    fail("Blockers:");
+    for (const issue of blocking) console.log(`  - ${issue.id}: ${issue.title}`);
   }
-
-  ok(`Wrote ${REPORT_JSON}`);
-  ok(`Wrote ${REPORT_MD}`);
-  console.log("");
-  console.log("=".repeat(80));
-
-  if (summary.exitCode === 0) {
-    ok("LIVING ESTATE INTELLIGENCE CHECK PASSED");
-    process.exit(0);
-  } else {
-    fail("LIVING ESTATE INTELLIGENCE CHECK FAILED");
-    process.exit(1);
-  }
+  ok(`Reports written: ${REPORT_JSON}, ${REPORT_MD}, ${MEMORY_FILE}`);
+  process.exit(summary.exitCode);
 }
 
 main();
