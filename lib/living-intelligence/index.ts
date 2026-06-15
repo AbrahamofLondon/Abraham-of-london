@@ -102,3 +102,5 @@ export type { LivingStateObjectsPayload } from "./living-state-report-composer";
 
 export { boardroomAdapter } from "./adapters/boardroom-adapter";
 export { assessmentAdapter } from "./adapters/assessment-adapter";
+export { commercialAdapter } from "./adapters/commercial-adapter";
+export { fulfilmentAdapter } from "./adapters/fulfilment-adapter";

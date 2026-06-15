@@ -22,6 +22,8 @@ import { fileURLToPath } from "node:url";
 
 import { boardroomAdapter } from "@/lib/living-intelligence/adapters/boardroom-adapter";
 import { assessmentAdapter } from "@/lib/living-intelligence/adapters/assessment-adapter";
+import { commercialAdapter } from "@/lib/living-intelligence/adapters/commercial-adapter";
+import { fulfilmentAdapter } from "@/lib/living-intelligence/adapters/fulfilment-adapter";
 import { evaluateLivingStateObject } from "@/lib/living-intelligence/living-state-engine";
 import {
   applyMemoryToBatch,
@@ -110,6 +112,63 @@ function discoverRoutes(): string[] {
   return [...routes];
 }
 
+// ─── Fulfilment proof records (Phase 5A) ─────────────────────────────────────
+//
+// These exercise the fulfilment adapter generically across different source
+// types and delivery states. They are NOT hardcoded to Boardroom — they test
+// paid-without-fulfilment, draft-without-review, delivery-claim-without-artifact,
+// and case-study-without-consent scenarios.
+
+function fulfilmentProofRecords(): Record<string, unknown>[] {
+  return [
+    {
+      sourceType: "boardroom_brief_order",
+      sourceId: "fulfilment-proof-paid-order",
+      productCode: "boardroom_brief",
+      deliveryStatus: "paid",
+      generationStatus: null,
+      proofStatus: null,
+      isOverdue: false,
+      adminRoute: "/admin/boardroom/orders/fulfilment-proof-paid-order",
+      nextAction: "Start review",
+    },
+    {
+      sourceType: "product_artifact",
+      sourceId: "fulfilment-proof-draft-artifact",
+      productCode: "boardroom_brief",
+      deliveryStatus: "draft_generated",
+      generationStatus: "DRAFT",
+      proofStatus: null,
+      isOverdue: false,
+      adminRoute: "/admin/artifacts",
+      nextAction: "Review draft",
+    },
+    {
+      sourceType: "boardroom_brief_order",
+      sourceId: "fulfilment-proof-delivery-claim",
+      productCode: "boardroom_brief",
+      deliveryStatus: "delivered",
+      generationStatus: "PENDING",
+      proofStatus: null,
+      isOverdue: false,
+      adminRoute: "/admin/boardroom/orders/fulfilment-proof-delivery-claim",
+      nextAction: "Verify delivery",
+    },
+    {
+      sourceType: "case_study",
+      sourceId: "fulfilment-proof-case-study",
+      productCode: "case_study",
+      deliveryStatus: "DRAFT",
+      generationStatus: "DRAFT",
+      consentStatus: "MISSING",
+      proofStatus: null,
+      isOverdue: false,
+      adminRoute: "/admin/case-studies",
+      nextAction: "Review draft and request consent",
+    },
+  ];
+}
+
 // ─── Boardroom proof case (governance self-test, not customer data) ──────────
 //
 // A realistic Boardroom DRAFT case that must be diagnosed as NOT approvable. It
@@ -190,6 +249,16 @@ function main(): void {
       records: assessmentProofRecords(),
       availableRoutes,
     }),
+    ...commercialAdapter.map({
+      domain: "commercial",
+      records: [],
+      availableRoutes,
+    }),
+    ...fulfilmentAdapter.map({
+      domain: "fulfilment",
+      records: fulfilmentProofRecords(),
+      availableRoutes,
+    }),
   ];
 
   const evaluated = mapped.map((object) =>
@@ -227,6 +296,10 @@ function main(): void {
       `living-state: assessment proof "${assessment.id}" stage=${assessment.currentStage} safeToShowUser=${assessment.safeToShowUser} evidence=${assessment.evidence.status} blockers=[${assessment.blockers.map((b) => b.code).join(", ")}]`,
     );
   }
+  const commercialObjects = objects.filter((o) => o.domain === "commercial");
+  const fulfilmentObjects = objects.filter((o) => o.domain === "fulfilment");
+  console.log(`living-state: commercial objects = ${commercialObjects.length} (${commercialObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  console.log(`living-state: fulfilment objects = ${fulfilmentObjects.length} (${fulfilmentObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   if (!fs.existsSync(path.join(REPORTS_DIR, "living-state-objects.json"))) {
     console.error("living-state: FAILED to write living-state-objects.json");
     process.exit(1);
