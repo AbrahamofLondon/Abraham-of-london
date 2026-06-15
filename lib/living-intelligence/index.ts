@@ -100,6 +100,9 @@ export type {
 export { composeLivingStateObjectsPayload, composeLivingStateSummaryMarkdown } from "./living-state-report-composer";
 export type { LivingStateObjectsPayload } from "./living-state-report-composer";
 
+export { buildOperatorCommandCentreModel } from "./operator-command-centre-model";
+export type { OperatorCommandCentreModel, PriorityQueueItem, DomainAlert } from "./operator-command-centre-model";
+
 export { boardroomAdapter } from "./adapters/boardroom-adapter";
 export { assessmentAdapter } from "./adapters/assessment-adapter";
 export { commercialAdapter } from "./adapters/commercial-adapter";
