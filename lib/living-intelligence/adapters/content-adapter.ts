@@ -32,6 +32,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { routeExists as routeExistsCheck } from "@/lib/living-intelligence/living-state-route-map";
 import {
   readString,
   readBool,
@@ -213,20 +214,18 @@ function detectContentBlockers(
     });
   }
 
-  // Restricted/draft content that might be publicly exposed.
-  if ((status === "draft" || access === "restricted") && family.expectsPublicRoutes) {
-    // Check if the route exists in availableRoutes.
-    const slug = filePath.replace(/\.(mdx|md)$/, "").split("/").pop() ?? "";
-    const expectedRoute = `${family.routePrefix}/${slug}`;
-    if (availableRoutes.includes(expectedRoute)) {
-      blockers.push({
-        code: "publication_not_allowed",
-        explanation: `Content file "${filePath}" is ${status ?? "restricted"} but its route (${expectedRoute}) exists in the application. Restricted content must not be publicly routable.`,
-        requiredAction: "Either publish the content or remove the public route.",
-      });
+      // Published content with no resolving route.
+    if (stage === "published") {
+      const slug = filePath.replace(/\.(mdx|md)$/, "").split("/").pop() ?? "";
+      const expectedRoute = `${family.routePrefix}/${slug}`;
+      if (!routeExistsCheck(expectedRoute, availableRoutes)) {
+        blockers.push({
+          code: "route_missing",
+          explanation: `Content file "${filePath}" is published but its expected route (${expectedRoute}) does not exist in the application.`,
+          requiredAction: "Create the missing route or update the content's publication status.",
+        });
+      }
     }
-  }
-
   // Content family is empty despite expected source files.
   const files = listContentFiles(family.dir);
   if (files.length === 0 && family.expectedMinFiles > 0) {
@@ -289,7 +288,7 @@ function mapOne(
   const title = readString(fm, "title") ?? `Content: ${slug}`;
   const id = `content-${family.name}-${slug}`;
   const expectedRoute = `${family.routePrefix}/${slug}`;
-  const routeExists = input.availableRoutes.includes(expectedRoute);
+  const routeExists = routeExistsCheck(expectedRoute, input.availableRoutes);
 
   const evidenceStatus = deriveContentEvidence(fm, stage);
   const contentBlockers = detectContentBlockers(fm, filePath, family, stage, input.availableRoutes);
@@ -319,7 +318,7 @@ function mapOne(
         `Frontmatter status: ${readString(fm, "status") ?? "not set"}`,
         `Route exists: ${routeExists}`,
       ],
-      missingEvidence: !readString(fm, "status")
+      missingEvidence: (!readString(fm, "status") && readBool(fm, "draft") !== false)
         ? ["Publication status in frontmatter"]
         : [],
       cannotInfer: buildCannotInfer(),
@@ -340,12 +339,12 @@ function mapOne(
         : [],
     },
     publication: {
-      relevant: true,
+      relevant: stage === "published",
       allowed: stage === "published",
       reason: stage === "published"
         ? "Content is published and publicly accessible."
         : `Content is not published (stage: ${stage}).`,
-      missing: stage !== "published" ? ["Published frontmatter status"] : [],
+      missing: stage !== "published" ? [] : [],
     },
     blockers: contentBlockers.map((b) => ({
       code: b.code,

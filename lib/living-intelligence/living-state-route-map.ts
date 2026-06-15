@@ -87,9 +87,15 @@ const REPAIR_ROUTE_MAP: Partial<
     missing_artifact: "/admin/fulfilment",
   },
   gmi: {
-    publication_not_allowed: "/admin/executive-reporting",
-    lifecycle_conflict: "/admin/executive-reporting",
-    missing_artifact: "/admin/executive-reporting",
+    publication_not_allowed: "/admin/living-state",
+    lifecycle_conflict: "/admin/living-state",
+    missing_artifact: "/admin/living-state",
+    source_of_truth_conflict: "/admin/living-state",
+  },
+  content: {
+    publication_not_allowed: "/admin/living-state",
+    route_missing: "/admin/living-state",
+    missing_evidence: "/admin/living-state",
   },
   retainer_oversight: {
     missing_operator_action: "/admin/retainer-oversight",

@@ -354,12 +354,12 @@ function mapOne(
         : [],
     },
     publication: {
-      relevant: true,
+      relevant: stage === "published",
       allowed: stage === "published",
       reason: stage === "published"
         ? "Publication is allowed for active editions."
         : `Publication is not allowed — lifecycle state is "${lifecycleRecord?.lifecycleState ?? "unknown"}".`,
-      missing: stage !== "published" ? ["Published lifecycle state"] : [],
+      missing: stage !== "published" ? [] : [],
     },
     blockers: lifecycleBlockers.map((b) => ({
       code: b.code,
