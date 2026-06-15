@@ -27,7 +27,7 @@ import LivingStatePanel from "@/components/living/LivingStatePanel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type FilterKey = "all" | "commercial" | "fulfilment" | "gmi" | "content" | "blocked" | "missing_repair_route" | "unsafe_automation" | "artifact_incomplete" | "publication" | "route_issue" | "lifecycle_tension" | "public_exposure";
+type FilterKey = "all" | "commercial" | "fulfilment" | "gmi" | "content" | "decision_centre" | "strategy_room" | "blocked" | "missing_repair_route" | "unsafe_automation" | "artifact_incomplete" | "publication" | "route_issue" | "lifecycle_tension" | "public_exposure" | "user_safe" | "needs_review" | "missing_evidence" | "execution_gap" | "component_underwired";
 
 type Props = {
   snapshot: LivingStateReportSnapshot | null;
@@ -73,7 +73,14 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "fulfilment", label: "Fulfilment" },
   { key: "gmi", label: "GMI" },
   { key: "content", label: "Content" },
+  { key: "decision_centre", label: "Decision Centre" },
+  { key: "strategy_room", label: "Strategy Room" },
   { key: "blocked", label: "Blocked" },
+  { key: "user_safe", label: "User-safe" },
+  { key: "needs_review", label: "Needs review" },
+  { key: "missing_evidence", label: "Missing evidence" },
+  { key: "execution_gap", label: "Execution gap" },
+  { key: "component_underwired", label: "Component underwired" },
   { key: "publication", label: "Publication" },
   { key: "route_issue", label: "Route issue" },
   { key: "lifecycle_tension", label: "Lifecycle tension" },
@@ -299,21 +306,40 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
     if (!snapshot) {
       return {
         all: 0, commercial: 0, fulfilment: 0, gmi: 0, content: 0,
-        blocked: 0, publication: 0, route_issue: 0, lifecycle_tension: 0,
+        decision_centre: 0, strategy_room: 0,
+        blocked: 0, user_safe: 0, needs_review: 0, missing_evidence: 0,
+        execution_gap: 0, component_underwired: 0,
+        publication: 0, route_issue: 0, lifecycle_tension: 0,
         public_exposure: 0, missing_repair_route: 0, unsafe_automation: 0,
         artifact_incomplete: 0,
       };
     }
     const gmiObjs = snapshot.objects.filter((o) => o.domain === "gmi");
     const contentObjs = snapshot.objects.filter((o) => o.domain === "content");
+    const dcObjs = snapshot.objects.filter((o) => o.domain === "decision_centre");
+    const srObjs = snapshot.objects.filter((o) => o.domain === "strategy_room");
     const publicationObjs = snapshot.objects.filter((o) => o.publication.relevant);
     const routeIssueObjs = snapshot.objects.filter((o) =>
-              o.blockers.some((b) => b.code === "route_missing"),
-            );
-          const lifecycleTensionObjs = snapshot.objects.filter((o) =>
-            o.blockers.some((b) => b.code === "lifecycle_conflict" || b.code === "source_of_truth_conflict"),    );
+      o.blockers.some((b) => b.code === "route_missing"),
+    );
+    const lifecycleTensionObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "lifecycle_conflict" || b.code === "source_of_truth_conflict"),
+    );
     const publicExposureObjs = snapshot.objects.filter((o) =>
       o.blockers.some((b) => b.code === "publication_not_allowed"),
+    );
+    const userSafeObjs = snapshot.objects.filter((o) => o.safeToShowUser);
+    const needsReviewObjs = snapshot.objects.filter((o) =>
+      o.currentStage === "awaiting_review" || o.currentStage === "ready_for_review",
+    );
+    const missingEvidenceObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "missing_evidence"),
+    );
+    const executionGapObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "missing_operator_action"),
+    );
+    const componentUnderwiredObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "component_without_live_state"),
     );
     return {
       all: snapshot.objects.length,
@@ -321,7 +347,14 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
       fulfilment: snapshot.fulfilmentObjects.length,
       gmi: gmiObjs.length,
       content: contentObjs.length,
+      decision_centre: dcObjs.length,
+      strategy_room: srObjs.length,
       blocked: snapshot.blockedObjects.length,
+      user_safe: userSafeObjs.length,
+      needs_review: needsReviewObjs.length,
+      missing_evidence: missingEvidenceObjs.length,
+      execution_gap: executionGapObjs.length,
+      component_underwired: componentUnderwiredObjs.length,
       publication: publicationObjs.length,
       route_issue: routeIssueObjs.length,
       lifecycle_tension: lifecycleTensionObjs.length,
@@ -355,6 +388,28 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
       case "lifecycle_tension":
         return snapshot.objects.filter((o) =>
           o.blockers.some((b) => b.code === "lifecycle_conflict" || b.code === "source_of_truth_conflict"),
+        );
+      case "decision_centre":
+        return snapshot.objects.filter((o) => o.domain === "decision_centre");
+      case "strategy_room":
+        return snapshot.objects.filter((o) => o.domain === "strategy_room");
+      case "user_safe":
+        return snapshot.objects.filter((o) => o.safeToShowUser);
+      case "needs_review":
+        return snapshot.objects.filter((o) =>
+          o.currentStage === "awaiting_review" || o.currentStage === "ready_for_review",
+        );
+      case "missing_evidence":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "missing_evidence"),
+        );
+      case "execution_gap":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "missing_operator_action"),
+        );
+      case "component_underwired":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "component_without_live_state"),
         );
       case "public_exposure":
         return snapshot.objects.filter((o) =>

@@ -26,6 +26,8 @@ import { commercialAdapter } from "@/lib/living-intelligence/adapters/commercial
 import { fulfilmentAdapter } from "@/lib/living-intelligence/adapters/fulfilment-adapter";
 import { gmiAdapter } from "@/lib/living-intelligence/adapters/gmi-adapter";
 import { contentAdapter } from "@/lib/living-intelligence/adapters/content-adapter";
+import { decisionCentreAdapter } from "@/lib/living-intelligence/adapters/decision-centre-adapter";
+import { strategyRoomAdapter } from "@/lib/living-intelligence/adapters/strategy-room-adapter";
 import { evaluateLivingStateObject } from "@/lib/living-intelligence/living-state-engine";
 import {
   applyMemoryToBatch,
@@ -171,6 +173,144 @@ function fulfilmentProofRecords(): Record<string, unknown>[] {
   ];
 }
 
+// ─── Decision Centre proof records (Phase 5C) ────────────────────────────────
+
+function dcProofRecords(): Record<string, unknown>[] {
+  return [
+    {
+      caseId: "dc-proof-signal-discovery",
+      title: "Decision under pressure — signal discovery phase",
+      cognitiveState: "SIGNAL_DISCOVERY",
+      evidenceTier: "user_reported",
+      unresolvedContradictions: 0,
+      nextRequiredAction: "Complete a Fast Diagnostic to establish evidence baseline",
+      primaryFinding: "A consequential decision is being delayed past the point where delay itself becomes the dominant risk.",
+      governanceImplication: "Without a governed next move, exposure compounds while no party owns the decision.",
+      strategyRoomActive: false,
+      returnBriefTriggered: false,
+      counselWarranted: false,
+      continuityStatus: "NEW",
+      priorOccurrences: 0,
+    },
+    {
+      caseId: "dc-proof-structural-recognition",
+      title: "Organisational drift — structural recognition",
+      cognitiveState: "STRUCTURAL_RECOGNITION",
+      evidenceTier: "single_source",
+      unresolvedContradictions: 1,
+      nextRequiredAction: "Resolve identified contradiction before advancing",
+      primaryFinding: "Multiple stakeholders are operating under different mandates.",
+      governanceImplication: "Authority diffusion is preventing structural progress.",
+      strategyRoomActive: false,
+      returnBriefTriggered: false,
+      counselWarranted: false,
+      continuityStatus: "REPEATED",
+      priorOccurrences: 2,
+    },
+    {
+      caseId: "dc-proof-execution-governance",
+      title: "Strategy Room execution — active governance",
+      cognitiveState: "EXECUTION_GOVERNANCE",
+      evidenceTier: "multi_source",
+      unresolvedContradictions: 0,
+      nextRequiredAction: "Complete Strategy Room execution and trigger return brief",
+      primaryFinding: "Execution path identified but not yet confirmed.",
+      governanceImplication: "Strategy Room session is active but return brief has not been triggered.",
+      strategyRoomActive: true,
+      returnBriefTriggered: false,
+      counselWarranted: false,
+      continuityStatus: "WORSENING",
+      priorOccurrences: 3,
+    },
+    {
+      caseId: "dc-proof-counsel-warranted",
+      title: "Founder identity lock — counsel sensitivity",
+      cognitiveState: "INTERVENTION_READINESS",
+      evidenceTier: "multi_source",
+      unresolvedContradictions: 2,
+      nextRequiredAction: "Assign operator review for counsel escalation",
+      primaryFinding: "Founder identity is operationally embedded.",
+      governanceImplication: "Counsel escalation is warranted but no review path exists.",
+      strategyRoomActive: false,
+      returnBriefTriggered: false,
+      counselWarranted: true,
+      continuityStatus: "VERIFIED_PATTERN",
+      priorOccurrences: 5,
+    },
+  ];
+}
+
+// ─── Strategy Room proof records (Phase 5C) ───────────────────────────────────
+
+function srProofRecords(): Record<string, unknown>[] {
+  return [
+    {
+      sessionId: "sr-proof-pending-admission",
+      caseId: "dc-proof-signal-discovery",
+      admissionStatus: "PENDING",
+      executionState: "PENDING",
+      evidenceTier: "user_reported",
+      decisionStatement: "",
+      returnBriefAvailable: false,
+      hasExecutionRecord: false,
+      signalPressureLocked: false,
+      escalationTriggerCount: 0,
+      retainerEligible: false,
+      artifactCount: 0,
+      artifactRoutes: [],
+      componentUnderwired: false,
+    },
+    {
+      sessionId: "sr-proof-active-execution",
+      caseId: "dc-proof-structural-recognition",
+      admissionStatus: "ADMITTED",
+      executionState: "ACTIVE",
+      evidenceTier: "single_source",
+      decisionStatement: "Restructure the decision authority before Q3 planning cycle.",
+      returnBriefAvailable: false,
+      hasExecutionRecord: true,
+      signalPressureLocked: false,
+      escalationTriggerCount: 1,
+      retainerEligible: false,
+      artifactCount: 2,
+      artifactRoutes: ["/strategy-room/artifacts/1", "/strategy-room/artifacts/2"],
+      componentUnderwired: false,
+    },
+    {
+      sessionId: "sr-proof-signal-locked",
+      caseId: "dc-proof-counsel-warranted",
+      admissionStatus: "ADMITTED",
+      executionState: "STALLED",
+      evidenceTier: "insufficient",
+      decisionStatement: "Resolve founder identity lock before delegation.",
+      returnBriefAvailable: true,
+      hasExecutionRecord: false,
+      signalPressureLocked: true,
+      escalationTriggerCount: 3,
+      retainerEligible: true,
+      artifactCount: 1,
+      artifactRoutes: [],
+      componentUnderwired: true,
+    },
+    {
+      sessionId: "sr-proof-completed",
+      caseId: "dc-proof-execution-governance",
+      admissionStatus: "ADMITTED",
+      executionState: "COMPLETED",
+      evidenceTier: "multi_source",
+      decisionStatement: "Execute the governance restructuring plan.",
+      returnBriefAvailable: true,
+      hasExecutionRecord: true,
+      signalPressureLocked: false,
+      escalationTriggerCount: 0,
+      retainerEligible: true,
+      artifactCount: 3,
+      artifactRoutes: ["/strategy-room/artifacts/1", "/strategy-room/artifacts/2", "/strategy-room/artifacts/3"],
+      componentUnderwired: true,
+    },
+  ];
+}
+
 // ─── Boardroom proof case (governance self-test, not customer data) ──────────
 //
 // A realistic Boardroom DRAFT case that must be diagnosed as NOT approvable. It
@@ -271,6 +411,16 @@ function main(): void {
       records: [],
       availableRoutes,
     }),
+    ...decisionCentreAdapter.map({
+      domain: "decision_centre",
+      records: dcProofRecords(),
+      availableRoutes,
+    }),
+    ...strategyRoomAdapter.map({
+      domain: "strategy_room",
+      records: srProofRecords(),
+      availableRoutes,
+    }),
   ];
 
   const evaluated = mapped.map((object) =>
@@ -316,6 +466,10 @@ function main(): void {
   const contentObjects = objects.filter((o) => o.domain === "content");
   console.log(`living-state: gmi objects = ${gmiObjects.length} (${gmiObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   console.log(`living-state: content objects = ${contentObjects.length} (${contentObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  const dcObjects = objects.filter((o) => o.domain === "decision_centre");
+  const srObjects = objects.filter((o) => o.domain === "strategy_room");
+  console.log(`living-state: decision_centre objects = ${dcObjects.length} (${dcObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  console.log(`living-state: strategy_room objects = ${srObjects.length} (${srObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   if (!fs.existsSync(path.join(REPORTS_DIR, "living-state-objects.json"))) {
     console.error("living-state: FAILED to write living-state-objects.json");
     process.exit(1);

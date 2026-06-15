@@ -106,3 +106,5 @@ export { commercialAdapter } from "./adapters/commercial-adapter";
 export { fulfilmentAdapter } from "./adapters/fulfilment-adapter";
 export { gmiAdapter } from "./adapters/gmi-adapter";
 export { contentAdapter } from "./adapters/content-adapter";
+export { decisionCentreAdapter } from "./adapters/decision-centre-adapter";
+export { strategyRoomAdapter } from "./adapters/strategy-room-adapter";
