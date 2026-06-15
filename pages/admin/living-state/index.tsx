@@ -27,7 +27,7 @@ import LivingStatePanel from "@/components/living/LivingStatePanel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type FilterKey = "all" | "commercial" | "fulfilment" | "blocked" | "missing_repair_route" | "unsafe_automation" | "artifact_incomplete";
+type FilterKey = "all" | "commercial" | "fulfilment" | "gmi" | "content" | "blocked" | "missing_repair_route" | "unsafe_automation" | "artifact_incomplete" | "publication" | "route_issue" | "lifecycle_tension" | "public_exposure";
 
 type Props = {
   snapshot: LivingStateReportSnapshot | null;
@@ -71,7 +71,13 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
   { key: "commercial", label: "Commercial" },
   { key: "fulfilment", label: "Fulfilment" },
+  { key: "gmi", label: "GMI" },
+  { key: "content", label: "Content" },
   { key: "blocked", label: "Blocked" },
+  { key: "publication", label: "Publication" },
+  { key: "route_issue", label: "Route issue" },
+  { key: "lifecycle_tension", label: "Lifecycle tension" },
+  { key: "public_exposure", label: "Public exposure" },
   { key: "missing_repair_route", label: "Missing repair route" },
   { key: "unsafe_automation", label: "Unsafe to automate" },
   { key: "artifact_incomplete", label: "Artifact incomplete" },
@@ -291,13 +297,35 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
   // Compute filter counts
   const filterCounts = React.useMemo<Record<FilterKey, number>>(() => {
     if (!snapshot) {
-      return { all: 0, commercial: 0, fulfilment: 0, blocked: 0, missing_repair_route: 0, unsafe_automation: 0, artifact_incomplete: 0 };
+      return {
+        all: 0, commercial: 0, fulfilment: 0, gmi: 0, content: 0,
+        blocked: 0, publication: 0, route_issue: 0, lifecycle_tension: 0,
+        public_exposure: 0, missing_repair_route: 0, unsafe_automation: 0,
+        artifact_incomplete: 0,
+      };
     }
+    const gmiObjs = snapshot.objects.filter((o) => o.domain === "gmi");
+    const contentObjs = snapshot.objects.filter((o) => o.domain === "content");
+    const publicationObjs = snapshot.objects.filter((o) => o.publication.relevant);
+    const routeIssueObjs = snapshot.objects.filter((o) =>
+              o.blockers.some((b) => b.code === "route_missing"),
+            );
+          const lifecycleTensionObjs = snapshot.objects.filter((o) =>
+            o.blockers.some((b) => b.code === "lifecycle_conflict" || b.code === "source_of_truth_conflict"),    );
+    const publicExposureObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "publication_not_allowed"),
+    );
     return {
       all: snapshot.objects.length,
       commercial: snapshot.commercialObjects.length,
       fulfilment: snapshot.fulfilmentObjects.length,
+      gmi: gmiObjs.length,
+      content: contentObjs.length,
       blocked: snapshot.blockedObjects.length,
+      publication: publicationObjs.length,
+      route_issue: routeIssueObjs.length,
+      lifecycle_tension: lifecycleTensionObjs.length,
+      public_exposure: publicExposureObjs.length,
       missing_repair_route: snapshot.objectsWithMissingRepairRoutes.length,
       unsafe_automation: snapshot.unsafeAutomationObjects.length,
       artifact_incomplete: snapshot.artifactIncompleteObjects.length,
@@ -312,8 +340,26 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
         return snapshot.commercialObjects;
       case "fulfilment":
         return snapshot.fulfilmentObjects;
+      case "gmi":
+        return snapshot.objects.filter((o) => o.domain === "gmi");
+      case "content":
+        return snapshot.objects.filter((o) => o.domain === "content");
       case "blocked":
         return snapshot.blockedObjects;
+      case "publication":
+        return snapshot.objects.filter((o) => o.publication.relevant);
+      case "route_issue":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "route_missing"),
+        );
+      case "lifecycle_tension":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "lifecycle_conflict" || b.code === "source_of_truth_conflict"),
+        );
+      case "public_exposure":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "publication_not_allowed"),
+        );
       case "missing_repair_route":
         return snapshot.objectsWithMissingRepairRoutes;
       case "unsafe_automation":

@@ -24,6 +24,8 @@ import { boardroomAdapter } from "@/lib/living-intelligence/adapters/boardroom-a
 import { assessmentAdapter } from "@/lib/living-intelligence/adapters/assessment-adapter";
 import { commercialAdapter } from "@/lib/living-intelligence/adapters/commercial-adapter";
 import { fulfilmentAdapter } from "@/lib/living-intelligence/adapters/fulfilment-adapter";
+import { gmiAdapter } from "@/lib/living-intelligence/adapters/gmi-adapter";
+import { contentAdapter } from "@/lib/living-intelligence/adapters/content-adapter";
 import { evaluateLivingStateObject } from "@/lib/living-intelligence/living-state-engine";
 import {
   applyMemoryToBatch,
@@ -259,6 +261,16 @@ function main(): void {
       records: fulfilmentProofRecords(),
       availableRoutes,
     }),
+    ...gmiAdapter.map({
+      domain: "gmi",
+      records: [],
+      availableRoutes,
+    }),
+    ...contentAdapter.map({
+      domain: "content",
+      records: [],
+      availableRoutes,
+    }),
   ];
 
   const evaluated = mapped.map((object) =>
@@ -300,6 +312,10 @@ function main(): void {
   const fulfilmentObjects = objects.filter((o) => o.domain === "fulfilment");
   console.log(`living-state: commercial objects = ${commercialObjects.length} (${commercialObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   console.log(`living-state: fulfilment objects = ${fulfilmentObjects.length} (${fulfilmentObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  const gmiObjects = objects.filter((o) => o.domain === "gmi");
+  const contentObjects = objects.filter((o) => o.domain === "content");
+  console.log(`living-state: gmi objects = ${gmiObjects.length} (${gmiObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  console.log(`living-state: content objects = ${contentObjects.length} (${contentObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   if (!fs.existsSync(path.join(REPORTS_DIR, "living-state-objects.json"))) {
     console.error("living-state: FAILED to write living-state-objects.json");
     process.exit(1);

@@ -104,3 +104,5 @@ export { boardroomAdapter } from "./adapters/boardroom-adapter";
 export { assessmentAdapter } from "./adapters/assessment-adapter";
 export { commercialAdapter } from "./adapters/commercial-adapter";
 export { fulfilmentAdapter } from "./adapters/fulfilment-adapter";
+export { gmiAdapter } from "./adapters/gmi-adapter";
+export { contentAdapter } from "./adapters/content-adapter";
