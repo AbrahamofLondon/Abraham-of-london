@@ -273,6 +273,58 @@ export default function PressurePage() {
                     </div>
                   </div>
 
+                  {/* ── Living Review ─────────────────────────────────────────── */}
+                  <div className="mt-8 border-t pt-6" style={{ borderTopColor: "rgba(255,255,255,0.06)" }}>
+                    <p style={{ ...mono, color: `${GOLD}88`, fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "10px" }}>
+                      Living Review
+                    </p>
+                    <p className="text-xs leading-6 text-white/40 mb-4">
+                      This review shows what the system heard, what it can support, what it cannot yet infer, and the next governed move. It does not treat a completed form as proof of execution, verification, or readiness.
+                    </p>
+
+                    {/* Evidence strength */}
+                    <div className="mb-3">
+                      <p style={{ ...mono, color: `${GOLD}88`, fontSize: 7, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "4px" }}>
+                        Evidence strength
+                      </p>
+                      <p className="text-xs leading-6 text-white/50">
+                        This is a pressure signal based on your concern. It is not a verified analysis. The system has not independently verified any claims.
+                      </p>
+                    </div>
+
+                    {/* What cannot be inferred */}
+                    <div className="mb-3">
+                      <p style={{ ...mono, color: `${GOLD}88`, fontSize: 7, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "4px" }}>
+                        What cannot be inferred
+                      </p>
+                      <ul className="space-y-0.5">
+                        <li className="text-[11px] leading-[1.6] text-white/40">• Verified evidence — user claims are not independently verified.</li>
+                        <li className="text-[11px] leading-[1.6] text-white/40">• Execution from intention — stating an intention is not executing it.</li>
+                        <li className="text-[11px] leading-[1.6] text-white/40">• Urgency from emotional intensity — pressure is not a deadline.</li>
+                      </ul>
+                    </div>
+
+                    {/* Next governed action */}
+                    <div className="border p-4" style={{ borderColor: "rgba(201,169,110,0.20)", backgroundColor: "rgba(201,169,110,0.03)" }}>
+                      <p style={{ ...mono, color: `${GOLD}AA`, fontSize: 7, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "4px" }}>
+                        Next governed action
+                      </p>
+                      <p className="text-sm leading-7 text-white/70">
+                        {result.recommendedNextStep}
+                      </p>
+                      <div className="mt-3">
+                        <Link
+                          href={result.route.href}
+                          className="inline-flex items-center gap-2 border px-4 py-2 text-[9px] uppercase tracking-widest"
+                          style={{ ...mono, borderColor: `${GOLD}40`, backgroundColor: `${GOLD}10`, color: '#F5F5F5', letterSpacing: '0.12em' }}
+                        >
+                          {result.route.label}
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
                   <FeedbackWidget
                     surface="pressure_signal_result"
                     subjectType="pressure_signal"

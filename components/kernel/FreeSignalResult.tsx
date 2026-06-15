@@ -16,6 +16,7 @@
  */
 
 import React from 'react'
+import Link from 'next/link'
 import type { KernelSignalResponse } from '@/pages/api/public/kernel-signal'
 import WhatTheSystemHeard from '@/components/living/WhatTheSystemHeard'
 import { buildUserLanguageInterpretations } from '@/lib/product/user-language-interpretation'
@@ -581,6 +582,82 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
               )}
             </div>
           </Section>
+        )}
+
+        {/* ── Living Review ─────────────────────────────────────────────────── */}
+        {!signal.clarificationRequired && (
+          <div className="mt-10 border-t border-white/[0.06] pt-8">
+            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '12px' }}>
+              Living Review
+            </p>
+            <p className="text-[12px] leading-[1.7] text-white/40 mb-6">
+              This review shows what the system heard, what it can support, what it cannot yet infer, and the next governed move. It does not treat a completed form as proof of execution, verification, or readiness.
+            </p>
+
+            {/* What the system heard */}
+            {signal.userLanguageEvidence && signal.userLanguageEvidence.length > 0 && (
+              <div className="mb-4">
+                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+                  What the system heard
+                </p>
+                <div className="space-y-2">
+                  {signal.userLanguageEvidence.slice(0, 3).map((quote, i) => (
+                    <p key={i} className="text-[13px] leading-[1.7] text-white/60 italic border-l-2 border-white/[0.08] pl-3">
+                      &ldquo;{quote.length > 200 ? quote.slice(0, 197) + '...' : quote}&rdquo;
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Evidence strength */}
+            <div className="mb-4">
+              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+                Evidence strength
+              </p>
+              <p className="text-[13px] leading-[1.7] text-white/50">
+                This is a free signal based on the information provided. It is not a verified outcome. The system has not independently verified any of the claims made in your input.
+              </p>
+            </div>
+
+            {/* What cannot be inferred */}
+            <div className="mb-4">
+              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+                What cannot be inferred
+              </p>
+              <ul className="space-y-1">
+                <li className="text-[12px] leading-[1.6] text-white/40">• Verified evidence — user claims are not independently verified.</li>
+                <li className="text-[12px] leading-[1.6] text-white/40">• Execution from intention — stating an intention is not executing it.</li>
+                <li className="text-[12px] leading-[1.6] text-white/40">• Readiness from confidence — confidence is not readiness.</li>
+                <li className="text-[12px] leading-[1.6] text-white/40">• Urgency from emotional intensity — pressure is not a deadline.</li>
+                <li className="text-[12px] leading-[1.6] text-white/40">• Contradiction resolution from a completed form — a form is not a resolution.</li>
+              </ul>
+            </div>
+
+            {/* Next governed action */}
+            <div className="border border-amber-500/20 bg-amber-500/[0.03] p-4">
+              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '6px' }}>
+                Next governed action
+              </p>
+              <p className="text-[14px] leading-[1.8] text-white/70">
+                {signal.directionOfMinimumViableMove || signal.decisionIntelligence?.nextAdmissibleMove || "Continue to the Decision Centre to carry this result forward into a governed case."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Link
+                  href="/decision-centre"
+                  className="inline-flex items-center gap-2 border px-4 py-2 text-[9px] uppercase tracking-widest transition-all hover:-translate-y-0.5"
+                  style={{ borderColor: `${GOLD}40`, backgroundColor: `${GOLD}10`, color: '#F5F5F5', ...mono, letterSpacing: '0.12em' }}
+                >
+                  Continue to Decision Centre
+                </Link>
+                {signal.decisionIntelligence?.progressiveEvidenceCapture?.nextBestCapture && (
+                  <span className="inline-flex items-center text-[10px] text-white/40" style={{ ...mono, letterSpacing: '0.10em' }}>
+                    Return with evidence to sharpen this reading
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* CTA — restrained */}
