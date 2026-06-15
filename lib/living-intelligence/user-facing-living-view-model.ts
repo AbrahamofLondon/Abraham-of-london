@@ -22,6 +22,7 @@
  */
 
 import type { LivingStateObject } from "@/lib/living-intelligence/living-state-object-contract";
+import type { LivingActionFeedback } from "@/lib/living-intelligence/living-action-feedback-contract";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ export type UserFacingLivingViewModel = {
     description: string;
     userActionRequired: boolean;
     requiresEvidence: boolean;
+    feedbackStatus?: string;
   }>;
   memory: {
     written: boolean;
@@ -51,6 +53,15 @@ export type UserFacingLivingViewModel = {
     safeToShowUser: boolean;
     operatorOnlyExcluded: boolean;
     automationNotAllowed: boolean;
+  };
+  feedback?: {
+    actionStatuses: Array<{
+      actionId: string;
+      label: string;
+      status: string;
+      evidenceRequired: boolean;
+      evidenceSubmitted: boolean;
+    }>;
   };
 };
 
@@ -70,6 +81,7 @@ export type UserFacingLivingViewModel = {
  */
 export function deriveUserFacingLivingViewModel(
   object: LivingStateObject,
+  feedbackRecords?: LivingActionFeedback[],
 ): UserFacingLivingViewModel {
   // ── What the system heard ──────────────────────────────────────────────────
   // From supporting evidence — this is what the system derived from user input.
@@ -146,6 +158,28 @@ export function deriveUserFacingLivingViewModel(
   );
   const automationNotAllowed = !object.safeToAutomate;
 
+  // Enrich next actions with feedback status.
+  const enrichedActions = nextGovernedActions.map((action) => {
+    const fb = feedbackRecords?.find((f) =>
+      f.label === action.label || f.actionId.includes(action.label.slice(0, 40)),
+    );
+    return {
+      ...action,
+      ...(fb ? { feedbackStatus: fb.status } : {}),
+    };
+  });
+
+  // Build user-safe feedback summary.
+  const actionStatuses = (feedbackRecords ?? [])
+    .filter((f) => f.actor === "user" || f.actor === "client")
+    .map((f) => ({
+      actionId: f.actionId,
+      label: f.label,
+      status: f.status,
+      evidenceRequired: f.evidenceRequired,
+      evidenceSubmitted: f.evidenceSubmitted,
+    }));
+
   return {
     objectId: object.id,
     domain: object.domain,
@@ -156,7 +190,7 @@ export function deriveUserFacingLivingViewModel(
     evidenceLimitations,
     contradictionOrTension,
     cannotInfer,
-    nextGovernedActions,
+    nextGovernedActions: enrichedActions,
     memory: {
       written: memoryWritten,
       recurrenceKnown,
@@ -168,6 +202,7 @@ export function deriveUserFacingLivingViewModel(
       operatorOnlyExcluded,
       automationNotAllowed,
     },
+    ...(actionStatuses.length > 0 ? { feedback: { actionStatuses } } : {}),
   };
 }
 

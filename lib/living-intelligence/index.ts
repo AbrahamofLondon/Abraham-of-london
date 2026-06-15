@@ -103,6 +103,37 @@ export type { LivingStateObjectsPayload } from "./living-state-report-composer";
 export { buildOperatorCommandCentreModel } from "./operator-command-centre-model";
 export type { OperatorCommandCentreModel, PriorityQueueItem, DomainAlert } from "./operator-command-centre-model";
 
+export { runFeedbackEngine, getUserSafeFeedback } from "./living-action-feedback-engine";
+export type { FeedbackEnrichment } from "./living-action-feedback-engine";
+
+export {
+  loadFeedbackStore,
+  saveFeedbackStore,
+  createFeedback,
+  upsertFeedback,
+  updateFeedbackStatus,
+  getFeedbackForObject,
+  getFeedbackByStatus,
+  ensureValidStore,
+} from "./living-action-feedback-store";
+
+export type {
+  LivingActionFeedback,
+  LivingActionFeedbackStatus,
+  LivingActionFeedbackActor,
+  LivingActionFeedbackSource,
+  LivingActionFeedbackStore,
+  LivingActionFeedbackSummary,
+} from "./living-action-feedback-contract";
+export {
+  LIVING_ACTION_FEEDBACK_STORE_VERSION,
+  LIVING_ACTION_FEEDBACK_REPORT_PATH,
+  LIVING_ACTION_FEEDBACK_SUMMARY_PATH,
+  LIVING_ACTION_FEEDBACK_STATUS_ORDER,
+  LIVING_ACTION_FEEDBACK_TERMINAL_STATUSES,
+  LIVING_ACTION_FEEDBACK_UNRESOLVED_STATUSES,
+} from "./living-action-feedback-contract";
+
 export { boardroomAdapter } from "./adapters/boardroom-adapter";
 export { assessmentAdapter } from "./adapters/assessment-adapter";
 export { commercialAdapter } from "./adapters/commercial-adapter";

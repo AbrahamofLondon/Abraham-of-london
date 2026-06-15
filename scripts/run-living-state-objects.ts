@@ -42,6 +42,8 @@ import {
   composeLivingStateSummaryMarkdown,
 } from "@/lib/living-intelligence/living-state-report-composer";
 import type { LivingStateObject } from "@/lib/living-intelligence/living-state-object-contract";
+import { runFeedbackEngine } from "@/lib/living-intelligence/living-action-feedback-engine";
+import { LIVING_ACTION_FEEDBACK_SUMMARY_PATH } from "@/lib/living-intelligence/living-action-feedback-contract";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -544,6 +546,11 @@ function main(): void {
   writeJson("reports/living-state-view-model.json", viewModel);
   writeText("reports/living-state-summary.md", composeLivingStateSummaryMarkdown(viewModel));
   writeJson("reports/living-state-memory.json", store);
+
+  // ── Feedback engine ─────────────────────────────────────────────────────────
+  const feedback = runFeedbackEngine(objects);
+  writeJson(LIVING_ACTION_FEEDBACK_SUMMARY_PATH, feedback.summary);
+  console.log(`living-action-feedback: ${feedback.summary.totalActions} actions, ${feedback.repeated.length} repeated, ${feedback.resolved.length} resolved, ${feedback.regressed.length} regressed`);
 
   // Console summary for the parent runner.
   const boardroom = objects.find((o) => o.domain === "boardroom");

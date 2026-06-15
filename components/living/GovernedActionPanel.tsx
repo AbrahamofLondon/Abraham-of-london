@@ -13,6 +13,7 @@ type Props = {
   whatProvesProgress: string | null;
   whatHappensNext: string | null;
   evidenceBasis?: string[];
+  feedbackStatus?: string | null;
   className?: string;
   variant?: LivingThemeVariant;
 };
@@ -23,6 +24,7 @@ export default function GovernedActionPanel({
   whatProvesProgress,
   whatHappensNext,
   evidenceBasis,
+  feedbackStatus,
   className = "",
   variant = "dark",
 }: Props) {
@@ -38,6 +40,34 @@ export default function GovernedActionPanel({
       <p className="text-base leading-7 mb-4" style={{ color: theme.heading }}>
         {requiredAction}
       </p>
+
+      {feedbackStatus && (
+        <div className="mb-3">
+          <span
+            className="inline-block font-mono text-[8px] uppercase tracking-[0.16em] px-2 py-0.5"
+            style={{
+              border: `1px solid ${
+                feedbackStatus === "verified_complete" ? theme.emerald :
+                feedbackStatus === "started" || feedbackStatus === "evidence_submitted" ? theme.accent :
+                feedbackStatus === "skipped" || feedbackStatus === "blocked" || feedbackStatus === "regressed" ? theme.red :
+                theme.amber
+              }40`,
+              color: feedbackStatus === "verified_complete" ? theme.emerald :
+                feedbackStatus === "started" || feedbackStatus === "evidence_submitted" ? theme.accent :
+                feedbackStatus === "skipped" || feedbackStatus === "blocked" || feedbackStatus === "regressed" ? theme.red :
+                theme.amber,
+              backgroundColor: `${
+                feedbackStatus === "verified_complete" ? theme.emerald :
+                feedbackStatus === "started" || feedbackStatus === "evidence_submitted" ? theme.accent :
+                feedbackStatus === "skipped" || feedbackStatus === "blocked" || feedbackStatus === "regressed" ? theme.red :
+                theme.amber
+              }10`,
+            }}
+          >
+            {feedbackStatus.replace(/_/g, ' ')}
+          </span>
+        </div>
+      )}
 
       {whyThisAction && (
         <div className="mb-3">

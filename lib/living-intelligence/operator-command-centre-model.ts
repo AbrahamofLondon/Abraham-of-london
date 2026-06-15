@@ -22,6 +22,7 @@
 
 import type { LivingStateObject, LivingStateSeverity } from "@/lib/living-intelligence/living-state-object-contract";
 import type { LivingStateReportSnapshot } from "@/lib/living-intelligence/living-state-report-loader";
+import type { FeedbackEnrichment } from "@/lib/living-intelligence/living-action-feedback-engine";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,16 @@ export type OperatorCommandCentreModel = {
     regressed: number;
     newIssues: number;
   };
+  feedback: {
+    totalActions: number;
+    repeatedActions: number;
+    resolvedActions: number;
+    regressedActions: number;
+    completedUnverified: number;
+    evidenceRequired: number;
+    evidenceSubmitted: number;
+    evidenceVerified: number;
+  };
   refusedToInfer: string[];
 };
 
@@ -108,6 +119,7 @@ const DOMAIN_LABELS: Record<string, string> = {
 
 export function buildOperatorCommandCentreModel(
   snapshot: LivingStateReportSnapshot,
+  feedback?: FeedbackEnrichment | null,
 ): OperatorCommandCentreModel {
   const objects = snapshot.objects;
   const now = snapshot.generatedAt ?? new Date().toISOString();
@@ -286,6 +298,16 @@ export function buildOperatorCommandCentreModel(
       resolved: memory.resolvedIssues,
       regressed: memory.regressions,
       newIssues: memory.newIssues,
+    },
+    feedback: {
+      totalActions: feedback?.summary.totalActions ?? 0,
+      repeatedActions: feedback?.summary.repeatedActions ?? 0,
+      resolvedActions: feedback?.summary.resolvedActions ?? 0,
+      regressedActions: feedback?.summary.regressedActions ?? 0,
+      completedUnverified: feedback?.summary.completedUnverified ?? 0,
+      evidenceRequired: feedback?.summary.evidenceRequired ?? 0,
+      evidenceSubmitted: feedback?.summary.evidenceSubmitted ?? 0,
+      evidenceVerified: feedback?.summary.evidenceVerified ?? 0,
     },
     refusedToInfer: snapshot.refusedToInfer,
   };

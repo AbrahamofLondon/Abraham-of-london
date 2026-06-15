@@ -23,6 +23,7 @@ import { requireAdminPage } from "@/lib/access/server";
 import { loadLivingStateReports } from "@/lib/living-intelligence/living-state-report-loader";
 import { buildOperatorCommandCentreModel } from "@/lib/living-intelligence/operator-command-centre-model";
 import type { OperatorCommandCentreModel } from "@/lib/living-intelligence/operator-command-centre-model";
+import { runFeedbackEngine } from "@/lib/living-intelligence/living-action-feedback-engine";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -49,7 +50,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         },
       };
     }
-    const model = buildOperatorCommandCentreModel(snapshot);
+    const feedback = runFeedbackEngine(snapshot.objects);
+    const model = buildOperatorCommandCentreModel(snapshot, feedback);
     return { props: { model, loadError: null } };
   } catch (err) {
     console.error("[admin-operator-command-centre]", err);
@@ -370,6 +372,23 @@ const OperatorCommandCentrePage: NextPage<Props> = ({ model, loadError }) => {
                 <StatCard label="Resolved" value={model.memory.resolved} color={EMERALD} />
                 <StatCard label="Regressed" value={model.memory.regressed} color={RED} />
                 <StatCard label="New issues" value={model.memory.newIssues} color={AMBER} />
+              </div>
+            </div>
+
+            {/* ── 3b. Action Feedback ──────────────────────────────────────────── */}
+            <div className="mb-8">
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] mb-3" style={{ color: ACCENT }}>
+                Action Feedback
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <StatCard label="Total actions" value={model.feedback.totalActions} />
+                <StatCard label="Repeated" value={model.feedback.repeatedActions} color={AMBER} />
+                <StatCard label="Resolved" value={model.feedback.resolvedActions} color={EMERALD} />
+                <StatCard label="Regressed" value={model.feedback.regressedActions} color={RED} />
+                <StatCard label="Completed unverified" value={model.feedback.completedUnverified} color={AMBER} />
+                <StatCard label="Evidence required" value={model.feedback.evidenceRequired} color={AMBER} />
+                <StatCard label="Evidence submitted" value={model.feedback.evidenceSubmitted} color={EMERALD} />
+                <StatCard label="Evidence verified" value={model.feedback.evidenceVerified} color={EMERALD} />
               </div>
             </div>
 
