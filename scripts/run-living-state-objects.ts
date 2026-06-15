@@ -28,6 +28,8 @@ import { gmiAdapter } from "@/lib/living-intelligence/adapters/gmi-adapter";
 import { contentAdapter } from "@/lib/living-intelligence/adapters/content-adapter";
 import { decisionCentreAdapter } from "@/lib/living-intelligence/adapters/decision-centre-adapter";
 import { strategyRoomAdapter } from "@/lib/living-intelligence/adapters/strategy-room-adapter";
+import { retainerOversightAdapter } from "@/lib/living-intelligence/adapters/retainer-oversight-adapter";
+import { professionalAdapter } from "@/lib/living-intelligence/adapters/professional-adapter";
 import { evaluateLivingStateObject } from "@/lib/living-intelligence/living-state-engine";
 import {
   applyMemoryToBatch,
@@ -240,6 +242,101 @@ function dcProofRecords(): Record<string, unknown>[] {
   ];
 }
 
+// ─── Retainer Oversight proof records (Phase 5D) ─────────────────────────────
+
+function retainerProofRecords(): Record<string, unknown>[] {
+  return [
+    {
+      accountId: "ro-proof-active-oversight",
+      status: "ACTIVE",
+      tier: "EXECUTIVE_OVERSIGHT",
+      signalCount: 12,
+      activeCaseCount: 4,
+      hasOversightBrief: true,
+      escalationRequired: false,
+      unresolvedCommitments: 2,
+      retainerEligible: true,
+    },
+    {
+      accountId: "ro-proof-escalation-required",
+      status: "ACTIVE",
+      tier: "INSTITUTIONAL_COMMAND",
+      signalCount: 8,
+      activeCaseCount: 3,
+      hasOversightBrief: true,
+      escalationRequired: true,
+      unresolvedCommitments: 5,
+      retainerEligible: true,
+    },
+    {
+      accountId: "ro-proof-no-signals",
+      status: "QUALIFIED",
+      tier: "GOVERNED_CONTINUITY",
+      signalCount: 0,
+      activeCaseCount: 0,
+      hasOversightBrief: false,
+      escalationRequired: false,
+      unresolvedCommitments: 0,
+      retainerEligible: true,
+    },
+  ];
+}
+
+// ─── Professional proof records (Phase 5D) ────────────────────────────────────
+
+function professionalProofRecords(): Record<string, unknown>[] {
+  return [
+    {
+      engagementId: "prof-proof-active-verified",
+      status: "active",
+      verificationStatus: "verified",
+      clientName: "Acme Corp",
+      hasClientConsent: true,
+      organisationBoundaryEnforced: true,
+      canViewRawResponses: false,
+      smallSampleSuppressionApplies: true,
+      hasStripeMetadata: false,
+      isBlocked: false,
+    },
+    {
+      engagementId: "prof-proof-no-consent",
+      status: "active",
+      verificationStatus: "verified",
+      clientName: "Beta Ltd",
+      hasClientConsent: false,
+      organisationBoundaryEnforced: true,
+      canViewRawResponses: false,
+      smallSampleSuppressionApplies: true,
+      hasStripeMetadata: false,
+      isBlocked: false,
+    },
+    {
+      engagementId: "prof-proof-unverified-advisor",
+      status: "active",
+      verificationStatus: "unverified",
+      clientName: "Gamma Inc",
+      hasClientConsent: false,
+      organisationBoundaryEnforced: false,
+      canViewRawResponses: true,
+      smallSampleSuppressionApplies: false,
+      hasStripeMetadata: true,
+      isBlocked: true,
+    },
+    {
+      engagementId: "prof-proof-concluded",
+      status: "concluded",
+      verificationStatus: "verified",
+      clientName: "Delta Group",
+      hasClientConsent: true,
+      organisationBoundaryEnforced: true,
+      canViewRawResponses: false,
+      smallSampleSuppressionApplies: true,
+      hasStripeMetadata: false,
+      isBlocked: false,
+    },
+  ];
+}
+
 // ─── Strategy Room proof records (Phase 5C) ───────────────────────────────────
 
 function srProofRecords(): Record<string, unknown>[] {
@@ -421,6 +518,16 @@ function main(): void {
       records: srProofRecords(),
       availableRoutes,
     }),
+    ...retainerOversightAdapter.map({
+      domain: "retainer_oversight",
+      records: retainerProofRecords(),
+      availableRoutes,
+    }),
+    ...professionalAdapter.map({
+      domain: "professional",
+      records: professionalProofRecords(),
+      availableRoutes,
+    }),
   ];
 
   const evaluated = mapped.map((object) =>
@@ -470,6 +577,10 @@ function main(): void {
   const srObjects = objects.filter((o) => o.domain === "strategy_room");
   console.log(`living-state: decision_centre objects = ${dcObjects.length} (${dcObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   console.log(`living-state: strategy_room objects = ${srObjects.length} (${srObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  const roObjects = objects.filter((o) => o.domain === "retainer_oversight");
+  const profObjects = objects.filter((o) => o.domain === "professional");
+  console.log(`living-state: retainer_oversight objects = ${roObjects.length} (${roObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
+  console.log(`living-state: professional objects = ${profObjects.length} (${profObjects.filter((o) => o.blockers.some((b) => b.severity === "blocker")).length} blocked)`);
   if (!fs.existsSync(path.join(REPORTS_DIR, "living-state-objects.json"))) {
     console.error("living-state: FAILED to write living-state-objects.json");
     process.exit(1);

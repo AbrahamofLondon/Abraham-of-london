@@ -108,3 +108,5 @@ export { gmiAdapter } from "./adapters/gmi-adapter";
 export { contentAdapter } from "./adapters/content-adapter";
 export { decisionCentreAdapter } from "./adapters/decision-centre-adapter";
 export { strategyRoomAdapter } from "./adapters/strategy-room-adapter";
+export { retainerOversightAdapter } from "./adapters/retainer-oversight-adapter";
+export { professionalAdapter } from "./adapters/professional-adapter";

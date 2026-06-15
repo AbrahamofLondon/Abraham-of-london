@@ -27,7 +27,7 @@ import LivingStatePanel from "@/components/living/LivingStatePanel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type FilterKey = "all" | "commercial" | "fulfilment" | "gmi" | "content" | "decision_centre" | "strategy_room" | "blocked" | "missing_repair_route" | "unsafe_automation" | "artifact_incomplete" | "publication" | "route_issue" | "lifecycle_tension" | "public_exposure" | "user_safe" | "needs_review" | "missing_evidence" | "execution_gap" | "component_underwired";
+type FilterKey = "all" | "commercial" | "fulfilment" | "gmi" | "content" | "decision_centre" | "strategy_room" | "retainer_oversight" | "professional" | "blocked" | "missing_repair_route" | "unsafe_automation" | "artifact_incomplete" | "publication" | "route_issue" | "lifecycle_tension" | "public_exposure" | "user_safe" | "needs_review" | "missing_evidence" | "execution_gap" | "component_underwired" | "client_safe" | "sponsor_safe" | "advisor_boundary" | "organisation_access" | "raw_response_protected" | "oversight_brief" | "retainer_readiness" | "consent_boundary";
 
 type Props = {
   snapshot: LivingStateReportSnapshot | null;
@@ -75,7 +75,17 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "content", label: "Content" },
   { key: "decision_centre", label: "Decision Centre" },
   { key: "strategy_room", label: "Strategy Room" },
+  { key: "retainer_oversight", label: "Retainer Oversight" },
+  { key: "professional", label: "Professional" },
   { key: "blocked", label: "Blocked" },
+  { key: "client_safe", label: "Client-safe" },
+  { key: "sponsor_safe", label: "Sponsor-safe" },
+  { key: "advisor_boundary", label: "Advisor boundary" },
+  { key: "organisation_access", label: "Organisation access" },
+  { key: "raw_response_protected", label: "Raw response protected" },
+  { key: "oversight_brief", label: "Oversight brief" },
+  { key: "retainer_readiness", label: "Retainer readiness" },
+  { key: "consent_boundary", label: "Consent boundary" },
   { key: "user_safe", label: "User-safe" },
   { key: "needs_review", label: "Needs review" },
   { key: "missing_evidence", label: "Missing evidence" },
@@ -307,8 +317,12 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
       return {
         all: 0, commercial: 0, fulfilment: 0, gmi: 0, content: 0,
         decision_centre: 0, strategy_room: 0,
+        retainer_oversight: 0, professional: 0,
         blocked: 0, user_safe: 0, needs_review: 0, missing_evidence: 0,
         execution_gap: 0, component_underwired: 0,
+        client_safe: 0, sponsor_safe: 0, advisor_boundary: 0,
+        organisation_access: 0, raw_response_protected: 0,
+        oversight_brief: 0, retainer_readiness: 0, consent_boundary: 0,
         publication: 0, route_issue: 0, lifecycle_tension: 0,
         public_exposure: 0, missing_repair_route: 0, unsafe_automation: 0,
         artifact_incomplete: 0,
@@ -318,6 +332,8 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
     const contentObjs = snapshot.objects.filter((o) => o.domain === "content");
     const dcObjs = snapshot.objects.filter((o) => o.domain === "decision_centre");
     const srObjs = snapshot.objects.filter((o) => o.domain === "strategy_room");
+    const roObjs = snapshot.objects.filter((o) => o.domain === "retainer_oversight");
+    const profObjs = snapshot.objects.filter((o) => o.domain === "professional");
     const publicationObjs = snapshot.objects.filter((o) => o.publication.relevant);
     const routeIssueObjs = snapshot.objects.filter((o) =>
       o.blockers.some((b) => b.code === "route_missing"),
@@ -341,6 +357,26 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
     const componentUnderwiredObjs = snapshot.objects.filter((o) =>
       o.blockers.some((b) => b.code === "component_without_live_state"),
     );
+    const clientSafeObjs = snapshot.objects.filter((o) => o.safeToShowUser);
+    const sponsorSafeObjs = snapshot.objects.filter((o) => o.safeToShowOperator);
+    const advisorBoundaryObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "missing_consent"),
+    );
+    const orgAccessObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "unsafe_to_show_user"),
+    );
+    const rawResponseObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "unsafe_to_show_user"),
+    );
+    const oversightBriefObjs = snapshot.objects.filter((o) =>
+      o.domain === "retainer_oversight" && o.artifact.status === "generated",
+    );
+    const retainerReadinessObjs = snapshot.objects.filter((o) =>
+      o.domain === "retainer_oversight" && o.raw?.retainerEligible === true,
+    );
+    const consentBoundaryObjs = snapshot.objects.filter((o) =>
+      o.blockers.some((b) => b.code === "missing_consent"),
+    );
     return {
       all: snapshot.objects.length,
       commercial: snapshot.commercialObjects.length,
@@ -349,12 +385,22 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
       content: contentObjs.length,
       decision_centre: dcObjs.length,
       strategy_room: srObjs.length,
+      retainer_oversight: roObjs.length,
+      professional: profObjs.length,
       blocked: snapshot.blockedObjects.length,
       user_safe: userSafeObjs.length,
       needs_review: needsReviewObjs.length,
       missing_evidence: missingEvidenceObjs.length,
       execution_gap: executionGapObjs.length,
       component_underwired: componentUnderwiredObjs.length,
+      client_safe: clientSafeObjs.length,
+      sponsor_safe: sponsorSafeObjs.length,
+      advisor_boundary: advisorBoundaryObjs.length,
+      organisation_access: orgAccessObjs.length,
+      raw_response_protected: rawResponseObjs.length,
+      oversight_brief: oversightBriefObjs.length,
+      retainer_readiness: retainerReadinessObjs.length,
+      consent_boundary: consentBoundaryObjs.length,
       publication: publicationObjs.length,
       route_issue: routeIssueObjs.length,
       lifecycle_tension: lifecycleTensionObjs.length,
@@ -393,6 +439,11 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
         return snapshot.objects.filter((o) => o.domain === "decision_centre");
       case "strategy_room":
         return snapshot.objects.filter((o) => o.domain === "strategy_room");
+      case "retainer_oversight":
+        return snapshot.objects.filter((o) => o.domain === "retainer_oversight");
+      case "professional":
+        return snapshot.objects.filter((o) => o.domain === "professional");
+      case "client_safe":
       case "user_safe":
         return snapshot.objects.filter((o) => o.safeToShowUser);
       case "needs_review":
@@ -410,6 +461,26 @@ const LivingStatePage: NextPage<Props> = ({ snapshot, loadError }) => {
       case "component_underwired":
         return snapshot.objects.filter((o) =>
           o.blockers.some((b) => b.code === "component_without_live_state"),
+        );
+      case "sponsor_safe":
+        return snapshot.objects.filter((o) => o.safeToShowOperator);
+      case "advisor_boundary":
+      case "consent_boundary":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "missing_consent"),
+        );
+      case "organisation_access":
+      case "raw_response_protected":
+        return snapshot.objects.filter((o) =>
+          o.blockers.some((b) => b.code === "unsafe_to_show_user"),
+        );
+      case "oversight_brief":
+        return snapshot.objects.filter((o) =>
+          o.domain === "retainer_oversight" && o.artifact.status === "generated",
+        );
+      case "retainer_readiness":
+        return snapshot.objects.filter((o) =>
+          o.domain === "retainer_oversight" && o.raw?.retainerEligible === true,
         );
       case "public_exposure":
         return snapshot.objects.filter((o) =>
