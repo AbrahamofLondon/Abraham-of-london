@@ -21,6 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -436,6 +437,37 @@ function main() {
   ok("Wrote reports/living-product-truth-report.json");
   ok("Wrote reports/living-product-truth-report.md");
   ok("Updated reports/living-product-memory.json");
+
+  // 6b. Living State Object layer (additive) — emit the new reusable reports via
+  //     the real engine (single source of truth) through the TS entrypoint.
+  //     Best-effort: a failure here is surfaced but does not alter the existing
+  //     estate-structure gate's exit semantics.
+  heading("6b. Living State Objects");
+  try {
+    const out = execSync("npx tsx scripts/run-living-state-objects.ts", {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    for (const lineOut of out.split("\n")) {
+      const trimmed = lineOut.trim();
+      if (trimmed.startsWith("living-state:")) ok(trimmed);
+    }
+    const requiredOutputs = [
+      "reports/living-state-objects.json",
+      "reports/living-state-view-model.json",
+      "reports/living-state-summary.md",
+      "reports/living-state-memory.json",
+    ];
+    let allPresent = true;
+    for (const rel of requiredOutputs) {
+      if (exists(rel)) ok(`Wrote ${rel}`);
+      else { warn(`Missing ${rel}`); allPresent = false; }
+    }
+    if (!allPresent) warn("Living State emission incomplete (see above)");
+  } catch (err) {
+    warn(`Living State emission skipped: ${err?.message ?? err}`);
+  }
 
   // 7. Exit
   const blockers = findings.filter((f) => f.blocksDeployment);

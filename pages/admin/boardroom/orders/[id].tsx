@@ -25,6 +25,16 @@ import {
   DELIVERY_STATUS_COLORS,
   type BoardroomDeliveryStatus,
 } from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
+import LivingStatePanel from "@/components/living/LivingStatePanel";
+import { boardroomAdapter } from "@/lib/living-intelligence/adapters/boardroom-adapter";
+import { evaluateLivingStateObject } from "@/lib/living-intelligence/living-state-engine";
+
+// Repair routes the Boardroom domain references — both exist in the app, so the
+// engine resolves them rather than false-flagging a missing route.
+const LIVING_STATE_KNOWN_ROUTES = [
+  "/admin/boardroom/orders/[id]",
+  "/admin/fulfilment",
+];
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const GOLD = "#C9A96E";
@@ -519,6 +529,38 @@ export default function BoardroomOrderDetailPage({
     ? `/boardroom/dossier/${String((order.metadata as Record<string, unknown>).dossierId)}`
     : null;
 
+  // ── Living State Object (generic, engine-derived) ──────────────────────────
+  // Map this real order through the shared Boardroom adapter + engine. The same
+  // contract powers every domain; this page renders the generic panel, not a
+  // boardroom-specific one. Unknowns default conservatively (toward "human must
+  // verify"), never toward a false "approved".
+  const livingStateObject = React.useMemo(() => {
+    const customerAccessUrl =
+      typeof order.metadata?.customerAccessUrl === "string"
+        ? order.metadata.customerAccessUrl
+        : "";
+    const record: Record<string, unknown> = {
+      orderId: order.id,
+      productCode: "BOARDROOM_BRIEF",
+      deliveryStatus: currentStatus || order.deliveryStatus,
+      artifactStatus: artifact?.status,
+      adminPreviewUrl: typeof artifact?.downloadUrl === "string" ? artifact.downloadUrl : "",
+      customerAccessUrl,
+      approvalAllowed:
+        currentStatus === "approved_for_delivery" ||
+        currentStatus === "customer_access_ready" ||
+        currentStatus === "delivered",
+      publicationIntended: Boolean(caseStudyDraft),
+    };
+    const [mapped] = boardroomAdapter.map({
+      domain: "boardroom",
+      records: [record],
+      availableRoutes: LIVING_STATE_KNOWN_ROUTES,
+    });
+    if (!mapped) return null;
+    return evaluateLivingStateObject(mapped, { availableRoutes: LIVING_STATE_KNOWN_ROUTES });
+  }, [order, currentStatus, artifact?.status, artifact?.downloadUrl, caseStudyDraft]);
+
   return (
     <AdminLayout>
       <Head><title>Order {order.id.slice(0, 12)} | Boardroom Admin</title></Head>
@@ -591,6 +633,12 @@ export default function BoardroomOrderDetailPage({
               </div>
             )}
           </div>
+        )}
+
+        {livingStateObject && (
+          <Section title="Living State">
+            <LivingStatePanel object={livingStateObject} audience="operator" variant="dark" />
+          </Section>
         )}
 
         <Section title="Order Details">

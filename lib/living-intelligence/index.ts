@@ -57,3 +57,48 @@ export { runLearningEngine } from "./governed-learning-engine";
 export type { LearnedInsight } from "./governed-learning-engine";
 export { auditLivingComponents } from "./living-component-auditor";
 export type { ComponentAudit, ComponentAuditStatus } from "./living-component-auditor";
+
+// ─── Living State Object layer (additive) ────────────────────────────────────
+// Reusable, estate-wide operational state intelligence. This sits beside the
+// estate-structure system above; it does not replace it. Each product area
+// provides a domain adapter, but all adapters emit the same LivingStateObject,
+// and the engine (not the presentation layer) owns the cross-cutting rules.
+
+export type {
+  LivingStateDomain, LivingStateSubjectType, LivingStateStage,
+  LivingStateBlockerCode, LivingStateSeverity, LivingStateActor,
+  LivingStateBlocker, LivingStateActionType, LivingStateNextAction,
+  LivingStateEvidenceStatus, LivingStateEvidence,
+  LivingStateConsentStatus, LivingStateConsent,
+  LivingStateArtifactStatus, LivingStateArtifact,
+  LivingStatePublication, LivingStateMemory, LivingStateObject,
+} from "./living-state-object-contract";
+export {
+  LIVING_STATE_SEVERITY_RANK, LIVING_STATE_NON_TERMINAL_STAGES, LIVING_STATE_NEVER_INFER,
+} from "./living-state-object-contract";
+
+export type { LivingDomainAdapter, LivingDomainAdapterInput } from "./living-domain-adapter-contract";
+export { readString, readBool, readNumber, readStringArray } from "./living-domain-adapter-contract";
+
+export { evaluateLivingStateObject, evaluateLivingStateEstate } from "./living-state-engine";
+export type { EvaluateContext, LivingStateEstateSummary } from "./living-state-engine";
+
+export {
+  emptyMemoryStore, coerceMemoryStore, deriveMemory, applyMemoryToBatch, summariseMemory,
+  LIVING_STATE_MEMORY_VERSION,
+} from "./living-state-memory";
+export type { LivingStateMemoryRecord, LivingStateMemoryStore } from "./living-state-memory";
+
+export { normaliseRoute, routeExists, resolveRepairRoute } from "./living-state-route-map";
+
+export { buildLivingStateViewModel, LIVING_STATE_ENGINE_VERSION } from "./living-state-view-model";
+export type {
+  LivingStateViewModel, LivingStateDomainRollup,
+  LivingStateUserFacing, LivingStateOperatorFacing,
+} from "./living-state-view-model";
+
+export { composeLivingStateObjectsPayload, composeLivingStateSummaryMarkdown } from "./living-state-report-composer";
+export type { LivingStateObjectsPayload } from "./living-state-report-composer";
+
+export { boardroomAdapter } from "./adapters/boardroom-adapter";
+export { assessmentAdapter } from "./adapters/assessment-adapter";
