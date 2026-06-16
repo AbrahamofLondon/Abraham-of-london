@@ -251,6 +251,12 @@ ehthumbs.db
 reports/**/*.json
 reports/**/*.md
 
+# Exceptions: canonical commercial-governance matrices are committed artifacts,
+# imported statically by lib/commercial/commercial-governance.ts so the production
+# build is deterministic on a clean checkout (Netlify). Keep these tracked.
+!reports/product-release-readiness-matrix.json
+!reports/product-release-governance-matrix.json
+
 # ------------------------------
 # Video build outputs (large files — use LFS or external storage)
 # ------------------------------
