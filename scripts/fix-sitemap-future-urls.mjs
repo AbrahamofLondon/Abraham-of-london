@@ -44,9 +44,11 @@ const PUBLIC_CONTENT_TYPES = [
 ];
 
 // Regression URLs that must never appear in sitemap-0.xml.
-// Add entries here whenever a future-dated URL is confirmed absent.
+// Only genuinely non-public content belongs here (drafts / future-dated). The
+// classifier above is the source of truth. Published blog posts — series or
+// standalone — are public and must NOT be force-removed from the sitemap.
+// (The short below is a confirmed draft; the classifier already excludes it.)
 const REGRESSION_URLS = [
-  "/blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape",
   "/shorts/when-the-burden-changes-address",
 ];
 
