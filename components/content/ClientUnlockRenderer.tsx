@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import ClientOnlyMDXRenderer from "@/components/mdx/ClientOnlyMDXRenderer";
 import AccessGate from "@/components/AccessGate";
 import { decodeBodyCodePayload } from "@/lib/content/client-codec";
-import type { AccessTier } from "@/lib/access/public";
+import { normalizeUserTier, hasAccess, type AccessTier } from "@/lib/access/public";
 
 type ClientUnlockRendererProps = {
   initialCode: string | null;
@@ -88,50 +88,91 @@ export default function ClientUnlockRenderer({
   const [loading, setLoading] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
+  // Guards the one-shot auto-unlock below so a failed fetch cannot re-fire.
+  const autoUnlockAttempted = React.useRef(false);
+
   const resolvedEndpoint = React.useMemo(() => {
     return safeString(endpoint) || buildDefaultEndpoint(slug);
   }, [endpoint, slug]);
 
-  const unlock = React.useCallback(async () => {
-    setLoading(true);
-    setUnlockError(null);
+  // Resolve the viewer's clearance the same way the gate (and the blog page) do,
+  // so a pre-authorized reader can be fetched automatically rather than being
+  // stranded behind a gate they could already pass.
+  const userTier = normalizeUserTier(
+    (session?.user as any)?.tier ?? (session?.user as any)?.role ?? "public",
+  );
+  const canRead = hasAccess(userTier, requiredTier as AccessTier);
 
-    try {
-      const res = await fetch(resolvedEndpoint, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        credentials: "same-origin",
-      });
+  // `silent` auto-attempts suppress error chrome so an unauthorized viewer still
+  // sees the gate (not a red error), while an explicit unlock click surfaces them.
+  const unlock = React.useCallback(
+    async (silent = false) => {
+      setLoading(true);
+      if (!silent) setUnlockError(null);
 
-      const json = await res.json().catch(() => ({}));
+      try {
+        const res = await fetch(resolvedEndpoint, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+        });
 
-      if (!res.ok || !json?.ok) {
-        setUnlockError(safeString(json?.reason) || "UNLOCK_FAILED");
-        return;
+        const json = await res.json().catch(() => ({}));
+
+        if (!res.ok || !json?.ok) {
+          if (!silent) setUnlockError(safeString(json?.reason) || "UNLOCK_FAILED");
+          return;
+        }
+
+        const decoded = decodeBodyCodePayload(json);
+        if (!decoded.trim()) {
+          if (!silent) setUnlockError("UNLOCK_PAYLOAD_MISSING");
+          return;
+        }
+
+        setCode(decoded);
+      } catch {
+        if (!silent) setUnlockError("UNLOCK_NETWORK_FAILURE");
+      } finally {
+        setLoading(false);
       }
+    },
+    [resolvedEndpoint],
+  );
 
-      const decoded = decodeBodyCodePayload(json);
-      if (!decoded.trim()) {
-        setUnlockError("UNLOCK_PAYLOAD_MISSING");
-        return;
-      }
-
-      setCode(decoded);
-    } catch {
-      setUnlockError("UNLOCK_NETWORK_FAILURE");
-    } finally {
-      setLoading(false);
+  // Hydration-lifecycle bridge for pre-authorized readers: gated pages ship
+  // initialCode=null, so without this the payload is never fetched and the gate
+  // renders instead of the content the viewer is entitled to. Fire exactly once.
+  React.useEffect(() => {
+    if (!code && session?.user && canRead && !autoUnlockAttempted.current) {
+      autoUnlockAttempted.current = true;
+      void unlock(true);
     }
-  }, [resolvedEndpoint]);
+  }, [code, session?.user, canRead, unlock]);
 
   if (!code) {
+    // While the silent auto-unlock is in flight for an entitled reader, show a
+    // quiet loading state rather than flashing the gate.
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-pulse font-mono text-[10px] uppercase tracking-widest text-amber-500/80">
+            Loading content…
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div>
         <AccessGate
           title={title ?? ""}
           requiredTier={requiredTier as AccessTier}
+          userTier={userTier}
           isAuthenticated={!!session?.user}
-          onUnlocked={unlock}
+          onUnlocked={() => {
+            void unlock();
+          }}
           message={message}
           onGoToAccess={onGoToJoin}
         />

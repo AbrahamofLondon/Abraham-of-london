@@ -245,6 +245,9 @@ const BriefPage: NextPage<Props> = ({
   const [loadingContent, setLoadingContent] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
+  // Guards the one-shot auto-unlock below so a failed fetch cannot re-fire.
+  const autoUnlockAttempted = React.useRef(false);
+
   const mdxComponents = React.useMemo(
     () => getMdxComponents(directive),
     [directive],
@@ -284,6 +287,22 @@ const BriefPage: NextPage<Props> = ({
       setLoadingContent(false);
     }
   }, [bareSlug, needsAuth]);
+
+  // Pre-authorized readers bypass <AccessGate>, but gated bodyCode was stripped
+  // in getStaticProps — without this, activeCode stays "" and the reader renders
+  // empty. Fetch the secured payload exactly once when authenticated + cleared.
+  React.useEffect(() => {
+    if (
+      needsAuth &&
+      session?.user &&
+      canRead &&
+      !activeCode &&
+      !autoUnlockAttempted.current
+    ) {
+      autoUnlockAttempted.current = true;
+      void handleUnlock();
+    }
+  }, [needsAuth, session?.user, canRead, activeCode, handleUnlock]);
 
   if (needsAuth && status === "loading") {
     return (

@@ -1,7 +1,7 @@
 /* pages/lexicon/[slug].tsx */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -71,6 +71,11 @@ function relatedTermsFromDoc(doc: any): Array<{ title: string; slug: string }> {
 
   if (!Array.isArray(raw)) return [];
 
+  // Dedupe by bare slug so the same term referenced more than once (e.g. via
+  // both `tags` and `seeAlso`) cannot produce duplicate React keys or repeated
+  // chips in the Related Terms list.
+  const seen = new Set<string>();
+
   return raw
     .map((item: any) => {
       const title =
@@ -84,7 +89,11 @@ function relatedTermsFromDoc(doc: any): Array<{ title: string; slug: string }> {
       const bare = lexiconBareSlug(slug);
       return title.trim() && bare ? { title: title.trim(), slug: bare } : null;
     })
-    .filter(Boolean) as Array<{ title: string; slug: string }>;
+    .filter((term): term is { title: string; slug: string } => {
+      if (!term || seen.has(term.slug)) return false;
+      seen.add(term.slug);
+      return true;
+    });
 }
 
 const LexiconEntryPage: NextPage<LexiconPageProps> = ({ entry, staticHtml }) => {
@@ -178,7 +187,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return { paths, fallback: "blocking" };
 };
 
-export const getStaticProps = async ({ params }: GetStaticPropsContext) => {
+export const getStaticProps: GetStaticProps<LexiconPageProps> = async ({ params }) => {
   const slug = lexiconBareSlug(params?.slug);
   if (!slug) return { notFound: true };
 

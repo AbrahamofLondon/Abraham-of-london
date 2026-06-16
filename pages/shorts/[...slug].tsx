@@ -7,7 +7,6 @@ import Link from "next/link";
 
 import Layout from "@/components/Layout";
 import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
-import ClientUnlockRenderer from "@/components/content/ClientUnlockRenderer";
 import NextStepCTA from "@/components/content/NextStepCTA";
 
 import { requiredTierFromDoc } from "@/lib/access/tiers";
@@ -393,12 +392,12 @@ async function loadAllShorts(): Promise<RawShortLike[]> {
 
 const ShortsSlugPage: NextPage<Props> = ({
   item = EMPTY_ITEM,
-  requiredTier = "public",
   relatedShorts = [],
   prevShort = null,
   nextShort = null,
 }) => {
-  const isPublic = requiredTier === "public";
+  // Owner rule: shorts are always public and rendered statically. No AccessGate,
+  // no ClientUnlockRenderer, no auth/userTier dependency.
   const safeItem = item || EMPTY_ITEM;
 
   const title = safeItem.title || "Short";
@@ -589,15 +588,7 @@ const ShortsSlugPage: NextPage<Props> = ({
         </div>
 
         <article className="mx-auto max-w-3xl px-6 py-8">
-          {!isPublic ? (
-            <ClientUnlockRenderer
-              slug={`shorts/${safeItem.slug}`}
-              requiredTier={requiredTier}
-              initialCode={null}
-              title={safeItem.title}
-              message="This short requires appropriate access."
-            />
-          ) : safeItem.staticHtml ? (
+          {safeItem.staticHtml ? (
             <StaticMDXRenderer html={safeItem.staticHtml} />
           ) : (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center font-mono text-sm text-red-200">
@@ -768,14 +759,18 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     return { notFound: true };
   }
 
-  const tier = requiredTierFromDoc(doc as any);
-  const isPublic = tier === "public";
-
-  // Strip body HTML for gated content
-  if (!isPublic) {
-    item.staticHtml = null;
-  } else if (!item.staticHtml) {
-    console.warn(`[Short ${item.title}] No body HTML available. Content may not render.`);
+  // Owner rule: every short is public. Never gate a short or strip its body.
+  // Non-public metadata on a short is treated as an explicit public override so
+  // the body always renders statically (the gated client-fetch path does not
+  // apply to shorts). A missing body is surfaced for the visibility checker.
+  const detectedTier = requiredTierFromDoc(doc as any);
+  if (detectedTier !== "public") {
+    console.warn(
+      `[shorts] "${item.title}" carries non-public metadata (${detectedTier}); overriding to public per owner rule.`,
+    );
+  }
+  if (!item.staticHtml) {
+    console.warn(`[shorts] "${item.title}" has no renderable body HTML.`);
   }
 
   const prevDoc =
@@ -797,7 +792,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   return {
     props: {
       item,
-      requiredTier: tier,
+      requiredTier: "public",
       relatedShorts,
       prevShort: toShortLinkItem(prevDoc),
       nextShort: toShortLinkItem(nextDoc),

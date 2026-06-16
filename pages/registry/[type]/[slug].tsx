@@ -61,6 +61,9 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
   const [busy, setBusy] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
+  // Guards the one-shot auto-unlock below so a failed fetch cannot re-fire.
+  const autoUnlockAttempted = React.useRef(false);
+
   const required = tiers.normalizeRequired(requiredTier);
   const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
 
@@ -101,6 +104,25 @@ const UniversalDispatchPage: NextPage<UniversalPageProps> = ({
       setBusy(false);
     }
   };
+
+  // Pre-authorized readers bypass <AccessGate>, but gated bodyCode was stripped
+  // in getStaticProps — without this, bodyCode stays "" and the article renders
+  // empty. Fetch the secured payload exactly once when authenticated + cleared.
+  React.useEffect(() => {
+    if (
+      needsAuth &&
+      session?.user &&
+      canAccess &&
+      !bodyCode &&
+      !autoUnlockAttempted.current
+    ) {
+      autoUnlockAttempted.current = true;
+      void handleUnlock();
+    }
+    // handleUnlock is intentionally omitted — it is not memoized; the ref guard
+    // makes this run exactly once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsAuth, session?.user, canAccess, bodyCode]);
 
   if (needsAuth && status === "loading") {
     return (

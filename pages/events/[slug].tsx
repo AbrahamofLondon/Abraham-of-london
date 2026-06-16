@@ -104,6 +104,12 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
 
   const required = tiers.normalizeRequired(requiredTier);
   const needsAuth = required !== "public";
+  const user = tiers.normalizeUser((session?.user as any)?.tier ?? "public");
+  const canAccess =
+    !needsAuth || (!!session?.user && tiers.hasAccess(user, required));
+
+  // Guards the one-shot auto-unlock below so a failed fetch cannot re-fire.
+  const autoUnlockAttempted = React.useRef(false);
 
   const handleUnlock = async () => {
     setLoading(true);
@@ -120,6 +126,24 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
       setLoading(false);
     }
   };
+
+  // Pre-authorized readers would otherwise see <AccessGate> instead of content,
+  // because gated bodyCode was stripped in getStaticProps. Fetch the secured
+  // payload exactly once when the reader is authenticated and cleared.
+  React.useEffect(() => {
+    if (
+      needsAuth &&
+      session?.user &&
+      canAccess &&
+      !bodyCode &&
+      !autoUnlockAttempted.current
+    ) {
+      autoUnlockAttempted.current = true;
+      void handleUnlock();
+    }
+    // handleUnlock is not memoized; the ref guard makes this run exactly once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsAuth, session?.user, canAccess, bodyCode]);
 
   if (!router || !mounted) {
     return (
@@ -181,7 +205,7 @@ const EventPage: NextPage<Props> = ({ event, initialBodyCode, requiredTier }) =>
                   <ClientOnlyMDXRenderer code={bodyCode} />
                 </div>
               ) : needsAuth ? (
-                <AccessGate title={event.title} requiredTier={required} isAuthenticated={!!session?.user} onUnlocked={handleUnlock} />
+                <AccessGate title={event.title} requiredTier={required} userTier={user} isAuthenticated={!!session?.user} onUnlocked={handleUnlock} />
               ) : (
                 <div className="py-20 text-center font-mono text-[10px] uppercase tracking-[0.5em] text-zinc-300">
                   No event content available

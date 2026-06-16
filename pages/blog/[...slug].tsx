@@ -129,6 +129,10 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({
   const [loadingContent, setLoadingContent] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
+  // Guards the one-shot auto-unlock below so a failed fetch cannot re-fire
+  // on every re-render (activeCode stays "" on failure).
+  const autoUnlockAttempted = React.useRef(false);
+
   const handleUnlock = React.useCallback(async () => {
     if (!needsAuth || !bareSlug) return;
 
@@ -159,6 +163,25 @@ const BlogSlugPage: NextPage<BlogSlugProps> = ({
       setLoadingContent(false);
     }
   }, [bareSlug, needsAuth]);
+
+  // Hydration-lifecycle bridge for pre-authorized users.
+  // A logged-in, cleared reader bypasses <AccessGate> (the gate's onUnlocked
+  // never fires), yet getStaticProps stripped `code` to "" for gated posts.
+  // Without this, activeCode stays "" and the reader renders empty. Fetch the
+  // secured payload exactly once when the user is authenticated and authorized
+  // and nothing has been loaded yet.
+  React.useEffect(() => {
+    if (
+      needsAuth &&
+      session?.user &&
+      canRead &&
+      !activeCode &&
+      !autoUnlockAttempted.current
+    ) {
+      autoUnlockAttempted.current = true;
+      void handleUnlock();
+    }
+  }, [needsAuth, session?.user, canRead, activeCode, handleUnlock]);
 
   if (needsAuth && status === "loading") {
     return (
