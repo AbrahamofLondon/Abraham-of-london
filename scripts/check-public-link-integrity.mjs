@@ -26,11 +26,14 @@ const ROOT = path.resolve(__dirname, "..");
 const MANIFEST_PATH = path.join(ROOT, "reports", "mdx-route-manifest.json");
 const OUTPUT_PATH = path.join(ROOT, "reports", "public-link-integrity-report.json");
 
-const TODAY = new Date("2026-05-28T23:59:59Z");
+// Use the real current date so publication classification tracks reality.
+// (Previously frozen at 2026-05-28, which wrongly kept now-published series
+// parts — dates already passed — classified as future-dated/SCHEDULED.)
+const TODAY = new Date();
 
 // ─── Known broken URLs (regression cases) ────────────────────────────────────
 const REGRESSION_URLS_LIST = [
-  "/blog/series/the-science-of-inherited-selves/choose-the-ancestral-landscape",
+  // Confirmed draft — must stay absent from the sitemap.
   "/shorts/when-the-burden-changes-address",
   // Series hub URLs — must return 200, not 404
   "/editorials/series/the-minds-clay-series-2",
