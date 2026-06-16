@@ -687,6 +687,19 @@ export default function EnterpriseLandingPage() {
           </div>
         </section>
 
+        {/* ── 6b. DIRECT ENTERPRISE ROUTES ───────────────────────────────────── */}
+        <section aria-label="Direct enterprise routes" className="px-6 pb-2 lg:px-12">
+          <div className="mx-auto max-w-7xl">
+            <Eyebrow>Move without guessing</Eyebrow>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <SecondaryLink href="/enterprise-decision-scan">Run the Enterprise Decision Scan</SecondaryLink>
+              <SecondaryLink href="/enterprise-decision-authority">Map decision authority</SecondaryLink>
+              <SecondaryLink href="/offers/enterprise-assessment-advisory-review">Enterprise Assessment + Advisory Review</SecondaryLink>
+              <SecondaryLink href="/counsel">Counsel review</SecondaryLink>
+            </div>
+          </div>
+        </section>
+
         {/* ── 7. EVIDENCE ────────────────────────────────────────────────────── */}
         <section aria-label="Evidence" className="px-6 py-14 lg:px-12 lg:py-16">
           <div className="mx-auto max-w-7xl">

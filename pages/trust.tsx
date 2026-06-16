@@ -615,6 +615,7 @@ const TrustPage: NextPage = () => (
           </p>
           <div className="flex flex-wrap gap-2">
             {[
+              { label: "Evidence standards", href: "/evidence" },
               { label: "Provenance demo", href: "/provenance/demo" },
               { label: "Provenance explained", href: "/provenance/explained" },
               { label: "Privacy policy", href: "/privacy" },

@@ -276,6 +276,14 @@ export default function DiagnosticsIndexPage() {
                   dossierIncluded: true,
                 }}
               />
+              <SurfaceCard
+                title="Fast Diagnostic Decision Support"
+                state="OPEN"
+                detail="For operators who need a structured review of a live decision before the next move."
+                why="Use this when you want governed decision support on a single high-stakes decision as a guided offer, not a self-serve tool."
+                href="/offers/fast-diagnostic-decision-support"
+                cta="View Fast Diagnostic offer"
+              />
             </div>
           </div>
         </section>

@@ -240,6 +240,24 @@ const intentCards: IntentCard[] = [
     cta: "View enterprise pathway",
     status: "Organisational",
   },
+  {
+    number: "04",
+    title: "I want fast diagnostic decision support",
+    description:
+      "A paid fast-diagnostic decision-support offer: structured reading of a single high-stakes decision with a governed result you can act on.",
+    href: "/offers/fast-diagnostic-decision-support",
+    cta: "View Fast Diagnostic offer",
+    status: "Paid",
+  },
+  {
+    number: "05",
+    title: "We need an enterprise assessment and advisory review",
+    description:
+      "An organisational assessment with an advisory review of authority, evidence discipline, and decision governance — by enquiry.",
+    href: "/offers/enterprise-assessment-advisory-review",
+    cta: "View Enterprise Assessment offer",
+    status: "By enquiry",
+  },
 ];
 
 const corridorStages: CorridorStageData[] = [

@@ -1151,6 +1151,37 @@ export default function DecisionCentrePage() {
               This is not a report viewer. It is the live state of decisions under governance — from diagnostic through to intervention and oversight.
             </p>
 
+            {/* Decision entry cluster — start with the decision in front of you */}
+            <div style={{ marginTop: "28px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88`, display: "block", marginBottom: "12px" }}>
+                Start with the decision in front of you
+              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "10px" }}>
+                {[
+                  { href: "/foundry/decision-test", label: "Test a Decision", note: "The canonical decision test" },
+                  { href: "/decision-pressure", label: "Decision Pressure", note: "Fast pressure signal" },
+                  { href: "/test-your-decision", label: "Test Your Decision", note: "Structured decision check" },
+                  { href: "/quick-check", label: "Quick Check", note: "Rapid situational read" },
+                  { href: "/decision-pathway", label: "Decision Pathway", note: "Find the right route" },
+                  { href: "/decision-instruments/signal", label: "Free Decision Signal", note: "Free perception check" },
+                  { href: "/diagnostics/fast", label: "Fast Diagnostic", note: "Begin a governed case" },
+                ].map((entry) => (
+                  <Link
+                    key={entry.href}
+                    href={entry.href}
+                    style={{ display: "block", border: `1px solid ${GOLD}1F`, backgroundColor: `${GOLD}06`, padding: "12px 14px", textDecoration: "none" }}
+                  >
+                    <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, display: "block" }}>
+                      {entry.label}
+                    </span>
+                    <span style={{ fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.45)", marginTop: "4px", display: "block" }}>
+                      {entry.note}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             {/* Product Authority Status Overview */}
             <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, display: "block", marginBottom: "12px" }}>

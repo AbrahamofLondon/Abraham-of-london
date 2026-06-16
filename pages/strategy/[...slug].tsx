@@ -205,7 +205,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const list = await getPublishedStrategies();
 
     const paths = (list || [])
-      .map((s: any) => cleanPathish(s?.slug || ""))
+      // Strip any leading collection prefix so the route segments don't double it
+      // (e.g. "strategy/sample" → "sample" → /strategy/sample, not /strategy/strategy/sample).
+      .map((s: any) => cleanPathish(s?.slug || "").replace(/^strateg(?:y|ies)\//i, ""))
       .filter(Boolean)
       .map((slug) => ({ params: { slug: slug.split("/").filter(Boolean) } }));
 
@@ -222,7 +224,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (!slug) return { notFound: true, revalidate: 300 };
 
   const { getStrategyBySlug } = await import("@/lib/server/strategies-data");
-  const doc = await getStrategyBySlug(slug);
+  // Stored slugs may be bare ("sample") or prefixed ("strategy/sample"); resolve either.
+  const doc =
+    (await getStrategyBySlug(slug)) || (await getStrategyBySlug(`strategy/${slug}`));
 
   if (!doc || (doc as any).draft === true || (doc as any).published === false) {
     return { notFound: true, revalidate: 300 };

@@ -11,6 +11,10 @@ import ReaderHeader from "@/components/reader/ReaderHeader";
 import ReaderBody from "@/components/reader/ReaderBody";
 
 export const getServerSideProps: GetServerSideProps = async () => {
+  // Internal reader-system test surface — not available in production.
+  if (process.env.NODE_ENV === "production") {
+    return { notFound: true };
+  }
   return { props: {} };
 };
 

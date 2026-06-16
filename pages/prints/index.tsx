@@ -113,7 +113,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const prints: PrintItem[] = printDocs
       .filter((p: any) => p && !isDraftContent(p))
       .map((p: any) => ({
-        slug: normalizeSlug(p.slug || p._raw?.flattenedPath || ""),
+        slug: normalizeSlug(p.slug || p._raw?.flattenedPath || "").replace(/^prints\//i, ""),
         title: p.title || "Untitled Print",
         excerpt: p.excerpt || p.description || null,
         description: p.description || null,
@@ -122,7 +122,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         featured: Boolean(p.featured),
         date: p.date ? String(p.date) : null,
         formattedDate: formatPrintDate(p.date),
-        href: getDocHref(p) || `/prints/${normalizeSlug(p.slug || p._raw?.flattenedPath || "")}`,
+        href:
+          getDocHref(p) ||
+          `/prints/${normalizeSlug(p.slug || p._raw?.flattenedPath || "").replace(/^prints\//i, "")}`,
         category: p.category || null,
         size: p.size || null,
         dimensions: getPrintDimensions(p),

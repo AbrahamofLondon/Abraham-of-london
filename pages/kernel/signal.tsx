@@ -12,9 +12,18 @@
 
 import React, { useState, useCallback } from 'react'
 import Head from 'next/head'
+import type { GetServerSideProps } from 'next'
 import Layout from '@/components/Layout'
 import { FreeSignalResult } from '@/components/kernel/FreeSignalResult'
 import type { KernelSignalResponse } from '@/pages/api/public/kernel-signal'
+
+// Not a public navigation surface. The canonical public decision-signal route is
+// /decision-instruments/signal — redirect anyone landing here directly.
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    redirect: { destination: '/decision-instruments/signal', permanent: false },
+  }
+}
 
 const GOLD = '#C9A96E'
 
