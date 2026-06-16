@@ -102,10 +102,11 @@ const nextConfig = {
   generateEtags: true,
   productionBrowserSourceMaps: false,
 
-  // Next.js 16+ defaults to Turbopack. This empty config acknowledges the
-  // webpack config below exists and silences the "no turbopack config"
-  // error when `--webpack` is not explicitly passed.
-  turbopack: {},
+  // Production builds intentionally use webpack.
+  // Turbopack currently bundles pages/_document into static-generation chunks and triggers
+  // the Next document guard during prerendering.
+  // Re-enable only after a verified Turbopack compatibility pass.
+  // turbopack: {},
 
   // Explicit — default is 60 seconds, setting it here forces Next to log
   // the specific page name when it times out during static generation.
