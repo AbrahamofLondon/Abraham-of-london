@@ -48,7 +48,7 @@ const ROUTES = (process.env.CONTENT_PERSISTENCE_ROUTES
   ? process.env.CONTENT_PERSISTENCE_ROUTES.split(",").map((s) => s.trim())
   : [
       "/shorts/authority-is-the-missing-layer", // short
-      "/briefs/frontier-resilience-fatigue-at-the-top", // brief
+      "/briefs/institutional-alpha-why-leaders-stop-hearing-reality", // brief (known-public, has publicationStatus: "published")
       "/library", // library item / index
     ]);
 
