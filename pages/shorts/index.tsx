@@ -24,23 +24,16 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { Search, LayoutGrid, List, Sparkles, ChevronRight } from "lucide-react";
 
 import Layout from "@/components/Layout";
 // ShortsCard available at @/components/shorts/ShortsCard for grid layouts.
 // This page uses tabular rows — card component is not needed here.
 import TodaysShort from "@/components/shorts/TodaysShort";
-import type { TodaysShortModel } from "@/components/shorts/TodaysShort";
-import {
-  readImprint,
-  writeImprint,
-  computeWhisper,
-  getOrCreateSeed,
-  updateStreak,
-  updateVisitCount,
-} from "@/lib/shorts/brand";
+import type { TodaysShortModel, RelatedShortModel } from "@/components/shorts/TodaysShort";
+import { readImprint, updateStreak } from "@/lib/shorts/brand";
+import type { Imprint } from "@/lib/shorts/brand";
 import { resolveDocCoverImage } from "@/lib/content/shared";
+import { computeReadTime, estimateWordCount } from "@/lib/shorts/read-time";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -95,7 +88,10 @@ type ShortIndexItem = {
 type ShortsIndexProps = {
   shorts: ShortIndexItem[];
   totalCount: number;
-  todaysShorts: TodaysShortModel[];
+  // The single daily short, selected server-side (carries compiled MDX).
+  todaysShort: TodaysShortModel | null;
+  // Metadata-only related list for the daily short.
+  relatedShorts: RelatedShortModel[];
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -169,24 +165,11 @@ function isPublishedShort(doc: RawShortDoc): boolean {
 }
 
 function estimateWordCountFromDoc(doc: RawShortDoc): number {
-  // Try to get body content to estimate word count
-  const bodyCode = (doc as any)?.body?.code || (doc as any)?.bodyCode || "";
-  if (bodyCode) {
-    const cleaned = bodyCode
-      .replace(/<[^>]*>/g, "")
-      .replace(/[#*_`\[\]()>|~-]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    return cleaned.split(/\s+/).filter(Boolean).length;
-  }
-  // Fallback: estimate from excerpt/description
+  // Prefer the markdown source for word count; fall back to excerpt/description.
+  const raw = (doc as any)?.body?.raw || "";
+  if (raw) return estimateWordCount(raw);
   const text = safeString(doc.excerpt) || safeString(doc.description) || "";
-  return text.split(/\s+/).filter(Boolean).length;
-}
-
-function computeReadTime(wordCount: number): string {
-  const min = Math.max(1, Math.ceil(wordCount / 220));
-  return `${min} min read`;
+  return estimateWordCount(text);
 }
 
 function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
@@ -246,429 +229,6 @@ const THEME_META: Record<ThemeKey, { label: string; subtitle: string; image: str
   relationships: { label: "Relationships", subtitle: "People, boundaries, and belonging.",     image: "/assets/images/shorts/themes/relationships.jpg" },
   gentle:        { label: "Gentle",        subtitle: "Permission to be human.",                image: "/assets/images/shorts/themes/gentle.jpg" },
 };
-
-const GRAIN: React.CSSProperties = {
-  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-  backgroundSize: "180px 180px",
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MOTION PRESETS
-// ─────────────────────────────────────────────────────────────────────────────
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.80, ease: [0.19, 1, 0.22, 1] as any } },
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HERO BACKDROP — READING CHAMBER ATMOSPHERE
-// ─────────────────────────────────────────────────────────────────────────────
-
-function HeroBackdrop() {
-  return (
-    <div className="pointer-events-none absolute inset-0 select-none overflow-hidden">
-      {/* Base void */}
-      <div className="absolute inset-0" style={{ backgroundColor: "rgb(2 2 3)" }} />
-
-      {/* Warm gold nebula — upper left */}
-      <div
-        className="absolute"
-        style={{
-          left: "-8%",
-          top: "-10%",
-          width: "900px",
-          height: "560px",
-          borderRadius: "50%",
-          background: "radial-gradient(ellipse at center, rgba(201,169,110,0.09) 0%, rgba(201,169,110,0.04) 28%, rgba(201,169,110,0.012) 50%, transparent 72%)",
-          filter: "blur(120px)",
-        }}
-      />
-
-      {/* Cool white nebula — right */}
-      <div
-        className="absolute"
-        style={{
-          right: "-4%",
-          top: "6%",
-          width: "480px",
-          height: "480px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle at center, rgba(255,255,255,0.038) 0%, rgba(255,255,255,0.012) 30%, transparent 70%)",
-          filter: "blur(110px)",
-        }}
-      />
-
-      {/* Architectural ghost rectangles — upper right */}
-      {[
-        { w: 400, h: 260, r: "13%", t: "16%", br: "32px", opacity: 0.045 },
-        { w: 320, h: 200, r: "15%", t: "20%", br: "26px", opacity: 0.030 },
-        { w: 240, h: 145, r: "17%", t: "24%", br: "20px", opacity: 0.022 },
-      ].map((rect, i) => (
-        <div
-          key={i}
-          className="absolute hidden xl:block"
-          style={{
-            right: rect.r,
-            top: rect.t,
-            width: `${rect.w}px`,
-            height: `${rect.h}px`,
-            borderRadius: rect.br,
-            border: `1px solid rgba(255,255,255,${rect.opacity})`,
-          }}
-        />
-      ))}
-
-      {/* Vertical structural lines */}
-      <div
-        className="absolute inset-y-0 hidden xl:block"
-        style={{ left: "8%", width: "1px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.04), transparent)" }}
-      />
-      <div
-        className="absolute inset-y-0 hidden xl:block"
-        style={{ right: "8%", width: "1px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.03), transparent)" }}
-      />
-
-      {/* Horizontal accent line */}
-      <div
-        className="absolute inset-x-0"
-        style={{ top: "30%", height: "1px", background: "linear-gradient(to right, transparent, rgba(255,255,255,0.03), transparent)" }}
-      />
-
-      {/* Bottom fade */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-48"
-        style={{ background: "linear-gradient(to top, rgb(3 3 5), transparent)" }}
-      />
-
-      {/* Grain */}
-      <div className="absolute inset-0 opacity-[0.018]" style={GRAIN} />
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HERO SECTION
-// ─────────────────────────────────────────────────────────────────────────────
-
-function HeroSection({
-  totalCount,
-  streak,
-  visits,
-  whisper,
-  isRareWhisper,
-  featuredShorts,
-}: {
-  totalCount: number;
-  streak: number;
-  visits: number;
-  whisper: string;
-  isRareWhisper: boolean;
-  featuredShorts: ShortIndexItem[];
-}) {
-  return (
-    <section className="relative overflow-hidden" style={{ backgroundColor: "rgb(2 2 3)" }}>
-      <HeroBackdrop />
-
-      {/* Top precision rule */}
-      <div
-        className="absolute inset-x-0 top-0 z-10"
-        style={{ height: "1px", background: `linear-gradient(to right, transparent, ${GOLD}28, transparent)` }}
-      />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-        {/* Spacer for fixed header */}
-        <div className="pt-36 md:pt-40 lg:pt-44" />
-
-        {/* ── Stats badge ───────────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.05, ease: [0.19, 1, 0.22, 1] }}
-        >
-          <div
-            className="inline-flex items-center gap-2.5 px-4 py-2 backdrop-blur-md"
-            style={{
-              border: "1px solid rgba(255,255,255,0.08)",
-              backgroundColor: "rgba(255,255,255,0.02)",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.34em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.30)",
-              }}
-            >
-              {totalCount} notes
-            </span>
-            <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.22)",
-              }}
-            >
-              {streak} day streak
-            </span>
-            <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.18)",
-              }}
-            >
-              {visits} visits
-            </span>
-          </div>
-        </motion.div>
-
-        {/* ── Headline ──────────────────────────────────────────────────── */}
-        <div className="mt-10 max-w-4xl">
-          {/* Eyebrow */}
-          <motion.div
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.70, delay: 0.08, ease: [0.19, 1, 0.22, 1] }}
-            className="flex items-center gap-3"
-          >
-            <div className="h-px w-10" style={{ background: `linear-gradient(to right, ${GOLD}55, transparent)` }} />
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8.5px",
-                letterSpacing: "0.40em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.28)",
-              }}
-            >
-              Brief signals · Lasting weight
-            </span>
-          </motion.div>
-
-          {/* Display title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.95, delay: 0.12, ease: [0.19, 1, 0.22, 1] }}
-            style={{
-              marginTop: "1.25rem",
-              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-              fontWeight: 300,
-              fontSize: "clamp(4.5rem, 9vw, 9rem)",
-              lineHeight: 0.88,
-              letterSpacing: "-0.055em",
-              color: "rgba(255,255,255,0.92)",
-            }}
-          >
-            Shorts
-          </motion.h1>
-
-          {/* Descriptor */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.85, delay: 0.22 }}
-            style={{
-              marginTop: "1.5rem",
-              fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-              fontWeight: 300,
-              fontSize: "clamp(1rem, 1.3vw, 1.20rem)",
-              lineHeight: 1.72,
-              color: "rgba(255,255,255,0.45)",
-              maxWidth: "44ch",
-            }}
-          >
-            Thought distilled to its sharpest edge. Written for people who need
-            clarity without noise — and who already know whether they're in the
-            right room.
-          </motion.p>
-
-          {/* Whisper */}
-          {whisper && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.30, ease: [0.19, 1, 0.22, 1] }}
-              className="mt-7"
-            >
-              <div
-                className="inline-flex items-center gap-2.5 px-4 py-2"
-                style={{
-                  border: `1px solid ${isRareWhisper ? "rgba(201,169,110,0.18)" : "rgba(255,255,255,0.07)"}`,
-                  backgroundColor: isRareWhisper ? "rgba(201,169,110,0.04)" : "rgba(255,255,255,0.02)",
-                }}
-              >
-                <Sparkles
-                  style={{
-                    width: "11px",
-                    height: "11px",
-                    color: isRareWhisper ? "rgba(201,169,110,0.60)" : "rgba(255,255,255,0.20)",
-                    strokeWidth: 1.5,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "9px",
-                    letterSpacing: "0.20em",
-                    color: isRareWhisper ? `${GOLD}CC` : "rgba(255,255,255,0.38)",
-                  }}
-                >
-                  {whisper}
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        {/* ── Featured rail — top 3 shorts ─────────────────────────────── */}
-        {featuredShorts.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.90, delay: 0.28, ease: [0.19, 1, 0.22, 1] }}
-            className="relative mt-14 overflow-hidden"
-            style={{
-              border: "1px solid rgba(255,255,255,0.07)",
-              backgroundColor: "rgba(255,255,255,0.015)",
-            }}
-          >
-            {/* Rail top thread */}
-            <div
-              className="absolute inset-x-0 top-0 h-px"
-              style={{ background: `linear-gradient(to right, transparent, ${GOLD}28, transparent)` }}
-            />
-
-            {/* Inner atmospheric radial */}
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{ background: `radial-gradient(ellipse 50% 60% at 0% 50%, ${GOLD}07, transparent)` }}
-            />
-
-            <div className="relative grid grid-cols-1 divide-y md:grid-cols-3 md:divide-x md:divide-y-0"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              {featuredShorts.slice(0, 3).map((item, idx) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className="group block px-6 py-6 transition-colors duration-400 hover:bg-white/[0.02]"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      {/* Meta */}
-                      <div className="mb-3 flex items-center gap-2">
-                        <span
-                          style={{
-                            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7.5px",
-                            letterSpacing: "0.36em",
-                            textTransform: "uppercase",
-                            color: `${GOLD}BB`,
-                          }}
-                        >
-                          {item.category.toUpperCase()}
-                        </span>
-                        {item.readTime && (
-                          <>
-                            <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
-                            <span
-                              style={{
-                                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                                fontSize: "7.5px",
-                                letterSpacing: "0.22em",
-                                textTransform: "uppercase",
-                                color: "rgba(255,255,255,0.24)",
-                              }}
-                            >
-                              {item.readTime}
-                            </span>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Title */}
-                      <h3
-                        style={{
-                          fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                          fontWeight: 300,
-                          fontSize: "clamp(1.1rem, 1.4vw, 1.30rem)",
-                          lineHeight: 1.08,
-                          letterSpacing: "-0.022em",
-                          color: "rgba(255,255,255,0.82)",
-                          transition: "color 350ms ease",
-                        }}
-                        className="group-hover:[color:rgba(255,255,255,1.0)]"
-                      >
-                        {item.title}
-                      </h3>
-
-                      {/* Excerpt — 1 sentence in the rail */}
-                      {item.excerpt && (
-                        <p
-                          style={{
-                            marginTop: "0.55rem",
-                            fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
-                            fontWeight: 300,
-                            fontSize: "0.875rem",
-                            lineHeight: 1.60,
-                            color: "rgba(255,255,255,0.32)",
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical" as any,
-                          }}
-                        >
-                          {item.excerpt.split(/(?<=[.!?])\s+/)[0]}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Arrow */}
-                    <div
-                      style={{
-                        flexShrink: 0,
-                        width: "24px",
-                        height: "24px",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transition: "border-color 350ms ease",
-                      }}
-                      className="group-hover:[border-color:rgba(201,169,110,0.25)]"
-                    >
-                      <ChevronRight
-                        style={{
-                          width: "11px",
-                          height: "11px",
-                          color: "rgba(255,255,255,0.20)",
-                          transition: "color 350ms ease",
-                        }}
-                        className="group-hover:[color:rgba(201,169,110,0.75)]"
-                      />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        <div className="pb-16 md:pb-20" />
-      </div>
-    </section>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // IMPRINT — last read, fading memory
@@ -751,225 +311,115 @@ function ImprintStrip({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FILTER BAR — search + category pills + view toggle
-// ─────────────────────────────────────────────────────────────────────────────
-
-function FilterBar({
-  searchQuery,
-  setSearchQuery,
-  activeCategory,
-  setActiveCategory,
-  categories,
-  viewMode,
-  setViewMode,
-  visibleCount,
-  totalCount,
-}: {
-  searchQuery: string;
-  setSearchQuery: (v: string) => void;
-  activeCategory: string;
-  setActiveCategory: (v: string) => void;
-  categories: string[];
-  viewMode: "grid" | "list";
-  setViewMode: (v: "grid" | "list") => void;
-  visibleCount: number;
-  totalCount: number;
-}) {
-  return (
-    <div
-      className="sticky top-0 z-40 border-b"
-      style={{
-        borderColor: "rgba(255,255,255,0.055)",
-        backgroundColor: "rgba(5,5,7,0.92)",
-        backdropFilter: "blur(20px)",
-      }}
-    >
-      <div className="mx-auto max-w-7xl px-6 lg:px-12">
-
-        {/* Row 1 — search + view toggle */}
-        <div className="flex items-center gap-5 py-4">
-
-          {/* Search — borderless, inline */}
-          <div className="relative flex-1 max-w-sm">
-            <Search
-              style={{
-                position: "absolute",
-                left: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: "14px",
-                height: "14px",
-                color: "rgba(255,255,255,0.22)",
-                pointerEvents: "none",
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Filter…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                paddingLeft: "1.5rem",
-                paddingRight: "0.5rem",
-                paddingTop: "0.35rem",
-                paddingBottom: "0.35rem",
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "11px",
-                letterSpacing: "0.10em",
-                color: "rgba(255,255,255,0.70)",
-              }}
-              className="placeholder:[color:rgba(255,255,255,0.22)]"
-            />
-          </div>
-
-          {/* Count — minimal */}
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
-              letterSpacing: "0.30em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.18)",
-              flexShrink: 0,
-            }}
-          >
-            {visibleCount} / {totalCount}
-          </span>
-
-          {/* View toggle — sharp, no rounded corners */}
-          <div
-            className="flex items-center"
-            style={{
-              border: "1px solid rgba(255,255,255,0.08)",
-              flexShrink: 0,
-            }}
-          >
-            {(["grid", "list"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setViewMode(mode)}
-                aria-label={`${mode} view`}
-                style={{
-                  padding: "7px 10px",
-                  background: viewMode === mode ? "rgba(255,255,255,0.07)" : "transparent",
-                  color: viewMode === mode ? "rgba(255,255,255,0.80)" : "rgba(255,255,255,0.28)",
-                  transition: "background 250ms ease, color 250ms ease",
-                  cursor: "pointer",
-                  border: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {mode === "grid"
-                  ? <LayoutGrid style={{ width: "14px", height: "14px" }} />
-                  : <List       style={{ width: "14px", height: "14px" }} />
-                }
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Row 2 — category pills (only if categories exist) */}
-        {categories.length > 1 && (
-          <div className="flex items-center gap-2 pb-3 overflow-x-auto hide-scrollbar">
-            {["All", ...categories].map((cat) => {
-              const isActive = cat === "All" ? activeCategory === "" : activeCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setActiveCategory(cat === "All" ? "" : cat)}
-                  style={{
-                    flexShrink: 0,
-                    padding: "4px 12px",
-                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
-                    letterSpacing: "0.32em",
-                    textTransform: "uppercase",
-                    border: `1px solid ${isActive ? `${GOLD}35` : "rgba(255,255,255,0.07)"}`,
-                    backgroundColor: isActive ? `${GOLD}0D` : "transparent",
-                    color: isActive ? `${GOLD}CC` : "rgba(255,255,255,0.28)",
-                    cursor: "pointer",
-                    transition: "all 250ms ease",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// EMPTY STATE
-// ─────────────────────────────────────────────────────────────────────────────
-
-function EmptyState({ query }: { query: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-28">
-      <div
-        className="mb-6 h-px w-10"
-        style={{ background: "linear-gradient(to right, transparent, var(--ds-accent-soft), transparent)" }}
-      />
-      <p
-        className="font-serif font-light italic"
-        style={{ fontSize: "1.5rem", color: "var(--ds-text-muted)" }}
-      >
-        Nothing found for &ldquo;{query}&rdquo;
-      </p>
-      <p
-        className="mt-3 font-mono text-[8.5px] uppercase tracking-[0.32em]"
-        style={{ color: "var(--ds-text-subtle)" }}
-      >
-        Try a broader term
-      </p>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-function extractShortBody(doc: RawShortDoc): string {
-  // Extract renderable body content from various possible fields
-  const body = (doc as any)?.body?.code || (doc as any)?.bodyCode || (doc as any)?.content || (doc as any)?.mdx || "";
-  if (body) return body;
-
-  // Fallback: try to get body from the raw document
-  const raw = (doc as any)?._raw?.sourceFilePath || "";
-  if (raw) return ""; // Can't render without body code at build time
-
-  return "";
+// Extract the compiled MDX (esbuild JS) for the daily short. This is what
+// useMDXComponent consumes — NOT HTML.
+function extractShortCode(doc: RawShortDoc): string {
+  return (doc as any)?.body?.code || (doc as any)?.bodyCode || "";
 }
 
+function extractShortRaw(doc: RawShortDoc): string {
+  return (doc as any)?.body?.raw || "";
+}
+
+// Full model for THE daily short only (carries compiled MDX + raw source).
 function toTodaysShortModel(doc: RawShortDoc): TodaysShortModel | null {
   const slug = resolveShortSlug(doc);
   if (!slug) return null;
 
-  const body = extractShortBody(doc);
+  const raw = extractShortRaw(doc);
+  const metaReadTime =
+    safeString(doc.readTime).trim() || safeString(doc.readTimeSafe).trim();
+  const readTime = metaReadTime || (raw ? computeReadTime(estimateWordCount(raw)) : "");
 
   return {
     slug,
     title: safeString(doc.title).trim() || "Untitled",
     excerpt: safeString(doc.excerpt).trim() || safeString(doc.description).trim() || "",
-    body,
+    code: extractShortCode(doc),
+    raw,
     theme: safeString(doc.theme).trim().toLowerCase() || "purpose",
     category: safeString(doc.category).trim() || "Signal",
-    readTime: safeString(doc.readTime).trim() || safeString(doc.readTimeSafe).trim() || "",
+    readTime,
     date: safeString(doc.date).trim() || "",
   };
+}
+
+// Metadata-only model for related shorts (NO body payload).
+function toRelatedShortModel(doc: RawShortDoc): RelatedShortModel | null {
+  const slug = resolveShortSlug(doc);
+  if (!slug) return null;
+  return {
+    slug,
+    title: safeString(doc.title).trim() || "Untitled",
+    excerpt: safeString(doc.excerpt).trim() || safeString(doc.description).trim() || "",
+    theme: safeString(doc.theme).trim().toLowerCase() || "purpose",
+    category: safeString(doc.category).trim() || "Signal",
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DAILY SELECTION (server-side, deterministic) — shared daily pick
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Curated pool for the "first" slot. Validated against published slugs at
+// use-time so a renamed/unpublished slug cannot break selection.
+const CURATED_FIRST_SHORTS = [
+  "authority-is-the-missing-layer",
+  "when-the-dashboard-lies-politely",
+  "the-discipline-of-bounded-adaptation",
+  "clarity-is-not-a-feeling",
+  "the-cost-of-living-in-escalation",
+];
+
+function dailyHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
+function dailySeedString(now: Date): string {
+  return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+}
+
+// Deterministic daily pick over the published docs (same for every visitor on a
+// given day). Prefers the curated pool when its slugs survive validation.
+function selectDailyDoc(docs: RawShortDoc[]): RawShortDoc | null {
+  if (docs.length === 0) return null;
+
+  const seed = Math.abs(dailyHash(dailySeedString(new Date())));
+
+  const curated = docs.filter((d) => {
+    const slug = resolveShortSlug(d);
+    return slug ? CURATED_FIRST_SHORTS.includes(slug) : false;
+  });
+
+  const pool = curated.length > 0 ? curated : docs;
+  return pool[seed % pool.length] ?? null;
+}
+
+function selectRelatedDocs(
+  current: TodaysShortModel,
+  docs: RawShortDoc[],
+  count = 3,
+): RelatedShortModel[] {
+  const candidates = docs
+    .map(toRelatedShortModel)
+    .filter(Boolean) as RelatedShortModel[];
+
+  const sameTheme = candidates.filter(
+    (s) => s.theme === current.theme && s.slug !== current.slug,
+  );
+  const other = candidates.filter(
+    (s) => s.theme !== current.theme && s.slug !== current.slug,
+  );
+
+  return [...sameTheme, ...other].slice(0, count);
 }
 
 function formatShortDate(date: string | null): string {
@@ -992,8 +442,19 @@ function firstSentence(input: string): string {
   return (match?.[0] || text).trim();
 }
 
-const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShorts }) => {
+const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShort, relatedShorts }) => {
   const [activeTheme, setActiveTheme] = React.useState<string>("");
+
+  // ── Slim retention surface (client-only) ────────────────────────────────
+  // Update the daily-return streak and read back the last-read imprint. All
+  // localStorage access lives here in an effect — never in render/useMemo.
+  const [streak, setStreak] = React.useState(0);
+  const [lastRead, setLastRead] = React.useState<Imprint | null>(null);
+
+  React.useEffect(() => {
+    setStreak(updateStreak());
+    setLastRead(readImprint());
+  }, []);
 
   const groupedByTheme = React.useMemo(() => {
     const map = new Map<string, ShortIndexItem[]>();
@@ -1022,8 +483,37 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShorts }) =
       </Head>
 
       <main className="ds-surface-shorts min-h-screen" style={{ backgroundColor: VOID }}>
-        {/* Today's Short — appears first, above the archive */}
-        {todaysShorts.length > 0 && <TodaysShort shorts={todaysShorts} />}
+        {/* Today's Short — selected server-side, appears first */}
+        {todaysShort && (
+          <TodaysShort todaysShort={todaysShort} relatedShorts={relatedShorts} />
+        )}
+
+        {/* Slim retention surface — daily-return streak + last-read imprint */}
+        {streak > 1 && (
+          <div
+            className="border-b"
+            style={{
+              borderColor: "rgba(255,255,255,0.05)",
+              backgroundColor: "rgba(0,0,0,0.30)",
+            }}
+          >
+            <div className="mx-auto max-w-5xl px-6 py-3 lg:px-10">
+              <span
+                className="font-mono text-[7.5px] uppercase tracking-[0.34em]"
+                style={{ color: "var(--ds-accent)" }}
+              >
+                {streak} day return streak
+              </span>
+            </div>
+          </div>
+        )}
+        {lastRead && (
+          <ImprintStrip
+            title={lastRead.title}
+            hoursRemaining={lastRead._hoursRemaining}
+            fadePercent={lastRead._fadePercent}
+          />
+        )}
 
         <header
           className="border-b px-6 pb-12 pt-16 lg:px-10 lg:pb-16 lg:pt-28"
@@ -1279,7 +769,7 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShorts }) =
 export default ShortsIndexPage;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATA — unchanged from working version
+// DATA — daily short picked server-side; archive shipped as metadata only
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
@@ -1288,8 +778,10 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
   );
   const fromShorts = (getAllShorts() || []) as RawShortDoc[];
 
-  const shorts = fromShorts
-    .filter(isPublishedShort)
+  const publishedDocs = fromShorts.filter(isPublishedShort);
+
+  // Archive list — metadata only (NO body payload).
+  const shorts = publishedDocs
     .map(toShortIndexItem)
     .filter(Boolean) as ShortIndexItem[];
 
@@ -1299,17 +791,21 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     return bT - aT;
   });
 
-  // Build todaysShorts with body content for the daily short selector
-  const todaysShorts = fromShorts
-    .filter(isPublishedShort)
-    .map(toTodaysShortModel)
-    .filter(Boolean) as TodaysShortModel[];
+  // Deterministic shared daily pick — only THIS short carries compiled MDX.
+  const dailyDoc = selectDailyDoc(publishedDocs);
+  const todaysShort = dailyDoc ? toTodaysShortModel(dailyDoc) : null;
+
+  // Related shorts — metadata only.
+  const relatedShorts = todaysShort
+    ? selectRelatedDocs(todaysShort, publishedDocs, 3)
+    : [];
 
   return {
     props: {
-      shorts:       sanitizeData(shorts),
-      totalCount:   shorts.length,
-      todaysShorts: sanitizeData(todaysShorts),
+      shorts:        sanitizeData(shorts),
+      totalCount:    shorts.length,
+      todaysShort:   todaysShort ? sanitizeData(todaysShort) : null,
+      relatedShorts: sanitizeData(relatedShorts),
     },
     revalidate: 3600,
   };

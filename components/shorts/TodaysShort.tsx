@@ -1,28 +1,37 @@
 // components/shorts/TodaysShort.tsx
-// Today's Short — one complete short, picked daily.
-// No teasers, no streaks, no urgency. Full content on arrival.
+// Today's Short — one complete short, picked daily (server-side).
+// The daily short is selected in getStaticProps via a deterministic date seed,
+// so only that short's compiled MDX (`code`) ships in props and real prose is
+// emitted into the SSR/SSG HTML. This component renders that MDX through the
+// Contentlayer runtime hook with a DARK-themed component map (the index hero is
+// void/gold, unlike the light ShortContent reading panel).
 
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { useMDXComponent } from "next-contentlayer2/hooks";
+import { readTimeFromText } from "@/lib/shorts/read-time";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
+// The daily short carries the compiled MDX (`code`) for rendering.
 export type TodaysShortModel = {
   slug: string;
   title: string;
   excerpt: string;
-  body: string;
+  code: string; // esbuild-compiled MDX from Contentlayer body.code
+  raw: string; // markdown source — used only for the read-time estimate
   theme: string;
   category: string;
   readTime: string;
   date: string;
 };
 
+// Related shorts are metadata-only (no body payload).
 export type RelatedShortModel = {
   slug: string;
   title: string;
@@ -30,26 +39,6 @@ export type RelatedShortModel = {
   theme: string;
   category: string;
 };
-
-// ---------------------------------------------------------------------------
-// Read-time helpers
-// ---------------------------------------------------------------------------
-
-function computeReadTime(wordCount: number): string {
-  const min = Math.max(1, Math.ceil(wordCount / 220));
-  return `${min} min read`;
-}
-
-function estimateWordCount(body: string): number {
-  if (!body) return 0;
-  // Strip HTML tags, markdown syntax, and count words
-  const cleaned = body
-    .replace(/<[^>]*>/g, "")
-    .replace(/[#*_`\[\]()>|~-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return cleaned.split(/\s+/).filter(Boolean).length;
-}
 
 // ---------------------------------------------------------------------------
 // Read history (localStorage)
@@ -89,140 +78,87 @@ function addToReadHistory(slug: string, theme: string): void {
   }
 }
 
-function getAlreadyReadSlugs(): Set<string> {
-  return new Set(getReadHistory().map((e) => e.slug));
-}
-
 // ---------------------------------------------------------------------------
-// Curated first-short pool (for first-time visitors)
+// Dark-themed MDX component map (void/gold hero — NOT the light reading panel)
 // ---------------------------------------------------------------------------
 
-const CURATED_FIRST_SHORTS = [
-  "authority-is-the-missing-layer",
-  "when-the-dashboard-lies-politely",
-  "the-discipline-of-bounded-adaptation",
-  "clarity-is-not-a-feeling",
-  "the-cost-of-living-in-escalation",
-];
+const darkMdxComponents = {
+  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h1
+      className="mt-10 mb-5 font-serif font-light"
+      style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", lineHeight: 1.12, letterSpacing: "-0.02em", color: "var(--ds-text)" }}
+      {...props}
+    />
+  ),
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h2
+      className="mt-10 mb-4 font-serif font-light"
+      style={{ fontSize: "clamp(1.35rem, 2.4vw, 1.8rem)", lineHeight: 1.15, letterSpacing: "-0.02em", color: "var(--ds-text)" }}
+      {...props}
+    />
+  ),
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h3
+      className="mt-8 mb-3 font-mono text-xs uppercase tracking-[0.18em]"
+      style={{ color: "var(--ds-text-secondary)" }}
+      {...props}
+    />
+  ),
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+    <p className="mb-6" style={{ color: "var(--ds-text-secondary)" }} {...props} />
+  ),
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+    <ul className="mb-6 list-disc space-y-2 pl-6" style={{ color: "var(--ds-text-secondary)" }} {...props} />
+  ),
+  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
+    <ol className="mb-6 list-decimal space-y-2 pl-6" style={{ color: "var(--ds-text-secondary)" }} {...props} />
+  ),
+  li: (props: React.HTMLAttributes<HTMLLIElement>) => (
+    <li style={{ lineHeight: 1.75 }} {...props} />
+  ),
+  blockquote: (props: React.HTMLAttributes<HTMLElement>) => (
+    <blockquote
+      className="my-8 border-l-2 pl-5 font-serif italic"
+      style={{ borderColor: "var(--ds-accent)", color: "var(--ds-text)" }}
+      {...props}
+    />
+  ),
+  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a className="underline underline-offset-4" style={{ color: "var(--ds-accent)" }} {...props} />
+  ),
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong className="font-semibold" style={{ color: "var(--ds-text)" }} {...props} />
+  ),
+  em: (props: React.HTMLAttributes<HTMLElement>) => (
+    <em style={{ fontStyle: "italic" }} {...props} />
+  ),
+  code: (props: React.HTMLAttributes<HTMLElement>) => (
+    <code
+      className="rounded px-1.5 py-0.5 font-mono text-[0.9em]"
+      style={{ border: "1px solid var(--ds-border)", backgroundColor: "rgba(255,255,255,0.04)", color: "var(--ds-text)" }}
+      {...props}
+    />
+  ),
+  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
+    <pre
+      className="mb-8 overflow-x-auto rounded-xl p-4 text-sm"
+      style={{ border: "1px solid var(--ds-border)", backgroundColor: "rgba(0,0,0,0.35)", color: "var(--ds-text-secondary)" }}
+      {...props}
+    />
+  ),
+  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
+    <hr className="my-10" style={{ border: "none", borderTop: "1px solid var(--ds-border)" }} {...props} />
+  ),
+};
 
 // ---------------------------------------------------------------------------
-// Deterministic daily selection
+// MDX body — rendered via the Contentlayer runtime hook (dark map)
 // ---------------------------------------------------------------------------
 
-function getDailySeed(): string {
-  const today = new Date();
-  return `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-}
-
-function selectTodaysShort(
-  shorts: TodaysShortModel[],
-  alreadyRead: Set<string>,
-  isFirstVisit: boolean,
-): TodaysShortModel | null | undefined {
-  if (shorts.length === 0) {
-    // Fallback: return a placeholder
-    return {
-      slug: "",
-      title: "No short available",
-      excerpt: "",
-      body: "",
-      theme: "",
-      category: "",
-      readTime: "",
-      date: "",
-    };
-  }
-
-  const seed = getDailySeed();
-
-  // First-time visitor: pick from curated pool
-  if (isFirstVisit) {
-    const curated = shorts.filter((s) => CURATED_FIRST_SHORTS.includes(s.slug));
-    if (curated.length > 0) {
-      const idx = Math.abs(hashCode(seed) % curated.length);
-      return curated[idx];
-    }
-  }
-
-  // Returning visitor: prefer unread shorts
-  const unread = shorts.filter((s) => !alreadyRead.has(s.slug));
-  const pool = unread.length > 0 ? unread : shorts;
-
-  // Theme rotation: weight themes so one theme doesn't dominate
-  const themeCounts = new Map<string, number>();
-  for (const s of pool) {
-    const t = s.theme || "purpose";
-    themeCounts.set(t, (themeCounts.get(t) || 0) + 1);
-  }
-
-  // Find least-represented theme among the pool
-  let minCount = Infinity;
-  let minTheme = "purpose";
-  for (const [theme, count] of themeCounts) {
-    if (count < minCount) {
-      minCount = count;
-      minTheme = theme;
-    }
-  }
-
-  // Prefer shorts from the least-represented theme
-  const themePool = pool.filter((s) => (s.theme || "purpose") === minTheme);
-  const finalPool = themePool.length > 0 ? themePool : pool;
-
-  const idx = Math.abs(hashCode(seed) % finalPool.length);
-  return finalPool[idx];
-}
-
-function hashCode(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return hash;
-}
-
-// ---------------------------------------------------------------------------
-// Related shorts selector
-// ---------------------------------------------------------------------------
-
-function selectRelatedShorts(
-  current: TodaysShortModel,
-  allShorts: TodaysShortModel[],
-  alreadyRead: Set<string>,
-  count: number = 3,
-): RelatedShortModel[] {
-  const excluded = new Set([current.slug, ...alreadyRead]);
-  const sameTheme = allShorts.filter(
-    (s) => s.theme === current.theme && !excluded.has(s.slug),
-  );
-  const other = allShorts.filter(
-    (s) => s.theme !== current.theme && !excluded.has(s.slug),
-  );
-
-  const result: RelatedShortModel[] = [];
-  for (const s of sameTheme) {
-    if (result.length >= count) break;
-    result.push({
-      slug: s.slug,
-      title: s.title,
-      excerpt: s.excerpt,
-      theme: s.theme,
-      category: s.category,
-    });
-  }
-  for (const s of other) {
-    if (result.length >= count) break;
-    result.push({
-      slug: s.slug,
-      title: s.title,
-      excerpt: s.excerpt,
-      theme: s.theme,
-      category: s.category,
-    });
-  }
-  return result;
+function MdxBody({ code }: { code: string }) {
+  const MDXContent = useMDXComponent(code);
+  if (!MDXContent) return null;
+  return <MDXContent components={darkMdxComponents} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -230,52 +166,24 @@ function selectRelatedShorts(
 // ---------------------------------------------------------------------------
 
 export type TodaysShortProps = {
-  shorts: TodaysShortModel[];
+  // Selected server-side; carries compiled MDX for the daily short.
+  todaysShort: TodaysShortModel;
+  // Metadata-only related list (no body payload).
+  relatedShorts: RelatedShortModel[];
 };
 
-export default function TodaysShort({ shorts }: TodaysShortProps) {
-  const [mounted, setMounted] = React.useState(false);
+export default function TodaysShort({ todaysShort, relatedShorts }: TodaysShortProps) {
+  // Honest read time derived from the markdown source (no payload cost; raw is
+  // small relative to compiled code and only used here).
+  const displayReadTime = React.useMemo(() => {
+    if (todaysShort.readTime) return todaysShort.readTime;
+    return todaysShort.raw ? readTimeFromText(todaysShort.raw) : "";
+  }, [todaysShort.readTime, todaysShort.raw]);
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Client-side selection (needs localStorage for read history)
-  const { todaysShort, relatedShorts, isFirstVisit } = React.useMemo(() => {
-    if (!mounted) {
-      return { todaysShort: null, relatedShorts: [], isFirstVisit: true };
-    }
-
-    const alreadyRead = getAlreadyReadSlugs();
-    const isFirst = alreadyRead.size === 0;
-
-    const selected = selectTodaysShort(shorts, alreadyRead, isFirst);
-
-    // Mark as read
-    if (selected && selected.slug) {
-      addToReadHistory(selected.slug, selected.theme);
-    }
-
-    const related = selected
-      ? selectRelatedShorts(selected, shorts, getAlreadyReadSlugs(), 3)
-      : [];
-
-    return { todaysShort: selected, relatedShorts: related, isFirstVisit: isFirst };
-  }, [mounted, shorts]);
-
-  // Compute honest read time
-  const wordCount = todaysShort?.body ? estimateWordCount(todaysShort.body) : 0;
-  const displayReadTime = todaysShort?.body ? computeReadTime(wordCount) : "";
-
-  if (!todaysShort) {
-    return (
-      <div className="px-6 py-16 text-center">
-        <p className="font-serif text-lg italic" style={{ color: "var(--ds-text-muted)" }}>
-          Loading...
-        </p>
-      </div>
-    );
-  }
+  // Mark as read on click-through to the full short (NOT on selection).
+  const handleReadFull = React.useCallback(() => {
+    if (todaysShort.slug) addToReadHistory(todaysShort.slug, todaysShort.theme);
+  }, [todaysShort.slug, todaysShort.theme]);
 
   if (!todaysShort.slug) {
     return null;
@@ -356,8 +264,8 @@ export default function TodaysShort({ shorts }: TodaysShortProps) {
           </span>
         </div>
 
-        {/* Full body content */}
-        {todaysShort.body && (
+        {/* Full body content — rendered through the MDX runtime (dark map) */}
+        {todaysShort.code && (
           <div
             className="prose-custom max-w-2xl font-serif font-light leading-relaxed"
             style={{
@@ -365,14 +273,16 @@ export default function TodaysShort({ shorts }: TodaysShortProps) {
               lineHeight: 1.75,
               color: "var(--ds-text-secondary)",
             }}
-            dangerouslySetInnerHTML={{ __html: todaysShort.body }}
-          />
+          >
+            <MdxBody code={todaysShort.code} />
+          </div>
         )}
 
         {/* Read full short link */}
         <div className="mt-10">
           <Link
             href={`/shorts/${todaysShort.slug}`}
+            onClick={handleReadFull}
             className="group inline-flex items-center gap-2 border-b pb-0.5 font-mono text-[8px] uppercase tracking-[0.35em] transition-colors"
             style={{
               borderColor: "var(--ds-accent-soft)",
