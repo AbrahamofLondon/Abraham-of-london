@@ -1,0 +1,561 @@
+[
+  {
+    "productCode": "fast_diagnostic",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "boardroom_brief",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "personal_decision_audit",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "decision_exposure_instrument",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "mandate_clarity_framework",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "intervention_path_selector",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "escalation_readiness_scorecard",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "structural_failure_diagnostic_canvas",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "execution_risk_index",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "team_alignment_gap_map",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "governance_drift_detector",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "strategic_priority_stack_builder",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "board_brief_builder",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "execution_integrity_protocol",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "alignment_audit_playbook",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "drift_detection_framework",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "operator_decision_pack",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "operator_essentials_pack",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "command_pack",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "governance_suite",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "case_dossier_tariff_shock",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "case_dossier_team_alignment",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "case_dossier_escalation_denied",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "team_assessment",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "enterprise_assessment",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "boardroom_mode",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "executive_reporting",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "diagnostic_report_basic",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "diagnostic_report_pro",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "executive_reporting_priority",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "reporting_monthly",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "reporting_custom",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "gmi_quarterly",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "strategy_room",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "strategy_room_extended",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "inner_circle",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "retainer_core",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "retainer_operational",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "retainer_institutional",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "professional",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "professional_annual",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "enterprise",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  },
+  {
+    "productCode": "additional_collaborator",
+    "authorityState": "authority_contract_missing",
+    "evidenceStatus": "unknown",
+    "validationStatus": "unknown",
+    "commercialEligibility": "unknown",
+    "fulfilmentEligibility": "unknown",
+    "publicClaimPermission": false,
+    "blockingReasons": [
+      "Requires authority resolution"
+    ],
+    "nextRequiredAction": "Run resolve-product-authority"
+  }
+]
