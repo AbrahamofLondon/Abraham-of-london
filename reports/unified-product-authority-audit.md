@@ -93,6 +93,35 @@ All 43 products are in the commercial catalog (`CATALOG` record in `lib/commerci
 - Proof state exists
 - Commercial/payment state exists
 
+## 🔑 Key Finding — The System Already Exists
+
+**The unified product authority system does not need to be built from scratch. It already exists.**
+
+The audit revealed that a comprehensive product authority system was previously constructed but never fully integrated into the estate's visible surfaces. The following are already in place and functional:
+
+- **Canonical contract** (`lib/product/product-authority-contract.ts`) — Defines all authority states, validation checks, evidence sources, and measurement boundaries.
+- **Resolver** (`lib/product/resolve-product-authority.ts`, 482 lines) — Takes a product code and derives the full authority contract from evidence state, validation results, and policy.
+- **Authority gates** — 8+ gate files controlling authority grants, surface claims, instrument signals, and capability status.
+- **Validation infrastructure** — Anti-gaming, frozen scenarios, evidence package registry, release governance.
+- **Commercial catalog** (`lib/commercial/catalog.ts`) — 43 products with commercial status, Stripe metadata, and checkout eligibility.
+- **Check scripts** — 17 check scripts covering checkout governance, system integrity, storefront coverage, fulfilment assurance, release readiness, and more.
+- **Resolver-aware checkout** — Checkout governance already blocks products that lack authority. Boardroom Brief Orders and Executive Reporting are correctly non-purchasable despite having Stripe prices.
+
+**What does NOT need to be built:**
+- A new authority contract
+- A new resolver
+- A new product registry
+- A new checkout firewall
+- New authority states
+
+**What DOES need to be done (integration, not invention):**
+1. Wire the 10 validation checks to real data sources (currently all report unknown)
+2. Make the Boardroom Brief Orders page consume the resolver to display authority status and blocking reasons
+3. Create a single `check-product-authority-system.mjs` that reports the unified view
+4. Fix the Prisma migration chain before adding new models
+
+The foundation is solid. The work is connecting existing pieces to visible surfaces.
+
 ## Phase 4 — Key Findings
 
 ### What's Working
