@@ -30,6 +30,8 @@ import { Search, LayoutGrid, List, Sparkles, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 // ShortsCard available at @/components/shorts/ShortsCard for grid layouts.
 // This page uses tabular rows — card component is not needed here.
+import TodaysShort from "@/components/shorts/TodaysShort";
+import type { TodaysShortModel } from "@/components/shorts/TodaysShort";
 import {
   readImprint,
   writeImprint,
@@ -93,6 +95,7 @@ type ShortIndexItem = {
 type ShortsIndexProps = {
   shorts: ShortIndexItem[];
   totalCount: number;
+  todaysShorts: TodaysShortModel[];
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -153,7 +156,37 @@ function isPublishedShort(doc: RawShortDoc): boolean {
   if (!doc) return false;
   if (doc.draft === true) return false;
   if (doc.published === false) return false;
+  // Exclude future-dated shorts
+  if (doc.date) {
+    try {
+      const d = new Date(doc.date);
+      if (Number.isFinite(d.getTime()) && d > new Date()) return false;
+    } catch {
+      // Ignore parse errors
+    }
+  }
   return true;
+}
+
+function estimateWordCountFromDoc(doc: RawShortDoc): number {
+  // Try to get body content to estimate word count
+  const bodyCode = (doc as any)?.body?.code || (doc as any)?.bodyCode || "";
+  if (bodyCode) {
+    const cleaned = bodyCode
+      .replace(/<[^>]*>/g, "")
+      .replace(/[#*_`\[\]()>|~-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return cleaned.split(/\s+/).filter(Boolean).length;
+  }
+  // Fallback: estimate from excerpt/description
+  const text = safeString(doc.excerpt) || safeString(doc.description) || "";
+  return text.split(/\s+/).filter(Boolean).length;
+}
+
+function computeReadTime(wordCount: number): string {
+  const min = Math.max(1, Math.ceil(wordCount / 220));
+  return `${min} min read`;
 }
 
 function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
@@ -161,12 +194,13 @@ function toShortIndexItem(doc: RawShortDoc): ShortIndexItem | null {
   if (!slug) return null;
   const intensityRaw = safeNumber(doc.intensity, 3);
   const intensity = clamp(intensityRaw, 1, 5) as 1 | 2 | 3 | 4 | 5;
+  const wordCount = estimateWordCountFromDoc(doc);
   return {
     id:        safeString(doc._id) || `short-${slug}`,
     title:     safeString(doc.title).trim() || "Untitled",
     excerpt:   safeString(doc.excerpt).trim() || safeString(doc.description).trim() || "",
     category:  safeString(doc.category).trim() || "Intel",
-    readTime:  safeString(doc.readTime).trim() || safeString(doc.readTimeSafe).trim() || "2 min",
+    readTime:  computeReadTime(wordCount),
     slug,
     href:      `/shorts/${slug}`,
     coverImage: resolveDocCoverImage(doc, { contentType: 'SHORT' }),
@@ -908,6 +942,36 @@ function EmptyState({ query }: { query: string }) {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
+function extractShortBody(doc: RawShortDoc): string {
+  // Extract renderable body content from various possible fields
+  const body = (doc as any)?.body?.code || (doc as any)?.bodyCode || (doc as any)?.content || (doc as any)?.mdx || "";
+  if (body) return body;
+
+  // Fallback: try to get body from the raw document
+  const raw = (doc as any)?._raw?.sourceFilePath || "";
+  if (raw) return ""; // Can't render without body code at build time
+
+  return "";
+}
+
+function toTodaysShortModel(doc: RawShortDoc): TodaysShortModel | null {
+  const slug = resolveShortSlug(doc);
+  if (!slug) return null;
+
+  const body = extractShortBody(doc);
+
+  return {
+    slug,
+    title: safeString(doc.title).trim() || "Untitled",
+    excerpt: safeString(doc.excerpt).trim() || safeString(doc.description).trim() || "",
+    body,
+    theme: safeString(doc.theme).trim().toLowerCase() || "purpose",
+    category: safeString(doc.category).trim() || "Signal",
+    readTime: safeString(doc.readTime).trim() || safeString(doc.readTimeSafe).trim() || "",
+    date: safeString(doc.date).trim() || "",
+  };
+}
+
 function formatShortDate(date: string | null): string {
   const raw = safeString(date);
   if (!raw) return "";
@@ -928,7 +992,7 @@ function firstSentence(input: string): string {
   return (match?.[0] || text).trim();
 }
 
-const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
+const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShorts }) => {
   const [activeTheme, setActiveTheme] = React.useState<string>("");
 
   const groupedByTheme = React.useMemo(() => {
@@ -958,6 +1022,9 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts }) => {
       </Head>
 
       <main className="ds-surface-shorts min-h-screen" style={{ backgroundColor: VOID }}>
+        {/* Today's Short — appears first, above the archive */}
+        {todaysShorts.length > 0 && <TodaysShort shorts={todaysShorts} />}
+
         <header
           className="border-b px-6 pb-12 pt-16 lg:px-10 lg:pb-16 lg:pt-28"
           style={{ borderColor: "var(--ds-border)" }}
@@ -1232,13 +1299,18 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     return bT - aT;
   });
 
+  // Build todaysShorts with body content for the daily short selector
+  const todaysShorts = fromShorts
+    .filter(isPublishedShort)
+    .map(toTodaysShortModel)
+    .filter(Boolean) as TodaysShortModel[];
+
   return {
     props: {
-      shorts:     sanitizeData(shorts),
-      totalCount: shorts.length,
+      shorts:       sanitizeData(shorts),
+      totalCount:   shorts.length,
+      todaysShorts: sanitizeData(todaysShorts),
     },
     revalidate: 3600,
   };
-
-
 };
