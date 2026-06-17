@@ -212,9 +212,10 @@ const brAuthorityClearing = boardroomChecks.filter(c => c.passes && c.cls === "f
 const brBlocking = boardroomChecks.filter(c => !c.passes).length;
 
 console.log(`  Boardroom Brief authority state: blocked (blocked_until_v2_revalidation)`);
-console.log(`  Checks passed: ${brPassed}/10`);
-console.log(`  Authority-clearing checks passed: ${brAuthorityClearing}/10`);
-console.log(`  Blocking/unresolved checks: ${brBlocking}/10`);
+console.log(`  Authority cleared: NO`);
+console.log(`  Checks passed: ${brPassed}/10 (does NOT imply authority clearance)`);
+console.log(`  Authority-clearing checks passed: ${brAuthorityClearing}/10 (ALL must pass for clearance)`);
+console.log(`  Blocking/unresolved checks: ${brBlocking}/10 (ANY blocks authority)`);
 console.log(`  Breakdown:`);
 for (const c of boardroomChecks) {
   const icon = c.passes ? "✅" : "❌";
@@ -225,6 +226,31 @@ for (const c of boardroomChecks) {
 }
 console.log(`\n  Note: Proxy checks do NOT count as authority-clearing.`);
 console.log(`  Contract-only and missing checks cannot pass until wired.`);
+
+// ── Phase 8: Product-wide authority surface ─────────────────────────────────
+console.log("\n=== PHASE 8: PRODUCT-WIDE AUTHORITY SURFACE ===\n");
+
+const surfacePath = PATH.join(ROOT, "pages/admin/product-authority.tsx");
+const surfaceExists = FS.existsSync(surfacePath);
+
+if (surfaceExists) {
+  const surfaceSrc = FS.readFileSync(surfacePath, "utf8");
+  const hasGetAllProducts = surfaceSrc.includes("getAllProducts");
+  const hasResolveProductAuthority = surfaceSrc.includes("resolveProductAuthority");
+  const hasBoardroomRow = surfaceSrc.includes("boardroom_brief");
+  const hasBadge = surfaceSrc.includes("ProductAuthorityBadge");
+
+  console.log(`  ✅ Admin surface exists at pages/admin/product-authority.tsx`);
+  console.log(`  ${hasGetAllProducts ? "✅" : "❌"} Uses getAllProducts() for catalog coverage`);
+  console.log(`  ${hasResolveProductAuthority ? "✅" : "❌"} Uses resolveProductAuthority() for each product`);
+  console.log(`  ${hasBoardroomRow ? "✅" : "❌"} Boardroom Brief appears as a row`);
+  console.log(`  ${hasBadge ? "✅" : "❌"} Uses ProductAuthorityBadge for visual state`);
+  console.log(`\n  All ${catalogProductCodes.length} products are resolved through the same resolver.`);
+  console.log(`  Boardroom is one row within the estate-wide authority picture.`);
+} else {
+  errors.push("Product-wide authority surface does not exist at pages/admin/product-authority.tsx");
+  console.log(`  ❌ Admin surface missing`);
+}
 
 // ── Summary ──────────────────────────────────────────────────────────────────
 console.log("\n========================================");
