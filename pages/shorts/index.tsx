@@ -216,6 +216,7 @@ const THEME_ORDER = [
   "inner-life",
   "outer-life",
   "relationships",
+  "authority",
   "gentle",
 ] as const;
 
@@ -228,6 +229,7 @@ const THEME_META: Record<ThemeKey, { label: string; subtitle: string; image: str
   "inner-life":  { label: "Inner Life",    subtitle: "The conversation beneath the surface.",  image: "/assets/images/shorts/themes/inner-life.jpg" },
   "outer-life":  { label: "Outer Life",    subtitle: "Work, systems, and visible consequence.", image: "/assets/images/shorts/themes/outer-life.jpg" },
   relationships: { label: "Relationships", subtitle: "People, boundaries, and belonging.",     image: "/assets/images/shorts/themes/relationships.jpg" },
+  authority:     { label: "Authority",     subtitle: "The right to decide.",                   image: "/assets/images/shorts/themes/outer-life.jpg" },
   gentle:        { label: "Gentle",        subtitle: "Permission to be human.",                image: "/assets/images/shorts/themes/gentle.jpg" },
 };
 

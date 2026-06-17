@@ -597,25 +597,7 @@ const ShortsSlugPage: NextPage<Props> = ({
           )}
 
           <div className="mt-8 border-t border-white/5 pt-6">
-            <ShortActions
-              shortId={canonicalSlug}
-              likes={interactions.likes}
-              isLiked={interactions.userLiked}
-              saves={interactions.saves}
-              isSaved={interactions.userSaved}
-              shares={interactions.shares}
-              onLike={() => {
-                if (interactionPending.like || !canonicalSlug) return;
-                void applyInteractionResponse("like");
-              }}
-              onSave={() => {
-                if (interactionPending.save || !canonicalSlug) return;
-                void applyInteractionResponse("save");
-              }}
-              onShare={() => {
-                void handleNativeShare();
-              }}
-            />
+            <ShortActions shortId={canonicalSlug} />
           </div>
 
           <div className="mt-4">
@@ -665,11 +647,7 @@ const ShortsSlugPage: NextPage<Props> = ({
           </div>
         ) : null}
 
-        <div id="comments" className="scroll-mt-16 border-t border-white/5 bg-black/30">
-          <div className="mx-auto max-w-3xl px-6 py-12">
-            <ShortComments shortId={canonicalSlug} />
-          </div>
-        </div>
+        {/* Comments section hidden until backend exists */}
 
         <button
           onClick={handleBackToTop}
