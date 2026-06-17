@@ -187,6 +187,26 @@ function applyFilter(orders: BoardroomOrderRow[], filter: FilterTab): BoardroomO
   }
 }
 
+// ── Boardroom Authority Section ──────────────────────────────────────────────
+
+function BoardroomAuthoritySection() {
+  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'boardroom_brief');
+  const contract = config ? resolveProductAuthority(config) : null;
+  if (!contract) return null;
+
+  return (
+    <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
+      <ProductAuthorityPanel contract={contract} expanded={true} />
+      <div style={{ marginTop: '1rem' }}>
+        <ProductAuthorityNotice contract={contract} />
+      </div>
+      <div style={{ marginTop: '1rem' }}>
+        <ProductEvidenceStatus contract={contract} />
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function BoardroomOrdersPage({ orders, fetchError }: Props) {
@@ -238,22 +258,8 @@ export default function BoardroomOrdersPage({ orders, fetchError }: Props) {
           </p>
         </div>
 
-        {/* Product Authority before Release */}
-        {(() => {
-          const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'boardroom_brief');
-          const contract = config ? resolveProductAuthority(config) : null;
-          return contract ? (
-            <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
-              <ProductAuthorityPanel contract={contract} expanded={true} />
-              <div style={{ marginTop: '1rem' }}>
-                <ProductAuthorityNotice contract={contract} />
-              </div>
-              <div style={{ marginTop: '1rem' }}>
-                <ProductEvidenceStatus contract={contract} />
-              </div>
-            </div>
-          ) : null;
-        })()}
+        {/* Product Authority before Release — loaded async from resolver */}
+        <BoardroomAuthoritySection />
 
         {fetchError && (
           <div style={{ padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", ...MONO, fontSize: 12, marginBottom: 16 }}>

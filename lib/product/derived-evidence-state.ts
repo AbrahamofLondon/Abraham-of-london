@@ -18,12 +18,24 @@
  * ProductAuthorityResolverInput.
  */
 
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+// Lazy fs/path — only available server-side. Client-side imports gracefully
+// fall back to empty state.
+function getFs() {
+  try { return require("fs"); } catch { return null; }
+}
+function getPath() {
+  try { return require("path"); } catch { return null; }
+}
 
-const ROOT = process.cwd();
-const LEDGER_PATH = join(ROOT, "reports", "product-value-evidence-ledger-v2.json");
-const VERIFICATION_PATH = join(ROOT, "reports", "evidence-ledger-artifact-verification.json");
+const ROOT = typeof process !== "undefined" && process.cwd ? process.cwd() : "";
+const LEDGER_PATH = (() => {
+  const p = getPath();
+  return p ? p.join(ROOT, "reports", "product-value-evidence-ledger-v2.json") : "";
+})();
+const VERIFICATION_PATH = (() => {
+  const p = getPath();
+  return p ? p.join(ROOT, "reports", "evidence-ledger-artifact-verification.json") : "";
+})();
 
 /**
  * Derived evidence state for a product.
@@ -107,10 +119,12 @@ interface VerificationReport {
  */
 function readEvidenceLedger(): LedgerEntry[] {
   try {
-    if (!existsSync(LEDGER_PATH)) {
+    const fs = getFs();
+    if (!fs || !LEDGER_PATH) return [];
+    if (!fs.existsSync(LEDGER_PATH)) {
       return [];
     }
-    const content = readFileSync(LEDGER_PATH, "utf-8");
+    const content = fs.readFileSync(LEDGER_PATH, "utf-8");
     const parsed = JSON.parse(content);
     if (Array.isArray(parsed)) {
       return parsed as LedgerEntry[];
@@ -123,10 +137,12 @@ function readEvidenceLedger(): LedgerEntry[] {
 
 function readVerificationReport(): VerificationReport | null {
   try {
-    if (!existsSync(VERIFICATION_PATH)) {
+    const fs = getFs();
+    if (!fs || !VERIFICATION_PATH) return null;
+    if (!fs.existsSync(VERIFICATION_PATH)) {
       return null;
     }
-    return JSON.parse(readFileSync(VERIFICATION_PATH, "utf-8")) as VerificationReport;
+    return JSON.parse(fs.readFileSync(VERIFICATION_PATH, "utf-8")) as VerificationReport;
   } catch {
     return null;
   }
