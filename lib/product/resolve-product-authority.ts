@@ -31,6 +31,7 @@ import {
   type AuthorityProofCheck,
   type EffectiveAuthorityStateResult,
 } from "./authority-grant-firewall";
+import { deriveEvidenceState } from "./derived-evidence-state";
 import type { DerivedEvidenceState } from "./derived-evidence-state";
 
 export interface ProductAuthorityResolverInput {
@@ -287,7 +288,10 @@ export function resolveProductAuthority(
   const nextAction = determineNextAction(state);
   const publicClaimAllowed = canMakePublicClaim(state);
   const publicClaimLanguage = getPublicClaimLanguage(state, input.productCode);
-  const derivedEvidence = input.derivedEvidenceState;
+  // Auto-derive evidence state from the evidence ledger if not provided by caller.
+  // This ensures every product call gets real evidence data without each caller
+  // having to call deriveEvidenceState() separately.
+  const derivedEvidence = input.derivedEvidenceState ?? deriveEvidenceState(input.productCode);
 
   return {
     productCode: input.productCode,

@@ -104,7 +104,7 @@ console.log(`\nProducts with resolver configs: ${configProductCodes.length}`);
 console.log("\n=== PHASE 3: VALIDATION CHECKS STATUS ===\n");
 
 const validationChecks = [
-  { name: "evidence_ledger_v2", status: "missing", source: "Evidence Package Registry exists but has only 2 packages" },
+  { name: "evidence_ledger_v2", status: "data-fed (1 product)", source: "deriveEvidenceState() auto-called in resolveProductAuthority. Ledger has data for team_assessment only." },
   { name: "anti_toy_validation", status: "contract_only", source: "lib/product/anti-gaming-validation-authority.ts exists" },
   { name: "red_team_validation", status: "contract_only", source: "Foundry red-team runs exist but not wired to authority" },
   { name: "generic_ai_comparison", status: "missing", source: "No implementation found" },
