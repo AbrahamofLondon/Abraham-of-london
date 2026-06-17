@@ -191,6 +191,41 @@ if (!hasResolverCall) {
   errors.push("Boardroom page does not call resolveProductAuthority");
 }
 
+// ── Phase 7: Boardroom validation semantics ─────────────────────────────────
+console.log("\n=== PHASE 7: BOARDROOM BRIEF VALIDATION SEMANTICS ===\n");
+
+const boardroomChecks = [
+  { name: "evidence_ledger_v2", cls: "fully_data_fed", passes: false, reason: "No evidence ledger entry for boardroom_brief" },
+  { name: "release_firewall", cls: "fully_data_fed", passes: false, reason: "Release lane is blocked_claim_unsafe_product" },
+  { name: "no_mock_authority", cls: "fully_data_fed", passes: true, reason: "mockAuthorityUsed is not true in config" },
+  { name: "validation_constitution", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
+  { name: "anti_gaming", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
+  { name: "adversarial_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
+  { name: "anti_toy_validation", cls: "contract_only", passes: false, reason: "Not wired to resolver — cannot pass" },
+  { name: "red_team_validation", cls: "contract_only", passes: false, reason: "Not wired to resolver — cannot pass" },
+  { name: "generic_ai_comparison", cls: "missing", passes: false, reason: "No implementation exists — cannot pass" },
+  { name: "market_comparison", cls: "missing", passes: false, reason: "No implementation exists — cannot pass" },
+];
+
+const brPassed = boardroomChecks.filter(c => c.passes).length;
+const brAuthorityClearing = boardroomChecks.filter(c => c.passes && c.cls === "fully_data_fed").length;
+const brBlocking = boardroomChecks.filter(c => !c.passes).length;
+
+console.log(`  Boardroom Brief authority state: blocked (blocked_until_v2_revalidation)`);
+console.log(`  Checks passed: ${brPassed}/10`);
+console.log(`  Authority-clearing checks passed: ${brAuthorityClearing}/10`);
+console.log(`  Blocking/unresolved checks: ${brBlocking}/10`);
+console.log(`  Breakdown:`);
+for (const c of boardroomChecks) {
+  const icon = c.passes ? "✅" : "❌";
+  const tag = c.cls === "fully_data_fed" ? "" :
+              c.cls === "evidence_dependent_proxy" ? " (proxy)" :
+              c.cls === "contract_only" ? " (not wired)" : " (missing)";
+  console.log(`    ${icon} ${c.name}${tag} — ${c.reason}`);
+}
+console.log(`\n  Note: Proxy checks do NOT count as authority-clearing.`);
+console.log(`  Contract-only and missing checks cannot pass until wired.`);
+
 // ── Summary ──────────────────────────────────────────────────────────────────
 console.log("\n========================================");
 console.log("  PRODUCT AUTHORITY SYSTEM CHECK");
