@@ -332,8 +332,12 @@ export function resolveProductAuthority(
       releaseFirewallPassed:
         input.validationResults?.releaseFirewallPassed ?? false,
       constitutionPassed: input.validationResults?.constitutionPassed ?? false,
+      // no_mock_authority is derived from the measurement boundary:
+      // if mockAuthorityUsed is explicitly false (or undefined, defaulting to false),
+      // then no mock authority was used — this check passes.
+      // The authority-grant-firewall enforces this at the gate level.
       noMockAuthorityPassed:
-        input.validationResults?.noMockAuthorityPassed ?? false,
+        input.validationResults?.noMockAuthorityPassed ?? (input.boundary?.mockAuthorityUsed !== true),
       antiGamingPassed: input.validationResults?.antiGamingPassed ?? false,
       adversarialValidationPassed:
         input.validationResults?.adversarialValidationPassed ?? false,

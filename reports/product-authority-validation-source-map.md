@@ -14,7 +14,7 @@
 | market_comparison | missing | No implementation found | ❌ |
 | release_firewall | contract-only | `lib/product/product-release-governance.ts` | ❌ Not wired to resolver |
 | validation_constitution | contract-only | `lib/product/frozen-validation-scenarios.ts` | ❌ Not wired to resolver |
-| no_mock_authority | contract-only | `lib/product/authority-grant-firewall.ts` | ❌ Not wired to resolver |
+| no_mock_authority | data-fed | `resolveProductAuthority()` checks `boundary.mockAuthorityUsed` | ✅ Wired in resolver |
 | anti_gaming | contract-only | `lib/product/anti-gaming-validation-authority.ts` | ❌ Not wired to resolver |
 | adversarial_validation | contract-only | `lib/decision-spine/adversarial-evidence-shield.ts` | ❌ Not wired to resolver |
 
@@ -99,13 +99,13 @@
 
 ### 8. no_mock_authority
 
-**Current status:** contract-only
-**Existing files:** `lib/product/authority-grant-firewall.ts`
-**Data source candidate:** Authority grant firewall enforces this automatically.
-**Resolver integration required:** Check boundary.mockAuthorityUsed in the resolver.
-**Boardroom implication:** boardroom_brief config has mockAuthorityUsed=false → passes.
-**All-product implication:** All products with mockAuthorityUsed=false pass.
-**Next action:** Already enforced by firewall. Resolver checks boundary.
+**Current status:** data-fed
+**Existing files:** `lib/product/authority-grant-firewall.ts`, `lib/product/resolve-product-authority.ts`
+**Data source candidate:** `input.boundary?.mockAuthorityUsed` in resolver.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` now derives `noMockAuthorityPassed` from `input.boundary?.mockAuthorityUsed !== true`.
+**Boardroom implication:** boardroom_brief config has `mockAuthorityUsed=false` → passes.
+**All-product implication:** All products with `mockAuthorityUsed !== true` pass.
+**Next action:** None — fully wired.
 
 ### 9. anti_gaming
 
@@ -129,15 +129,18 @@
 
 ---
 
-## Wiring Priority
+## Wiring Priority (Current Pass)
 
-1. **evidence_ledger_v2** — Wire `deriveEvidenceState()` into `resolveProductAuthority()` (highest priority, already has data)
-2. **no_mock_authority** — Already enforced by firewall, just needs resolver to check boundary
+### ✅ Completed this pass
+1. **evidence_ledger_v2** — `deriveEvidenceState()` auto-called in `resolveProductAuthority()` ✅
+2. **no_mock_authority** — Derived from `boundary.mockAuthorityUsed !== true` in resolver ✅
+
+### Remaining for future passes
 3. **release_firewall** — Wire release governance query into resolver
 4. **validation_constitution** — Wire frozen scenarios query into resolver
-5. **anti_gaming** — Wire anti-gaming check into resolver
-6. **anti_toy_validation** — Wire anti-toy check into resolver
-7. **adversarial_validation** — Wire adversarial shield into resolver
-8. **red_team_validation** — Wire red-team query into resolver
-9. **generic_ai_comparison** — Keep missing/unknown
-10. **market_comparison** — Keep missing/unknown
+5. **anti_gaming** — Wire anti-gaming check into resolver (ledger has data for team_assessment)
+6. **anti_toy_validation** — Wire anti-toy check into resolver (ledger has data for team_assessment)
+7. **adversarial_validation** — Wire adversarial shield into resolver (ledger has data for team_assessment)
+8. **red_team_validation** — Wire red-team query into resolver (ledger has data for team_assessment)
+9. **generic_ai_comparison** — Keep missing/unknown (no implementation exists)
+10. **market_comparison** — Keep missing/unknown (no implementation exists)

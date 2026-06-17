@@ -111,7 +111,7 @@ const validationChecks = [
   { name: "market_comparison", status: "missing", source: "No implementation found" },
   { name: "release_firewall", status: "contract_only", source: "lib/product/product-release-governance.ts exists" },
   { name: "validation_constitution", status: "contract_only", source: "lib/product/frozen-validation-scenarios.ts exists" },
-  { name: "no_mock_authority", status: "contract_only", source: "lib/product/authority-grant-firewall.ts enforces this" },
+  { name: "no_mock_authority", status: "data-fed", source: "Derived from boundary.mockAuthorityUsed !== true in resolveProductAuthority()" },
   { name: "anti_gaming", status: "contract_only", source: "lib/product/anti-gaming-validation-authority.ts exists" },
   { name: "adversarial_validation", status: "contract_only", source: "Adversarial Evidence Shield exists in integrity guards" },
 ];
