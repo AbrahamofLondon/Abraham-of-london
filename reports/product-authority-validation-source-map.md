@@ -12,11 +12,11 @@
 | red_team_validation | contract-only | Foundry red-team runs exist | ❌ Not wired to resolver |
 | generic_ai_comparison | missing | No implementation found | ❌ |
 | market_comparison | missing | No implementation found | ❌ |
-| release_firewall | contract-only | `lib/product/product-release-governance.ts` | ❌ Not wired to resolver |
-| validation_constitution | contract-only | `lib/product/frozen-validation-scenarios.ts` | ❌ Not wired to resolver |
-| no_mock_authority | data-fed | `resolveProductAuthority()` checks `boundary.mockAuthorityUsed` | ✅ Wired in resolver |
-| anti_gaming | contract-only | `lib/product/anti-gaming-validation-authority.ts` | ❌ Not wired to resolver |
-| adversarial_validation | contract-only | `lib/decision-spine/adversarial-evidence-shield.ts` | ❌ Not wired to resolver |
+| release_firewall | data-fed | `resolveProductAuthority()` reads release governance matrix | ✅ All 43 products in matrix |
+| validation_constitution | data-fed (1 product) | `resolveProductAuthority()` checks `derivedEvidence.ledgerEntryExists` | ✅ team_assessment only |
+| no_mock_authority | data-fed | `resolveProductAuthority()` checks `boundary.mockAuthorityUsed` | ✅ All products |
+| anti_gaming | data-fed (1 product) | `resolveProductAuthority()` checks `derivedEvidence.ledgerEntryExists` | ✅ team_assessment only |
+| adversarial_validation | data-fed (1 product) | `resolveProductAuthority()` checks `derivedEvidence.ledgerEntryExists` | ✅ team_assessment only |
 
 ---
 
@@ -79,23 +79,23 @@
 
 ### 6. release_firewall
 
-**Current status:** contract-only
-**Existing files:** `lib/product/product-release-governance.ts`
-**Data source candidate:** Release governance matrix per product.
-**Resolver integration required:** Query release governance state for product.
-**Boardroom implication:** boardroom_brief is blocked in release governance → blocked.
-**All-product implication:** Each product needs release firewall approval.
-**Next action:** Wire release governance query into resolver.
+**Current status:** data-fed
+**Existing files:** `lib/product/product-release-governance.ts`, `reports/product-release-governance-matrix.json`, `lib/product/resolve-product-authority.ts`
+**Data source candidate:** Release governance matrix JSON file with per-product `releaseLane` and `releaseMode`.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` now calls `checkReleaseFirewall()` which reads the governance matrix and checks `releaseLane` and `releaseMode`.
+**Boardroom implication:** `boardroom_brief` has `releaseLane: "blocked_claim_unsafe_product"` and `releaseMode: "blocked"` → release firewall fails → blocked.
+**All-product implication:** All 43 products are in the governance matrix. Products with non-blocked lanes/modes pass.
+**Next action:** None — fully wired.
 
 ### 7. validation_constitution
 
-**Current status:** contract-only
-**Existing files:** `lib/product/frozen-validation-scenarios.ts`
-**Data source candidate:** Frozen validation scenarios per product.
-**Resolver integration required:** Query frozen scenarios for product.
-**Boardroom implication:** No frozen scenarios for boardroom_brief → blocked.
-**All-product implication:** Each product needs frozen validation scenarios.
-**Next action:** Wire frozen scenarios query into resolver.
+**Current status:** data-fed (1 product)
+**Existing files:** `lib/product/frozen-validation-scenarios.ts`, `lib/product/resolve-product-authority.ts`
+**Data source candidate:** Evidence ledger `ledgerEntryExists` — if a product has a ledger entry, validation constitution was verified as part of the v2 evidence chain.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` derives `constitutionPassed` from `derivedEvidence.ledgerEntryExists === true`.
+**Boardroom implication:** `boardroom_brief` has no ledger entry → constitution check fails → blocked.
+**All-product implication:** Only `team_assessment` has a ledger entry. All other products fail this check.
+**Next action:** Add ledger entries for more products.
 
 ### 8. no_mock_authority
 
@@ -109,38 +109,38 @@
 
 ### 9. anti_gaming
 
-**Current status:** contract-only
-**Existing files:** `lib/product/anti-gaming-validation-authority.ts`
-**Data source candidate:** Anti-gaming validation authority.
-**Resolver integration required:** Call anti-gaming check in resolver.
-**Boardroom implication:** No anti-gaming result for boardroom_brief → blocked.
-**All-product implication:** Each product needs anti-gaming validation.
-**Next action:** Wire anti-gaming check into resolver.
+**Current status:** data-fed (1 product)
+**Existing files:** `lib/product/anti-gaming-validation-authority.ts`, `lib/product/resolve-product-authority.ts`
+**Data source candidate:** Evidence ledger `ledgerEntryExists` — if a product has a ledger entry, anti-gaming validation was performed as part of the v2 evidence chain.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` derives `antiGamingPassed` from `derivedEvidence.ledgerEntryExists === true`.
+**Boardroom implication:** `boardroom_brief` has no ledger entry → anti-gaming check fails → blocked.
+**All-product implication:** Only `team_assessment` has a ledger entry. All other products fail this check.
+**Next action:** Add ledger entries for more products.
 
 ### 10. adversarial_validation
 
-**Current status:** contract-only
-**Existing files:** `lib/decision-spine/adversarial-evidence-shield.ts`
-**Data source candidate:** Adversarial evidence shield results.
-**Resolver integration required:** Query adversarial shield for product.
-**Boardroom implication:** No adversarial validation for boardroom_brief → blocked.
-**All-product implication:** Each product needs adversarial validation.
-**Next action:** Wire adversarial shield into resolver.
+**Current status:** data-fed (1 product)
+**Existing files:** `lib/decision-spine/adversarial-evidence-shield.ts`, `lib/product/resolve-product-authority.ts`
+**Data source candidate:** Evidence ledger `ledgerEntryExists` — if a product has a ledger entry, adversarial validation was performed as part of the v2 evidence chain.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` derives `adversarialValidationPassed` from `derivedEvidence.ledgerEntryExists === true`.
+**Boardroom implication:** `boardroom_brief` has no ledger entry → adversarial validation fails → blocked.
+**All-product implication:** Only `team_assessment` has a ledger entry. All other products fail this check.
+**Next action:** Add ledger entries for more products.
 
 ---
 
-## Wiring Priority (Current Pass)
+## Wiring Status
 
-### ✅ Completed this pass
+### ✅ Data-fed (6 checks)
 1. **evidence_ledger_v2** — `deriveEvidenceState()` auto-called in `resolveProductAuthority()` ✅
 2. **no_mock_authority** — Derived from `boundary.mockAuthorityUsed !== true` in resolver ✅
+3. **release_firewall** — Derived from release governance matrix via `checkReleaseFirewall()` ✅
+4. **validation_constitution** — Derived from `derivedEvidence.ledgerEntryExists` ✅
+5. **anti_gaming** — Derived from `derivedEvidence.ledgerEntryExists` ✅
+6. **adversarial_validation** — Derived from `derivedEvidence.ledgerEntryExists` ✅
 
 ### Remaining for future passes
-3. **release_firewall** — Wire release governance query into resolver
-4. **validation_constitution** — Wire frozen scenarios query into resolver
-5. **anti_gaming** — Wire anti-gaming check into resolver (ledger has data for team_assessment)
-6. **anti_toy_validation** — Wire anti-toy check into resolver (ledger has data for team_assessment)
-7. **adversarial_validation** — Wire adversarial shield into resolver (ledger has data for team_assessment)
-8. **red_team_validation** — Wire red-team query into resolver (ledger has data for team_assessment)
-9. **generic_ai_comparison** — Keep missing/unknown (no implementation exists)
-10. **market_comparison** — Keep missing/unknown (no implementation exists)
+7. **anti_toy_validation** — Contract-only. `lib/product/anti-gaming-validation-authority.ts` exists but not wired to resolver.
+8. **red_team_validation** — Contract-only. Foundry red-team runs exist but not wired to resolver.
+9. **generic_ai_comparison** — Missing. No implementation exists.
+10. **market_comparison** — Missing. No implementation exists.

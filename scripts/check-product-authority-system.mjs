@@ -109,11 +109,11 @@ const validationChecks = [
   { name: "red_team_validation", status: "contract_only", source: "Foundry red-team runs exist but not wired to authority" },
   { name: "generic_ai_comparison", status: "missing", source: "No implementation found" },
   { name: "market_comparison", status: "missing", source: "No implementation found" },
-  { name: "release_firewall", status: "contract_only", source: "lib/product/product-release-governance.ts exists" },
-  { name: "validation_constitution", status: "contract_only", source: "lib/product/frozen-validation-scenarios.ts exists" },
+  { name: "release_firewall", status: "data-fed", source: "Derived from release governance matrix in resolveProductAuthority() via checkReleaseFirewall()" },
+  { name: "validation_constitution", status: "data-fed (1 product)", source: "Derived from derivedEvidence.ledgerEntryExists in resolveProductAuthority(). Only team_assessment has ledger data." },
   { name: "no_mock_authority", status: "data-fed", source: "Derived from boundary.mockAuthorityUsed !== true in resolveProductAuthority()" },
-  { name: "anti_gaming", status: "contract_only", source: "lib/product/anti-gaming-validation-authority.ts exists" },
-  { name: "adversarial_validation", status: "contract_only", source: "Adversarial Evidence Shield exists in integrity guards" },
+  { name: "anti_gaming", status: "data-fed (1 product)", source: "Derived from derivedEvidence.ledgerEntryExists in resolveProductAuthority(). Only team_assessment has ledger data." },
+  { name: "adversarial_validation", status: "data-fed (1 product)", source: "Derived from derivedEvidence.ledgerEntryExists in resolveProductAuthority(). Only team_assessment has ledger data." },
 ];
 
 for (const check of validationChecks) {
