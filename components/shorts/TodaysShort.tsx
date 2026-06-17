@@ -1,29 +1,31 @@
 // components/shorts/TodaysShort.tsx
 // Today's Short — one complete short, picked daily (server-side).
 // The daily short is selected in getStaticProps via a deterministic date seed,
-// so only that short's compiled MDX (`code`) ships in props and real prose is
-// emitted into the SSR/SSG HTML. This component renders that MDX through the
-// Contentlayer runtime hook with a DARK-themed component map (the index hero is
-// void/gold, unlike the light ShortContent reading panel).
+// so only that short's body ships in props and real prose is emitted into the
+// SSR/SSG HTML. The body is rendered to STATIC HTML at build time via
+// renderDocBodyToStaticHtml (the same sanctioned path the short detail page
+// uses) and rendered here through StaticMDXRenderer — NOT through
+// useMDXComponent, whose `new Function(body.code)` evaluation breaks SSG on this
+// estate's ESM-formatted compiled MDX.
 
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { useMDXComponent } from "next-contentlayer2/hooks";
+import { StaticMDXRenderer } from "@/lib/mdx/static-mdx-runtime";
 import { readTimeFromText } from "@/lib/shorts/read-time";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-// The daily short carries the compiled MDX (`code`) for rendering.
+// The daily short carries its body as build-time static HTML (`bodyHtml`).
 export type TodaysShortModel = {
   slug: string;
   title: string;
   excerpt: string;
-  code: string; // esbuild-compiled MDX from Contentlayer body.code
+  bodyHtml: string; // static HTML from renderDocBodyToStaticHtml (build time)
   raw: string; // markdown source — used only for the read-time estimate
   theme: string;
   category: string;
@@ -79,94 +81,11 @@ function addToReadHistory(slug: string, theme: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Dark-themed MDX component map (void/gold hero — NOT the light reading panel)
-// ---------------------------------------------------------------------------
-
-const darkMdxComponents = {
-  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1
-      className="mt-10 mb-5 font-serif font-light"
-      style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", lineHeight: 1.12, letterSpacing: "-0.02em", color: "var(--ds-text)" }}
-      {...props}
-    />
-  ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2
-      className="mt-10 mb-4 font-serif font-light"
-      style={{ fontSize: "clamp(1.35rem, 2.4vw, 1.8rem)", lineHeight: 1.15, letterSpacing: "-0.02em", color: "var(--ds-text)" }}
-      {...props}
-    />
-  ),
-  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3
-      className="mt-8 mb-3 font-mono text-xs uppercase tracking-[0.18em]"
-      style={{ color: "var(--ds-text-secondary)" }}
-      {...props}
-    />
-  ),
-  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p className="mb-6" style={{ color: "var(--ds-text-secondary)" }} {...props} />
-  ),
-  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="mb-6 list-disc space-y-2 pl-6" style={{ color: "var(--ds-text-secondary)" }} {...props} />
-  ),
-  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="mb-6 list-decimal space-y-2 pl-6" style={{ color: "var(--ds-text-secondary)" }} {...props} />
-  ),
-  li: (props: React.HTMLAttributes<HTMLLIElement>) => (
-    <li style={{ lineHeight: 1.75 }} {...props} />
-  ),
-  blockquote: (props: React.HTMLAttributes<HTMLElement>) => (
-    <blockquote
-      className="my-8 border-l-2 pl-5 font-serif italic"
-      style={{ borderColor: "var(--ds-accent)", color: "var(--ds-text)" }}
-      {...props}
-    />
-  ),
-  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a className="underline underline-offset-4" style={{ color: "var(--ds-accent)" }} {...props} />
-  ),
-  strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong className="font-semibold" style={{ color: "var(--ds-text)" }} {...props} />
-  ),
-  em: (props: React.HTMLAttributes<HTMLElement>) => (
-    <em style={{ fontStyle: "italic" }} {...props} />
-  ),
-  code: (props: React.HTMLAttributes<HTMLElement>) => (
-    <code
-      className="rounded px-1.5 py-0.5 font-mono text-[0.9em]"
-      style={{ border: "1px solid var(--ds-border)", backgroundColor: "rgba(255,255,255,0.04)", color: "var(--ds-text)" }}
-      {...props}
-    />
-  ),
-  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre
-      className="mb-8 overflow-x-auto rounded-xl p-4 text-sm"
-      style={{ border: "1px solid var(--ds-border)", backgroundColor: "rgba(0,0,0,0.35)", color: "var(--ds-text-secondary)" }}
-      {...props}
-    />
-  ),
-  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
-    <hr className="my-10" style={{ border: "none", borderTop: "1px solid var(--ds-border)" }} {...props} />
-  ),
-};
-
-// ---------------------------------------------------------------------------
-// MDX body — rendered via the Contentlayer runtime hook (dark map)
-// ---------------------------------------------------------------------------
-
-function MdxBody({ code }: { code: string }) {
-  const MDXContent = useMDXComponent(code);
-  if (!MDXContent) return null;
-  return <MDXContent components={darkMdxComponents} />;
-}
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export type TodaysShortProps = {
-  // Selected server-side; carries compiled MDX for the daily short.
+  // Selected server-side; carries the daily short's body as static HTML.
   todaysShort: TodaysShortModel;
   // Metadata-only related list (no body payload).
   relatedShorts: RelatedShortModel[];
@@ -264,8 +183,8 @@ export default function TodaysShort({ todaysShort, relatedShorts }: TodaysShortP
           </span>
         </div>
 
-        {/* Full body content — rendered through the MDX runtime (dark map) */}
-        {todaysShort.code && (
+        {/* Full body content — build-time static HTML (no runtime MDX eval) */}
+        {todaysShort.bodyHtml && (
           <div
             className="prose-custom max-w-2xl font-serif font-light leading-relaxed"
             style={{
@@ -274,7 +193,7 @@ export default function TodaysShort({ todaysShort, relatedShorts }: TodaysShortP
               color: "var(--ds-text-secondary)",
             }}
           >
-            <MdxBody code={todaysShort.code} />
+            <StaticMDXRenderer html={todaysShort.bodyHtml} />
           </div>
         )}
 

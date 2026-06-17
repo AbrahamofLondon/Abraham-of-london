@@ -34,6 +34,7 @@ import { readImprint, updateStreak } from "@/lib/shorts/brand";
 import type { Imprint } from "@/lib/shorts/brand";
 import { resolveDocCoverImage } from "@/lib/content/shared";
 import { computeReadTime, estimateWordCount } from "@/lib/shorts/read-time";
+import { renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -88,7 +89,7 @@ type ShortIndexItem = {
 type ShortsIndexProps = {
   shorts: ShortIndexItem[];
   totalCount: number;
-  // The single daily short, selected server-side (carries compiled MDX).
+  // The single daily short, selected server-side (carries static body HTML).
   todaysShort: TodaysShortModel | null;
   // Metadata-only related list for the daily short.
   relatedShorts: RelatedShortModel[];
@@ -314,17 +315,14 @@ function ImprintStrip({
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Extract the compiled MDX (esbuild JS) for the daily short. This is what
-// useMDXComponent consumes — NOT HTML.
-function extractShortCode(doc: RawShortDoc): string {
-  return (doc as any)?.body?.code || (doc as any)?.bodyCode || "";
-}
-
 function extractShortRaw(doc: RawShortDoc): string {
   return (doc as any)?.body?.raw || "";
 }
 
-// Full model for THE daily short only (carries compiled MDX + raw source).
+// Full model for THE daily short only. The body is rendered to STATIC HTML at
+// build time via renderDocBodyToStaticHtml (the same sanctioned path the detail
+// page uses) — we never ship compiled MDX `body.code`, which breaks SSG because
+// useMDXComponent runs `new Function(code)` on ESM-formatted code.
 function toTodaysShortModel(doc: RawShortDoc): TodaysShortModel | null {
   const slug = resolveShortSlug(doc);
   if (!slug) return null;
@@ -334,11 +332,13 @@ function toTodaysShortModel(doc: RawShortDoc): TodaysShortModel | null {
     safeString(doc.readTime).trim() || safeString(doc.readTimeSafe).trim();
   const readTime = metaReadTime || (raw ? computeReadTime(estimateWordCount(raw)) : "");
 
+  const { html: bodyHtml } = renderDocBodyToStaticHtml(doc);
+
   return {
     slug,
     title: safeString(doc.title).trim() || "Untitled",
     excerpt: safeString(doc.excerpt).trim() || safeString(doc.description).trim() || "",
-    code: extractShortCode(doc),
+    bodyHtml: bodyHtml || "",
     raw,
     theme: safeString(doc.theme).trim().toLowerCase() || "purpose",
     category: safeString(doc.category).trim() || "Signal",
@@ -791,7 +791,8 @@ export const getStaticProps: GetStaticProps<ShortsIndexProps> = async () => {
     return bT - aT;
   });
 
-  // Deterministic shared daily pick — only THIS short carries compiled MDX.
+  // Deterministic shared daily pick — only THIS short carries the body (as
+  // build-time static HTML).
   const dailyDoc = selectDailyDoc(publishedDocs);
   const todaysShort = dailyDoc ? toTodaysShortModel(dailyDoc) : null;
 
