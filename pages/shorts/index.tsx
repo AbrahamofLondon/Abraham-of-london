@@ -483,38 +483,6 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShort, rela
       </Head>
 
       <main className="ds-surface-shorts min-h-screen" style={{ backgroundColor: VOID }}>
-        {/* Today's Short — selected server-side, appears first */}
-        {todaysShort && (
-          <TodaysShort todaysShort={todaysShort} relatedShorts={relatedShorts} />
-        )}
-
-        {/* Slim retention surface — daily-return streak + last-read imprint */}
-        {streak > 1 && (
-          <div
-            className="border-b"
-            style={{
-              borderColor: "rgba(255,255,255,0.05)",
-              backgroundColor: "rgba(0,0,0,0.30)",
-            }}
-          >
-            <div className="mx-auto max-w-5xl px-6 py-3 lg:px-10">
-              <span
-                className="font-mono text-[7.5px] uppercase tracking-[0.34em]"
-                style={{ color: "var(--ds-accent)" }}
-              >
-                {streak} day return streak
-              </span>
-            </div>
-          </div>
-        )}
-        {lastRead && (
-          <ImprintStrip
-            title={lastRead.title}
-            hoursRemaining={lastRead._hoursRemaining}
-            fadePercent={lastRead._fadePercent}
-          />
-        )}
-
         <header
           className="border-b px-6 pb-12 pt-16 lg:px-10 lg:pb-16 lg:pt-28"
           style={{ borderColor: "var(--ds-border)" }}
@@ -596,6 +564,38 @@ const ShortsIndexPage: NextPage<ShortsIndexProps> = ({ shorts, todaysShort, rela
             </div>
           </div>
         </header>
+
+        {/* Today's Short — selected server-side; sits below the hero for sane hierarchy */}
+        {todaysShort && (
+          <TodaysShort todaysShort={todaysShort} relatedShorts={relatedShorts} />
+        )}
+
+        {/* Slim retention surface — daily-return streak + last-read imprint */}
+        {streak > 1 && (
+          <div
+            className="border-b"
+            style={{
+              borderColor: "rgba(255,255,255,0.05)",
+              backgroundColor: "rgba(0,0,0,0.30)",
+            }}
+          >
+            <div className="mx-auto max-w-5xl px-6 py-3 lg:px-10">
+              <span
+                className="font-mono text-[7.5px] uppercase tracking-[0.34em]"
+                style={{ color: "var(--ds-accent)" }}
+              >
+                {streak} day return streak
+              </span>
+            </div>
+          </div>
+        )}
+        {lastRead && (
+          <ImprintStrip
+            title={lastRead.title}
+            hoursRemaining={lastRead._hoursRemaining}
+            fadePercent={lastRead._fadePercent}
+          />
+        )}
 
         {/* Theme navigation strip */}
         <nav className="border-b px-6 py-5 lg:px-10" style={{ borderColor: "var(--ds-border)" }}>
