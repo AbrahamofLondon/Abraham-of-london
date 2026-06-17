@@ -239,14 +239,34 @@ if (surfaceExists) {
   const hasResolveProductAuthority = surfaceSrc.includes("resolveProductAuthority");
   const hasBoardroomRow = surfaceSrc.includes("boardroom_brief");
   const hasBadge = surfaceSrc.includes("ProductAuthorityBadge");
+  const hasAuthGuard = surfaceSrc.includes("requireAdminPage");
+  const hasAdminLayout = surfaceSrc.includes("AdminLayout");
+  const hasBackButton = surfaceSrc.includes("BackToOperatorCommandCentre");
+  const hasAuthorityCleared = surfaceSrc.includes("authorityCleared") || surfaceSrc.includes("authorityState");
+  const hasBlockingReasons = surfaceSrc.includes("blockingReasons");
+  const hasNextAction = surfaceSrc.includes("nextAction");
 
   console.log(`  ✅ Admin surface exists at pages/admin/product-authority.tsx`);
   console.log(`  ${hasGetAllProducts ? "✅" : "❌"} Uses getAllProducts() for catalog coverage`);
   console.log(`  ${hasResolveProductAuthority ? "✅" : "❌"} Uses resolveProductAuthority() for each product`);
   console.log(`  ${hasBoardroomRow ? "✅" : "❌"} Boardroom Brief appears as a row`);
   console.log(`  ${hasBadge ? "✅" : "❌"} Uses ProductAuthorityBadge for visual state`);
+  console.log(`  ${hasAuthGuard ? "✅" : "❌"} Admin auth guard (requireAdminPage) in place`);
+  console.log(`  ${hasAdminLayout ? "✅" : "❌"} AdminLayout wrapper applied`);
+  console.log(`  ${hasBackButton ? "✅" : "❌"} BackToOperatorCommandCentre navigation present`);
+  console.log(`  ${hasAuthorityCleared ? "✅" : "❌"} Shows authority state per product`);
+  console.log(`  ${hasBlockingReasons ? "✅" : "❌"} Shows blocking reasons per product`);
+  console.log(`  ${hasNextAction ? "✅" : "❌"} Shows next action per product`);
   console.log(`\n  All ${catalogProductCodes.length} products are resolved through the same resolver.`);
   console.log(`  Boardroom is one row within the estate-wide authority picture.`);
+
+  // Verify it doesn't only render explicit entries
+  const hasDefaultPath = surfaceSrc.includes("default-resolved") || surfaceSrc.includes("default path") || surfaceSrc.includes("isExplicitEntry");
+  if (hasDefaultPath) {
+    console.log(`  ✅ Surface distinguishes explicit vs default-resolved products`);
+  } else {
+    warnings.push("Admin surface may not distinguish explicit vs default-resolved products");
+  }
 } else {
   errors.push("Product-wide authority surface does not exist at pages/admin/product-authority.tsx");
   console.log(`  ❌ Admin surface missing`);

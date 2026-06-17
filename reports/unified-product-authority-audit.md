@@ -148,6 +148,34 @@ The foundation is solid. The work is connecting existing pieces to visible surfa
 - Checkout governance is resolver-aware
 - Storefront coverage is resolver-aware
 
+## Milestone — Product Authority Control Surface
+
+**Status:** ✅ Complete (2026-06-17)
+
+| Item | Status |
+|---|---|
+| Admin route | `/admin/product-authority` |
+| Auth protection | `requireAdminPage` guard + `AdminLayout` wrapper |
+| Resolver source | `resolveProductAuthority()` from canonical resolver |
+| Product coverage | All 43 products via `getAllProducts()` |
+| Explicit entries | 8 (marked with gold "explicit" label) |
+| Default-resolved | 35 (marked with dim "default" label) |
+| Boardroom row | Present as one row in estate-wide picture |
+| Authority state | Shown per product via `ProductAuthorityBadge` |
+| Blocking reasons | Shown per product |
+| Next action | Shown per product |
+| Checker verification | `check-product-authority-system.mjs` Phase 8 |
+| Build | ✅ Compiled successfully |
+| Boardroom remains blocked | ✅ |
+| Checkout aligned | ✅ |
+| Public claim denied | ✅ |
+
+### Remaining evidence gaps
+- 3 checks fully data-fed: `evidence_ledger_v2`, `release_firewall`, `no_mock_authority`
+- 3 checks evidence-dependent proxy: `validation_constitution`, `anti_gaming`, `adversarial_validation`
+- 2 checks contract-only: `anti_toy_validation`, `red_team_validation`
+- 2 checks missing: `generic_ai_comparison`, `market_comparison`
+
 ## Phase 5 — Recommendations
 
 1. **Create `scripts/check-product-authority-system.mjs`** — Single checker that reports unified authority state for all 43 products.
