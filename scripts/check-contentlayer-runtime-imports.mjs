@@ -9,9 +9,17 @@
  * Background
  * ----------
  * webpack bundles every statically-analysable require/import it can trace.
- * `require("contentlayer/generated")` inlines ALL 300+ MDX documents
- * (~47 MB of JSON) into the server chunk, which exceeds Vercel Hobby's
- * 50 MB unzipped Lambda limit and causes "Deploying outputs... Error".
+ * `require("contentlayer/generated")` inlines ALL generated docs into the server
+ * chunk. Measured 2026-06-17: the per-type `_index.json` total is 64.57 MB
+ * uncompressed — and, contrary to this comment's earlier wording, it is NOT
+ * dominated by the outbound corpora (X/LinkedIn/Facebook indexes are only
+ * ~0.9 MB combined). The weight is Brief 22.8 MB + VaultBrief 19.4 MB +
+ * Intelligence 10.3 MB. Bundling all of it into one function risks the
+ * serverless size limit (this project deploys on Netlify — AWS Lambda: 50 MB
+ * zipped / 250 MB unzipped — NOT Vercel). The fix is per-route tracing of each
+ * route's own type `_index.json` (see next.config.mjs +
+ * lib/content/route-content-types.mjs), which is why importing the full barrel
+ * here is forbidden.
  *
  * Approved files may import contentlayer/generated because they run ONLY
  * at build time (getStaticProps / getStaticPaths scripts) or are dead-code

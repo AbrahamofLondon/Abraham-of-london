@@ -1,12 +1,38 @@
 /**
  * next.config.mjs — Netlify-aligned build configuration
- * Restores deploy controls, canonical redirects, security headers,
- * and server-side chunk discipline without reintroducing standalone output.
+ *
+ * Restores deploy controls, canonical redirects, security headers, and
+ * server-side chunk discipline. Uses `output: "standalone"` on Netlify (and
+ * disables it on Vercel, which packages its own way and OOMs on the standalone
+ * node_modules copy — see the `output` field below). [Corrected 2026-06-17: an
+ * earlier header line here claimed standalone was NOT used; it is, and is
+ * required for Netlify's handler packaging.]
+ *
+ * CONTENT TRACING (Approach A — do NOT revert to fs-only):
+ * Public content pages are `●` ISR routes whose getStaticProps reads
+ * `.contentlayer/generated/<Type>/_index.json` from the runtime filesystem via
+ * lib/contentlayer-helper.ts. Next's tracer cannot see those dynamic `fs` reads,
+ * so without explicit tracing the generated indexes are NOT bundled into the
+ * Netlify handler → ISR revalidation regenerates EMPTY pages ("content appears
+ * after deploy, then disappears on refresh"). `outputFileTracingIncludes` below
+ * is GENERATED from lib/content/route-content-types.mjs to bundle ONLY each
+ * route's own type `_index.json` into the handler.
+ *
+ * Why NOT import `contentlayer/generated` directly (Approach B): the barrel
+ * inlines the FULL corpus — measured 64.57 MB uncompressed of `_index.json`
+ * (Brief 22.8 MB + VaultBrief 19.4 MB + Intelligence 10.3 MB dominate; the
+ * X/LinkedIn/Facebook outbound corpora are only ~0.9 MB, contrary to a stale
+ * comment in scripts/check-contentlayer-runtime-imports.mjs) — into every
+ * function, overflowing the serverless function size limit. Per-route per-type
+ * tracing keeps each handler small. scripts/check-content-route-tracing.mjs
+ * guards this config against drift; scripts/check-contentlayer-runtime-imports.mjs
+ * forbids the barrel.
  */
 
 import path from "path";
 import { fileURLToPath } from "url";
 import { withContentlayer } from "next-contentlayer2";
+import { buildContentTracingIncludes } from "./lib/content/route-content-types.mjs";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NEXTAUTH_URL GUARD
@@ -169,6 +195,11 @@ const nextConfig = {
     "/api/private/vault/[...path]": [
       "./private/vault/frameworks/inner-circle/operating-cadence-pack.pptx",
     ],
+    // Per-route content-index tracing, GENERATED from the SSOT
+    // (lib/content/route-content-types.mjs). Bundles only each route's own
+    // `_index.json` into the Netlify handler so ISR revalidation has data.
+    // See the header note above; guarded by scripts/check-content-route-tracing.mjs.
+    ...buildContentTracingIncludes(),
   },
   outputFileTracingExcludes: {
     "/downloads/[...slug]": [
