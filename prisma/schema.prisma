@@ -5469,8 +5469,8 @@ model ProductArtifact {
   privateNotes          String?
   generatedBy           String?
   downloadUrl           String?   // Used as adminPreviewUrl for Boardroom dossiers
-  adminPreviewUrl       String?   // Explicit admin preview URL for the generated artifact
-  customerAccessUrl     String?   // Customer-facing secure access URL (populated after approval)
+  adminPreviewUrl       String?   @map("admin_preview_url") // Explicit admin preview URL for the generated artifact
+  customerAccessUrl     String?   @map("customer_access_url") // Customer-facing secure access URL (populated after approval)
   manifestId            String?
   parentArtifactId      String?
   createdAt             DateTime  @default(now())
