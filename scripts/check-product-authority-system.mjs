@@ -116,10 +116,11 @@ console.log(`\nProducts with resolver configs: ${configProductCodes.length}`);
 console.log("\n=== PHASE 3: VALIDATION CHECKS STATUS ===\n");
 
 // Honest validation check classification:
-// fully_data_fed = has a distinct real source or defensible system-wide adapter
-// evidence_dependent_proxy = depends on evidence ledger presence, not a check-specific source
-// contract_only = source file exists but not wired to resolver
-// missing = no implementation found
+// fully_data_fed = reads a real source and can pass/fail from data
+// evidence_dependent_proxy = reads a real evidence source but not a check-specific source
+// contract_stub_missing_source = contract exists, source absent, cannot pass
+// contract_only = design/contract exists but no runtime evidence adapter
+// missing = no contract and no implementation
 const validationChecks = [
   { name: "evidence_ledger_v2", classification: "fully_data_fed", source: "deriveEvidenceState() reads reports/product-value-evidence-ledger-v2.json. Auto-called in resolveProductAuthority()." },
   { name: "release_firewall", classification: "fully_data_fed", source: "checkReleaseFirewall() reads reports/product-release-governance-matrix.json. All 43 products have entries." },
@@ -129,19 +130,21 @@ const validationChecks = [
   { name: "adversarial_validation", classification: "evidence_dependent_proxy", source: "Derived from derivedEvidence.ledgerEntryExists. lib/decision-spine/adversarial-evidence-shield.ts exists but not called by resolver." },
   { name: "anti_toy_validation", classification: "evidence_dependent_proxy", source: "Wired through lib/product/anti-toy-validation-adapter.ts. Reads from evidence ledger (testsRun.antiToy) or anti-toy review report (reports/product-anti-toy-review.md). Ledger has data for team_assessment only; report has data for 6 products." },
   { name: "red_team_validation", classification: "evidence_dependent_proxy", source: "Wired through lib/product/red-team-validation-adapter.ts. Reads from evidence ledger (testsRun.redTeam) or red-team review report (reports/product-red-team-review.md). Ledger has data for team_assessment only; report has data for 6 products." },
-  { name: "generic_ai_comparison", classification: "evidence_dependent_proxy", source: "Wired through lib/product/generic-ai-comparison-contract.ts (contract stub). Evidence ledger has data for team_assessment only. All other products: missing_source / blocked_until_comparison_source_exists." },
-  { name: "market_comparison", classification: "evidence_dependent_proxy", source: "Wired through lib/product/market-comparison-contract.ts (contract stub). Evidence ledger has data for team_assessment only. All other products: missing_source / blocked_until_market_comparison_source_exists." },
+  { name: "generic_ai_comparison", classification: "contract_stub_missing_source", source: "Contract stub at lib/product/generic-ai-comparison-contract.ts. Evidence ledger has data for team_assessment only (no standalone comparison module). All other products: missing_source / blocked_until_comparison_source_exists. CANNOT pass without real comparison source." },
+  { name: "market_comparison", classification: "contract_stub_missing_source", source: "Contract stub at lib/product/market-comparison-contract.ts. Evidence ledger has data for team_assessment only (no standalone comparison module). All other products: missing_source / blocked_until_market_comparison_source_exists. CANNOT pass without real comparison source." },
 ];
 
 for (const check of validationChecks) {
   const icon = check.classification === "fully_data_fed" ? "✅" :
                check.classification === "evidence_dependent_proxy" ? "🟡" :
+               check.classification === "contract_stub_missing_source" ? "🔶" :
                check.classification === "contract_only" ? "⚠️" : "❌";
   console.log(`  ${icon} ${check.name} — ${check.classification} (${check.source})`);
 }
 
 const fullyDataFed = validationChecks.filter((c) => c.classification === "fully_data_fed").length;
 const evidenceProxy = validationChecks.filter((c) => c.classification === "evidence_dependent_proxy").length;
+const contractStubMissingSource = validationChecks.filter((c) => c.classification === "contract_stub_missing_source").length;
 const contractOnlyChecks = validationChecks.filter((c) => c.classification === "contract_only").length;
 const missingChecks = validationChecks.filter((c) => c.classification === "missing").length;
 
@@ -203,8 +206,8 @@ const boardroomChecks = [
   { name: "adversarial_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
   { name: "anti_toy_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
   { name: "red_team_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
-  { name: "generic_ai_comparison", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails; no standalone comparison source exists" },
-  { name: "market_comparison", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails; no standalone comparison source exists" },
+  { name: "generic_ai_comparison", cls: "contract_stub_missing_source", passes: false, reason: "No ledger entry — contract stub only; no standalone comparison source exists. CANNOT pass." },
+  { name: "market_comparison", cls: "contract_stub_missing_source", passes: false, reason: "No ledger entry — contract stub only; no standalone comparison source exists. CANNOT pass." },
 ];
 
 const brPassed = boardroomChecks.filter(c => c.passes).length;
@@ -221,11 +224,12 @@ for (const c of boardroomChecks) {
   const icon = c.passes ? "✅" : "❌";
   const tag = c.cls === "fully_data_fed" ? "" :
               c.cls === "evidence_dependent_proxy" ? " (proxy)" :
+              c.cls === "contract_stub_missing_source" ? " (stub, no source)" :
               c.cls === "contract_only" ? " (not wired)" : " (missing)";
   console.log(`    ${icon} ${c.name}${tag} — ${c.reason}`);
 }
 console.log(`\n  Note: Proxy checks do NOT count as authority-clearing.`);
-console.log(`  Contract-only and missing checks cannot pass until wired.`);
+console.log(`  Contract-stub-missing-source checks CANNOT pass until a real source exists.`);
 
 // ── Phase 8: Product-wide authority surface ─────────────────────────────────
 console.log("\n=== PHASE 8: PRODUCT-WIDE AUTHORITY SURFACE ===\n");
@@ -283,7 +287,7 @@ console.log(`Default-resolved products: ${missingFromResolver.length}`);
 console.log(`Successfully resolved: ${catalogProductCodes.length}`);
 console.log(`Missing resolver coverage: ${extraInResolver.length}`);
 console.log(`Blocked products: ${blocked.length}`);
-console.log(`Validation checks — fully_data_fed: ${fullyDataFed}, evidence_dependent_proxy: ${evidenceProxy}, contract_only: ${contractOnlyChecks}, missing: ${missingChecks}`);
+console.log(`Validation checks — fully_data_fed: ${fullyDataFed}, evidence_dependent_proxy: ${evidenceProxy}, contract_stub_missing_source: ${contractStubMissingSource}, contract_only: ${contractOnlyChecks}, missing: ${missingChecks}`);
 console.log(`Boardroom UI wired: ${hasResolverCall ? "Yes" : "No"}`);
 console.log(`Checkout agreement: ${errors.filter(e => e.includes("checkout") || e.includes("purchasable")).length === 0 ? "Yes" : "Issues found"}`);
 

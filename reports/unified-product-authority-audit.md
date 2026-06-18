@@ -1,8 +1,8 @@
 # Unified Product Authority System — Audit Report
 
-**Date:** 2026-06-17
-**Branch:** fix/shorts-daily-retention
-**Status:** Existing system is comprehensive. No new files needed.
+**Date:** 2026-06-18
+**Branch:** work/evidence-source-wiring
+**Status:** Evidence-source wiring phase complete. Classifications hardened.
 
 ## Phase 1 — Existing Authority/Governance Pieces Found
 
@@ -170,11 +170,12 @@ The foundation is solid. The work is connecting existing pieces to visible surfa
 | Checkout aligned | ✅ |
 | Public claim denied | ✅ |
 
-### Remaining evidence gaps
-- 3 checks fully data-fed: `evidence_ledger_v2`, `release_firewall`, `no_mock_authority`
-- 3 checks evidence-dependent proxy: `validation_constitution`, `anti_gaming`, `adversarial_validation`
-- 2 checks contract-only: `anti_toy_validation`, `red_team_validation`
-- 2 checks missing: `generic_ai_comparison`, `market_comparison`
+### Evidence gaps (as of 2026-06-18 — evidence-source wiring pass)
+- 3 checks fully_data_fed: `evidence_ledger_v2`, `release_firewall`, `no_mock_authority`
+- 5 checks evidence_dependent_proxy: `validation_constitution`, `anti_gaming`, `adversarial_validation`, `anti_toy_validation`, `red_team_validation`
+- 2 checks contract_stub_missing_source: `generic_ai_comparison`, `market_comparison`
+- 0 checks contract_only
+- 0 checks missing
 
 ## Phase 5 — Recommendations
 

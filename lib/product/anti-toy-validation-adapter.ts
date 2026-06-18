@@ -68,8 +68,8 @@ function checkAntiToyReviewReport(productCode: string): AntiToyValidationResult 
 
     const section = match[0];
 
-    // Extract toy risk score: "Toy risk score: 0/100 — passes"
-    const scoreMatch = section.match(/Toy risk score:\s*(\d+)\/100/i);
+    // Extract toy risk score: "Toy risk score: 0/100 — passes" or "- **Toy risk score:** 0/100 — passes"
+    const scoreMatch = section.match(/(?:Toy risk score|\*\*Toy risk score\*\*):\s*(\d+)\/100/i);
     if (!scoreMatch) {
       return null;
     }
@@ -81,9 +81,9 @@ function checkAntiToyReviewReport(productCode: string): AntiToyValidationResult 
     const toyRiskScore = parseInt(scoreValue, 10);
     const passes = toyRiskScore <= 5; // ANTI_TOY_GOLD_MAXIMUM
 
-    // Extract reasons
+    // Extract reasons (handles both "Reasons:" and "- **Reasons:**" formats)
     const reasons: string[] = [];
-    const reasonsSection = section.match(/Reasons:\n((?:  - .+\n?)*)/);
+    const reasonsSection = section.match(/(?:\*\*)?Reasons(?:\*\*)?:\n((?:  - .+\n?)*)/);
     if (reasonsSection && reasonsSection[1]) {
       const reasonLines = reasonsSection[1]
         .split("\n")

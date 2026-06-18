@@ -67,8 +67,8 @@ function checkRedTeamReviewReport(productCode: string): RedTeamValidationResult 
 
     const section = match[0];
 
-    // Extract survival status: "Survives: yes" or "Survives: NO"
-    const survivesMatch = section.match(/Survives:\s*(yes|no)/i);
+    // Extract survival status: "Survives: yes", "Survives: **yes**", or "Survives: NO"
+    const survivesMatch = section.match(/Survives:\s*\*{0,2}(yes|no)\*{0,2}/i);
     if (!survivesMatch) {
       return null;
     }
