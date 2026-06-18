@@ -190,8 +190,8 @@ const validationChecks = [
   { name: "adversarial_validation", classification: "evidence_dependent_proxy", source: "Derived from derivedEvidence.ledgerEntryExists. lib/decision-spine/adversarial-evidence-shield.ts exists but not called by resolver." },
   { name: "anti_toy_validation", classification: "evidence_dependent_proxy", source: "Wired through lib/product/anti-toy-validation-adapter.ts. Reads from evidence ledger (testsRun.antiToy) or anti-toy review report (reports/product-anti-toy-review.md). Ledger has data for team_assessment only; report has data for 6 products." },
   { name: "red_team_validation", classification: "evidence_dependent_proxy", source: "Wired through lib/product/red-team-validation-adapter.ts. Reads from evidence ledger (testsRun.redTeam) or red-team review report (reports/product-red-team-review.md). Ledger has data for team_assessment only; report has data for 6 products." },
-  { name: "generic_ai_comparison", classification: "contract_stub_missing_source", source: "Contract stub at lib/product/generic-ai-comparison-contract.ts. Evidence ledger has data for team_assessment only (no standalone comparison module). All other products: missing_source / blocked_until_comparison_source_exists. CANNOT pass without real comparison source." },
-  { name: "market_comparison", classification: "contract_stub_missing_source", source: "Contract stub at lib/product/market-comparison-contract.ts. Evidence ledger has data for team_assessment only (no standalone comparison module). All other products: missing_source / blocked_until_market_comparison_source_exists. CANNOT pass without real comparison source." },
+  { name: "generic_ai_comparison", classification: "evidence_dependent_proxy", source: "Phase 8: Wired through lib/product/generic-ai-comparison-engine.ts. Defines 6 comparison dimensions (specificity, actionability, depth, originality, evidence_basis, reuse_value). Must outperform generic AI on 4/6 dimensions to pass. Evidence ledger has data for team_assessment only. All other products: missing_source / blocked_until_comparison_source_exists. CANNOT pass without real comparison evidence." },
+  { name: "market_comparison", classification: "evidence_dependent_proxy", source: "Phase 8: Wired through lib/product/market-comparison-engine.ts. Defines 5 comparator categories (output_depth, specificity, actionability, evidence_transparency, time_to_value). Must differentiate on 3/5 categories to pass. Evidence ledger has data for team_assessment only. All other products: missing_source / blocked_until_market_comparison_source_exists. CANNOT pass without real comparison evidence." },
 ];
 
 for (const check of validationChecks) {
@@ -283,8 +283,8 @@ const boardroomChecks = [
   { name: "adversarial_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
   { name: "anti_toy_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
   { name: "red_team_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
-  { name: "generic_ai_comparison", cls: "contract_stub_missing_source", passes: false, reason: "No ledger entry — contract stub only; no standalone comparison source exists. CANNOT pass." },
-  { name: "market_comparison", cls: "contract_stub_missing_source", passes: false, reason: "No ledger entry — contract stub only; no standalone comparison source exists. CANNOT pass." },
+  { name: "generic_ai_comparison", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — engine exists but no product-specific comparison data. CANNOT pass." },
+  { name: "market_comparison", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — engine exists but no product-specific comparison data. CANNOT pass." },
 ];
 
 const brPassed = boardroomChecks.filter(c => c.passes).length;

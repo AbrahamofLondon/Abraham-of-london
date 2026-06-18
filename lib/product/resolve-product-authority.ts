@@ -35,8 +35,8 @@ import { deriveEvidenceState } from "./derived-evidence-state";
 import type { DerivedEvidenceState } from "./derived-evidence-state";
 import { resolveAntiToyValidation } from "./anti-toy-validation-adapter";
 import { resolveRedTeamValidation } from "./red-team-validation-adapter";
-import { resolveGenericAiComparison } from "./generic-ai-comparison-contract";
-import { resolveMarketComparison } from "./market-comparison-contract";
+import { resolveGenericAiComparison } from "./generic-ai-comparison-engine";
+import { resolveMarketComparison } from "./market-comparison-engine";
 
 /**
  * Read the release governance matrix. Uses try/catch for fs so this module
@@ -402,7 +402,10 @@ export function resolveProductAuthority(
         input.productCode,
         input.validationResults?.redTeamPassed ?? derivedEvidence?.testResults?.redTeamPassed
       ).passed,
-      // generic_ai_comparison: wired through generic-ai-comparison contract stub.
+      // generic_ai_comparison: wired through generic-ai-comparison engine.
+      // Phase 8: Real comparison engine with defined dimensions, pass/fail logic.
+      // Reads from evidence ledger (testsRun.genericAiComparison) or standalone
+      // comparison report (reports/product-generic-ai-comparison.md).
       // Evidence ledger has data for team_assessment only. All other products
       // return missing_source / blocked_until_comparison_source_exists.
       // This check CANNOT pass without real comparison evidence.
@@ -410,7 +413,10 @@ export function resolveProductAuthority(
         input.productCode,
         input.validationResults?.genericAiComparisonPassed ?? derivedEvidence?.testResults?.genericAiComparisonPassed
       ).passed,
-      // market_comparison: wired through market-comparison contract stub.
+      // market_comparison: wired through market-comparison engine.
+      // Phase 8: Real comparison engine with defined categories, pass/fail logic.
+      // Reads from evidence ledger (testsRun.marketComparison) or standalone
+      // comparison report (reports/product-market-comparison.md).
       // Evidence ledger has data for team_assessment only. All other products
       // return missing_source / blocked_until_market_comparison_source_exists.
       // This check CANNOT pass without real comparison evidence.
