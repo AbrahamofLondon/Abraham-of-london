@@ -1,9 +1,14 @@
 import {
   getProductEvidenceLedgerEntry,
   type ProductEvidenceLedgerEntry,
-  type ProductEvidenceLedgerSource,
   type ProductJudgementRunRole,
 } from "@/lib/intelligence/product-evidence-ledger";
+import {
+  evaluateSourceSets,
+  type SourceCaptureRecord,
+  type SourceSet,
+  type SourceSetEvaluation,
+} from "@/lib/intelligence/source-capture-contract";
 
 export type RunEvidenceConfidence = "exploratory" | "bounded" | "confident";
 
@@ -16,27 +21,23 @@ export type RunEvidenceLedgerDecision =
   | "blocked_insufficient_product_evidence"
   | "blocked_authority_not_cleared";
 
-export type RunEvidenceSourceSetStatus = "valid" | "missing" | "empty";
+/**
+ * Re-exported from source-capture-contract for convenience.
+ * Use SourceSet directly; this alias preserves backward compatibility.
+ */
+export type RunEvidenceSourceSetStatus = SourceSetEvaluation["status"];
 
-export interface RunEvidenceSourceRef {
-  sourceId: string;
-  sourceType: ProductEvidenceLedgerSource["sourceType"];
-  location: string;
-  note?: string;
-}
+/**
+ * Re-exported from source-capture-contract for convenience.
+ * Use SourceCaptureRecord directly.
+ */
+export type RunEvidenceSourceRef = SourceCaptureRecord;
 
-export interface RunEvidenceSourceSet {
-  sourceSetId: string;
-  label: string;
-  sources: RunEvidenceSourceRef[];
-}
-
-export interface RunEvidenceSourceSetEvaluation {
-  status: RunEvidenceSourceSetStatus;
-  totalSets: number;
-  totalSources: number;
-  blockers: string[];
-}
+/**
+ * Re-exported from source-capture-contract for convenience.
+ * Use SourceSet directly.
+ */
+export type RunEvidenceSourceSet = SourceSet;
 
 export interface RunEvidenceLedgerInput {
   productId: string;
@@ -106,42 +107,23 @@ function buildInsufficientEvidenceBlockers(product: ProductEvidenceLedgerEntry):
   ]);
 }
 
+/**
+ * Evaluate source sets using the canonical source-capture-contract.
+ *
+ * This is a thin wrapper that delegates to evaluateSourceSets() so that
+ * all source-capture logic lives in one place.  The wrapper preserves the
+ * existing public API signature for backward compatibility.
+ */
 export function evaluateRunEvidenceSourceSets(
   sourceSets: RunEvidenceSourceSet[],
-): RunEvidenceSourceSetEvaluation {
-  if (sourceSets.length === 0) {
-    return {
-      status: "missing",
-      totalSets: 0,
-      totalSources: 0,
-      blockers: ["Run evidence ledger requires at least one named source set."],
-    };
-  }
-
-  const emptySets = sourceSets.filter((sourceSet) => sourceSet.sources.length === 0);
-  if (emptySets.length > 0) {
-    return {
-      status: "empty",
-      totalSets: sourceSets.length,
-      totalSources: 0,
-      blockers: emptySets.map(
-        (sourceSet) => `Source set ${sourceSet.sourceSetId} is empty and cannot support a judgement run.`,
-      ),
-    };
-  }
-
-  return {
-    status: "valid",
-    totalSets: sourceSets.length,
-    totalSources: sourceSets.reduce((total, sourceSet) => total + sourceSet.sources.length, 0),
-    blockers: [],
-  };
+): SourceSetEvaluation {
+  return evaluateSourceSets(sourceSets);
 }
 
 export function createProductEvidenceSourceSet(
   productId: string,
   options: { sourceSetId?: string; label?: string } = {},
-): RunEvidenceSourceSet | null {
+): SourceSet | null {
   const product = getProductEvidenceLedgerEntry(productId);
   if (!product) {
     return null;
@@ -152,8 +134,11 @@ export function createProductEvidenceSourceSet(
     label: options.label ?? `${product.productName} evidence`,
     sources: product.evidenceSources.map((source) => ({
       sourceId: source.sourceId,
-      sourceType: source.sourceType,
+      sourceType: source.sourceType as SourceCaptureRecord["sourceType"],
       location: source.location,
+      capturedAt: new Date().toISOString(),
+      freshness: source.freshness as SourceCaptureRecord["freshness"] ?? "unknown",
+      applicability: source.applicability as SourceCaptureRecord["applicability"] ?? "direct",
       note: source.note,
     })),
   };

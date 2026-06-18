@@ -165,8 +165,14 @@ export function evaluateTeamAssessmentTruthCase(
     caseDefinition.expected.forbidHighConfidence &&
     result.confidence === "HIGH"
   ) {
+    const label =
+      caseDefinition.kind === "stale_evidence"
+        ? "Stale-evidence"
+        : caseDefinition.kind === "adversarial"
+          ? "Adversarial"
+          : "Weak-evidence";
     violationReasons.push(
-      "Weak-evidence case incorrectly claimed HIGH confidence.",
+      `${label} case incorrectly claimed HIGH confidence.`,
     );
   }
 
@@ -209,6 +215,21 @@ export function evaluateTeamAssessmentTruthCase(
     violationReasons.push(
       `Observed judgement score ${observedJudgementScore} exceeds the allowed weak-evidence ceiling of ${caseDefinition.expected.maxObservedJudgementScore}.`,
     );
+  }
+
+  // Stale-evidence-specific checks
+  if (caseDefinition.kind === "stale_evidence") {
+    const allText = `${evidenceText} ${unresolvedText}`;
+    if (!/stale/i.test(allText) && !/outdated/i.test(allText) && !/expired/i.test(allText)) {
+      violationReasons.push(
+        "Stale-evidence case did not flag any evidence as stale, outdated, or expired.",
+      );
+    }
+    if (result.confidence === "HIGH") {
+      violationReasons.push(
+        "Stale-evidence case must not produce HIGH confidence.",
+      );
+    }
   }
 
   return {

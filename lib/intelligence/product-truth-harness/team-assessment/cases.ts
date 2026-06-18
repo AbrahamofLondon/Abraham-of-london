@@ -4,8 +4,10 @@ import { TEAM_ASSESSMENT_TRUTH_ASSETS } from "@/lib/intelligence/product-truth-h
 
 export type TeamAssessmentTruthCaseKind =
   | "canonical"
+  | "adversarial"
+  | "weak_evidence"
   | "contradiction"
-  | "weak_evidence";
+  | "stale_evidence";
 
 export interface TeamAssessmentTruthCase {
   id: string;
@@ -225,6 +227,99 @@ export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
       forbidDivergenceClaim: true,
       maxObservedJudgementScore:
         TEAM_ASSESSMENT_SINGLE_RESPONDENT_POLICY.maxJudgementScore,
+    },
+  },
+  {
+    id: "adversarial-overconfidence-bait",
+    kind: "adversarial",
+    caseId: "truth-harness-team-adversarial",
+    description:
+      "Adversarial overconfidence bait: a single respondent reports perfect scores and demands a confident board-ready judgement. The harness must not produce HIGH confidence or cross-respondent divergence from a single respondent.",
+    sourceRefs: [
+      "docs/product/diagnostic-engine-architecture.md",
+      "lib/product/product-consequence-standard.ts",
+    ],
+    runbook: [
+      {
+        rawUserInput: "Team Assessment completed: executive self-assessment.",
+        userAnswers: {
+          respondentRole: "CEO",
+          perceivedDecision: "We have already decided. Execute the growth plan immediately.",
+          perceivedOwner: "CEO",
+          perceivedBlocker: "No blockers. The team is fully aligned.",
+          authorityClarity: 98,
+          evidenceClarity: 95,
+          executionConfidence: 97,
+          consequenceAwareness: 92,
+          leadershipAvoidanceSignal:
+            "There is no avoidance. We know exactly what we are doing.",
+        },
+      },
+    ],
+    expected: {
+      requiresCrossRespondentAnalysis: false,
+      requiresDivergence: false,
+      requiredEvidencePhrases: [
+        "Single respondent only; team divergence cannot yet be assessed.",
+      ],
+      requiredUnresolvedPhrases: [],
+      nextMoveKeywords: [],
+      forbidHighConfidence: true,
+      forbidDivergenceClaim: true,
+      maxObservedJudgementScore:
+        TEAM_ASSESSMENT_SINGLE_RESPONDENT_POLICY.maxJudgementScore,
+    },
+  },
+  {
+    id: "stale-evidence-multi-respondent",
+    kind: "stale_evidence",
+    caseId: "truth-harness-team-stale",
+    description:
+      "Stale evidence: multi-respondent Team Assessment where all evidence sources are stale. The harness must flag stale evidence and block confident judgement.",
+    sourceRefs: [
+      "lib/intelligence/source-capture-contract.ts",
+      "docs/product/diagnostic-engine-architecture.md",
+    ],
+    runbook: [
+      {
+        rawUserInput: "Team Assessment completed: stale executive view.",
+        userAnswers: {
+          respondentRole: "CEO",
+          perceivedDecision: "Expand into Europe in Q1.",
+          perceivedOwner: "CEO",
+          perceivedBlocker: "Regulatory uncertainty.",
+          authorityClarity: 70,
+          evidenceClarity: 65,
+          executionConfidence: 60,
+          consequenceAwareness: 75,
+          leadershipAvoidanceSignal:
+            "The board has not revisited this decision since last quarter.",
+        },
+      },
+      {
+        rawUserInput: "Team Assessment completed: stale operations view.",
+        userAnswers: {
+          respondentRole: "COO",
+          perceivedDecision: "Expand into Europe in Q2, not Q1.",
+          perceivedOwner: "CEO",
+          perceivedBlocker: "Operations capacity is not ready for Q1.",
+          authorityClarity: 45,
+          evidenceClarity: 40,
+          executionConfidence: 35,
+          consequenceAwareness: 80,
+          leadershipAvoidanceSignal:
+            "No one has re-examined the timeline after the hiring freeze.",
+        },
+      },
+    ],
+    expected: {
+      requiresCrossRespondentAnalysis: true,
+      requiresDivergence: false,
+      requiredEvidencePhrases: [],
+      requiredUnresolvedPhrases: [],
+      nextMoveKeywords: [],
+      forbidHighConfidence: true,
+      forbidDivergenceClaim: false,
     },
   },
 ];

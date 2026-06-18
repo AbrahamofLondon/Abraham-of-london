@@ -4,6 +4,11 @@ import {
   buildRunEvidenceLedgerEntry,
   createProductEvidenceSourceSet,
 } from "@/lib/intelligence/run-evidence-ledger";
+import {
+  evaluateSourceSets,
+  type SourceCaptureRecord,
+  type SourceSet,
+} from "@/lib/intelligence/source-capture-contract";
 
 describe("run evidence ledger", () => {
   it("requires named source sets", () => {
@@ -87,5 +92,93 @@ describe("run evidence ledger", () => {
     expect(entry.maximumPermittedConfidence).toBe("bounded");
     expect(entry.mayRun).toBe(true);
     expect(entry.confidentOriginatorAllowed).toBe(false);
+  });
+});
+
+describe("source capture contract", () => {
+  const makeSource = (
+    overrides: Partial<SourceCaptureRecord> = {},
+  ): SourceCaptureRecord => ({
+    sourceId: "test-source-001",
+    sourceType: "manual_assertion",
+    location: "tests/intelligence/run-evidence-ledger.test.ts",
+    capturedAt: "2026-06-18T00:00:00.000Z",
+    freshness: "fresh",
+    applicability: "direct",
+    ...overrides,
+  });
+
+  const makeSet = (
+    sources: SourceCaptureRecord[],
+    overrides: Partial<SourceSet> = {},
+  ): SourceSet => ({
+    sourceSetId: "test-set",
+    label: "Test Source Set",
+    sources,
+    ...overrides,
+  });
+
+  it("blocks provenance when source set is missing", () => {
+    const evaluation = evaluateSourceSets([]);
+    expect(evaluation.status).toBe("missing");
+    expect(evaluation.blockers.length).toBeGreaterThan(0);
+    expect(evaluation.blockers[0]).toMatch(/requires at least one named source set/i);
+  });
+
+  it("blocks provenance when source set is empty", () => {
+    const evaluation = evaluateSourceSets([makeSet([])]);
+    expect(evaluation.status).toBe("empty");
+    expect(evaluation.blockers.length).toBeGreaterThan(0);
+    expect(evaluation.blockers[0]).toMatch(/empty/i);
+  });
+
+  it("represents insufficient evidence via source applicability", () => {
+    const sources = [makeSource({ applicability: "insufficient" })];
+    const evaluation = evaluateSourceSets([makeSet(sources)]);
+
+    expect(evaluation.allSourcesInsufficient).toBe(true);
+    expect(evaluation.status).toBe("insufficient");
+    expect(evaluation.blockers.length).toBeGreaterThan(0);
+    expect(evaluation.blockers.some((b) => /insufficient/i.test(b))).toBe(true);
+  });
+
+  it("represents stale evidence via source freshness", () => {
+    const sources = [makeSource({ freshness: "stale" })];
+    const evaluation = evaluateSourceSets([makeSet(sources)]);
+
+    expect(evaluation.hasStaleSources).toBe(true);
+    expect(evaluation.status).toBe("stale");
+    expect(evaluation.blockers.length).toBeGreaterThan(0);
+    expect(evaluation.blockers.some((b) => /stale/i.test(b))).toBe(true);
+  });
+
+  it("represents contradiction-triggering evidence via source applicability", () => {
+    const sources = [
+      makeSource({ sourceId: "src-a", applicability: "direct" }),
+      makeSource({
+        sourceId: "src-b",
+        applicability: "contradictory",
+        contradictsSourceIds: ["src-a"],
+      }),
+    ];
+    const evaluation = evaluateSourceSets([makeSet(sources)]);
+
+    expect(evaluation.hasContradictorySources).toBe(true);
+    expect(evaluation.status).toBe("contradictory");
+    expect(evaluation.blockers.length).toBeGreaterThan(0);
+    expect(evaluation.blockers.some((b) => /contradict/i.test(b))).toBe(true);
+  });
+
+  it("passes valid source sets", () => {
+    const sources = [makeSource()];
+    const evaluation = evaluateSourceSets([makeSet(sources)]);
+
+    expect(evaluation.status).toBe("valid");
+    expect(evaluation.blockers).toEqual([]);
+    expect(evaluation.hasStaleSources).toBe(false);
+    expect(evaluation.hasContradictorySources).toBe(false);
+    expect(evaluation.allSourcesInsufficient).toBe(false);
+    expect(evaluation.totalSets).toBe(1);
+    expect(evaluation.totalSources).toBe(1);
   });
 });
