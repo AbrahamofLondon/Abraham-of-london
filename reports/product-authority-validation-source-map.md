@@ -1,17 +1,17 @@
 # Product Authority Validation Source Map
 
-**Date:** 2026-06-17
-**Status:** Evidence wiring phase
+**Date:** 2026-06-18
+**Status:** Evidence-source wiring phase — adapters created for anti_toy, red_team, generic_ai_comparison, market_comparison
 
 ## Validation Check Status Summary
 
 | Check | Status | Source File | Data Fed? |
 |---|---|---|---|
 | evidence_ledger_v2 | data-fed (1 product) | `lib/product/derived-evidence-state.ts` + `reports/product-value-evidence-ledger-v2.json` | ✅ team_assessment only |
-| anti_toy_validation | contract-only | `lib/product/anti-gaming-validation-authority.ts` | ❌ Not wired to resolver |
-| red_team_validation | contract-only | Foundry red-team runs exist | ❌ Not wired to resolver |
-| generic_ai_comparison | missing | No implementation found | ❌ |
-| market_comparison | missing | No implementation found | ❌ |
+| anti_toy_validation | evidence_dependent_proxy | `lib/product/anti-toy-validation-adapter.ts` — reads ledger `testsRun.antiToy` or anti-toy review report | ✅ team_assessment (ledger); 6 products (report) |
+| red_team_validation | evidence_dependent_proxy | `lib/product/red-team-validation-adapter.ts` — reads ledger `testsRun.redTeam` or red-team review report | ✅ team_assessment (ledger); 6 products (report) |
+| generic_ai_comparison | evidence_dependent_proxy | `lib/product/generic-ai-comparison-contract.ts` (contract stub) — reads ledger `testsRun.genericAiComparison` | ✅ team_assessment only |
+| market_comparison | evidence_dependent_proxy | `lib/product/market-comparison-contract.ts` (contract stub) — reads ledger `testsRun.marketComparison` | ✅ team_assessment only |
 | release_firewall | data-fed | `resolveProductAuthority()` reads release governance matrix | ✅ All 43 products in matrix |
 | validation_constitution | data-fed (1 product) | `resolveProductAuthority()` checks `derivedEvidence.ledgerEntryExists` | ✅ team_assessment only |
 | no_mock_authority | data-fed | `resolveProductAuthority()` checks `boundary.mockAuthorityUsed` | ✅ All products |
@@ -39,43 +39,62 @@
 
 ### 2. anti_toy_validation
 
-**Current status:** contract-only
-**Existing files:** `lib/product/anti-gaming-validation-authority.ts`
-**Data source candidate:** Anti-gaming validation authority can be called per-product.
-**Resolver integration required:** Call anti-toy check in resolver and pass result to validationResults.
-**Boardroom implication:** boardroom_brief has no anti-toy result → blocked.
-**All-product implication:** Each product needs anti-toy validation run.
-**Next action:** Wire anti-toy check into resolver's validation results.
+**Current status:** evidence_dependent_proxy
+**Existing files:**
+- `lib/product/anti-toy-validation-adapter.ts` — NEW: Adapter that resolves anti-toy from ledger or report
+- `lib/product/anti-toy-product-test.ts` — Real test module with `runAntiToyTest()` (requires rendered output samples)
+- `lib/product/derived-evidence-state.ts` — Reads ledger `testsRun.antiToy`
+- `reports/product-anti-toy-review.md` — Real review report with scores for 6 products
+- `reports/product-value-evidence-ledger-v2.json` — Ledger entry with antiToy test data for team_assessment
+
+**Data source candidate:** Evidence ledger `testsRun.antiToy` OR anti-toy review report.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` calls `resolveAntiToyValidation()` from the adapter, which checks ledger first, then report.
+**Boardroom implication:** `boardroom_brief` has no ledger entry and no report entry → anti-toy check fails → blocked.
+**All-product implication:** Only `team_assessment` has ledger data. Report has data for: fast_diagnostic, team_assessment, enterprise_assessment, case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied. All other products fail this check.
+**Next action:** Add ledger entries for more products; run anti-toy tests on more products.
 
 ### 3. red_team_validation
 
-**Current status:** contract-only
-**Existing files:** Foundry red-team runs (`lib/research/engines/content-red-team-adapter.ts`)
-**Data source candidate:** Foundry red-team results per product.
-**Resolver integration required:** Query latest red-team run for product code.
-**Boardroom implication:** No red-team run for boardroom_brief → blocked.
-**All-product implication:** Each product needs red-team validation.
-**Next action:** Wire red-team query into resolver.
+**Current status:** evidence_dependent_proxy
+**Existing files:**
+- `lib/product/red-team-validation-adapter.ts` — NEW: Adapter that resolves red-team from ledger or report
+- `lib/product/product-red-team-reviewers.ts` — Real panel module with `runRedTeamPanel()` (requires rendered output samples)
+- `lib/product/red-team-remediation.ts` — Remediation planning for failed reviews
+- `lib/product/derived-evidence-state.ts` — Reads ledger `testsRun.redTeam`
+- `reports/product-red-team-review.md` — Real review report with panel results for 6 products
+- `reports/product-value-evidence-ledger-v2.json` — Ledger entry with redTeam test data for team_assessment
+
+**Data source candidate:** Evidence ledger `testsRun.redTeam` OR red-team review report.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` calls `resolveRedTeamValidation()` from the adapter, which checks ledger first, then report.
+**Boardroom implication:** `boardroom_brief` has no ledger entry and no report entry → red-team check fails → blocked.
+**All-product implication:** Only `team_assessment` has ledger data. Report has data for: fast_diagnostic, team_assessment, enterprise_assessment, case_dossier_tariff_shock, case_dossier_team_alignment, case_dossier_escalation_denied. All other products fail this check.
+**Next action:** Add ledger entries for more products; run red-team panels on more products.
 
 ### 4. generic_ai_comparison
 
-**Current status:** missing
-**Existing files:** None
-**Data source candidate:** Would need AI comparison framework.
-**Resolver integration required:** Would need new implementation.
-**Boardroom implication:** Unknown/blocked until implemented.
-**All-product implication:** All products blocked on this check.
-**Next action:** Keep as missing/unknown. Do not fabricate.
+**Current status:** evidence_dependent_proxy (contract stub)
+**Existing files:**
+- `lib/product/generic-ai-comparison-contract.ts` — NEW: Contract stub documenting the gap
+- `reports/product-value-evidence-ledger-v2.json` — Ledger entry with genericAiComparison test data for team_assessment (passed: true, score: 8.9)
+
+**Data source candidate:** Evidence ledger `testsRun.genericAiComparison` — only team_assessment has data.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` calls `resolveGenericAiComparison()` from the contract stub.
+**Boardroom implication:** `boardroom_brief` has no ledger entry → generic_ai_comparison check fails → blocked.
+**All-product implication:** Only `team_assessment` has data. All other products return `missing_source` / `blocked_until_comparison_source_exists`.
+**Next action:** Do not fabricate. A real implementation requires running the product against a generic AI (e.g., ChatGPT) and comparing outputs.
 
 ### 5. market_comparison
 
-**Current status:** missing
-**Existing files:** None
-**Data source candidate:** Would need market comparison framework.
-**Resolver integration required:** Would need new implementation.
-**Boardroom implication:** Unknown/blocked until implemented.
-**All-product implication:** All products blocked on this check.
-**Next action:** Keep as missing/unknown. Do not fabricate.
+**Current status:** evidence_dependent_proxy (contract stub)
+**Existing files:**
+- `lib/product/market-comparison-contract.ts` — NEW: Contract stub documenting the gap
+- `reports/product-value-evidence-ledger-v2.json` — Ledger entry with marketComparison test data for team_assessment (passed: true, score: 8.3)
+
+**Data source candidate:** Evidence ledger `testsRun.marketComparison` — only team_assessment has data.
+**Resolver integration required:** ✅ Done — `resolveProductAuthority()` calls `resolveMarketComparison()` from the contract stub.
+**Boardroom implication:** `boardroom_brief` has no ledger entry → market_comparison check fails → blocked.
+**All-product implication:** Only `team_assessment` has data. All other products return `missing_source` / `blocked_until_market_comparison_source_exists`.
+**Next action:** Do not fabricate. A real implementation requires comparing the product against market alternatives.
 
 ### 6. release_firewall
 
@@ -139,8 +158,17 @@
 5. **anti_gaming** — Derived from `derivedEvidence.ledgerEntryExists` ✅
 6. **adversarial_validation** — Derived from `derivedEvidence.ledgerEntryExists` ✅
 
-### Remaining for future passes
-7. **anti_toy_validation** — Contract-only. `lib/product/anti-gaming-validation-authority.ts` exists but not wired to resolver.
-8. **red_team_validation** — Contract-only. Foundry red-team runs exist but not wired to resolver.
-9. **generic_ai_comparison** — Missing. No implementation exists.
-10. **market_comparison** — Missing. No implementation exists.
+### 🟡 Evidence-dependent proxy (4 checks — newly wired in this pass)
+7. **anti_toy_validation** — Wired through `lib/product/anti-toy-validation-adapter.ts`. Reads from ledger `testsRun.antiToy` or anti-toy review report. Only `team_assessment` has ledger data; 6 products have report data.
+8. **red_team_validation** — Wired through `lib/product/red-team-validation-adapter.ts`. Reads from ledger `testsRun.redTeam` or red-team review report. Only `team_assessment` has ledger data; 6 products have report data.
+9. **generic_ai_comparison** — Wired through `lib/product/generic-ai-comparison-contract.ts` (contract stub). Evidence ledger has data for `team_assessment` only. All other products: `missing_source` / `blocked_until_comparison_source_exists`. **Not faked.**
+10. **market_comparison** — Wired through `lib/product/market-comparison-contract.ts` (contract stub). Evidence ledger has data for `team_assessment` only. All other products: `missing_source` / `blocked_until_market_comparison_source_exists`. **Not faked.**
+
+## New Files Created in This Pass
+
+| File | Purpose |
+|---|---|
+| `lib/product/anti-toy-validation-adapter.ts` | Resolves anti-toy validation from evidence ledger or anti-toy review report |
+| `lib/product/red-team-validation-adapter.ts` | Resolves red-team validation from evidence ledger or red-team review report |
+| `lib/product/generic-ai-comparison-contract.ts` | Contract stub for generic AI comparison — documents gap, prevents fake passes |
+| `lib/product/market-comparison-contract.ts` | Contract stub for market comparison — documents gap, prevents fake passes |

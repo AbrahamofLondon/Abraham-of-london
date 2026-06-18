@@ -62,6 +62,16 @@ export type DerivedEvidenceState = {
     scenarioSet?: string;
     validationRun?: string;
   };
+  /** Individual test results from the evidence ledger, if available. */
+  testResults?: {
+    antiToyPassed?: boolean;
+    redTeamPassed?: boolean;
+    genericAiComparisonPassed?: boolean;
+    marketComparisonPassed?: boolean;
+    antiGamingPassed?: boolean;
+    adversarialValidationPassed?: boolean;
+    constitutionPassed?: boolean;
+  };
 };
 
 /**
@@ -205,6 +215,21 @@ export function deriveEvidenceState(productCode: string): DerivedEvidenceState {
   const canSupportAuthorityReview =
     status === "trusted_artifact_supported" || status === "pending_contract_mismatch";
 
+  // Extract individual test results from the evidence ledger, if available.
+  // The ledger stores testsRun as a Record<string, { passed?: boolean }>.
+  const testsRun = record?.testsRun;
+  const testResults = testsRun
+    ? {
+        antiToyPassed: getTestPassed(testsRun, "antiToy"),
+        redTeamPassed: getTestPassed(testsRun, "redTeam"),
+        genericAiComparisonPassed: getTestPassed(testsRun, "genericAiComparison"),
+        marketComparisonPassed: getTestPassed(testsRun, "marketComparison"),
+        antiGamingPassed: getTestPassed(testsRun, "antiGaming"),
+        adversarialValidationPassed: getTestPassed(testsRun, "adversarialValidation"),
+        constitutionPassed: getTestPassed(testsRun, "validationConstitution"),
+      }
+    : undefined;
+
   return {
     productCode,
     ledgerEntryExists: Boolean(record),
@@ -219,7 +244,17 @@ export function deriveEvidenceState(productCode: string): DerivedEvidenceState {
       scenarioSet: verification.scenarioPath,
       validationRun: verification.validationPath ?? record?.validationRunHash ?? record?.ledgerEntryHash,
     },
+    testResults,
   };
+}
+
+/** Extract a test's passed status from the ledger's testsRun record. */
+function getTestPassed(
+  testsRun: Record<string, { passed?: boolean }>,
+  testKey: string
+): boolean | undefined {
+  const test = testsRun[testKey];
+  return test ? test.passed : undefined;
 }
 
 function mapVerifierStatus(status: string | undefined): DerivedEvidenceState["ledgerStatus"] {

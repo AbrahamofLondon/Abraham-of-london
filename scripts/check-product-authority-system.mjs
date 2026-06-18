@@ -127,10 +127,10 @@ const validationChecks = [
   { name: "validation_constitution", classification: "evidence_dependent_proxy", source: "Derived from derivedEvidence.ledgerEntryExists. No constitution-specific source queried. Ledger has data for team_assessment only." },
   { name: "anti_gaming", classification: "evidence_dependent_proxy", source: "Derived from derivedEvidence.ledgerEntryExists. lib/product/anti-gaming-validation-authority.ts exists but not called by resolver." },
   { name: "adversarial_validation", classification: "evidence_dependent_proxy", source: "Derived from derivedEvidence.ledgerEntryExists. lib/decision-spine/adversarial-evidence-shield.ts exists but not called by resolver." },
-  { name: "anti_toy_validation", classification: "contract_only", source: "lib/product/anti-gaming-validation-authority.ts has validateProductUpgradeNotGamed() but not wired to resolver." },
-  { name: "red_team_validation", classification: "contract_only", source: "Foundry red-team runs exist (lib/research/engines/content-red-team-adapter.ts) but not wired to resolver." },
-  { name: "generic_ai_comparison", classification: "missing", source: "No implementation found anywhere in the codebase." },
-  { name: "market_comparison", classification: "missing", source: "No implementation found anywhere in the codebase." },
+  { name: "anti_toy_validation", classification: "evidence_dependent_proxy", source: "Wired through lib/product/anti-toy-validation-adapter.ts. Reads from evidence ledger (testsRun.antiToy) or anti-toy review report (reports/product-anti-toy-review.md). Ledger has data for team_assessment only; report has data for 6 products." },
+  { name: "red_team_validation", classification: "evidence_dependent_proxy", source: "Wired through lib/product/red-team-validation-adapter.ts. Reads from evidence ledger (testsRun.redTeam) or red-team review report (reports/product-red-team-review.md). Ledger has data for team_assessment only; report has data for 6 products." },
+  { name: "generic_ai_comparison", classification: "evidence_dependent_proxy", source: "Wired through lib/product/generic-ai-comparison-contract.ts (contract stub). Evidence ledger has data for team_assessment only. All other products: missing_source / blocked_until_comparison_source_exists." },
+  { name: "market_comparison", classification: "evidence_dependent_proxy", source: "Wired through lib/product/market-comparison-contract.ts (contract stub). Evidence ledger has data for team_assessment only. All other products: missing_source / blocked_until_market_comparison_source_exists." },
 ];
 
 for (const check of validationChecks) {
@@ -201,10 +201,10 @@ const boardroomChecks = [
   { name: "validation_constitution", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
   { name: "anti_gaming", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
   { name: "adversarial_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
-  { name: "anti_toy_validation", cls: "contract_only", passes: false, reason: "Not wired to resolver — cannot pass" },
-  { name: "red_team_validation", cls: "contract_only", passes: false, reason: "Not wired to resolver — cannot pass" },
-  { name: "generic_ai_comparison", cls: "missing", passes: false, reason: "No implementation exists — cannot pass" },
-  { name: "market_comparison", cls: "missing", passes: false, reason: "No implementation exists — cannot pass" },
+  { name: "anti_toy_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
+  { name: "red_team_validation", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails" },
+  { name: "generic_ai_comparison", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails; no standalone comparison source exists" },
+  { name: "market_comparison", cls: "evidence_dependent_proxy", passes: false, reason: "No ledger entry — proxy check fails; no standalone comparison source exists" },
 ];
 
 const brPassed = boardroomChecks.filter(c => c.passes).length;

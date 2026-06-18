@@ -33,6 +33,10 @@ import {
 } from "./authority-grant-firewall";
 import { deriveEvidenceState } from "./derived-evidence-state";
 import type { DerivedEvidenceState } from "./derived-evidence-state";
+import { resolveAntiToyValidation } from "./anti-toy-validation-adapter";
+import { resolveRedTeamValidation } from "./red-team-validation-adapter";
+import { resolveGenericAiComparison } from "./generic-ai-comparison-contract";
+import { resolveMarketComparison } from "./market-comparison-contract";
 
 /**
  * Read the release governance matrix. Uses try/catch for fs so this module
@@ -383,13 +387,37 @@ export function resolveProductAuthority(
       evidenceLedgerHash: derivedEvidence?.artifactRefs.ledger ?? input.v2EvidencePath,
       scenarioSetHash: derivedEvidence?.artifactRefs.scenarioSet,
       outputHash: derivedEvidence?.artifactRefs.renderedOutput,
-      renderedOutputCaptured: input.validationResults?.antiToyPassed ?? false,
-      antiToyPassed: input.validationResults?.antiToyPassed ?? false,
-      redTeamPassed: input.validationResults?.redTeamPassed ?? false,
-      genericAiComparisonPassed:
-        input.validationResults?.genericAiComparisonPassed ?? false,
-      marketComparisonPassed:
-        input.validationResults?.marketComparisonPassed ?? false,
+      renderedOutputCaptured: derivedEvidence?.testResults?.antiToyPassed ?? input.validationResults?.antiToyPassed ?? false,
+      // anti_toy_validation: wired through anti-toy validation adapter.
+      // Reads from evidence ledger (testsRun.antiToy) or anti-toy review report.
+      // Without a ledger entry or report entry, this check cannot pass.
+      antiToyPassed: resolveAntiToyValidation(
+        input.productCode,
+        input.validationResults?.antiToyPassed ?? derivedEvidence?.testResults?.antiToyPassed
+      ).passed,
+      // red_team_validation: wired through red-team validation adapter.
+      // Reads from evidence ledger (testsRun.redTeam) or red-team review report.
+      // Without a ledger entry or report entry, this check cannot pass.
+      redTeamPassed: resolveRedTeamValidation(
+        input.productCode,
+        input.validationResults?.redTeamPassed ?? derivedEvidence?.testResults?.redTeamPassed
+      ).passed,
+      // generic_ai_comparison: wired through generic-ai-comparison contract stub.
+      // Evidence ledger has data for team_assessment only. All other products
+      // return missing_source / blocked_until_comparison_source_exists.
+      // This check CANNOT pass without real comparison evidence.
+      genericAiComparisonPassed: resolveGenericAiComparison(
+        input.productCode,
+        input.validationResults?.genericAiComparisonPassed ?? derivedEvidence?.testResults?.genericAiComparisonPassed
+      ).passed,
+      // market_comparison: wired through market-comparison contract stub.
+      // Evidence ledger has data for team_assessment only. All other products
+      // return missing_source / blocked_until_market_comparison_source_exists.
+      // This check CANNOT pass without real comparison evidence.
+      marketComparisonPassed: resolveMarketComparison(
+        input.productCode,
+        input.validationResults?.marketComparisonPassed ?? derivedEvidence?.testResults?.marketComparisonPassed
+      ).passed,
       // release_firewall is derived from the release governance matrix:
       // if the product's releaseLane is not blocked and releaseMode allows
       // commercial release, the firewall is passed.
