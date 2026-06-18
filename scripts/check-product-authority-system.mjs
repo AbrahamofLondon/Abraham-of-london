@@ -27,19 +27,56 @@ const warnings = [];
 const RESOLVER_PATH = PATH.join(ROOT, "lib/product/resolve-product-authority.ts");
 const resolverSrc = FS.readFileSync(RESOLVER_PATH, "utf8");
 
-// Extract product codes from PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS
+// Extract product codes — handles both inline and .map() array patterns
 const configProductCodes = [];
 const codeRegex = /productCode:\s*"([^"]+)"/g;
 let m;
 while ((m = codeRegex.exec(resolverSrc)) !== null) {
-  configProductCodes.push(m[1]);
+  if (m[1] !== "contract.productCode" && m[1] !== "input.productCode") {
+    configProductCodes.push(m[1]);
+  }
 }
 
-// Extract policy states
+// Also extract codes from string arrays used in .map() patterns
+const arrayCodeRegex = /"([a-z_][a-z0-9_]*)"/g;
+const arraySectionStart = resolverSrc.indexOf("PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS");
+const arraySection = resolverSrc.substring(arraySectionStart);
+const mapArrayRegex = /\.\.\.\[([\s\S]*?)\]\s*\.map/g;
+let mapMatch;
+while ((mapMatch = mapArrayRegex.exec(arraySection)) !== null) {
+  const arrayContent = mapMatch[1];
+  let itemMatch;
+  while ((itemMatch = arrayCodeRegex.exec(arrayContent)) !== null) {
+    if (!configProductCodes.includes(itemMatch[1])) {
+      configProductCodes.push(itemMatch[1]);
+    }
+  }
+}
+
+// Extract policy states — handles both inline and .map() patterns
 const policyStates = {};
-const blockRegex = /productCode:\s*"([^"]+)",\s*policyState:\s*"([^"]+)"/g;
-while ((m = blockRegex.exec(resolverSrc)) !== null) {
+
+// 1. Inline patterns: productCode: "x", policyState: "y"
+const inlineRegex = /productCode:\s*"([^"]+)",\s*policyState:\s*"([^"]+)"/g;
+while ((m = inlineRegex.exec(resolverSrc)) !== null) {
   policyStates[m[1]] = m[2];
+}
+
+// 2. .map() patterns: .map((productCode) => ({ ... policyState: "y" ... }))
+// Find all ...[...].map((...) => ({...})) patterns and extract policyState + array contents
+const mapBlockRegex = /\.\.\.\[([^\]]+)\]\s*\.map\(\((\w+)\)\s*=>\s*\(\{([\s\S]*?)\}\)\)/g;
+let mapBlockMatch;
+while ((mapBlockMatch = mapBlockRegex.exec(resolverSrc)) !== null) {
+  const arrayContent = mapBlockMatch[1];
+  const mapBody = mapBlockMatch[3];
+  const psMatch = mapBody.match(/policyState:\s*"([^"]+)"/);
+  if (psMatch) {
+    const state = psMatch[1];
+    let itemMatch;
+    while ((itemMatch = arrayCodeRegex.exec(arrayContent)) !== null) {
+      policyStates[itemMatch[1]] = state;
+    }
+  }
 }
 
 // ── Load commercial catalog ──────────────────────────────────────────────────
@@ -58,8 +95,7 @@ while ((m = catalogRegex.exec(catalogSrc)) !== null) {
 // ── Phase 1: Resolver coverage — unambiguous ────────────────────────────────
 console.log("\n=== PHASE 1: RESOLVER COVERAGE ===\n");
 
-// Deduplicate — the resolver has the same productCode in multiple places
-// (e.g., in getDefaultProductConfigurations and in PUBLIC_NON_EXEMPT...)
+// Deduplicate
 const uniqueConfigCodes = [...new Set(configProductCodes.filter(c => c !== "contract.productCode" && c !== "input.productCode"))];
 const allConfigCodes = new Set(uniqueConfigCodes);
 const allCatalogCodes = new Set(catalogProductCodes);
@@ -84,33 +120,57 @@ if (catalogProductCodes.length !== 43) {
   errors.push(`Expected 43 products in catalog, found ${catalogProductCodes.length}`);
 }
 
+// Fail if any product has no resolver coverage
+if (missingFromResolver.length > 0) {
+  errors.push(`${missingFromResolver.length} product(s) missing from resolver config: ${missingFromResolver.join(", ")}`);
+}
+
 // Fail if resolved count doesn't match catalog count
-// (All products are resolved — explicit entries + default path = 43)
-const resolvedCount = uniqueConfigCodes.length + missingFromResolver.length;
+const resolvedCount = uniqueConfigCodes.length;
 if (resolvedCount !== catalogProductCodes.length) {
   errors.push(`Resolved products (${resolvedCount}) does not match catalog products (${catalogProductCodes.length})`);
 } else {
-  console.log(`\n✅ All ${catalogProductCodes.length} products are resolved (${uniqueConfigCodes.length} explicit + ${missingFromResolver.length} default path)`);
+  console.log(`\n✅ All ${catalogProductCodes.length} products have explicit resolver entries`);
 }
 
 console.log(`\nExplicit entries: ${uniqueConfigCodes.sort().join(", ")}`);
 
-// ── Phase 2: Blocked products are non-purchasable ────────────────────────────
+// ── Phase 2: Authority state distribution ────────────────────────────────────
 console.log("\n=== PHASE 2: AUTHORITY STATE DISTRIBUTION ===\n");
 
 const blocked = Object.entries(policyStates)
   .filter(([, state]) => state.startsWith("blocked"))
   .map(([code]) => code);
 
-const releaseReady = []; // Would need release governance matrix for authoritative list
-const evidencePath = catalogProductCodes.filter(
-  (c) => !blocked.includes(c) && !releaseReady.includes(c)
-);
-
 console.log(`Blocked products: ${blocked.length}`);
 blocked.forEach((c) => console.log(`  ❌ ${c} — ${policyStates[c] || "unknown"}`));
 
-console.log(`\nProducts with resolver configs: ${configProductCodes.length}`);
+console.log(`\nProducts with resolver configs: ${uniqueConfigCodes.length}`);
+
+// Extract priorV1Evidence products (these have authority derived from v1 evidence, not policy state)
+// Match productCode followed by priorV1Evidence within a short span (single config block)
+const priorV1Products = new Set();
+// Find all occurrences of "priorV1Evidence:" and look backwards for the LAST productCode
+let priorIdx = 0;
+while ((priorIdx = resolverSrc.indexOf("priorV1Evidence:", priorIdx + 1)) !== -1) {
+  const before = resolverSrc.substring(Math.max(0, priorIdx - 200), priorIdx);
+  // Find ALL productCode matches and take the LAST one (closest to priorV1Evidence)
+  const pcRegex = /productCode:\s*"([^"]+)"/g;
+  let pcMatch;
+  let lastMatch = null;
+  while ((pcMatch = pcRegex.exec(before)) !== null) {
+    lastMatch = pcMatch;
+  }
+  if (lastMatch) {
+    priorV1Products.add(lastMatch[1]);
+  }
+}
+
+// Verify all catalog products have either a policy state OR priorV1Evidence
+const productsWithoutPolicy = catalogProductCodes.filter((c) => !policyStates[c] && !priorV1Products.has(c));
+if (productsWithoutPolicy.length > 0) {
+  errors.push(`${productsWithoutPolicy.length} product(s) have no policy state or priorV1Evidence: ${productsWithoutPolicy.join(", ")}`);
+}
 
 // ── Phase 3: Validation checks status ────────────────────────────────────────
 console.log("\n=== PHASE 3: VALIDATION CHECKS STATUS ===\n");
@@ -166,6 +226,23 @@ if (executiveBlocked) {
   errors.push("executive_reporting is not blocked but should be");
 }
 
+// Verify all 14 instruments are blocked
+const instrumentBlocked = [
+  "decision_exposure_instrument", "mandate_clarity_framework",
+  "intervention_path_selector", "escalation_readiness_scorecard",
+  "structural_failure_diagnostic_canvas", "execution_risk_index",
+  "team_alignment_gap_map", "governance_drift_detector",
+  "strategic_priority_stack_builder", "board_brief_builder",
+  "execution_integrity_protocol", "alignment_audit_playbook",
+  "drift_detection_framework", "operator_decision_pack",
+].every(c => blocked.includes(c));
+
+if (instrumentBlocked) {
+  console.log(`  ✅ All 14 public decision instruments are blocked`);
+} else {
+  errors.push("Not all 14 public decision instruments are blocked");
+}
+
 // ── Phase 5: Public claim permission ─────────────────────────────────────────
 console.log("\n=== PHASE 5: PUBLIC CLAIM PERMISSION ===\n");
 
@@ -194,7 +271,7 @@ if (!hasResolverCall) {
   errors.push("Boardroom page does not call resolveProductAuthority");
 }
 
-// ── Phase 7: Boardroom validation semantics ─────────────────────────────────
+// ── Phase 7: Boardroom Brief validation semantics ────────────────────────────
 console.log("\n=== PHASE 7: BOARDROOM BRIEF VALIDATION SEMANTICS ===\n");
 
 const boardroomChecks = [
@@ -283,7 +360,7 @@ console.log("========================================\n");
 
 console.log(`Products in catalog: ${catalogProductCodes.length}`);
 console.log(`Explicit authority entries: ${uniqueConfigCodes.length}`);
-console.log(`Default-resolved products: ${missingFromResolver.length}`);
+console.log(`Products without policy state: ${productsWithoutPolicy.length}`);
 console.log(`Successfully resolved: ${catalogProductCodes.length}`);
 console.log(`Missing resolver coverage: ${extraInResolver.length}`);
 console.log(`Blocked products: ${blocked.length}`);

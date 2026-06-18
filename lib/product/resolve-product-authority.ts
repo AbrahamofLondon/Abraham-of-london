@@ -551,11 +551,31 @@ export function getDefaultProductConfigurations(): ProductAuthorityResolverInput
 }
 
 export const PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS: ProductAuthorityResolverInput[] = [
+  // ── Blocked until v2 revalidation (have prior v1 or require full revalidation) ──
   {
     productCode: "boardroom_brief",
     policyState: "blocked_until_v2_revalidation",
     policyReason: "Boardroom/report product requires v2 route, fulfilment, report, admin, and evidence validation before authority can be granted",
   },
+  {
+    productCode: "executive_reporting",
+    policyState: "blocked_until_v2_revalidation",
+    policyReason: "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted",
+  },
+  {
+    productCode: "boardroom_mode",
+    policyState: "blocked_until_v2_revalidation",
+    policyReason: "Boardroom mode requires v2 evidence-gated route proof before authority can be restored",
+  },
+
+  // ── Blocked until claim evidenced (no evidence at all) ──
+  {
+    productCode: "strategy_room",
+    policyState: "blocked_until_claim_evidenced",
+    policyReason: "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted",
+  },
+
+  // ── 14 Public decision instruments — blocked until claim evidenced ──
   ...[
     "decision_exposure_instrument",
     "mandate_clarity_framework",
@@ -576,19 +596,79 @@ export const PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS: ProductAuthorityResolv
     policyState: "blocked_until_claim_evidenced" as const,
     policyReason: "Public decision instrument or methodology product requires product-specific evidence ledger and validation before authority can be granted",
   })),
+
+  // ── Operator packs — blocked until claim evidenced ──
+  ...[
+    "operator_essentials_pack",
+    "command_pack",
+    "governance_suite",
+  ].map((productCode) => ({
+    productCode,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Operator/governance product requires product-specific evidence ledger and validation before authority can be granted",
+  })),
+
+  // ── Case dossiers — blocked until claim evidenced (have anti-toy/red-team report data but no ledger) ──
+  ...[
+    "case_dossier_tariff_shock",
+    "case_dossier_team_alignment",
+    "case_dossier_escalation_denied",
+  ].map((productCode) => ({
+    productCode,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Evidence dossier product requires evidence ledger entry and full validation before authority can be granted",
+  })),
+
+  // ── Diagnostic reports — blocked until claim evidenced ──
+  ...[
+    "diagnostic_report_basic",
+    "diagnostic_report_pro",
+    "executive_reporting_priority",
+  ].map((productCode) => ({
+    productCode,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Diagnostic report product requires product-specific evidence ledger and validation before authority can be granted",
+  })),
+
+  // ── Reporting products — evidence-limited commercial (can be sold manually, not authority-cleared) ──
+  ...[
+    "reporting_monthly",
+    "reporting_custom",
+    "gmi_quarterly",
+  ].map((productCode) => ({
+    productCode,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Reporting product requires product-specific evidence ledger and validation before authority can be granted. Currently available via manual fulfilment only.",
+  })),
+
+  // ── Strategy/extended products ──
   {
-    productCode: "executive_reporting",
-    policyState: "blocked_until_v2_revalidation",
-    policyReason: "Executive/report product requires v2 route, report, admin, and generation validation before authority can be granted",
-  },
-  {
-    productCode: "strategy_room",
+    productCode: "strategy_room_extended",
     policyState: "blocked_until_claim_evidenced",
-    policyReason: "Scheduled session product requires product-specific evidence and fulfilment proof before authority can be granted",
+    policyReason: "Extended strategy product requires product-specific evidence and fulfilment proof before authority can be granted",
   },
-  {
-    productCode: "boardroom_mode",
-    policyState: "blocked_until_v2_revalidation",
-    policyReason: "Boardroom mode requires v2 evidence-gated route proof before authority can be restored",
-  },
+
+  // ── Membership/subscription products ──
+  ...[
+    "inner_circle",
+    "professional",
+    "professional_annual",
+    "enterprise",
+    "additional_collaborator",
+  ].map((productCode) => ({
+    productCode,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Membership/subscription product requires product-specific evidence ledger and validation before authority can be granted",
+  })),
+
+  // ── Retainer products ──
+  ...[
+    "retainer_core",
+    "retainer_operational",
+    "retainer_institutional",
+  ].map((productCode) => ({
+    productCode,
+    policyState: "blocked_until_claim_evidenced" as const,
+    policyReason: "Retainer product requires product-specific evidence ledger and validation before authority can be granted",
+  })),
 ];
