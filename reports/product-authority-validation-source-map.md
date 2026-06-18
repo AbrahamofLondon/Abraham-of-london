@@ -174,3 +174,46 @@
 | `lib/product/red-team-validation-adapter.ts` | Resolves red-team validation from evidence ledger or red-team review report |
 | `lib/product/generic-ai-comparison-contract.ts` | Contract stub for generic AI comparison — documents gap, prevents fake passes |
 | `lib/product/market-comparison-contract.ts` | Contract stub for market comparison — documents gap, prevents fake passes |
+| `reports/boardroom-fulfilment-lifecycle.md` | Documents fulfilment vs authority separation for Boardroom Brief |
+| `reports/v2-revalidation-path.md` | Documents the path from blocked → evidence review → authority eligible |
+
+---
+
+## Phase 8 Carry-Forward Debt Ledger
+
+The following debts remain after this closure pass and must be addressed before Phase 8 can begin:
+
+### 🔴 Critical (blocks authority for all products)
+
+| # | Debt | Impact | Owner |
+|---|---|---|---|
+| 1 | **generic_ai_comparison** — No standalone comparison module exists. Contract stub returns `missing_source`. Requires building a framework that runs products against generic AI alternatives (ChatGPT, Claude, Gemini) and compares outputs. | Blocks all 43 products from passing this check. | Unassigned |
+| 2 | **market_comparison** — No standalone comparison module exists. Contract stub returns `missing_source`. Requires building a framework that evaluates products against market alternatives. | Blocks all 43 products from passing this check. | Unassigned |
+
+### 🟡 High (blocks specific products)
+
+| # | Debt | Impact | Owner |
+|---|---|---|---|
+| 3 | **Boardroom Brief v2 revalidation not started** — No evidence ledger entry exists. No frozen scenarios. No rendered output captured. | Boardroom remains `blocked_until_v2_revalidation`. Cannot progress to authority review. | Unassigned |
+| 4 | **Executive Reporting v2 revalidation not started** — Same as Boardroom. | Executive reporting remains `blocked_until_v2_revalidation`. | Unassigned |
+| 5 | **Boardroom Mode v2 revalidation not started** — Same as Boardroom. | Boardroom mode remains `blocked_until_v2_revalidation`. | Unassigned |
+| 6 | **Only 3 products have anti-toy evidence** — fast_diagnostic, team_assessment, enterprise_assessment have report data. 37 products have no anti-toy evidence. | 37 products cannot pass anti_toy_validation. | Unassigned |
+| 7 | **Only 3 products have red-team evidence** — Same 3 products. 37 products have no red-team evidence. | 37 products cannot pass red_team_validation. | Unassigned |
+
+### 🟢 Medium (improves system completeness)
+
+| # | Debt | Impact | Owner |
+|---|---|---|---|
+| 8 | **14 public instruments blocked_until_claim_evidenced** — No evidence ledger entries exist for any decision instrument. | Instruments cannot be sold or publicly claimed as validated. | Unassigned |
+| 9 | **Anti-gaming adapter not directly called** — `lib/product/anti-gaming-validation-authority.ts` exists but resolver uses ledger proxy. | Anti-gaming check is evidence_dependent_proxy, not fully_data_fed. | Unassigned |
+| 10 | **Adversarial validation adapter not directly called** — `lib/decision-spine/adversarial-evidence-shield.ts` exists but resolver uses ledger proxy. | Adversarial check is evidence_dependent_proxy, not fully_data_fed. | Unassigned |
+| 11 | **Validation constitution not independently verified** — Check depends on `ledgerEntryExists` rather than a constitution-specific source. | Constitution check is evidence_dependent_proxy, not fully_data_fed. | Unassigned |
+
+### Summary
+
+| Severity | Count | Description |
+|---|---|---|
+| 🔴 Critical | 2 | No comparison sources exist (generic AI, market) |
+| 🟡 High | 5 | v2 revalidation not started for key products; evidence gaps for 37 products |
+| 🟢 Medium | 4 | Proxy checks could be upgraded to fully_data_fed with direct adapter wiring |
+| **Total** | **11** | Debts to resolve before Phase 8 |

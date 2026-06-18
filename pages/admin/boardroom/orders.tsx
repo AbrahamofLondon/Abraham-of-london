@@ -196,12 +196,24 @@ function BoardroomAuthoritySection() {
 
   return (
     <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
+      {/* Authority State — derived from validation evidence, not fulfilment */}
+      <div style={{ marginBottom: '0.75rem', fontSize: 10, color: 'rgba(242,241,238,0.5)', fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+        ═══ PRODUCT AUTHORITY STATE (separate from fulfilment) ═══
+      </div>
       <ProductAuthorityPanel contract={contract} expanded={true} />
       <div style={{ marginTop: '1rem' }}>
         <ProductAuthorityNotice contract={contract} />
       </div>
       <div style={{ marginTop: '1rem' }}>
         <ProductEvidenceStatus contract={contract} />
+      </div>
+      {/* Separation notice */}
+      <div style={{ marginTop: '1rem', padding: '0.75rem', border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.06)', borderRadius: '0.25rem' }}>
+        <p style={{ margin: 0, fontSize: 11, color: '#f87171', fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
+          ⚠ Authority state is separate from fulfilment state. A delivered order does NOT imply
+          authority clearance. Boardroom Brief requires v2 revalidation with full evidence chain
+          before authority can be granted. See the validation checks below for current status.
+        </p>
       </div>
     </div>
   );
