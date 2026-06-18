@@ -9,7 +9,7 @@
  *   - Legacy status mapping
  *   - Audit event recording
  */
-import { describe, it, expect } from "@jest/globals";
+import { describe, expect, it } from "vitest";
 import {
   isValidTransition,
   assertValidTransition,

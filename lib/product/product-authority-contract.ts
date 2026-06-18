@@ -13,6 +13,11 @@
  * Authority sources must be deterministic and auditable.
  */
 
+import type {
+  AuthorityClearanceState,
+  ProductAuthorityBackboneRecord,
+} from "./product-qualification-backbone";
+
 export type ProductAuthorityState =
   | "externally_proven_gold_product"
   | "diagnostic_product"
@@ -28,8 +33,11 @@ export type ProductAuthorityState =
 
 export type EvidenceSourceType =
   | "generated_evidence"
+  | "structured_external_evidence"
   | "legacy_evidence"
   | "reported_summary_only"
+  | "explicit_missing_evidence"
+  | "explicit_blocked_evidence"
   | "manual_assertion"
   | "registry_label"
   | "surface_claim";
@@ -96,6 +104,8 @@ export interface ProductAuthorityContract {
   contractVersion: "v2";
   lastValidatedAt?: string;
   validationHash?: string;
+  authorityClearanceState?: AuthorityClearanceState;
+  authorityBackbone?: ProductAuthorityBackboneRecord;
 }
 
 /**

@@ -28,6 +28,9 @@ export function ProductAuthorityPanel({
   const evidenceSourceLabel = {
     generated_evidence: "Generated Evidence (Deterministic)",
     legacy_evidence: "Legacy Evidence (v1)",
+    structured_external_evidence: "Structured External Evidence",
+    explicit_missing_evidence: "Explicit Missing-Evidence Record",
+    explicit_blocked_evidence: "Explicit Blocked-Evidence Record",
     reported_summary_only: "Report Summary",
     manual_assertion: "Manual Assertion",
     registry_label: "Registry Label",
@@ -135,11 +138,11 @@ export function ProductAuthorityPanel({
         style={{
           padding: "8px 12px",
           backgroundColor:
-            canMakePublicClaims && contract.currentAuthorityState === "externally_proven_gold_product"
+            canMakePublicClaims
               ? "#d1fae5"
               : "#fee2e2",
           borderLeft:
-            canMakePublicClaims && contract.currentAuthorityState === "externally_proven_gold_product"
+            canMakePublicClaims
               ? "4px solid #10b981"
               : "4px solid #ef4444",
           borderRadius: "4px",
@@ -150,7 +153,7 @@ export function ProductAuthorityPanel({
           style={{
             fontSize: "13px",
             color:
-              canMakePublicClaims && contract.currentAuthorityState === "externally_proven_gold_product"
+              canMakePublicClaims
                 ? "#065f46"
                 : "#7f1d1d",
             lineHeight: "1.5",

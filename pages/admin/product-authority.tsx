@@ -1,230 +1,261 @@
-/**
- * pages/admin/product-authority.tsx
- *
- * Product-Wide Authority Control Surface
- *
- * Shows all 43 products with their authority state, evidence state,
- * validation status, blocking reasons, and next action.
- *
- * Every product resolves through the same resolver. Boardroom Brief
- * appears as one row within the estate-wide picture, not as a bespoke case.
- */
-
 import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import AdminLayout from "@/components/admin/AdminLayout";
 import BackToOperatorCommandCentre from "@/components/admin/BackToOperatorCommandCentre";
 import { requireAdminPage } from "@/lib/access/server";
-import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
-import { ProductAuthorityBadge } from "@/components/product/ProductAuthorityBadge";
-import type { ProductAuthorityContract } from "@/lib/product/product-authority-contract";
-import { getAllProducts } from "@/lib/commercial/catalog";
+import {
+  buildProductAuthorityBackboneReport,
+  type ProductAuthorityBackboneRecord,
+} from "@/lib/product/product-qualification-backbone";
+
+type ProductRow = {
+  product: string;
+  productCode: string;
+  productFamily: string;
+  authorityState: string;
+  evidenceState: string;
+  validationState: string;
+  v2State: string;
+  antiToyState: string;
+  redTeamState: string;
+  genericAiState: string;
+  marketState: string;
+  fulfilmentState: string;
+  releaseState: string;
+  publicClaimPermission: boolean;
+  blockerSummary: string[];
+  nextRequiredEvidence: string[];
+};
 
 type Props = {
-  products: Array<{
-    code: string;
-    name: string;
-    authorityState: string;
-    evidenceState: string;
-    validationSummary: string;
-    blockingReasons: string[];
-    nextAction: string;
-    publicClaimAllowed: boolean;
-    isExplicitEntry: boolean;
-  }>;
+  generatedAt: string;
+  summary: ReturnType<typeof buildProductAuthorityBackboneReport>["summary"];
+  rows: ProductRow[];
 };
 
 const MONO: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const GOLD = "#C9A96E";
-const DIM = "rgba(242,241,238,0.35)";
-const RULE = "rgba(255,255,255,0.07)";
+const DIM = "rgba(242,241,238,0.55)";
+const RULE = "rgba(255,255,255,0.08)";
 
-function statusColor(state: string): string {
-  if (state.startsWith("externally_proven") || state.startsWith("diagnostic") || state.startsWith("judgement")) return "#4ade80";
-  if (state.startsWith("legacy_validated")) return "#facc15";
-  if (state.startsWith("blocked")) return "#ef4444";
-  if (state.startsWith("pending") || state.startsWith("measurement")) return "#60a5fa";
-  if (state === "static_reference" || state === "internal_only") return "#a78bfa";
-  return DIM;
+function tone(value: string): string {
+  if (value === "authority_cleared" || value === "passed" || value === "verified" || value === "proof_attached") {
+    return "#4ade80";
+  }
+  if (value === "blocked" || value === "failed" || value === "missing" || value === "missing_source") {
+    return "#ef4444";
+  }
+  if (value === "evidence_incomplete" || value === "revalidation_required" || value === "insufficient" || value === "requires_product_review") {
+    return "#facc15";
+  }
+  if (value === "not_release_eligible" || value === "not_claim_eligible" || value === "not_applicable") {
+    return "#94a3b8";
+  }
+  return "#60a5fa";
 }
 
-function evidenceColor(state: string): string {
-  if (state === "trusted_artifact_supported") return "#4ade80";
-  if (state === "missing") return "#ef4444";
-  if (state === "unknown") return "#facc15";
-  return DIM;
+function summarize(product: ProductAuthorityBackboneRecord): ProductRow {
+  return {
+    product: product.productName,
+    productCode: product.productId,
+    productFamily: product.productFamily,
+    authorityState: product.authorityClearance.state,
+    evidenceState: product.evidence.evidenceState,
+    validationState: product.validationState,
+    v2State: product.v2Revalidation.revalidationStatus,
+    antiToyState: product.antiToy.state,
+    redTeamState: product.redTeam.state,
+    genericAiState: product.genericAiComparison.state,
+    marketState: product.marketComparison.state,
+    fulfilmentState: product.fulfilmentQualification.state,
+    releaseState: product.releaseFirewall.state,
+    publicClaimPermission: product.authorityClearance.publicClaimPermission,
+    blockerSummary: product.blockerSummary,
+    nextRequiredEvidence: product.nextRequiredEvidence,
+  };
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const result = await requireAdminPage(ctx);
   if ("redirect" in result || "notFound" in result) return result as any;
 
-  const catalogProducts = getAllProducts();
-  const defaultConfigs = getDefaultProductConfigurations();
-  const explicitCodes = new Set(defaultConfigs.map((c) => c.productCode));
+  const report = buildProductAuthorityBackboneReport();
 
-  const products = catalogProducts.map((cat) => {
-    const config = defaultConfigs.find((c) => c.productCode === cat.code);
-    const contract = config
-      ? resolveProductAuthority(config)
-      : resolveProductAuthority({ productCode: cat.code });
-
-    const evidenceState = contract.validation.evidenceLedgerV2Present
-      ? "trusted_artifact_supported"
-      : "missing";
-
-    const passedCount = [
-      contract.validation.evidenceLedgerV2Present,
-      contract.validation.antiToyPassed,
-      contract.validation.redTeamPassed,
-      contract.validation.genericAiComparisonPassed,
-      contract.validation.marketComparisonPassed,
-      contract.validation.releaseFirewallPassed,
-      contract.validation.constitutionPassed,
-      contract.validation.noMockAuthorityPassed,
-      contract.validation.antiGamingPassed,
-      contract.validation.adversarialValidationPassed,
-    ].filter(Boolean).length;
-
-    return {
-      code: cat.code,
-      name: cat.displayName || cat.code,
-      authorityState: contract.currentAuthorityState,
-      evidenceState,
-      validationSummary: `${passedCount}/10`,
-      blockingReasons: contract.blockingReasons,
-      nextAction: contract.nextEvidenceAction,
-      publicClaimAllowed: contract.publicClaimAllowed,
-      isExplicitEntry: explicitCodes.has(cat.code),
-    };
-  });
-
-  return { props: { products } };
+  return {
+    props: {
+      generatedAt: report.generatedAt,
+      summary: report.summary,
+      rows: report.products.map(summarize),
+    },
+  };
 };
 
-export default function ProductAuthorityPage({ products }: Props) {
+export default function ProductAuthorityPage({ generatedAt, summary, rows }: Props) {
   const [search, setSearch] = React.useState("");
-  const [filterBlocked, setFilterBlocked] = React.useState(false);
+  const [blockedOnly, setBlockedOnly] = React.useState(false);
 
   const filtered = React.useMemo(() => {
-    let result = products;
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      result = result.filter(
-        (p) => p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q),
-      );
-    }
-    if (filterBlocked) {
-      result = result.filter((p) => p.authorityState.startsWith("blocked"));
-    }
-    return result;
-  }, [products, search, filterBlocked]);
-
-  const blockedCount = products.filter((p) => p.authorityState.startsWith("blocked")).length;
-  const explicitCount = products.filter((p) => p.isExplicitEntry).length;
+    const q = search.trim().toLowerCase();
+    return rows.filter((row) => {
+      const matchesSearch = !q ||
+        row.product.toLowerCase().includes(q) ||
+        row.productCode.toLowerCase().includes(q) ||
+        row.productFamily.toLowerCase().includes(q);
+      const matchesBlocked = !blockedOnly ||
+        row.authorityState === "blocked" ||
+        row.authorityState === "evidence_incomplete" ||
+        row.authorityState === "revalidation_required";
+      return matchesSearch && matchesBlocked;
+    });
+  }, [blockedOnly, rows, search]);
 
   return (
     <AdminLayout>
-      <Head><title>Product Authority | Admin</title></Head>
-      <div style={{ padding: "24px 32px", maxWidth: 1400 }}>
+      <Head>
+        <title>Product Authority | Admin</title>
+      </Head>
+
+      <div style={{ padding: "24px 32px", maxWidth: 1800 }}>
         <BackToOperatorCommandCentre />
 
         <div style={{ marginBottom: 24 }}>
-          <p style={{ ...MONO, fontSize: 11, color: GOLD, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>
+          <p
+            style={{
+              ...MONO,
+              fontSize: 11,
+              color: GOLD,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
             Estate · Product Authority
           </p>
-          <h1 style={{ fontSize: 22, fontWeight: 400, color: "#f5f0e8" }}>Product Authority Control Surface</h1>
-          <p style={{ fontSize: 13, color: DIM, marginTop: 6 }}>
-            All {products.length} products resolved through the unified authority system.
-            {explicitCount} with explicit authority entries, {products.length - explicitCount} default-resolved.
-            {blockedCount} blocked.
+          <h1 style={{ fontSize: 22, fontWeight: 400, color: "#f5f0e8", margin: 0 }}>
+            Product Authority Control Surface
+          </h1>
+          <p style={{ fontSize: 13, color: DIM, marginTop: 8 }}>
+            {rows.length} products resolved through the evidence qualification backbone.{" "}
+            {summary.explicitEvidenceObjects} explicit evidence objects,{" "}
+            {summary.productsWithLedgerEntries} ledger entries,{" "}
+            {summary.productsWithExplicitMissingLedgerStates} explicit missing-ledger states,{" "}
+            {summary.authorityCleared} authority-cleared,{" "}
+            {summary.publicClaimPermissionEnabled} public-claim enabled.
           </p>
         </div>
 
-        {/* Filters */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 16, alignItems: "center" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
+            gap: 12,
+            marginBottom: 20,
+          }}
+        >
+          {[
+            ["Evidence Objects", `${summary.explicitEvidenceObjects}`],
+            ["Ledger Entries", `${summary.productsWithLedgerEntries}`],
+            ["Authority Cleared", `${summary.authorityCleared}`],
+            ["Evidence Incomplete", `${summary.evidenceIncomplete}`],
+            ["Generic-AI Coverage", `${summary.genericAiCoverage}`],
+            ["Public Claims", `${summary.publicClaimPermissionEnabled}`],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              style={{
+                border: `1px solid ${RULE}`,
+                padding: "12px 14px",
+                background: "rgba(255,255,255,0.02)",
+              }}
+            >
+              <div style={{ ...MONO, fontSize: 10, color: DIM, textTransform: "uppercase" }}>{label}</div>
+              <div style={{ fontSize: 22, color: "#f5f0e8", marginTop: 6 }}>{value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
           <input
             type="text"
-            placeholder="Search products…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search product, code, or family"
             style={{
-              ...MONO, fontSize: 11, padding: "6px 12px",
-              background: "rgba(255,255,255,0.04)", border: `1px solid ${RULE}`,
-              color: "#f5f0e8", outline: "none", width: 280,
+              ...MONO,
+              width: 320,
+              padding: "8px 12px",
+              fontSize: 11,
+              border: `1px solid ${RULE}`,
+              background: "rgba(255,255,255,0.03)",
+              color: "#f5f0e8",
+              outline: "none",
             }}
           />
-          <label style={{ ...MONO, fontSize: 10, color: DIM, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <label style={{ ...MONO, fontSize: 11, color: DIM, display: "flex", alignItems: "center", gap: 8 }}>
             <input
               type="checkbox"
-              checked={filterBlocked}
-              onChange={(e) => setFilterBlocked(e.target.checked)}
+              checked={blockedOnly}
+              onChange={(event) => setBlockedOnly(event.target.checked)}
               style={{ accentColor: GOLD }}
             />
-            Blocked only ({blockedCount})
+            Show authority-blocking rows only
           </label>
         </div>
 
-        {/* Table */}
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", border: `1px solid ${RULE}` }}>
           <table style={{ width: "100%", borderCollapse: "collapse", ...MONO, fontSize: 10 }}>
             <thead>
-              <tr style={{ borderBottom: `1px solid ${RULE}`, color: DIM, textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Product</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Code</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Source</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Authority</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Evidence</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Validation</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Public Claim</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Blocking / Next Action</th>
+              <tr style={{ borderBottom: `1px solid ${RULE}`, color: DIM, textTransform: "uppercase" }}>
+                {[
+                  "Product",
+                  "Family",
+                  "Authority",
+                  "Evidence",
+                  "Validation",
+                  "V2",
+                  "Anti-Toy",
+                  "Red-Team",
+                  "Generic-AI",
+                  "Market",
+                  "Fulfilment",
+                  "Release",
+                  "Public Claim",
+                  "Blockers",
+                  "Next Required Evidence",
+                ].map((label) => (
+                  <th key={label} style={{ padding: "10px 12px", textAlign: "left", whiteSpace: "nowrap" }}>
+                    {label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
-                <tr key={p.code} style={{ borderBottom: `1px solid ${RULE}`, color: "#f5f0e8" }}>
-                  <td style={{ padding: "10px 12px", whiteSpace: "nowrap" }}>{p.name}</td>
-                  <td style={{ padding: "10px 12px", color: DIM }}>{p.code}</td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <span style={{ color: p.isExplicitEntry ? GOLD : DIM }}>
-                      {p.isExplicitEntry ? "explicit" : "default"}
-                    </span>
+              {filtered.map((row) => (
+                <tr key={row.productCode} style={{ borderBottom: `1px solid ${RULE}`, color: "#f5f0e8" }}>
+                  <td style={{ padding: "10px 12px", minWidth: 220 }}>
+                    <div>{row.product}</div>
+                    <div style={{ color: DIM, marginTop: 4 }}>{row.productCode}</div>
                   </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <ProductAuthorityBadge
-                      productCode={p.code}
-                      currentAuthorityState={p.authorityState as any}
-                      size="small"
-                      variant="compact"
-                    />
+                  <td style={{ padding: "10px 12px", color: DIM, minWidth: 160 }}>{row.productFamily}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.authorityState), minWidth: 140 }}>{row.authorityState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.evidenceState) }}>{row.evidenceState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.validationState) }}>{row.validationState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.v2State) }}>{row.v2State}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.antiToyState) }}>{row.antiToyState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.redTeamState) }}>{row.redTeamState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.genericAiState) }}>{row.genericAiState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.marketState) }}>{row.marketState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.fulfilmentState) }}>{row.fulfilmentState}</td>
+                  <td style={{ padding: "10px 12px", color: tone(row.releaseState) }}>{row.releaseState}</td>
+                  <td style={{ padding: "10px 12px", color: row.publicClaimPermission ? "#4ade80" : "#ef4444" }}>
+                    {row.publicClaimPermission ? "enabled" : "denied"}
                   </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <span style={{ color: evidenceColor(p.evidenceState) }}>{p.evidenceState}</span>
+                  <td style={{ padding: "10px 12px", minWidth: 320, color: DIM }}>
+                    {row.blockerSummary.length > 0 ? row.blockerSummary.slice(0, 3).join(" | ") : "None"}
                   </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <span style={{ color: p.validationSummary === "10/10" ? "#4ade80" : DIM }}>
-                      {p.validationSummary}
-                    </span>
-                  </td>
-                  <td style={{ padding: "10px 12px" }}>
-                    <span style={{ color: p.publicClaimAllowed ? "#4ade80" : "#ef4444" }}>
-                      {p.publicClaimAllowed ? "allowed" : "denied"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "10px 12px", color: DIM, maxWidth: 300 }}>
-                    {p.blockingReasons.length > 0 ? (
-                      <ul style={{ margin: 0, paddingLeft: 16, listStyle: "none" }}>
-                        {p.blockingReasons.slice(0, 2).map((r, i) => (
-                          <li key={i} style={{ marginBottom: 2 }}>• {r}</li>
-                        ))}
-                        {p.blockingReasons.length > 2 && (
-                          <li style={{ color: GOLD }}>• +{p.blockingReasons.length - 2} more</li>
-                        )}
-                      </ul>
-                    ) : (
-                      <span>{p.nextAction || "—"}</span>
-                    )}
+                  <td style={{ padding: "10px 12px", minWidth: 320, color: DIM }}>
+                    {row.nextRequiredEvidence.length > 0 ? row.nextRequiredEvidence.slice(0, 3).join(" | ") : "None"}
                   </td>
                 </tr>
               ))}
@@ -232,23 +263,8 @@ export default function ProductAuthorityPage({ products }: Props) {
           </table>
         </div>
 
-        {filtered.length === 0 && (
-          <div style={{ padding: 40, textAlign: "center", color: DIM, ...MONO, fontSize: 11 }}>
-            No products match the current filter.
-          </div>
-        )}
-
-        <div style={{ marginTop: 24, padding: "16px 0", borderTop: `1px solid ${RULE}`, ...MONO, fontSize: 10, color: DIM }}>
-          <div>Total products: {products.length}</div>
-          <div>Explicit authority entries: {explicitCount}</div>
-          <div>Default-resolved: {products.length - explicitCount}</div>
-          <div>Blocked: {blockedCount}</div>
-          <div>Boardroom Brief: {
-            (() => {
-              const bb = products.find((p) => p.code === "boardroom_brief");
-              return bb ? `${bb.authorityState} — ${bb.publicClaimAllowed ? "public claim allowed" : "public claim denied"}` : "not found";
-            })()
-          }</div>
+        <div style={{ marginTop: 18, ...MONO, fontSize: 10, color: DIM }}>
+          Generated: {generatedAt}
         </div>
       </div>
     </AdminLayout>
