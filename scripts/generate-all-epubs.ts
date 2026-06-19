@@ -38,11 +38,9 @@ type BuildManifestItem = {
   outputPath: string;
   publicHref: string;
   sizeBytes: number;
-  generatedAt: string;
 };
 
 type BuildManifest = {
-  generatedAt: string;
   count: number;
   items: BuildManifestItem[];
 };
@@ -282,13 +280,11 @@ function toManifestItem(result: BuildSuccess): BuildManifestItem {
     outputPath: result.outputPath,
     publicHref: `/epubs/${result.slug}.epub`,
     sizeBytes: result.sizeBytes,
-    generatedAt: new Date().toISOString(),
   };
 }
 
 function writeManifest(items: BuildManifestItem[]): void {
   const manifest: BuildManifest = {
-    generatedAt: new Date().toISOString(),
     count: items.length,
     items,
   };

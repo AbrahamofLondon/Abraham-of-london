@@ -39,7 +39,6 @@ const config = {
   transform: async (config, path) => {
     return {
       loc: path,
-      lastmod: new Date().toISOString(),
       changefreq: calculateChangeFrequency(path),
       priority: calculatePriority(path),
       alternateRefs: config.alternateRefs || [],

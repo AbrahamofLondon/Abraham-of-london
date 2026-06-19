@@ -124,7 +124,7 @@ function main() {
 
   const backboneReport = buildProductAuthorityBackboneReport();
   const products = backboneReport.products;
-  const generatedAt = new Date().toISOString();
+  const generatedAt = "";
 
   const backboneJson = toBackboneJson(backboneReport);
   const ledgerJson = toLedgerStatusJson(products, generatedAt);
