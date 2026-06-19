@@ -4,13 +4,14 @@ import Layout from "@/components/Layout";
 import PolicyFooter from "@/components/PolicyFooter";
 import { getPageTitle, siteConfig } from "@/config/site";
 
-const LAST_UPDATED = "30 April 2026";
+const LAST_UPDATED = "19 June 2026";
 
 const sections = [
   "Who We Are",
   "What We Collect",
   "How We Use It",
   "Email And Decision Continuity",
+  "LinkedIn Integration Data",
   "Sharing And Processors",
   "Retention",
   "Your Rights",
@@ -148,8 +149,40 @@ const PrivacyPage: NextPage = () => {
               </p>
             </section>
 
+            <section className="space-y-4 rounded-sm border border-white/5 bg-white/[0.02] p-6">
+              <h2 className="font-serif text-2xl italic text-white">
+                5. LinkedIn Integration Data
+              </h2>
+              <p className="text-sm font-light leading-relaxed text-zinc-300">
+                Where a user connects LinkedIn to Abraham of London, we may process LinkedIn
+                account, organisation page, post, engagement, and analytics data strictly for
+                authorised publishing, content management, engagement monitoring, and performance
+                reporting.
+              </p>
+              <ul className="list-disc space-y-2 pl-5 text-sm font-light leading-relaxed text-zinc-400">
+                <li>We do not sell LinkedIn data.</li>
+                <li>We do not use LinkedIn personal data for advertising or sales targeting.</li>
+                <li>We do not scrape LinkedIn.</li>
+                <li>We do not replicate LinkedIn feeds.</li>
+                <li>We do not publish content without user authorisation.</li>
+              </ul>
+              <p className="text-sm font-light leading-relaxed text-zinc-300">
+                Users may disconnect LinkedIn access or request deletion of LinkedIn integration
+                data by contacting{" "}
+                <a
+                  className="text-amber-500 underline underline-offset-4"
+                  href={`mailto:${contactEmail}`}
+                >
+                  {contactEmail}
+                </a>
+                . Where deletion is required by LinkedIn or requested by the user, we will remove
+                LinkedIn-connected records, tokens, cached API data, and related integration
+                records where legally and technically practicable.
+              </p>
+            </section>
+
             <section className="space-y-4">
-              <h2 className="font-serif text-2xl italic text-white">5. Sharing And Processors</h2>
+              <h2 className="font-serif text-2xl italic text-white">6. Sharing And Processors</h2>
               <p className="text-sm font-light leading-relaxed text-zinc-300">
                 We do not sell personal data. We share data only where needed to operate the site,
                 deliver messages you asked to receive, process access, or protect the service.
@@ -168,7 +201,7 @@ const PrivacyPage: NextPage = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="font-serif text-2xl italic text-white">6. Retention</h2>
+              <h2 className="font-serif text-2xl italic text-white">7. Retention</h2>
               <p className="text-sm font-light leading-relaxed text-zinc-300">
                 We keep data only for as long as it is reasonably needed for the relevant service,
                 security, legal, or record-keeping purpose.
@@ -182,7 +215,7 @@ const PrivacyPage: NextPage = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="font-serif text-2xl italic text-white">7. Your Rights</h2>
+              <h2 className="font-serif text-2xl italic text-white">8. Your Rights</h2>
               <p className="text-sm font-light leading-relaxed text-zinc-300">
                 Subject to applicable law, you may request access, correction, deletion,
                 restriction, objection, or portability. You may also withdraw consent where we rely

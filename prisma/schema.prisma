@@ -4730,6 +4730,109 @@ model LinkedInPublishAttempt {
   @@map("linkedin_publish_attempts")
 }
 
+/// Reviewer-scoped LinkedIn Community Management API connection.
+/// Tokens are encrypted at rest using LINKEDIN_TOKEN_ENCRYPTION_KEY and are never
+/// sent to the browser. This model is deliberately separate from admin outbound
+/// publishing connections so LinkedIn reviewers cannot touch production/admin
+/// publishing state.
+model LinkedInReviewConnection {
+  id                         String    @id @default(cuid())
+  workspaceId                String
+  userId                     String?
+  userEmail                  String?
+  linkedinMemberUrn          String?
+  linkedinMemberDisplayName  String?
+  linkedinOrganizationUrn    String?
+  organizationName           String?
+  encryptedAccessToken       String?
+  encryptedRefreshToken      String?
+  grantedScopes              String    @default("")
+  tokenExpiresAt             DateTime?
+  status                     String    @default("review_demo") // not_connected | active | expired | revoked | review_demo
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+  revokedAt                  DateTime?
+
+  @@unique([workspaceId, userEmail])
+  @@index([workspaceId])
+  @@index([status])
+  @@map("linkedin_review_connections")
+}
+
+/// LinkedIn review workspace draft. Contains approved sample content only.
+model LinkedInReviewPostDraft {
+  id                         String    @id @default(cuid())
+  workspaceId                String
+  authorId                   String?
+  authorEmail                String?
+  sourceType                 String    @default("review_workspace")
+  sourceId                   String    @default("cost-of-slow-decisions")
+  title                      String
+  content                    String
+  status                     String    @default("Draft") // Draft | Awaiting approval | Approved | Published | Failed | Archived
+  approvalStatus             String    @default("not_approved")
+  approvedBy                 String?
+  approvedAt                 DateTime?
+  linkedinOrganizationUrn    String?
+  linkedinPostUrn            String?
+  publishedAt                DateTime?
+  errorMessage               String?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([sourceId])
+  @@map("linkedin_review_post_drafts")
+}
+
+/// Reviewer-safe analytics snapshots. No mocked values are stored as live data.
+model LinkedInReviewAnalyticsSnapshot {
+  id                         String   @id @default(cuid())
+  workspaceId                String
+  linkedinOrganizationUrn    String?
+  linkedinPostUrn            String?
+  metricsJson                Json
+  source                     String   @default("pending_standard_tier")
+  capturedAt                 DateTime @default(now())
+  createdAt                  DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([capturedAt])
+  @@map("linkedin_review_analytics_snapshots")
+}
+
+/// Reviewer-safe audit event stream for the LinkedIn review workflow.
+model LinkedInReviewAuditEvent {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  actorId          String?
+  actorEmail       String?
+  eventType        String
+  safeMetadataJson Json     @default("{}")
+  createdAt        DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("linkedin_review_audit_events")
+}
+
+/// Workspace-level review state used to keep delete-data from immediately
+/// recreating demo records on the same request or a later refresh.
+model LinkedInReviewWorkspaceState {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  deletedAt   DateTime?
+  resetAt     DateTime?
+  resetBy     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([deletedAt])
+  @@map("linkedin_review_workspace_states")
+}
+
 // ============================================================================
 // OUTBOUND PUBLISH LEDGER — durable, idempotent publish record for all providers
 // ============================================================================

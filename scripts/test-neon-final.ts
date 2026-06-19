@@ -4,9 +4,10 @@ import { Pool } from 'pg';
 async function testNeonFinal() {
   console.log('🔗 Final Neon connection test...');
   
-  // Load from environment or use direct string
-  const connectionString = process.env.DATABASE_URL || 
-    'postgresql://neondb_owner:npg_lVTc95DapNuM@ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech/abraham_of_london?sslmode=require';
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is required for the Neon connection test');
+  }
   
   console.log('Host:', connectionString.split('@')[1]?.split('/')[0]);
   console.log('Database:', connectionString.split('/').pop()?.split('?')[0]);

@@ -5,8 +5,10 @@ import { join } from 'path';
 async function setupNeonTables() {
   console.log('📦 Setting up Inner Circle tables on Neon...');
   
-  // connectionString should ideally be in process.env.DATABASE_URL
-  const connectionString = 'postgresql://neondb_owner:npg_lVTc95DapNuM@ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech/abraham_of_london?sslmode=require';
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is required to set up Neon tables');
+  }
   
   const pool = new Pool({
     connectionString,

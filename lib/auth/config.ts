@@ -16,6 +16,7 @@ import { checkRateLimit } from "@/lib/server/rate-limit";
 // Checked in requireAdminApi / requireAdminPage via session.user.adminSessionIssuedAt.
 export const ADMIN_SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
 const ADMIN_ROLES = new Set(["ADMIN", "OWNER"]);
+const LINKEDIN_REVIEWER_ROLE = "LINKEDIN_REVIEWER";
 
 function bootstrapRoleForEmail(email: string) {
   if (email === "info@abrahamoflondon.org") return "OWNER" as const;
@@ -68,12 +69,14 @@ function buildProviders() {
 
   const adminUserEmail = firstEnv("ADMIN_USER_EMAIL", "NEXTAUTH_ADMIN_EMAIL");
   const adminUserPassword = firstEnv("ADMIN_USER_PASSWORD", "NEXTAUTH_ADMIN_PASSWORD");
+  const reviewerEmail = firstEnv("LINKEDIN_REVIEWER_EMAIL")?.trim().toLowerCase();
+  const reviewerPasswordHash = firstEnv("LINKEDIN_REVIEWER_PASSWORD_HASH");
 
-  if (adminUserEmail && adminUserPassword) {
+  if ((adminUserEmail && adminUserPassword) || (reviewerEmail && reviewerPasswordHash)) {
     providers.push(
       CredentialsProvider({
         id: "credentials",
-        name: "Admin Credentials",
+        name: "Credentials",
         credentials: {
           email: { label: "Email", type: "email" },
           password: { label: "Password", type: "password" },
@@ -81,10 +84,11 @@ function buildProviders() {
         async authorize(credentials) {
           const email = credentials?.email?.trim().toLowerCase();
           const password = credentials?.password ?? "";
-          const expectedEmail = adminUserEmail.trim().toLowerCase();
-          const configuredPasswordHash = adminUserPassword;
+          const expectedEmail = adminUserEmail?.trim().toLowerCase() || "";
+          const configuredPasswordHash =
+            email === reviewerEmail ? reviewerPasswordHash : adminUserPassword;
 
-          if (!email || !password || !expectedEmail || !configuredPasswordHash) {
+          if (!email || !password || !configuredPasswordHash) {
             return null;
           }
 
@@ -123,14 +127,17 @@ function buildProviders() {
 
           const passwordOk = await verifyPassword(password, configuredPasswordHash);
 
-          if (email !== expectedEmail || !passwordOk) {
+          const isAdminCredential = Boolean(expectedEmail && email === expectedEmail);
+          const isReviewerCredential = Boolean(reviewerEmail && email === reviewerEmail);
+
+          if ((!isAdminCredential && !isReviewerCredential) || !passwordOk) {
             return null;
           }
 
           return {
-            id: `bootstrap:${email}`,
+            id: isReviewerCredential ? `linkedin-reviewer:${email}` : `bootstrap:${email}`,
             email,
-            name: "Administrative Access",
+            name: isReviewerCredential ? "LinkedIn Reviewer" : "Administrative Access",
           };
         },
       }),
@@ -221,11 +228,19 @@ export const authOptions: NextAuthOptions = {
       token.email = fallbackEmail;
 
       const bootstrapRole = bootstrapRoleForEmail(fallbackEmail);
+      const isLinkedInReviewer =
+        fallbackEmail === (process.env.LINKEDIN_REVIEWER_EMAIL || "linkedin-reviewer@abrahamoflondon.org")
+          .trim()
+          .toLowerCase();
 
       // Stamp bootstrap admin flag so edge/token-only guards can check without
       // a DB round-trip. This is safe — the email itself is the source of truth.
       if (bootstrapRole !== null) {
         token.isBootstrapAdmin = true;
+      }
+      if (isLinkedInReviewer) {
+        (token as any).role = LINKEDIN_REVIEWER_ROLE;
+        (token as any).isLinkedInReviewer = true;
       }
 
       if (bootstrapRole) {
@@ -248,7 +263,9 @@ export const authOptions: NextAuthOptions = {
 
         if (dbUser) {
           token.sub = dbUser.id;
-          token.role = dbUser.role;
+          if (!isLinkedInReviewer) {
+            token.role = dbUser.role;
+          }
         }
       } catch (error) {
         const safe = classifyAuthError(error);
@@ -290,7 +307,8 @@ export const authOptions: NextAuthOptions = {
       }
 
       session.user.id = typeof token.sub === "string" ? token.sub : "";
-      session.user.role = typeof token.role === "string" ? token.role : "USER";
+      (session.user as any).role = typeof token.role === "string" ? token.role : "USER";
+      (session.user as any).isLinkedInReviewer = token.isLinkedInReviewer === true;
       // Propagate bootstrap admin flag from JWT so client code can read it
       // without an extra DB round-trip.
       (session.user as any).isBootstrapAdmin =

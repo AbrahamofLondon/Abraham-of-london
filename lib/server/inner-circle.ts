@@ -183,7 +183,10 @@ export class DatabaseClient {
     try {
       const { Pool } = await import('pg');
       const conn = process.env.INNER_CIRCLE_DB_URL ?? process.env.DATABASE_URL;
-      const connectionString = conn || 'postgresql://neondb_owner:npg_lVTc95DapNuM@ep-solitary-mud-ab6t4raj-pooler.eu-west-2.aws.neon.tech/abraham_of_london?sslmode=require';
+      if (!conn) {
+        throw new Error('INNER_CIRCLE_DB_URL or DATABASE_URL is required');
+      }
+      const connectionString = conn;
       this.config = {
         connectionString,
         ssl: connectionString.includes('localhost') ? undefined : { rejectUnauthorized: false },

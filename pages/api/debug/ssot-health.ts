@@ -6,6 +6,9 @@
 // module graph even if the NODE_ENV guard were to fail at trace time.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServerSession } from "next-auth";
+
+import { authOptions } from "@/lib/auth/options";
 
 function sample(list: any[], n = 3) {
   return (list || []).slice(0, n).map((d: any) => ({
@@ -15,9 +18,18 @@ function sample(list: any[], n = 3) {
   }));
 }
 
-export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (process.env.NODE_ENV !== "development") {
     return res.status(404).json({ error: "Not found" });
+  }
+
+  const session = await getServerSession(req, res, authOptions);
+  const role = String((session?.user as any)?.role || "");
+  if (role === "LINKEDIN_REVIEWER") {
+    return res.status(403).json({ ok: false, error: "Forbidden" });
+  }
+  if (!session?.user?.email) {
+    return res.status(401).json({ ok: false, error: "Authentication required" });
   }
 
   try {
