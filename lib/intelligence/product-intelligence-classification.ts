@@ -306,7 +306,9 @@ export function listAllProductIntelligenceClassifications(): ProductIntelligence
   return report.classifications;
 }
 
-export function getProductIntelligenceClass(productCode: string): ProductIntelligenceClass {
+export function getProductIntelligenceClassification(
+  productCode: string,
+): ProductIntelligenceClassification {
   const report = buildProductIntelligenceClassificationReport();
 
   if (!report.canonicalProductCodes.includes(productCode)) {
@@ -323,5 +325,9 @@ export function getProductIntelligenceClass(productCode: string): ProductIntelli
     );
   }
 
-  return classification.classification;
+  return classification;
+}
+
+export function getProductIntelligenceClass(productCode: string): ProductIntelligenceClass {
+  return getProductIntelligenceClassification(productCode).classification;
 }

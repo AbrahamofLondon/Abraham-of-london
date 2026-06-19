@@ -51,7 +51,7 @@ describe("run evidence ledger", () => {
     expect(proofEntry.productRunRole).toBe("proof_surface");
 
     expect(derivativeEntry.decision).toBe("blocked_non_originator_product");
-    expect(derivativeEntry.productRunRole).toBe("derivative");
+    expect(derivativeEntry.productRunRole).toBe("proof_surface");
   });
 
   it("blocks originator runs when product evidence is insufficient", () => {

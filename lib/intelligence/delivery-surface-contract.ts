@@ -1,6 +1,13 @@
 import { getProduct } from "@/lib/commercial/catalog";
-import { getCorridorRecord, type OverclaimRisk, type ReadinessStatus } from "@/lib/product/paid-corridor-contract";
-import { getSurfaceById, type SurfaceExposureStatus } from "@/lib/product/product-surface-registry";
+import {
+  getCorridorRecord,
+  type OverclaimRisk,
+  type ReadinessStatus,
+} from "@/lib/product/paid-corridor-contract";
+import {
+  getSurfaceById,
+  type SurfaceExposureStatus,
+} from "@/lib/product/product-surface-registry";
 
 export const DELIVERY_TRUTH_SURFACES = [
   "team_assessment",
@@ -12,7 +19,14 @@ export const DELIVERY_TRUTH_SURFACES = [
 
 export type DeliveryTruthSurface = (typeof DELIVERY_TRUTH_SURFACES)[number];
 
-export interface DeliverySurfaceContract {
+export type DeliveryReadabilityClass =
+  | "board"
+  | "executive"
+  | "professional"
+  | "basic"
+  | "poor";
+
+export interface DeliverySurfaceTemplate {
   surface: DeliveryTruthSurface;
   displayName: string;
   deliveryCeiling: number;
@@ -25,7 +39,33 @@ export interface DeliverySurfaceContract {
   sourceRefs: string[];
 }
 
-function buildDeliverySurfaceContract(surface: DeliveryTruthSurface): DeliverySurfaceContract {
+export interface DeliverySurfaceContract {
+  artifactId: string;
+  productId: string;
+  orderId?: string;
+  hasStructuredSections: boolean;
+  hasExecutiveSummary: boolean;
+  hasForensicLayer: boolean;
+  hasEvidenceReferences: boolean;
+  hasProvenanceReference: boolean;
+  hasConfidenceDisclosure: boolean;
+  mobileParity: boolean;
+  readabilityClass: DeliveryReadabilityClass;
+  deliverySurfaceScore: 0 | 1 | 2 | 3 | 4 | 5;
+}
+
+export type DeliverySurfaceContractInput = Omit<
+  DeliverySurfaceContract,
+  "deliverySurfaceScore"
+>;
+
+function assertNever(_: never): never {
+  throw new Error("Unhandled delivery readability class.");
+}
+
+function buildDeliverySurfaceTemplate(
+  surface: DeliveryTruthSurface,
+): DeliverySurfaceTemplate {
   const registry = getSurfaceById(surface);
   const corridor = getCorridorRecord(surface);
   const catalog = getProduct(surface);
@@ -58,15 +98,58 @@ function buildDeliverySurfaceContract(surface: DeliveryTruthSurface): DeliverySu
   };
 }
 
-export const DELIVERY_SURFACE_CONTRACTS: DeliverySurfaceContract[] =
-  DELIVERY_TRUTH_SURFACES.map(buildDeliverySurfaceContract);
+function getReadabilityWeight(readabilityClass: DeliveryReadabilityClass): number {
+  switch (readabilityClass) {
+    case "board":
+      return 2;
+    case "executive":
+      return 2;
+    case "professional":
+      return 1;
+    case "basic":
+      return 0;
+    case "poor":
+      return -1;
+    default:
+      return assertNever(readabilityClass);
+  }
+}
 
-export function getDeliverySurfaceContract(
+function clampDeliverySurfaceScore(value: number): 0 | 1 | 2 | 3 | 4 | 5 {
+  const rounded = Math.max(0, Math.min(5, Math.round(value)));
+  return rounded as 0 | 1 | 2 | 3 | 4 | 5;
+}
+
+export const DELIVERY_SURFACE_TEMPLATES: DeliverySurfaceTemplate[] =
+  DELIVERY_TRUTH_SURFACES.map(buildDeliverySurfaceTemplate);
+
+export function getDeliverySurfaceTemplate(
   surface: DeliveryTruthSurface,
-): DeliverySurfaceContract | undefined {
-  return DELIVERY_SURFACE_CONTRACTS.find((contract) => contract.surface === surface);
+): DeliverySurfaceTemplate | undefined {
+  return DELIVERY_SURFACE_TEMPLATES.find((template) => template.surface === surface);
 }
 
 export function getDeliverySurfaceTruthCeiling(surface: DeliveryTruthSurface): number {
-  return getDeliverySurfaceContract(surface)?.deliveryCeiling ?? 0;
+  return getDeliverySurfaceTemplate(surface)?.deliveryCeiling ?? 0;
+}
+
+export function evaluateDeliverySurfaceContract(
+  input: DeliverySurfaceContractInput,
+): DeliverySurfaceContract {
+  let rawScore = 0;
+
+  if (input.hasStructuredSections) rawScore += 1;
+  if (input.hasExecutiveSummary) rawScore += 1;
+  if (input.hasForensicLayer) rawScore += 1;
+  if (input.hasEvidenceReferences) rawScore += 1;
+  if (input.hasProvenanceReference) rawScore += 1;
+  if (input.hasConfidenceDisclosure) rawScore += 1;
+  if (input.mobileParity) rawScore += 1;
+
+  rawScore += getReadabilityWeight(input.readabilityClass);
+
+  return {
+    ...input,
+    deliverySurfaceScore: clampDeliverySurfaceScore(rawScore / 2),
+  };
 }

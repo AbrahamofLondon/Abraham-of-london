@@ -1,6 +1,13 @@
 import type { DecisionIntelligenceInput } from "@/lib/intelligence/decision-intelligence-orchestrator";
 import { TEAM_ASSESSMENT_SINGLE_RESPONDENT_POLICY } from "@/lib/intelligence/judgement-truth-contract";
 import { TEAM_ASSESSMENT_TRUTH_ASSETS } from "@/lib/intelligence/product-truth-harness/team-assessment/assets";
+import type {
+  SourceApplicability,
+  SourceCaptureRecord,
+  SourceFreshness,
+  SourceSet,
+  SourceType,
+} from "@/lib/intelligence/source-capture-contract";
 
 export type TeamAssessmentTruthCaseKind =
   | "canonical"
@@ -15,6 +22,7 @@ export interface TeamAssessmentTruthCase {
   caseId: string;
   description: string;
   sourceRefs: string[];
+  sourceSets: SourceSet[];
   runbook: Array<Pick<DecisionIntelligenceInput, "rawUserInput" | "userAnswers">>;
   expected: {
     requiresCrossRespondentAnalysis: boolean;
@@ -32,6 +40,35 @@ export interface TeamAssessmentTruthCase {
 const canonicalKeywords = ["divergence", "decision", "team"];
 const contradictionKeywords = ["resolve", "divergence", "decision"];
 
+function makeSourceRecord(input: {
+  sourceId: string;
+  sourceType?: SourceType;
+  location: string;
+  capturedAt: string;
+  freshness: SourceFreshness;
+  applicability: SourceApplicability;
+  note: string;
+  lastVerifiedAt?: string;
+  contradictsSourceIds?: string[];
+}): SourceCaptureRecord {
+  return {
+    sourceType: "manual_assertion",
+    ...input,
+  };
+}
+
+function makeCaseSourceSet(
+  sourceSetId: string,
+  label: string,
+  sources: SourceCaptureRecord[],
+): SourceSet {
+  return {
+    sourceSetId,
+    label,
+    sources,
+  };
+}
+
 export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
   {
     id: "canonical-hidden-divergence",
@@ -43,6 +80,37 @@ export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
       TEAM_ASSESSMENT_TRUTH_ASSETS.teamAlignmentIllusion.relativePath,
       TEAM_ASSESSMENT_TRUTH_ASSETS.hiddenDivergenceOutcome.relativePath,
       "lib/product/team-assessment-gold-composer.ts",
+    ],
+    sourceSets: [
+      makeCaseSourceSet("canonical-hidden-divergence-intake", "Canonical hidden divergence intake", [
+        makeSourceRecord({
+          sourceId: "canonical-sales-director",
+          location: "truth-harness://team-assessment/canonical/sales-director",
+          capturedAt: "2026-06-14T09:00:00.000Z",
+          lastVerifiedAt: "2026-06-14T09:10:00.000Z",
+          freshness: "fresh",
+          applicability: "direct",
+          note: "Sales director respondent capture for the canonical divergence case.",
+        }),
+        makeSourceRecord({
+          sourceId: "canonical-engineering-lead",
+          location: "truth-harness://team-assessment/canonical/engineering-lead",
+          capturedAt: "2026-06-14T09:05:00.000Z",
+          lastVerifiedAt: "2026-06-14T09:10:00.000Z",
+          freshness: "fresh",
+          applicability: "direct",
+          note: "Engineering lead respondent capture for the canonical divergence case.",
+        }),
+        makeSourceRecord({
+          sourceId: "canonical-product-manager",
+          location: "truth-harness://team-assessment/canonical/product-manager",
+          capturedAt: "2026-06-14T09:08:00.000Z",
+          lastVerifiedAt: "2026-06-14T09:10:00.000Z",
+          freshness: "fresh",
+          applicability: "direct",
+          note: "Product manager respondent capture for the canonical divergence case.",
+        }),
+      ]),
     ],
     runbook: [
       {
@@ -120,6 +188,41 @@ export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
     sourceRefs: [
       "lib/validation/frozen-scenario-sets-v2.ts",
       TEAM_ASSESSMENT_TRUTH_ASSETS.teamAlignmentIllusion.relativePath,
+    ],
+    sourceSets: [
+      makeCaseSourceSet(
+        "contradiction-resource-allocation-intake",
+        "Contradiction resource allocation intake",
+        [
+          makeSourceRecord({
+            sourceId: "contradiction-product-manager",
+            location: "truth-harness://team-assessment/contradiction/product-manager",
+            capturedAt: "2026-06-14T10:00:00.000Z",
+            lastVerifiedAt: "2026-06-14T10:05:00.000Z",
+            freshness: "fresh",
+            applicability: "direct",
+            note: "Product manager respondent capture for the contradiction case.",
+          }),
+          makeSourceRecord({
+            sourceId: "contradiction-ops-manager",
+            location: "truth-harness://team-assessment/contradiction/ops-manager",
+            capturedAt: "2026-06-14T10:03:00.000Z",
+            lastVerifiedAt: "2026-06-14T10:05:00.000Z",
+            freshness: "fresh",
+            applicability: "direct",
+            note: "Operations manager respondent capture for the contradiction case.",
+          }),
+          makeSourceRecord({
+            sourceId: "contradiction-customer-success",
+            location: "truth-harness://team-assessment/contradiction/customer-success",
+            capturedAt: "2026-06-14T10:04:00.000Z",
+            lastVerifiedAt: "2026-06-14T10:05:00.000Z",
+            freshness: "fresh",
+            applicability: "direct",
+            note: "Customer success respondent capture for the contradiction case.",
+          }),
+        ],
+      ),
     ],
     runbook: [
       {
@@ -199,6 +302,19 @@ export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
       "docs/product/diagnostic-engine-architecture.md",
       "lib/product/product-consequence-standard.ts",
     ],
+    sourceSets: [
+      makeCaseSourceSet("weak-evidence-single-respondent-intake", "Weak evidence single respondent intake", [
+        makeSourceRecord({
+          sourceId: "weak-single-respondent",
+          location: "truth-harness://team-assessment/weak/single-respondent",
+          capturedAt: "2026-06-14T11:00:00.000Z",
+          lastVerifiedAt: "2026-06-14T11:05:00.000Z",
+          freshness: "fresh",
+          applicability: "insufficient",
+          note: "Single self-report without corroboration; should stay below confident judgement.",
+        }),
+      ]),
+    ],
     runbook: [
       {
         rawUserInput: "Team Assessment completed: watch.",
@@ -238,6 +354,19 @@ export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
     sourceRefs: [
       "docs/product/diagnostic-engine-architecture.md",
       "lib/product/product-consequence-standard.ts",
+    ],
+    sourceSets: [
+      makeCaseSourceSet("adversarial-overconfidence-bait-intake", "Adversarial overconfidence bait intake", [
+        makeSourceRecord({
+          sourceId: "adversarial-single-respondent",
+          location: "truth-harness://team-assessment/adversarial/single-respondent",
+          capturedAt: "2026-06-14T11:30:00.000Z",
+          lastVerifiedAt: "2026-06-14T11:31:00.000Z",
+          freshness: "fresh",
+          applicability: "insufficient",
+          note: "Single respondent overclaims certainty; evidence remains insufficient for high-confidence judgement.",
+        }),
+      ]),
     ],
     runbook: [
       {
@@ -279,6 +408,28 @@ export const TEAM_ASSESSMENT_TRUTH_CASES: TeamAssessmentTruthCase[] = [
     sourceRefs: [
       "lib/intelligence/source-capture-contract.ts",
       "docs/product/diagnostic-engine-architecture.md",
+    ],
+    sourceSets: [
+      makeCaseSourceSet("stale-evidence-multi-respondent-intake", "Stale evidence multi-respondent intake", [
+        makeSourceRecord({
+          sourceId: "stale-ceo-input",
+          location: "truth-harness://team-assessment/stale/ceo",
+          capturedAt: "2025-11-15T08:00:00.000Z",
+          lastVerifiedAt: "2025-11-16T08:00:00.000Z",
+          freshness: "stale",
+          applicability: "direct",
+          note: "CEO respondent evidence captured months before the current run and not refreshed since.",
+        }),
+        makeSourceRecord({
+          sourceId: "stale-coo-input",
+          location: "truth-harness://team-assessment/stale/coo",
+          capturedAt: "2025-11-15T08:05:00.000Z",
+          lastVerifiedAt: "2025-11-16T08:00:00.000Z",
+          freshness: "stale",
+          applicability: "direct",
+          note: "COO respondent evidence captured months before the current run and not refreshed since.",
+        }),
+      ]),
     ],
     runbook: [
       {

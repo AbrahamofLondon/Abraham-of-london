@@ -31,6 +31,7 @@ describe("team assessment truth harness", () => {
 
     expect(run.surface).toBe("team_assessment");
     expect(run.effectiveCeiling).toBe(6);
+    expect(run.passed).toBe(true);
 
     const canonical = run.cases.find((truthCase) => truthCase.kind === "canonical");
     const adversarial = run.cases.find((truthCase) => truthCase.kind === "adversarial");
@@ -45,6 +46,11 @@ describe("team assessment truth harness", () => {
     expect(weak).toBeDefined();
     expect(contradiction).toBeDefined();
     expect(stale).toBeDefined();
+    expect(canonical?.passed).toBe(true);
+    expect(adversarial?.passed).toBe(true);
+    expect(weak?.passed).toBe(true);
+    expect(contradiction?.passed).toBe(true);
+    expect(stale?.passed).toBe(true);
   });
 
   it("fails planted contradiction misses", async () => {
@@ -122,15 +128,13 @@ describe("team assessment truth harness", () => {
     expect(evaluated.violationReasons.join(" ")).toMatch(/HIGH confidence/i);
   });
 
-  it("detects stale evidence in stale-evidence case results", async () => {
+  it("detects stale evidence from the live source-set posture", async () => {
     const staleCase = requireCase("stale-evidence-multi-respondent");
     const liveRun = await runTeamAssessmentTruthCase(staleCase);
 
-    const evaluated = evaluateTeamAssessmentTruthCase(staleCase, {
-      ...liveRun.rawResult,
-      evidenceBasis: [...liveRun.rawResult.evidenceBasis, "Evidence is stale: captured 180 days ago."],
-    });
-
-    expect(evaluated.passed).toBe(true);
+    expect(liveRun.sourceSetStatus).toBe("stale");
+    expect(liveRun.sourceSetBlockers.join(" ")).toMatch(/stale/i);
+    expect(liveRun.rawResult.evidenceBasis.join(" ")).toMatch(/stale/i);
+    expect(liveRun.passed).toBe(true);
   });
 });

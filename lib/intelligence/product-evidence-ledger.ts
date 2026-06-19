@@ -1,5 +1,9 @@
 import { getProduct, type ProductCategory } from "@/lib/commercial/catalog";
 import {
+  getProductIntelligenceClassification,
+  type ProductIntelligenceClass,
+} from "@/lib/intelligence/product-intelligence-classification";
+import {
   buildProductAuthorityBackboneReport,
   type ProductAuthorityBackboneRecord,
   type ProductAuthorityBackboneReport,
@@ -21,25 +25,6 @@ type SourceCoverageLevel = ProductAuthorityBackboneRecord["evidence"]["sourceCov
 type SourceApplicability = ProductAuthorityBackboneRecord["evidence"]["sourceApplicability"];
 type SourceFreshness = ProductAuthorityBackboneRecord["evidence"]["sourceFreshness"];
 
-const WRAPPER_CATEGORIES = new Set<ProductCategory>([
-  "bundle",
-  "membership",
-  "retainer",
-]);
-
-const DERIVATIVE_CATEGORIES = new Set<ProductCategory>([
-  "intelligence",
-  "reporting",
-  "reporting_premium",
-]);
-
-const ORIGINATOR_CATEGORIES = new Set<ProductCategory>([
-  "decision_tools",
-  "execution",
-  "execution_premium",
-  "governed_playbook",
-]);
-
 const ORIGINATOR_SURFACE_TYPES = new Set<SurfaceType>([
   "diagnostic",
   "instrument",
@@ -47,13 +32,7 @@ const ORIGINATOR_SURFACE_TYPES = new Set<SurfaceType>([
   "product",
 ]);
 
-export type ProductJudgementRunRole =
-  | "originator"
-  | "derivative"
-  | "wrapper"
-  | "proof_surface"
-  | "fulfilment"
-  | "unsupported";
+export type ProductJudgementRunRole = ProductIntelligenceClass;
 
 export interface ProductEvidenceLedgerSource {
   sourceId: string;
@@ -78,6 +57,7 @@ export interface ProductEvidenceLedgerEntry {
   productName: string;
   productFamily: string;
   category: ProductCategory | "unclassified";
+  intelligenceClass: ProductIntelligenceClass;
   evidenceState: EvidenceState;
   ledgerStatus: LedgerStatus;
   authorityState: AuthorityState;
@@ -141,95 +121,93 @@ function getPrimarySurfaceType(surfaceTypes: Array<SurfaceType | "no_surface">):
 }
 
 function buildRunPolicy(
-  backboneProduct: ProductAuthorityBackboneRecord,
-  category: ProductCategory | undefined,
+  intelligenceClass: ProductIntelligenceClass,
   surfaces: ProductSurface[],
 ): ProductJudgementRunPolicy {
   const surfaceTypes = getSurfaceTypes(surfaces);
   const primarySurfaceType = getPrimarySurfaceType(surfaceTypes);
 
-  if (category === "evidence") {
-    return {
-      role: "proof_surface",
-      mayOriginateJudgementRuns: false,
-      primarySurfaceType,
-      surfaceTypes,
-      blockers: ["Evidence and proof products may display or verify judgement outputs, but they must not originate them."],
-      rationale: ["Catalog category is evidence, so the surface is treated as a proof surface."],
-    };
+  switch (intelligenceClass) {
+    case "originator":
+      return {
+        role: intelligenceClass,
+        mayOriginateJudgementRuns: true,
+        primarySurfaceType,
+        surfaceTypes,
+        blockers: [],
+        rationale: [
+          "Judgement-run authority is inherited from the canonical product intelligence classification.",
+          primarySurfaceType === "no_surface"
+            ? "No product surface is registered, so origination depends entirely on the canonical classification."
+            : `Primary mapped surface type ${primarySurfaceType} remains compatible with originator posture.`,
+        ],
+      };
+    case "derivative":
+      return {
+        role: intelligenceClass,
+        mayOriginateJudgementRuns: false,
+        primarySurfaceType,
+        surfaceTypes,
+        blockers: [
+          "Derivative products may package or transform prior judgement, but they must not originate judgement runs.",
+        ],
+        rationale: [
+          "Judgement-run restrictions are inherited from the canonical product intelligence classification.",
+        ],
+      };
+    case "wrapper":
+      return {
+        role: intelligenceClass,
+        mayOriginateJudgementRuns: false,
+        primarySurfaceType,
+        surfaceTypes,
+        blockers: [
+          "Wrapper products may route, package, or entitle access, but they must not originate judgement runs.",
+        ],
+        rationale: [
+          "Wrapper posture is inherited from the canonical product intelligence classification.",
+        ],
+      };
+    case "infrastructure":
+      return {
+        role: intelligenceClass,
+        mayOriginateJudgementRuns: false,
+        primarySurfaceType,
+        surfaceTypes,
+        blockers: [
+          "Infrastructure products may govern or support intelligence delivery, but they must not originate judgement runs.",
+        ],
+        rationale: [
+          "Infrastructure posture is inherited from the canonical product intelligence classification.",
+        ],
+      };
+    case "fulfilment":
+      return {
+        role: intelligenceClass,
+        mayOriginateJudgementRuns: false,
+        primarySurfaceType,
+        surfaceTypes,
+        blockers: [
+          "Fulfilment products may deliver an existing judgement artifact, but they must not originate judgement runs.",
+        ],
+        rationale: [
+          "Fulfilment posture is inherited from the canonical product intelligence classification.",
+        ],
+      };
+    case "proof_surface":
+      return {
+        role: intelligenceClass,
+        mayOriginateJudgementRuns: false,
+        primarySurfaceType,
+        surfaceTypes,
+        blockers: [
+          "Proof-surface products may display or verify judgement outputs, but they must not originate them.",
+        ],
+        rationale: [
+          "Proof-surface posture is inherited from the canonical product intelligence classification.",
+        ],
+      };
   }
-
-  if (category && WRAPPER_CATEGORIES.has(category)) {
-    return {
-      role: "wrapper",
-      mayOriginateJudgementRuns: false,
-      primarySurfaceType,
-      surfaceTypes,
-      blockers: ["Wrapper, bundle, membership, and retainer products may route or entitle access, but they must not originate judgement runs."],
-      rationale: [`Catalog category ${category} is a wrapper-style commercial surface.`],
-    };
-  }
-
-  if (category && DERIVATIVE_CATEGORIES.has(category)) {
-    return {
-      role: "derivative",
-      mayOriginateJudgementRuns: false,
-      primarySurfaceType,
-      surfaceTypes,
-      blockers: ["Derivative report and intelligence products may package findings, but they must not originate judgement runs."],
-      rationale: [`Catalog category ${category} is a derivative output surface.`],
-    };
-  }
-
-  if (
-    surfaceTypes.length > 0 &&
-    surfaceTypes.every((surfaceType) => surfaceType === "proof_surface")
-  ) {
-    return {
-      role: "proof_surface",
-      mayOriginateJudgementRuns: false,
-      primarySurfaceType,
-      surfaceTypes,
-      blockers: ["Proof surfaces are evidence-review surfaces and must not originate judgement runs."],
-      rationale: ["All mapped product surfaces are proof surfaces."],
-    };
-  }
-
-  if (
-    surfaceTypes.length > 0 &&
-    surfaceTypes.every((surfaceType) => surfaceType === "fulfilment_layer")
-  ) {
-    return {
-      role: "fulfilment",
-      mayOriginateJudgementRuns: false,
-      primarySurfaceType,
-      surfaceTypes,
-      blockers: ["Fulfilment surfaces may deliver an existing judgement artifact, but they must not originate judgement runs."],
-      rationale: ["All mapped product surfaces are fulfilment layers."],
-    };
-  }
-
-  if (category && ORIGINATOR_CATEGORIES.has(category)) {
-    return {
-      role: "originator",
-      mayOriginateJudgementRuns: true,
-      primarySurfaceType,
-      surfaceTypes,
-      blockers: [],
-      rationale: [`Catalog category ${category} is permitted to originate judgement runs.`],
-    };
-  }
-
-  return {
-    role: "unsupported",
-    mayOriginateJudgementRuns: false,
-    primarySurfaceType,
-    surfaceTypes,
-    blockers: [
-      `No explicit judgement-run origination contract exists for product category ${category ?? "unclassified"}.`,
-    ],
-    rationale: ["The product does not match an originator, wrapper, derivative, fulfilment, or proof-surface contract."],
-  };
 }
 
 function toLedgerSource(source: EvidenceSource): ProductEvidenceLedgerSource {
@@ -247,13 +225,18 @@ function toLedgerEntry(backboneProduct: ProductAuthorityBackboneRecord): Product
   const catalogProduct = getProduct(backboneProduct.productId);
   const category = catalogProduct?.category ?? "unclassified";
   const surfaces = getCatalogSurfaces(backboneProduct.productId);
-  const judgementRunPolicy = buildRunPolicy(backboneProduct, catalogProduct?.category, surfaces);
+  const intelligenceClassification = getProductIntelligenceClassification(backboneProduct.productId);
+  const judgementRunPolicy = buildRunPolicy(
+    intelligenceClassification.classification,
+    surfaces,
+  );
 
   return {
     productId: backboneProduct.productId,
     productName: backboneProduct.productName,
     productFamily: backboneProduct.productFamily,
     category,
+    intelligenceClass: intelligenceClassification.classification,
     evidenceState: backboneProduct.evidence.evidenceState,
     ledgerStatus: backboneProduct.ledger.ledgerStatus,
     authorityState: backboneProduct.authorityClearance.state,
@@ -317,9 +300,9 @@ function buildSummary(entries: ProductEvidenceLedgerEntry[]): ProductEvidenceLed
     originator: 0,
     derivative: 0,
     wrapper: 0,
+    infrastructure: 0,
     proof_surface: 0,
     fulfilment: 0,
-    unsupported: 0,
   };
 
   for (const entry of entries) {

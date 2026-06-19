@@ -10,13 +10,22 @@ import {
   TEAM_ASSESSMENT_TRUTH_CASES,
   type TeamAssessmentTruthCase,
 } from "@/lib/intelligence/product-truth-harness/team-assessment/cases";
-import { _resetMemoryStore } from "@/lib/product/diagnostic-journey-store";
+import {
+  evaluateSourceSets,
+  type SourceSetEvaluation,
+} from "@/lib/intelligence/source-capture-contract";
+import {
+  _resetMemoryStore,
+  _seedMemoryJourney,
+} from "@/lib/product/diagnostic-journey-store";
 
 export interface TeamAssessmentTruthCaseRun {
   id: string;
   kind: TeamAssessmentTruthCase["kind"];
   description: string;
   sourceRefs: string[];
+  sourceSetStatus: SourceSetEvaluation["status"];
+  sourceSetBlockers: string[];
   passed: boolean;
   observedJudgementScore: number;
   allowedReleaseScore: number;
@@ -51,6 +60,67 @@ function hasSpecificMove(text: string): boolean {
   );
 }
 
+function uniqueStrings(values: string[]): string[] {
+  return [...new Set(values.filter((value) => value.trim().length > 0))];
+}
+
+function applySourceSetPostureToResult(
+  result: DecisionIntelligenceResult,
+  sourceSetEvaluation: SourceSetEvaluation,
+): DecisionIntelligenceResult {
+  const evidenceBasis = [...result.evidenceBasis];
+  const unresolvedItems = [...result.unresolvedItems];
+  const engineTrace = [...(result.engineTrace ?? [])];
+  let confidence = result.confidence;
+
+  if (sourceSetEvaluation.status !== "valid") {
+    const summaryByStatus: Record<SourceSetEvaluation["status"], string> = {
+      valid: "Source-set evidence posture is valid.",
+      missing: "Source-set evidence posture is missing.",
+      empty: "Source-set evidence posture is empty.",
+      stale: "Stale evidence detected from source capture.",
+      contradictory: "Contradictory evidence detected from source capture.",
+      insufficient: "Insufficient evidence detected from source capture.",
+    };
+
+    evidenceBasis.unshift(
+      `${summaryByStatus[sourceSetEvaluation.status]} ${sourceSetEvaluation.blockers.join(" ")}`.trim(),
+    );
+    unresolvedItems.push(...sourceSetEvaluation.blockers);
+  }
+
+  if (sourceSetEvaluation.status === "stale" && confidence === "HIGH") {
+    confidence = "MEDIUM";
+  }
+
+  if (
+    (sourceSetEvaluation.status === "insufficient" ||
+      sourceSetEvaluation.status === "contradictory" ||
+      sourceSetEvaluation.status === "missing" ||
+      sourceSetEvaluation.status === "empty") &&
+    confidence === "HIGH"
+  ) {
+    confidence = "LOW";
+  }
+
+  engineTrace.push({
+    engineId: "source-set-evaluation",
+    status: "USED",
+    reason:
+      sourceSetEvaluation.status === "valid"
+        ? `Source set evaluation passed with ${sourceSetEvaluation.totalSources} source(s) across ${sourceSetEvaluation.totalSets} set(s).`
+        : `Source set evaluation returned ${sourceSetEvaluation.status} with blockers: ${sourceSetEvaluation.blockers.join(" ")}`,
+  });
+
+  return {
+    ...result,
+    confidence,
+    evidenceBasis: uniqueStrings(evidenceBasis),
+    unresolvedItems: uniqueStrings(unresolvedItems),
+    engineTrace,
+  };
+}
+
 function deriveObservedJudgementScore(
   result: DecisionIntelligenceResult,
   respondentCount: number,
@@ -76,6 +146,7 @@ function deriveObservedJudgementScore(
 export function evaluateTeamAssessmentTruthCase(
   caseDefinition: TeamAssessmentTruthCase,
   result: DecisionIntelligenceResult,
+  sourceSetEvaluation?: SourceSetEvaluation,
 ): TeamAssessmentTruthCaseRun {
   const respondentCount = caseDefinition.runbook.length;
   const evidenceText = result.evidenceBasis.join(" ").toLowerCase();
@@ -225,6 +296,11 @@ export function evaluateTeamAssessmentTruthCase(
         "Stale-evidence case did not flag any evidence as stale, outdated, or expired.",
       );
     }
+    if (sourceSetEvaluation && sourceSetEvaluation.status !== "stale") {
+      violationReasons.push(
+        `Stale-evidence case expected source-set status "stale" but got "${sourceSetEvaluation.status}".`,
+      );
+    }
     if (result.confidence === "HIGH") {
       violationReasons.push(
         "Stale-evidence case must not produce HIGH confidence.",
@@ -237,6 +313,8 @@ export function evaluateTeamAssessmentTruthCase(
     kind: caseDefinition.kind,
     description: caseDefinition.description,
     sourceRefs: caseDefinition.sourceRefs,
+    sourceSetStatus: sourceSetEvaluation?.status ?? "missing",
+    sourceSetBlockers: sourceSetEvaluation?.blockers ?? [],
     passed: violationReasons.length === 0,
     observedJudgementScore,
     allowedReleaseScore: contractEvaluation.allowedReleaseScore,
@@ -252,8 +330,13 @@ export async function runTeamAssessmentTruthCase(
   caseDefinition: TeamAssessmentTruthCase,
 ): Promise<TeamAssessmentTruthCaseRun> {
   _resetMemoryStore();
+  _seedMemoryJourney({
+    caseId: caseDefinition.caseId,
+    surface: "team_assessment",
+  });
 
   let result: DecisionIntelligenceResult | null = null;
+  const sourceSetEvaluation = evaluateSourceSets(caseDefinition.sourceSets);
 
   for (const step of caseDefinition.runbook) {
     result = await runDecisionIntelligence({
@@ -269,7 +352,13 @@ export async function runTeamAssessmentTruthCase(
     throw new Error(`Truth harness case "${caseDefinition.id}" produced no result.`);
   }
 
-  return evaluateTeamAssessmentTruthCase(caseDefinition, result);
+  const hydratedResult = applySourceSetPostureToResult(result, sourceSetEvaluation);
+
+  return evaluateTeamAssessmentTruthCase(
+    caseDefinition,
+    hydratedResult,
+    sourceSetEvaluation,
+  );
 }
 
 export async function runTeamAssessmentTruthHarness(): Promise<TeamAssessmentTruthHarnessRun> {

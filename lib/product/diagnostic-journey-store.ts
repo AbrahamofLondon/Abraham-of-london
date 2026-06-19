@@ -433,3 +433,31 @@ export async function listDiagnosticJourneysForActor(params: {
 export function _resetMemoryStore(): void {
   memoryStore.clear()
 }
+
+/**
+ * Seed an in-memory journey record without touching Prisma.
+ * Used by local harnesses that need aggregate respondent continuity
+ * but must not require database availability.
+ */
+export function _seedMemoryJourney(params: {
+  caseId: string
+  surface: DiagnosticJourneySurface
+  email?: string | null
+  accountId?: string | null
+}): DiagnosticJourneyRecord {
+  const existing = memoryStore.get(params.caseId)
+  if (existing) {
+    existing.currentSurface = params.surface
+    existing.updatedAt = new Date().toISOString()
+    return existing
+  }
+
+  const record = createDiagnosticJourneyRecord({
+    caseId: params.caseId,
+    surface: params.surface,
+    email: params.email,
+    accountId: params.accountId,
+  })
+  memoryStore.set(params.caseId, record)
+  return record
+}

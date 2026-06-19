@@ -4,6 +4,7 @@ import {
   buildProductEvidenceLedger,
   getProductEvidenceLedgerEntry,
 } from "@/lib/intelligence/product-evidence-ledger";
+import { buildProductIntelligenceClassificationReport } from "@/lib/intelligence/product-intelligence-classification";
 
 describe("product evidence ledger", () => {
   const ledger = buildProductEvidenceLedger();
@@ -15,11 +16,12 @@ describe("product evidence ledger", () => {
     for (const entry of ledger.entries) {
       expect(entry.productId).toBeTruthy();
       expect(entry.productName).toBeTruthy();
+      expect(entry.intelligenceClass).toBeTruthy();
       expect(entry.evidenceState).toBeTruthy();
       expect(entry.ledgerStatus).toBeTruthy();
       expect(entry.authorityState).toBeTruthy();
       expect(entry.evidenceLedgerEntryId).toBeTruthy();
-      expect(entry.judgementRunPolicy.role).not.toBe("unsupported");
+      expect(entry.judgementRunPolicy.role).toBe(entry.intelligenceClass);
     }
   });
 
@@ -61,12 +63,24 @@ describe("product evidence ledger", () => {
     expect(getProductEvidenceLedgerEntry("case_dossier_tariff_shock")?.judgementRunPolicy.role).toBe("proof_surface");
     expect(getProductEvidenceLedgerEntry("case_dossier_tariff_shock")?.judgementRunPolicy.mayOriginateJudgementRuns).toBe(false);
 
-    expect(getProductEvidenceLedgerEntry("gmi_q2_2026")?.judgementRunPolicy.role).toBe("derivative");
+    expect(getProductEvidenceLedgerEntry("gmi_q2_2026")?.judgementRunPolicy.role).toBe("proof_surface");
     expect(getProductEvidenceLedgerEntry("gmi_q2_2026")?.judgementRunPolicy.mayOriginateJudgementRuns).toBe(false);
   });
 
-  it("has no silent origination fallbacks", () => {
-    expect(ledger.summary.runRoles.unsupported).toBe(0);
-    expect(ledger.summary.runRoles.originator).toBeGreaterThan(0);
+  it("consumes the canonical intelligence classification for all 43 products", () => {
+    const classificationReport = buildProductIntelligenceClassificationReport();
+    const ledgerRoleCounts = ledger.summary.runRoles;
+
+    expect(classificationReport.classifiedProductCount).toBe(43);
+
+    for (const entry of ledger.entries) {
+      const classification = classificationReport.classifications.find(
+        (item) => item.productCode === entry.productId,
+      );
+      expect(classification?.classification).toBe(entry.intelligenceClass);
+      expect(entry.judgementRunPolicy.role).toBe(classification?.classification);
+    }
+
+    expect(ledgerRoleCounts).toEqual(classificationReport.countsByClass);
   });
 });
