@@ -1,98 +1,82 @@
 # Market-Ready Expansion Audit — Fathering Without Fear
 
-**Date:** 2026-06-23
-**Current total:** ~42,204 words (body only, 22 chapters)
-**Previously reported:** 38,094 (may have excluded frontmatter/endnotes differently)
+**Date:** 2026-06-23 (updated from initial draft; word counts recalculated)
+**Current prose total:** ~37,860 words (22 chapters, prose-only strip)
+**Prior audit total:** ~42,204 (that count included in-file processing notes; corrected here)
 **Stage:** D — Architecture/control pass complete. Not yet final market-length pass.
+
+---
+
+## Counting Methodology
+
+All word counts strip: YAML frontmatter, chapter-title heading (`#`), horizontal rules (`---`), and
+`*...*`-delimited processing/drafting notes. Prose direct addresses written as part of the narrative
+text are counted separately where confirmed. The counts below reflect publishable prose only.
+Processing-note content (Wave drafts, AUTHOR DETAIL NEEDED blocks, gate annotations) is not prose.
 
 ---
 
 ## Chapter-by-Chapter Expansion Table
 
-| Ch | Title | Words | Function | Verdict | Expansion Type | Est. Target | Est. Add | Source Needed? |
-| :- | :---- | ----: | :------- | :------ | :------------- | ----------: | -------: | :------------- |
-| 1 | Hounslow Call | 1,190 | Opening — phone call that reorganises everything | Controlled but underdeveloped | Scene expansion; sensory detail (the flat, the phone, the moment before answering) | 1,500–1,800 | 300–600 | Room detail; time of day; what Abraham saw/heard before the call |
-| 2 | Isua to Agege | 1,038 | Ancestral origin — lineage, name, missionary departure | Controlled but underdeveloped | Historical/contextual expansion; sensory detail (the road, the tailoring, the boolekaja journey) | 1,500–2,000 | 500–1,000 | More detail on Abraham Adaramola's life in Lagos; Iyalode's early years |
-| 3 | Boy Who Was Already Old | 1,234 | Childhood — early speech, Iyalode's rejection, father's certainty | Controlled but underdeveloped | Memory-fragment expansion; ordinary domestic detail (house, meals, family interactions) | 1,800–2,500 | 600–1,300 | Childhood scenes; specific memories of Iyalode's rejection; father's teaching |
-| 4 | A Hearing Date | 1,234 | Present-day legal machinery — the court as room | Saturated | No expansion — legally constrained, intentionally brief | 1,200–1,400 | 0–200 | None |
-| 5 | Jumoke | 954 | Twin sister's death — kitchen visitation | Controlled but underdeveloped | Scene expansion; ordinary domestic detail (Jumoke as living child before the death) | 1,500–2,000 | 500–1,000 | One mundane detail about Jumoke as a living child; the kitchen; the day |
-| 6 | Fire and the Deal | 2,515 | Near-death, hell, bargain, waking fire | Saturated | No expansion — already fully rendered from source detail | 2,500–2,800 | 0–300 | None |
-| 7 | Name That Had to Be Powerful | 1,196 | Iyalode speaks Jesus' name | Controlled but underdeveloped | Scene expansion; sensory detail (the room, her voice, the moment) | 1,500–2,000 | 300–800 | The room where Iyalode spoke; her exact words or closest memory |
-| 8 | Spiritual Covering | 1,010 | Iyalode's full introduction | Skeletal | Memory-fragment expansion; ordinary family detail (her beauty, her authority, her daily life) | 1,500–2,500 | 500–1,500 | Scenes of Iyalode in daily life; specific memories of her presence |
-| 9 | Father at Fifteen | 1,305 | David Senior raising siblings alone | Controlled but underdeveloped | Historical/contextual expansion; ordinary domestic detail | 1,800–2,500 | 500–1,200 | More detail on David Senior's childhood; the visitations from his own father |
-| 10 | Leaving Lagos | 906 | August 2017 departure | Intentionally brief | Minimal expansion — sensory detail (the departure itself, what was left behind) | 1,200–1,500 | 300–600 | What Abraham packed; who saw him off; the moment of leaving |
-| 11 | A Post on Facebook | 866 | Grief post, reply, invitation | Controlled but underdeveloped | Scene expansion; message sequence (texts, call, the invitation unfolding) | 1,200–1,500 | 300–600 | The phone call itself; what was said; the decision to go |
-| 12 | Married by December | 3,802 | Marriage speed, absence of the dead | Saturated | No expansion — already the longest chapter, fully rendered | 3,800–4,200 | 0–400 | None |
-| 13 | Serena | 901 | National service, journal, spiritual warning | Controlled but underdeveloped | Scene expansion; memory-fragment expansion (the voice, the near-death experiences) | 1,200–1,800 | 300–900 | The voice/threat detail; the two near-death experiences; one physical detail each |
-| 14 | David Was Missing | 3,763 | Brother's death — trance, absence, confirmation | Saturated | No expansion — fully rendered, emotionally complete | 3,700–4,000 | 0–300 | None |
-| 15 | Funke | 903 | Sister's death — protector, medical bill, divorce | Controlled but underdeveloped | Scene expansion; ordinary domestic detail (Funke as living person before the death) | 1,500–2,000 | 600–1,100 | One mundane detail about Funke; the phone call; the medical bill |
-| 16 | Fatherhood Began Outside | 1,275 | Expulsion, fatherhood beginning outside a door | Legally constrained | Minimal expansion — sensory detail only; no legal chronology | 1,500–1,800 | 200–500 | The door; the moment of being told to leave; what Abraham carried |
-| 17 | What the System Sees | 3,040 | Contact room — what the file cannot see | Saturated | No expansion — legally constrained, formally complete | 3,000–3,200 | 0–200 | None |
-| 18 | Seven Years | 3,743 | Duration — calendar, repetition, formation | Saturated | No expansion — formally complete | 3,700–4,000 | 0–300 | None |
-| 19 | Damisi | 3,381 | The child as person, not evidence | Saturated | No expansion — child protection boundary, formally complete | 3,300–3,500 | 0–200 | None |
-| 20 | Love Does Not Fear | 3,291 | Theological synthesis — 1 John 4:18 | Saturated | No expansion — theological restraint, formally complete | 3,200–3,500 | 0–200 | None |
-| 21 | Devotion | 2,898 | David Senior's death — Norwich, devotion, the whole inheritance | Saturated | No expansion — fully rendered, emotionally complete | 2,800–3,200 | 0–300 | None |
-| 22 | Final Room | 1,759 | Closing — dining table, presence | Controlled but underdeveloped | Minimal expansion — sensory detail (the room, the people, the ordinary moment) | 2,000–2,500 | 200–700 | Who was at the table; what was said; one sensory detail |
+| Ch | Title | Words | Verdict | Expansion Allowed | Expansion Prohibited | Target | Est. Add |
+| :- | :---- | ----: | :------ | :---------------- | :------------------- | -----: | -------: |
+| 1 | Hounslow Call | 1,184 | Controlled but underdeveloped | Scene; sensory (flat, phone, moment before answering) | Legal; allegation; court reference | 1,800–2,200 | 600–1,000 |
+| 2 | Isua to Agege | 912 | **Skeletal** — founding chapter | Historical/contextual; sensory (road, tailoring, arrival in Lagos); memory-fragment | Ancestry prestige; invented genealogy; Oba of Benin as fact | 2,000–2,500 | 1,100–1,600 |
+| 3 | Boy Who Was Already Old | 820 | **Skeletal** — naming chapter | Memory-fragment; domestic detail (house, meals); Iyalode doubt + David Senior recognition | Mystification; reincarnation endorsed as fact; Ch.6 anticipation | 1,800–2,200 | 980–1,380 |
+| 4 | A Hearing Date | 846 | Intentionally brief — legally constrained | Minimal sensory only (Teams screen, room, body-in-waiting) | Legal chronology; named parties; court documents | 1,000–1,200 | 150–350 |
+| 5 | Jumoke | 636 | **Skeletal** — first death | Scene (Jumoke as living child before death); ordinary domestic; clinging-presence texture | Sentimentalisation; supernatural spectacle; Ch.6 fire anticipation | 1,500–2,000 | 864–1,364 |
+| 6 | Fire and the Deal | 2,451 | Saturated | None | Any expansion | 2,400–2,600 | 0 |
+| 7 | Name That Had to Be Powerful | 837 | Controlled but underdeveloped | Scene (Iyalode speaking, the room, the weight); ordinary-presence detail | Evangelical register; doctrinal explanation; making it theatrical | 1,500–1,800 | 663–963 |
+| 8 | Spiritual Covering | 666 | **Skeletal** — major character | Full scene; ordinary domestic (neatness, meals, visits, people treating family differently); contradiction rendering | Hagiography; condemnation; exoticisation; resolving her contradiction | 1,800–2,500 | 1,134–1,834 |
+| 9 | Father at Fifteen | 927 | **Skeletal** | Historical/contextual; scene (farming, working in homes, keeping siblings); promise-keeping texture across years | Hagiography; genealogy catalogue; theatrical founding-ancestor appearance | 2,000–2,500 | 1,073–1,573 |
+| 10 | Leaving Lagos | 616 | **Skeletal** — three major events in 616 words | Scene (departure morning, Heathrow texture, provision moments); retrospective discernment lesson; post-burial vulnerability | David Senior's death as full emotional rendering (Ch.21 territory); Facebook/invitation (Ch.11 territory); moralising the lesson | 2,200–2,800 | 1,584–2,184 |
+| 11 | A Post on Facebook | 791 | Controlled but underdeveloped | Scene (post texture, reply landing, invitation quality) | Motive diagnosis; naming her; flattening the plane-crash detail; dramatic-irony warning to reader | 1,200–1,500 | 409–709 |
+| 12 | Married by December | 3,786 | Saturated — legally aware | None | Legal records; chat content; court documents; villain construction | 3,700–4,000 | 0 |
+| 13 | Serena | 812 | Controlled but underdeveloped | Scene (national service ordinary life — walking, shirts, Aba trips); memory-fragment (voice, near-death) | Sexualisation; gossip register; spiritual overclaiming; drawing the line to London explicitly | 1,500–2,000 | 688–1,188 |
+| 14 | David Was Missing From the Wedding | 3,483 | Saturated | None | Any expansion | 3,400–3,600 | 0 |
+| 15 | Funke | 733 | **Skeletal** — grief hinge | Scene (Funke as living person before death); "small mummy" texture; ordinary before the loss | Grief spectacle; duplication of Ch.14 register; Ch.16 anticipation | 1,500–2,000 | 767–1,267 |
+| 16 | Fatherhood Began Outside | 1,146 | Legally constrained | Sensory (door offered, expulsion moment, staying); emotional texture of the door refused | Allegation detail; sealed orders; revenge prose; clinical diagnosis | 1,800–2,200 | 654–1,054 |
+| 17 | What the System Sees | 2,806 | Saturated — legally constrained | None | Named hearings; sealed orders; court outcomes; complaint register | 2,800–3,000 | 0 |
+| 18 | Seven Years | 3,523 | Saturated | None | Legal chronology dump; grievance accumulation; martyrdom register | 3,500–3,700 | 0 |
+| 19 | Damisi | 3,321 | Saturated — child protection | None | Damisi as evidence; adversarial mother register; medical/assessment claims | 3,300–3,500 | 0 |
+| 20 | Love Does Not Fear | 3,160 | Saturated — theological restraint | None | Sermon; false resolution; cheap victory language; collapse into Ch.21 | 3,100–3,400 | 0 |
+| 21 | Devotion | 2,719 | Near-saturated — recently expanded | Minimal if structural gap found (none identified currently) | Duplication of Ch.10 or Ch.9 territory; David Senior as hagiography | 2,800–3,000 | 81–281 |
+| 22 | Final Room | 1,685 | Controlled but underdeveloped | Scene; sensory (room, people, ordinary moment at the table); closing weight | Triumphalism; resolution shopping; sermon; earned-peace speech | 2,000–2,500 | 315–815 |
 
 ---
 
-## Summary
+## Part-Level Word Count Analysis
 
-| Category | Count | Chapters |
-| :------- | ----: | :------- |
-| **Saturated** — no expansion needed | 9 | 4, 6, 12, 14, 17, 18, 19, 20, 21 |
-| **Controlled but underdeveloped** — expansion would strengthen | 9 | 1, 2, 3, 5, 7, 9, 11, 13, 15 |
-| **Skeletal** — needs substantial expansion | 1 | 8 (Spiritual Covering) |
-| **Legally constrained** — minimal expansion only | 2 | 16, 22 |
-| **Intentionally brief** — minimal expansion only | 1 | 10 (Leaving Lagos) |
+| Part | Chapters | Current Words | Chapters Avg | Share of Book |
+| :--- | :------: | -----------: | -----------: | ------------: |
+| Part One (Ch.1–5) | 5 | 4,398 | 880 | 11.6% |
+| Part Two (Ch.6–10) | 5 | 5,497 | 1,099 | 14.5% |
+| Part Three (Ch.11–16) | 6 | 10,751 | 1,792 | 28.4% |
+| Part Four (Ch.17–22) | 6 | 17,214 | 2,869 | 45.5% |
+| **Total** | **22** | **37,860** | **1,721** | **100%** |
+
+**Critical imbalance:** Parts One and Two together account for only 26% of the manuscript while covering
+the entire ancestral and childhood foundation (Ch.1–10). Part Four alone accounts for 45%. The book is
+dramatically back-loaded. The average Part One/Two chapter (880 and 1,099 words) is 3× shorter than
+the average Part Four chapter (2,869 words). Early chapters are skeletal; late chapters are developed.
+Expansion should concentrate on Parts One and Two.
 
 ---
 
 ## Top 10 Expansion Opportunities (Ranked)
 
 | Rank | Ch | Title | Current | Est. Add | Why |
-| :-- | :- | :---- | ------: | -------: | :-- |
-| 1 | 8 | Spiritual Covering | 1,010 | 500–1,500 | Most under-built chapter relative to importance. Iyalode is a major figure but rendered in ~1,000 words. Needs scenes of her daily life, her authority, her contradiction. |
-| 2 | 3 | Boy Who Was Already Old | 1,234 | 600–1,300 | Childhood is the book's foundation. More domestic detail, family interaction, early speech, Iyalode's rejection would strengthen everything that follows. |
-| 3 | 5 | Jumoke | 954 | 500–1,000 | The first death in the book. Jumoke needs to be a living child before she becomes a visitation. Currently compressed to the point of feeling functional. |
-| 4 | 15 | Funke | 903 | 600–1,100 | Same as Jumoke — Funke needs to be a living person before she becomes a loss. The medical bill detail is powerful but compressed. |
-| 5 | 9 | Father at Fifteen | 1,305 | 500–1,200 | David Senior's childhood is one of the book's most extraordinary stories. More detail on how he raised his siblings alone, the visitations, the provision. |
-| 6 | 2 | Isua to Agege | 1,038 | 500–1,000 | The ancestral opening. More sensory detail on the road, the tailoring, the boolekaja journey, Abraham Adaramola's life in Lagos would strengthen the foundation. |
-| 7 | 7 | Name That Had to Be Powerful | 1,196 | 300–800 | Iyalode speaking Jesus' name is a key spiritual moment. The room, her voice, the exact memory would make it land harder. |
-| 8 | 13 | Serena | 901 | 300–900 | The voice/threat and near-death experiences are currently summaries. One physical detail each would turn them into moments. |
-| 9 | 1 | Hounslow Call | 1,190 | 300–600 | The opening chapter. More sensory detail on the flat, the phone, the moment before answering would strengthen the hook. |
-| 10 | 11 | A Post on Facebook | 866 | 300–600 | The phone call itself is the missing piece. What was said, how the invitation unfolded, the decision. |
-
----
-
-## Estimated Additional Word Count Available
-
-| Scenario | Current | Est. Add | Target | Verdict |
-| :------- | ------: | -------: | -----: | :------ |
-| Minimal responsible expansion | 42,204 | 4,000–6,000 | **46,000–48,000** | Safe, strengthens without diluting |
-| Moderate expansion (top 5 chapters) | 42,204 | 6,000–10,000 | **48,000–52,000** | Achievable if source material is available |
-| Full expansion (all underdeveloped) | 42,204 | 10,000–16,000 | **52,000–58,000** | Requires substantial new source material |
-| Maximum possible (all chapters) | 42,204 | 14,000–20,000 | **56,000–62,000** | Would risk diluting compression |
-
----
-
-## Recommended Target Length
-
-### EXPAND TO 45,000–50,000 WORDS
-
-**Rationale:**
-
-1. **The book's compression is a strength, not a weakness.** The 38,000–42,000 word current range is a valid literary form. But several chapters are compressed to the point of feeling functional rather than felt. A responsible expansion to 45,000–50,000 words would strengthen those chapters without losing the book's formal discipline.
-
-2. **The saturated chapters (9 of 22) should not be touched.** Chapters 4, 6, 12, 14, 17, 18, 19, 20, and 21 are formally complete. Expanding them would weaken the book.
-
-3. **The expansion opportunity is concentrated in the ancestral and early-life chapters (1–11).** This is where the book's foundation is laid. Strengthening these chapters would make the later, heavier chapters land harder.
-
-4. **45,000–50,000 words is a commercially legible length for a literary memoir.** *Crying in H Mart* (~45K), *Stay True* (~45K), *Minor Feelings* (~45K), and *Grief Is for People* (~52K) all sit in this range. It is short enough to be distinctive, long enough to be taken seriously as a full-length book.
-
-5. **The 55,000–60,000 range is achievable but source-dependent.** It would require the author to supply new material for the skeletal and underdeveloped chapters. Without new source material, expansion beyond 50,000 would risk padding.
-
-6. **The 65,000–75,000 range is not recommended.** The book's formal strategy is compression. Doubling the word count would change the book's nature, not improve it. If the author wants to write a longer book, that is a different project.
+| :--: | :-: | :---- | ------: | -------: | :-- |
+| 1 | 10 | Leaving Lagos | 616 | 1,584–2,184 | Three major events (departure, provision arc, David Senior's death/burial) compressed into 616 words. The most under-built chapter relative to confirmed source material. |
+| 2 | 8 | Spiritual Covering | 666 | 1,134–1,834 | Iyalode is the book's most complex figure after David Senior. Her full portrait confirmed ready: ordinary details, dual spiritual frame, contradiction. Currently 666 words. |
+| 3 | 5 | Jumoke | 636 | 864–1,364 | The book's first and most structurally important death. Jumoke as a living child before the kitchen is confirmed and available. 636 words is too compressed for this weight. |
+| 4 | 2 | Isua to Agege | 912 | 1,100–1,600 | The founding chapter. Ancestral history available. Sensory grounding of the road, the tailoring, the departure toward Eko. Currently abstract for what the treatment demands. |
+| 5 | 9 | Father at Fifteen | 927 | 1,073–1,573 | David Senior at fifteen is one of the extraordinary stories in the book. Farming, homes, siblings, promises, correspondence college — compressed into under 1,000 words. |
+| 6 | 3 | Boy Who Was Already Old | 820 | 980–1,380 | The naming chapter. Iyalode's doubt and David Senior's recognition are confirmed and specific. At 820 words the chapter carries the function but not the weight. |
+| 7 | 15 | Funke | 733 | 767–1,267 | Grief hinge. Funke as "small mummy" is a confirmed, distinctive characterisation. She needs to be a person before she becomes a loss. 733 words is the skeletal minimum. |
+| 8 | 16 | Fatherhood Began Outside | 1,146 | 654–1,054 | The structural turn from Part Three to Part Four. The door offered and refused deserves more weight. Legally constrained but emotionally undersized at 1,146 words. |
+| 9 | 13 | Serena | 812 | 688–1,188 | National service life is rich and confirmed (Awka, shirts, Aba fabric trips, shared proximity). Currently compressed. The voice and near-death experiences need physical anchoring. |
+| 10 | 22 | Final Room | 1,685 | 315–815 | The book's closing scene. Sensory detail of the room and the gathering would give it earned weight rather than formal brevity. |
 
 ---
 
@@ -100,48 +84,134 @@
 
 | Ch | Title | Reason |
 | :- | :---- | :----- |
-| 4 | A Hearing Date | Legally constrained. The brevity is the point — the court reduces a life to ten minutes on a screen. |
-| 6 | Fire and the Deal | Fully rendered. All source detail incorporated. Any expansion would be invention. |
-| 12 | Married by December | Already the longest chapter. Fully rendered. |
-| 14 | David Was Missing | Fully rendered. Emotionally complete. |
-| 17 | What the System Sees | Legally constrained. Formally complete. |
-| 18 | Seven Years | Formally complete. Duration rendered through repetition, not expansion. |
-| 19 | Damisi | Child protection boundary. Must not become evidence. |
-| 20 | Love Does Not Fear | Theological restraint. Must not become sermon. |
-| 21 | Devotion | Fully rendered. Emotionally complete. |
+| 6 | Fire and the Deal | Fully rendered from source detail. Any expansion would be invention. |
+| 12 | Married by December | Already 3,786 words — the book's longest chapter. Legally aware. Do not add. |
+| 14 | David Was Missing From the Wedding | Formally complete and emotionally saturated. |
+| 17 | What the System Sees | Legally constrained. Formally complete at 2,806 words. |
+| 18 | Seven Years | Duration rendered through repetition. Expanding would break the register. |
+| 19 | Damisi | Child-protection boundary. Must not become evidence. Do not add. |
+| 20 | Love Does Not Fear | Theological restraint. Expansion would push toward sermon. |
+| 21 | Devotion | Recently expanded. Near-saturated. Review only for structural gap. |
+| 4 | A Hearing Date | Intentionally brief. The brevity is the point — the court reduces everything to ten minutes. |
 
 ---
 
-## Author-Source Questions Needed Before Expansion
+## Proposed Target Manuscript Length
 
-Before any expansion can proceed, the author must supply:
-
-1. **Iyalode scenes (Ch.8):** Do you have any specific memories of Iyalode's daily life — her voice, her movements, the room she occupied, something ordinary she said or did? Any family story about her that hasn't yet been included?
-
-2. **Childhood domestic detail (Ch.3):** Can you recall one ordinary scene from your childhood home — a meal, a conversation with your father, a moment with your siblings, the physical space of the house?
-
-3. **Jumoke as a living child (Ch.5):** One mundane detail about Jumoke before her death — something she found funny, a phrase she used, an ordinary moment.
-
-4. **Funke as a living person (Ch.15):** Same — one ordinary detail about Funke before her death. A conversation, a gesture, something she said that was not about the fight.
-
-5. **David Senior's childhood (Ch.9):** Any more detail on how he raised his siblings at fifteen? The visitations from his own father? How the provision arrived?
-
-6. **The voice/threat and near-death experiences (Ch.13):** One physical detail from either the voice moment or one near-death experience. Where were you? What did you hear? What happened?
-
-7. **The Hounslow flat (Ch.1):** What did the flat look like? What time of day did the call come? What were you doing before it rang?
-
-8. **The phone call (Ch.11):** What was said in the call that confirmed the invitation? Not the content of the relationship — just the texture of that conversation.
-
-9. **The final room (Ch.22):** Who was at the table? What was the ordinary detail of that gathering — the food, the conversation, the light?
+| Scenario | Baseline | Min Add | Max Add | Target Range | Verdict |
+| :------- | -------: | ------: | ------: | -----------: | :------ |
+| Minimal expansion (skeletal gaps only) | 37,860 | 7,000 | 10,000 | **45,000–48,000** | Safe floor; strengthens without diluting |
+| Moderate expansion (top 7 opportunities) | 37,860 | 10,000 | 14,000 | **48,000–52,000** | Source-ready; no invention required |
+| **Full expansion (all underdeveloped)** | 37,860 | 11,054 | 17,554 | **49,000–55,000** | **Recommended range** |
+| Extended expansion (author supplies new scenes) | 37,860 | 17,000 | 22,000 | **55,000–60,000** | Achievable if author supplies additional memory detail |
+| Maximum stretch | 37,860 | 22,000 | 37,000 | **60,000–75,000** | Not recommended — would require heavy padding or new material that dilutes voice |
 
 ---
 
 ## Recommendation
 
-> **EXPAND TO 45,000–50,000 WORDS — SOURCE-DEPENDENT**
+> ### EXPAND TO 50,000–55,000 WORDS
+> *(source-dependent; 55,000–60,000 possible with additional author material)*
 
-The current 42,204-word draft is a strong architectural pass. It proves the structure, the voice, and the restraint. But several chapters are underbuilt relative to their importance in the book. A responsible expansion of 4,000–8,000 words — focused on the ancestral and early-life chapters — would strengthen the foundation without diluting the compression.
+**Rationale:**
 
-The expansion cannot proceed without author-supplied source material. The nine saturated chapters must not be touched. The expansion must be scene-based and sensory, not explanatory or chronological.
+1. **The true prose baseline is ~37,860 words, not 42,204.** The prior audit included drafting/processing
+   notes in its count. Those notes do not appear in the published book. The book is shorter than
+   previously reported.
 
-If the author cannot supply new source material, the book should remain at its current length and be positioned as a deliberately compressed literary memoir. The 42,000-word version is publishable. The 45,000–50,000-word version would be stronger.
+2. **The architectural imbalance is a structural risk.** Parts One and Two (Ch.1–10) average under 1,100
+   words per chapter. Part Four (Ch.17–22) averages nearly 2,900 words per chapter. A reader entering
+   the ancestral foundation through chapters that feel compressed will struggle to feel the weight of
+   the later fight. The early chapters need to earn the later ones.
+
+3. **The expansion gap is concentrated in the verifiable.** The chapters most in need of expansion
+   (Ch.2, 3, 5, 8, 9, 10) all have confirmed source material with confirmed author details in the
+   treatment files. This is not speculative expansion. The gate says READY. The material exists.
+   It needs to be written.
+
+4. **50,000–55,000 words is the correct commercial register for this book.** It is compressed literary
+   memoir — shorter than most commercial memoirs (70,000–90,000), but comparable to the strongest
+   comp titles: *Grief Is for People* (~52K), *Stay True* (~45K), *Minor Feelings* (~45K). At 50K–55K
+   the book reads as deliberately compressed, not incomplete. At 37,860 it risks reading as a structural
+   draft rather than a finished manuscript.
+
+5. **The nine saturated chapters must not be touched.** Chapters 6, 12, 14, 17, 18, 19, 20, 21, and 4
+   are formally complete. Expanding them would dilute the voice and violate the source material.
+
+6. **65,000–75,000 is not the right target.** The book's compression is a craft position, not a
+   deficiency. Doubling the word count would change the book's nature. If the author wants to expand
+   into that range, the ancestral chapters (2, 3, 7, 8, 9) would need substantial new source material
+   — scenes, dialogue, physical detail not yet confirmed. That is a different conversation.
+
+---
+
+## Author-Source Questions Needed Before Expansion
+
+The following questions unlock the blocked expansion gates. None of these are about legal material.
+All are about sensory and domestic detail that would come from the author's memory or family oral
+history.
+
+1. **Ch.2 — Isua to Agege:** Do you have any physical detail from the family oral history about the
+   founding ancestor's departure — a road, a season, a specific place, something about the tailoring
+   shop or the kola-nut trade? Even approximate/approximate is enough to anchor the scene.
+
+2. **Ch.3 — Boy Who Was Already Old:** Can you recall one ordinary scene from childhood in the house —
+   a meal, a morning, an errand, a moment where Iyalode's doubt was visible to you as a child even
+   before you had language for it? One physical domestic detail.
+
+3. **Ch.5 — Jumoke:** Is there one ordinary memory of Jumoke alive and in motion — something she found
+   funny, a phrase she used, an ordinary domestic action, the sound of her in the house, how she looked
+   when she was content? Even a single sentence-level detail would unlock expansion.
+
+4. **Ch.8 — Spiritual Covering:** Any additional memory of Iyalode in daily life that hasn't yet been
+   used — a sound, a preference she had, a sentence she said that was not about faith, the quality of
+   her in a room, the way she moved, the food she prepared?
+
+5. **Ch.9 — Father at Fifteen:** More detail on how David Senior kept his siblings during those years —
+   specific farm work, specific home-work, a meal that was harder to find, a school-fee moment, a day
+   when the promises felt impossible to keep? One scene, one specific instance of the promise as labour.
+
+6. **Ch.10 — Leaving Lagos:** The departure morning itself — what was the house like? What did you
+   carry? Who else was there when David Senior prayed? Was there a moment before the prayer when you
+   both knew this was real? And the burial: one sensory detail from Nigeria in September 2017.
+
+7. **Ch.13 — Serena:** One physical detail from the voice/threat moment — where were you, what time,
+   what did you hear? And one near-death experience described at scene level, not summary level.
+
+8. **Ch.15 — Funke:** One ordinary memory of Funke that is not about the fight or the business or the
+   death. Something she said that was just her. The "small mummy" phrase is confirmed — what did her
+   voice sound like when she said it?
+
+9. **Ch.22 — Final Room:** Who was at the table? What was the food? What was said that was ordinary?
+   One sensory detail from the room.
+
+---
+
+## Warning List — Do Not Pad
+
+These chapters are at or near their correct prose volume. Expansion here would dilute not strengthen.
+
+- **Ch.6 (Fire and the Deal):** Invention beyond confirmed source detail is prohibited.
+- **Ch.12 (Married by December):** The longest chapter. Any addition risks legal exposure.
+- **Ch.14 (David Was Missing):** Formally complete. Grief handled correctly. Leave it.
+- **Ch.17 (What the System Sees):** Legally constrained. Formally complete.
+- **Ch.18 (Seven Years):** Duration rendered through register, not accumulation. Do not add.
+- **Ch.19 (Damisi):** Child-protection boundary. Every addition risks turning a person into evidence.
+- **Ch.20 (Love Does Not Fear):** Theological restraint. The chapter earns what it says. Do not preach more.
+- **Ch.21 (Devotion):** Near-saturated. Review only for one structural gap if found; otherwise leave.
+- **Ch.4 (A Hearing Date):** The brevity is load-bearing. The court compresses time; the chapter does too.
+
+---
+
+## Summary of Changes from Prior Audit (89cb1a795)
+
+| Item | Prior Audit | This Audit | Reason |
+| :--- | ----------: | ---------: | :----- |
+| Total prose baseline | 42,204 | 37,860 | Prior count included processing notes |
+| Ch.3 word count | 1,234 | 820 | Prior count included drafting notes |
+| Ch.4 word count | 1,234 | 846 | Prior count included drafting notes |
+| Ch.5 word count | 954 | 636 | Prior count included drafting notes |
+| Ch.8 word count | 1,010 | 666 | Prior count included drafting notes |
+| Ch.10 word count | 906 | 616 | Prior count included drafting notes |
+| Recommended target | 45K–50K | **50K–55K** | Lower baseline requires more expansion to reach commercial floor |
+| Verdict | EXPAND TO 45K–50K | **EXPAND TO 50K–55K** | Corrected from prior audit |
