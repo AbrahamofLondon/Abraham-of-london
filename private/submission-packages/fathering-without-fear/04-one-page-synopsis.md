@@ -29,3 +29,4 @@ Then the Damisi chapter renders the boy entirely as a child — through football
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
 *Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 47,000 words across twenty-four chapters.
+
