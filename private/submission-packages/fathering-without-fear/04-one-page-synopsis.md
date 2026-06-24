@@ -16,7 +16,9 @@ What followed were seven years of supervised contact. Abraham saw his son Damisi
 
 The book does not narrate the legal process in detail. It does not name the other parties. It does not present allegations or invite the reader to judge. It holds the institutional pressure as weather — something Abraham moved through rather than something he prosecuted on the page.
 
-In the later chapters, Abraham tries to rebuild ordinary adult life alongside the institutional pressure — social life, community, the attempt to imagine a future family while the system still holds his son. A relationship tests his fatherhood commitment in the most ordinary way possible: when he is told he could move city or country for work instead of staying in London for his son, he ends the conversation. He does not call back. The choice is not dramatic. It is a quiet refusal to trade presence for practicality.
+Between the institutional-fight chapters and the resolution movement, one restored chapter — "The Version in His Head" — shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, networks, dates, builds community, and misreads proximity as providence. A relationship tests his fatherhood commitment in the most ordinary way possible: when he is told he could move city or country for work instead of staying in London for his son, he ends the conversation. He does not call back. The choice is not dramatic. It is a quiet refusal to trade presence for practicality.
+
+Then the Damisi chapter renders the boy entirely as a child — through football, swimming, vocabulary precision, toy-car races, and a sentence: "I am not your bro. I am your son."
 
 The book closes in a room — a dining table, a laptop, a paper moved aside, a document saved. Everything the book has carried is present without being displayed. The room is ordinary. The ordinariness is the point.
 
