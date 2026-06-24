@@ -6,7 +6,43 @@
 **Possible upper range:** 55,000–60,000 only if author source material supports real scene-level expansion
 **Total estimated expansion:** 12,000–17,000 words across 7 priority chapters
 
-**Governing principle:** Expand through scene, sensory detail, and ordinary embodied memory. Never through explanation, sermon, legal chronology, or padding.
+**Governing principle — MASTERPIECE-PRESSURE STANDARD**
+
+Do not treat market-ready expansion as word-count inflation.
+
+The objective is not to make the manuscript longer. The objective is to make every chapter more necessary, more embodied, more specific, more pressurised, and more unforgettable.
+
+A revision may:
+- expand;
+- compress;
+- restructure;
+- cut;
+- restore;
+- withhold;
+- or leave unchanged.
+
+The decision must be based on literary force, not target word count.
+
+**Rules:**
+1. No chapter expands unless the added material makes the chapter better.
+2. No chapter remains expanded if compression makes it stronger.
+3. No bloated prose.
+4. No inventory.
+5. No explanatory padding.
+6. No "beautiful" paragraph that does not increase pressure.
+7. No market-body expansion that weakens the book's authority.
+
+**Chapter test before any revision:**
+1. What is the real question of this chapter?
+2. What is the chapter currently pretending to be about?
+3. What must the reader carry away for days?
+4. Which material increases pressure?
+5. Which material merely increases word count?
+6. Which sentence must survive?
+7. Which sentence is secretly the chapter's ending?
+8. What must not be explained?
+
+**Application to this plan:** The priority chapters below are priority because they must become stronger — not because they must be longer. Every expansion listed here is contingent on the chapter test above. If source material arrives and the test says compress, we compress. If the test says cut, we cut. The target ranges are directional, not contractual.
 
 ---
 
