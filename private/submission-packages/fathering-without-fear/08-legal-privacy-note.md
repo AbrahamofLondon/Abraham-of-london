@@ -82,6 +82,8 @@ However, this should be reviewed by legal counsel before publication to assess a
 Completed 2026-06-24. High-priority chapters reviewed individually. Full register below.
 
 ### Ch.17 — Fatherhood Began Outside
+
+Status: SPECIALIST LEGAL REVIEW REQUIRED before publication.
 **Verdict: SPECIALIST REVIEW REQUIRED**
 
 | Search Term / Issue | Exact Wording | Risk Level | Recommendation |
