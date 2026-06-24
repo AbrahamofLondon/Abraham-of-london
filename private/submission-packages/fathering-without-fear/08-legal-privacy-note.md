@@ -74,6 +74,85 @@ The chapter contains two references to "dismissive avoidant" — first as Elena'
 
 However, this should be reviewed by legal counsel before publication to assess any potential defamation or privacy risk.
 
+## 24-Chapter Legal / Privacy Audit Register
+
+Completed 2026-06-24. High-priority chapters reviewed individually. Full register below.
+
+### Ch.17 — Fatherhood Began Outside
+**Verdict: SPECIALIST REVIEW REQUIRED**
+
+| Search Term / Issue | Exact Wording | Risk Level | Recommendation |
+|---------------------|---------------|------------|----------------|
+| "allegation" / "arrested" | "an allegation was made. Abraham was arrested. The case did not proceed. The consequences in family life did." | High | Protected register — oblique, non-accusatory, no sealed detail. Requires specialist legal review before publication. |
+| Mother naming | None | Low | Mother not named, not characterised, not judged. |
+| Police/court facts | None beyond safe oblique formulation | Low | No police detail, no court name, no charge, no finding. |
+| Damisi as evidence | "He only knew time, absence, arrival, leaving" | Low | Child protected — rendered through experience, not evidence. |
+
+### Ch.18 — What the System Sees
+**Verdict: LOW RISK**
+
+| Search Term / Issue | Exact Wording | Risk Level | Recommendation |
+|---------------------|---------------|------------|----------------|
+| CAFCASS / assessment / report / finding | None in prose | Low | Absent. |
+| Sealed material | None | Low | Absent. |
+| Reader judgment framing | "The process had its own sight. It saw risk, compliance, dates, attendance, directions, delays." | Low | Institutional observation, not grievance. No villain construction. |
+| Child-protection risk | "Damisi sat on the floor. He had a truck with him..." | Low | Child rendered through play, not evidence. |
+
+### Ch.19 — Seven Years
+**Verdict: LOW RISK**
+
+| Search Term / Issue | Exact Wording | Risk Level | Recommendation |
+|---------------------|---------------|------------|----------------|
+| Damisi as evidence | "He did not turn his son into evidence of anything." | Low | Chapter explicitly refuses this. |
+| Birthday-card risk | "A line about things having been difficult... a line about a promise" | Low | No sealed material. Child's response rendered obliquely. |
+| Mother/respondent framing | None | Low | Absent. |
+| Institutional allegation | "A structure can be necessary and still fail to see enough." | Low | General observation, not specific accusation. |
+
+### Ch.20 — The Version in His Head
+**Verdict: LOW-MEDIUM — LEGAL REVIEW WATCH**
+
+| Search Term / Issue | Exact Wording | Risk Level | Recommendation |
+|---------------------|---------------|------------|----------------|
+| "dismissive avoidant" (1st occurrence) | "She said she was dismissive avoidant. Abraham did not know what that meant." | Medium | Elena's own self-description. Not author's diagnosis. Flagged for legal review. |
+| "dismissive avoidant" (2nd occurrence) | "He typed the words she had given him months earlier: dismissive avoidant." | Medium | Abraham's self-reading after relationship ended. No clinical authority claimed. |
+| LSEG / employer detail | None | Low | Removed in pseudonym pass. |
+| Workplace identifiers | None | Low | Removed. |
+| Stacked-identification risk | Elena/Maya used as pseudonyms. Olu/Nene confirmed safe. | Low | No identifying detail stacked. |
+
+### Ch.21 — Damisi
+**Verdict: LOW RISK**
+
+| Search Term / Issue | Exact Wording | Risk Level | Recommendation |
+|---------------------|---------------|------------|----------------|
+| Child as evidence | "Damisi is not a legal object or symbolic child." | Low | Chapter explicitly refuses this. |
+| School/medical/court facts | None | Low | Absent. |
+| Identifying third-party risk | Supervisor referred to as "aunty" — Damisi corrects: "She is not aunty." | Low | No name used. |
+| Child as symbol | "A child is not a collection of winsome details arranged to soften a reader." | Low | Chapter explicitly refuses this. |
+
+### Secondary Chapter Summary
+
+| Chapter | Verdict | Notes |
+|---------|---------|-------|
+| Ch.6 — A Year Without Home | Low | Name-sensitive (Mary, Matthew, Mr Adeniranye, Justice/Mrs Ali, St Thomas Aquinas, Mokuolu) but low-risk family/school material. PUBLIC-SAFE WITH RESTRAINT. |
+| Ch.13 — Married by December | Low | Registry fact oblique. No motive claims, no diagnosis, no blame language. |
+| Ch.14 — Serena | Low | "Serena" pseudonym throughout. No real-name leakage. Spiritual material held as personal experience. |
+| Ch.15 — David Was Missing from the Wedding | Low | Death/grief handled with dignity. No unsupported claims. Vision rendered as personal experience. |
+| Ch.16 — Funke | Low | Health-cause wording ("possible hole in the heart") rendered as doctor's finding, not author's diagnosis. No accusation. |
+
+### Protected-Chapter Confirmation
+
+All five high-priority chapters (Ch.17–Ch.21) avoid:
+- Mother naming or characterisation
+- Sealed family-court material
+- Workplace identifiers
+- Diagnosis or motive claims against identifiable individuals
+- Damisi as evidence, proof, or argument
+
+### Unresolved Legal-Review Items
+
+1. **Ch.17** — Requires specialist legal review before publication or wide submission. The oblique allegation/arrest wording is in protected register but cannot be fully cleared by internal audit.
+2. **Ch.20** — Two "dismissive avoidant" references flagged for legal review. Mitigated by being Elena's own self-description and Abraham's self-reading, but should be reviewed for potential defamation risk.
+
 ## Legal / Procedural Chronology
 
 The manuscript does not contain a legal or procedural chronology. Dates, hearings, applications, orders, and institutional decisions are intentionally withheld. The book renders institutional pressure as something the author moved through — as duration, as weather, as cost — not as something the book prosecutes or invites the reader to adjudicate.
