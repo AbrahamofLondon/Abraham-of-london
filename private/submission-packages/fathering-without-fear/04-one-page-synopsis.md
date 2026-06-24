@@ -8,6 +8,8 @@ The family line runs back to Isua, in Ondo, where the Adaramola lineage begins w
 
 Abraham's father, David Senior, became a parent at fifteen when his own father died. He carried his younger siblings through Lagos, educated them, kept them together, and built a life from promises made in grief. He named his son Abraham — not casually, but because he recognised something in the child that connected to the grandfather who had built and died before his work was finished.
 
+After Jumoke's death, Abraham is sent to Akure. At St Thomas Aquinas College, he spends a year without seeing his family, stays with his older cousin Mary, and learns a form of silence that still allows him to pass exams while refusing the life arranged around him. In April 1990, he commits his life to Jesus. When his father asks what is wrong, Abraham says he is tired of Akure. David Senior trusts him enough to let him choose another school. Abraham chooses Adebayo Mokuolu College because his childhood friends are supposed to be there. They do not return.
+
 As a child, Abraham survives a bedroom fire after waking into smoke and flame. The mosquito coil had fallen. The mattress was burning. He woke his sisters, used a blanket, and put the fire out. The scene becomes one of the book's earliest encounters with fear, prayer, and survival — a deal made in darkness, before a fire that was real.
 
 Abraham leaves Lagos for London under his father's prayer from Psalm 27. David Senior lays hands on his head and speaks provision over him. Abraham does not yet know how literal the prayer will become.
@@ -26,4 +28,4 @@ Then the Damisi chapter renders the boy entirely as a child — through football
 
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
-*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 45,000 words across twenty-three chapters.
+*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 47,000 words across twenty-four chapters.

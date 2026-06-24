@@ -1,15 +1,15 @@
 # Market-Ready Expansion Audit — Fathering Without Fear
 
-**Date:** 2026-06-24 (updated — 23-chapter post-restoration revision)
-**Current prose total:** 45,008 words (23 chapters, prose-only strip)
-**Prior audit total:** ~37,860 (22 chapters, pre-restoration)
-**Stage:** E — Architecture complete. 45k milestone locked. Optional expansion to 50k available.
+**Date:** 2026-06-24 (updated — 24-chapter post-Akure integration)
+**Current prose total:** 46,835 words (24 chapters, prose-only strip)
+**Prior audit total:** 45,008 (23 chapters, pre-Akure)
+**Stage:** F — Architecture complete. 47k baseline locked. Optional expansion to 50k available.
 
 ---
 
 ## Counting Methodology
 
-All word counts strip: YAML frontmatter, chapter-title heading (`#`), and trailing production notes (italic `*...*` blocks at end of chapters preceded by `---`). Internal `---` section dividers are preserved as content markers. This is the established prose-only method applied consistently across all 23 draft `.mdx` files.
+All word counts strip: YAML frontmatter, chapter-title heading (`#`), and trailing production notes (italic `*...*` blocks at end of chapters preceded by `---`). Internal `---` section dividers are preserved as content markers. This is the established prose-only method applied consistently across all 24 draft `.mdx` files.
 
 ---
 

@@ -1,4 +1,12 @@
+# Fathering Without Fear
 
+**Abraham of London**
+
+---
+
+*24 chapters. Approximately 46,835 prose-only words.*
+
+---
 
 # Chapter 1 — Hounslow Call
 
@@ -80,7 +88,10 @@ He was still in the room. He was still on the bed. He was still, as far as the p
 
 But the voice carried more than the room could see.
 
+---
 
+
+---
 
 # Chapter 2 — Isua to Agege
 
@@ -114,7 +125,10 @@ Abraham is not in this chapter. He is not born yet. But the name is already what
 
 The road between Isua and Lagos is shorter now. The inheritance is not.
 
+---
 
+
+---
 
 # Chapter 3 — The Boy Who Was Already Old
 
@@ -162,7 +176,10 @@ Years later, filling out his MBA application, he wrote the name again. Abraham. 
 
 He spent years not knowing that he was the answer to a question he had not been present to hear.
 
+---
 
+
+---
 
 # Chapter 4 — A Hearing Date
 
@@ -240,7 +257,10 @@ It was presence.
 
 And in those years, presence was often the only form of fatherhood the process allowed him to practice.
 
+---
 
+
+---
 
 # Chapter 5 — Jumoke
 
@@ -282,9 +302,131 @@ Jumoke was gentle. She was kind. She was not weak. She was seven, and she is sti
 
 He had protected her once at a school in Agege. After that, memory kept asking him to protect her where no child could be reached.
 
+---
 
 
-# Chapter 6 — The Fire and the Deal
+---
+
+# Chapter 6 — A Year Without Home
+
+After Jumoke died, Abraham left home.
+
+The death did not remain only in the house where the news arrived. It moved through the rooms and altered the arrangements of the living. He was twelve, or thirteen, still close enough to childhood that the body receives decisions before the mind has the authority to question them. The family had lost a child. Then another child was sent away.
+
+He went to Akure.
+
+St Thomas Aquinas College was the name of the school, but the name did not matter first as education. It mattered as distance. Akure was not Lagos. It was not the house where Jumoke had followed him, sat beside him, and waited for him to look. It was not the compound where his parents drove in with the news already written on his mother's face. It was not home.
+
+For a whole year he did not see his family.
+
+One year is not long in the accounting of adults. Adults say a year and mean calendar, school term, fees, arrangement, something necessary for a child to become more formed. A child receives a year differently. A year can become the size of the world. It can become the full measure of absence. It can teach the body that people may love you and still not be where you are.
+
+Akure became the place where childhood continued without home.
+
+He first stayed with his older cousin Mary. Mary had once lived with Abraham's parents when she was younger. She was one of the people who had passed through their house and been held there, as many people passed through that household and were held. She was not a stranger sent to take charge of him. She belonged to the family story in the ordinary way extended family belongs: already known, already connected, carrying obligations that had not needed to be written down.
+
+There was no malice in her.
+
+That has to be said clearly, because pain can make later memory unfair. Mary was not trying to punish him for being away from home. She was trying, in the way available to her, to toughen him. Abraham was not domesticated. He had not been trained for that kind of household usefulness. In Lagos he had been the child who read, watched, debated elders, lived inside thoughts larger than his age, and moved through the house as someone loved and particular. In Akure, that was not enough.
+
+There were chores.
+
+There was farm work.
+
+There were practical things a boy could be asked to do because the day required doing them and no one was exempt from the day. Mary treated him the way she treated her only son, Matthew. That was part of the fairness and part of the wound. She did not make Abraham less than her son. She did not make him special either. She placed him inside the same ordinary demand: carry this, do this, come here, go there, learn what the body must learn when a household has work attached to it.
+
+The problem was not cruelty.
+
+The problem was that Abraham had already been removed from one form of life and placed inside another before he had language for the removal. A child can be treated fairly and still feel displaced. A child can be fed, instructed, corrected, and still understand that the place where he is sleeping is not the place his body is waiting for.
+
+Later, Matthew would die too.
+
+In April 1990, inside that season, Abraham devoted his life to Jesus.
+
+This did not make the loneliness disappear. It did not turn Akure into home. It did not give him a testimony in the easy sense, the kind a person can narrate with light already falling on the ending.
+
+That week in April 1990, after the fellowship had been postponed more than once, Abraham sat in the Ali family's living room and listened as Jesus was preached. Justice and Mrs Ali were Mary's landlords. The fellowship was in their home, with the Ali family and others gathered, people sitting on sofas while the message moved through the room. What was said resonated with him. At the end, when they asked whether anyone wanted to make a commitment, he said yes.
+
+It was a turning toward God from inside a life that had become difficult to inhabit. The name had already come to him through Iyalode. The faith had already moved through the family before he understood its path. In Akure, as a teenager, he gave himself to Jesus in a more deliberate way.
+
+He did not yet know what a life given would cost.
+
+He knew only that something in him had turned.
+
+At Aquinas, Abraham began refusing class.
+
+Not once. Not as a boy testing a boundary for the pleasure of being difficult. Almost a whole year. When other students absconded, he went with them. During school hours, when he should have been inside a classroom, he was outside with boys who had also found a way not to be where the timetable said they should be. They roamed the streets. The day moved as if lessons were happening somewhere else, which they were. Bells rang for other people. Teachers taught rooms he was not inside. Books opened without him.
+
+He was not collapsing.
+
+That is part of what made the refusal harder to read. If he had failed, the adults would have had a simpler category for him. Laziness. Stubbornness. A child going bad. But he did not fail in the expected way. He still passed the normal tests and examinations. The schoolwork did not expose the absence fully because the mind could still perform. He could stay away from class and still cross the mark required of him. He could be missing and still appear, on paper, present enough.
+
+That is a particular kind of silence.
+
+It does not ask for help in the language adults recognise. It lets the report show passing grades while the body spends school hours in the street. It refuses a life without yet knowing how to argue against the life. It says no with the feet because the mouth has not been given a sentence large enough.
+
+His maths teacher noticed.
+
+Mr Adeniranye was not discovering a boy who could not learn. He was discovering a boy whose attendance and performance did not fit together in the expected way. The result was not simple failure. It was contradiction. A student absent from class should not be passing as if class had held him. A child roaming the streets during school hours should not still be clearing the ordinary academic gates. Something did not match.
+
+The parents were summoned.
+
+David Senior had already tried to arrange care around the boy. He had visited the school and placed Abraham in the care of the maths and English teachers because those subjects mattered. That was how David Senior often loved: by structure, by assignment, by placing a person under the care of another person who could help carry the thing he could not be present to carry every hour himself. He had not abandoned the boy to chance. He had made an arrangement.
+
+The arrangement was failing.
+
+When David Senior asked Abraham what the problem was, he did not ask in anger.
+
+That mattered.
+
+Anger would have made the question smaller. Anger would have turned the behaviour into disobedience and the conversation into discipline. David Senior could be strict. He could carry duty with a hard edge when duty required it. But in this moment, the source of the problem had to be heard before it could be answered.
+
+Abraham told him.
+
+He was tired of living in Akure.
+
+That was the sentence available. It was not everything. A child rarely has everything. He did not say, I have not seen my family for a year and the year has entered my body. He did not say, I lost Jumoke and then I lost the house that still remembered her. He did not say, I am passing your tests but I am not here. He said he was tired of living in Akure.
+
+David Senior received the sentence.
+
+He was not pleased. That is not the point. He was resigned to Abraham's decision in the particular way of a father who trusted him. He had trusted this child before. He had seen something in him from birth, something the child himself had not chosen and did not understand. Trust, in David Senior, did not always arrive as tenderness. Sometimes it arrived as responsibility handed back to the person who had spoken.
+
+He told Abraham to choose any school he wanted.
+
+Any school.
+
+For a child who had spent a year without home, choice was not a small thing. It gave him back a piece of agency inside a life that had been arranged around him. He was not being asked only to obey the next placement. He was being asked where he wanted to go.
+
+He chose Adebayo Mokuolu College in Ogba, Lagos.
+
+He did not choose it because of a prospectus. He did not choose it because it was the best school in an abstract sense, or because he had made a careful study of options. He chose it because his childhood friends attended there. The boys from America. The ones whose presence made the school feel like more than a school. If he went there, he would not simply be leaving Akure. He would be joining something that had survived from before.
+
+That was the hope.
+
+He had lost home once. He thought he was choosing a way back toward it.
+
+Friendship can become a place when a child has lost the other places. The school in Ogba held, in his mind, the possibility of continuity. He would arrive and find them. The year away would not have erased everything. There would be boys who knew him from before, boys whose faces carried Lagos, childhood, the ordinary world before death and departure had rearranged it.
+
+But they did not return.
+
+They had gone to America for a holiday and did not come back. The family whose children he had hoped to join had returned to America permanently. There was no goodbye. No final afternoon in which the leaving could be understood while it was happening. No sentence placed carefully enough for a child to hold. They were simply gone, and by the time Abraham chose the school that was supposed to restore them to him, the restoration had already failed.
+
+This was not the same as Jumoke's death.
+
+It should not be made equal to it.
+
+The school he chose did not give him back the boys from America.
+
+He had already learned to keep going after the thing he hoped to find had disappeared.
+
+And he entered it anyway.
+
+---
+
+
+---
+
+# Chapter 7 — The Fire and the Deal
 
 The room was the next one from where his parents slept. A children's room, in a house with many rooms, the kind of proximity that meant you were near enough to reach but far enough to be separate.
 
@@ -394,6 +536,7 @@ The mosquito coil: after everything, someone identified it as the cause. The met
 
 What the household understood was this: it was a miracle he had woken up when he did. That was their reading of the morning — that something had pulled him from sleep at exactly the right moment, that the fire had not consumed him in his bed, that he had woken and acted and managed it before it spread. They were right that something had happened. They could not know what.
 
+*AUTHOR DETAIL NEEDED: confirm the identity of the elder brother who arrived after the father in the aftermath sequence. If it was David, this changes the emotional register of the scene and should be handled before any final expansion of the aftermath. Do not insert a name until confirmed.*
 
 ---
 
@@ -411,10 +554,9 @@ He has been living inside it ever since. The deal has cost him things. It has ma
 
 He has never tried to renegotiate.
 
+---
 
-
-
-# Chapter 7 — The Name That Had to Be Powerful
+# Chapter 8 — The Name That Had to Be Powerful
 
 She said that Jesus was the most powerful person she knew.
 
@@ -458,9 +600,12 @@ The woman who doubted him at birth had named the thing that would carry him forw
 
 He did not know that yet, not fully. He only knew that something had been set down and something had been picked up again, and the distance between those two acts was the distance a boy travels before he becomes the man the name was waiting for.
 
+---
 
 
-# Chapter 8 — The Spiritual Covering
+---
+
+# Chapter 9 — The Spiritual Covering
 
 She was not tall, but somehow looked larger than most.
 
@@ -488,9 +633,12 @@ There were whispers in the family — oral belief, not fact — that something h
 
 Abraham has been working out what he inherits from her ever since. Not a legacy. Not a lesson. A person — irreducible, unresolved, real.
 
+---
 
 
-# Chapter 9 — The Boy Who Became a Father at Fifteen
+---
+
+# Chapter 10 — The Boy Who Became a Father at Fifteen
 
 David Senior was not quite fifteen when his father died. Somewhere around fifteen. The family kept dates the way some families kept dates in Lagos at that time — the important things were marked and mourned; exact ages were approximate; the number could be fourteen or it could be fifteen and what mattered was not the number.
 
@@ -524,9 +672,12 @@ Abraham received this as a story — not as a memory he shared, but as something
 
 Abraham Adaramola had left work unfinished. David Senior picked it up at fifteen without knowing that was what he was doing. What he did not know at fifteen became who he was. Abraham was not born into money or ease. He was born into a father shaped already by a refusal to disappear from the people who needed him. The refusal was not heroism. It was the only available position.
 
+---
 
 
-# Chapter 10 — Leaving Lagos
+---
+
+# Chapter 11 — Leaving Lagos
 
 The family had converged at David Senior’s house before the airport.
 
@@ -624,9 +775,12 @@ The prayer was.
 
 He was being carried. That was real. What he was being carried toward — whether it was what he believed it was — the next several years would answer.
 
+---
 
 
-# Chapter 11 — A Post on Facebook
+---
+
+# Chapter 12 — A Post on Facebook
 
 Nigeria was familiar when Abraham returned. He was not.
 
@@ -672,9 +826,12 @@ He did not know how exposed grief had made him. He did not know that the place w
 
 That knowledge belonged to a later Abraham, one who had not yet been formed by what came next. The Abraham on the black couch knew only that grief had been met by something that felt like grief, and that this felt, in that moment, like enough.
 
+---
 
 
-# Chapter 12 — Married by December
+---
+
+# Chapter 13 — Married by December
 
 When Abraham returned to Lagos after the burial, he was in a kind of limbo.
 
@@ -870,10 +1027,9 @@ The rest of the story would not begin because he saw nothing.
 
 It would begin because he saw something and made it smaller than his hope.
 
+---
 
-
-
-# Chapter 13 — Serena
+# Chapter 14 — Serena
 
 Serena was walking beside him when the road changed the posting.
 
@@ -955,9 +1111,12 @@ What he carried from Serena was not a romance story. It was a road in Anambra, a
 
 He had been warned. He had not yet learned how to read a warning. He left Serena behind. He did not leave behind the education he had refused to receive. He only postponed understanding it, and the postponement had a price he could not yet see.
 
+---
 
 
-# Chapter 14 — David Was Missing From the Wedding
+---
+
+# Chapter 15 — David Was Missing From the Wedding
 
 David was the one who knew how to enter a room.
 
@@ -1181,9 +1340,12 @@ Beside his father, the most loyal person Abraham has ever had in his life. He ne
 
 Now that witness was gone.
 
+---
 
 
-# Chapter 15 — Funke
+---
+
+# Chapter 16 — Funke
 
 In every family photograph where she appears, Funke is in the middle. Not because someone placed her there. Because that was where she stood — between siblings, between cousins, between the thing that needed doing and the people who had not yet started doing it. She wore iro and buba, scarf tied with the care of someone who believed that how a family presented itself was not vanity but order. She was neat in the way her grandmother Iyalode had been neat: deliberately, as a practice, as a form of authority that did not need to announce itself.
 
@@ -1245,9 +1407,12 @@ She had not stopped.
 
 She was gone.
 
+---
 
 
-# Chapter 16 — Fatherhood Began Outside
+---
+
+# Chapter 17 — Fatherhood Began Outside
 
 He was going to be a father.
 
@@ -1309,9 +1474,12 @@ It began in a borrowed room, in a video call that ended too soon, in a meeting r
 
 It would not become easier. It would become the centre of everything.
 
+---
 
 
-# Chapter 17 — What the System Sees
+---
+
+# Chapter 18 — What the System Sees
 
 The room was not built for fatherhood.
 
@@ -1511,9 +1679,12 @@ Not because the forms were enough.
 
 Because his son was.
 
+---
 
 
-# Chapter 18 — Seven Years
+---
+
+# Chapter 19 — Seven Years
 
 The calendar did not look violent.
 
@@ -1801,9 +1972,12 @@ It lives in the person who has to keep entering the next square.
 
 That was what seven years produced: not a man who had been spared discomfort, but a father disciplined enough to remain present without making his son carry the whole weight of why presence had become so hard.
 
+---
 
 
-# Chapter 19 — The Version in His Head
+---
+
+# Chapter 20 — The Version in His Head
 
 Abraham could still dance.
 
@@ -1951,9 +2125,12 @@ His son was in London.
 
 So he stayed.
 
+---
 
 
-# Chapter 20 - Damisi
+---
+
+# Chapter 21 - Damisi
 
 Damisi likes football.
 
@@ -2321,9 +2498,12 @@ Damisi is a boy.
 
 And Abraham's task is to love him in a way that lets him remain one for as long as childhood will allow.
 
+---
 
 
-# Chapter 21 — Love Does Not Fear
+---
+
+# Chapter 22 — Love Does Not Fear
 
 The sentence changed while he was typing.
 
@@ -2539,9 +2719,12 @@ The verse had not become smaller.
 
 It had become harder.
 
+---
 
 
-# Chapter 22 — Devotion
+---
+
+# Chapter 23 — Devotion
 
 Sons often receive a father's devotion as weather.
 
@@ -2757,9 +2940,12 @@ He built in Isua.
 
 And long before Abraham knew how to call any of this devotion, he was already living beneath it.
 
+---
 
 
-# Chapter 23 — Final Room
+---
+
+# Chapter 24 — Final Room
 
 The dining table had become a workstation.
 The laptop was open on it. Phones lay nearby. A cup sat to the left of the laptop — tea, by then probably cold, the kind that gets made at the start of a working hour and forgotten until the hour has moved past it. The bay window held the light behind the blinds, bright enough to enter the room without taking it over. A clock on the wall marked the afternoon in increments he no longer needed to watch. The radiator ticked as it heated. Chairs remained around the table because the table had not stopped being a table. A printer stood within reach. Papers were nearby — some organised, some not, the natural drift of work that has nowhere else to go. Shelves carried the ordinary objects work gathers around itself: folders, a notebook, things that had not been opened in days. A mirror was on the wall, reflecting the same light the window let in.
@@ -2777,3 +2963,7 @@ The actual man was enough because the actual man had remained. Not as performanc
 The future did not appear as a grand road from that table. It appeared as the next faithfulness. A sentence to write. A boundary to keep. A call to make or not make. A door to test. A son to love without making him responsible for the meaning of love. A past to carry without asking it to become clean.
 He reached forward and moved one paper aside. Not because it needed to be moved. Because the gesture was something to do with his hands while he thought about what came next. The paper had been sitting there for days. He moved it to the corner of the table, making room for something he could not yet name.
 Then he saved the document open on the laptop, closed the screen — the lid meeting the base with a soft click — and left the chair where it was.
+---
+
+
+---

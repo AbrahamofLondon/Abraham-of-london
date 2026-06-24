@@ -1,8 +1,8 @@
 # Fathering Without Fear — Submission Package
 
 **Author:** Abraham of London (Abraham Adaramola)
-**Word count:** 45,008 (prose-only)
-**Chapters:** 23
+**Word count:** 46,835 (prose-only)
+**Chapters:** 24
 **Category:** Compressed literary memoir
 
 ## Contents
@@ -13,8 +13,8 @@
 | `01-clean-manuscript.md` | Full manuscript, stripped of production material |
 | `02-first-50-pages.md` | Opening sample |
 | `03-query-letter.md` | Query letter template with agent personalisation placeholders |
-| `04-one-page-synopsis.md` | One-page synopsis (~800 words) |
-| `05-long-synopsis.md` | Long synopsis (~2,200 words) |
+| `04-one-page-synopsis.md` | One-page synopsis |
+| `05-long-synopsis.md` | Long synopsis |
 | `06-author-bio.md` | Short and longer author bios |
 | `07-positioning-note.md` | Internal positioning note (category, brevity rationale, comp-title placeholder) |
 | `08-legal-privacy-note.md` | Private legal/privacy note (not for automatic submission) |
@@ -23,23 +23,18 @@
 
 ## Architecture
 
-The manuscript is structured as 23 short chapters covering:
+The manuscript is structured as 24 short chapters across five movements:
 
-- Ancestral lineage (Ch.2–3)
-- Childhood marking (Ch.5–9)
-- Departure and formation (Ch.10–12)
-- Loss and marriage (Ch.11–15)
-- Fatherhood under constraint (Ch.16–18)
-- Adult-life breadth / fatherhood tested (Ch.19)
-- Father-child relationship (Ch.20)
-- Theological reckoning (Ch.21)
-- Legacy and devotion (Ch.22)
-- Resolution (Ch.23)
+- Ancestral lineage and childhood formation (Ch.1–11)
+- Marriage, death, and fatherhood (Ch.12–17)
+- Institutional fight (Ch.18–19)
+- Adult-life breadth and fatherhood tested (Ch.20–21)
+- Resolution: love, devotion, and the final room (Ch.22–24)
 
 ## Important Notes
 
-- **Ch.16 requires specialist legal review before publication or wide submission.**
-- **Ch.19 uses pseudonyms; the "dismissive avoidant" reference should be reviewed.**
+- **Ch.17 requires specialist legal review before publication or wide submission.**
+- **Ch.20 uses pseudonyms; the "dismissive avoidant" reference should be reviewed.**
 - **No further new chapters should be added unless they solve a demonstrable structural absence.**
 - **Comp titles require fresh market research.** Do not use AI-generated comp titles without verification.
 - **Agent list requires fresh web research.** Do not submit to agents without current verification.
@@ -47,4 +42,4 @@ The manuscript is structured as 23 short chapters covering:
 
 ## Package Date
 
-2026-06-24 (updated for 23-chapter, 45k manuscript)
+2026-06-24 (updated for 24-chapter, ~47k manuscript)

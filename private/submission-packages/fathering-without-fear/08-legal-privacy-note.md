@@ -4,9 +4,13 @@
 
 ---
 
-## Chapter 16 — Legal Review Required
+## Chapter 6 — Childhood/School Material
 
-Chapter 16 ("Fatherhood Began Outside") deals with pregnancy, marital expulsion, and the beginning of father-child separation. The chapter is written in a protected register: it narrates structural and emotional pressure without including legal specifics, court findings, allegations, or protected record substance.
+Chapter 6 ("A Year Without Home") covers Abraham's year at St Thomas Aquinas College in Akure after Jumoke's death. Names used: Mary (cousin), Matthew (Mary's son), Mr Adeniranye (maths teacher), Justice and Mrs Ali (landlords/fellowship hosts). These are family/community figures in a childhood memoir context — standard memoir practice. No legal/court risk. Faith material is public-safe with restraint.
+
+## Chapter 17 — Legal Review Required
+
+Chapter 17 ("Fatherhood Began Outside") deals with pregnancy, marital expulsion, and the beginning of father-child separation. The chapter is written in a protected register: it narrates structural and emotional pressure without including legal specifics, court findings, allegations, or protected record substance.
 
 This chapter requires specialist legal review before publication or wide submission. The review should confirm that:
 
@@ -48,9 +52,9 @@ Specific privacy decisions:
 - Supervisors and institutional staff are rendered as environmental conditions, not as named individuals;
 - The other parent in the family proceedings is not named, characterised, or judged in the text.
 
-## Chapter 19 — Pseudonym Pass
+## Chapter 20 — Pseudonym Pass
 
-Chapter 19 ("The Version in His Head") was restored and pseudonymised on 2026-06-24. The following pseudonym decisions apply:
+Chapter 20 ("The Version in His Head") was restored and pseudonymised on 2026-06-24. The following pseudonym decisions apply:
 
 - **Samina → Maya** (role-based identifier used in prose)
 - **Anita → Elena** (pseudonym used throughout)

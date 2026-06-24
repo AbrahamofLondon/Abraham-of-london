@@ -8,7 +8,7 @@ The book sits in the literary nonfiction space alongside formally compressed mem
 
 ## Word Count
 
-Approximately 45,000 words across 23 chapters.
+Approximately 47,000 words across 24 chapters.
 
 ## Why the Brevity Is Intentional
 
@@ -34,9 +34,9 @@ None of these options improves the book.
 
 ## On the Restored Chapter
 
-One chapter — Ch.19, "The Version in His Head" — was restored during the editorial process because it solved a demonstrable structural gap. Between the institutional-fight chapters and the resolution movement, the manuscript lacked the texture of Abraham's ordinary adult life: social world, romantic desire, financial desperation, community, the attempt to rebuild a life while the system still held his son. The restored chapter fills that gap with the Damisi red line — the book's strongest non-institutional proof of Abraham's fatherhood commitment.
+One chapter — Ch.20, "The Version in His Head" — was restored during the editorial process because it solved a demonstrable structural gap. Between the institutional-fight chapters and the resolution movement, the manuscript lacked the texture of Abraham's ordinary adult life: social world, romantic desire, financial desperation, community, the attempt to rebuild a life while the system still held his son. The restored chapter fills that gap with the Damisi red line — the book's strongest non-institutional proof of Abraham's fatherhood commitment.
 
-No further new chapters should be added unless they solve a demonstrable structural absence. The 23-chapter, 45,000-word manuscript is the complete book.
+A second chapter — Ch.6, "A Year Without Home" — was added to fill an early-formation gap: the year Abraham spent in Akure after Jumoke's death, displaced from home, refusing class while still passing, committing to faith, and choosing a school because he hoped to find friends who had already gone. No further new chapters should be added unless they solve a demonstrable structural absence. The 24-chapter, approximately 47,000-word manuscript is the complete book.
 
 ## Suitable Agent / Editor Interest Profile
 
