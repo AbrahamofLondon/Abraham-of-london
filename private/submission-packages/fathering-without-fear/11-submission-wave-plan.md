@@ -44,7 +44,7 @@ The court material exists in the manuscript. It is not the book's centre. Do not
 
 | Agent | Agency | Country | Query Method | Materials |
 | :---- | :----- | :------ | :----------- | :-------- |
-| Kate Evans | Peters Fraser & Dunlop | UK | Email to agent directly | Cover letter + chapter outline + three sample chapters |
+| Kate Evans | Peters Fraser & Dunlop | UK | kevans@pfd.co.uk | Cover letter + chapter outline + three sample chapters |
 | Nicola Chang | David Higham Associates | UK | nicolasubmissions@davidhigham.co.uk | Cover letter + first 50pp (Word docs only) |
 | Elise Dillsworth | Elise Dillsworth Agency | UK | elise@elisedillsworthagency.com | Cover letter + proposal + chapter outline + 30pp sample |
 | Michael Bourret | Dystel, Goderich & Bourret | US | QueryManager only (link at dystel.com) | Nonfiction proposal + sample chapter |
@@ -110,7 +110,7 @@ The court material exists in the manuscript. It is not the book's centre. Do not
 | Kate McKean | Howard Morhaim Literary | US | Only if she has reopened from Summer 2026 closure |
 | Peter Straus | RCW Literary Agency | UK | Verify submission requirements first |
 | Anna Webber | A.M. Heath | UK | Email anna.webber@amheath.com; synopsis + 10,000-word excerpt |
-| Jemima Forrester | David Higham Associates | UK | Only if all other DHA queries resolved |
+| Jemima Forrester | David Higham Associates | UK | Downgraded to B on lock pass; nonfiction interest is lifestyle/popular culture not literary memoir; only if all other DHA agents have passed |
 | Daisy Chandley | Peters Fraser & Dunlop | UK | Only if Evans/Gauntlett resolved |
 | Caroline Wood | Felicity Bryan Associates | UK | Only if Plitt resolved |
 | Lori Galvin | Aevitas Creative Management | US | Aevitas form; only if Levitt/Liebow resolved |
