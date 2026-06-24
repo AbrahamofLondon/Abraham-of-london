@@ -1,8 +1,8 @@
 # Fathering Without Fear — Submission Package
 
 **Author:** Abraham of London (Abraham Adaramola)
-**Word count:** 38,094
-**Chapters:** 22
+**Word count:** 45,008 (prose-only)
+**Chapters:** 23
 **Category:** Compressed literary memoir
 
 ## Contents
@@ -10,8 +10,8 @@
 | File | Description |
 |---|---|
 | `00-package-readiness-report.md` | Final readiness state, validation results, remaining risks |
-| `01-clean-manuscript.md` | Full 22-chapter manuscript, stripped of production material |
-| `02-first-50-pages.md` | Opening sample (Chapters 1–12, ~14,651 words) |
+| `01-clean-manuscript.md` | Full manuscript, stripped of production material |
+| `02-first-50-pages.md` | Opening sample |
 | `03-query-letter.md` | Query letter template with agent personalisation placeholders |
 | `04-one-page-synopsis.md` | One-page synopsis (~800 words) |
 | `05-long-synopsis.md` | Long synopsis (~2,200 words) |
@@ -21,15 +21,30 @@
 | `09-agent-targeting-criteria.md` | Agent targeting criteria (agent list requires fresh research) |
 | `10-submission-tracker.csv` | Submission tracking spreadsheet (header only) |
 
+## Architecture
+
+The manuscript is structured as 23 short chapters covering:
+
+- Ancestral lineage (Ch.2–3)
+- Childhood marking (Ch.5–9)
+- Departure and formation (Ch.10–12)
+- Loss and marriage (Ch.11–15)
+- Fatherhood under constraint (Ch.16–18)
+- Adult-life breadth / fatherhood tested (Ch.19)
+- Father-child relationship (Ch.20)
+- Theological reckoning (Ch.21)
+- Legacy and devotion (Ch.22)
+- Resolution (Ch.23)
+
 ## Important Notes
 
 - **Ch.16 requires specialist legal review before publication or wide submission.**
-- **Ch.15 was reconstructed from source material; author confirmation welcome.**
-- **Do not restore Chapters 23–28.** The 22-chapter manuscript is the complete book.
+- **Ch.19 uses pseudonyms; the "dismissive avoidant" reference should be reviewed.**
+- **No further new chapters should be added unless they solve a demonstrable structural absence.**
 - **Comp titles require fresh market research.** Do not use AI-generated comp titles without verification.
 - **Agent list requires fresh web research.** Do not submit to agents without current verification.
 - **`08-legal-privacy-note.md` is private.** Do not include it in standard query submissions.
 
 ## Package Date
 
-2026-06-23
+2026-06-24 (updated for 23-chapter, 45k manuscript)

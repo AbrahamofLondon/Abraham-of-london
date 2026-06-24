@@ -16,6 +16,8 @@ What followed were seven years of supervised contact. Abraham saw his son Damisi
 
 The book does not narrate the legal process in detail. It does not name the other parties. It does not present allegations or invite the reader to judge. It holds the institutional pressure as weather — something Abraham moved through rather than something he prosecuted on the page.
 
-In the final chapters, Abraham returns to his father. David Senior, who became a father at fifteen, who carried what had to be carried, who watched Abraham with the recognition of someone who had seen this weight before. The book closes in a room — a dining table, a family gathering, a moment in which everything the book has carried is present without being displayed. The room is ordinary. The ordinariness is the point.
+In the later chapters, Abraham tries to rebuild ordinary adult life alongside the institutional pressure — social life, community, the attempt to imagine a future family while the system still holds his son. A relationship tests his fatherhood commitment in the most ordinary way possible: when he is told he could move city or country for work instead of staying in London for his son, he ends the conversation. He does not call back. The choice is not dramatic. It is a quiet refusal to trade presence for practicality.
 
-*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 38,000 words across twenty-two chapters.
+The book closes in a room — a dining table, a laptop, a paper moved aside, a document saved. Everything the book has carried is present without being displayed. The room is ordinary. The ordinariness is the point.
+
+*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 45,000 words across twenty-three chapters.

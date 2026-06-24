@@ -8,11 +8,11 @@ The book sits in the literary nonfiction space alongside formally compressed mem
 
 ## Word Count
 
-Approximately 38,000 words across 22 chapters.
+Approximately 45,000 words across 23 chapters.
 
 ## Why the Brevity Is Intentional
 
-The book's compression is its formal strategy, not a sign of incompleteness. Most chapters are between 600 and 3,500 words. Each carries a single weight — a name, a fire, a hearing date, a death, a boy's favourite animal — and sets it down before moving to the next.
+The book's compression is its formal strategy, not a sign of incompleteness. Most chapters are between 800 and 3,800 words. Each carries a single weight — a name, a fire, a hearing date, a death, a boy's favourite animal — and sets it down before moving to the next.
 
 This structure reflects three deliberate choices:
 
@@ -32,15 +32,11 @@ Expanding to 60,000–80,000 words would require either:
 
 None of these options improves the book.
 
-## Why Chapters 23–28 Should Not Be Restored
+## On the Restored Chapter
 
-Six additional chapters were drafted and removed during the editorial process. They covered material that either:
+One chapter — Ch.19, "The Version in His Head" — was restored during the editorial process because it solved a demonstrable structural gap. Between the institutional-fight chapters and the resolution movement, the manuscript lacked the texture of Abraham's ordinary adult life: social world, romantic desire, financial desperation, community, the attempt to rebuild a life while the system still held his son. The restored chapter fills that gap with the Damisi red line — the book's strongest non-institutional proof of Abraham's fatherhood commitment.
 
-- Repeated ground already covered in the 22-chapter structure;
-- Extended into territory requiring legal clearance that has not been obtained;
-- Weakened the closing movement by adding weight after the book's natural resolution.
-
-These chapters should not be restored unless new source material proves structural necessity. The 22-chapter, 38,000-word manuscript is the complete book.
+No further new chapters should be added unless they solve a demonstrable structural absence. The 23-chapter, 45,000-word manuscript is the complete book.
 
 ## Suitable Agent / Editor Interest Profile
 

@@ -48,6 +48,28 @@ Specific privacy decisions:
 - Supervisors and institutional staff are rendered as environmental conditions, not as named individuals;
 - The other parent in the family proceedings is not named, characterised, or judged in the text.
 
+## Chapter 19 — Pseudonym Pass
+
+Chapter 19 ("The Version in His Head") was restored and pseudonymised on 2026-06-24. The following pseudonym decisions apply:
+
+- **Samina → Maya** (role-based identifier used in prose)
+- **Anita → Elena** (pseudonym used throughout)
+- **Sheryl, Tamara, Jenny** → role-based phrasing ("two American women," "another friend")
+- **Olu and Nene** — retained per author instruction (confirmed as real names safe for use)
+- **No employer detail** — Anita's employer (LSEG) removed from all prose
+- **No identifying personal detail** — addresses, specific workplaces, and other identifiers removed
+
+### Flagged for Legal Review
+
+The chapter contains two references to "dismissive avoidant" — first as Elena's own self-description, later as Abraham's research after the relationship ended. This is mitigated by:
+
+- The term is presented as Elena's own self-description, not the author's diagnosis;
+- Abraham does not understand the term when first hearing it;
+- The later research is presented as self-examination ("He read about himself"), not as character analysis of Elena;
+- No clinical authority is claimed.
+
+However, this should be reviewed by legal counsel before publication to assess any potential defamation or privacy risk.
+
 ## Legal / Procedural Chronology
 
 The manuscript does not contain a legal or procedural chronology. Dates, hearings, applications, orders, and institutional decisions are intentionally withheld. The book renders institutional pressure as something the author moved through — as duration, as weather, as cost — not as something the book prosecutes or invites the reader to adjudicate.

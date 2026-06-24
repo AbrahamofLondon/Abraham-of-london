@@ -24,28 +24,32 @@ Chapter 15 introduces Funke, Abraham's sister, who appointed herself his protect
 
 Chapter 16 marks the beginning of fatherhood. Abraham learns he is going to be a father — and is told to leave the home. Fatherhood does not begin inside a marriage. It begins outside a door. The chapter is deliberately spare. It names the structural pressure — expulsion, attempted reconciliation, restriction — without narrating legal specifics, because a living child stands inside the story.
 
-## Movement Three: The Contact Room (Chapters 17–19)
+## Movement Three: The Contact Room (Chapters 17–18)
 
-The book's middle third takes place largely inside supervised contact rooms. Abraham sees his son Damisi under institutional arrangements — rooms with supervisors, time limits, toys that belong to the institution, and files that record that a visit occurred but cannot record what happened inside it.
+The book's middle section takes place largely inside supervised contact rooms. Abraham sees his son Damisi under institutional arrangements — rooms with supervisors, time limits, toys that belong to the institution, and files that record that a visit occurred but cannot record what happened inside it.
 
 Chapter 17 renders the contact room as a physical and emotional space. Abraham learns to calibrate every gesture — how to kneel to a child's eye level, how to respond to a whispered moment without making it visible to the room, how to say goodbye in a way that holds together long enough for the child to leave before it falls apart.
 
 Chapter 18 covers seven years. Not as chronology but as duration — the accumulation of adjustments, the calendar that makes time look orderly while the body carries it differently. Abraham's silence during those years is not cowardice. It is fatherhood: the refusal to say anything publicly that might land on his son.
 
-Chapter 19 is the Damisi chapter. It is the longest chapter in the book and the most carefully controlled. Damisi is rendered entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument. Damisi remains Damisi.
+## Movement Four: Ordinary Life, Fatherhood Tested, and the Child (Chapters 19–20)
 
-## Movement Four: Love, Devotion, and the Final Room (Chapters 20–22)
+Chapter 19 — "The Version in His Head" — is the restored chapter that fills a structural gap in the manuscript. Between the institutional-fight chapters and the resolution movement, the reader now sees Abraham trying to rebuild ordinary adult life. He dances, networks, dates, builds community. He misreads proximity as providence and chooses at the level of his own wound. The chapter's centre is the Damisi red line: when a woman suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. Fatherhood is tested not in a courtroom but in an ordinary conversation about practicality.
 
-Chapter 20 returns to faith. Abraham encounters 1 John 4:18 — "perfect love casts out fear" — not as a sermon but as a correction. The verse had always been available, but he had not been the man who could read it without turning it into justification for what he wanted. The chapter places the theological work of the book without becoming devotional literature.
+Chapter 20 is the Damisi chapter. Damisi is rendered entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument. Damisi remains Damisi.
 
-Chapter 21 returns to David Senior. The father who became a parent at fifteen. The father who watched Abraham with the recognition of someone who had carried the same weight a generation earlier. The chapter renders devotion not as a feeling but as a practice — the accumulated decisions of a man who remained present when remaining was costly.
+## Movement Five: Love, Devotion, and the Final Room (Chapters 21–23)
 
-Chapter 22 closes the book in a room. A dining table. A family gathering. The room is ordinary. The ordinariness is the point. Everything the book has carried — the fire, the names, the deaths, the contact room, the seven years, the boy who plays number 7 — is present without being displayed. The book does not resolve into triumph or defeat. It resolves into presence: a man at a table, in a room, with the people who remain.
+Chapter 21 returns to faith. Abraham encounters 1 John 4:18 — "perfect love casts out fear" — not as a sermon but as a correction. The verse had always been available, but he had not been the man who could read it without turning it into justification for what he wanted. The chapter places the theological work of the book without becoming devotional literature.
+
+Chapter 22 returns to David Senior. The father who became a parent at fifteen. The father who watched Abraham with the recognition of someone who had carried the same weight a generation earlier. The chapter renders devotion not as a feeling but as a practice — the accumulated decisions of a man who remained present when remaining was costly.
+
+Chapter 23 closes the book in a room. A dining table turned workstation. A laptop, phones, a cup of tea gone cold. Abraham moves one paper aside, saves the document, closes the screen — the lid meeting the base with a soft click — and leaves the chair where it was. Everything the book has carried — the fire, the names, the deaths, the contact room, the seven years, the boy who plays number 7 — is present without being displayed. The book does not resolve into triumph or defeat. It resolves into presence: a man at a table, in a room, with the work still ahead of him.
 
 ## Structure and Form
 
-*Fathering Without Fear* is approximately 38,000 words across twenty-two chapters. Most chapters are between 600 and 3,500 words. The shortest (Chapter 10, "Leaving Lagos") is 621 words. The longest (Chapter 12, "Married by December") is approximately 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
+*Fathering Without Fear* is approximately 45,000 words across twenty-three chapters. Most chapters are between 800 and 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
 
-The book withholds legal detail deliberately. Chapter 16 is legally sensitive and requires specialist review before publication. Pseudonyms are used where privacy requires them. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
+The book withholds legal detail deliberately. Chapter 16 is legally sensitive and requires specialist review before publication. Chapter 19 uses pseudonyms for privacy. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
 
 The title — *Fathering Without Fear* — names the book's central correction. Fear governed the early years: fear of loss, fear of the system, fear of saying the wrong thing in the wrong room. The book's arc is toward a love that does not require fear to sustain it. Not fearlessness as bravado, but love as a practice strong enough to survive what the situation demanded.
