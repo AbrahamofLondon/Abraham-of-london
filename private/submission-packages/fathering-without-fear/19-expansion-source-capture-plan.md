@@ -1,3 +1,5 @@
+> **Historical / superseded note:** This document reflects an earlier manuscript state before the 23-chapter, 45,008-word baseline. Do not use its 22-chapter or 38k references as current manuscript facts. Current baseline: 23 chapters, 45,008 prose-only words, with Ch.19 restored as *The Version in His Head*.
+
 # Expansion Source Capture Plan — Fathering Without Fear
 
 **Date:** 2026-06-23

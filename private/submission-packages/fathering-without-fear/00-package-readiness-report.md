@@ -57,8 +57,8 @@ Counted using consistent methodology: YAML frontmatter stripped, chapter-title h
 | :--- | :----- |
 | `README.md` | Created |
 | `00-package-readiness-report.md` | **Updated** (23-chapter, 45k+ baseline) |
-| `01-clean-manuscript.md` | Created (22-chapter version; requires regeneration for 23-chapter) |
-| `02-first-50-pages.md` | Created (22-chapter version) |
+| `01-clean-manuscript.md` | **Regenerated** (23-chapter, 45,008 prose-only words) |
+| `02-first-50-pages.md` | **Regenerated** (23-chapter version) |
 | `03-query-letter.md` | Created |
 | `04-one-page-synopsis.md` | Created |
 | `05-long-synopsis.md` | Created |
@@ -74,7 +74,7 @@ Counted using consistent methodology: YAML frontmatter stripped, chapter-title h
 | `15-agent-research-table.csv` | Created |
 | `16-research-execution-brief.md` | Created |
 | `17-comp-title-research-findings.md` | Created |
-| `18-market-ready-expansion-audit.md` | Created (22-chapter counts; needs update) |
+| `18-market-ready-expansion-audit.md` | **Updated** (23-chapter, 45,008 baseline) |
 | `19-expansion-source-capture-plan.md` | Created |
 | `20-volume-architecture-decision-audit.md` | **Updated** (23-chapter post-restoration) |
 | `21-restored-chapter-architecture-audit.md` | Created (22-chapter pre-restoration) |
@@ -103,7 +103,7 @@ The 23-chapter architecture covers all major life-stages:
 
 2. **Ch.19 pseudonym review** — Chapter 19 ("The Version in His Head") uses pseudonyms (Elena, Maya) and role-based identifiers. The "dismissive avoidant" reference (Elena's own self-description) should be reviewed for potential defamation risk. No employer detail or identifying personal detail is present.
 
-3. **01-clean-manuscript.md regeneration** — The clean manuscript file still reflects the 22-chapter, ~38k version. It should be regenerated from the 23 draft files before submission.
+3. **01-clean-manuscript.md regeneration** — The clean manuscript file has been regenerated from the current 23-chapter manuscript and reflects the 45,008-word prose-only baseline.
 
 4. **Comp titles** — No comp titles have been researched. The positioning note includes a placeholder. Comp-title research must be conducted using fresh market data before submission.
 
