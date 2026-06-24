@@ -65,12 +65,15 @@ Chapter 20 ("The Version in His Head") was restored and pseudonymised on 2026-06
 
 ### Flagged for Legal Review
 
-The chapter contains two references to "dismissive avoidant" — first as Elena's own self-description, later as Abraham's research after the relationship ended. This is mitigated by:
+The phrase "dismissive avoidant" remains in the chapter twice. It is retained as reported self-description, not as an authorial diagnosis. The author confirms Elena used the phrase herself in front of witnesses. The prose does not present Abraham as making a clinical judgment and does not claim diagnostic authority. It remains flagged for legal/privacy review because the phrase is psychological/attachment language and could still be read as character labelling.
+
+Mitigating factors:
 
 - The term is presented as Elena's own self-description, not the author's diagnosis;
 - Abraham does not understand the term when first hearing it;
 - The later research is presented as self-examination ("He read about himself"), not as character analysis of Elena;
-- No clinical authority is claimed.
+- No clinical authority is claimed;
+- Elena used the phrase herself in front of witnesses (author-confirmed).
 
 However, this should be reviewed by legal counsel before publication to assess any potential defamation or privacy risk.
 
