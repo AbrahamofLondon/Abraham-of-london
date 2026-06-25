@@ -21,7 +21,7 @@ When his son Damisi was born, fatherhood did not begin inside a home. It began o
 
 The book is structured as twenty-four short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
-This is not a legal memoir, a parenting guide, or a grievance text. It is a book about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
+The book is a compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear. It is about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
 
 A chapter outline and three sample chapters are attached. The complete manuscript is available on request.
 

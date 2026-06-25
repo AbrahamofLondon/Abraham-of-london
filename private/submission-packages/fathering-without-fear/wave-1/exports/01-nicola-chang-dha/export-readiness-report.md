@@ -4,10 +4,10 @@
 |-------|-------|
 | Agent | Nicola Chang |
 | Agency | David Higham Associates |
-| Materials created | cover-letter-source.md, first-50-pages-source.md, metadata-scrub-report.md |
-| Materials not created and why | DOCX files not exported — requires Microsoft Word or compatible software to create .docx from source text. Source files are ready. |
-| DOCX files | 0 (source files ready for Word export) |
-| Metadata scrub reports | 1 (metadata-scrub-report.md — reports PENDING until DOCX created and scrubbed) |
+| Materials created | cover-letter-source.md, first-50-pages-source.md, metadata-scrub-report-cover-letter.md, metadata-scrub-report-first-50-pages.md, Fathering-Without-Fear-Cover-Letter-Nicola-Chang.docx, Fathering-Without-Fear-First-50-Pages-Nicola-Chang.docx |
+| Materials not created and why | None — all required materials exist. |
+| DOCX files | 2 — Cover Letter and First 50 Pages |
+| Metadata scrub reports | 2 — both PASS (Author set to Abraham of London; no private metadata detected) |
 | Live requirement still requiring send-day recheck | Open/closed status on davidhigham.co.uk; DHA one-agent rule |
-| Ready for manual submission after send-day check | Yes — after DOCX created, metadata scrubbed, and open status verified |
+| Ready for manual submission after send-day check | Yes — DOCX files exist, metadata scrub reports PASS. Send-day recheck required before sending. |
 | Risk/caution | DHA requires Word documents only — no PDFs. Ensure DOCX is properly formatted and metadata-scrubbed before sending. |

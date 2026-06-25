@@ -54,6 +54,6 @@ Chapter 24 closes the book in an ordinary room, at a table, with a laptop, paper
 
 *Fathering Without Fear* is approximately 47,000 words across twenty-four chapters. Most chapters are between 800 and 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
 
-The book withholds legal detail deliberately. Chapter 17 is legally sensitive and requires specialist review before publication. Chapter 20 uses pseudonyms for privacy. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
+The book withholds legal detail deliberately. Chapter 17 is rendered in a protected, restrained register and requires specialist review before publication. Chapter 20 uses pseudonyms for privacy. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
 
 The title — *Fathering Without Fear* — names the book's central correction. Fear governed the early years: fear of loss, fear of the system, fear of saying the wrong thing in the wrong room. The book's arc is toward a love that does not require fear to sustain it. Not fearlessness as bravado, but love as a practice strong enough to survive what the situation demanded.
