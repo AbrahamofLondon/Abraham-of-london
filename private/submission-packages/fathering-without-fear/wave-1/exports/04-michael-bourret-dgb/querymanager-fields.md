@@ -14,9 +14,9 @@ I'm querying you because of your explicit interest in BIPOC literature and your 
 
 The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
 
-Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke fought for him and did not survive the cost. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
+Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke carried the family's weight and did not set it down. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
 
-When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
+When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
 The book is structured as twenty-four short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
@@ -49,7 +49,7 @@ The family line begins in Isua, with a tailor who became the first Christian in 
 
 Abraham leaves Lagos for London under his father's prayer from Psalm 27. He buries his father, marries quickly, and discovers that fatherhood does not begin inside a home. An allegation is made. The case does not proceed. The consequences in family life do.
 
-What follows are years of supervised contact rooms, time limits, and the discipline of loving a child through arrangements that can record a visit but cannot record what happened inside it. Between those years, one chapter shows Abraham rebuilding ordinary adult life — dancing, socialising, testing whether he can remain present when someone he is close to suggests he leave London for work. He does not leave. His son is in London. So he stays.
+What follows are years of contact rooms, time limits, and the discipline of loving a child through arrangements that can record a visit but cannot record what happened inside it. Between those years, one chapter shows Abraham rebuilding ordinary adult life — dancing, socialising, testing whether he can remain present when someone he is close to suggests he leave London for work. He does not leave. His son is in London. So he stays.
 
 The book closes with Damisi rendered wholly as a child — through football, swimming, vocabulary, a sentence: "I am not your bro. I am your son."
 
