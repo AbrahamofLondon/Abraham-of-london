@@ -1,0 +1,122 @@
+# Materials to Send — Elise Dillsworth, Elise Dillsworth Agency
+
+**Requirement source:** elisedillsworthagency.com — confirmed
+**Required materials:** Cover letter + proposal + chapter outline + 30pp writing sample
+
+---
+
+## Email Structure
+
+**To:** elise@elisedillsworthagency.com
+**Subject:** Fathering Without Fear — Abraham of London — Nonfiction Submission
+**Body:** Brief covering note (3 sentences); full materials as attachments
+
+### Email Body (covering note)
+
+> Dear Elise Dillsworth,
+>
+> Please find attached a nonfiction proposal for *Fathering Without Fear* — a compressed literary memoir of approximately 47,000 words, tracing a Nigerian-British family across four generations and arriving at a father who refuses to disappear. The package includes a cover letter, chapter outline, and thirty-page writing sample.
+>
+> With thanks,
+> Abraham Adaramola (writing as Abraham of London)
+
+---
+
+## Attachments Required
+
+Dillsworth requires a full nonfiction proposal. The standard structure for a literary memoir proposal is:
+
+### Attachment: Full Nonfiction Proposal
+
+**Filename:** `Fathering-Without-Fear_Proposal_EliseDillsworth.docx`
+**Format:** Word .docx or PDF — confirm preference on website; both are generally accepted unless otherwise stated
+**Formatting:** 12pt serif font (Times New Roman or Georgia); double-spaced; page-numbered; 1-inch margins; author name and title in header
+
+The proposal document contains four sections, combined in a single document:
+
+---
+
+#### Section 1: Overview / Pitch (2–3 pages)
+
+Use the personalised query letter as the opening section of the proposal. Then extend with the following content:
+
+**Proposed title:** *Fathering Without Fear*
+**Author:** Abraham of London (Abraham Adaramola)
+**Word count:** Approximately 47,000 words (complete manuscript)
+**Genre:** Literary memoir
+**Comparable titles:**
+
+- *Between the World and Me* — Ta-Nehisi Coates (compressed, morally serious personal narrative addressed to a child; politically resonant without being polemical)
+- *The Rules Do Not Apply* — Ariel Levy (memoir of extreme personal exposure under institutional pressure; formally disciplined)
+- *Burntcoat* — Sarah Hall (compressed, chamber-sized prose narrative; each chapter a pressure point)
+- *Homegoing* — Yaa Gyasi (multigenerational African/diaspora family narrative moving from West Africa to Britain/America — the family-line architecture; note: this is fiction, but the generational scope is the closest comparison for the book's ancestral structure)
+- *Boy, Snow, Bird* — Chinelo Okparanta (contemporary Nigerian/British family narrative in compressed, literary form — if equivalent exists in nonfiction)
+
+Note: Lead with Coates and Levy as the primary comparisons. The Homegoing comparison should be flagged as "architecture comparable" given it is fiction.
+
+**Market:**
+*Fathering Without Fear* is positioned for the literary memoir market with crossover potential into the following adjacent categories:
+- Diaspora memoir (Nigerian-British; Ondo/Lagos/London arc — a route not yet well-represented in UK literary memoir)
+- Faith and spiritual memoir (the Psalm 27, Iyalode, and 1 John 4:18 threads; but the book does not sit in the Christian memoir market — the faith is serious and private, not evangelical)
+- Fatherhood memoir (an underrepresented category; most published examples are by women writing about motherhood; the father's perspective, particularly a Black British father under institutional pressure, is a genuine gap)
+
+Primary readership: readers of literary memoir, narrative nonfiction; readers of Toni Morrison, Claudia Rankine, Coates, Ernaux; readers engaged with questions of family inheritance, diaspora, and identity.
+
+**Manuscript status:** Complete. Available on request.
+
+---
+
+#### Section 2: Author Biography (1 page)
+
+Draw from `06-author-bio.md`. The biography should include:
+- Full name (Abraham Adaramola) and pen name (Abraham of London)
+- Family background: Nigerian-British; Lagos to London
+- Any professional background relevant to the material or to the readership
+- The fact that this is a debut memoir (if applicable — do not misrepresent; if there are other publications, list them)
+- Location: London
+
+Dillsworth will want to understand the author's relationship to the subject — the fact that this is his own story, told with formal care, should be stated plainly.
+
+---
+
+#### Section 3: Chapter Outline (6–8 pages)
+
+Include the full chapter outline from `wave-1/02-kate-evans-pfd/materials-to-send.md`. This is the same outline; it does not need to be rewritten, only formatted consistently.
+
+---
+
+#### Section 4: Writing Sample (approximately 30 pages / 7,500–8,000 words)
+
+**Recommended chapters for this agent:**
+
+1. **Ch.1 — Hounslow Call** (1,541 words) — the opening hook; establishes voice and compression
+2. **Ch.2 — Isua to Agege** (976 words) — the ancestral lineage; the international arc begins here
+3. **Ch.3 — The Boy Who Was Already Old** (1,327 words) — naming inheritance; the ancestral tailor
+4. **Ch.6 — The Fire and the Deal** (2,506 words) — the book's strongest early chapter; survival, prayer, fear, and faith in their rawest form
+5. **Ch.10 — Leaving Lagos** (1,660 words) — the crossing to London; Psalm 27 prayer
+
+Total for these five chapters: approximately 8,010 words (~32 pages). This sample is slightly over 30 pages — trim to exactly 30 if a strict page limit applies; otherwise this is the optimal selection for Dillsworth.
+
+**Why this selection for Dillsworth specifically:**
+- Chs.1–3 establish the international arc she specifically values
+- Ch.6 (the fire) is the book's most viscerally rendered chapter — it demonstrates literary prose quality, not just interesting content
+- Ch.10 (Leaving Lagos) closes the selection at the point of departure — from Lagos to London — which directly illustrates the diaspora arc she works with
+
+---
+
+## What NOT to Include
+
+- Do not include Ch.17 or any chapter with active legal content in the writing sample (legal review pending)
+- Do not include a full manuscript unsolicited
+- Do not include a marketing plan, sales projections, or social media follower counts unless asked
+
+---
+
+## Final Assembly Checklist
+
+- [ ] Proposal document assembled: Overview → Author Bio → Chapter Outline → Writing Sample
+- [ ] Document properly formatted and page-numbered throughout
+- [ ] Writing sample chapters are clean — no tracked changes, no comments
+- [ ] Combined file size is manageable (under 10MB)
+- [ ] Subject line confirmed: **Fathering Without Fear — Abraham of London — Nonfiction Submission**
+- [ ] Send date recorded — three-month no-reply deadline noted
