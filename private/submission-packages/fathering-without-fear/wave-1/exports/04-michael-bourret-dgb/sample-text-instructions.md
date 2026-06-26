@@ -1,21 +1,83 @@
-# Sample Text Instructions — Michael Bourret, Dystel Goderich & Bourret
+# QueryManager Sample Text — Michael Bourret
 
-**Route:** QueryManager form — paste or upload sample text as the form allows.
+## FIELD: Sample Pages / Sample Chapter
 
-## Option A: Single Chapter (if form accepts short text)
+Chapter 1 — Hounslow Call
 
-**Chapter:** Ch.1 — Hounslow Call
-**Word count:** 1,541 words
-**Source:** `01-clean-manuscript.md` — copy from "# Chapter 1 — Hounslow Call" to the end of the chapter.
+In February 2021, Abraham was sitting on his bed in Hounslow when the court called.
 
-## Option B: Two Chapters (if minimum word count required)
+It was not a video hearing. There was no screen to look into, no face to read, no room to enter. Only a voice. A voice could enter without giving him anything to look at. A voice could ask him to respond before his body had found the posture of a hearing. A voice could make the bed, the phone, and the room in Hounslow belong to something larger than themselves without changing any of them.
 
-**Chapters:** Ch.1 — Hounslow Call (1,541 words) + Ch.6 — Fire and the Deal (2,506 words)
-**Total:** ~4,047 words
-**Source:** `01-clean-manuscript.md`
+He had not been informed.
 
-## Format Notes
+He was not ready.
 
-- If pasting into a text field: preserve paragraph breaks, use blank lines before chapter headings
-- If uploading a file: use .docx format, 12pt Times New Roman, double-spaced, 1-inch margins
-- No tracked changes, no comments, no review markup
+The call concerned a hearing — a hearing that had been placed into the day without warning him. The bed had not been chosen for this. The room had not been arranged for it. He had not sat down as a man preparing to be heard. And somewhere inside the meaning of the call, though not inside the room itself, there was a child. His son, Damisi, existed at the centre of what the hearing would decide, and Damisi was not in the room, and Damisi would not hear his father's voice through the phone, and Damisi did not know that a man in Hounslow was sitting on a bed wondering whether the room he was in had just become a courtroom.
+
+He told the clerk he had never been notified.
+
+It was the plain thing to say. It did not need embellishment. He did not know about the hearing. He had not prepared for it. If a man is called into a thing he did not know existed, the first fact is not his attitude. The first fact is that he did not know.
+
+He said it.
+
+Then he waited.
+
+The clerk did not force him to proceed. Her words did not compel him. Nobody said, You must continue now. Nobody turned the call into command by naming it as command. She did not push past what he had said or pretend not to have heard it.
+
+But silence can carry more pressure than instruction.
+
+The silence on the other side was loud and clear.
+
+He could insist. He could stop the call. He could hold to the fact that he had not been told. Or he could remain on the line. The room held him while he decided. It held him without helping him. The phone did not explain what would happen if he refused to continue. The voice had brought the hearing into the room, but it had not brought preparation with it.
+
+He had almost protested.
+
+Almost is not nothing. It is a place the body visits before the mouth decides whether to follow. It is the small rise in the chest before a sentence. It is the heat of the fair point before a man measures the cost of making it. Abraham had the fair point. He had already made it once. He had not been notified.
+
+A spoken pressure can be answered. A silence has to be interpreted while it is happening.
+
+Then he was told the judge was about to be brought onto the call.
+
+The sentence landed plainly.
+
+The judge was about to be brought onto the call.
+
+That was the point at which the room could no longer be treated as private in the old way. The call was still only sound. But the next voice would carry the authority of the hearing he had not known to prepare for. He had entered nothing, and yet he was already inside it. No door had opened. No name had been called across a waiting room. No one had asked him to rise. The call had made its own entrance. It had found him where he was and asked him to meet it there.
+
+He could not look around the place where the hearing was happening. He could not read a face. He could not tell from a movement whether someone had understood what he had said. He could not see whether she had turned away, covered the receiver, or looked toward someone else. The line gave him only sound, pause, and the next instruction.
+
+He had no time to build the version of himself a man imagines he will present when he is ready. No time to collect his thoughts into sequence. No time to become calm before calm was required of him. A court hearing, even an unexpected one, asks a man to be coherent. It asks him to hold his case, hold his composure, hold the thread of what has already been decided and what still might be. Abraham had none of this ready. What he had was a bed, a phone, and the knowledge that somewhere in the system his son's name was attached to a proceeding he had not been told about.
+
+So a man learns to speak with less than the whole of himself. He makes the sentence small enough to survive the room. He offers what he has and hopes the room will not ask for what he does not.
+
+He had not been notified. That was true.
+
+He was unprepared. That was also true.
+
+And yet he stayed.
+
+Not because the scene was fair. Not because he understood what was happening. He stayed because the other possibility was absence, and absence had its own danger.
+
+A father can disappear in more than one way. He can leave. He can be removed. He can also disappear by refusing a difficult room because the room was wrongly arranged.
+
+Abraham knew something about refusal to disappear that was older than this call and older than this room. It ran in the family — not as a slogan passed down, but as a pattern that had repeated itself across generations before him. A grandfather who built and died before his children could hold what he had built. A father who picked up responsibility at fifteen because there was no one else. A grandmother who walked from Osun to Lagos and carried faith alongside everything else. A sister who took the family's ordinary weight onto her own body and did not set it down. None of them had disappeared when the room became too hard to remain inside. Abraham had not yet told any of their stories. He would. They were the reason he was still on the line.
+
+But this chapter begins before the stories. It begins in the room. It begins with a man who has not been told, has not been prepared, and is still there.
+
+A phone in his hand. A bed beneath him. A voice telling him a judge was about to join. The knowledge that he had not been told. The pressure of a child somewhere inside the meaning of the call. And his own voice, which suddenly seemed too small for everything it was being asked to carry.
+
+The answer did not come as a speech. It came first as not hanging up. It came as remaining in a room that no longer felt entirely his.
+
+Abraham stayed on the line.
+
+He would not make the child carry the argument. That was the first discipline. Damisi was a boy, not evidence. His love for his father was not a legal exhibit. His absence from the room was not the chapter's thesis. He was somewhere else, living the life a child lives, and this book would not ask him to do anything more than be what he already was.
+
+He would not make the system carry the blame. That was the second discipline. The court was machinery. It processed what it could process. It did not speak the language of love, and it was not required to. The man who needed the system to be his enemy would lose something more important than the case.
+
+He would not reduce what had happened to him — or what he had allowed to happen to himself — into a case for the reader's verdict. The book that follows is not a brief. It is not a complaint. It is not an appeal. It is the account of a man who refused to disappear, told from far enough back to show where the refusal began, and told with enough restraint to let the child remain a child inside it.
+
+The call moved on.
+
+He was still in the room. He was still on the bed. He was still, as far as the phone was concerned, only a voice.
+
+But the voice carried more than the room could see.

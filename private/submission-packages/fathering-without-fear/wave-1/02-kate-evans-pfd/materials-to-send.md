@@ -87,10 +87,10 @@ Abraham's sister Funke was the family organiser, the first daughter of the first
 Abraham learns he is going to be a father — and is told to leave. Fatherhood does not begin inside a marriage or inside a home. It begins outside a door. The chapter is spare because the moment it holds is spare.
 
 **Chapter 17 — What the System Sees** (3,032 words)
-An allegation is made. Abraham is arrested. The case does not proceed. The consequences in family life do. The chapter names the structural pressure without narrating legal specifics, because a living child stands inside the story.
+The household breaks apart. The consequences in family life continue. The chapter names the structural pressure without narrating private specifics, because a living child stands inside the story.
 
 **Chapter 18 — Seven Years** (3,737 words)
-Seven years of supervised contact rooms, time limits, files that record that a visit occurred but cannot record what happened inside it. Abraham learns to calibrate every gesture in those rooms — how to respond to a whispered moment without making it visible, how to say goodbye in a way that holds together long enough for the child to leave before it falls apart.
+Years of contact rooms, time limits, and files that record that a visit occurred but cannot record what happened inside it. Abraham learns to calibrate every gesture in those rooms — how to respond to a whispered moment without making it visible, how to say goodbye in a way that holds together long enough for the child to leave before it falls apart.
 
 **Chapter 19 — The Version in His Head** (2,295 words)
 Between the institutional years and the resolution movement, Abraham rebuilds ordinary adult life. He dances, networks, socialises, builds community. A relationship tests his fatherhood commitment in the most ordinary way: when Elena suggests he could move city or country for work, Abraham ends the conversation. His son is in London. So he stays.

@@ -15,7 +15,7 @@
 
 Dear Reiko Davis,
 
-I'm writing to you because of your description of what compels you in narrative nonfiction: intimate personal stories that function as lenses for larger issues — social justice, the history and experiences of people of colour, the forces that shape individual lives. *Fathering Without Fear* is built on exactly that logic: a Black Nigerian-British man's account of fatherhood becomes a study in what institutions do to fathers, what faith does to families, and what ancestry actually means when it is tested by courts and time. Your confirmation that you were open to new submissions in late 2025 and your clear appetite for this kind of work encouraged me to write.
+I'm writing to you because of your description of what compels you in narrative nonfiction: intimate personal stories that function as lenses for larger issues — social justice, the history and experiences of people of colour, the forces that shape individual lives. *Fathering Without Fear* is built on exactly that logic: a Black Nigerian-British man's account of fatherhood becomes a study in what pressure does to fathers, what faith does to families, and what ancestry actually means when it is tested by distance and time. Your confirmation that you were open to new submissions in late 2025 and your clear appetite for this kind of work encouraged me to write.
 
 *Fathering Without Fear* is a compressed literary memoir of approximately 47,000 words.
 

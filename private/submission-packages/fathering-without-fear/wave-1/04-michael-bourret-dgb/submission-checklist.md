@@ -37,7 +37,7 @@
 
 ## Content Checks
 
-- [ ] Query positions the book as BIPOC memoir with literary quality — not legal memoir
+- [ ] Query positions the book as BIPOC memoir with literary quality — not grievance narrative
 - [ ] Query does not mention court proceedings, allegations, or family court in the opening paragraph
 - [ ] Faith framing is not devotional — do not describe as Christian memoir or devotional nonfiction
 - [ ] Cultural stakes are clear: Nigerian-British, multigenerational, fatherhood and identity

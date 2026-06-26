@@ -1,81 +1,59 @@
-# Chapter Outline Source — Kate Evans, Peters Fraser & Dunlop
+# Fathering Without Fear — Chapter Outline
 
-**Source:** Adapted from `wave-1/02-kate-evans-pfd/materials-to-send.md`. All 24 chapters, 2–4 sentences each.
+## Movement One: Inheritance (Chapters 1–11)
 
----
+The book opens with a phone call in Hounslow, west London. Abraham is sitting on his bed when the court calls. He has not been notified. He is not prepared. But he stays on the line, because the other possibility is absence, and absence has its own danger.
 
-**FATHERING WITHOUT FEAR — Chapter Outline**
-*Abraham of London*
+The book moves backward — into the family line, the faith, and the country that made him.
 
-**Chapter 1 — Hounslow Call** (1,541 words)
-The book opens in February 2021. Abraham is in his room in Hounslow when the court calls without notification. He is not prepared. But he stays on the line — because the alternative is absence, and absence has its own danger. The book begins here, then moves backwards.
+The family line runs back to Isua, in Ondo, where the Adaramola lineage begins with a tailor who sewed for a British missionary and became the first in the family to take Christianity seriously. His wife Iyalode walked from Osun to Lagos beside him, carrying both the older spiritual knowledge and the new faith. She lived to 118.
 
-**Chapter 2 — Isua to Agege** (976 words)
-The family line. Abraham's ancestor Adarabioyo was a tailor in Isua, in Ondo state, who sewed for a British missionary and became the first in the family to take Christianity seriously. His wife Iyalode walked from Osun to Lagos beside him. She lived to 118. The chapter establishes what Abraham carries before he knows he carries it.
+Abraham's father, David Senior, became a parent at fifteen when his own father died. He carried his younger siblings — Abiodun, Funmilayo, Evans — through Lagos, educated them, kept them together. He named his son Abraham because he recognised something in the child that connected to his own father, the tailor, who had built and died before his work was finished.
 
-**Chapter 3 — The Boy Who Was Already Old** (1,327 words)
-Abraham is born as one of triplets. He is rejected by Iyalode because she believes he does not fit the name — too dark, too connected to the maternal line. Yet David Senior sees something else: recognition. The child grows into a boy who speaks too early, questions too deeply, and stops answering to Abraham around Primary 3, using Seun instead until his MBA application.
+After Jumoke's death, Abraham is sent to Akure. At St Thomas Aquinas College, he spends a year without seeing his family. He stays with his older cousin Mary, who treats him fairly but cannot replace home. He begins refusing class — not failing, but absenting himself while still passing the ordinary tests. In April 1990, he commits his life to Jesus in a Church of God Mission house fellowship. When his father asks what is wrong, Abraham says he is tired of Akure. David Senior trusts him enough to let him choose another school. Abraham chooses Adebayo Mokuolu College because his childhood friends are supposed to be there. They have gone to America and do not return.
 
-**Chapter 4 — A Hearing Date** (1,227 words)
-27 July 2023. A Teams screen, a mute button, a name in the corner. Ten minutes that hold a child's future. The original judge returns to sit — not triumph, but the prevention of another loss. Presence as the only form of fatherhood the process allows.
+As a child, Abraham survives a bedroom fire. The mosquito coil falls. The mattress burns. He wakes into smoke, wakes his sisters, uses a blanket, and puts the fire out. Before waking, he had a dream — an entrance with pillars, a fall through darkness, a deal made in a place he could not name. The fire becomes part of the family's spiritual memory, not as spectacle, but as a moment Abraham never fully escaped.
 
-**Chapter 5 — Jumoke** (1,380 words)
-Abraham's youngest sister, who followed him everywhere as a child. She died at seven. On 11 November 1989, Abraham knew before being told: a thought arrived in the kitchen that was not his. The chapter is a portrait of a living child, rendered whole before she is lost.
+The early chapters are short because the memories they carry are specific and compressed. A hearing date that reduces a father's life to ten minutes on a screen. Jumoke, Abraham's sister, who followed him everywhere as a child and died at seven. A grandmother whose spiritual authority preceded the Christianity that gave it its final name. A father who became a parent before he understood what parenthood would cost.
 
-**Chapter 6 — Fire and the Deal** (2,506 words)
-As a child, Abraham wakes into a burning room. The mosquito coil has fallen; the mattress is alight. He wakes his sisters, smothers the fire with a blanket, and saves the room. Before waking, he had a dream — a deal made in a place he could not name. The chapter is the book's first full encounter with fear, prayer, and survival as intertwined experiences.
+Abraham leaves Lagos for London under his father's prayer from Psalm 27:10. David Senior lays hands on his head and speaks provision over him. The prayer becomes literal in ways Abraham could not have foreseen.
 
-**Chapter 7 — The Name That Had to Be Powerful** (1,435 words)
-Iyalode said Jesus was the most powerful person she knew — not as a lesson, but as a conclusion. The name Abraham was given because David Senior believed his own father had returned in this child. Around age eight, Abraham stopped answering to it and used Seun until his MBA application.
+## Movement Two: Marriage, Death, and Fatherhood (Chapters 12–17)
 
-**Chapter 8 — Spiritual Covering** (1,107 words)
-Iyalode rendered in full: fair-skinned, graceful, particular about her meals, prayed in Uhami. People flocked to her house like the town's Jerusalem. She held both traditional spiritual authority and Christianity. She doubted Abraham but also first spoke Jesus' name with weight. She died at 118 in 2006.
+A post on Facebook initiates the sequence that leads to Abraham's marriage. He returns to Lagos in December 2017 and marries quickly — not recklessly, but with the momentum of a man who believes the shape of a life can be decided by faith and followed through by action. David Senior has recently died. Abraham sat at his father's body during the wake and the fact of it did not arrive the way facts are supposed to arrive.
 
-**Chapter 9 — Father at Fifteen** (1,111 words)
-David Senior was not quite fifteen when his father died. He had three younger siblings: Abiodun, Funmilayo, Evans. He promised his dying father to educate them and not let them be separated. He refused to follow Iyalode back to Isua. He earned his teaching certificate, later store management through RRC International. He kept his promises.
+Chapter 15 is the book's grief centre. David — Abraham's brother, the bright and sociable one, the one who had already planned Abraham's future from England — was missing from the wedding. Abraham searched for him at the altar during a trance and then returned to the ceremony. The next day he travelled to Lagos and asked a single question at his father's gate: *Is David dead?* The family was not surprised he already knew. David died on 5 May 2003, in Kent.
 
-**Chapter 10 — Leaving Lagos** (1,660 words)
-27 January 2016. The family gathers at David Senior's house. David Senior lays hands on Abraham's head and prays Psalm 27:10 over him. Abraham carries black suitcases, food his mother insisted on, two hundred and fifty dollars. Heathrow at dawn. A plain room in Norwich — single bed, white mattress, red curtains. Provision arriving as objects, directions, people, timing.
+Chapter 16 introduces Funke, Abraham's sister. She was the family organiser, the first daughter of the first son. She was "big mummy" to her nieces and nephews, and she called herself "small mummy" in relation to Abraham's crisis — a smaller version of their mother Rachael. She ran a dry-cleaning service and a catering business, making firewood-cooked meals. She was told to stop working after a doctor found a possible hole in her heart. She collapsed at work two days later. Two days after Funke's death, Abraham was served with divorce papers. He could not pay her medical bill.
 
-**Chapter 11 — A Post on Facebook** (1,450 words)
-Abraham is lying on the black couch — his father's couch — trying to watch a movie. He posts about his father's death. A woman from his past responds: her own father died suddenly. Grief recognising grief. Text messages become a phone call. The invitation becomes clear: come back to the UK.
+Chapter 17 marks the beginning of fatherhood. Abraham learns he is going to be a father — and is told to leave. Fatherhood does not begin inside a marriage. It begins outside a door. The household breaks apart. The consequences in family life continue. The chapter is deliberately spare. It names the structural pressure without narrating private specifics, because a living child stands inside the story.
 
-**Chapter 12 — Married by December** (3,795 words)
-Abraham returns to Lagos after the burial, in limbo. The engagement in October 2017 — her people already assembled, more than "close family only." The registry — something on a form told him what no conversation had. Two days before the wedding he asked directly: is there anything? She said no. At 4am they agreed to cancel. He drove to Aunt Sade. The wedding happened anyway.
+## Movement Three: The Contact Room (Chapters 18–19)
 
-**Chapter 13 — Serena** (2,259 words)
-Awka South LGA, Anambra, approximately 2002/2003. Serena came from danger needing a transfer. A walk, a stranger, a question — the transfer opened. Fabrics from Aba, limited-edition shirts. Closeness without crossing the boundary. Then a journal written before him, describing a spirit husband. A voice threatening to kill him. Two near-death experiences.
+The book's middle section takes place largely inside supervised contact rooms. Abraham sees his son Damisi under institutional arrangements — rooms with supervisors, time limits, toys that belong to the institution, and files that record that a visit occurred but cannot record what happened inside it.
 
-**Chapter 14 — David Was Missing from the Wedding** (3,753 words)
-David — dark-skinned, shorter, with a lovely smile. He could warm a room. He called Abraham naive with concern. At De La Morems car park he made Abraham promise: only say I do after I have nodded. At the altar, Abraham searched for the nod in a trance. The next day he travelled to Lagos and asked: Is David dead? David died on 5 May 2003, in Kent.
+Chapter 18 renders the contact room as a physical and emotional space. Abraham learns to calibrate every gesture — how to kneel to a child's eye level, how to respond to a whispered moment without making it visible to the room, how to say goodbye in a way that holds together long enough for the child to leave before it falls apart.
 
-**Chapter 15 — Funke** (1,516 words)
-Funke was the first daughter of the first son. She called herself small mummy. She ran a dry-cleaning service and a catering business making firewood-cooked meals. A doctor found a possible hole in her heart. She was told to stop working. She collapsed two days later. Two days after Funke's death, Abraham was served with divorce papers. He could not pay her medical bill.
+Chapter 19 covers seven years. Not as chronology but as duration — the accumulation of adjustments, the calendar that makes time look orderly while the body carries it differently. Abraham's silence during those years is not cowardice. It is fatherhood: the refusal to say anything publicly that might land on his son.
 
-**Chapter 16 — Fatherhood Began Outside** (1,577 words)
-He was going to be a father. Then he was told to leave. He stayed with Toyin for a month. An allegation was made. Abraham was arrested. The case did not proceed. The consequences in family life did. Fatherhood became something practised through distance, permission, and time measured by others. The chapter is deliberately spare — a living child stands inside the story.
+## Movement Four: Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–21)
 
-**Chapter 17 — What the System Sees** (3,032 words)
-The contact room: a chair for the supervisor, a socket low on the skirting board, a door. Damisi on the floor with a red and grey truck. Abraham kneeling to eye level. The word "bro" corrected: "I am not your bro. I am your son." Learning the correct height, pace, volume. Ten minutes before the end, he gives the warning himself. The walk afterward.
+Chapter 20 — "The Version in His Head" — is the restored chapter that fills a structural gap in the manuscript. Between the institutional-fight chapters and the resolution movement, the reader now sees Abraham trying to rebuild ordinary adult life. He dances, networks, dates, builds community. He misreads proximity as providence and chooses at the level of his own wound. The chapter's centre is the Damisi red line: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. Fatherhood is tested not in a courtroom but in an ordinary conversation about practicality.
 
-**Chapter 18 — Seven Years** (3,737 words)
-19 July 2019 to 2026. The Northern line to London Bridge, the train toward Catford, seventeen minutes on foot. Always early, always first. Learning to hold expectation at a careful distance. Sessions monthly in approximation. The birthday card — a line about things having been difficult — left on the surface. The discipline of holding what you see without converting it into something the room could use.
+Chapter 21 is the Damisi chapter. Damisi is rendered entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument. Damisi remains Damisi.
 
-**Chapter 19 — The Version in His Head** (2,295 words)
-The restored chapter. Abraham could still dance — Be At One, February 14, 2024. Maya, then Elena. She said she was dismissive avoidant; he did not know what it meant. Nine minutes from Elena. By October she withdrew. On February 4, 2025, she said focusing everything on Damisi was not practical — he could move city, move country. Abraham ended the conversation. He did not call back. Damisi was in London. Therefore Abraham stayed in London. The chapter uses pseudonyms (Elena, Maya) for privacy.
+## Movement Five: Love, Devotion, and the Final Room (Chapters 22–24)
 
-**Chapter 20 — Damisi** (3,376 words)
-The quiet heart of the book. Damisi likes football, swimming, goalkeeping, number 7. He corrects "sustained" to "preserved." He likes pizza, dinosaurs, jokes, dancing, tigers (strength). He wants to win but makes room for his father's joy. He proposed escaping through a window. "I am not your bro. I am your son." He is rendered entirely as a child, never as evidence.
+Chapter 22 returns to faith. Abraham encounters 1 John 4:18 — "perfect love casts out fear" — not as a sermon but as a correction. The verse had always been available, but he had not been the man who could read it without turning it into justification for what he wanted. The chapter places the theological work of the book without becoming devotional literature.
 
-**Chapter 21 — Love Does Not Fear** (3,283 words)
-The theological synthesis. The sentence changed while Abraham was typing notes for this book. 1 John 4:18 — "perfect love casts out fear" — had been misread as a command to keep moving past warnings. The correction: love does not become holier because it refuses to notice what is in front of it. Courage is not speed. Fear would not be allowed to become the final interpreter.
+Chapter 23 returns to David Senior. The father who became a parent at fifteen. The father who watched Abraham with the recognition of someone who had carried the same weight a generation earlier. The chapter renders devotion not as a feeling but as a practice — the accumulated decisions of a man who remained present when remaining was costly.
 
-**Chapter 22 — Devotion** (2,893 words)
-David Senior's devotion rendered as structure, not sentiment. The dead father appeared to him, asking for two promises: educate the siblings, never let them be separated. The interview — two hundred candidates, a wait from seven in the morning until eight at night. The job that enabled the burial rites and the house in Isua. A woman came after his death to collect the second half of her son's school fees, not knowing he was dead. David Senior had committed himself to helping her while he had no job or pension.
+Chapter 24 closes the book in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
-**Chapter 23 — Final Room** (847 words)
-The dining table had become a workstation. The laptop open, phones nearby, tea gone cold. From that surface he could see how many rooms had passed through his life. No final account of every grief. No neat repair of every rupture. The actual man was enough because the actual man had remained. He reached forward, moved one paper aside, saved the document, closed the screen, and left the chair where it was.
+## Structure and Form
 
----
+*Fathering Without Fear* is approximately 47,000 words across twenty-four chapters. Most chapters are between 800 and 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
 
-*Total: approximately 47,000 words across twenty-four chapters.*
+The book protects private material deliberately. The fatherhood chapters are rendered in a restrained register. Chapter 20 uses pseudonyms for privacy. The memoir holds institutional pressure as something Abraham moved through, not something the book prosecutes.
+
+The title — *Fathering Without Fear* — names the book's central correction. Fear governed the early years: fear of loss, fear of the system, fear of saying the wrong thing in the wrong room. The book's arc is toward a love that does not require fear to sustain it. Not fearlessness as bravado, but love as a practice strong enough to survive what the situation demanded.

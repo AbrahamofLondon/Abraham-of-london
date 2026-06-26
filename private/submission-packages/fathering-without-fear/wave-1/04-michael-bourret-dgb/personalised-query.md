@@ -10,7 +10,7 @@
 
 Dear Michael Bourret,
 
-I'm querying you because of your explicit interest in BIPOC literature and your appetite for projects that break the mold — both of which describe *Fathering Without Fear*. This memoir does not follow the expected arc of the immigrant success story or the legal injustice narrative; it follows the compression of a lineage across four generations, ending with a father who has refused to disappear and is now reckoning with what he passes on. Your track record with narrative nonfiction and memoir that takes unexpected angles, combined with your commitment to BIPOC authorship, makes you an ideal first American agent to approach.
+I'm querying you because of your explicit interest in BIPOC literature and your appetite for projects that break the mold — both of which describe *Fathering Without Fear*. This memoir does not follow the expected arc of the immigrant success story or the institutional grievance narrative; it follows the compression of a lineage across four generations, ending with a father who has refused to disappear and is now reckoning with what he passes on. Your track record with narrative nonfiction and memoir that takes unexpected angles, combined with your commitment to BIPOC authorship, makes you an ideal first American agent to approach.
 
 *Fathering Without Fear* is a compressed literary memoir of approximately 47,000 words.
 
@@ -49,9 +49,9 @@ He is querying you directly, without representation. The complete manuscript is 
 
 The family line begins in Isua, with a tailor who became the first Christian in the lineage and whose wife Iyalode lived to 118, carrying both Yoruba spiritual knowledge and Christian faith without perceiving them as contradictions. Abraham's father, David Senior, became a parent at fifteen when his own father died, and he named his son Abraham for the weight he recognised in the child.
 
-Abraham leaves Lagos for London under his father's prayer from Psalm 27. He buries his father, marries quickly, and discovers that fatherhood does not begin inside a home. An allegation is made. The case does not proceed. The consequences in family life do.
+Abraham leaves Lagos for London under his father's prayer from Psalm 27. He buries his father, marries quickly, and discovers that fatherhood does not begin inside a home. The household breaks apart. The consequences in family life continue.
 
-What follows are years of supervised contact rooms, time limits, and the discipline of loving a child through arrangements that can record a visit but cannot record what happened inside it. Between those years, one chapter shows Abraham rebuilding ordinary adult life — dancing, socialising, testing whether he can remain present when someone he is close to suggests he leave London for work. He does not leave. His son is in London. So he stays.
+What follows are years of supervised contact rooms, time limits, and the discipline of loving a child through arrangements that could record a visit but could not record what happened inside it. Between those years, one chapter shows Abraham rebuilding ordinary adult life — dancing, socialising, testing whether he can remain present when someone he is close to suggests he leave London for work. He does not leave. His son is in London. So he stays.
 
 The book closes with Damisi rendered wholly as a child — through football, swimming, vocabulary, a sentence: "I am not your bro. I am your son."
 
