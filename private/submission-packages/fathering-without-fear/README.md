@@ -1,45 +1,67 @@
 # Fathering Without Fear — Submission Package
 
-**Author:** Abraham of London (Abraham Adaramola)
-**Word count:** 46,835 (prose-only)
-**Chapters:** 24
-**Category:** Compressed literary memoir
+## Folder Structure
 
-## Contents
+```
+private/submission-packages/fathering-without-fear/
+├── README.md                          ← this file
+├── current-package/                   ← latest active submission materials
+│   ├── 01-clean-manuscript.md         ← complete 25-chapter manuscript
+│   ├── 02-first-50-pages.md           ← first ~50 pages extract
+│   ├── 03-query-letter.md             ← base query letter template
+│   ├── 04-one-page-synopsis.md        ← one-page synopsis
+│   ├── 05-long-synopsis.md            ← detailed chapter synopsis
+│   ├── 06-author-bio.md               ← author biography
+│   ├── 06-nonfiction-proposal-core.md ← nonfiction proposal core
+│   ├── 07-positioning-note.md         ← market positioning
+│   ├── 08-legal-privacy-note.md       ← legal/privacy review
+│   ├── 09-agent-targeting-criteria.md ← agent selection criteria
+│   ├── 10-agent-target-list.md        ← agent target list
+│   ├── 10-submission-tracker.csv      ← submission tracking
+│   ├── 11-submission-wave-plan.md     ← wave plan
+│   └── 12-agent-personalisation-notes.md ← agent personalisation
+├── research-and-market/               ← research, comps, agent targeting
+│   ├── 11-comp-title-research-plan.md
+│   ├── 12-agent-research-plan.md
+│   ├── 14-comp-title-research-table.csv
+│   ├── 15-agent-research-table.csv
+│   ├── 16-research-execution-brief.md
+│   ├── 17-comp-title-research-findings.md
+│   ├── 18-market-ready-expansion-audit.md
+│   └── 19-expansion-source-capture-plan.md
+├── architecture-and-audit/            ← internal architecture, audit, legal prep
+│   ├── 00-package-readiness-report.md
+│   ├── 13-legal-review-preparation-note.md
+│   ├── 20-volume-architecture-decision-audit.md
+│   ├── 21-restored-chapter-architecture-audit.md
+│   └── 23-chapter-architecture-audit.md
+└── wave-1/                            ← Wave 1 export/submission set
+    ├── 01-nicola-chang-dha/
+    ├── 02-kate-evans-pfd/
+    ├── 03-elise-dillsworth/
+    ├── 04-michael-bourret-dgb/
+    ├── 05-reiko-davis-defiore/
+    ├── 06-sarah-levitt-aevitas/
+    └── exports/
+```
 
-| File | Description |
-|---|---|
-| `00-package-readiness-report.md` | Final readiness state, validation results, remaining risks |
-| `01-clean-manuscript.md` | Full manuscript, stripped of production material |
-| `02-first-50-pages.md` | Opening sample |
-| `03-query-letter.md` | Query letter template with agent personalisation placeholders |
-| `04-one-page-synopsis.md` | One-page synopsis |
-| `05-long-synopsis.md` | Long synopsis |
-| `06-author-bio.md` | Short and longer author bios |
-| `07-positioning-note.md` | Internal positioning note (category, brevity rationale, comp-title placeholder) |
-| `08-legal-privacy-note.md` | Private legal/privacy note (not for automatic submission) |
-| `09-agent-targeting-criteria.md` | Agent targeting criteria (agent list requires fresh research) |
-| `10-submission-tracker.csv` | Submission tracking spreadsheet (header only) |
+## Current Manuscript
 
-## Architecture
+- **Title:** Fathering Without Fear
+- **Author:** Abraham of London (Abraham Adaramola)
+- **Chapters:** 25
+- **Ch.20:** The Available Tools (newly integrated)
+- **Word count:** Approximately 47,000 words
 
-The manuscript is structured as 24 short chapters across five movements:
+## Source Material
 
-- Ancestral lineage and childhood formation (Ch.1–11)
-- Marriage, death, and fatherhood (Ch.12–17)
-- Institutional fight (Ch.18–19)
-- Adult-life breadth and fatherhood tested (Ch.20–21)
-- Resolution: love, devotion, and the final room (Ch.22–24)
+Canonical chapter source files live at:
+`content/source-material/fathering-without-fear/drafts/`
 
-## Important Notes
+Protected source recall sessions live at:
+`content/source-material/fathering-without-fear/author-recall/`
 
-- **Ch.17 requires specialist legal review before publication or wide submission.**
-- **Ch.20 uses pseudonyms; the "dismissive avoidant" reference should be reviewed.**
-- **No further new chapters should be added unless they solve a demonstrable structural absence.**
-- **Comp titles require fresh market research.** Do not use AI-generated comp titles without verification.
-- **Agent list requires fresh web research.** Do not submit to agents without current verification.
-- **`08-legal-privacy-note.md` is private.** Do not include it in standard query submissions.
+## Git Status
 
-## Package Date
-
-2026-06-24 (updated for 24-chapter, ~47k manuscript)
+- **Branch:** main
+- **Push status:** Not pushed — held for owner review
