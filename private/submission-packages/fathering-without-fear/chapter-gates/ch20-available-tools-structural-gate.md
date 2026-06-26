@@ -100,16 +100,16 @@ This is a significant cost. The decision should not be taken lightly.
 
 ### 10. Recommended Status
 
-**SOURCE ONLY — do not draft yet.**
+**DRAFT CANDIDATE ONLY — DO NOT INTEGRATE YET.**
 
 Rationale:
 - The material fills a real but non-fatal structural gap.
-- The book is not incoherent without it.
-- The Wave 1 rebuild cost is significant.
-- The material carries moderate risk that requires careful handling.
-- The decision should be made after Wave 1 results are known, not before.
-
-If Wave 1 produces agent interest, the chapter can be drafted and offered as supplementary material. If Wave 1 produces no interest, the chapter may strengthen the manuscript for Wave 2.
+- The book is not incoherent without it, but becomes more inevitable with it.
+- The Wave 1 rebuild cost is significant — do not integrate until Wave 1 results are known.
+- The material carries moderate risk that is containable with restraint.
+- A draft candidate should be created to test whether the material can be written at the book's register without violating red lines.
+- If the draft succeeds, it can be held for Wave 2 consideration.
+- If Wave 1 produces agent interest, the draft can be offered as supplementary material without requiring immediate integration.
 
 ---
 
@@ -125,4 +125,4 @@ If Wave 1 produces agent interest, the chapter can be drafted and offered as sup
 | Can be written with restraint? | Yes, with discipline |
 | Would require 25 chapters? | Yes |
 | Would require Wave 1 rebuild? | Yes |
-| Recommended status | SOURCE ONLY |
+| Recommended status | DRAFT CANDIDATE ONLY |
