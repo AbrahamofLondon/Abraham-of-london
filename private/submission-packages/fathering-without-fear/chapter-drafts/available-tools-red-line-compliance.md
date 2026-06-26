@@ -4,6 +4,7 @@
 **Source checked:** `content/source-material/fathering-without-fear/author-recall/ch20-available-tools-source-session.mdx`
 **Date:** 2026-06-26
 **Result:** PASS — public-safe owner-review candidate
+**Owner-truth revision:** Completed
 
 ---
 
@@ -19,6 +20,22 @@ The public candidate uses only public-safe/generalised material from the source:
 - clubs as temporary social/body shelter;
 - desire and dating as private, generalised emotional pressure;
 - Damisi as the non-negotiable fatherhood line.
+
+---
+
+## Owner-Truth Corrections Confirmed
+
+| Correction | Result |
+|---|---|
+| Abraham never doubted his worthiness to be chosen | PASS |
+| Dating is framed as discernment under pressure, not desperate validation | PASS |
+| Club access corrected to group attendance / reservations / sometimes VIP passes | PASS |
+| No implication that club entry depended on arriving early | PASS |
+| Abraham does not drink | PASS |
+| Dancing is clear-headed | PASS |
+| Dancing does not compromise next-day work discipline | PASS |
+| Defensive omission language removed or minimised | PASS |
+| Nightlife is not framed as moral collapse | PASS |
 
 ---
 

@@ -4,6 +4,7 @@
 **Date:** 2026-06-26
 **Status:** Final public-safe editorial candidate — not integrated
 **Recommendation:** ACCEPT — READY FOR OWNER REVIEW
+**Owner-truth revision:** Completed
 
 ---
 
@@ -29,6 +30,13 @@ The chapter's structural answer is:
 
 > He did not become reckless. He survived a narrowed life with the tools still available to him.
 
+The owner-truth revision corrects four material points:
+
+- Abraham never doubted his worthiness to be chosen; the harder question was whether someone could understand the life gathered around him.
+- Club access was through group attendance, reservations, and sometimes VIP passes, not early arrival.
+- Abraham does not drink; dancing was clear-headed and did not compromise next-day work discipline.
+- Defensive "not cataloguing / not naming / not settling accounts" prose was removed or minimised so the chapter reads as narrative, not redaction.
+
 ---
 
 ## Why This Version Survives
@@ -38,10 +46,11 @@ The final candidate no longer tries to carry every source fact. It narrows to on
 1. A man becomes difficult to recognise.
 2. Hunger and rent pressure shrink ordinary life.
 3. Rooms where help should have been fail to become help in time.
-4. Music gives the body somewhere temporary to put pressure.
-5. Desire returns through injury.
-6. Fatherhood remains the non-negotiable line.
-7. The available tools keep him alive but are not sufficient for love.
+4. The nightclub becomes one of the available rooms through group life, not status performance.
+5. Music gives the clear-headed body somewhere temporary to put pressure.
+6. Desire returns through injury without implying diminished worth.
+7. Fatherhood remains the non-negotiable line.
+8. The available tools keep him alive but are not sufficient for love.
 
 That final turn prepares Ch.20 rather than explaining it away.
 
@@ -51,7 +60,7 @@ That final turn prepares Ch.20 rather than explaining it away.
 
 The chapter should make Ch.20 stronger, not weaker.
 
-It hands Ch.20 a man already in motion, already hungry, already vulnerable to mistaking nearness for providence. It removes the need for Ch.20 to explain the whole survival context in its opening pages and lets Ch.20 focus more sharply on the specific Elena/Maya/dance-floor sequence and the Damisi red line.
+It hands Ch.20 a man already in motion, already hungry, socially alive, desirable, disciplined, and still vulnerable to mistaking nearness for providence. It removes the need for Ch.20 to explain the whole survival context in its opening pages and lets Ch.20 focus more sharply on the specific Elena/Maya/dance-floor sequence and the Damisi red line.
 
 The final line of the candidate deliberately opens toward Ch.20:
 
