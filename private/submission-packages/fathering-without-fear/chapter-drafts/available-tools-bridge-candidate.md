@@ -114,6 +114,8 @@ Desire returned inside that same pressure.
 
 Eventually, he began again. There was attention. There was interest. There were invitations, promises, hesitations, and sudden withdrawals. Some connections disappeared almost as soon as they arrived. Some stayed long enough to show him the shape of the life he was carrying.
 
+Gugu would later call them life lessons. The phrase was simple, almost too simple, but it was not wrong.
+
 He was not unwanted.
 
 That was never the truth.
