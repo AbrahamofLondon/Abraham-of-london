@@ -1,76 +1,98 @@
-# Integration Note — "The Available Tools"
+# Integration Recommendation — "The Available Tools"
 
 **Label:** `available-tools-bridge-candidate`
 **Date:** 2026-06-26
-**Status:** Draft candidate — not integrated
+**Status:** Final public-safe editorial candidate — not integrated
+**Recommendation:** ACCEPT — READY FOR OWNER REVIEW
 
 ---
 
-## Structural Placement
+## Placement
 
-The candidate chapter sits between:
+Recommended placement if later approved by the owner:
 
-| Before | After |
-|--------|-------|
-| Ch.19 — Seven Years | Ch.20 — The Version in His Head |
-| Ends with the discipline of sustained presence: the Northern line, the birthday card, the refusal to turn Damisi into evidence | Opens with Abraham dancing at Be At One, February 14, 2024 |
+| Before | New candidate | After |
+|--------|---------------|-------|
+| Ch.19 — Seven Years | The Available Tools | Ch.20 — The Version in His Head |
 
-## Emotional Bridge
+Do not renumber the manuscript yet. Do not integrate into `01-clean-manuscript.md` until the owner explicitly approves.
 
-The existing manuscript moves directly from institutional endurance (Ch.19) to a man on a dance floor (Ch.20). The reader is given no explicit bridge between these two states. The book's formal strategy of compression can justify this gap — the reader is trusted to infer that life continued between the contact rooms and the nightclub. But the gap is real, and this chapter fills it by answering the question: *How did he get from there to here?*
+---
 
-The answer provided by this chapter is:
+## Structural Function
 
-> He did not leap from discipline into recklessness. He survived a narrowed world with the tools that were available.
+The chapter earns its place because it answers the missing transition between institutional endurance and the man seen dancing, dating, improvising, and misreading proximity in "The Version in His Head."
 
-The chapter shows:
-1. **Hunger and precarity** — the physical reality of those years (bananas, peanuts, rent arrears, fear of public funds)
-2. **Institutional abandonment** — bad legal advice, church silence — rendered without accusation
-3. **Survival through imperfect tools** — nightclubs as available social space, not as moral collapse
-4. **Dating from wound** — the recognition that desire was not operating from wholeness
-5. **The psychological insight** — old wounds were acting beneath apparent choices
-6. **Forward pull into Ch.20** — the closing lines make The Version in His Head feel inevitable
+Without the bridge, the manuscript can still be followed, but the move from Ch.19 to Ch.20 is abrupt: the reader is asked to infer how a father trained by seven years of restraint becomes a man on a dance floor looking for life, warmth, and future. The revised candidate makes that movement morally legible without turning it into defence.
+
+The chapter's structural answer is:
+
+> He did not become reckless. He survived a narrowed life with the tools still available to him.
+
+---
+
+## Why This Version Survives
+
+The final candidate no longer tries to carry every source fact. It narrows to one emotional movement:
+
+1. A man becomes difficult to recognise.
+2. Hunger and rent pressure shrink ordinary life.
+3. Rooms where help should have been fail to become help in time.
+4. Music gives the body somewhere temporary to put pressure.
+5. Desire returns through injury.
+6. Fatherhood remains the non-negotiable line.
+7. The available tools keep him alive but are not sufficient for love.
+
+That final turn prepares Ch.20 rather than explaining it away.
+
+---
+
+## Effect on Ch.20
+
+The chapter should make Ch.20 stronger, not weaker.
+
+It hands Ch.20 a man already in motion, already hungry, already vulnerable to mistaking nearness for providence. It removes the need for Ch.20 to explain the whole survival context in its opening pages and lets Ch.20 focus more sharply on the specific Elena/Maya/dance-floor sequence and the Damisi red line.
+
+The final line of the candidate deliberately opens toward Ch.20:
+
+> They were not enough for love.
+
+This preserves Ch.20's force because the next chapter shows what happens when Abraham enters love using instruments that were only sufficient for survival.
+
+---
 
 ## Chapter-Numbering Implications
 
-If this chapter is accepted into the manuscript:
+If integrated later:
 
 | Current | Proposed |
 |---------|----------|
 | Ch.19 — Seven Years | Ch.19 — Seven Years |
-| *(gap)* | **Ch.20 — The Available Tools** *(new)* |
+| *(gap)* | Ch.20 — The Available Tools |
 | Ch.20 — The Version in His Head | Ch.21 — The Version in His Head |
 | Ch.21 — Damisi | Ch.22 — Damisi |
 | Ch.22 — Love Does Not Fear | Ch.23 — Love Does Not Fear |
 | Ch.23 — Devotion | Ch.24 — Devotion |
 | Ch.24 — Final Room | Ch.25 — Final Room |
 
-**Do not renumber yet.** This is a draft candidate only. Renumbering would require:
-- Updating `01-clean-manuscript.md`
-- Updating `02-first-50-pages.md` (if Ch.20 falls within first 50 pages)
-- Updating `03-query-letter.md` (24 → 25 chapters)
-- Updating `04-one-page-synopsis.md`
-- Updating `05-long-synopsis.md`
-- Updating `06-nonfiction-proposal-core.md`
-- Updating `07-positioning-note.md`
-- Updating all 6 personalised query letters
-- Updating all 6 submission checklists
-- Regenerating affected DOCX exports
-- Updating all export readiness reports
+Renumbering would require updates to all manuscript/package/query/export materials. Do not do this before owner approval.
 
-This is a significant cost. The decision should be made after Wave 1 results are known.
+---
 
-## Risk Assessment
+## Wave 1 Recommendation
 
-| Risk | Level | Mitigation |
-|------|-------|------------|
-| Legal/privacy exposure | Low | All protected names removed. No defamatory claims. No private third-party details. |
-| Tone mismatch with manuscript | Low | Written in the book's existing register: compressed, restrained, image-led. |
-| Reader perception of self-pity | Low | The chapter refuses self-pity explicitly. The thesis is descriptive, not accusatory. |
-| Church criticism | Low | No church named. No pastor named. Tone is sorrowful, not bitter. |
-| Dating material | Low | No graphic detail. No catalogue. No identifiable women. No bitterness. |
-| Wave 1 rebuild cost | High | Would require updating all submission materials if accepted now. |
+Do not integrate before current Wave 1 review unless the owner explicitly decides to reopen all package materials.
 
-## Recommendation
+Recommended practical posture:
 
-**Hold as draft candidate.** Do not integrate until Wave 1 results are known. If Wave 1 produces agent interest, the chapter can be offered as supplementary material. If Wave 1 produces no interest, the chapter may strengthen the manuscript for Wave 2.
+- Hold as an approved owner-review candidate.
+- Do not alter submitted or rebuilt Wave 1 exports yet.
+- If owner approves after Wave 1, integrate in a separate manuscript/package revision pass.
+
+---
+
+## Final Integration Recommendation
+
+**ACCEPT — READY FOR OWNER REVIEW**
+
+The chapter should not be treated as already admitted to the manuscript. It has earned owner review because it makes the bridge between Ch.19 and Ch.20 more emotionally inevitable and does so without exposing protected source material.

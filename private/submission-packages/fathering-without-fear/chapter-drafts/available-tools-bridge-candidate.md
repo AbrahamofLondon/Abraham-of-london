@@ -4,97 +4,198 @@
 **Working title:** The Available Tools
 **Proposed location:** Between Ch.19 — Seven Years and Ch.20 — The Version in His Head
 **Target register:** Compressed literary memoir — restrained, image-led, morally serious
+**Editorial status:** ACCEPT — READY FOR OWNER REVIEW
 
 ---
 
 ## The Available Tools
 
-A video surfaced in which Abraham was dancing in a nightclub. Someone who knew him from before saw it and called. He said he thought it was a deepfake. He was almost certain it was not real.
+Femi called because he thought he had seen a deepfake of his brother dancing in a nightclub.
 
-Abraham told him it was real.
+He had watched the video more than once. He knew Abraham's face. He knew the way his body moved when he was relaxed, the way his shoulders carried themselves, the way he could enter a room without trying to become the room. Still, the video unsettled him. It seemed too far from the Abraham he knew.
 
-The silence that followed was not the silence of disappointment. It was the silence of recognition failing. The man on the phone had known a different Abraham — the one who read, debated, carried a name chosen for him before he could speak, left Lagos under a father's prayer. That Abraham did not end up in places where the lights were low and the music made thinking optional.
+So he called.
 
-But that Abraham had not lived through seven years of contact rooms, a divorce that outlasted the marriage, a visa system that could not process a father who was not also a provider, and a body that had learned to keep going on the cheapest available fuel.
+Was it real?
 
----
+Abraham said it was.
 
-The cheapest available fuel, in that period, was bananas from a market stall and peanuts from a discount shop. That was sometimes the week's food. He ate them because they were cheap, because they did not require cooking, because a man who has stopped believing he deserves a proper meal will not go to the trouble of preparing one.
+There are ways a man can survive and still become difficult to recognise. The change is not always moral. It is not always collapse. Sometimes the face remains the same, the name remains the same, the voice on the phone remains the same, and still something in the person has moved far enough that someone who loves him has to ask whether the image is false.
 
-He had been warned against public funds. A lawyer had told him that accepting state support could count against him later. Whether the advice was correct did not matter in the moment. What mattered was that it closed a door. He could not ask for help from the place that was supposed to hold people who had fallen through. So he did not ask.
+The video was not false.
 
-The rent arrears accumulated. He does not name the amount because the amount is not the point. The point is that a man who had spent his life trying to be orderly — who had studied, planned, saved, prayed, and believed that discipline would be recognised — found himself in a room where the arithmetic no longer worked and there was no one coming to fix it.
-
----
-
-A lawyer's advice had left him exposed. Later, another legal team would help repair what could still be repaired. But by then the damage had already entered ordinary life: rent, food, sleep, dignity.
-
-The first adviser had been recommended by someone Abraham met while working to make ends meet. The advice seemed sound. The application was submitted. The refusal arrived. The response itself suggested that the advice had been incorrect. Abraham did not pursue it. He was too tired, and the machine of complaint required a kind of energy he no longer had.
-
-A friend of the family, ill herself, helped draw the route another team would follow. She wrote the strategy from a bed, between treatments. The team that implemented it was not interested in money. They were interested in the case. They succeeded where the first attempt had failed. Abraham does not name them here because he has not asked their permission, but he has not forgotten what they did.
+Abraham had been going out almost every weekend.
 
 ---
 
-He went to places where help was supposed to live. Some listened. Some promised to call. Life continued anyway.
+The years had narrowed him before the music found him.
 
-There was a church that met in a large room. Abraham had a short window to regularise his immigration status or leave the country. He spoke to someone who introduced him to a pastor. The pastor took his number. He never called.
+There were weeks when food meant bananas from the market and peanuts from a discount shop. They were cheap. They could be carried in a bag. They did not require cooking. A man could eat them without preparing a meal, without arranging a table, without pretending that the day had made room for nourishment.
 
-Abraham does not name the church. He does not know whether the pastor intended to call and forgot, or decided against it, or was waiting for something Abraham could not provide. What he knows is that he went to a place where help was supposed to live, and help was not there when he needed it. That is not an accusation. It is a fact about a particular set of weeks in a particular year.
+At first, food is just food. Then repetition changes it. The same bananas. The same peanuts. The same calculation in the same body. How long they would last. What could be delayed. Whether hunger was already present or only waiting behind the next hour.
 
-After that, the nightclubs became his social space.
+He did not dramatise it to himself. Hunger does not always arrive with a speech. Sometimes it arrives as a smaller life. A smaller shop. A smaller basket. A smaller expectation of what the evening will contain.
 
----
+He was not only hungry for food.
 
-He had not planned it that way. He had not planned any of it. But a man who cannot afford a meal can still afford entry to a club if he arrives early enough, and a man who has been refused by the institutions that were supposed to hold him will find somewhere else to be held, even if the holding is only the pressure of bodies in a room where no one is asking for his immigration status.
-
-He danced. That was the thing he could still do. The music found him. He did not chase it. For a few hours, on a dance floor, he could remember that he had a body before he had a case.
-
-He was not looking for a solution in those rooms. He was looking for a pause. The pause became a pattern. The pattern became almost every weekend.
+That was harder to name.
 
 ---
 
-He wanted to start dating again. For a long time, he could not get himself to. The divorce had not only ended a marriage; it had ended his sense that he was someone another person could choose. The contact rooms had not only restricted his fatherhood; they had made him feel that his love was something that needed to be supervised. The visa situation had not only limited his movement; it had made him feel that his presence in the country was provisional.
+There were rooms where help should have been.
 
-Eventually, he began. The encounters were brief, some of them. Some lasted weeks. Some lasted months. He does not catalogue them here. That is not what this chapter is for.
+Some were professional. Some were spiritual. Some were simply quiet. In one room, advice had closed a door he had thought would open. Later, another team would help repair what could still be repaired, but repair does not erase the season before it. By the time a better route appeared, the damage had already entered ordinary life: rent, food, sleep, dignity.
 
-What this chapter is for is the recognition that came later: that he was not always choosing freely.
+He had been told to be careful about public support. Whether the warning was right is not the burden of this chapter. The effect was enough. A door marked help became a door he was afraid to touch.
 
-He thought he was choosing freely. Later he would wonder how much of the choosing had been done by old wounds wearing the clothes of appetite.
+So the body adjusted.
 
----
+It adjusted to arrears. It adjusted to uncertainty. It adjusted to the strange humiliation of being trained for order and living inside disorder. He had studied. He had worked. He had prayed. He had believed, not naively but deeply, that discipline was one of the ways a man kept faith with the future.
 
-Some offers looked like rescue. Some refusals looked like judgment. Some desires looked like kindness until he asked what they would cost.
+Discipline did not feed him.
 
-A woman offered to pay off his rent arrears within two weeks of meeting him. She had not known him long enough to make that offer wisely. He did not accept. He recognised, even then, that dependence can be created for reasons that are not altruistic.
-
-Another woman said she could not be with a man who already had a child. Her first child, she said, must come from her. Abraham understood the logic even if he could not accept the conclusion. Damisi existed. Damisi would always exist. Any woman who wanted Abraham would have to want Damisi too.
-
-Some women liked him until they learned he was Nigerian. He does not make a theory out of this. He reports it as something that happened more than once, and that he noticed, and that he filed away under the category of things that tell you more about the other person than about yourself.
-
-Some women moved too fast. Some were looking for a project, not a partner. Some were kind and genuine, and he was not ready to receive what they were offering because he was still trying to become someone who could be chosen without also being rescued.
-
-He does not blame any of them. He is not writing this chapter to settle accounts. He is writing it because the pattern taught him something about himself that he had not seen before: that he was choosing from a place of hunger, and hunger has its own logic.
+Not then.
 
 ---
 
-A disciplined man using undisciplined tools because the disciplined world stopped holding him.
+He also went to places where faith should have made the room warmer.
 
-That is the sentence he arrived at later, while writing the book. It is not self-pity. It is not justification. It is description. He had been trained by his father, by his faith, by the lineage that ran through Isua and Lagos, to believe that order would be rewarded. He had studied. He had prepared. He had prayed. He had done what the men before him had done: carried the weight, kept the promises, stayed present.
+No one needs to be named. There is no use in turning disappointment into an address. He spoke. Some listened. Someone took his number. A call did not come. Life continued.
 
-But the world he was living in did not reward order the way the world he had been raised in had promised. The court did not care that he had been a faithful husband. The visa system did not care that he had an MBA. The church did not care that he had a short window to regularise his status. The women who refused him did not care that he was trying to rebuild a life from a position of precarity.
+That is all.
 
-So he used what was available. Bananas. Peanuts. Nightclubs. The strange kindness of strangers. The body's ability to keep moving when the mind has stopped believing the movement will arrive anywhere.
+The silence was not loud. It did not arrive as rejection. It did not throw him out of a room or tell him he was unworthy of care. It simply failed to become help in time.
 
-These were the available tools. They were not the tools he would have chosen. They were the tools that were there.
+Some silences do not shout.
+
+They still leave marks.
+
+Afterward, the nightclubs became a kind of room.
+
+Not a better room. Not a holy one. Not a solution. A room.
+
+There were lights there, and music, and people who did not ask for the whole account before allowing him to stand among them. There were bodies moving without explanation. There was noise large enough to let a man stop listening to himself for a while. There was the ordinary permission of rhythm: enter, move, sweat, leave.
+
+He was not saved there.
+
+He was given somewhere to put the pressure.
 
 ---
 
-What he learned from that period, and what he is still learning, is that hunger can disguise itself as hope.
+This is easy to misunderstand.
 
-He thought he was looking for love. He was also looking for proof that he was still chooseable. He thought he was dancing. He was also trying to remember that he had a body that could feel pleasure, not only pressure. He thought he was surviving. He was also, without knowing it, collecting the material that would later become the version of himself he could not yet see.
+A nightclub can be made into scandal by people who need scandal. It can be made into glamour by people who need glamour. For Abraham, it was neither. It was a temporary shelter for the body.
 
-The version in his head had already begun forming. He did not know it yet. He was still inside the period where the tools were the only thing that made the next day possible. But the man who would later sit at a dining table in London and write this book was already being assembled — not by intention, but by the slow accumulation of nights, mistakes, kindnesses, refusals, and the ordinary discipline of not disappearing.
+On the dance floor, he did not have to explain his visa. He did not have to explain the contact room. He did not have to explain why fatherhood had become an appointment, why money had thinned, why the future he had imagined had become narrower than the life he was still trying to live.
 
-He entered the next relationship carrying machinery he had not yet named.
+The music did not ask him to be coherent.
 
-He did not yet know how much hunger can disguise itself as hope.
+It asked him to move.
+
+So he moved.
+
+That was one of the tools left to him: the body's ability to enter motion before the mind had agreed to hope.
+
+The old Abraham had not disappeared. The boy named before he understood naming, the son who left Lagos under prayer, the man who knew how to argue, study, plan, and endure — he was still there. But he had been joined by another man, one who knew that a cheap night out could sometimes keep despair from taking the whole evening.
+
+It was not noble.
+
+It was available.
+
+---
+
+Desire returned in the same damaged weather.
+
+For a long time after the marriage broke, he could not enter the thought of being chosen again. Then he began to try. Not as a man entering abundance. As a man testing whether any part of him was still reachable.
+
+Some encounters were brief. Some lasted longer. This is not a chapter for cataloguing them. The women do not belong to this book as examples arranged for Abraham's self-understanding. They had their own lives, their own wounds, their own private reasons for moving closer or away.
+
+What belongs here is the condition in which he met them.
+
+He wanted love. He wanted a future. He wanted family not as an idea but as a room with people in it, a table, a business perhaps, a shared life that did not require him to keep proving that he had not vanished.
+
+But wanting does not make a man free.
+
+Some offers looked like rescue. Some refusals touched places in him that had already been sore for years. Some kindness arrived too quickly and asked for dependence before trust had grown large enough to carry it. Some possibilities required him to make Damisi smaller inside his own life, and that was the one bargain he could not make.
+
+He did not always understand this at the time.
+
+He thought he was choosing.
+
+Later, he would wonder how much of the choosing had been done by hunger wearing the clothes of hope.
+
+Fatherhood was the exception that kept refusing to become negotiable.
+
+Other parts of him could be confused. He could misread attention. He could misread timing. He could mistake a long conversation for depth, a shared evening for direction, a small mercy for the beginning of a life. He could be too grateful for warmth because warmth had been scarce. He could give meaning to coincidences because meaning was one of the few luxuries left to a man who could not afford much else.
+
+But Damisi did not become smaller because Abraham was lonely.
+
+That mattered. It was not purity. It was not proof that Abraham understood himself. It was simply the line that held while other lines moved. The boy remained his son, not a problem to be managed around, not a complication to be hidden until the relationship was secure, not a cost to be negotiated down so a woman could imagine a cleaner future.
+
+The child was not evidence here either.
+
+He was the fact Abraham could not betray.
+
+---
+
+There are injuries that do not announce themselves as injuries. They become preferences. They become patience. They become the ability to wait too long for someone who has already begun leaving. They become the urge to explain everything early, to place the whole file of one's life in front of a person and ask, without saying so, whether this is still someone worth choosing.
+
+Abraham called it honesty.
+
+Some of it was honesty.
+
+Some of it was hunger.
+
+A man who has been misread for years can begin to confuse being fully known with being safe. He can offer too much too soon because secrecy feels like danger and partial knowledge feels like the beginning of another judgment. He can mistake a listener for a witness, a witness for a companion, a companion for a future.
+
+He did not know all of this then.
+
+He was learning with the instruments he had.
+
+That is what the title means.
+
+Not tools as mastery. Not tools as craft. Not the orderly instruments David Senior would have respected: work, provision, prayer, responsibility, a plan made before the day required it.
+
+Available tools.
+
+What remained when the better instruments were out of reach.
+
+Bananas. Peanuts. Motion. Noise. A room full of strangers. A conversation that lasted long enough to feel like warmth. A number saved in a phone. A train fare managed. A body still able to dance. A father still refusing to leave the city where his son lived.
+
+They were insufficient.
+
+He used them anyway.
+
+---
+
+This is not a defence of that period.
+
+It is not an accusation against it either.
+
+It is a way of saying that some choices are made from freedom, and some are made from the small remaining space after pressure has done its work. A person can choose and still have had the choice narrowed before he arrived at it. He can move toward pleasure and still be moving under instruction from pain. He can be alive on a dance floor and still be carrying the room where he waited for his son.
+
+That was the man in the video.
+
+Not a fake.
+
+Not a new Abraham.
+
+The same man, using what was left.
+
+The music had given his body somewhere to go. The hunger had taught him how little a week could hold. The silences had taught him not every room marked help would help in time. Desire had begun to return, but it had returned through injury, not around it.
+
+By the time he walked into the next chapter of his life, he was not reckless.
+
+He was underfed in more than one way.
+
+He could still dance.
+
+That mattered.
+
+It did not save him.
+
+It moved him toward the room where he would mistake nearness for providence, attention for safety, and a woman's listening for the future he had been trying to rebuild.
+
+He entered that room carrying tools that had kept him alive.
+
+They were not enough for love.
