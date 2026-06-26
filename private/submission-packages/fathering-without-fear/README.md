@@ -34,7 +34,8 @@ private/submission-packages/fathering-without-fear/
 │   ├── 13-legal-review-preparation-note.md
 │   ├── 20-volume-architecture-decision-audit.md
 │   ├── 21-restored-chapter-architecture-audit.md
-│   └── 23-chapter-architecture-audit.md
+│   ├── 23-chapter-architecture-audit.md
+│   └── submission-package-folder-tidy-report.md
 └── wave-1/                            ← Wave 1 export/submission set
     ├── 01-nicola-chang-dha/
     ├── 02-kate-evans-pfd/
@@ -60,6 +61,14 @@ Canonical chapter source files live at:
 
 Protected source recall sessions live at:
 `content/source-material/fathering-without-fear/author-recall/`
+
+## Owner-Review Readiness
+
+This package is ready for owner review. No submissions, forms, test forms, draft emails, or agent outreach have been performed.
+
+**Do not submit, send, or publish any materials from this package without explicit owner approval.**
+
+All Wave 1 export materials have been forensically audited and rebuilt. Metadata has been scrubbed. Red-line compliance has been confirmed.
 
 ## Git Status
 

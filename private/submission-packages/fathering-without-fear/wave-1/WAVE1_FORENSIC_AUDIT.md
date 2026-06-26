@@ -8,19 +8,19 @@ Audit date: 2026-06-26
 
 Scope: private/submission-packages/fathering-without-fear/wave-1/
 
-Source of truth used:
+Source of truth used (paths reflect pre-tidy root locations — now under `current-package/`):
 
-- private/submission-packages/fathering-without-fear/01-clean-manuscript.md
-- private/submission-packages/fathering-without-fear/02-first-50-pages.md
-- private/submission-packages/fathering-without-fear/03-query-letter.md
-- private/submission-packages/fathering-without-fear/04-one-page-synopsis.md
-- private/submission-packages/fathering-without-fear/05-long-synopsis.md
-- private/submission-packages/fathering-without-fear/06-nonfiction-proposal-core.md
-- private/submission-packages/fathering-without-fear/06-author-bio.md
-- private/submission-packages/fathering-without-fear/08-legal-privacy-note.md
-- private/submission-packages/fathering-without-fear/10-agent-target-list.md
-- private/submission-packages/fathering-without-fear/11-submission-wave-plan.md
-- private/submission-packages/fathering-without-fear/12-agent-personalisation-notes.md
+- private/submission-packages/fathering-without-fear/current-package/01-clean-manuscript.md
+- private/submission-packages/fathering-without-fear/current-package/02-first-50-pages.md
+- private/submission-packages/fathering-without-fear/current-package/03-query-letter.md
+- private/submission-packages/fathering-without-fear/current-package/04-one-page-synopsis.md
+- private/submission-packages/fathering-without-fear/current-package/05-long-synopsis.md
+- private/submission-packages/fathering-without-fear/current-package/06-nonfiction-proposal-core.md
+- private/submission-packages/fathering-without-fear/current-package/06-author-bio.md
+- private/submission-packages/fathering-without-fear/current-package/08-legal-privacy-note.md
+- private/submission-packages/fathering-without-fear/current-package/10-agent-target-list.md
+- private/submission-packages/fathering-without-fear/current-package/11-submission-wave-plan.md
+- private/submission-packages/fathering-without-fear/current-package/12-agent-personalisation-notes.md
 
 ## Executive Result
 
