@@ -15,7 +15,7 @@
 
 > Dear Nicola Chang,
 >
-> Please find attached my query letter and first fifty pages for *Fathering Without Fear*, a compressed literary memoir of approximately 47,000 words. I am querying you because your stated literary touchstones — Janet Malcolm, Annie Ernaux — describe the aesthetic this manuscript aims for.
+> Please find attached my query letter and first fifty pages for *Fathering Without Fear*, a compressed literary memoir of approximately 49,000 words. I am querying you because your stated literary touchstones — Janet Malcolm, Annie Ernaux — describe the aesthetic this manuscript aims for.
 >
 > With thanks,
 > Abraham Adaramola (writing as Abraham of London)

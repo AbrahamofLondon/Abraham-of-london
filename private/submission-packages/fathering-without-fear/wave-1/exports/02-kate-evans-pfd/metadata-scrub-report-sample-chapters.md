@@ -1,6 +1,6 @@
-# Metadata Scrub Report — Fathering-Without-Fear-Sample-Chapters-Chs1-3-Kate-Evans.docx
+# Metadata Scrub Report
 
-DOCX file: Fathering-Without-Fear-Sample-Chapters-Chs1-3-Kate-Evans.docx
+DOCX file: $rel
 Author: Abraham of London
 Last modified by:
 Company:
@@ -10,8 +10,8 @@ Keywords:
 Comments:
 Template: Normal.dotm
 Hyperlink base:
-Tracked changes: false
-Hidden comments: false
-Absolute paths: false
-Local usernames: false
+Tracked changes: False
+Hidden comments: False
+Absolute paths: False
+Local usernames: False
 Result: PASS — Author intentionally set to Abraham of London; no private metadata detected.

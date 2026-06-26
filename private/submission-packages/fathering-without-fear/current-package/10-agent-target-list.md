@@ -2,7 +2,7 @@
 
 **Date compiled:** 2026-06-25
 **Method:** Live web research — agency websites, QueryTracker, Manuscript Wish List, Reedsy, agent profiles. All submission status and requirements verified against primary sources where accessible. Fields marked [VERIFY] require live confirmation before querying.
-**Manuscript:** *Fathering Without Fear* by Abraham of London — literary memoir, ~47,000 words, 24 chapters
+**Manuscript:** *Fathering Without Fear* by Abraham of London — literary memoir, ~49,000 words, 25 chapters
 **Positioning:** "A compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear."
 
 ---
@@ -117,7 +117,7 @@
 
 ### Michael Bourret — Dystel, Goderich & Bourret (US)
 
-**Why he might respond:** Bourret has stated explicitly that he has "a special interest in BIPOC literature and writers" and seeks "offbeat projects that break the mold." This manuscript breaks the mold in form (24 short chapters, each a compression, not a linear narrative) and in content (a Black Nigerian-British father who refuses to be reduced to victimhood). His track record with narrative nonfiction and memoir, combined with his BIPOC focus, makes him an ideal first US query. The book's spiritual architecture (the Psalm 27:10 through-line) adds the layering his "offbeat" appetite responds to.
+**Why he might respond:** Bourret has stated explicitly that he has "a special interest in BIPOC literature and writers" and seeks "offbeat projects that break the mold." This manuscript breaks the mold in form (25 short chapters, each a compression, not a linear narrative) and in content (a Black Nigerian-British father who refuses to be reduced to victimhood). His track record with narrative nonfiction and memoir, combined with his BIPOC focus, makes him an ideal first US query. The book's spiritual architecture (the Psalm 27:10 through-line) adds the layering his "offbeat" appetite responds to.
 
 **What to emphasise:** The Nigerian lineage. The BIPOC authorship. The non-linear, compressed architecture. The refusal to be reduced.
 
@@ -231,7 +231,7 @@
 
 **Why she might respond:** Webber is drawn to the "overlooked and unexpected" — to books that "come at their subject at an angle." A Nigerian-British memoir that begins with the ancestral tailoring of Abraham Adaramola in Isua and ends at a table in a restored family is exactly the kind of unexpected angle that characterises her list. Her interest in memory, truth, and moral complexity — and her representation of writers like Samantha Harvey and David Szalay — signals appetite for serious, literary, formally ambitious work.
 
-**What to emphasise:** The unexpected entry point (ancestral lineage as origin). The angle. The formal structure (24 short chapters as compression rather than expansion). The moral complexity of the father's refusal.
+**What to emphasise:** The unexpected entry point (ancestral lineage as origin). The angle. The formal structure (25 short chapters as compression rather than expansion). The moral complexity of the father's refusal.
 
 **What NOT to emphasise:** The legal material.
 

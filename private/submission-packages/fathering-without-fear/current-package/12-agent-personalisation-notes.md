@@ -51,7 +51,7 @@ I'm querying you because you've described seeking narrative nonfiction that give
 
 ## Sarah Levitt — Aevitas Creative Management (US)
 
-I'm writing to you because of your formulation of "memoir plus" — the idea that the most interesting nonfiction is not quite memoir, not quite straight narrative, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is memoir plus inheritance study plus spiritual reckoning plus institutional critique, all compressed into 24 chapters that refuse to let any single register dominate. Your track record with culturally significant nonfiction and your openness to strong, underrepresented voices convinced me that Aevitas — and specifically your list — is the right home for this manuscript in the US market.
+I'm writing to you because of your formulation of "memoir plus" — the idea that the most interesting nonfiction is not quite memoir, not quite straight narrative, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is memoir plus inheritance study plus spiritual reckoning plus institutional critique, all compressed into 25 chapters that refuse to let any single register dominate. Your track record with culturally significant nonfiction and your openness to strong, underrepresented voices convinced me that Aevitas — and specifically your list — is the right home for this manuscript in the US market.
 
 ---
 
@@ -63,7 +63,7 @@ I'm writing to you because your eclectic nonfiction range — memoir, history, p
 
 ## Peter Straus — RCW Literary Agency (UK)
 
-I am writing to you because RCW's reputation for discovering and nurturing new literary voices is precisely the context in which this debut memoir belongs. *Fathering Without Fear* is a compressed, formally serious literary memoir — 24 chapters, each a closed pressure chamber — about a Black Nigerian-British man's reckoning with inheritance, fatherhood, faith, and the cost of refusing to disappear. The agency's long record of representing literary work that takes formal risks and moral seriousness seriously made it essential to approach.
+I am writing to you because RCW's reputation for discovering and nurturing new literary voices is precisely the context in which this debut memoir belongs. *Fathering Without Fear* is a compressed, formally serious literary memoir — 25 chapters, each a closed pressure chamber — about a Black Nigerian-British man's reckoning with inheritance, fatherhood, faith, and the cost of refusing to disappear. The agency's long record of representing literary work that takes formal risks and moral seriousness seriously made it essential to approach.
 
 ---
 

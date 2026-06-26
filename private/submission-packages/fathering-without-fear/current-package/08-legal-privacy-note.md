@@ -52,9 +52,21 @@ Specific privacy decisions:
 - Supervisors and institutional staff are rendered as environmental conditions, not as named individuals;
 - The other parent in the family proceedings is not named, characterised, or judged in the text.
 
-## Chapter 20 — Pseudonym Pass
+## Chapter 20 — Available Tools Bridge
 
-Chapter 20 ("The Version in His Head") was restored and pseudonymised on 2026-06-24. The following pseudonym decisions apply:
+Chapter 20 ("The Available Tools") was added as a public-safe bridge between the contact-room years and the relationship chapter. It includes hunger, rent pressure, spiritual silence, nightclubs, dating pressure, and social survival without naming protected legal advisers, church leaders, employers, or private romantic third parties.
+
+Known privacy decisions:
+
+- **Gugu** is used as a pseudonym.
+- Legal/professional rooms are generalised.
+- Church identities are not named.
+- Romantic details are pattern-level and non-identifying.
+- Damisi remains protected as a son, not as evidence.
+
+## Chapter 21 — Pseudonym Pass
+
+Chapter 21 ("The Version in His Head") was restored and pseudonymised on 2026-06-24, then renumbered after the insertion of "The Available Tools" as Ch.20. The following pseudonym decisions apply:
 
 - **Samina → Maya** (role-based identifier used in prose)
 - **Anita → Elena** (pseudonym used throughout)
@@ -77,7 +89,7 @@ Mitigating factors:
 
 However, this should be reviewed by legal counsel before publication to assess any potential defamation or privacy risk.
 
-## 24-Chapter Legal / Privacy Audit Register
+## 25-Chapter Legal / Privacy Audit Register
 
 Completed 2026-06-24. High-priority chapters reviewed individually. Full register below.
 
@@ -113,7 +125,17 @@ Status: SPECIALIST LEGAL REVIEW REQUIRED before publication.
 | Mother/respondent framing | None | Low | Absent. |
 | Institutional allegation | "A structure can be necessary and still fail to see enough." | Low | General observation, not specific accusation. |
 
-### Ch.20 — The Version in His Head
+### Ch.20 — The Available Tools
+**Verdict: LOW-MEDIUM — LEGAL REVIEW WATCH**
+
+| Search Term / Issue | Exact Wording | Risk Level | Recommendation |
+|---------------------|---------------|------------|----------------|
+| Legal/professional rooms | Generalised references to rooms where help should have been | Medium | Public-safe because no adviser is named and no professional misconduct claim is made. Retain restraint. |
+| Church silence | Generalised spiritual-room silence | Medium | Public-safe because no church or leader is named. Tone is sorrow, not accusation. |
+| Dating/social material | Pattern-level references only | Low | No private third-party details. Gugu used as pseudonym. |
+| Damisi as evidence | "The child was not evidence here either." | Low | Chapter explicitly refuses use of child as argument. |
+
+### Ch.21 — The Version in His Head
 **Verdict: LOW-MEDIUM — LEGAL REVIEW WATCH**
 
 | Search Term / Issue | Exact Wording | Risk Level | Recommendation |
@@ -124,7 +146,7 @@ Status: SPECIALIST LEGAL REVIEW REQUIRED before publication.
 | Workplace identifiers | None | Low | Removed. |
 | Stacked-identification risk | Elena/Maya used as pseudonyms. Olu/Nene confirmed safe. | Low | No identifying detail stacked. |
 
-### Ch.21 — Damisi
+### Ch.22 — Damisi
 **Verdict: LOW RISK**
 
 | Search Term / Issue | Exact Wording | Risk Level | Recommendation |
@@ -146,7 +168,7 @@ Status: SPECIALIST LEGAL REVIEW REQUIRED before publication.
 
 ### Protected-Chapter Confirmation
 
-All five high-priority chapters (Ch.17–Ch.21) avoid:
+All six high-priority chapters (Ch.17–Ch.22) avoid:
 - Mother naming or characterisation
 - Sealed family-court material
 - Workplace identifiers
@@ -156,7 +178,7 @@ All five high-priority chapters (Ch.17–Ch.21) avoid:
 ### Unresolved Legal-Review Items
 
 1. **Ch.17** — Requires specialist legal review before publication or wide submission. The oblique allegation/arrest wording is in protected register but cannot be fully cleared by internal audit.
-2. **Ch.20** — Two "dismissive avoidant" references flagged for legal review. Mitigated by being Elena's own self-description and Abraham's self-reading, but should be reviewed for potential defamation risk.
+2. **Ch.21** — Two "dismissive avoidant" references flagged for legal review. Mitigated by being Elena's own self-description and Abraham's self-reading, but should be reviewed for potential defamation risk.
 
 ## Legal / Procedural Chronology
 

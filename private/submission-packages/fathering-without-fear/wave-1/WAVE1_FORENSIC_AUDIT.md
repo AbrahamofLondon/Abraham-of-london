@@ -1,5 +1,9 @@
 # WAVE 1 FORENSIC AUDIT — Fathering Without Fear
 
+> **SUPERSEDED READINESS STATUS — DO NOT USE FOR SEND-DAY APPROVAL.**
+>
+> This audit records the previous Wave 1 export state before the insertion of Ch.20 — "The Available Tools" and the 25-chapter package lock. It is retained as historical forensic evidence only. Current Wave 1 readiness must be checked against `WAVE_1_CH20_INTEGRATION_LOCK_REPORT.md` and any update-required note generated after Ch.20 integration.
+
 Audit date: 2026-06-26
 
 Scope: private/submission-packages/fathering-without-fear/wave-1/
@@ -152,7 +156,7 @@ Outward-facing files and extracted DOCX text were scanned for: 23 chapters; twen
 
 Exact outward-facing hits after rebuild: none.
 
-Current outward-facing facts use: 24 chapters; approximately 47,000 words; Ch.24 Final Room where chapter numbering is referenced.
+Current outward-facing facts at the time of this historical audit used: 24 chapters; approximately 47,000 words; Ch.24 Final Room where chapter numbering is referenced. This is superseded by the 25-chapter package after Ch.20 — "The Available Tools" integration.
 
 ## Legal/Privacy Audit
 

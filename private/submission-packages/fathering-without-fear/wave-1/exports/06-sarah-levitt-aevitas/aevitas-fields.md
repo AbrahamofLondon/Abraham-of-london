@@ -8,7 +8,7 @@
 
 Dear Sarah Levitt,
 
-I'm writing to you because of your formulation of "memoir plus" — the idea that the most interesting nonfiction is not quite memoir, not quite straight narrative, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is memoir plus inheritance study plus spiritual reckoning plus institutional critique, all compressed into 24 chapters that refuse to let any single register dominate. Your track record with culturally significant nonfiction and your openness to strong, underrepresented voices convinced me that Aevitas — and specifically your list — is the right home for this manuscript in the US market.
+I'm writing to you because of your formulation of "memoir plus" — the idea that the most interesting nonfiction is not quite memoir, not quite straight narrative, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is memoir plus inheritance study plus spiritual reckoning plus institutional critique, all compressed into 25 chapters that refuse to let any single register dominate. Your track record with culturally significant nonfiction and your openness to strong, underrepresented voices convinced me that Aevitas — and specifically your list — is the right home for this manuscript in the US market.
 
 The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
 
@@ -16,7 +16,7 @@ Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, ea
 
 When his son was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
-The book is structured as twenty-four short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
+The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
 It sits in conversation with the compressed grief architecture of *Grief Is for People* and the spare self-interrogation of *Stay True*, while moving through fatherhood, inheritance, faith, and institutional pressure in its own register.
 

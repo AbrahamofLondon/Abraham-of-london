@@ -1,4 +1,4 @@
-> **Historical / superseded note:** This document reflects an earlier manuscript state before the 23-chapter, 45,008-word baseline. Do not use its 22-chapter or 38k references as current manuscript facts. Current baseline: 24 chapters, 46,835 prose-only words. Ch.6 "A Year Without Home" integrated, Ch.20 "The Version in His Head" restored..
+> **Historical / superseded note:** This document reflects an earlier manuscript state before the 25-chapter package. Do not use its 22-chapter, 23-chapter, 24-chapter, 38k, 45,008, or 46,835 references as current manuscript facts. Current baseline: 25 chapters, approximately 48,700 prose-only words. Ch.20 "The Available Tools" integrated; Ch.21 "The Version in His Head"; Ch.25 "Final Room".
 
 # Restored-Chapter Architecture Audit — Fathering Without Fear
 

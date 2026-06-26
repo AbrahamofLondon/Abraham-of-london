@@ -11,9 +11,9 @@
 
 1. **Ch.17 legal review complete** — this chapter requires specialist legal review before submission. No wave should launch until this is confirmed safe.
 2. **Query letter finalised** — draft is in file `03-query-letter.md`; it must be reviewed for positioning accuracy against this wave plan before use.
-3. **Synopsis finalised** — in file `04-one-page-synopsis.md` and `05-long-synopsis.md`; verify they reflect the current 24-chapter structure.
+3. **Synopsis finalised** — in file `04-one-page-synopsis.md` and `05-long-synopsis.md`; verify they reflect the current 25-chapter structure.
 4. **Author bio finalised** — in file `06-author-bio.md`.
-5. **Submission package complete** — verify all materials are current against the 24-chapter, 47,000-word baseline.
+5. **Submission package complete** — verify all materials are current against the 25-chapter, 49,000-word baseline.
 
 ---
 

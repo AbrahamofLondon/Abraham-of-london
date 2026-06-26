@@ -4,7 +4,7 @@
 
 ## Why Sarah Levitt
 
-Levitt has articulated a specific category — "memoir plus" — that this book inhabits precisely. She describes it as work that is not quite memoir, not quite straight nonfiction, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is exactly that: it is memoir plus inheritance study, plus spiritual reckoning, plus multigenerational history, plus institutional endurance — and the 24-chapter compressed structure is its formal architecture. No single label captures the book, and Levitt has built her list around the books that don't fit clean labels.
+Levitt has articulated a specific category — "memoir plus" — that this book inhabits precisely. She describes it as work that is not quite memoir, not quite straight nonfiction, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is exactly that: it is memoir plus inheritance study, plus spiritual reckoning, plus multigenerational history, plus institutional endurance — and the 25-chapter compressed structure is its formal architecture. No single label captures the book, and Levitt has built her list around the books that don't fit clean labels.
 
 She has represented MacArthur Genius grant recipients and has a reputation for culturally significant nonfiction — writing that matters beyond the individual story. Her note that she is "typically closed" but welcomes "extraordinary voices" signals a high bar that this manuscript is built to clear.
 
@@ -57,7 +57,7 @@ If Levitt responds or requests more:
 
 This book should reach Sarah Levitt as:
 
-> "'Memoir plus' in the most exact sense: a personal story fused with inheritance study, spiritual reckoning, and institutional critique — compressed into 24 chapters that refuse to let any single register dominate. Culturally significant, formally deliberate, and written from inside a life that has not yet been written about at this level."
+> "'Memoir plus' in the most exact sense: a personal story fused with inheritance study, spiritual reckoning, and institutional critique — compressed into 25 chapters that refuse to let any single register dominate. Culturally significant, formally deliberate, and written from inside a life that has not yet been written about at this level."
 
 Not as: a pure memoir, a grievance narrative, a faith book, or an immigration story.
 

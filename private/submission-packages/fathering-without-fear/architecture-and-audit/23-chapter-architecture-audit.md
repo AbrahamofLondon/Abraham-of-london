@@ -1,4 +1,4 @@
-> **Historical / superseded note:** This document reflects the 23-chapter manuscript state before Ch.6 "A Year Without Home" was integrated. Current baseline: 24 chapters, 46,835 prose-only words. The manuscript is now structured as a 24-chapter work.
+> **Historical / superseded note:** This document reflects the 23-chapter manuscript state before Ch.6 "A Year Without Home" and Ch.20 "The Available Tools" were integrated. Current baseline: 25 chapters, approximately 48,700 prose-only words. The manuscript is now structured as a 25-chapter work.
 
 # 23-Chapter Architecture Audit — Fathering Without Fear
 

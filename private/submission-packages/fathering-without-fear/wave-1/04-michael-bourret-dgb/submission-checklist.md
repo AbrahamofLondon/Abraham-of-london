@@ -41,7 +41,7 @@
 - [ ] Query does not mention court proceedings, allegations, or family court in the opening paragraph
 - [ ] Faith framing is not devotional — do not describe as Christian memoir or devotional nonfiction
 - [ ] Cultural stakes are clear: Nigerian-British, multigenerational, fatherhood and identity
-- [ ] "Offbeat" / structural unconventionality is named: 24 short chapters, each a compression, ancestral lineage to court room to legacy
+- [ ] "Offbeat" / structural unconventionality is named: 25 short chapters, each a compression, ancestral lineage to court room to legacy
 
 ---
 

@@ -67,6 +67,6 @@ Not as: an immigration story, a court memoir, a faith testimony, or a social jus
 
 **Upside:** Her alignment with the book's cultural and literary character is the strongest of any UK agent on the list. She has explicitly built her career around exactly this kind of work.
 
-**Risk:** She is an independent with a small list. This means she takes fewer books, and she will assess commercial potential alongside literary quality. The book's 47,000-word length and the absence of any established platform will be factors. The proposal needs to make the commercial case clearly: diaspora memoir is an expanding category with no current direct competitor; the fatherhood angle is fresh; the multigenerational Nigerian-British arc is not yet occupied by another recent title.
+**Risk:** She is an independent with a small list. This means she takes fewer books, and she will assess commercial potential alongside literary quality. The book's 49,000-word length and the absence of any established platform will be factors. The proposal needs to make the commercial case clearly: diaspora memoir is an expanding category with no current direct competitor; the fatherhood angle is fresh; the multigenerational Nigerian-British arc is not yet occupied by another recent title.
 
 **Mitigant:** The proposal's market section and comparable titles must be precise. Don't undersell the book's position — it is the first major literary memoir about a Black British father navigating family courts and surviving. That is a real market position.

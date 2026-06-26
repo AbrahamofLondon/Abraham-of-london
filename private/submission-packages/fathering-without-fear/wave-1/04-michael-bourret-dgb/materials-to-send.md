@@ -39,7 +39,7 @@ Paste or upload **Chapter 1 — Hounslow Call** (1,541 words).
 Enter: **Narrative Nonfiction / Literary Memoir**
 
 ### Field: Word Count
-Enter: **47,000**
+Enter: **49,000**
 
 ### Field: Comparable Titles
 Enter 2–3 comparable titles:

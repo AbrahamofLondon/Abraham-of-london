@@ -15,7 +15,7 @@
 
 > Dear Elise Dillsworth,
 >
-> Please find attached a nonfiction proposal for *Fathering Without Fear* — a compressed literary memoir of approximately 47,000 words, tracing a Nigerian-British family across four generations and arriving at a father who refuses to disappear. The package includes a cover letter, chapter outline, and thirty-page writing sample.
+> Please find attached a nonfiction proposal for *Fathering Without Fear* — a compressed literary memoir of approximately 49,000 words, tracing a Nigerian-British family across four generations and arriving at a father who refuses to disappear. The package includes a cover letter, chapter outline, and thirty-page writing sample.
 >
 > With thanks,
 > Abraham Adaramola (writing as Abraham of London)
@@ -42,7 +42,7 @@ Use the personalised query letter as the opening section of the proposal. Then e
 
 **Proposed title:** *Fathering Without Fear*
 **Author:** Abraham of London (Abraham Adaramola)
-**Word count:** Approximately 47,000 words (complete manuscript)
+**Word count:** approximately 49,000 words (complete manuscript)
 **Genre:** Literary memoir
 **Comparable titles:**
 

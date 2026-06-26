@@ -1,5 +1,7 @@
 # Market-Ready Expansion Audit — Fathering Without Fear
 
+> **Historical / superseded note:** This audit reflects the 24-chapter, post-Akure package state before Ch.20 — "The Available Tools" was integrated. Current active package baseline: 25 chapters, approximately 48,700 prose-only words, with Ch.20 "The Available Tools" and Ch.25 "Final Room". Do not use this audit as current send-day readiness evidence.
+
 **Date:** 2026-06-24 (updated — 24-chapter post-Akure integration)
 **Current prose total:** 46,835 words (24 chapters, prose-only strip)
 **Prior audit total:** 45,008 (23 chapters, pre-Akure)

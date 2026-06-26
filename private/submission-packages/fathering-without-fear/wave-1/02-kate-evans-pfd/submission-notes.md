@@ -28,7 +28,7 @@ PFD is one of the UK's two or three leading literary agencies. A successful subm
 If Evans responds with questions or requests more material:
 
 1. **The ancestral lineage**: The Isua-to-Lagos movement, Iyalode's walk, the tailor, the name. This is what gives the book its reach beyond a personal story — it is a study of what is transmitted across generations
-2. **The formal architecture**: 24 short chapters, each a closed unit. The brevity is not an incompleteness — it is a commitment to restraint that mirrors the narrator's own discipline in those contact rooms
+2. **The formal architecture**: 25 short chapters, each a closed unit. The brevity is not an incompleteness — it is a commitment to restraint that mirrors the narrator's own discipline in those contact rooms
 3. **What the book refuses**: It refuses the legal argument, the victim arc, the memoir-as-catharsis structure. These refusals are active choices, not evasions
 4. **The Agassi comparison**: Both books — *OPEN* and *Fathering Without Fear* — are about a man who stayed present at enormous personal cost, and who found that the cost clarified rather than diminished what mattered
 

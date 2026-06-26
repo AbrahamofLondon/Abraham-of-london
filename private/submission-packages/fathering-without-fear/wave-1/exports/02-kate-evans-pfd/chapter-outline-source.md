@@ -1,4 +1,4 @@
-# Fathering Without Fear — Chapter Outline
+# Long Synopsis — Fathering Without Fear
 
 ## Movement One: Inheritance (Chapters 1–11)
 
@@ -26,7 +26,7 @@ Chapter 15 is the book's grief centre. David — Abraham's brother, the bright a
 
 Chapter 16 introduces Funke, Abraham's sister. She was the family organiser, the first daughter of the first son. She was "big mummy" to her nieces and nephews, and she called herself "small mummy" in relation to Abraham's crisis — a smaller version of their mother Rachael. She ran a dry-cleaning service and a catering business, making firewood-cooked meals. She was told to stop working after a doctor found a possible hole in her heart. She collapsed at work two days later. Two days after Funke's death, Abraham was served with divorce papers. He could not pay her medical bill.
 
-Chapter 17 marks the beginning of fatherhood. Abraham learns he is going to be a father — and is told to leave. Fatherhood does not begin inside a marriage. It begins outside a door. The household breaks apart. The consequences in family life continue. The chapter is deliberately spare. It names the structural pressure without narrating private specifics, because a living child stands inside the story.
+Chapter 17 marks the beginning of fatherhood. Abraham learns he is going to be a father — and is told to leave. Fatherhood does not begin inside a marriage. It begins outside a door. An allegation is made. Abraham is arrested. The case does not proceed. The consequences in family life do. The chapter is deliberately spare. It names the structural pressure without narrating legal specifics, because a living child stands inside the story.
 
 ## Movement Three: The Contact Room (Chapters 18–19)
 
@@ -36,24 +36,26 @@ Chapter 18 renders the contact room as a physical and emotional space. Abraham l
 
 Chapter 19 covers seven years. Not as chronology but as duration — the accumulation of adjustments, the calendar that makes time look orderly while the body carries it differently. Abraham's silence during those years is not cowardice. It is fatherhood: the refusal to say anything publicly that might land on his son.
 
-## Movement Four: Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–21)
+## Movement Four: Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–22)
 
-Chapter 20 — "The Version in His Head" — is the restored chapter that fills a structural gap in the manuscript. Between the institutional-fight chapters and the resolution movement, the reader now sees Abraham trying to rebuild ordinary adult life. He dances, networks, dates, builds community. He misreads proximity as providence and chooses at the level of his own wound. The chapter's centre is the Damisi red line: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. Fatherhood is tested not in a courtroom but in an ordinary conversation about practicality.
+Chapter 20 — "The Available Tools" — is the restored bridge that fills the gap between institutional endurance and adult dislocation. Hunger, rent pressure, spiritual silence, work exhaustion, nightclubs, and the return of desire become part of a narrowed life in which Abraham survives with what remains available. The chapter does not present nightlife as collapse or dating as validation. It shows a disciplined man improvising under pressure, with tools that can keep him alive but cannot teach him how to love from an uninjured place.
 
-Chapter 21 is the Damisi chapter. Damisi is rendered entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument. Damisi remains Damisi.
+Chapter 21 — "The Version in His Head" — shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, networks, dates, builds community. He misreads proximity as providence and chooses at the level of his own wound. The chapter's centre is the Damisi red line: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. Fatherhood is tested not in a courtroom but in an ordinary conversation about practicality.
 
-## Movement Five: Love, Devotion, and the Final Room (Chapters 22–24)
+Chapter 22 is the Damisi chapter. Damisi is rendered entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument. Damisi remains Damisi.
 
-Chapter 22 returns to faith. Abraham encounters 1 John 4:18 — "perfect love casts out fear" — not as a sermon but as a correction. The verse had always been available, but he had not been the man who could read it without turning it into justification for what he wanted. The chapter places the theological work of the book without becoming devotional literature.
+## Movement Five: Love, Devotion, and the Final Room (Chapters 23–25)
 
-Chapter 23 returns to David Senior. The father who became a parent at fifteen. The father who watched Abraham with the recognition of someone who had carried the same weight a generation earlier. The chapter renders devotion not as a feeling but as a practice — the accumulated decisions of a man who remained present when remaining was costly.
+Chapter 23 returns to faith. Abraham encounters 1 John 4:18 — "perfect love casts out fear" — not as a sermon but as a correction. The verse had always been available, but he had not been the man who could read it without turning it into justification for what he wanted. The chapter places the theological work of the book without becoming devotional literature.
 
-Chapter 24 closes the book in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
+Chapter 24 returns to David Senior. The father who became a parent at fifteen. The father who watched Abraham with the recognition of someone who had carried the same weight a generation earlier. The chapter renders devotion not as a feeling but as a practice — the accumulated decisions of a man who remained present when remaining was costly.
+
+Chapter 25 closes the book in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
 ## Structure and Form
 
-*Fathering Without Fear* is approximately 47,000 words across twenty-four chapters. Most chapters are between 800 and 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
+*Fathering Without Fear* is approximately 49,000 words across twenty-five chapters. Most chapters are between 800 and 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
 
-The book protects private material deliberately. The fatherhood chapters are rendered in a restrained register. Chapter 20 uses pseudonyms for privacy. The memoir holds institutional pressure as something Abraham moved through, not something the book prosecutes.
+The book withholds legal detail deliberately. Chapter 17 is rendered in a protected, restrained register and requires specialist review before publication. Chapter 21 uses pseudonyms for privacy. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
 
 The title — *Fathering Without Fear* — names the book's central correction. Fear governed the early years: fear of loss, fear of the system, fear of saying the wrong thing in the wrong room. The book's arc is toward a love that does not require fear to sustain it. Not fearlessness as bravado, but love as a practice strong enough to survive what the situation demanded.

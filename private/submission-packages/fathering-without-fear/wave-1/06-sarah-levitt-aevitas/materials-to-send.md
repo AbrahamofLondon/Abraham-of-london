@@ -28,7 +28,7 @@ Paste the author bio from `personalised-query.md` (the section headed "Author Bi
 Enter: **Memoir / Narrative Nonfiction**
 
 ### Field: Word Count
-Enter: **47,000**
+Enter: **49,000**
 
 ### Field: First 50 Pages (upload or paste)
 The first 50 pages of *Fathering Without Fear* span approximately Chapters 1–6.

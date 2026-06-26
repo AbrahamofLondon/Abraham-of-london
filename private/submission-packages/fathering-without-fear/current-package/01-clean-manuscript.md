@@ -4,7 +4,7 @@
 
 ---
 
-*24 chapters. Approximately 46,835 prose-only words.*
+*25 chapters. Approximately 48,700 prose-only words.*
 
 ---
 
@@ -535,10 +535,6 @@ Abraham's father was surprised that his son had been able to fight the fire.
 The mosquito coil: after everything, someone identified it as the cause. The metal stand was found — on the floor or in the bed, displaced from the table at some point during the night or the fire or the fighting of it. The coil had been there, as it was most nights. The stand had been sufficient. Small and ordinary and capable of enough.
 
 What the household understood was this: it was a miracle he had woken up when he did. That was their reading of the morning — that something had pulled him from sleep at exactly the right moment, that the fire had not consumed him in his bed, that he had woken and acted and managed it before it spread. They were right that something had happened. They could not know what.
-
-*AUTHOR DETAIL NEEDED: confirm the identity of the elder brother who arrived after the father in the aftermath sequence. If it was David, this changes the emotional register of the scene and should be handled before any final expansion of the aftermath. Do not insert a name until confirmed.*
-
----
 
 He did not tell anyone about the dream. Not that morning. Not in the weeks after. Not for a long time. He did not have language for what had happened at the entrance, or in the fall, or in the exchange in the darkness. The fire was explicable — a coil, a mattress, a child who woke in time. The dream was something else.
 

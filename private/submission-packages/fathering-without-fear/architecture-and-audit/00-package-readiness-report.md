@@ -1,5 +1,7 @@
 # Package Readiness Report — Fathering Without Fear
 
+> **Historical / superseded note:** This report reflects the 24-chapter, post-Akure package state before Ch.20 — "The Available Tools" was integrated. Current active package baseline: 25 chapters, approximately 48,700 prose-only words, with Ch.20 "The Available Tools" and Ch.25 "Final Room". Do not use this report as current send-day readiness evidence.
+
 **Date:** 2026-06-24 (updated — 24-chapter post-Akure integration)
 **Status:** PACKAGE PREPARATION READY — SUBJECT TO LEGAL REVIEW
 

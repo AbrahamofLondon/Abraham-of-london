@@ -1,8 +1,8 @@
 # Nonfiction Proposal Core — Fathering Without Fear
 
 **Author:** Abraham of London (Abraham Adaramola)
-**Word Count:** Approximately 47,000 words
-**Chapters:** 24
+**Word Count:** Approximately 49,000 words
+**Chapters:** 25
 **Category:** Compressed literary memoir / short memoir-in-fragments
 
 ---
@@ -19,7 +19,7 @@ Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, ea
 
 When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
-The book is structured as twenty-four short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
+The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
 This is not a legal memoir, a parenting guide, or a grievance text. It is a book about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
 
@@ -37,7 +37,9 @@ The book is built in five movements:
 
 **Movement Four — Fatherhood Under Constraint (Chapters 17–18):** The contact room, seven years of journeying from the Northern line to Catford, the discipline of remaining present.
 
-**Movement Five — Love, Devotion, and the Final Room (Chapters 19–24):** The restored chapter, the child rendered entirely as a boy, the theological reckoning, the father's devotion, the final room.
+**Movement Four — Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–22):** The available tools chapter, the restored relationship chapter, and the child rendered entirely as a boy.
+
+**Movement Five — Love, Devotion, and the Final Room (Chapters 23–25):** The theological reckoning, the father's devotion, the final room.
 
 ---
 
@@ -92,13 +94,15 @@ What follows are years of distance, waiting, and supervised contact rooms. Abrah
 
 The book does not narrate the legal process in detail. It does not name the other parties. It holds the institutional pressure as weather — something Abraham moved through rather than something he prosecutes on the page.
 
-Between the institutional-fight chapters and the resolution movement, one restored chapter — "The Version in His Head" — shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, socialises, dates, builds community. A relationship tests his fatherhood commitment in the most ordinary way possible: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. His son is in London. So he stays.
+Between the institutional-fight chapters and the resolution movement, "The Available Tools" shows the precarious years between endurance and dislocation. Hunger, rent arrears, spiritual silence, work exhaustion, nightclubs, and the return of desire all become part of a narrowed life in which Abraham survives with what is available. The chapter does not present nightlife as collapse or dating as validation; it shows a disciplined man improvising under pressure.
+
+Then "The Version in His Head" shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, socialises, dates, builds community. A relationship tests his fatherhood commitment in the most ordinary way possible: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. His son is in London. So he stays.
 
 Then the Damisi chapter renders the boy entirely as a child — through football, swimming, vocabulary precision, toy-car races, and a sentence: "I am not your bro. I am your son."
 
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
-*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 47,000 words across twenty-four chapters.
+*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 49,000 words across twenty-five chapters.
 
 ---
 

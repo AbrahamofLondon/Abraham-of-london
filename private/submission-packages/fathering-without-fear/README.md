@@ -51,7 +51,7 @@ private/submission-packages/fathering-without-fear/
 - **Author:** Abraham of London (Abraham Adaramola)
 - **Chapters:** 25
 - **Ch.20:** The Available Tools (newly integrated)
-- **Word count:** Approximately 47,000 words
+- **Word count:** Approximately 49,000 words
 
 ## Source Material
 
