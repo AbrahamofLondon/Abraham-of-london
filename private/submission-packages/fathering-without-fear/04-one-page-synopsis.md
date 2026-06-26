@@ -22,11 +22,13 @@ What follows are years of distance, waiting, and supervised contact rooms. Abrah
 
 The book does not narrate the legal process in detail. It does not name the other parties. It holds the institutional pressure as weather — something Abraham moved through rather than something he prosecutes on the page.
 
-Between the institutional-fight chapters and the resolution movement, one restored chapter — "The Version in His Head" — shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, socialises, dates, builds community. A relationship tests his fatherhood commitment in the most ordinary way possible: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. His son is in London. So he stays.
+Between the institutional-fight chapters and the resolution movement, a restored chapter — "The Available Tools" — shows the precarious years between endurance and dislocation. Hunger, rent arrears, failed counsel, spiritual silence, work exhaustion, nightclubs, and the return of desire all become part of a narrowed life in which Abraham survives with what is available. The chapter does not present nightlife as collapse or dating as validation; it shows a disciplined man improvising under pressure, learning that some tools can keep a man alive without teaching him how to love from an uninjured place.
+
+Then "The Version in His Head" shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, socialises, dates, builds community. A relationship tests his fatherhood commitment in the most ordinary way possible: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. His son is in London. So he stays.
 
 Then the Damisi chapter renders the boy entirely as a child — through football, swimming, vocabulary precision, toy-car races, and a sentence: "I am not your bro. I am your son."
 
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
-*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 47,000 words across twenty-four chapters.
+*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 47,000 words across twenty-five chapters.
 

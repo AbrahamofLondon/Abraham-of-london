@@ -114,7 +114,7 @@ Desire returned inside that same pressure.
 
 Eventually, he began again. There was attention. There was interest. There were invitations, promises, hesitations, and sudden withdrawals. Some connections disappeared almost as soon as they arrived. Some stayed long enough to show him the shape of the life he was carrying.
 
-Gugu would later call them life lessons. The phrase was simple, almost too simple, but it was not wrong.
+Olu would later call them life lessons. The phrase was simple, almost too simple, but it was not wrong.
 
 He was not unwanted.
 
@@ -142,9 +142,7 @@ But Damisi did not become smaller because Abraham was lonely.
 
 The boy remained his son. Not a problem to be managed around. Not a complication to be hidden until a relationship was secure. Not a cost to be negotiated down so someone else could imagine a cleaner future.
 
-The child was not evidence here either.
-
-He was the fact Abraham could not betray.
+The child was not a bargaining chip. Not a complication to be managed around. He was the fact Abraham could not betray.
 
 That line held while other lines moved.
 

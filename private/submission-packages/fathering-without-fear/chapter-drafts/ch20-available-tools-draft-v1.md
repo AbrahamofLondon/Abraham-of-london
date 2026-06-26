@@ -1,3 +1,9 @@
+> **SUPERSEDED DRAFT** — Retained for editorial history only.
+> Current integrated chapter: **Ch.20 — The Available Tools** in `01-clean-manuscript.md`.
+> Do not use this file as manuscript source.
+
+---
+
 # DRAFT CANDIDATE ONLY — NOT INTEGRATED INTO MANUSCRIPT
 
 **LEGAL / PRIVACY REVIEW REQUIRED BEFORE ANY PUBLIC USE**
