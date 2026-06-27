@@ -94,23 +94,39 @@ function transformRawMdxToMarkdownLike(input: string): string {
 
   s = s.replace(/^\s*import\s.+?;?\s*$/gm, "");
   s = s.replace(/^\s*export\s.+?;?\s*$/gm, "");
+  s = s.replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+
+  const attrValue = (attrs: string, name: string): string => {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = attrs.match(
+      new RegExp(`\\b${escaped}=(?:"([^"]*)"|'([^']*)'|{\`([^\`]*)\`}|{"([^"]*)"}|{'([^']*)'})`),
+    );
+    return match?.[1] || match?.[2] || match?.[3] || match?.[4] || match?.[5] || "";
+  };
 
   s = s.replace(/^(\s*)<Callout\b([^>]*)>\s*$/gm, (_m: string, _indent: string, attrs: string) => {
-    const titleMatch = attrs.match(
-      /\btitle=(?:"([^"]*)"|'([^']*)'|{`([^`]*)`}|{"([^"]*)"}|{'([^']*)'})/,
-    );
-    const title =
-      titleMatch?.[1] ||
-      titleMatch?.[2] ||
-      titleMatch?.[3] ||
-      titleMatch?.[4] ||
-      titleMatch?.[5] ||
-      "Callout";
+    const title = attrValue(attrs, "title") || "Callout";
     return `> **${title}**\n>`;
   });
 
   s = s.replace(/^(\s*)<\/Callout>\s*$/gm, "");
+  s = s.replace(/^(\s*)<Note\b([^>]*)>\s*$/gm, (_m: string, _indent: string, attrs: string) => {
+    const title = attrValue(attrs, "title") || "Doctrine Note";
+    return `> **${title}**\n>`;
+  });
+  s = s.replace(/^(\s*)<\/Note>\s*$/gm, "");
+  s = s.replace(/^(\s*)<Verse\b[^>]*>\s*$/gm, ">");
+  s = s.replace(/^(\s*)<\/Verse>\s*$/gm, "");
+  s = s.replace(/^(\s*)<Quote\b[^>]*>\s*$/gm, ">");
+  s = s.replace(/^(\s*)<\/Quote>\s*$/gm, "");
+  s = s.replace(/^(\s*)<DocumentFooter\b[^>]*>\s*$/gm, "\n---\n");
+  s = s.replace(/^(\s*)<\/DocumentFooter>\s*$/gm, "");
   s = s.replace(/^(\s*)<SectionBreak\s*\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^(\s*)<Divider\b[^>]*\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^(\s*)<Rule\b([^>]*)\/>\s*$/gm, (_m: string, _indent: string, attrs: string) => {
+    const label = attrValue(attrs, "label");
+    return label ? `\n---\n\n**${label}**\n` : "\n---\n";
+  });
 
   s = s.replace(
     /^(\s*)<PullQuote\b([^>]*)>\s*$/gm,
@@ -130,11 +146,21 @@ function transformRawMdxToMarkdownLike(input: string): string {
   );
   s = s.replace(/^(\s*)<\/PullQuote>\s*$/gm, "");
 
-  s = s.replace(/<[A-Z][A-Za-z0-9._-]*\b[^>]*\/>/g, "");
   s = s.replace(
-    /<[A-Z][A-Za-z0-9._-]*\b[^>]*>[\s\S]*?<\/[A-Z][A-Za-z0-9._-]*>/g,
-    "",
+    /<Link\b[^>]*href=(?:"([^"]*)"|'([^']*)'|{`([^`]*)`}|{"([^"]*)"}|{'([^']*)'})[^>]*>([\s\S]*?)<\/Link>/g,
+    (_m: string, a: string, b: string, c: string, d: string, e: string, inner: string) => {
+      const href = a || b || c || d || e || "#";
+      const text = inner
+        .replace(/<\/?span\b[^>]*>/g, "")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      return text ? `[${text}](${href})` : "";
+    },
   );
+  s = s.replace(/<\/?(div|span)\b[^>]*>/g, "");
+  s = s.replace(/<[A-Z][A-Za-z0-9._-]*\b[^>]*\/>/g, "");
+  s = s.replace(/<\/?[A-Z][A-Za-z0-9._-]*\b[^>]*>/g, "");
 
   s = s.replace(/\s+[A-Za-z_:][-A-Za-z0-9_:.]*=(?:\{[^}]*\}|"[^"]*"|'[^']*')/g, "");
 
@@ -223,7 +249,7 @@ function MarkdownFallback({ content }: { content: string }) {
   const html = React.useMemo(() => renderMarkdownToHtml(content), [content]);
   return (
     <div
-      className="smdx-content"
+      className="smdx-content aol-mdx-content max-w-none"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

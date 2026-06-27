@@ -15,7 +15,7 @@ interface Heading {
 }
 
 interface TableOfContentsProps {
-  contentRef?: React.RefObject<HTMLElement>;
+  contentRef?: React.RefObject<HTMLElement | null>;
   className?: string;
   maxHeadings?: number;
   delayMs?: number;
@@ -41,7 +41,7 @@ function makeId(text: string, index: number): string {
 function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): Heading[] {
   if (!root) return [];
 
-  const elements = Array.from(root.querySelectorAll("h2, h3, h4, h5"));
+  const elements = Array.from(root.querySelectorAll("h1, h2, h3, h4, h5"));
   const used = new Set<string>();
   const extracted: Heading[] = [];
 
@@ -61,6 +61,7 @@ function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): He
       uniqueId = `${id}-${suffix}`;
       suffix++;
     }
+    el.id = uniqueId;
     used.add(uniqueId);
 
     extracted.push({
@@ -86,9 +87,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
   React.useEffect(() => {
     const root =
       contentRef?.current ||
+      document.querySelector("[data-reader-content='true']") ||
+      document.querySelector(".smdx-content") ||
       document.querySelector(".aol-mdx-content") ||
       document.querySelector(".prose-hardened") ||
-      document.querySelector("main") ||
       null;
 
     if (!root) return;

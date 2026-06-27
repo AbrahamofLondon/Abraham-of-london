@@ -33,10 +33,32 @@ type Props = {
 
 const DEFAULT_COVER = "/assets/images/books/the-architecture-of-human-purpose.jpg";
 
+const UNLOCK_ERROR_MESSAGES: Record<string, string> = {
+  CLEARANCE_REQUIRED:
+    "Professional access required. Sign in with an eligible account to continue.",
+  SESSION_INVALID:
+    "Unable to verify access. Please refresh or sign in again.",
+  INSUFFICIENT_CLEARANCE:
+    "Professional access required. This canon volume is available inside the professional reading chamber.",
+  UNLOCK_FAILED:
+    "Unable to verify access. Please refresh or sign in again.",
+  UNLOCK_NETWORK_FAILURE:
+    "Unable to verify access. Please refresh or sign in again.",
+  UNLOCK_PAYLOAD_MISSING:
+    "This volume could not be loaded. Please refresh or try again.",
+  BODY_UNAVAILABLE:
+    "This volume is temporarily unavailable in the reading chamber.",
+};
+
 function safeString(value: unknown): string {
   if (typeof value === "string") return value;
   if (value == null) return "";
   return String(value);
+}
+
+function readerFacingUnlockError(reason: unknown): string {
+  const key = safeString(reason).trim().toUpperCase();
+  return UNLOCK_ERROR_MESSAGES[key] || "Unable to verify access. Please refresh or sign in again.";
 }
 
 function normalizePathish(input: unknown): string {
@@ -150,7 +172,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok || !json?.ok) {
-        setUnlockError(json?.reason || "UNLOCK_FAILED");
+        setUnlockError(readerFacingUnlockError(json?.reason || "UNLOCK_FAILED"));
         return;
       }
 
@@ -159,10 +181,10 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
       if (decoded.trim()) {
         setActiveCode(decoded);
       } else {
-        setUnlockError("UNLOCK_PAYLOAD_MISSING");
+        setUnlockError(readerFacingUnlockError("UNLOCK_PAYLOAD_MISSING"));
       }
     } catch {
-      setUnlockError("UNLOCK_NETWORK_FAILURE");
+      setUnlockError(readerFacingUnlockError("UNLOCK_NETWORK_FAILURE"));
     } finally {
       setLoadingContent(false);
     }
@@ -254,7 +276,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
       headerTransparent={false}
     >
       <Head>
-        <title>{title} // Abraham of London</title>
+        <title>{`${title} // Abraham of London`}</title>
         {excerpt ? <meta name="description" content={excerpt} /> : null}
         <meta
           name="robots"

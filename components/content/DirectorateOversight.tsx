@@ -16,22 +16,7 @@ import {
 import type { AccessTier } from "@/lib/access/public";
 import { getTierLabel } from "@/lib/access/public";
 import { SafeTableOfContents } from "@/components/mdx/TableOfContents";
-import dynamic from "next/dynamic";
-
-// Dynamically loaded with ssr:false to keep compiled-MDX evaluation off the SSG path
-const ClientOnlyMDXRenderer = dynamic(
-  () => import("@/components/mdx/ClientOnlyMDXRenderer"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex justify-center py-20">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
-          Loading…
-        </span>
-      </div>
-    ),
-  },
-);
+import ClientOnlyMDXRenderer from "@/components/mdx/ClientOnlyMDXRenderer";
 
 type DirectorateKind = "essay" | "book" | "volume" | "document";
 type CoverAspect = "wide" | "book" | "square" | "standard" | "auto";
@@ -325,6 +310,7 @@ export default function DirectorateOversight({
   childrenTopRight,
   childrenBottom,
 }: DirectorateOversightProps) {
+  const readerContentRef = React.useRef<HTMLDivElement>(null);
   const resolvedCover = cover || DEFAULT_COVER;
   const resolvedCategory = getResolvedCategory(kind, category);
   const resolvedReadTime = normalizeReadTime(readTime);
@@ -460,7 +446,7 @@ export default function DirectorateOversight({
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           <div className="order-2 lg:col-span-9 lg:order-1">
             <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.02))] p-3 shadow-[0_30px_100px_-70px_rgba(0,0,0,0.95)]">
-              <div className="rounded-[26px] border border-white/8 bg-black/45 p-8 md:p-12">
+              <div className="rounded-[26px] border border-white/8 bg-black/45 p-6 md:p-12">
                 <div className="mb-8 flex items-center gap-3 border-b border-white/10 pb-6">
                   <div className="h-px w-10 bg-amber-400/40" />
                   <div className="text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/68">
@@ -478,10 +464,12 @@ export default function DirectorateOversight({
                     <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                   </div>
                 ) : hasValidContent ? (
-                  <ClientOnlyMDXRenderer
-                    code={cleanCode}
-                    debug={process.env.NODE_ENV === "development"}
-                  />
+                  <div ref={readerContentRef} data-reader-content="true">
+                    <ClientOnlyMDXRenderer
+                      code={cleanCode}
+                      debug={process.env.NODE_ENV === "development"}
+                    />
+                  </div>
                 ) : (
                   <div className="py-20 text-center text-white/50">
                     <EmptyStateIcon kind={kind} />
@@ -505,7 +493,7 @@ export default function DirectorateOversight({
                 <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/68">
                   On This Page
                 </div>
-                <SafeTableOfContents delayMs={600} />
+                <SafeTableOfContents contentRef={readerContentRef} delayMs={600} />
               </div>
             </div>
           )}
