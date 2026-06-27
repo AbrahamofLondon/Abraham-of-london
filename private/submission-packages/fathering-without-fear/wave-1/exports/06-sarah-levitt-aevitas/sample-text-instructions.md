@@ -1,8 +1,8 @@
-# Aevitas First 50 Pages Paste Block — Sarah Levitt
+# Aevitas First 50 Pages Paste Block - Sarah Levitt
 
 ## FIELD: First 50 Pages
 
-Chapter 1 — Hounslow Call
+# Chapter 1 — Hounslow Call
 
 In February 2021, Abraham was sitting on his bed in Hounslow when the court called.
 
@@ -22,7 +22,7 @@ He said it.
 
 Then he waited.
 
-The clerk did not force him to proceed. Her words did not compel him. Nobody said, You must continue now. Nobody turned the call into command by naming it as command. She did not push past what he had said or pretend not to have heard it.
+The clerk did not force him to proceed. Her words did not compel him. Nobody said, *You must continue now*. Nobody turned the call into command by naming it as command. She did not push past what he had said or pretend not to have heard it.
 
 But silence can carry more pressure than instruction.
 
@@ -82,7 +82,7 @@ He was still in the room. He was still on the bed. He was still, as far as the p
 
 But the voice carried more than the room could see.
 
-Chapter 2 — Isua to Agege
+# Chapter 2 — Isua to Agege
 
 The road between Isua and Lagos is shorter now than it was. That is not the interesting thing about it.
 
@@ -114,7 +114,7 @@ Abraham is not in this chapter. He is not born yet. But the name is already what
 
 The road between Isua and Lagos is shorter now. The inheritance is not.
 
-Chapter 3 — The Boy Who Was Already Old
+# Chapter 3 — The Boy Who Was Already Old
 
 He was a boy who spoke too early, and whose questions made adults go quiet.
 
@@ -160,7 +160,7 @@ Years later, filling out his MBA application, he wrote the name again. Abraham. 
 
 He spent years not knowing that he was the answer to a question he had not been present to hear.
 
-Chapter 4 — A Hearing Date
+# Chapter 4 — A Hearing Date
 
 The screen did not look like a place where time could be taken.
 
@@ -202,7 +202,7 @@ Abraham did not experience it as triumph.
 
 Triumph would have been the wrong word. Nothing about that morning gave him back what had already been taken by time. Nothing made the process gentle. Nothing made the waiting harmless. The return of continuity did not turn machinery into love. It simply meant that, for that day, the machinery did not send him all the way back to the beginning again.
 
-Sometimes that is what relief looks like inside an institution: not restoration, not reversal, not a clean answer, but the prevention of another loss.
+Sometimes that is what relief looks like inside an institution: not restoration, not vindication, not a clean answer, but the prevention of another loss.
 
 The screen remained a screen.
 
@@ -236,11 +236,11 @@ It was presence.
 
 And in those years, presence was often the only form of fatherhood the process allowed him to practice.
 
-Chapter 5 — Jumoke
+# Chapter 5 — Jumoke
 
-There is a photograph. The family is arranged the way families arrange themselves when someone says stand together — the adults behind, the children placed. Jumoke is standing in front. She is the smallest figure in the frame, positioned where the eye lands first, and she is not smiling. She does not look unhappy. She looks like a child who is somewhere else at the centre of her, some country the camera cannot follow her into. She is fixed at that age now. The photograph will not let her grow older.
+There is a photograph. The family is arranged the way families arrange themselves when someone says *stand together* — the adults behind, the children placed. Jumoke is standing in front. She is the smallest figure in the frame, positioned where the eye lands first, and she is not smiling. She does not look unhappy. She looks like a child who is somewhere else at the centre of her, some country the camera cannot follow her into. She is fixed at that age now. The photograph will not let her grow older.
 
-Jumoke came after the triplets. The triplets had been announced in the newspaper — The Punch ran a notice, the way Lagos papers did for births the neighbourhood considered significant. Three at once. People came to see them. The house was full for weeks. By the time Jumoke arrived, the house had gone back to ordinary. She was the child who came after the occasion.
+Jumoke came after the triplets. The triplets had been announced in the newspaper — *The Punch* ran a notice, the way Lagos papers did for births the neighbourhood considered significant. Three at once. People came to see them. The house was full for weeks. By the time Jumoke arrived, the house had gone back to ordinary. She was the child who came after the occasion.
 
 The girls in that family were strong. They held their own with anyone. Jumoke was the milder version — not weak, but chilled. She was gentle in a household where gentleness was not the dominant mode. She was kind. She was affectionate in the way that some children are before the world teaches them to ration it. She gave warmth without being asked, without calculating, without conditions. She was Abraham's favourite. He was hers.
 
@@ -276,7 +276,7 @@ Jumoke was gentle. She was kind. She was not weak. She was seven, and she is sti
 
 He had protected her once at a school in Agege. After that, memory kept asking him to protect her where no child could be reached.
 
-Chapter 6 — A Year Without Home
+# Chapter 6 — A Year Without Home
 
 After Jumoke died, Abraham left home.
 
@@ -390,7 +390,7 @@ He had already learned to keep going after the thing he hoped to find had disapp
 
 And he entered it anyway.
 
-Chapter 7 — The Fire and the Deal
+# Chapter 7 — The Fire and the Deal
 
 The room was the next one from where his parents slept. A children's room, in a house with many rooms, the kind of proximity that meant you were near enough to reach but far enough to be separate.
 
@@ -504,7 +504,7 @@ He has been living inside it ever since. The deal has cost him things. It has ma
 
 He has never tried to renegotiate.
 
-Chapter 8 — The Name That Had to Be Powerful
+# Chapter 8 — The Name That Had to Be Powerful
 
 She said that Jesus was the most powerful person she knew.
 
@@ -548,7 +548,7 @@ The woman who doubted him at birth had named the thing that would carry him forw
 
 He did not know that yet, not fully. He only knew that something had been set down and something had been picked up again, and the distance between those two acts was the distance a boy travels before he becomes the man the name was waiting for.
 
-Chapter 9 — The Spiritual Covering
+# Chapter 9 — The Spiritual Covering
 
 She was not tall, but somehow looked larger than most.
 
@@ -576,7 +576,7 @@ There were whispers in the family — oral belief, not fact — that something h
 
 Abraham has been working out what he inherits from her ever since. Not a legacy. Not a lesson. A person — irreducible, unresolved, real.
 
-Chapter 10 — The Boy Who Became a Father at Fifteen
+# Chapter 10 — The Boy Who Became a Father at Fifteen
 
 David Senior was not quite fifteen when his father died. Somewhere around fifteen. The family kept dates the way some families kept dates in Lagos at that time — the important things were marked and mourned; exact ages were approximate; the number could be fourteen or it could be fifteen and what mattered was not the number.
 
@@ -610,7 +610,7 @@ Abraham received this as a story — not as a memory he shared, but as something
 
 Abraham Adaramola had left work unfinished. David Senior picked it up at fifteen without knowing that was what he was doing. What he did not know at fifteen became who he was. Abraham was not born into money or ease. He was born into a father shaped already by a refusal to disappear from the people who needed him. The refusal was not heroism. It was the only available position.
 
-Chapter 11 — Leaving Lagos
+# Chapter 11 — Leaving Lagos
 
 The family had converged at David Senior’s house before the airport.
 
@@ -640,7 +640,7 @@ Abraham knelt.
 
 The family gathered around him. The children who had been moving through the room became still. Femi and Bayo stood nearby. His mother stood there too. David Senior laid his hands on Abraham’s head.
 
-The hands were ordinary hands. The hands of his father. The weight of them was not heavy, but it stayed. David Senior quoted Psalm 27:10: When my father and my mother forsake me, then the Lord will take care of me. Then he prayed the verse over him as provision. The sense of the prayer was clear: unless he had ever looked away from another person in need, Abraham would not be stranded abroad. His needs would be met.
+The hands were ordinary hands. The hands of his father. The weight of them was not heavy, but it stayed. David Senior quoted Psalm 27:10: *When my father and my mother forsake me, then the Lord will take care of me.* Then he prayed the verse over him as provision. The sense of the prayer was clear: unless he had ever looked away from another person in need, Abraham would not be stranded abroad. His needs would be met.
 
 David Senior was not performing faith. He was handing over the most reliable thing he knew.
 
@@ -681,3 +681,81 @@ A single bed with a white mattress. Red curtains. A desk with a black lamp. Shel
 He sat there with the black suitcase.
 
 He had left a house full of people and arrived in a room that contained only what he could carry.
+
+The ticket had been paid for by a client of the employer he was leaving behind in Lagos. The same client had also paid for a few days of hotel accommodation in London. Abraham did not use the hotel. Visa delays had already cost him two weeks of orientation, and he needed to get to Norwich. Somewhere in London, a room had been paid for and left empty while he moved toward another room he had not yet seen.
+
+That, too, would become part of the pattern: provision arriving, then being redirected by urgency.
+
+After arrival, a Ghanaian woman helped him find the accommodation office. She did not know him. She simply saw someone who needed direction and gave it. Another man helped him find the business school, where staff helped him with his dorm keys. The help was not grand. It was directional. A person. An office. A building. A key.
+
+On his first night on campus, a woman who knew him from Lagos found him. She had heard he was coming. She brought a cooked meal. It was the first food in England that felt made for him rather than bought by him. She told another man who also knew Abraham, and he came later. He bought Abraham a SIM card so he could call home, a winter jacket because what he had brought would not be enough, and gave him cash.
+
+At the time, each help arrived as the next practical thing.
+
+A ticket. A key. A meal. A SIM card. A coat. A few notes of cash.
+
+Only later did the sequence begin to gather around his father’s prayer. Provision did not arrive as spectacle. It arrived as objects, directions, people, and timing. Nothing announced itself as supernatural. Nothing needed to. The pattern was not loud. It was exact.
+
+Abraham had left because the life he was living in Lagos was not becoming the life he wanted to build. He was working, moving, surviving, but not recalibrating. He wanted to see the world and find out what else was possible. He did not yet know that this path would lead toward a refinery venture that would not close. He did not know which ambitions would fail, which hopes would survive, or how many times provision would come at the last moment instead of the first.
+
+He only knew that he had left.
+
+He was in a small room in Norwich. The red curtains were there. The black lamp. The white mattress. The suitcase. The food. The SIM card. The coat. The cash. The key.
+
+His father’s hands were no longer on his head.
+
+The prayer was.
+
+He was being carried. That was real. What he was being carried toward — whether it was what he believed it was — the next several years would answer.
+
+# Chapter 12 — A Post on Facebook
+
+Nigeria was familiar when Abraham returned. He was not.
+
+The streets knew what they had always known. The house knew its rooms. People still spoke in the registers he understood without translation. But his father was in the ground now, and the MBA had ended, and the man who had left for Norwich under a father's prayer had come back with a certificate and an absence. He had left Nigeria on 27 January 2016 with David Senior alive and speaking. He had returned on 10 September 2017 to bury him. The distance between those two dates held an entire life he had not been present for — the last conversations, the last meals, the last time David Senior had sat in this room and made a decision about something ordinary.
+
+The burial was over. The visitors had come and gone. The house had absorbed the condolences and returned to its own silence. That was the part grief does not prepare a person for — not the event, not the mourning, but the ordinary silence that arrives after the mourning ends and the house is simply a house again, except the person who made it home is no longer in it.
+
+He was lying on the black couch in his living room, trying to watch a movie he could not hear or see. The screen was moving. The sound was present. None of it reached him. He does not remember what the movie was. He remembers the light from the screen crossing the ceiling. He remembers the weight of the phone in his hand. He remembers that the couch had been his father's couch before the burial — David Senior had sat in this room, on this leather, in the months before the MBA departure. Now Abraham was lying where his father had sat, and his father was not in the house or anywhere reachable.
+
+The movie kept playing. People were speaking on the screen. He could see their mouths open and close. He could not have said what scene it was. The grief was not dramatic. It was not the kind that breaks things. It was the kind that sits in a room and makes everything in the room slightly unreachable — the sound, the light, the movie, the future.
+
+He needed to vent.
+
+He picked up his phone and opened Facebook. The app was already there. He typed something about his father's death. He cannot recover the exact wording now, but he remembers the shape of it — trust in God's heart even when God's hand could not be seen. That was what his father had taught him. That was what the MBA departure prayer had been built on. That was the language available to him in the moment: a man lying on his dead father's couch, putting loss into the only frame he trusted.
+
+He posted it without expectation. He was not looking for comfort. He was not looking for an answer. He was looking for a way to make the sentence exist outside his own head, because inside his head it had been circling without landing, and he needed it to land somewhere — even if only on a screen that strangers would scroll past.
+
+He put the phone down on his chest and looked at the ceiling. The light from the movie was still crossing it. The sound was still present. Nothing had changed in the room. But something had left him — the post, the pressure of the unsaid, the sentence that needed to exist outside his own body.
+
+The phone buzzed. Then it buzzed again.
+
+Most people responded the way people respond. They were sorry for his loss. They were praying for him and his family. They used the sentences available to the living when they are standing at the edge of someone else's death and cannot enter it. Those sentences were not false. They simply came from outside the room grief had put him in. He read them. He appreciated them. They did not change the weight on his chest.
+
+Then a different notification arrived.
+
+A woman from his past had responded. He had not spoken to her in years. Her name on the screen was familiar in the way old names are — not current, not forgotten, just stored somewhere between memory and obligation.
+
+Her own father, she said, had died suddenly, in a way that left grief with no time to prepare.
+
+He read the sentence twice. Not because it was long. It was not long. But because it came from inside the room, not from outside it. She was not offering sympathy from a distance. She was speaking as someone who had stood where he was standing. The words did not feel rehearsed. They felt paid for. There are messages grief ignores because they sound like courtesy. There are others it opens because they sound like recognition. Hers sounded like recognition.
+
+He does not remember the exact sentence now. The fog of that year has closed over the wording. But the shape of it was something about having to find a way to make sense of God's goodness even when you cannot make sense of what has happened. That was the part that stopped him — not that she was comforting him, but that she was working through the same question aloud, from inside her own unresolved loss. She was not standing outside his grief offering words. She was standing inside her own.
+
+He read it again on the black couch, the phone held above his face, the movie still moving on the screen. The house was quiet. The reply was not long. But it made the distance between them feel shorter than it had any right to be. What sounded like understanding entered through the place in him that had just been broken.
+
+A grieving man does not always know what he is looking for. Sometimes he is not looking for anything. He is simply lying on a couch in a room that used to contain his father, and a sentence arrives that sounds like it was written by someone who has been in the same room. That is not romance. It is not strategy. It is the particular gravity that grief exerts on people who recognise each other's weight. Abraham felt it. He did not resist it. He did not know there was anything to resist.
+
+The invitation did not arrive all at once. It began in text messages, the kind of exchange that lets grief answer in pieces — a sentence here, a reply there, the slow accumulation of something that felt less like conversation and more like company. Then it became a phone call. The phone call was longer than either of them expected. Then there was another.
+
+By the time the invitation became clear — come back to the UK — Abraham did not experience it as something to defend against. He experienced it as recognition. He had buried his father. Someone had answered the grief from inside grief. The invitation did not feel like temptation. It felt like a door opening from inside loss, held open by someone who claimed to know what the loss weighed.
+
+He did not know how exposed grief had made him. He did not know that the place where a man has just been broken is also the place where he is most likely to trust a voice that matches the shape of the break. He had no reason, then, to distrust grief speaking back to grief.
+
+That knowledge belonged to a later Abraham, one who had not yet been formed by what came next. The Abraham on the black couch knew only that grief had been met by something that felt like grief, and that this felt, in that moment, like enough.
+
+# Chapter 13 — Married by December
+
+When Abraham returned to Lagos after the burial, he was in a kind of limbo.
+
+**Calibration note:** This paste block rendered to 50 manuscript pages when verified as 12pt Times New Roman, double-spaced, with 1-inch margins.

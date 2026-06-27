@@ -1,50 +1,4 @@
-# Personalised Query Letter — Reiko Davis, DeFiore & Company
-
-**Version:** Wave 1 — ready for final review before send
-**Email:** reiko@defliterary.com
-**Subject:** QUERY Fathering Without Fear
-**Format when sent:** Entire content pasted in email body — no attachments; query + bio + first 20 pages, in that order
-
----
-
-## Email Content — Paste in Full
-
-**Subject:** QUERY Fathering Without Fear
-
----
-
-Dear Reiko Davis,
-
-I'm writing to you because of your description of what compels you in narrative nonfiction: intimate personal stories that function as lenses for larger issues — social justice, the history and experiences of people of colour, the forces that shape individual lives. *Fathering Without Fear* is built on exactly that logic: a Black Nigerian-British man's account of fatherhood becomes a study in what pressure does to fathers, what faith does to families, and what ancestry actually means when it is tested by distance and time. Your confirmation that you were open to new submissions in late 2025 and your clear appetite for this kind of work encouraged me to write.
-
-*Fathering Without Fear* is a compressed literary memoir of approximately 49,000 words.
-
-The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
-
-Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke fought for him and did not survive the cost. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
-
-When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
-
-The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
-
-The book is a compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear. It is about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
-
-The complete manuscript is available on request.
-
-Thank you for your time and consideration.
-
-Abraham of London
-Abraham Adaramola
-
----
-
-## Author Bio (paste immediately after query letter)
-
-Abraham Adaramola, writing as Abraham of London, is a Nigerian-British writer based in London. He was born in Lagos and raised across south-west Nigeria before moving to the UK, where he has lived for more than two decades. *Fathering Without Fear* is his debut memoir — a compressed literary account of inheritance, faith, fatherhood, and the cost of remaining present across four generations of a Nigerian-British family. The complete manuscript is available on request.
-
----
-
-## First 20 Pages (paste immediately after author bio)
+# Fathering Without Fear - 30-Page Writing Sample
 
 # Chapter 1 — Hounslow Call
 
@@ -360,14 +314,178 @@ This did not make the loneliness disappear. It did not turn Akure into home. It 
 
 That week in April 1990, after the fellowship had been postponed more than once, Abraham sat in the Ali family's living room and listened as Jesus was preached. Justice and Mrs Ali were Mary's landlords. The fellowship was in their home, with the Ali family and others gathered, people sitting on sofas while the message moved through the room. What was said resonated with him. At the end, when they asked whether anyone wanted to make a commitment, he said yes.
 
-**Calibration note:** This paste block rendered to 20 manuscript pages when verified as 12pt Times New Roman, double-spaced, with 1-inch margins.
+It was a turning toward God from inside a life that had become difficult to inhabit. The name had already come to him through Iyalode. The faith had already moved through the family before he understood its path. In Akure, as a teenager, he gave himself to Jesus in a more deliberate way.
 
----
+He did not yet know what a life given would cost.
 
-## Notes on This Version
+He knew only that something in him had turned.
 
-- Opening paragraph echoes Davis's exact language ("intimate personal stories that function as lenses for larger issues") — this is a direct reflection of her stated interest; do not modify this phrase
-- "Social justice, the history and experiences of people of colour" are her stated categories — these appear in the personalisation to confirm the fit, but the query body never reduces the book to a social justice narrative
-- "Your confirmation that you were open to new submissions in late 2025" — this is based on the research confirmation from late 2025; verify she is still open before sending; do not include this line if her status has changed
-- The bio is intentionally brief — Davis's submission style (email body, no attachments) suggests she reads quickly; a long bio in this context would dilute the effect
-- Chapters 1–4 are chosen for this agent because they establish both the personal story (Ch.1: the court call) and the social/structural lens (Ch.2: the ancestral lineage; Ch.3: naming as inheritance; Ch.4: the hearing as institutional reduction)
+At Aquinas, Abraham began refusing class.
+
+Not once. Not as a boy testing a boundary for the pleasure of being difficult. Almost a whole year. When other students absconded, he went with them. During school hours, when he should have been inside a classroom, he was outside with boys who had also found a way not to be where the timetable said they should be. They roamed the streets. The day moved as if lessons were happening somewhere else, which they were. Bells rang for other people. Teachers taught rooms he was not inside. Books opened without him.
+
+He was not collapsing.
+
+That is part of what made the refusal harder to read. If he had failed, the adults would have had a simpler category for him. Laziness. Stubbornness. A child going bad. But he did not fail in the expected way. He still passed the normal tests and examinations. The schoolwork did not expose the absence fully because the mind could still perform. He could stay away from class and still cross the mark required of him. He could be missing and still appear, on paper, present enough.
+
+That is a particular kind of silence.
+
+It does not ask for help in the language adults recognise. It lets the report show passing grades while the body spends school hours in the street. It refuses a life without yet knowing how to argue against the life. It says no with the feet because the mouth has not been given a sentence large enough.
+
+His maths teacher noticed.
+
+Mr Adeniranye was not discovering a boy who could not learn. He was discovering a boy whose attendance and performance did not fit together in the expected way. The result was not simple failure. It was contradiction. A student absent from class should not be passing as if class had held him. A child roaming the streets during school hours should not still be clearing the ordinary academic gates. Something did not match.
+
+The parents were summoned.
+
+David Senior had already tried to arrange care around the boy. He had visited the school and placed Abraham in the care of the maths and English teachers because those subjects mattered. That was how David Senior often loved: by structure, by assignment, by placing a person under the care of another person who could help carry the thing he could not be present to carry every hour himself. He had not abandoned the boy to chance. He had made an arrangement.
+
+The arrangement was failing.
+
+When David Senior asked Abraham what the problem was, he did not ask in anger.
+
+That mattered.
+
+Anger would have made the question smaller. Anger would have turned the behaviour into disobedience and the conversation into discipline. David Senior could be strict. He could carry duty with a hard edge when duty required it. But in this moment, the source of the problem had to be heard before it could be answered.
+
+Abraham told him.
+
+He was tired of living in Akure.
+
+That was the sentence available. It was not everything. A child rarely has everything. He did not say, I have not seen my family for a year and the year has entered my body. He did not say, I lost Jumoke and then I lost the house that still remembered her. He did not say, I am passing your tests but I am not here. He said he was tired of living in Akure.
+
+David Senior received the sentence.
+
+He was not pleased. That is not the point. He was resigned to Abraham's decision in the particular way of a father who trusted him. He had trusted this child before. He had seen something in him from birth, something the child himself had not chosen and did not understand. Trust, in David Senior, did not always arrive as tenderness. Sometimes it arrived as responsibility handed back to the person who had spoken.
+
+He told Abraham to choose any school he wanted.
+
+Any school.
+
+For a child who had spent a year without home, choice was not a small thing. It gave him back a piece of agency inside a life that had been arranged around him. He was not being asked only to obey the next placement. He was being asked where he wanted to go.
+
+He chose Adebayo Mokuolu College in Ogba, Lagos.
+
+He did not choose it because of a prospectus. He did not choose it because it was the best school in an abstract sense, or because he had made a careful study of options. He chose it because his childhood friends attended there. The boys from America. The ones whose presence made the school feel like more than a school. If he went there, he would not simply be leaving Akure. He would be joining something that had survived from before.
+
+That was the hope.
+
+He had lost home once. He thought he was choosing a way back toward it.
+
+Friendship can become a place when a child has lost the other places. The school in Ogba held, in his mind, the possibility of continuity. He would arrive and find them. The year away would not have erased everything. There would be boys who knew him from before, boys whose faces carried Lagos, childhood, the ordinary world before death and departure had rearranged it.
+
+But they did not return.
+
+They had gone to America for a holiday and did not come back. The family whose children he had hoped to join had returned to America permanently. There was no goodbye. No final afternoon in which the leaving could be understood while it was happening. No sentence placed carefully enough for a child to hold. They were simply gone, and by the time Abraham chose the school that was supposed to restore them to him, the restoration had already failed.
+
+This was not the same as Jumoke's death.
+
+It should not be made equal to it.
+
+The school he chose did not give him back the boys from America.
+
+He had already learned to keep going after the thing he hoped to find had disappeared.
+
+And he entered it anyway.
+
+# Chapter 7 — The Fire and the Deal
+
+The room was the next one from where his parents slept. A children's room, in a house with many rooms, the kind of proximity that meant you were near enough to reach but far enough to be separate.
+
+Three beds. Three children. The arrangement was simple: entering the room, there was a bed to the left — Jumoke's. Directly ahead, opposite the door, Yemisi's bed, with its black metal poles. The poles had small gold ornaments on them — decorative, the way children's beds in Lagos households sometimes were, small ornaments on the frame that caught the light if there was light to catch. Abraham's bed was to the right, the closest to the door. Between his bed and the entrance was the table.
+
+On the table was the mosquito coil. It was there most nights. Lagos nights, in a house without reliable screens, needed some defence against what the air carried. The coil sat in its metal stand and burned slowly through the dark hours, the slow spiral doing its work, the smoke drifting where it drifted. No one thought about it particularly. There was no reason to. It was as ordinary as the table it sat on, as the room, as the night.
+
+The children went to sleep. Jumoke to the left. Yemisi ahead, under the gold-ornamented poles. Abraham to the right, nearest the door, nearest the table, nearest the coil.
+
+The coil burned. The night continued.
+
+In a Lagos house in the early 1980s, this was not unusual. A mosquito coil was as ordinary as the nets people did not have, as ordinary as the shutting of windows against rain that also shut out breeze. The coil sat in its metal stand and the stand sat on its table and the table sat just inside the door of a room where three children had gone to sleep.
+
+The room was ordinary in the way rooms are ordinary before they become the rooms where something happened.
+
+Something moved in the night, and the night became something else entirely.
+
+He was at an entrance.
+
+It had pillars — massive, looking aged, the kind of aged that suggests centuries rather than decades, as if the construction had been there since before living memory began keeping count. The gate was not golden. Not decorated in the way stories had led him to expect significant gates to be. It was not the heavenly architecture of Sunday school pictures or the ornate grandeur of the illustrated Bibles that moved through Lagos churches. It looked old and plain and serious. It had stood for a long time. Whatever it was the entrance to had existed long before Abraham arrived in front of it.
+
+The scale was larger than ordinary — not so large as to be overwhelming, but more than the size of anything made for ordinary use. It had the quality of a boundary: a place that existed not to be beautiful but to mark the difference between one kind of territory and another. On the other side of it: the silence of somewhere that had been emptied of its inhabitants a very long time ago. An old city. A city that might have been full once. That was no longer full.
+
+There were figures near the gate. Not many — six or seven scattered around, and at each side of the entrance a pair, standing at the gate posts. They had the form of men. He understood, later, what they were. At the time, standing in front of them, he did not have a name for what they were. What he felt was not fear. It was shock. The simple, absolute disorientation of a body that has been placed somewhere without being given any warning that it was going to move.
+
+Where is this. That was the shape of what moved through him. Not a question asked in words. A state.
+
+He knew, without knowing how he knew, that what stood before him was a boundary. He was not afraid. The entrance was not threatening. It was simply there, and he was there, and the space between them felt like the most important distance he had ever stood inside.
+
+Then he was moved away from it. Not by his own will. In an instant, without any transition he could feel, he was taken from the entrance.
+
+And he began to fall.
+
+The fall was smooth. Not violent, not a plummeting. Fast, but not too fast. It had the quality of something that would continue indefinitely — not speed that would accelerate toward impact, but speed that would simply go on. Smooth and endless, fast but controlled.
+
+He was alone. No one and nothing fell with him. Just him, and the dark, and the falling — the smooth, fast, endless falling that had no bottom he could see and no ceiling he could look back up toward.
+
+The darkness was total. No light, no ground visible below him, no ceiling visible above. He was inside darkness that had no walls and no bottom he could see. And there was no fire. That is important — there was no fire, no flame, no heat, none of the images he had been given by the church. Just darkness and the fall and the sounds.
+
+The sounds were coming from beneath him.
+
+Screaming. Crying. Many voices, not from one direction — from beneath him, from whatever was below, from the place the fall was carrying him toward. Not from around him, not from beside him. From beneath. He was above them and falling toward them and the screaming surrounded him as he fell, rising as he descended or staying where it was while he moved through the dark toward it. A dark torture chamber, endlessly bottomless — that is the phrase that surfaces when he tries to describe it. Endless depth and the sounds of people inside that depth.
+
+He knew it was hell.
+
+Not because anyone told him. Not because he saw flames or figures or any of the images he had been taught. He knew it the way a body knows temperature — without language, without argument, directly.
+
+The thought in his heart was: this was hell.
+
+And yet, inside that knowledge, he felt he could get out.
+
+He does not know why that confidence was there. It was not based on anything he had done or earned. It was not the confidence of a person who has a plan or a technique. It was simply present — as if the capacity to leave had been placed inside the same space as the knowledge of where he was, two facts that arrived together. The confidence did not make the falling stop. The screaming from beneath did not stop. The darkness did not lighten. Everything that was there remained exactly as it was. And yet something in the composition of where he was had changed. He could get out.
+
+The falling continued. The screaming from beneath continued. The knowing had shifted. He said a quiet prayer.
+
+Not a formal one. Not one he had been taught. Not the prayer a child recites at bedtime or the one that moves through a congregation together in a building on a Sunday. A prayer that rose from somewhere in him that had recognised the entrance and understood the darkness and still believed, without reason to, that there was something on the other side of both.
+
+A few weeks before, he had heard a story in church — they did not go regularly, but they had gone, and he had heard it. A king who was told that he was going to die. The king turned toward the wall. He wept. He prayed. He reminded God of how he had lived. And God heard him. That was the story. God heard him and the king was given more time. Not exemption from death — time. More years inside the covenant.
+
+He was not a king. He was a child falling through darkness, in a state he could not name and had not chosen. The prayer was entirely in his mind. Everything was like that — like thought reaching through without sound, like telepathy. Nothing was spoken. But whatever in him could reach, reached.
+
+Right there, he got an answer.
+
+The answer came as thoughts. Not as a voice, not as words spoken into the air, not as anything that would become a story that could be repeated exactly. As thoughts. As a knowing that arrived in him the same way the prayer had left him — directly, in the body, without needing language to confirm itself. He felt it the way he had felt the fall: as fact.
+
+He made a promise.
+
+He does not remember the sentence as a transcript. He remembers the exchange as a demand and an answer — that he offered his life, and that something accepted the offer. That a deal was closed. There was a bargaining in it, and a surrender, and a rescue, and an agreement, and they were all one thing simultaneously, not four things in sequence.
+
+Then he woke.
+
+The smell came first. Smoke. Before sight, before understanding, before any sense of where the body was and what it was lying on — smoke.
+
+Then sight: the room was faintly lit. Not dark in the way it had been dark when he went to sleep. A different quality of dark, with a source. The mattress was burning. The top right corner of it — the corner nearest the table, nearest the door — was on fire. The bedsheet had caught too. Flame moving along the surface. Smoke low and close.
+
+He had no burns. He had been lying in this bed and the mattress had been burning and he had no burns anywhere on him.
+
+He got up.
+
+He does not remember deciding to move. He remembers only that he was already moving, that his body had begun the work before his mind had caught up to what the work required. He went to his sisters first. He woke them. They ran — out the door, toward their parents' room, gone from the room.
+
+He went to the bathroom for water. He came back. He had his blanket: grey, with two lines at the top — red or orange, he cannot be certain of the colour in the dark of five in the morning. He had the blanket in his hands. He used what he had brought and what he was holding.
+
+He does not remember deciding what to do. He remembers the blanket.
+
+The fire went out. The bedsheet was burned. The mattress had a scorched corner. The smoke was still in the air. The room held the smell that he still holds in his memory now — the specific smell of a burnt mattress, which cannot be described in words but which stays in the body as fact.
+
+By the time the adults arrived, the fire was out.
+
+His father came first. He checked Abraham immediately — certain there must be burns somewhere, certain a child who had been in a burning room would have the evidence on his body. Abraham kept telling him he was fine. He was fine. There were no burns anywhere.
+
+Others from the household arrived. The mattress was moved outside. The windows were opened. The smoke began to clear from the room.
+
+Abraham's father was surprised that his son had been able to fight the fire.
+
+The mosquito coil: after everything, someone identified it as the cause. The metal stand was found — on the floor or in the bed, displaced from the table at some point during the night or the fire or the fighting of it. The coil had been there, as it was most nights. The stand had been sufficient. Small and ordinary and capable of enough.
+
+What the household understood was this: it was a miracle he had woken up when he did. That was their reading of the morning — that something had pulled him from sleep at exactly the right moment, that the fire had not consumed him in his bed, that he had woken and acted and managed it before it spread. They were right that something had happened. They could not know what.
+
+He did not tell anyone about the dream. Not that morning. Not in the weeks after. Not for a long time. He did not have language for what had happened at the entrance, or in the fall, or in the exchange in the darkness. The fire was explicable — a coil, a mattress, a child who woke in time. The dream was something else.
