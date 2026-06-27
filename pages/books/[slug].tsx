@@ -35,15 +35,15 @@ const DEFAULT_COVER = "/assets/images/books/the-architecture-of-human-purpose.jp
 
 const UNLOCK_ERROR_MESSAGES: Record<string, string> = {
   CLEARANCE_REQUIRED:
-    "Professional access required. Sign in with an eligible account to continue.",
+    "Sign in to access this volume. Professional or Inner Circle access required.",
   SESSION_INVALID:
-    "Unable to verify access. Please refresh or sign in again.",
+    "Your session has expired. Please sign in again to continue reading.",
   INSUFFICIENT_CLEARANCE:
-    "Professional access required. This canon volume is available inside the professional reading chamber.",
+    "Your account does not have access to this volume. Upgrade your access tier to continue.",
   UNLOCK_FAILED:
-    "Unable to verify access. Please refresh or sign in again.",
+    "Unable to verify access. Please sign in again or refresh the page.",
   UNLOCK_NETWORK_FAILURE:
-    "Unable to verify access. Please refresh or sign in again.",
+    "Unable to verify access. Please check your connection and try again.",
   UNLOCK_PAYLOAD_MISSING:
     "This volume could not be loaded. Please refresh or try again.",
   BODY_UNAVAILABLE:
@@ -252,7 +252,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
             <AccessGate
               title={title}
               requiredTier={required}
-              message="This volume requires appropriate access."
+              message={doc?.lockMessage || "This volume requires appropriate access."}
               isAuthenticated={!!session?.user}
               onUnlocked={handleUnlock}
             />
@@ -304,7 +304,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
         loading={loadingContent}
         unlockError={unlockError}
         activeCode={activeCode}
-        emptyLabel="No content available."
+        emptyLabel={doc?.lockMessage || "No content available."}
       />
     </Layout>
   );
