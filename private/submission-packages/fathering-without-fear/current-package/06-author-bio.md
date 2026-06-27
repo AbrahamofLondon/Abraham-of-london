@@ -2,13 +2,13 @@
 
 ## Short Bio (for query submissions)
 
-Abraham Adaramola, writing as Abraham of London, is a Nigerian-born, London-based writer. He holds an MBA from the University of East Anglia and has worked in strategy, consulting, operations, and business leadership. *Fathering Without Fear* is his first book. He writes on faith, fatherhood, inheritance, decision, and endurance.
+Abraham Adaramola, writing as Abraham of London, is a Nigerian-born, London-based writer and father. *Fathering Without Fear* is his first book: a compressed literary memoir shaped by fire, family loss, faith, and seven years of trying to remain present in his son's life. He writes on fatherhood, inheritance, decision, and endurance.
 
 ## Longer Bio (for full submissions or editorial use)
 
 Abraham Adaramola writes under the name Abraham of London. He was born in Nigeria and is based in London.
 
-He holds an MBA from the University of East Anglia and has spent his professional career working across strategy, consulting, operations, and business leadership. His work has taken him between Nigeria and the United Kingdom, and the movement between those two worlds — their different assumptions about family, faith, authority, and responsibility — runs through everything he writes.
+He holds an MBA from the University of East Anglia and has worked across strategy, operations, and business leadership. His life has moved between Nigeria and the United Kingdom, and the movement between those two worlds — their different assumptions about family, faith, authority, and responsibility — runs through everything he writes.
 
 *Fathering Without Fear* is his first book. It is a compressed literary memoir about what a man inherits from his father, what he refuses to pass on, and what it costs to remain present as a father when institutional process, grief, and distance make remaining the most difficult thing the situation demands.
 

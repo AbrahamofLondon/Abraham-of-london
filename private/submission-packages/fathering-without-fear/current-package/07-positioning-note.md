@@ -36,7 +36,7 @@ None of these options improves the book.
 
 One chapter — Ch.20, "The Available Tools" — was added during the editorial process because it solved a demonstrable structural gap between institutional endurance and adult dislocation. It carries hunger, rent pressure, spiritual silence, work exhaustion, nightclubs, and the return of desire without presenting nightlife as collapse or dating as validation.
 
-Another chapter — Ch.21, "The Version in His Head" — restores the texture of Abraham's ordinary adult life: social world, romantic desire, community, and the attempt to rebuild a life while the system still held his son. It carries the Damisi red line — the book's strongest non-institutional proof of Abraham's fatherhood commitment.
+Another chapter — Ch.21, "The Version in His Head" — restores the texture of Abraham's ordinary adult life: social world, romantic desire, community, and the attempt to rebuild a life while the system still held his son. It carries the fatherhood red line — the book's strongest non-institutional proof of Abraham's refusal to disappear.
 
 A third chapter — Ch.6, "A Year Without Home" — was added to fill an early-formation gap: the year Abraham spent in Akure after Jumoke's death, displaced from home, refusing class while still passing, committing to faith, and choosing a school because he hoped to find friends who had already gone. No further new chapters should be added unless they solve a demonstrable structural absence. The 25-chapter, approximately 49,000-word manuscript is the complete book.
 
@@ -54,7 +54,7 @@ A third chapter — Ch.6, "A Year Without Home" — was added to fill an early-f
 Comp titles to be researched. Any comp-title selection must be based on fresh market research and should reflect:
 
 - Formally compressed memoirs (short chapters, fragmentary structure)
-- Literary memoirs dealing with fatherhood, inheritance, or family law
+- Literary memoirs dealing with fatherhood, inheritance, or institutional pressure
 - Faith-inflected literary nonfiction that is not devotional genre
 - Nigerian/British or diaspora memoir
 - Books in the 30,000–50,000 word range that were successfully published and positioned as complete works

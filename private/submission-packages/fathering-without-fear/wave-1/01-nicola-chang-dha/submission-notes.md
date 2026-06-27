@@ -69,4 +69,4 @@ Not as: a court story, a grievance, a parenting book, or a faith testimony.
 
 **Risk:** She is primarily a fiction agent who crosses into literary nonfiction selectively. Her nonfiction list is shorter than her fiction list. The submission needs to clear her prose bar, not just her subject-interest bar.
 
-**Mitigant:** Lead with Ch.1 (Hounslow Call) and Ch.6 (The Fire and the Deal) — these are the book's most formally compressed chapters and the ones most likely to demonstrate the aesthetic she looks for in the first 50 pages.
+**Mitigant:** Use the verified opening first-50-pages extract. It begins with Ch.1 (Hounslow Call) and reaches the early fire material in manuscript order, without rearranging the sample or treating the fire chapter as a separate lead excerpt.

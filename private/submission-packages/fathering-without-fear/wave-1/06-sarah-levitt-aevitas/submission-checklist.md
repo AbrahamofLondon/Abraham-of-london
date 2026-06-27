@@ -28,7 +28,7 @@
 
 - [ ] Query letter text (from `personalised-query.md`) — ready to paste into form
 - [ ] Author bio — ready to paste; typically 100–200 words
-- [ ] First 50 pages of manuscript as a document — approximately Ch.1 through Ch.6 (~8,000–12,500 words depending on page definition)
+- [ ] First 50 pages of manuscript as a document — use the verified opening first-50-pages extract, not the old Ch.1–Ch.6 estimate
 - [ ] Genre selected: Memoir / Narrative Nonfiction
 
 ---
