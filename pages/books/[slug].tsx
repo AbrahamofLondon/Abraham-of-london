@@ -206,7 +206,19 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
     }
   }, [needsAuth, session?.user, canRead, activeCode, handleUnlock]);
 
-  if (needsAuth && status === "loading") {
+  // Session loading timeout — if the session check takes longer than 5 seconds,
+  // treat the user as unauthenticated and show the AccessGate locked state.
+  // This prevents indefinite "Verifying clearance…" when the auth provider is
+  // slow, unreachable, or the session endpoint is missing.
+  const [sessionTimeout, setSessionTimeout] = React.useState(false);
+  React.useEffect(() => {
+    if (status === "loading") {
+      const timer = setTimeout(() => setSessionTimeout(true), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  if (needsAuth && status === "loading" && !sessionTimeout) {
     return (
       <Layout title={title}>
         <div className="flex min-h-screen items-center justify-center bg-black">
