@@ -128,12 +128,65 @@ The Builder's Catechism now shows:
 
 ---
 
+## Gated Book Access Fix (Commit `977933994`)
+
+### Root Cause of Stuck Verification
+
+The book page at `pages/books/[slug].tsx` renders "Verifying clearance…" when `needsAuth` is `true` and `useSession()` status is `"loading"`. This is the NextAuth session check. If the session endpoint is slow, unreachable, or the auth provider hangs, this state persists **indefinitely** — the user never transitions to the AccessGate locked state.
+
+### Fix
+
+Added a **5-second timeout** to the session loading state:
+
+```tsx
+const [sessionTimeout, setSessionTimeout] = React.useState(false);
+React.useEffect(() => {
+  if (status === "loading") {
+    const timer = setTimeout(() => setSessionTimeout(true), 5000);
+    return () => clearTimeout(timer);
+  }
+}, [status]);
+```
+
+The loading condition changed from:
+```tsx
+if (needsAuth && status === "loading")
+```
+to:
+```tsx
+if (needsAuth && status === "loading" && !sessionTimeout)
+```
+
+When the timeout fires:
+1. `sessionTimeout` becomes `true`
+2. The loading condition becomes `false`
+3. Falls through to `needsAuth && (!session?.user || !canRead)` which is `true`
+4. Renders `AccessGate` with `isAuthenticated={false}` → dignified locked state
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `pages/books/[slug].tsx` | Added 5-second session loading timeout |
+
+### Behaviour Matrix
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| No valid session, auth fast | "Verifying clearance…" briefly, then AccessGate | Same (no regression) |
+| No valid session, auth slow/hanging | **"Verifying clearance…" indefinitely** | "Verifying clearance…" for max 5s, then AccessGate |
+| No valid session, auth endpoint missing | **"Verifying clearance…" indefinitely** | "Verifying clearance…" for max 5s, then AccessGate |
+| Valid session, eligible | "Verifying clearance…" briefly, then content | Same (no regression) |
+| Valid session, not eligible | "Verifying clearance…" briefly, then AccessGate | Same (no regression) |
+
+---
+
 ## Verification Status
 
 | Status | Value |
 |--------|-------|
-| **Local verified** | ✅ YES — production build passes, detection logic confirmed correct |
-| **Pushed** | ✅ YES — `a7d7d9fbb` on `origin/main` |
+| **Local verified** | ✅ YES — production build passes, all checks pass |
+| **Pushed** | ✅ YES — `977933994` on `origin/main` |
 | **Deployed/live verified** | ⏳ Pending deployment — requires Vercel/Netlify redeploy |
 
 ### To verify live after deployment:
