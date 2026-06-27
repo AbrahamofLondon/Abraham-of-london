@@ -9,11 +9,23 @@ export function decodeBodyCodePayload(payload: {
   compressed?: unknown;
   encoding?: unknown;
 }): string {
-  const bodyCode = safeString(payload?.bodyCode);
+  return decodeCompressedPayload(payload?.bodyCode, payload?.compressed, payload?.encoding);
+}
+
+export function decodeBodyHtmlPayload(payload: {
+  bodyHtml?: unknown;
+  compressed?: unknown;
+  encoding?: unknown;
+}): string {
+  return decodeCompressedPayload(payload?.bodyHtml, payload?.compressed, payload?.encoding);
+}
+
+function decodeCompressedPayload(value: unknown, compressedValue?: unknown, encodingValue?: unknown): string {
+  const bodyCode = safeString(value);
   if (!bodyCode) return "";
 
-  const compressed = payload?.compressed === true;
-  const encoding = safeString(payload?.encoding).toLowerCase();
+  const compressed = compressedValue === true;
+  const encoding = safeString(encodingValue).toLowerCase();
 
   if (!compressed) return bodyCode;
   if (encoding && encoding !== "gzip-base64") return bodyCode;

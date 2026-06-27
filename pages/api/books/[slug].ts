@@ -10,12 +10,14 @@ import type { AccessTier } from "@/lib/access/tiers";
 
 import { normalizeSlug } from "@/lib/content/shared";
 import { getRenderableBody } from "@/lib/content/render-body";
+import { renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 
 type OkResponse = {
   ok: true;
   tier: AccessTier;
   requiredTier: AccessTier;
   bodyCode: string;
+  bodyHtml?: string;
   compressed: true;
   encoding: "gzip-base64";
   slugResolved: string;
@@ -149,8 +151,9 @@ export default async function handler(
   const requiredTier = tiers.normalizeRequired(requiredTierFromDoc(doc));
   const slugResolved = booksBareSlug(doc?.slug || doc?._raw?.flattenedPath || bare);
   const renderBody = getRenderableBody(doc);
+  const staticRender = renderDocBodyToStaticHtml(doc);
 
-  if (!renderBody.code.trim()) {
+  if (!renderBody.code.trim() && !staticRender.html.trim()) {
     return res.status(500).json({ ok: false, reason: "BODY_UNAVAILABLE" });
   }
 
@@ -160,6 +163,7 @@ export default async function handler(
       tier: "public",
       requiredTier: "public",
       bodyCode: compress(renderBody.code),
+      bodyHtml: staticRender.html ? compress(staticRender.html) : undefined,
       compressed: true,
       encoding: "gzip-base64",
       slugResolved,
@@ -186,6 +190,7 @@ export default async function handler(
     tier: userTier,
     requiredTier,
     bodyCode: compress(renderBody.code),
+    bodyHtml: staticRender.html ? compress(staticRender.html) : undefined,
     compressed: true,
     encoding: "gzip-base64",
     slugResolved,

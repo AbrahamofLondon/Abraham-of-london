@@ -126,10 +126,57 @@ function transformRawMdxToMarkdownLike(input: string): string {
   // Strip import/export statements
   s = s.replace(/^\s*import\s.+?;?\s*$/gm, "");
   s = s.replace(/^\s*export\s.+?;?\s*$/gm, "");
+  s = s.replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
 
-  // Strip JSX component tags (self-closing and paired)
+  const attrValue = (attrs: string, name: string): string => {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = attrs.match(
+      new RegExp(`\\b${escaped}=(?:"([^"]*)"|'([^']*)'|{\`([^\`]*)\`}|{"([^"]*)"}|{'([^']*)'})`),
+    );
+    return match?.[1] || match?.[2] || match?.[3] || match?.[4] || match?.[5] || "";
+  };
+
+  s = s.replace(/^(\s*)<Callout\b([^>]*)>\s*$/gm, (_m, _indent, attrs) => {
+    const title = attrValue(attrs, "title") || "Callout";
+    return `> **${title}**\n>`;
+  });
+  s = s.replace(/^(\s*)<\/Callout>\s*$/gm, "");
+
+  s = s.replace(/^(\s*)<Note\b([^>]*)>\s*$/gm, (_m, _indent, attrs) => {
+    const title = attrValue(attrs, "title") || "Doctrine Note";
+    return `> **${title}**\n>`;
+  });
+  s = s.replace(/^(\s*)<\/Note>\s*$/gm, "");
+
+  s = s.replace(/^(\s*)<(Verse|Quote|PullQuote)\b[^>]*>\s*$/gm, ">");
+  s = s.replace(/^(\s*)<\/(Verse|Quote|PullQuote)>\s*$/gm, "");
+
+  s = s.replace(/^(\s*)<DocumentFooter\b[^>]*>\s*$/gm, "\n---\n");
+  s = s.replace(/^(\s*)<\/DocumentFooter>\s*$/gm, "");
+  s = s.replace(/^(\s*)<SectionBreak\s*\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^(\s*)<Divider\b[^>]*\/>\s*$/gm, "\n---\n");
+  s = s.replace(/^(\s*)<Rule\b([^>]*)\/>\s*$/gm, (_m, _indent, attrs) => {
+    const label = attrValue(attrs, "label");
+    return label ? `\n---\n\n**${label}**\n` : "\n---\n";
+  });
+
+  s = s.replace(
+    /<Link\b[^>]*href=(?:"([^"]*)"|'([^']*)'|{`([^`]*)`}|{"([^"]*)"}|{'([^']*)'})[^>]*>([\s\S]*?)<\/Link>/g,
+    (_m, a, b, c, d, e, inner) => {
+      const href = a || b || c || d || e || "#";
+      const text = String(inner || "")
+        .replace(/<\/?span\b[^>]*>/g, "")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      return text ? `[${text}](${href})` : "";
+    },
+  );
+  s = s.replace(/<\/?(div|span)\b[^>]*>/g, "");
+
+  // Strip unknown JSX component tags while preserving their inner text.
   s = s.replace(/<[A-Z][A-Za-z0-9._-]*\b[^>]*\/>/g, "");
-  s = s.replace(/<[A-Z][A-Za-z0-9._-]*\b[^>]*>[\s\S]*?<\/[A-Z][A-Za-z0-9._-]*>/g, "");
+  s = s.replace(/<\/?[A-Z][A-Za-z0-9._-]*\b[^>]*>/g, "");
 
   // Strip remaining JSX attributes from intrinsic elements
   s = s.replace(/\s+[A-Za-z_:][-A-Za-z0-9_:.]*=(?:\{[^}]*\}|"[^"]*"|'[^']*')/g, "");

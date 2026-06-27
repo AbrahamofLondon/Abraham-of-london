@@ -14,7 +14,8 @@ import DirectorateOversight from "@/components/content/DirectorateOversight";
 import { joinHref } from "@/lib/content/shared";
 import { sanitizeData, resolveDocCoverImage } from "@/lib/content/client-utils";
 import { getRenderableBody } from "@/lib/content/render-body";
-import { decodeBodyCodePayload } from "@/lib/content/client-codec";
+import { decodeBodyCodePayload, decodeBodyHtmlPayload } from "@/lib/content/client-codec";
+import { renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 
 import type { AccessTier } from "@/lib/access/tier-policy";
 import {
@@ -152,6 +153,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
   const canRead = !needsAuth || (!!session?.user && hasAccess(userTier, required));
 
   const [activeCode, setActiveCode] = React.useState<string>(doc?.bodyCode || "");
+  const [activeHtml, setActiveHtml] = React.useState<string>(doc?.staticHtml || "");
   const [loadingContent, setLoadingContent] = React.useState(false);
   const [unlockError, setUnlockError] = React.useState<string | null>(null);
 
@@ -176,9 +178,13 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
         return;
       }
 
+      const decodedHtml = decodeBodyHtmlPayload(json);
       const decoded = decodeBodyCodePayload(json);
 
-      if (decoded.trim()) {
+      if (decodedHtml.trim()) {
+        setActiveHtml(decodedHtml);
+        setActiveCode("");
+      } else if (decoded.trim()) {
         setActiveCode(decoded);
       } else {
         setUnlockError(readerFacingUnlockError("UNLOCK_PAYLOAD_MISSING"));
@@ -316,6 +322,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
         loading={loadingContent}
         unlockError={unlockError}
         activeCode={activeCode}
+        activeHtml={activeHtml}
         emptyLabel={doc?.lockMessage || "No content available."}
       />
     </Layout>
@@ -360,8 +367,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const requiredTier = normalizeRequiredTier(requiredTierFromDoc(rawDoc));
     const locked = requiredTier !== "public";
     const renderBody = getRenderableBody(rawDoc);
-    const bodyCode = locked ? "" : renderBody.code;
-    const bodyEmpty = !locked && (renderBody.mode === "empty" || renderBody.mode === "suspicious" || !bodyCode.trim());
+    const staticRender = !locked ? renderDocBodyToStaticHtml(rawDoc) : { html: "", mode: "empty" };
+    const bodyCode = locked || staticRender.html ? "" : renderBody.code;
+    const bodyEmpty = !locked && !staticRender.html && (renderBody.mode === "empty" || renderBody.mode === "suspicious" || !bodyCode.trim());
 
     // Strip body (raw MDX source + compiled code) before serialising into page
     // props — locked books set bodyCode="" but rawDoc.body would still leak
@@ -372,6 +380,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       ...safeRawDoc,
       slug: bare,
       bodyCode,
+      staticHtml: staticRender.html,
+      staticMode: staticRender.mode,
       bodyMode: renderBody.mode,
       coverImage: resolveDocCoverImage(rawDoc) || rawDoc?.coverImage || DEFAULT_COVER,
     };

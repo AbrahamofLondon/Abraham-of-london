@@ -17,6 +17,7 @@ import type { AccessTier } from "@/lib/access/public";
 import { getTierLabel } from "@/lib/access/public";
 import { SafeTableOfContents } from "@/components/mdx/TableOfContents";
 import ClientOnlyMDXRenderer from "@/components/mdx/ClientOnlyMDXRenderer";
+import { StaticMDXRenderer } from "@/lib/mdx/static-mdx-runtime";
 
 type DirectorateKind = "essay" | "book" | "volume" | "document";
 type CoverAspect = "wide" | "book" | "square" | "standard" | "auto";
@@ -52,6 +53,7 @@ type DirectorateOversightProps = {
   loading?: boolean;
   unlockError?: string | null;
   activeCode?: string | null;
+  activeHtml?: string | null;
   emptyLabel?: string;
   childrenTopRight?: React.ReactNode;
   childrenBottom?: React.ReactNode;
@@ -306,6 +308,7 @@ export default function DirectorateOversight({
   loading = false,
   unlockError = null,
   activeCode = "",
+  activeHtml = "",
   emptyLabel = "No content available.",
   childrenTopRight,
   childrenBottom,
@@ -338,6 +341,9 @@ export default function DirectorateOversight({
   }, [activeCode]);
 
   const hasValidContent = cleanCode.length > 30;
+  const cleanHtml = typeof activeHtml === "string" ? activeHtml.trim() : "";
+  const hasStaticContent = cleanHtml.length > 30;
+  const hasReaderContent = hasStaticContent || hasValidContent;
 
   return (
     <>
@@ -463,6 +469,13 @@ export default function DirectorateOversight({
                   <div className="flex justify-center py-20">
                     <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                   </div>
+                ) : hasStaticContent ? (
+                  <div ref={readerContentRef} data-reader-content="true">
+                    <StaticMDXRenderer
+                      html={cleanHtml}
+                      className="aol-mdx-content max-w-none"
+                    />
+                  </div>
                 ) : hasValidContent ? (
                   <div ref={readerContentRef} data-reader-content="true">
                     <ClientOnlyMDXRenderer
@@ -487,7 +500,7 @@ export default function DirectorateOversight({
             </div>
           </div>
 
-          {hasValidContent && !loading && !unlockError && (
+          {hasReaderContent && !loading && !unlockError && (
             <div className="order-1 h-fit lg:sticky lg:top-24 lg:col-span-3 lg:order-2">
               <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-5">
                 <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.34em] text-amber-200/68">

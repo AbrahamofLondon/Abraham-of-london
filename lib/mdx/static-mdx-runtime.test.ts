@@ -7,7 +7,7 @@
  * - compiled body.code + valid body.raw → rendered HTML via raw fallback
  * - compiled body.code with no body.raw → empty safely
  * - readable body.code → rendered as markdown
- * - raw editorial MDX with Callout/PullQuote-like tags → stripped and rendered
+ * - raw editorial MDX with Callout/PullQuote-like tags → mapped and rendered
  * - empty doc → empty result
  * - leaked module code in body.code → skipped safely
  */
@@ -116,11 +116,13 @@ describe("renderDocBodyToStaticHtml", () => {
     expect(result.html).toContain("<strong>bold</strong>");
     expect(result.html).toContain("<em>italic</em>");
     expect(result.html).toContain('<a href="/test"');
-    // JSX component tags should be stripped
+    // JSX component tags should be stripped while their text is preserved
     expect(result.html).not.toContain("<Callout");
     expect(result.html).not.toContain("<PullQuote");
     expect(result.html).not.toContain("</Callout>");
     expect(result.html).not.toContain("</PullQuote>");
+    expect(result.html).toContain("What is man for?");
+    expect(result.html).toContain("Purpose is not a discovery");
   });
 
   // ── compiled body.code with no body.raw ────────────────────────────────
@@ -167,7 +169,7 @@ describe("renderDocBodyToStaticHtml", () => {
   });
 
   // ── raw editorial MDX with JSX tags ────────────────────────────────────
-  it("strips JSX component tags from raw editorial MDX and renders cleanly", () => {
+  it("maps JSX component tags from raw editorial MDX and renders cleanly", () => {
     const doc = makeDoc({
       rawBody: rawEditorialMdx(),
     });
@@ -184,9 +186,9 @@ describe("renderDocBodyToStaticHtml", () => {
     expect(result.html).not.toContain("</Callout>");
     expect(result.html).not.toContain("<PullQuote");
     expect(result.html).not.toContain("</PullQuote>");
-    // Content between JSX tags is stripped along with the tags
-    expect(result.html).not.toContain("What is man for?");
-    expect(result.html).not.toContain("Purpose is not a discovery");
+    // Content between JSX tags is preserved
+    expect(result.html).toContain("What is man for?");
+    expect(result.html).toContain("Purpose is not a discovery");
     // Markdown headings rendered
     expect(result.html).toContain("The Mandate");
     // Horizontal rules rendered
