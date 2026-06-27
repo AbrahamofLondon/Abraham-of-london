@@ -21,7 +21,7 @@ I'm writing to you because of your description of what compels you in narrative 
 
 The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
 
-Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke fought for him and did not survive the cost. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
+Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke carried the family's weight and did not set it down. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
 
 When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
@@ -34,7 +34,6 @@ The complete manuscript is available on request.
 Thank you for your time and consideration.
 
 Abraham of London
-Abraham Adaramola
 
 ---
 
