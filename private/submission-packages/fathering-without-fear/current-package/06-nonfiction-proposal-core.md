@@ -108,4 +108,4 @@ The book closes in an ordinary room, at a table, with a laptop, papers, and the 
 
 ## Sample Pages
 
-The complete manuscript is available on request. For initial submission, a calibrated first-50-pages extract is available, beginning with the Hounslow Call and continuing consecutively through the opening movement to a clean paragraph boundary. The extract has been verified by rendered DOCX page count rather than estimated word count.
+The complete manuscript is available on request. For initial submission, a first-50-pages extract is available, beginning with the Hounslow Call and continuing consecutively through the opening movement to a clean paragraph boundary. The extract has been verified as 50 manuscript pages in standard submission format.

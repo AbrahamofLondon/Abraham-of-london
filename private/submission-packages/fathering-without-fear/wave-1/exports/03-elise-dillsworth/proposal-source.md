@@ -17,7 +17,7 @@ A compressed literary memoir about fatherhood, inheritance, faith, and the cost 
 
 Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke fought for him and did not survive the cost. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
 
-When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
+When his son was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
 The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
@@ -90,7 +90,7 @@ After the MBA, Abraham returns to Nigeria to bury his father. Grief brings him b
 
 The marriage brings fatherhood, but fatherhood does not begin inside a home. An allegation is made. Abraham is arrested. The case does not proceed. The consequences in family life do. Fatherhood becomes something practised through distance, permission, and time measured by others.
 
-What follows are years of distance, waiting, and supervised contact rooms. Abraham sees his son Damisi in rooms with supervisors, time limits, and files that record that a visit took place but cannot record what happened inside it. A boy corrects his father's Yoruba. A boy says "I am not your bro — I am your son." A boy plays number 7. Abraham's task in those rooms is to love him without making the love performative, and to let the child remain a child.
+What follows are years of distance, waiting, and supervised contact rooms. Abraham sees his son in rooms with supervisors, time limits, and files that record that a visit took place but cannot record what happened inside it. A boy corrects his father's Yoruba. A boy says "I am not your bro — I am your son." A boy plays number 7. Abraham's task in those rooms is to love him without making the love performative, and to let the child remain a child.
 
 The book does not narrate the legal process in detail. It does not name the other parties. It holds the institutional pressure as weather — something Abraham moved through rather than something he prosecutes on the page.
 
@@ -98,7 +98,7 @@ Between the institutional-fight chapters and the resolution movement, "The Avail
 
 Then "The Version in His Head" shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, socialises, dates, builds community. A relationship tests his fatherhood commitment in the most ordinary way possible: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. His son is in London. So he stays.
 
-Then the Damisi chapter renders the boy entirely as a child — through football, swimming, vocabulary precision, toy-car races, and a sentence: "I am not your bro. I am your son."
+Then Chapter 22 renders the boy entirely as a child — through football, swimming, vocabulary precision, toy-car races, and a sentence: "I am not your bro. I am your son."
 
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
@@ -108,4 +108,4 @@ The book closes in an ordinary room, at a table, with a laptop, papers, and the 
 
 ## Sample Pages
 
-The complete manuscript is available on request. For initial submission, a calibrated first-50-pages extract is available, beginning with the Hounslow Call and continuing consecutively through the opening movement to a clean paragraph boundary. The extract has been verified by rendered DOCX page count rather than estimated word count.
+The complete manuscript is available on request. For initial submission, a first-50-pages extract is available, beginning with the Hounslow Call and continuing consecutively through the opening movement to a clean paragraph boundary. The extract has been verified as 50 manuscript pages in standard submission format.

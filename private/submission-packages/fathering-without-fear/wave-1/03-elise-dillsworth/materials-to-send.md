@@ -85,9 +85,9 @@ Include the full chapter outline from `wave-1/02-kate-evans-pfd/materials-to-sen
 
 ---
 
-#### Section 4: Writing Sample (30 rendered pages)
+#### Section 4: Writing Sample (30 manuscript pages)
 
-Use the calibrated 30-page sample:
+Use the verified 30-page sample:
 
 `wave-1/exports/03-elise-dillsworth/Fathering-Without-Fear-30-Page-Sample-Elise-Dillsworth.docx`
 
@@ -95,7 +95,7 @@ Source Markdown:
 
 `wave-1/exports/03-elise-dillsworth/30-page-sample-source.md`
 
-The sample begins at Chapter 1 and stops at a clean paragraph boundary. It has been verified as 30 rendered manuscript pages. Do not substitute the earlier non-consecutive chapter selection; Dillsworth requested a page sample, and the calibrated export is now the controlling file.
+The sample begins at Chapter 1 and stops at a clean paragraph boundary. It has been verified as 30 manuscript pages in standard submission format. Do not substitute the earlier non-consecutive chapter selection; Dillsworth requested a page sample, and the verified export is now the controlling file.
 
 ---
 

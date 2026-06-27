@@ -31,11 +31,11 @@ Enter: **Memoir / Narrative Nonfiction**
 Enter: **49,000**
 
 ### Field: First 50 Pages (upload or paste)
-Use the calibrated first-50-pages extract. It has been verified as 50 rendered manuscript pages in standard submission format.
+Use the verified first-50-pages extract. It has been checked as 50 manuscript pages in standard submission format.
 
 **Paste source:** `wave-1/exports/06-sarah-levitt-aevitas/sample-text-instructions.md`
 
-**DOCX source if the form allows upload:** use the calibrated first-50 DOCX from the current package or Nicola export as the formatting model, not a fresh word-count estimate.
+**DOCX source if the form allows upload:** use the verified first-50 DOCX from the current package or Nicola export as the formatting model, not a fresh word-count estimate.
 
 The extract begins at Chapter 1 and stops at a clean paragraph boundary. Do not shorten it back to Chapters 1–6; that old estimate underfilled the sample.
 
@@ -57,7 +57,7 @@ If the form requires paste: paste clean text; ensure chapter headings are clearl
 
 - [ ] Query letter ready to paste (from `personalised-query.md`)
 - [ ] Author bio ready to paste
-- [ ] 50-page manuscript extract prepared from the calibrated paste block/export
+- [ ] 50-page manuscript extract prepared from the verified paste block/export
 - [ ] Extract is clean: no tracked changes, no comments
 - [ ] Sarah Levitt is selected in the agent dropdown on the form
 - [ ] Submission confirmation is saved or screenshotted

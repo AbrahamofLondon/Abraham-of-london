@@ -26,7 +26,7 @@ Aevitas Creative Management is one of the leading US literary agencies, with str
 
 If Levitt responds or requests more:
 
-1. **The formal architecture** — not a memoir in the confessional mode; 24 pressure-chamber chapters, each carrying a single weight; the structure was chosen, not inherited from the events
+1. **The formal architecture** — not a memoir in the confessional mode; 25 pressure-chamber chapters, each carrying a single weight; the structure was chosen, not inherited from the events
 2. **The "plus" elements** — what the personal story opens onto: the ancestral Isua lineage as colonial and post-colonial history; the Iyalode figure as a study in how spiritual knowledge is transmitted across generations; the contact rooms as a study of what institutional structures do to fathers
 3. **The cultural significance** — no book currently occupies the position of a Black British father writing about fatherhood, ancestral inheritance, and institutional endurance with literary seriousness. This is a gap, not a crowded category.
 4. **The Psalm 27:10 through-line** — "When my mother and father forsake me, then the Lord will take me up." This verse runs through the book from the father's prayer in Lagos to the narrator's fatherhood in London. It is the book's theological spine, understood not as doctrine but as inheritance.

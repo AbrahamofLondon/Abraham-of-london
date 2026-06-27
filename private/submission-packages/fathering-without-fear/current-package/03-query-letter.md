@@ -1,5 +1,8 @@
 # Query Letter — Fathering Without Fear
 
+> INTERNAL REUSABLE TEMPLATE — DO NOT SEND AS-IS.
+> Use only as a base for personalised agent submissions.
+
 Dear [Agent Name],
 
 I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 49,000 words. [Specific reason for querying this agent.]

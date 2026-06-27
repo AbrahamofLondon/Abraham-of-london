@@ -30,7 +30,7 @@
 
 ## Manuscript Extract — Pages 1–50
 
-Use the calibrated first-50-pages export:
+Use the verified first-50-pages export:
 
 `wave-1/exports/01-nicola-chang-dha/Fathering-Without-Fear-First-50-Pages-Nicola-Chang.docx`
 
@@ -38,7 +38,7 @@ Source:
 
 `wave-1/exports/01-nicola-chang-dha/first-50-pages-source.md`
 
-The file has been verified as 50 rendered manuscript pages in standard submission format. Do not rebuild from the old Chapters 1–6 estimate; that version underfilled the sample.
+The file has been verified as 50 manuscript pages in standard submission format. Do not rebuild from the old Chapters 1–6 estimate; that version underfilled the sample.
 
 ---
 

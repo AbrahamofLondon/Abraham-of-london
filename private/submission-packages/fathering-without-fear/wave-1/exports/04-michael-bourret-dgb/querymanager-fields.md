@@ -64,7 +64,7 @@ Abraham leaves Lagos for London under his father's prayer from Psalm 27. He buri
 
 Between those years, one chapter shows Abraham rebuilding ordinary adult life: dancing, socialising, and testing whether he can remain present when someone he is close to suggests he leave London for work. He does not leave. His son is in London. So he stays.
 
-The book closes with Damisi rendered wholly as a child — through football, swimming, vocabulary, and a sentence: "I am not your bro. I am your son."
+The book closes with his son rendered wholly as a child — through football, swimming, vocabulary, and a sentence: "I am not your bro. I am your son."
 
 Fathering Without Fear is approximately 49,000 words across twenty-five chapters. It is a compressed literary memoir about inheritance, faith, and the cost of remaining present.
 

@@ -30,7 +30,7 @@ Chapter 17 marks the beginning of fatherhood. Abraham learns he is going to be a
 
 ## Movement Three: The Contact Room (Chapters 18–19)
 
-The book's middle section takes place largely inside supervised contact rooms. Abraham sees his son Damisi under institutional arrangements — rooms with supervisors, time limits, toys that belong to the institution, and files that record that a visit occurred but cannot record what happened inside it.
+The book's middle section takes place largely inside supervised contact rooms. Abraham sees his son under institutional arrangements — rooms with supervisors, time limits, toys that belong to the institution, and files that record that a visit occurred but cannot record what happened inside it.
 
 Chapter 18 renders the contact room as a physical and emotional space. Abraham learns to calibrate every gesture — how to kneel to a child's eye level, how to respond to a whispered moment without making it visible to the room, how to say goodbye in a way that holds together long enough for the child to leave before it falls apart.
 
@@ -40,9 +40,9 @@ Chapter 19 covers seven years. Not as chronology but as duration — the accumul
 
 Chapter 20 — "The Available Tools" — is the restored bridge that fills the gap between institutional endurance and adult dislocation. Hunger, rent pressure, spiritual silence, work exhaustion, nightclubs, and the return of desire become part of a narrowed life in which Abraham survives with what remains available. The chapter does not present nightlife as collapse or dating as validation. It shows a disciplined man improvising under pressure, with tools that can keep him alive but cannot teach him how to love from an uninjured place.
 
-Chapter 21 — "The Version in His Head" — shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, networks, dates, builds community. He misreads proximity as providence and chooses at the level of his own wound. The chapter's centre is the Damisi red line: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. Fatherhood is tested not in a courtroom but in an ordinary conversation about practicality.
+Chapter 21 — "The Version in His Head" — shows Abraham trying to rebuild ordinary adult life alongside the pressure. He dances, networks, dates, builds community. He misreads proximity as providence and chooses at the level of his own wound. The chapter's centre is the fatherhood red line: when Elena suggests he could move city or country for work instead of staying in London for his son, Abraham ends the conversation. He does not call back. Fatherhood is tested not in a courtroom but in an ordinary conversation about practicality.
 
-Chapter 22 is the Damisi chapter. Damisi is rendered entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument. Damisi remains Damisi.
+Chapter 22 renders his son entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument.
 
 ## Movement Five: Love, Devotion, and the Final Room (Chapters 23–25)
 
