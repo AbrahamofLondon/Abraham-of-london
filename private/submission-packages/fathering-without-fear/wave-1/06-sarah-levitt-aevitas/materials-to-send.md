@@ -31,33 +31,13 @@ Enter: **Memoir / Narrative Nonfiction**
 Enter: **49,000**
 
 ### Field: First 50 Pages (upload or paste)
-The first 50 pages of *Fathering Without Fear* span approximately Chapters 1–6.
+Use the calibrated first-50-pages extract. It has been verified as 50 rendered manuscript pages in standard submission format.
 
-**Chapters to include:**
+**Paste source:** `wave-1/exports/06-sarah-levitt-aevitas/sample-text-instructions.md`
 
-| Chapter | Title | Word Count |
-| :------ | :---- | ---------: |
-| Ch.1 | Hounslow Call | 1,541 |
-| Ch.2 | Isua to Agege | 976 |
-| Ch.3 | The Boy Who Was Already Old | 1,327 |
-| Ch.4 | A Hearing Date | 1,227 |
-| Ch.5 | Jumoke | 1,380 |
-| Ch.6 | The Fire and the Deal | 2,506 |
-| **Total** | | **~8,957 words** |
+**DOCX source if the form allows upload:** use the calibrated first-50 DOCX from the current package or Nicola export as the formatting model, not a fresh word-count estimate.
 
-At 250 words per manuscript page, 50 pages = approximately 12,500 words. These six chapters come to approximately 8,957 words (~36 pages). To reach 50 pages, continue into Chapter 7 (The Name That Had to Be Powerful, 1,435 words) and Chapter 8 (The Spiritual Covering, 1,107 words), for a running total of approximately 11,499 words (~46 pages), or add part of Chapter 9 to reach the full 50 pages.
-
-**Recommended selection for this agent:**
-Include Chapters 1–8 and as much of Chapter 9 as needed to reach 50 pages. This gives Levitt:
-- The institutional hook (Ch.1)
-- The ancestral lineage (Chs.2–3)
-- The compression at the level of institutional brevity (Ch.4)
-- The first death (Ch.5)
-- The fire and spiritual inheritance (Ch.6)
-- The naming chapter (Ch.7)
-- Iyalode — the deepest ancestral figure (Ch.8)
-
-This selection demonstrates the full range of the "memoir plus" structure: personal story, ancestral history, spiritual inquiry, institutional encounter — all before the end of page 50.
+The extract begins at Chapter 1 and stops at a clean paragraph boundary. Do not shorten it back to Chapters 1–6; that old estimate underfilled the sample.
 
 **Format for upload:**
 If the form allows file upload: export from `01-clean-manuscript.md` as a clean .docx or .pdf.
@@ -77,7 +57,7 @@ If the form requires paste: paste clean text; ensure chapter headings are clearl
 
 - [ ] Query letter ready to paste (from `personalised-query.md`)
 - [ ] Author bio ready to paste
-- [ ] 50-page manuscript extract prepared — Ch.1 through approximately Ch.9 opening
+- [ ] 50-page manuscript extract prepared from the calibrated paste block/export
 - [ ] Extract is clean: no tracked changes, no comments
 - [ ] Sarah Levitt is selected in the agent dropdown on the form
 - [ ] Submission confirmation is saved or screenshotted

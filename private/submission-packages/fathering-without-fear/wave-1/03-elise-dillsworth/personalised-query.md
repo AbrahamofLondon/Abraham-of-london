@@ -9,7 +9,7 @@
 
 Dear Elise Dillsworth,
 
-I'm writing to you because your work as a commissioning editor at Virago and as co-founder of the Diversity in Publishing Network signals a particular sensitivity to the kind of writing this memoir represents — work that is international in arc, serious in form, and grounded in lives that British publishing has historically underrepresented. *Fathering Without Fear* traces a Nigerian-British family from an ancestral tailor in Isua to a courtroom in London across four generations, and it does so in compressed, literary prose that refuses both the memoir-as-grievance and the memoir-as-testimony. Your stated interest in memoir, autobiography, and international writing made you one of the first agents I wanted to approach.
+I'm writing to you because your work as a commissioning editor at Virago, your role in the Diversity in Publishing Network, and your stated interest in memoir and international writing all point toward the kind of book this is. *Fathering Without Fear* traces a Nigerian-British family from an ancestral tailor in Isua to a father sitting in a London room waiting for a court call. It is written in compressed prose and keeps the legal material in the background, where it belongs. The subject is fatherhood, inheritance, faith, and what it costs not to disappear.
 
 I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 49,000 words.
 

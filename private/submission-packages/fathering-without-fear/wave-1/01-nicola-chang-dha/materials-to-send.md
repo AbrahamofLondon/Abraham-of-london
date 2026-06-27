@@ -33,7 +33,9 @@
 ### Attachment 2: First 50 Pages
 
 **Filename:** `Fathering-Without-Fear_First50Pages_AbrahamofLondon.docx`
-**Source:** `01-clean-manuscript.md` or direct draft files; extract Chapters 1 through the point at which page 50 falls (~12,500 words at 250 words per page)
+**Source:** `wave-1/exports/01-nicola-chang-dha/first-50-pages-source.md`
+**Verified export:** `wave-1/exports/01-nicola-chang-dha/Fathering-Without-Fear-First-50-Pages-Nicola-Chang.docx`
+**Verified rendered length:** 50 manuscript pages after the page-count calibration pass.
 **Format requirements (strict — DHA enforces):**
 - Word .docx only — no PDF
 - 12pt Times New Roman or similar serif font
@@ -61,6 +63,7 @@
 
 - [ ] Two attachments prepared and named correctly
 - [ ] Both files open without errors in Word
+- [ ] First-50 DOCX remains the verified calibrated export; do not rebuild from a word-count estimate
 - [ ] Email body covering note is three sentences maximum
 - [ ] Subject line is exactly: **Fathering Without Fear — Abraham of London — Query**
 - [ ] No PDF files attached

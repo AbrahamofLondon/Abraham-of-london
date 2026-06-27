@@ -9,25 +9,25 @@
 
 ## Kate Evans — Peters Fraser & Dunlop (UK)
 
-I am seeking representation for *Fathering Without Fear*, and I'm querying you because of the way you've described your nonfiction interests: writing that says something about how we live, from strong narrative voices to the extraordinary texture of personal experience. This memoir carries exactly that kind of weight — not a thesis about fatherhood, but the specific grain of a life in which inheritance, faith, and institutional pressure converge in a single man's history. Your openness to both the passionate manifesto and the singular personal story made you the right agent to approach first among PFD's list.
+I am seeking representation for *Fathering Without Fear*, and I am querying you because of the way you describe nonfiction: writing that says something about how we live, carried by strong narrative voices and the texture of personal experience. This memoir is not a thesis about fatherhood. It is the record of one life in which inheritance, faith, and institutional pressure meet in practical decisions: staying on a call, taking a train to a contact room, refusing to leave the city where a child lives. That emphasis on lived texture is why I am approaching you first at PFD.
 
 ---
 
 ## Nicola Chang — David Higham Associates (UK)
 
-I am writing because your stated touchstones — Janet Malcolm's moral seriousness, Annie Ernaux's compression, work that navigates the boundary between fiction and nonfiction — describe the aesthetic this manuscript aims for. *Fathering Without Fear* is a memoir that moves with the precision of literary fiction: short chapters, deliberate withholding, a commitment to rendering rather than explaining. Your interest in narrative that approaches power, class, and culture through a unique and fearless voice is exactly the appetite I hope this book meets.
+I am writing because your stated touchstones — Janet Malcolm's moral seriousness, Annie Ernaux's compression, work at the boundary between fiction and nonfiction — name the kind of attention this manuscript asks for. *Fathering Without Fear* is a memoir built from short chapters, deliberate withholding, and scenes that render pressure rather than explain it. Your interest in narrative that approaches power, class, and culture through a distinct voice is the reason I am sending this to you first at DHA.
 
 ---
 
 ## Elise Dillsworth — Elise Dillsworth Agency (UK)
 
-I'm writing to you because your work as a commissioning editor at Virago and as co-founder of the Diversity in Publishing Network signals a particular sensitivity to the kind of writing this memoir represents — work that is international in arc, serious in form, and grounded in lives that British publishing has historically underrepresented. *Fathering Without Fear* traces a Nigerian-British family from an ancestral tailor in Isua to a courtroom in London across four generations, and it does so in compressed, literary prose that refuses both the memoir-as-grievance and the memoir-as-testimony. Your stated interest in memoir, autobiography, and international writing made you one of the first agents I wanted to approach.
+I'm writing to you because your work as a commissioning editor at Virago, your role in the Diversity in Publishing Network, and your stated interest in memoir and international writing all point toward the kind of book this is. *Fathering Without Fear* traces a Nigerian-British family from an ancestral tailor in Isua to a father sitting in a London room waiting for a court call. It is written in compressed prose and keeps the legal material in the background, where it belongs. The subject is fatherhood, inheritance, faith, and what it costs not to disappear.
 
 ---
 
 ## Michael Bourret — Dystel, Goderich & Bourret (US)
 
-I'm querying you because of your explicit interest in BIPOC literature and your appetite for projects that break the mold — both of which describe *Fathering Without Fear*. This memoir does not follow the expected arc of the immigrant success story or the legal injustice narrative; it follows the compression of a lineage across four generations, ending with a father who has refused to disappear and is now reckoning with what he passes on. Your track record with narrative nonfiction and memoir that takes unexpected angles, combined with your commitment to BIPOC authorship, makes you an ideal first American agent to approach.
+I'm querying you because of your stated interest in BIPOC literature and work that breaks the mold. *Fathering Without Fear* does not follow the expected immigrant-success arc or the institutional grievance narrative. It moves through four generations of a Nigerian-British family and arrives at a father trying to stay present under pressure without turning his child into evidence. Your interest in memoir and narrative nonfiction that takes an unexpected angle is the reason I am approaching you.
 
 ---
 
@@ -51,7 +51,7 @@ I'm querying you because you've described seeking narrative nonfiction that give
 
 ## Sarah Levitt — Aevitas Creative Management (US)
 
-I'm writing to you because of your formulation of "memoir plus" — the idea that the most interesting nonfiction is not quite memoir, not quite straight narrative, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is memoir plus inheritance study plus spiritual reckoning plus institutional critique, all compressed into 25 chapters that refuse to let any single register dominate. Your track record with culturally significant nonfiction and your openness to strong, underrepresented voices convinced me that Aevitas — and specifically your list — is the right home for this manuscript in the US market.
+I'm writing to you because of your formulation of "memoir plus" — nonfiction that is not quite memoir, not quite straight narrative, but fuses a personal story with a larger architecture. *Fathering Without Fear* is a memoir about fatherhood that carries an ancestral line, a private faith, and years of institutional pressure without letting any one register take over the book. Your interest in this kind of hybrid nonfiction is the reason I am approaching you.
 
 ---
 

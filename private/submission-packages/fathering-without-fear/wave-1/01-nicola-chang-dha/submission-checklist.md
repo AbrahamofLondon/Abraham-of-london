@@ -30,16 +30,15 @@
 
 ## Manuscript Extract — Pages 1–50
 
-The first 50 pages of *Fathering Without Fear* span approximately Chapters 1–6 (Hounslow Call through The Fire and the Deal). This includes:
+Use the calibrated first-50-pages export:
 
-- Ch.1 Hounslow Call (1,541 words)
-- Ch.2 Isua to Agege (976 words)
-- Ch.3 The Boy Who Was Already Old (1,327 words)
-- Ch.4 A Hearing Date (1,227 words)
-- Ch.5 Jumoke (1,380 words)
-- Ch.6 The Fire and the Deal (2,506 words — include as far as page 50 runs)
+`wave-1/exports/01-nicola-chang-dha/Fathering-Without-Fear-First-50-Pages-Nicola-Chang.docx`
 
-Total approximate: ~8,957 words for Chs.1–6. At ~250 words per manuscript page, 50 pages ≈ 12,500 words. Adjust extraction to ensure exactly 50 pages are included, stopping mid-chapter if necessary with a clean sentence break.
+Source:
+
+`wave-1/exports/01-nicola-chang-dha/first-50-pages-source.md`
+
+The file has been verified as 50 rendered manuscript pages in standard submission format. Do not rebuild from the old Chapters 1–6 estimate; that version underfilled the sample.
 
 ---
 

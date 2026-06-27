@@ -360,8 +360,6 @@ This did not make the loneliness disappear. It did not turn Akure into home. It 
 
 That week in April 1990, after the fellowship had been postponed more than once, Abraham sat in the Ali family's living room and listened as Jesus was preached. Justice and Mrs Ali were Mary's landlords. The fellowship was in their home, with the Ali family and others gathered, people sitting on sofas while the message moved through the room. What was said resonated with him. At the end, when they asked whether anyone wanted to make a commitment, he said yes.
 
-**Calibration note:** This paste block rendered to 20 manuscript pages when verified as 12pt Times New Roman, double-spaced, with 1-inch margins.
-
 ---
 
 ## Notes on This Version

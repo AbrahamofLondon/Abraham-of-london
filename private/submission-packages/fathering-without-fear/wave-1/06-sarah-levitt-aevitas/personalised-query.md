@@ -10,7 +10,7 @@
 
 Dear Sarah Levitt,
 
-I'm writing to you because of your formulation of "memoir plus" — the idea that the most interesting nonfiction is not quite memoir, not quite straight narrative, but something that fuses a personal story with a larger architecture. *Fathering Without Fear* is memoir plus inheritance study plus spiritual reckoning plus institutional critique, all compressed into 25 chapters that refuse to let any single register dominate. Your track record with culturally significant nonfiction and your openness to strong, underrepresented voices convinced me that Aevitas — and specifically your list — is the right home for this manuscript in the US market.
+I'm writing to you because of your formulation of "memoir plus" — nonfiction that is not quite memoir, not quite straight narrative, but fuses a personal story with a larger architecture. *Fathering Without Fear* is a memoir about fatherhood that carries an ancestral line, a private faith, and years of institutional pressure without letting any one register take over the book. Your interest in this kind of hybrid nonfiction is the reason I am approaching you.
 
 *Fathering Without Fear* is a compressed literary memoir of approximately 49,000 words.
 
@@ -35,7 +35,7 @@ Abraham Adaramola
 
 ## Author Bio (for form bio field — 150 words)
 
-Abraham Adaramola, writing as Abraham of London, is a Nigerian-British writer based in London. He was born in Lagos and raised in south-west Nigeria before moving to the UK, where he has lived for more than two decades. *Fathering Without Fear* is his debut memoir — a study in inheritance, faith, and fatherhood across four generations of a Nigerian-British family, written in 24 compressed chapters that move from an ancestral tailor in Isua to a father insisting on his son's name in London. The complete manuscript is available on request.
+Abraham Adaramola, writing as Abraham of London, is a Nigerian-British writer based in London. He was born in Lagos and raised in south-west Nigeria before moving to the UK, where he has lived for more than two decades. *Fathering Without Fear* is his debut memoir — a study in inheritance, faith, and fatherhood across four generations of a Nigerian-British family, written in 25 compressed chapters that move from an ancestral tailor in Isua to a father insisting on his son's name in London. The complete manuscript is available on request.
 
 ---
 

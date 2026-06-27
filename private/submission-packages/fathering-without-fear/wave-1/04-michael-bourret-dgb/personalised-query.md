@@ -10,7 +10,7 @@
 
 Dear Michael Bourret,
 
-I'm querying you because of your explicit interest in BIPOC literature and your appetite for projects that break the mold — both of which describe *Fathering Without Fear*. This memoir does not follow the expected arc of the immigrant success story or the institutional grievance narrative; it follows the compression of a lineage across four generations, ending with a father who has refused to disappear and is now reckoning with what he passes on. Your track record with narrative nonfiction and memoir that takes unexpected angles, combined with your commitment to BIPOC authorship, makes you an ideal first American agent to approach.
+I'm querying you because of your stated interest in BIPOC literature and work that breaks the mold. *Fathering Without Fear* does not follow the expected immigrant-success arc or the institutional grievance narrative. It moves through four generations of a Nigerian-British family and arrives at a father trying to stay present under pressure without turning his child into evidence. Your interest in memoir and narrative nonfiction that takes an unexpected angle is the reason I am approaching you.
 
 *Fathering Without Fear* is a compressed literary memoir of approximately 49,000 words.
 
@@ -37,7 +37,7 @@ Abraham Adaramola
 
 Abraham Adaramola, writing as Abraham of London, is a Nigerian-British writer. He was born in Lagos, raised across the south-west of Nigeria, and has lived in London for more than two decades. *Fathering Without Fear* is his debut memoir.
 
-The book draws on his own family's history — a lineage that begins with a tailor in Isua, in Ondo state, and traces four generations to the author's present life in London. The memoir navigates fatherhood, faith, inheritance, diaspora, and the institutional pressures on a Black British father — written with the formal discipline and deliberate compression of a writer who has lived with the material for a long time before committing it to the page.
+The book draws on his own family's history — a lineage that begins with a tailor in Isua, in Ondo state, and traces four generations to the author's present life in London. The memoir moves through fatherhood, faith, inheritance, diaspora, and the institutional pressures on a Black British father, in short chapters shaped by restraint rather than argument.
 
 He is querying you directly, without representation. The complete manuscript is available on request.
 

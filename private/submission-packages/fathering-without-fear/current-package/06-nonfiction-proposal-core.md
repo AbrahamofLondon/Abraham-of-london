@@ -27,19 +27,19 @@ This is not a legal memoir, a parenting guide, or a grievance text. It is a book
 
 ## Structure
 
-The book is built in five movements:
+The book is built in six movements:
 
-**Movement One — Inheritance (Chapters 1–10):** Opens with a phone call in Hounslow, then moves backward into the ancestral world — the tailor in Isua who sewed for a British missionary, the grandmother Iyalode who carried both Yoruba spiritual knowledge and Christian faith, the father David Senior who became a parent at fifteen.
+**Movement One — Inheritance (Chapters 1–5):** Opens with a phone call in Hounslow, then moves backward into the ancestral world — the tailor in Isua who sewed for a British missionary, the grandmother Iyalode who carried both Yoruba spiritual knowledge and Christian faith, the child named Abraham, and Jumoke's death.
 
-**Movement Two — Childhood Marking (Chapters 6–10):** The fire and the deal, the name that had to be powerful, the spiritual covering, the year without home, the father at fifteen, leaving Lagos under Psalm 27:10.
+**Movement Two — Childhood Marking and Departure (Chapters 6–11):** The year without home, the fire and the deal, the name that had to be powerful, the spiritual covering, the father at fifteen, and leaving Lagos under Psalm 27:10.
 
-**Movement Three — Loss and Marriage (Chapters 11–16):** A Facebook post in grief, a quick marriage, a brother missing from the wedding, a sister who fought and died, fatherhood beginning outside a home.
+**Movement Three — Loss and Marriage (Chapters 12–17):** A Facebook post in grief, a quick marriage, a brother missing from the wedding, a sister who fought and died, fatherhood beginning outside a home.
 
-**Movement Four — Fatherhood Under Constraint (Chapters 17–18):** The contact room, seven years of journeying from the Northern line to Catford, the discipline of remaining present.
+**Movement Four — Fatherhood Under Constraint (Chapters 18–19):** The contact room, seven years of travelling from the Northern line to Catford, the discipline of remaining present.
 
-**Movement Four — Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–22):** The available tools chapter, the restored relationship chapter, and the child rendered entirely as a boy.
+**Movement Five — Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–22):** The available tools chapter, the restored relationship chapter, and the child rendered entirely as a boy.
 
-**Movement Five — Love, Devotion, and the Final Room (Chapters 23–25):** The theological reckoning, the father's devotion, the final room.
+**Movement Six — Love, Devotion, and the Final Room (Chapters 23–25):** The theological reckoning, the father's devotion, the final room.
 
 ---
 
@@ -108,4 +108,4 @@ The book closes in an ordinary room, at a table, with a laptop, papers, and the 
 
 ## Sample Pages
 
-The complete manuscript is available on request. For initial submission, the first 50 pages (Chapters 1–6) are provided, covering the Hounslow Call through The Fire and the Deal — the opening movement that establishes the book's formal compression, its ancestral lineage, and the spiritual contract that governs the narrator's life.
+The complete manuscript is available on request. For initial submission, a calibrated first-50-pages extract is available, beginning with the Hounslow Call and continuing consecutively through the opening movement to a clean paragraph boundary. The extract has been verified by rendered DOCX page count rather than estimated word count.

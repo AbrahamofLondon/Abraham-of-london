@@ -9,7 +9,7 @@
 
 Dear Nicola Chang,
 
-I am writing because your stated touchstones — Janet Malcolm's moral seriousness, Annie Ernaux's compression, work that navigates the boundary between fiction and nonfiction — describe the aesthetic this manuscript aims for. *Fathering Without Fear* is a memoir that moves with the precision of literary fiction: short chapters, deliberate withholding, a commitment to rendering rather than explaining. Your interest in narrative that approaches power, class, and culture through a unique and fearless voice is exactly the appetite I hope this book meets.
+I am writing because your stated touchstones — Janet Malcolm's moral seriousness, Annie Ernaux's compression, work at the boundary between fiction and nonfiction — name the kind of attention this manuscript asks for. *Fathering Without Fear* is a memoir built from short chapters, deliberate withholding, and scenes that render pressure rather than explain it. Your interest in narrative that approaches power, class, and culture through a distinct voice is the reason I am sending this to you first at DHA.
 
 I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 49,000 words.
 

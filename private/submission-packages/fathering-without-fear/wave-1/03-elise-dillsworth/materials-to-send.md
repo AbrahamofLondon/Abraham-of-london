@@ -85,22 +85,17 @@ Include the full chapter outline from `wave-1/02-kate-evans-pfd/materials-to-sen
 
 ---
 
-#### Section 4: Writing Sample (approximately 30 pages / 7,500–8,000 words)
+#### Section 4: Writing Sample (30 rendered pages)
 
-**Recommended chapters for this agent:**
+Use the calibrated 30-page sample:
 
-1. **Ch.1 — Hounslow Call** (1,541 words) — the opening hook; establishes voice and compression
-2. **Ch.2 — Isua to Agege** (976 words) — the ancestral lineage; the international arc begins here
-3. **Ch.3 — The Boy Who Was Already Old** (1,327 words) — naming inheritance; the ancestral tailor
-4. **Ch.6 — The Fire and the Deal** (2,506 words) — the book's strongest early chapter; survival, prayer, fear, and faith in their rawest form
-5. **Ch.10 — Leaving Lagos** (1,660 words) — the crossing to London; Psalm 27 prayer
+`wave-1/exports/03-elise-dillsworth/Fathering-Without-Fear-30-Page-Sample-Elise-Dillsworth.docx`
 
-Total for these five chapters: approximately 8,010 words (~32 pages). This sample is slightly over 30 pages — trim to exactly 30 if a strict page limit applies; otherwise this is the optimal selection for Dillsworth.
+Source Markdown:
 
-**Why this selection for Dillsworth specifically:**
-- Chs.1–3 establish the international arc she specifically values
-- Ch.6 (the fire) is the book's most viscerally rendered chapter — it demonstrates literary prose quality, not just interesting content
-- Ch.10 (Leaving Lagos) closes the selection at the point of departure — from Lagos to London — which directly illustrates the diaspora arc she works with
+`wave-1/exports/03-elise-dillsworth/30-page-sample-source.md`
+
+The sample begins at Chapter 1 and stops at a clean paragraph boundary. It has been verified as 30 rendered manuscript pages. Do not substitute the earlier non-consecutive chapter selection; Dillsworth requested a page sample, and the calibrated export is now the controlling file.
 
 ---
 

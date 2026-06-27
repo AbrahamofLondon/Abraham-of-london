@@ -1,4 +1,4 @@
-# Aevitas First 50 Pages Paste Block - Sarah Levitt
+# Aevitas First 50 Pages Paste Block — Sarah Levitt
 
 ## FIELD: First 50 Pages
 
@@ -757,5 +757,3 @@ That knowledge belonged to a later Abraham, one who had not yet been formed by w
 # Chapter 13 — Married by December
 
 When Abraham returned to Lagos after the burial, he was in a kind of limbo.
-
-**Calibration note:** This paste block rendered to 50 manuscript pages when verified as 12pt Times New Roman, double-spaced, with 1-inch margins.

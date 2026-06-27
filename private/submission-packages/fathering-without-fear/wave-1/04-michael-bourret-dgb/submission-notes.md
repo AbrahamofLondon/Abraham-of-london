@@ -6,7 +6,7 @@
 
 Bourret has stated explicitly that he has "a special interest in BIPOC literature and writers" and seeks "offbeat projects that break the mold." Both statements apply directly to this manuscript. DGB is one of the leading US literary agencies with a strong nonfiction track record, and Bourret personally has one of the most visible commitments to BIPOC authorship on the US agent list.
 
-The book's unconventional architecture — 24 short compressed chapters, an ancestral lineage as the opening movement, no linear cause-and-effect legal narrative — is exactly the kind of structural offbeat that Bourret's profile signals. Most memoir about fathers in family court is either polemical (the system is wrong) or confessional (here is what happened to me). *Fathering Without Fear* does neither. It is a study of inheritance. That is unusual enough to register.
+The book's unconventional architecture — 25 short compressed chapters, an ancestral lineage as the opening movement, no linear cause-and-effect legal narrative — is exactly the kind of structural offbeat that Bourret's profile signals. Most memoir about fathers in family court is either polemical (the system is wrong) or confessional (here is what happened to me). *Fathering Without Fear* does neither. It is a study of inheritance. That is unusual enough to register.
 
 DGB is also a strong US agency for UK authors — they have the transatlantic rights infrastructure to handle a book with dual UK/US market potential.
 
@@ -29,7 +29,7 @@ If Bourret responds or requests more material:
 1. **The four-generation structure** — this is not a standard memoir about the narrator; it is a study of what is transmitted
 2. **The BIPOC specificity** — Nigerian-British, not just "Black British"; the Ondo/Lagos origin is specific and different from the more commonly represented West African diaspora experiences in US publishing
 3. **The fatherhood gap** — there is no major US literary memoir currently occupying the position of a Black man writing about fatherhood under institutional pressure with literary seriousness. That position is open.
-4. **The cultural stakes** — inheritance, faith, naming, and the refusal to disappear: these are universal stakes made specific through one man's life
+4. **The cultural stakes** — inheritance, faith, naming, and the refusal to disappear: these are broad stakes made specific through one man's life
 
 ---
 
@@ -56,7 +56,7 @@ If Bourret responds or requests more material:
 
 This book should reach Michael Bourret as:
 
-> "A BIPOC literary memoir that breaks the standard form of immigrant narrative and legal grievance — tracing a Nigerian-British lineage across four generations to a father who refuses to disappear, written in 24 short, formally compressed chapters."
+> "A Nigerian-British literary memoir that breaks the standard form of immigrant narrative and legal grievance — tracing a family line across four generations to a father who refuses to disappear, written in 25 short, formally compressed chapters."
 
 Not as: a legal case study, a faith testimony, a social media–ready diversity narrative, or a campaign.
 
