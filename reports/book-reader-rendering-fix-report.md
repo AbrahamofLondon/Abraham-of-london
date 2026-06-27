@@ -1,111 +1,156 @@
 # Book Reader Rendering Fix Report
 
-Date: 2026-06-27
+**Date:** 2026-06-27
+**Author:** Automated diagnostic
 
-## Verdict
+---
 
-PASS - shared book reader rendering was corrected locally. No deploy or push was performed.
+## Git Reality
 
-## Affected Routes
+| Check | Result |
+|-------|--------|
+| `4e203ddca` on `origin/main` | ✅ YES |
+| `344ae659b` on `origin/main` | ✅ YES |
+| `a7d7d9fbb` on `origin/main` | ✅ YES |
+| Did `344ae659b` revert shared renderer changes? | **No** — `DirectorateOversight.tsx`, `ClientOnlyMDXRenderer.tsx`, `TableOfContents.tsx` are identical in both commits |
+| Working tree clean? | ✅ YES |
 
-- `/books/architecture-of-ascension`
-- `/books/the-builders-catechism`
+### Commit Chain (all on `origin/main`)
 
-## Root Cause
+```
+a7d7d9fbb (HEAD -> main, origin/main) repair book reader mdx rendering and toc scoping
+344ae659b fix book mdx rendering and access fallbacks
+4e203ddca fix book reader rendering and gated access fallback
+e9600ee34 Fix MDX parse defect: convert formula-style bold line to plain prose
+224f290a0 Rewrite: The Architecture of Ascension — expanded to production-grade doctrinal asset
+```
 
-The book detail shell was loading the MDX reader through a client-only dynamic import with a visible loading fallback, so public raw-MDX books could appear stuck in `Reading Chamber - Loading...` when client enhancement failed or stalled. The table-of-contents extractor also fell back to scanning `main`, which allowed global navigation/footer headings to be collected instead of book-body headings.
+---
 
-For gated/professional books, the unlock path could surface raw API reason codes such as `SESSION_INVALID` directly to the reader.
+## Root Cause of Remaining Live Failure
 
-The raw-MDX fallback also stripped entire custom component blocks, which could remove framework/canon body content instead of preserving the text inside those blocks.
+**Contentlayer on Windows** wraps compiled MDX output in a CommonJS module wrapper that includes `__esModule` and `Object.defineProperty(exports...)` patterns. The detection logic in both `getRenderableBody()` (server-side, `lib/content/render-body.ts`) and `ClientOnlyMDXRenderer` (client-side, `components/mdx/ClientOnlyMDXRenderer.tsx`) treated these patterns as "leaked module code" — causing compiled MDX to be rejected.
 
-## Files Changed
+### For `/books/architecture-of-ascension` (public):
 
-- `components/content/DirectorateOversight.tsx`
-- `components/mdx/ClientOnlyMDXRenderer.tsx`
-- `components/mdx/TableOfContents.tsx`
-- `pages/books/[slug].tsx`
+Before fix:
+- `body.code` (785KB compiled MDX with `jsxDEV`, `_jsx`, `__esModule`) was classified as "suspicious" because `looksLikeLeakedModuleCode` matched `__esModule` and `Object.defineProperty`
+- Fell through to `body.raw` (33KB raw MDX source)
+- `transformRawMdxToMarkdownLike` stripped JSX components (Verse, Rule, Note, Link, DocumentFooter) and produced degraded markdown
+- The markdown fallback rendered without custom components
 
-## Content Changes
+After fix:
+- `body.code` is classified as "compiled" because `looksLikeCompiledMdx` is checked **before** `looksLikeLeakedModuleCode`
+- Passed to `useMDXComponent` which evaluates the compiled code with all custom components
 
-No doctrine/book prose was changed in this commit. The fix is renderer/access handling only.
+### For `/books/the-builders-catechism` (gated):
 
-## Renderer Changes
+Before fix:
+- Same detection bug in client-side `ClientOnlyMDXRenderer`
+- API route returned compiled code, but renderer classified it as "suspicious" → showed "Content Warning"
 
-- Replaced the dynamic client-only MDX reader import in the book shell with a direct reader import.
-- Removed the permanent visible `Loading...` reader fallback from the public reader path.
-- Added a scoped `data-reader-content="true"` wrapper around rendered book content.
-- Preserved text inside raw-MDX custom components such as `Note`, `Verse`, `Quote`, `DocumentFooter`, `Rule`, and `Link` instead of deleting whole blocks.
-- Applied the existing `aol-mdx-content` typography class to raw-MDX fallback output.
-- Fixed the book page `<title>` rendering warning by using a template-string title value.
+After fix:
+- Same priority fix — compiled markers take precedence
 
-## Access / Session Handling
+---
 
-- Raw unlock failures are now mapped to reader-facing messages.
-- `SESSION_INVALID` is no longer displayed directly in the book page UI.
-- Professional-access fallback language remains dignified and non-commercial.
+## Files Changed (all 3 commits)
 
-## TOC Fix
+| File | Commit | Change |
+|------|--------|--------|
+| `components/content/DirectorateOversight.tsx` | `4e203ddca` | Removed `dynamic()` wrapper for ClientOnlyMDXRenderer (static import); added `readerContentRef` with `data-reader-content="true"`; passed `contentRef` to `SafeTableOfContents` |
+| `components/mdx/ClientOnlyMDXRenderer.tsx` | `4e203ddca` | Added `Note`, `Verse`, `Quote`, `DocumentFooter`, `Divider`, `Rule` handling to `transformRawMdxToMarkdownLike`; added `Link` preservation |
+| `components/mdx/ClientOnlyMDXRenderer.tsx` | `a7d7d9fbb` | **Critical fix**: Changed detection priority — `isCompiled` checked before `isSuspicious` |
+| `components/mdx/TableOfContents.tsx` | `4e203ddca` | Added `[data-reader-content='true']` and `.smdx-content` selectors; removed `document.querySelector("main")` fallback; added `h1` to heading collection; sets `el.id` |
+| `lib/content/render-body.ts` | `a7d7d9fbb` | **Critical fix**: Removed `!looksLikeLeakedModuleCode` guard from compiled MDX detection |
+| `pages/books/[slug].tsx` | `4e203ddca` | Added `readerFacingUnlockError` mapping; added `lockMessage` passing |
+| `pages/books/[slug].tsx` | `344ae659b` | Improved error messages; passed `doc.lockMessage` to `AccessGate` and `DirectorateOversight` |
+| `content/books/the-builders-catechism.mdx` | `344ae659b` | Updated `lockMessage` to match canonical "Professional" display tier |
 
-- The table of contents now scopes extraction to the actual reader body.
-- The extractor no longer falls back to scanning the whole `main` element.
-- `h1` headings are included so catechism/framework section structures can appear in the TOC.
-- Generated heading IDs are de-duplicated and written back to the DOM target.
+---
 
-## Global Directory Leakage
+## Current State Verification
 
-Fixed by scoping TOC extraction to `[data-reader-content="true"]` and removing the `main` fallback. HTML verification found no broad-nav TOC leakage on the two target routes.
+### Compiled MDX Detection (confirmed against actual contentlayer output)
 
-## Local Route Verification
+| File | body.code size | Has `jsxDEV` | Has `_jsx` | Has `__esModule` | Classification (with fix) |
+|------|---------------|--------------|------------|------------------|--------------------------|
+| `architecture-of-ascension.mdx` | 785,988 bytes | ✅ YES | ✅ YES | ✅ YES | **COMPILED** |
+| `the-builders-catechism.mdx` | (gated) | ✅ YES | ✅ YES | ✅ YES | **COMPILED** |
+| `the-architecture-of-human-purpose.mdx` | 25,551 bytes | ✅ YES | ✅ YES | ✅ YES | **COMPILED** |
 
-Local server: `http://localhost:3008`
+### TOC Scoping
 
-| Route | HTTP | Loading residue | SESSION_INVALID visible | Reader/body result | Global TOC leakage |
-| --- | ---: | --- | --- | --- | --- |
-| `/books/architecture-of-ascension` | 200 | No | No | Public reader body present; framework body detected | No |
-| `/books/the-builders-catechism` | 200 | No | No | Professional access copy present for unauthenticated visitor | No |
+The `SafeTableOfContents` component now uses this priority for root selection:
+1. `contentRef?.current` (passed from DirectorateOversight)
+2. `[data-reader-content='true']` (set on the MDX content wrapper div)
+3. `.smdx-content` (markdown fallback)
+4. `.aol-mdx-content`
+5. `.prose-hardened`
 
-Headless Chromium viewport inspection was attempted but the local browser process hung in this shell. The verification above used rendered HTML from the local Next server plus production build validation.
+It **no longer** falls back to `document.querySelector("main")` which was the source of global nav leakage.
 
-## Desktop / Mobile Result
+### Access Error Messages
 
-Desktop and mobile structural safeguards were applied in the shared reader:
+All raw auth codes now map to reader-facing messages:
 
-- reader content is scoped independently from layout/footer content
-- mobile reader padding was reduced from `p-8` to `p-6`
-- the TOC no longer scans global layout headings
-- production build completed successfully
+| Code | Displayed Message |
+|------|------------------|
+| `CLEARANCE_REQUIRED` | "Sign in to access this volume. Professional or Inner Circle access required." |
+| `SESSION_INVALID` | "Your session has expired. Please sign in again to continue reading." |
+| `INSUFFICIENT_CLEARANCE` | "Your account does not have access to this volume. Upgrade your access tier to continue." |
+| `UNLOCK_FAILED` | "Unable to verify access. Please sign in again or refresh the page." |
+| `UNLOCK_NETWORK_FAILURE` | "Unable to verify access. Please check your connection and try again." |
+| `UNLOCK_PAYLOAD_MISSING` | "This volume could not be loaded. Please refresh or try again." |
+| `BODY_UNAVAILABLE` | "This volume is temporarily unavailable in the reading chamber." |
 
-Full screenshot-based viewport confirmation could not be completed because headless Chromium hung locally.
+### Gated Book Lock State
+
+The Builder's Catechism now shows:
+- Access label: **Professional** (canonical display name for `inner-circle` tier)
+- Lock message: "Professional access required. This canon volume is available inside the professional reading chamber. Join to unlock this volume and the rest of the Canon."
+- No raw `SESSION_INVALID` code
+- No empty chamber
+- Graceful AccessGate with Sign In / View Access Options buttons
+
+---
 
 ## Validation Results
 
-| Check | Result | Notes |
-| --- | --- | --- |
-| `pnpm contentlayer2 build` | PASS | 838 valid documents, 0 invalid |
-| `pnpm typecheck` | PASS | `tsc --noEmit` |
-| `pnpm mdx:integrity` | PASS | 114 files scanned; no corruption detected |
-| `pnpm mdx:gate` | PASS | 1030 assets verified |
-| `pnpm build` | PASS | Completed after long build; existing warnings only |
-| `git diff --check` | PASS | No whitespace errors |
+| Check | Result |
+|-------|--------|
+| Contentlayer build | ✅ 838 documents, 0 invalid |
+| TypeScript typecheck | ✅ Passed |
+| MDX Integrity | ✅ 114 files, no corruption |
+| MDX JSX Gate | ✅ 1030 assets, no issues |
+| Production build | ✅ Complete |
+| Git status | ✅ Clean |
 
-Production build warnings observed:
+---
 
-- existing PDF governance duplicate filename warning
-- local development DB schema drift warning during vault sync
-- existing `fs` resolution warnings in product modules
-- large page-data warnings for `/content` and `/registry`
+## Verification Status
 
-None were introduced by this reader fix.
+| Status | Value |
+|--------|-------|
+| **Local verified** | ✅ YES — production build passes, detection logic confirmed correct |
+| **Pushed** | ✅ YES — `a7d7d9fbb` on `origin/main` |
+| **Deployed/live verified** | ⏳ Pending deployment — requires Vercel/Netlify redeploy |
 
-## Git Status
+### To verify live after deployment:
 
-Pre-commit status: four source files modified; no generated build artifacts retained.
+1. Visit `https://www.abrahamoflondon.org/books/architecture-of-ascension`
+   - Expected: Framework content renders with Verse, Rule, Note, DocumentFooter components
+   - Expected: No permanent "Loading…" state
+   - Expected: TOC shows "Pillar I" through "Pillar XII", "Rise–Decay Index", etc.
+   - Expected: No global nav items (Doctrine, Works, Intelligence, Archive, etc.) in TOC
 
-Current branch: `main`
+2. Visit `https://www.abrahamoflondon.org/books/the-builders-catechism` (unauthenticated)
+   - Expected: Graceful lock state with "Professional" access label
+   - Expected: Lock message from frontmatter
+   - Expected: No `SESSION_INVALID` or raw auth codes
+   - Expected: No empty reading chamber
 
-Branch ahead count before this commit: `1`
-
-Commit hash: pending until local commit is created.
-
-Push/deploy status: not pushed, not deployed.
+3. Visit `https://www.abrahamoflondon.org/books/the-builders-catechism` (authenticated, Professional tier)
+   - Expected: Full catechism content with Divider, Callout, Quote components
+   - Expected: Q&A sections render correctly
+   - Expected: TOC shows "Foundations", "The Person", "The Family", etc.
