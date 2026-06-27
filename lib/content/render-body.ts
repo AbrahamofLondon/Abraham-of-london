@@ -131,17 +131,17 @@ export function getRenderableBody(doc: any): RenderBodyResult {
   const legacyBodyCode = asString(doc?.bodyCode);
 
   // 1. Primary: compiled body.code
-  if (bodyCode && looksLikeCompiledMdx(bodyCode) && !looksLikeLeakedModuleCode(bodyCode)) {
+  // Contentlayer wraps compiled MDX in a CommonJS module wrapper that includes
+  // __esModule and Object.defineProperty(exports... patterns. These are NOT
+  // leaked module code — they are the legitimate compiled output. We detect
+  // compiled MDX by looking for JSX runtime markers first.
+  if (bodyCode && looksLikeCompiledMdx(bodyCode)) {
     diagnostics.source = "body.code";
     return { mode: "compiled", code: bodyCode, diagnostics };
   }
 
   // 2. Legacy: compiled bodyCode field
-  if (
-    legacyBodyCode &&
-    looksLikeCompiledMdx(legacyBodyCode) &&
-    !looksLikeLeakedModuleCode(legacyBodyCode)
-  ) {
+  if (legacyBodyCode && looksLikeCompiledMdx(legacyBodyCode)) {
     diagnostics.source = "bodyCode";
     diagnostics.usedFallback = true;
     return { mode: "compiled", code: legacyBodyCode, diagnostics };

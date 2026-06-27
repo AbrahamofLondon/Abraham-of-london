@@ -324,15 +324,15 @@ export default function ClientOnlyMDXRenderer({
     return <EmptyState />;
   }
 
-  const isSuspicious = looksLikeLeakedModuleCode(safeCode);
-  const isCompiled = !isSuspicious && looksLikeCompiledMdx(safeCode);
-  const isRawMdx = !isSuspicious && !isCompiled && looksLikeRawMdx(safeCode);
-  const isRaw = !isSuspicious && !isCompiled && !isRawMdx && looksLikeRawMarkdown(safeCode);
+  const isCompiled = looksLikeCompiledMdx(safeCode);
+  const isSuspicious = !isCompiled && looksLikeLeakedModuleCode(safeCode);
+  const isRawMdx = !isCompiled && !isSuspicious && looksLikeRawMdx(safeCode);
+  const isRaw = !isCompiled && !isSuspicious && !isRawMdx && looksLikeRawMarkdown(safeCode);
 
-  const renderPath = isSuspicious
-    ? "suspicious"
-    : isCompiled
-      ? "compiled"
+  const renderPath = isCompiled
+    ? "compiled"
+    : isSuspicious
+      ? "suspicious"
       : isRawMdx
         ? "raw-mdx"
         : isRaw
