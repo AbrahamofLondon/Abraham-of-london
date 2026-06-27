@@ -6,9 +6,9 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Lock } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import AccessGate from "@/components/AccessGate";
 import DirectorateOversight from "@/components/content/DirectorateOversight";
 
 import { joinHref } from "@/lib/content/shared";
@@ -23,6 +23,7 @@ import {
   normalizeRequiredTier,
   hasAccess,
   requiredTierFromDoc,
+  getTierLabel,
 } from "@/lib/access/tier-policy";
 
 type Props = {
@@ -136,6 +137,56 @@ function normalizeCoverPosition(
     : null;
 }
 
+function BookLockedState({
+  title,
+  slug,
+  message,
+  requiredTier,
+  authenticated,
+}: {
+  title: string;
+  slug: string;
+  message: string;
+  requiredTier: AccessTier;
+  authenticated: boolean;
+}) {
+  const requiredLabel = getTierLabel(requiredTier);
+  const returnPath = `/books/${slug}`;
+  const signInHref = `/api/auth/signin?callbackUrl=${encodeURIComponent(returnPath)}`;
+
+  return (
+    <div className="mx-auto max-w-xl py-16 text-center">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-amber-500/25 bg-amber-500/10">
+        <Lock className="h-5 w-5 text-amber-300" />
+      </div>
+      <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.34em] text-amber-200/70">
+        {requiredLabel} access required
+      </p>
+      <h2 className="mt-4 font-serif text-3xl italic text-white">{title}</h2>
+      <p className="mt-4 text-sm leading-relaxed text-white/55">
+        This volume requires {requiredLabel} access.
+      </p>
+      {message ? (
+        <p className="mt-3 text-sm leading-relaxed text-white/45">{message}</p>
+      ) : null}
+      <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <Link
+          href={signInHref}
+          className="inline-flex items-center justify-center bg-amber-500 px-5 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-black transition hover:bg-white"
+        >
+          {authenticated ? "Sign In Again" : "Sign In"}
+        </Link>
+        <Link
+          href="/access"
+          className="inline-flex items-center justify-center border border-white/10 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.28em] text-white/55 transition hover:border-white/25 hover:text-white"
+        >
+          View Access Options
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty }) => {
   const { data: session, status } = useSession();
 
@@ -212,30 +263,6 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
     }
   }, [needsAuth, session?.user, canRead, activeCode, handleUnlock]);
 
-  // Session loading timeout — if the session check takes longer than 5 seconds,
-  // treat the user as unauthenticated and show the AccessGate locked state.
-  // This prevents indefinite "Verifying clearance…" when the auth provider is
-  // slow, unreachable, or the session endpoint is missing.
-  const [sessionTimeout, setSessionTimeout] = React.useState(false);
-  React.useEffect(() => {
-    if (status === "loading") {
-      const timer = setTimeout(() => setSessionTimeout(true), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [status]);
-
-  if (needsAuth && status === "loading" && !sessionTimeout) {
-    return (
-      <Layout title={title}>
-        <div className="flex min-h-screen items-center justify-center bg-black">
-          <div className="animate-pulse font-mono text-xs text-amber-500">
-            Verifying clearance…
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   if (bodyEmpty && !needsAuth) {
     return (
       <Layout title={title} description="This volume is under institutional review.">
@@ -262,28 +289,16 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
     );
   }
 
-  if (needsAuth && (!session?.user || !canRead)) {
-    return (
-      <Layout title={title}>
-        <div className="flex min-h-screen items-center justify-center bg-black px-6">
-          <div className="w-full max-w-lg">
-            <AccessGate
-              title={title}
-              requiredTier={required}
-              message={doc?.lockMessage || "This volume requires appropriate access."}
-              isAuthenticated={!!session?.user}
-              onUnlocked={handleUnlock}
-            />
-            {unlockError ? (
-              <div className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-red-400/90">
-                {unlockError}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  const showLockedReader = needsAuth && (!session?.user || !canRead);
+  const lockedReaderFallback = showLockedReader ? (
+    <BookLockedState
+      title={title}
+      slug={bareSlug}
+      requiredTier={required}
+      authenticated={!!session?.user}
+      message={doc?.lockMessage || "This volume requires appropriate access."}
+    />
+  ) : null;
 
   return (
     <Layout
@@ -323,6 +338,7 @@ const BookSlugPage: NextPage<Props> = ({ doc, requiredTier, bareSlug, bodyEmpty 
         unlockError={unlockError}
         activeCode={activeCode}
         activeHtml={activeHtml}
+        readerFallback={lockedReaderFallback}
         emptyLabel={doc?.lockMessage || "No content available."}
       />
     </Layout>

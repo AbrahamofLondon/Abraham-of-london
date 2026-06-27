@@ -66,7 +66,18 @@ Unknown JSX component tags are stripped while preserving their inner text.
 
 ## Locked-State Behaviour
 
-Gated books continue to use the existing access gate. Raw auth/session codes are not presented in the book UI. Entitled users can receive static HTML through the books API instead of depending on raw-MDX client parsing.
+Gated books now render a server/static-safe locked-state block inside the Reading Chamber by default. The book route no longer renders a durable full-page `Verifying clearance...` state while `useSession()` is loading.
+
+Raw auth/session codes are not presented in the book UI. Entitled users can receive static HTML through the books API instead of depending on raw-MDX client parsing.
+
+For unauthenticated or unknown sessions, `/books/the-builders-catechism` renders:
+
+- Professional access required
+- the book title
+- the book lock message
+- sign-in/access-option actions
+
+The footer/global directory no longer acts as a substitute for an empty reader body.
 
 ## Public-Book Behaviour
 
@@ -116,6 +127,7 @@ Full browser viewport inspection remains unreliable in this Windows shell becaus
 | Check | Result | Notes |
 | --- | --- | --- |
 | Live HTML inspection | CONFIRMED ROOT | live Architecture response contained raw MDX import text in payload before this fix |
+| Production authority headers | PASS | `www.abrahamoflondon.org` is served by Netlify, not Vercel |
 | Static render audit | PASS | all routed book pages produce clean static HTML |
 | `pnpm contentlayer2 build` | PASS | 838 valid documents, 0 invalid |
 | `pnpm typecheck` | PASS | `tsc --noEmit` |
@@ -123,6 +135,7 @@ Full browser viewport inspection remains unreliable in this Windows shell becaus
 | `pnpm mdx:integrity` | PASS | no corruption detected |
 | `pnpm mdx:gate` | PASS | all assets verified |
 | `pnpm build` | PASS | completed with existing unrelated warnings |
+| `next build --webpack` | PASS | completed after Builder SSR fallback fix |
 | `git diff --check` | PASS | no whitespace errors |
 
 Existing unrelated build warnings:

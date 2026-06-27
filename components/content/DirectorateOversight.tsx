@@ -54,6 +54,7 @@ type DirectorateOversightProps = {
   unlockError?: string | null;
   activeCode?: string | null;
   activeHtml?: string | null;
+  readerFallback?: React.ReactNode;
   emptyLabel?: string;
   childrenTopRight?: React.ReactNode;
   childrenBottom?: React.ReactNode;
@@ -309,6 +310,7 @@ export default function DirectorateOversight({
   unlockError = null,
   activeCode = "",
   activeHtml = "",
+  readerFallback = null,
   emptyLabel = "No content available.",
   childrenTopRight,
   childrenBottom,
@@ -483,6 +485,8 @@ export default function DirectorateOversight({
                       debug={process.env.NODE_ENV === "development"}
                     />
                   </div>
+                ) : readerFallback ? (
+                  <div data-reader-content="true">{readerFallback}</div>
                 ) : (
                   <div className="py-20 text-center text-white/50">
                     <EmptyStateIcon kind={kind} />
