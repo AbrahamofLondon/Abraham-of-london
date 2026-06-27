@@ -1,10 +1,10 @@
 # Metadata Scrub Report
 
-DOCX file: $rel
+DOCX file: Fathering-Without-Fear-Proposal-Elise-Dillsworth.docx
 Author: Abraham of London
 Last modified by:
 Company:
-Title: Fathering Without Fear — Proposal — Elise Dillsworth
+Title: Fathering Without Fear — Nonfiction Proposal — Elise Dillsworth
 Subject:
 Keywords:
 Comments:

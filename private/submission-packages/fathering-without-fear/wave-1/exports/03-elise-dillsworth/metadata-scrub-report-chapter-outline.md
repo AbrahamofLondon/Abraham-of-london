@@ -1,6 +1,6 @@
 # Metadata Scrub Report
 
-DOCX file: $rel
+DOCX file: Fathering-Without-Fear-Chapter-Outline-Elise-Dillsworth.docx
 Author: Abraham of London
 Last modified by:
 Company:

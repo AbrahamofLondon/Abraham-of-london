@@ -1,10 +1,10 @@
 # Metadata Scrub Report
 
-DOCX file: $rel
+DOCX file: Fathering-Without-Fear-Sample-Chapters-Chs1-3-Kate-Evans.docx
 Author: Abraham of London
 Last modified by:
 Company:
-Title: Fathering Without Fear — Sample Chapters 1-3 — Kate Evans
+Title: Fathering Without Fear — Sample Chapters (1–3) — Kate Evans
 Subject:
 Keywords:
 Comments:

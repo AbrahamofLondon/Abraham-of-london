@@ -1,6 +1,6 @@
 # Metadata Scrub Report
 
-DOCX file: $rel
+DOCX file: Fathering-Without-Fear-First-50-Pages-Nicola-Chang.docx
 Author: Abraham of London
 Last modified by:
 Company:
