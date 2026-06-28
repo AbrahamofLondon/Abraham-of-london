@@ -113,3 +113,19 @@ The drafted Ch.1 opening is on-voice and can serve as the tuning fork:
 > "There was an hour, late in the afternoon, when his wife went somewhere he could not follow, and the strange thing — the thing he never said aloud, because there was no one to say it to who would not try to mend it — was that he had stopped minding."
 
 Note: the long accumulating first clause; the em-dash held qualification; the short landing ("he had stopped minding"); the plain diction; the withholding. This is the target. Draft toward it, and toward the memoir's corrected-sentence gravity, and the book will read as his.
+
+---
+
+## 10. Standing operating principles (novel-wide law)
+
+Adopted as standing law for all 30 chapters (from the Ch.1 expansion briefs). These govern structure and effect; §§1–9 govern the sentence.
+
+1. **The ordinary precedes the extraordinary, always.** Before any chapter shows Obianuju in the hour / in trance / in cold / in absence, it must first show her in *presence*. Before the protagonist meets any of the three forces, show him doing something mundane. The reader cannot feel what is taken unless they have first felt what was there.
+2. **The supernatural is admitted through the mundane, never announced.** The narration surrounding supernatural material becomes *plainer*, not more theatrical. No "and then the room changed." The contrast carries the power; atmospheric signalling drains it.
+3. **Trance is present tense; everything else is past.** Reliable across all 30 chapters. The tense shift (into italic present) is the reader's only register signal — no hybrid passages, no exceptions.
+4. **The three forces stay distinct and unexplained.** Spirit Husband = CLAIM (cold, absence); the Voice = INTIMIDATION (speaks once or twice in the whole book); the Trance = MESSENGER (accurate, neutral, never threatens). No conflation; no character names them; no narrator explains them. The reader learns them like the tide — by experience.
+5. **Obianuju is never reduced to her function in his story.** Every chapter featuring her contains at least one moment where she exists beyond him — a thought, a gesture, an action wholly her own. (Her own unfinished business is visible to the reader even where he cannot see it.)
+6. **The protagonist's fearlessness is the central danger, not a virtue.** Never admired uncritically. He is not brave; he is constitutionally unable to register certain threats, and that inability is what will cost him. Hold it the way Ch.1's close holds it.
+7. **Every chapter has an acceptance-gate sentence** — one irreplaceable line that could only belong to this author, this man, this world. Identify it before committing a chapter; if you cannot, the chapter is not finished. *(Ch.1: "He ate the bitter half and gave her the less bitter, and that, too, was a thing he did without being able to defend it.")*
+
+**The over-engineering guard (carried with these):** motifs must feel *discovered, not deployed*; sentence-level truth outranks structural symmetry; the test for any addition is — *would this still belong if the blueprint did not exist?* If no, cut it. Do not let the architecture show.
