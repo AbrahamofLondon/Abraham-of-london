@@ -8,7 +8,7 @@ function cx(...inputs: Array<string | false | null | undefined>): string {
   return inputs.filter(Boolean).join(" ");
 }
 
-interface Heading {
+export interface Heading {
   id: string;
   text: string;
   level: number;
@@ -38,7 +38,7 @@ function makeId(text: string, index: number): string {
     .slice(0, 80) || `section-${index}`;
 }
 
-function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): Heading[] {
+export function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): Heading[] {
   if (!root) return [];
 
   const elements = Array.from(root.querySelectorAll("h1, h2, h3, h4, h5"));
@@ -47,7 +47,7 @@ function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): He
 
   for (let i = 0; i < elements.length && extracted.length < maxHeadings; i++) {
     const el = elements[i] as HTMLElement;
-    if (el.closest("[data-toc-root='true']")) continue;
+    if (el.closest("[data-toc-root='true'], nav, footer, [data-global-nav], [data-site-footer]")) continue;
 
     const text = (el.textContent || "").trim();
     if (!text) continue;
@@ -74,6 +74,23 @@ function collectHeadings(root: HTMLElement | null, maxHeadings: number = 50): He
   return extracted;
 }
 
+export function resolveTocRoot(contentRef?: React.RefObject<HTMLElement | null>): HTMLElement | null {
+  return (
+    contentRef?.current ||
+    (document.querySelector("[data-reader-content='true']") as HTMLElement | null) ||
+    null
+  );
+}
+
+function sameHeadings(a: Heading[], b: Heading[]): boolean {
+  if (a.length !== b.length) return false;
+
+  return a.every((heading, index) => {
+    const next = b[index];
+    return next !== undefined && heading.id === next.id && heading.text === next.text && heading.level === next.level;
+  });
+}
+
 const TableOfContents: React.FC<TableOfContentsProps> = ({
   contentRef,
   className = "",
@@ -85,36 +102,38 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   // Collect headings after content is rendered
   React.useEffect(() => {
-    const root =
-      contentRef?.current ||
-      document.querySelector("[data-reader-content='true']") ||
-      document.querySelector(".smdx-content") ||
-      document.querySelector(".aol-mdx-content") ||
-      document.querySelector(".prose-hardened") ||
-      null;
+    const root = resolveTocRoot(contentRef);
 
-    if (!root) return;
+    if (!root) {
+      setHeadings((previous) => (previous.length === 0 ? previous : []));
+      return;
+    }
 
-    const timeoutId = setTimeout(() => {
-      const nextHeadings = collectHeadings(root as HTMLElement, maxHeadings);
-      setHeadings(nextHeadings);
-    }, delayMs);
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const refreshHeadings = () => {
+      const nextHeadings = collectHeadings(root, maxHeadings);
+      setHeadings((previous) => (sameHeadings(previous, nextHeadings) ? previous : nextHeadings));
+    };
+
+    const queueRefresh = (delay = 80) => {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(refreshHeadings, delay);
+    };
+
+    queueRefresh(delayMs);
 
     // Re-collect on mutations (useful when MDX renders dynamically)
-    const observer = new MutationObserver(() => {
-      const nextHeadings = collectHeadings(root as HTMLElement, maxHeadings);
-      setHeadings(nextHeadings);
-    });
+    const observer = new MutationObserver(() => queueRefresh());
 
     observer.observe(root, {
       childList: true,
       subtree: true,
-      attributes: true,
-      attributeFilter: ["id"],
+      characterData: true,
     });
 
     return () => {
-      clearTimeout(timeoutId);
+      if (refreshTimer) clearTimeout(refreshTimer);
       observer.disconnect();
     };
   }, [contentRef, maxHeadings, delayMs]);
@@ -135,8 +154,9 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
-        if (visible.length > 0 && visible[0]?.target?.id) {
-          setActiveId(visible[0].target.id);
+        const firstVisible = visible[0];
+        if (firstVisible?.target?.id) {
+          setActiveId((previous) => (previous === firstVisible.target.id ? previous : firstVisible.target.id));
         }
       },
       {

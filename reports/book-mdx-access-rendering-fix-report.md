@@ -1,10 +1,10 @@
 # Book MDX Access Rendering Fix Report
 
-Date: 2026-06-27
+Date: 2026-06-28
 
 ## Verdict
 
-PASS - local rendering/parser/access-layer repair completed and validated. No push or manual deploy was performed.
+PASS - local rendering/parser/access-layer repair completed and the Architecture browser hang was reproduced, fixed, and verified in local production. No push or manual deploy was performed.
 
 ## Root Cause
 
@@ -91,7 +91,26 @@ The footer/global directory no longer acts as a substitute for an empty reader b
 
 ## TOC Result
 
-The previous TOC scoping fix remains in place. The TOC reads headings from `[data-reader-content="true"]`, not from global layout or footer content.
+The original server-side body fix was not sufficient because the client-side table of contents could still scan outside the reader. `TableOfContents` now resolves only:
+
+- the passed reader `contentRef`, or
+- `[data-reader-content="true"]`
+
+It no longer falls back to `document`, `main`, `.aol-mdx-content`, `.smdx-content`, `.prose-hardened`, or any broad page/content selector. If the reader boundary is missing, the TOC renders no sections rather than scanning the page shell.
+
+The mutation observer also no longer watches `id` attributes that `collectHeadings` assigns itself. This removes the update-loop risk observed during hydration.
+
+Local production verification confirmed the Architecture TOC contains 46 book headings, beginning with:
+
+- `THE ARCHITECTURE OF ASCENSION`
+- `12 Pillars for the Sovereign Household`
+- `Doctrinal Asset // Volume IV Supplement`
+- `PROLOGUE: THE GEOMETRY OF GOVERNANCE`
+- `THE RISE–DECAY INDEX`
+- `SOVEREIGNTY SCORECARD (Condensed)`
+- `PILLAR I`
+
+The TOC did not contain the global navigation labels `Doctrine`, `Works`, `Intelligence`, `Archive`, `Instruments`, `Trust`, `Selective`, or `Controlled archive`.
 
 ## Book Source Audit
 
@@ -115,12 +134,47 @@ Direct static-render checks confirmed:
 
 ## Mobile / Desktop Check
 
-Full browser viewport inspection remains unreliable in this Windows shell because local Next dev route compilation can hang during `/books/[slug]` compilation. The low-collateral fix removes the reader's client-side raw-MDX dependency and was validated through static render checks plus the production build.
+Local production browser verification was completed against:
+
+`http://localhost:3017/books/architecture-of-ascension`
+
+Playwright had previously reproduced the live browser-side hang: after `domcontentloaded`, screenshot/evaluation timed out during hydration. After the TOC scoping and observer fix, Playwright successfully captured screenshots and evaluated the DOM at both 5 seconds and 15 seconds.
+
+Screenshots captured:
+
+- `tmp/architecture-local-5s.png`
+- `tmp/architecture-local-15s.png`
+
+Local production DOM result:
+
+- HTTP status: 200
+- `document.readyState`: `complete`
+- reader boundary present: yes
+- Architecture title present: yes
+- `PROLOGUE: THE GEOMETRY OF GOVERNANCE` present: yes
+- reader heading count: 46
+- TOC uses book headings only: yes
+- footer inside reader boundary: no
+- permanent `Loading...`: no
+- permanent `Verifying clearance...`: no
+- `SESSION_INVALID`: no
+- raw MDX import text visible: no
+- horizontal overflow at 1366px viewport: no
+
+The page body still contains terms such as `Intelligence`, `Instruments`, and `Selective` elsewhere in the page shell/footer, which is expected for the global site chrome. They are not used as TOC entries and the footer is not inside `[data-reader-content="true"]`.
+
+Console output during local production verification contained local environment noise:
+
+- `/api/auth/session` returned 500 in the local unauthenticated environment, causing a NextAuth client fetch error.
+- Google Analytics `region1.google-analytics.com` was blocked by the local CSP.
+
+No page errors, request failures, reader exceptions, TOC loop errors, `SESSION_INVALID`, or hydration-crash evidence were present.
 
 ## Tests Added / Updated
 
 - Updated `lib/mdx/static-mdx-runtime.test.ts` so raw MDX component blocks preserve inner text instead of deleting it.
-- Focused test run passed: 12 tests.
+- Added `components/mdx/TableOfContents.test.ts` to enforce reader-boundary TOC scoping and prevent global layout fallback.
+- Focused test run passed: 15 tests.
 
 ## Validation Results
 
@@ -131,12 +185,13 @@ Full browser viewport inspection remains unreliable in this Windows shell becaus
 | Static render audit | PASS | all routed book pages produce clean static HTML |
 | `pnpm contentlayer2 build` | PASS | 838 valid documents, 0 invalid |
 | `pnpm typecheck` | PASS | `tsc --noEmit` |
-| `pnpm exec vitest run lib/mdx/static-mdx-runtime.test.ts` | PASS | 12 tests passed |
+| `pnpm exec vitest run components/mdx/TableOfContents.test.ts lib/mdx/static-mdx-runtime.test.ts` | PASS | 15 tests passed |
 | `pnpm mdx:integrity` | PASS | no corruption detected |
 | `pnpm mdx:gate` | PASS | all assets verified |
 | `pnpm build` | PASS | completed with existing unrelated warnings |
 | `next build --webpack` | PASS | completed after Builder SSR fallback fix |
 | `git diff --check` | PASS | no whitespace errors |
+| Local production Playwright browser check | PASS | screenshots and DOM evaluation completed at 5s and 15s; no TOC/global heading leakage |
 
 Existing unrelated build warnings:
 
