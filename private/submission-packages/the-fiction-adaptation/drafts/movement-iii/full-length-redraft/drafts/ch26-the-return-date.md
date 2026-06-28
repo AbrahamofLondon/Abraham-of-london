@@ -296,19 +296,7 @@ He had begun to wonder what it was about.
 
 And that wondering was more dangerous than any question he had asked before.
 
-The protagonist stood at the gate and watched him go. The evening light was the particular gold it went only in the half-hour before the calls, and the town was doing its ordinary evening — women calling children, radios playing music, the smell of plantain frying and diesel and salt. All of it was the same. None of it was the same.
 
-Mr Stephen had seen the room.
-
-The room had been empty.
-
-And the no-colour door was still closed.
-
-But Mr Stephen had said he would not ask for the photograph again. And the protagonist understood that this was not a gift. It was a statement. Mr Stephen no longer needed the photograph. He had seen the room. He had found nothing. And he had begun to wonder whether the photograph was never about the room at all.
-
-He had begun to wonder what it was about.
-
-And that wondering was more dangerous than any question he had asked before.
 
 ---
 
