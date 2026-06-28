@@ -114,7 +114,7 @@ The difference was small and everything. The protagonist stood in the yard with 
 
 ---
 
-The woman who sold dried shrimp was near the mosque wall, as Kene had said. She was old — older than Mama Nneoma, or older in the way that age showed more on some faces — and she sat on a low stool behind a tray of shrimp the colour of rust. She did not call out to them as they approached. She watched them the way the town watched everything, without appearing to watch, and when they stopped in front of her tray she did not ask what they wanted.
+The woman who sold dried shrimp was near the mosque wall, as Kene had said. She was old — older than Mama Agnes, or older in the way that age showed more on some faces — and she sat on a low stool behind a tray of shrimp the colour of rust. She did not call out to them as they approached. She watched them the way the town watched everything, without appearing to watch, and when they stopped in front of her tray she did not ask what they wanted.
 
 "You brought him," she said to Kene.
 
@@ -318,7 +318,7 @@ He walked to the front door. He opened it. The night air hit his face, warm and 
 
 He did not know where he was going. He only knew that he could not wait for morning. The cold had been waiting for thirty years. It had waited for the woman in the market, and for the woman before her, and for Obianuju. It would wait for him too, if he let it. But he did not have to let it. He could move. He could act. He could walk through the dark toward the one person who had given him a sentence he had not yet learned to use.
 
-He walked through the dark toward Mama Nneoma's compound.
+He walked through the dark toward Mama Agnes's compound.
 
 He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had to walk.
 

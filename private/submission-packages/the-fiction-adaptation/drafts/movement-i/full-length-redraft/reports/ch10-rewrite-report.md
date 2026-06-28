@@ -88,13 +88,13 @@ The reader feels that if nothing changes, something ordinary and future-facing w
 
 ## What Present-Tense Action the Protagonist Takes Before the End
 
-**Old:** He decides to go to Mama Nneoma in the morning. He sits with his hands not open.
+**Old:** He decides to go to Mama Agnes in the morning. He sits with his hands not open.
 
-**New:** He does not wait for morning. He walks through the dark toward Mama Nneoma's compound that night.
+**New:** He does not wait for morning. He walks through the dark toward Mama Agnes's compound that night.
 
 The chapter ends with him in motion:
 
-> *He walked through the dark toward Mama Nneoma's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
+> *He walked through the dark toward Mama Agnes's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
 
 The no-colour door material is preserved (he touches the handle, does not open it) but now functions as pressure toward the door he must approach elsewhere, not merely a refusal to open the one in front of him.
 
@@ -118,7 +118,7 @@ The line remains the shrimp seller's testimony. It is not repeated by the narrat
 
 ## Revised Acceptance-Gate Sentence
 
-> *He walked through the dark toward Mama Nneoma's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
+> *He walked through the dark toward Mama Agnes's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
 
 This sentence carries action (he walks), consequence (he leaves the cold behind), the shift from endurance to movement (he does not wait for morning), and the connection to the Elder (he goes toward her compound). It is not reflection. It is movement.
 
@@ -144,6 +144,6 @@ This sentence carries action (he walks), consequence (he leaves the cold behind)
 2. ✅ Shrimp woman revelation as scene, not data (physical reaction, reluctance, specific detail)
 3. ✅ Obianuju's confession as confrontation (restrained rupture, withheld truth, cost)
 4. ✅ Stakes felt (Kene's question, shrimp woman's hands, Obianuju's first-week knowledge)
-5. ✅ Protagonist acts in present time (leaves that night, walks toward Mama Nneoma)
+5. ✅ Protagonist acts in present time (leaves that night, walks toward Mama Agnes)
 
 The chapter now functions at the required standard. It is more dramatic while remaining literary. The cold remains implicit. No genre machinery was added.

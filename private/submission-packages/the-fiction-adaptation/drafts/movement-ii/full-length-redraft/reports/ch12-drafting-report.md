@@ -10,7 +10,7 @@
 - `foundation/01-voice-and-style-bible.md`, `02-world-and-cosmology-bible.md`, `03-character-bibles.md`, `04-motif-and-image-system.md`, `06-structural-blueprint.md`
 - `…/movement-ii/full-length-redraft/drafts/ch11-the-reversal.md` (the reversal Ch.12 carries forward)
 - `…/movement-i/full-length-redraft/drafts/ch05-the-confidant.md` (Kene's voice and the town's established texture: pepper woman, standpipe, boys at the wall, fish tables, radio's brass bar)
-- `…/movement-i/full-length-redraft/drafts/ch09…`, `ch10…` (the shrimp-woman and Mama Nneoma visits the town now gossips about)
+- `…/movement-i/full-length-redraft/drafts/ch09…`, `ch10…` (the shrimp-woman and Mama Agnes visits the town now gossips about)
 
 ## Output
 
@@ -43,11 +43,11 @@ It opens in the market with the pepper woman — not the cold, not Ch.11's wound
 
 ## Secondary pressure point introduced (returnable)
 
-**Obiefuna, the landlord** — owns the house and three others; files men under their addresses ("the husband from the lane"); his name means *may the homestead not be lost*; he **will not cross his own threshold** (collects at the gate). His desire: keep the house occupied *and quiet*, because "a house that empties is a house that talks." He has filled the house twice before with tenants "who did not ask the town for its memory." He is practical, not prophetic — and his livelihood quietly depends on the cold staying private, which makes him a human accomplice to the claim's appetite for continuation (rhyme, never stated). He can return.
+**Mr Stephen, the landlord** — owns the house and three others; files men under their addresses ("the husband from the lane"); has not lost a house in thirty years; he **will not cross his own threshold** (collects at the gate). His desire: keep the house occupied *and quiet*, because "a house that empties is a house that talks." He has filled the house twice before with tenants "who did not ask the town for its memory." He is practical, not prophetic — and his livelihood quietly depends on the cold staying private, which makes him a human accomplice to the claim's appetite for continuation (rhyme, never stated). He can return.
 
 ## How the town begins to respond
 
-- The pepper woman reveals the talk has started (his visits to the shrimp woman and Mama Nneoma went "past forty windows").
+- The pepper woman reveals the talk has started (his visits to the shrimp woman and Mama Agnes went "past forty windows").
 - A public sign of the cold: the young fish-seller whose catch "would not soften" in the heat, and the other sellers who have "drifted" their tables a hand's width clear of him over weeks — social avoidance, not spectacle.
 - After his misstep: the pepper woman's warmth withdraws to mere courtesy ("Greet the house" — "the cruelest thing she had given him all day, because it was what she gave to strangers"); the lane receives him differently (late greetings, a lifted chin that is "a greeting and not a welcome," the standpipe congregation bending as he passes).
 
@@ -57,7 +57,7 @@ He honours, and then fails, the new term of the marriage. Doing her errand (badl
 
 ## How the protagonist acts and what it costs
 
-He has learned to move but not to aim ("Movement is not the same as aim" — Kene). He asks Obiefuna, **aloud, in the market's hearing**, who lived in the house before and why they left — turning the house's private dread into a public question ("this is the knocking," Obiefuna says, his face closing "like a ledger shut"). Cost: Obiefuna withdraws with a quiet warning; the pepper woman cools to courtesy; the snail woman sharpens the rumour toward Obianuju; the lane's attention changes; the house stops being private. He gained a hundred witnesses, "and not one of them was on his side."
+He has learned to move but not to aim ("Movement is not the same as aim" — Kene). He asks Mr Stephen, **aloud, in the market's hearing**, who lived in the house before and why they left — turning the house's private dread into a public question ("this is the knocking," Mr Stephen says, his face closing "like a ledger shut"). Cost: Mr Stephen withdraws with a quiet warning; the pepper woman cools to courtesy; the snail woman sharpens the rumour toward Obianuju; the lane's attention changes; the house stops being private. He gained a hundred witnesses, "and not one of them was on his side."
 
 ## How Obianuju is protected from rumour reduction
 
@@ -79,7 +79,7 @@ Through social weather only: the fish that will not soften; the drifted tables; 
 ## Motifs used (and why organic)
 
 - **Cold** (fish, lane, withdrawal) — the claim's public weather.
-- **Door / threshold** (Obiefuna who won't cross his threshold; the final "door open between them" he cannot hang shut) — the chapter's spine image; pays off Ch.11's door/control.
+- **Door / threshold** (Mr Stephen who won't cross his threshold; the final "door open between them" he cannot hang shut) — the chapter's spine image; pays off Ch.11's door/control.
 - **Naming** (he withholds Obianuju's name; the town gropes toward a wrong one) — the book's naming motif made social.
 - **Hands / salt / market** — the embodied town (the pepper woman's hands, salt drying on his, the basket).
 - **Lateness** (he is late to the prices, late to seeing the windows) — his signature flaw in a new key.
@@ -99,6 +99,6 @@ It carries the social widening, the town's appetite (feed/feed-on), the first pu
 
 ## Recommendation for next step
 
-Proceed to **Ch.13 — The Grey City**, carrying: (a) the public name beginning to form around Obianuju (the cost compounds when he leaves for the grey city and the town talks in his absence); (b) Obiefuna as a returnable pressure (rent/eviction leverage); (c) the blueprint's displaced "isolation/narrowing" beat, which now belongs to Ch.13. Reconcile the blueprint's Ch.12 label ("Isolation" → "Social Consequence") in a later housekeeping pass.
+Proceed to **Ch.13 — The Grey City**, carrying: (a) the public name beginning to form around Obianuju (the cost compounds when he leaves for the grey city and the town talks in his absence); (b) Mr Stephen as a returnable pressure (rent/eviction leverage); (c) the blueprint's displaced "isolation/narrowing" beat, which now belongs to Ch.13. Reconcile the blueprint's Ch.12 label ("Isolation" → "Social Consequence") in a later housekeeping pass.
 
 *No push. No deploy. No merge. No upstream pull.*

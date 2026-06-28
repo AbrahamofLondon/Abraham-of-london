@@ -1,13 +1,13 @@
 # The One Who Arrived First
 
-## Movement II — The Cost (Chapter 11, full-length redraft)
+## Movement II — The Cost (full-length redraft)
 
 
 # Chapter 11: The Reversal
 
 He came back to the house in the hour before dawn. It was the same as he had left it. The same grey walls, holding the same grey light. The same no-colour door. The same cold standing at the edges of the rooms the way it always stood — patient, in no hurry, waiting out the warm centre of the day. He knew the house the way you know a face, and it was that knowing that told him, before he had crossed the front room, that something had shifted. Not the cold; the cold was the same. Something else — the way the air shifts before a change of season, invisible and absolute.
 
-He had not slept. He had walked to Mama Nneoma's compound and found it dark, and he had stood at her gate until the first light touched the almond tree. The waiting had been the hardest part — not because he was impatient, but because the waiting gave him time to feel what he had done. He had left the house. He had walked out of the cold. He had chosen movement over endurance. And now he was standing at an old woman's gate in the dark, not knowing what he would say when she opened the door.
+He had not slept. He had walked to Mama Agnes's compound and found it dark, and he had stood at her gate until the first light touched the almond tree. The waiting had been the hardest part — not because he was impatient, but because the waiting gave him time to feel what he had done. He had left the house. He had walked out of the cold. He had chosen movement over endurance. And now he was standing at an old woman's gate in the dark, not knowing what he would say when she opened the door.
 
 The compound was quiet. A goat shifted somewhere in the shadows. The almond tree's leaves moved in a wind he could not feel on his skin. He thought of knocking, and did not knock, because knocking would have meant he had a right to be there at this hour, and he was not certain he had that right.
 
@@ -45,7 +45,7 @@ When he rose to leave, she walked with him to the door. She stood on the step wi
 
 "You have made the house notice you," she said. "It will not forget that. That is not the same as knowing what to do about it."
 
-He had walked home with that sentence burning in him, and now he stood in the front room with the first grey light coming through the window, and he understood that Mama Nneoma had been right. The house had noticed him. The cold had noticed him. And so had Obianuju.
+He had walked home with that sentence burning in him, and now he stood in the front room with the first grey light coming through the window, and he understood that Mama Agnes had been right. The house had noticed him. The cold had noticed him. And so had Obianuju.
 
 She was in the kitchen, doing the ordinary work of the morning — the kettle, the basin, the cloth — and she did not turn when he entered. He watched her hands. They moved through the familiar tasks with the same economy they always had, measuring, wiping, folding, but there was a precision to them now that was not the precision of competence. It was the precision of a woman who was holding herself very still on the inside and letting her hands do the work so that nothing else would show.
 
@@ -61,7 +61,7 @@ It was not a question.
 
 "I woke and you were not here."
 
-"I went to Mama Nneoma."
+"I went to Mama Agnes."
 
 She did not answer. She poured water from the kettle into a cup, and the steam rose, and she set the cup on the table without looking at him. The gesture was the same as every other morning — the same cup, the same place, the same ordinary offering — but something in the way she set it down was different. She set it down as though she were placing it at a boundary she did not intend to cross.
 
@@ -85,7 +85,7 @@ He looked at her. She was still facing the kettle, her back to him, and he could
 
 She turned then. Her face was not angry. It was not afraid. It was the face of a woman who had been holding something in place for a long time and had felt it begin to shift.
 
-"You brought back evidence," she said. "You brought back salt. You brought back the knowledge that the cold can touch you. And you took that knowledge to Kene, and Kene took you to the woman in the market, and the woman in the market told you about the child. And then you took all of that to Mama Nneoma. You have been walking through the town with the cold on your hand, showing it to people, and every person who has seen it has become part of it."
+"You brought back evidence," she said. "You brought back salt. You brought back the knowledge that the cold can touch you. And you took that knowledge to Kene, and Kene took you to the woman in the market, and the woman in the market told you about the child. And then you took all of that to Mama Agnes. You have been walking through the town with the cold on your hand, showing it to people, and every person who has seen it has become part of it."
 
 He said nothing. The cup on the table was cooling. The steam had stopped rising.
 
@@ -167,7 +167,7 @@ She looked at him then, and her face did something he had never seen before. It 
 
 "Yes."
 
-"By taking the cold to Kene. By taking it to the woman in the market. By taking it to Mama Nneoma. By walking through the town with salt on your hand, telling people about the house, about the hour, about me."
+"By taking the cold to Kene. By taking it to the woman in the market. By taking it to Mama Agnes. By walking through the town with salt on your hand, telling people about the house, about the hour, about me."
 
 "I did not tell them about you."
 
@@ -215,7 +215,7 @@ She looked at him for a long moment. Her hand was still on the handle, and her h
 
 "I want you to stop trying to save me," she said.
 
-The sentence entered him and found no room prepared for it. He had thought he was saving her. He had thought the movement, the investigation, the walk to Mama Nneoma — all of it was love, was action, was the kind of staying that refused to let the cold have what it wanted without a fight. But she had not asked him to fight. She had asked him, two years ago, to hold a line while she drove a nail into a wall, and he had held it, and he had thought that holding the line was the same as understanding what the line was for.
+The sentence entered him and found no room prepared for it. He had thought he was saving her. He had thought the movement, the investigation, the walk to Mama Agnes — all of it was love, was action, was the kind of staying that refused to let the cold have what it wanted without a fight. But she had not asked him to fight. She had asked him, two years ago, to hold a line while she drove a nail into a wall, and he had held it, and he had thought that holding the line was the same as understanding what the line was for.
 
 "I was not trying to save you," he said.
 
@@ -310,3 +310,5 @@ But he had heard her say "right now" — not "forever," not "never again," but "
 He held it.
 
 And he waited.
+
+---

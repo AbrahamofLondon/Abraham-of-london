@@ -149,7 +149,7 @@ The stake is visible without being melodramatic. It is stated plainly by the shr
 - **Shrimp seller register:** grave, plain, ancestral. The story told without drama.
 - **Walk home register:** solitary, reflective.
 - **Doorstep with Obianuju:** tender, painful, honest. She confesses what she knew and did not know.
-- **Night register:** cold gathering at the edges, the protagonist with his hand on the handle, the decision to go to Mama Nneoma.
+- **Night register:** cold gathering at the edges, the protagonist with his hand on the handle, the decision to go to Mama Agnes.
 
 The registers modulate across both chapters. No single register is held for too long.
 
@@ -278,7 +278,7 @@ Accepted under one condition: it must remain testimony, not doctrine. It works b
 
 ## Elder Sentence Handling
 
-The Elder's sentence does not appear in Ch.9. It is referenced at the very close of Ch.10 — the protagonist decides to go to Mama Nneoma in the morning, carrying the sentence he has not yet learned to use. This is the first time he has actively chosen to seek her since Ch.6. The sentence is not repeated verbatim in the chapter body; it appears only in the final paragraph as his internal resolution.
+The Elder's sentence does not appear in Ch.9. It is referenced at the very close of Ch.10 — the protagonist decides to go to Mama Agnes in the morning, carrying the sentence he has not yet learned to use. This is the first time he has actively chosen to seek her since Ch.6. The sentence is not repeated verbatim in the chapter body; it appears only in the final paragraph as his internal resolution.
 
 ---
 
@@ -288,7 +288,7 @@ The Elder's sentence does not appear in Ch.9. It is referenced at the very close
 
 ### Movement II Governing Standard
 
-Every chapter in Movement II must exact a cost. Not atmosphere. Cost. Each chapter must make something harder after it happens. Possible costs: a relationship becomes less innocent; a room becomes less safe; Obianuju remembers too much; the protagonist acts and damages something; Kene pays for knowing; Mama Nneoma withholds or reveals at a price; the town recognises the house more publicly; the cold crosses a boundary; the protagonist's own keeping becomes dangerous; love loses one of its illusions.
+Every chapter in Movement II must exact a cost. Not atmosphere. Cost. Each chapter must make something harder after it happens. Possible costs: a relationship becomes less innocent; a room becomes less safe; Obianuju remembers too much; the protagonist acts and damages something; Kene pays for knowing; Mama Agnes withholds or reveals at a price; the town recognises the house more publicly; the cold crosses a boundary; the protagonist's own keeping becomes dangerous; love loses one of its illusions.
 
 If a chapter does not cost anyone anything, it is not a Movement II chapter.
 
@@ -349,7 +349,7 @@ If a chapter does not cost anyone anything, it is not a Movement II chapter.
 - [x] Kene returns as full character
 - [x] Social world widens (shrimp seller, house history)
 - [x] External stake visible (continuation)
-- [x] Protagonist acts (goes to Kene, decides to seek Mama Nneoma)
+- [x] Protagonist acts (goes to Kene, decides to seek Mama Agnes)
 - [x] Emotional register varies across both chapters
 # Ch.9–10 Acceptance-Gate Audit
 
@@ -424,7 +424,7 @@ The triplet (gift / warning / receipt) is the author's signature rhythm, earned 
 | He seeks out the shrimp seller | Kene brings him; she says "You brought him" / "He should have come sooner" |
 | He learns the cold was there before Obianuju | The shrimp seller: "I lived in that house, thirty years ago" |
 | He learns the cold wants to continue | The shrimp seller: "It wants a life to attach itself to. It wants to continue." |
-| He decides to go to Mama Nneoma in the morning | Final paragraph: "And in the morning, he would go to Mama Nneoma." |
+| He decides to go to Mama Agnes in the morning | Final paragraph: "And in the morning, he would go to Mama Agnes." |
 | He sits with his hands not open | "He did not sit with his hands open. He sat with his hands on his knees, and his hands were not open." |
 
 ### Acceptance-Gate Sentence
@@ -526,7 +526,7 @@ It is the shrimp seller's voice — plain, ancestral, unadorned. It does not exp
 - [x] Kene returns as full character
 - [x] Social world widens (shrimp seller, house history)
 - [x] External stake visible (continuation)
-- [x] Protagonist acts (goes to Kene, investigates, decides to seek Mama Nneoma)
+- [x] Protagonist acts (goes to Kene, investigates, decides to seek Mama Agnes)
 - [x] Emotional register varies across both chapters
 
 ---
