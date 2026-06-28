@@ -29,7 +29,7 @@ The owner invited rewriting the source. This package does that additively: it do
 
 1. **Allegory, not roman à clef.** The merged central figure and liminal register are legal-ethical protection. No 1:1 mapping to real persons. The novel tells a true *shape*, never a factual claim.
 2. **Child protection carries over from the memoir.** No depiction of the real child. If continuation/pregnancy appears in the allegory, it stays symbolic and off-page. (See memoir child-protection architecture.)
-3. **The non-villain rule is non-negotiable** (from source). The reader must not be able to hate Adaeze cleanly. Every harm sits near a gift.
+3. **The non-villain rule is non-negotiable** (from source). The reader must not be able to hate Obianuju cleanly. Every harm sits near a gift.
 4. **Memoir/novel firewall.** Nothing invented for the novel may be read back into the memoir as fact, and the novel must not contradict-then-confuse the memoir's protected canon in a way that invites legal read-across. The deliberate merge of two figures into one *strengthens* this firewall.
 5. **Cultural authority, not exotica.** The Igbo/Yoruba spiritual cosmology is rendered with seriousness and from the inside — this is both the artistic standard and the market engine of this lane.
 6. **No push, no submission, no publication** of any of this without explicit owner approval. Planning only.
