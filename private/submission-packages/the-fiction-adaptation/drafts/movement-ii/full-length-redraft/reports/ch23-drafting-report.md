@@ -36,9 +36,9 @@ The title is earned by the chapter. The key changed: the house's relationship to
 
 | Measure | Value |
 | :------ | ----: |
-| Ch.23 | 4,028 words |
+| Ch.23 (repaired) | 3,573 words |
 | Ch.1–22 (reported) | 82,268 words |
-| **Ch.1–23 total** | **86,296 words** |
+| **Ch.1–23 total** | **85,841 words** |
 
 ---
 
