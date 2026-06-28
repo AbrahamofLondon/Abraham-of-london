@@ -64,7 +64,7 @@ This carries the protagonist's specific new failure.
 - **No new Trance:** confirmed.
 - **No new Voice line:** confirmed.
 - **No cosmology exposition:** confirmed.
-- **No memoir leakage:** confirmed by restricted-term guard search on Ch.20 after removing avoided terminology.
+- **No memoir leakage:** confirmed by restricted-term guard search and context-aware review. `order` was reviewed as arrangement/control language, not legal texture.
 - **No site/content/FWF files touched:** confirmed. Changes remain inside `private/submission-packages/the-fiction-adaptation/`.
 
 ## Files Updated

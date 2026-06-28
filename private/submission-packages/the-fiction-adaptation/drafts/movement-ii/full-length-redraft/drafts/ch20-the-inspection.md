@@ -78,7 +78,7 @@ He stopped while still wanting to improve it. That was the first work of the day
 
 Mr Stephen arrived exactly when he said he would.
 
-He came without umbrella, because the rain had lifted an hour earlier and only the edges of his trousers showed the road. He wore a pale shirt with the sleeves rolled once, neither too casual nor too formal, and carried a narrow notebook in one hand. Not a ledger. Not the rent book. A smaller thing, private to him, where houses became facts a man could arrange. He greeted them from the gate before opening it, as though courtesy itself were a key.
+He came without umbrella, because the rain had lifted an hour earlier and only the edges of his trousers showed the road. He wore a pale shirt with the sleeves rolled once, neither too casual nor too formal, and carried a narrow notebook in one hand. Not a ledger. Not the rent book. A smaller thing, private to him, where houses became facts a man could order. He greeted them from the gate before opening it, as though courtesy itself were a key.
 
 "Good morning," he said. "I hope I have not come at a bad time."
 
@@ -158,9 +158,9 @@ That was the trouble. A man can obey and still make the obedience visible.
 
 ---
 
-They entered the front room in the sequence Obianuju allowed.
+They entered the front room in the order Obianuju allowed.
 
-She went first. Mr Stephen followed. The protagonist came last and hated the correctness of it, because the sequence made him feel both excluded and protected, and he had not yet learned to accept protection without mistaking it for judgment. The front room was neither warm nor cold. It had chosen the more dangerous temperature: ordinary.
+She went first. Mr Stephen followed. The protagonist came last and hated the correctness of it, because the order made him feel both excluded and protected, and he had not yet learned to accept protection without mistaking it for judgment. The front room was neither warm nor cold. It had chosen the more dangerous temperature: ordinary.
 
 The stain near the no-colour door had dried into a pale-edged shadow. The floorboard did not click while they crossed. Of course it did not. Houses, like people, sometimes know when to behave in front of authority.
 
@@ -334,7 +334,7 @@ The rain did not touch his face there. He wished, stupidly, that it would.
 
 Mr Stephen opened the notebook then.
 
-The smallness of it made the act worse. A large ledger would have been theatrical; a form would have been too official; a letter would have made the moment too easy to hate. The narrow notebook belonged to a man keeping his own arrangement. He wrote the date. He wrote something else the protagonist could not see. He wrote with a pencil sharpened carefully and kept too short for a careless hand.
+The smallness of it made the act worse. A large ledger would have been theatrical; a form would have been too official; a letter would have made the moment too easy to hate. The narrow notebook belonged to a man keeping his own order. He wrote the date. He wrote something else the protagonist could not see. He wrote with a pencil sharpened carefully and kept too short for a careless hand.
 
 "I will send Brother Paul again after three dry days," he said.
 
