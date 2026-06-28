@@ -60,7 +60,7 @@ He should have gone cold himself. Instead something in him — the thirty-year-o
 
 "You spoke to me," he said.
 
-He said it out loud. To the room. And he heard, in his own voice, the terrible thing: not fear, not even defiance, but a kind of relief, the relief of a man who has been told for weeks that he is no use and has just been informed, by the thing itself, that he is a factor after all. He had mistaken being addressed for being chosen. He had been spoken to, and his whole starved usefulness had stood up inside him and called it honour.
+He said it out loud. To the room. And he heard, in his own voice, the terrible thing: not fear, not even defiance, but a kind of relief, the relief of a man who has been told for weeks that he is no use and has just been informed, by the thing itself, that he is a factor after all. He had been spoken to, and his whole starved usefulness had stood up inside him and called it honour.
 
 "I am not afraid of you," he said — and took the step.
 
