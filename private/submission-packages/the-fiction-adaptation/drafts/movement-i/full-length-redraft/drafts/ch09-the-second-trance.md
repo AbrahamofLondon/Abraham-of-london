@@ -62,13 +62,15 @@ The room did not change. The light did not change. But the air near the window h
 
 The cloth was in his hand.
 
+His feet had arrived before the rest of him. He had been sitting — at the table, with the cup — and the next thing his body knew was the wet of the yard coming up through his shoes into his soles, packed earth on the leather that he had no memory of crossing, and the cold rising in him slowly from the ground up, as though the boundary had set him down a little short of where a body was meant to land.
+
 He was standing in the kitchen yard. The basin was there, the water grey and still, the morning light the same grey it had been when he sat down with his tea. The cloth she had hung on the line was in his hand, and it was wet, and the wet was cold, and when he looked at his palm the skin was white with salt.
 
 He stood very still.
 
 The yard was the yard. The line was the line. The cloth was the cloth he had watched her hang the evening before. But it was wet, and it was cold, and the salt on his hand was real, and he had not walked to the line to take it down. He had been sitting at the table. He had set his cup down. He had watched the air move near the window. And then he was here, with the cloth in his hand and the salt on his skin and the knowledge that he had been somewhere with laws, and that the laws had let him bring something back.
 
-He looked at the cloth. It was not stiff anymore. It was ordinary wet cloth, the kind that would dry in an hour if he hung it again. But the salt on his hand was not ordinary. It was the same salt that had been on her palm in the market, the same salt that filmed the windows, the same salt that was on everything the town owned because the sea insisted. He touched his tongue to his palm. Salt. Real salt. The kind that came from the sea and stayed.
+He looked at the cloth. It was not stiff anymore. It was ordinary wet cloth, the kind that would dry in an hour if he hung it again. But the salt on his hand was not ordinary. It was the same salt that had been on her palm in the market, the same salt that filmed the windows, the same salt that was on everything the town owned because the sea insisted. He held the hand still and looked at it — the white grains caught in the lines of the palm, not the sea-damp that dries to nothing but salt that had been left there, set there, the way the tide leaves a mark on a wall to show how high it came and then withdraws and lets the mark do its remembering. He touched his tongue to his palm. Salt. Real salt. The kind that came from the sea and stayed.
 
 He had brought something back.
 
@@ -132,7 +134,7 @@ He stood at the edge of the market with his hands in his pockets and the salt st
 
 He would go to Kene.
 
-Not for advice. Not for rescue. Not to confess what he had seen in the trance, because he did not have the words for it and Kene would not have the framework for it. He would go to Kene because Kene had asked whether he could leave, and he had not answered, and the question had been waiting for him ever since. He would go to Kene because Kene was the only person in the town who had felt the cold from outside and had not turned it into a mystery or a monster. He would go to Kene because he needed to say one sentence aloud, to another human being, before the sentence became too heavy to carry alone.
+Not for advice. Not for rescue. Not to confess what he had seen in the trance, because he did not have the words for it and Kene would not have the framework for it. He would go to Kene because Kene had asked whether he could leave, and he had not answered, and the question had been waiting for him ever since. He would go to Kene because Kene was the only person in the town who had felt the cold from outside and had not turned it into a mystery or a monster. He would go to Kene because there was a sentence he needed to put into the air, and he could not say it to Obianuju first — to say it to her first would make it a thing between them before he understood it, and he needed it to be a thing in the world before it became a thing in his marriage. The sentence was not complicated. It was that the cold had touched him, and that he was no longer certain the house was a place a man could stay in and remain himself. He needed one person who stood outside it to hear him say so before he carried it back through his own door.
 
 He turned away from the market and walked toward Kene's road.
 

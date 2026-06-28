@@ -4,7 +4,7 @@ MOVEMENT II DRAFT. Ch.11: The Reversal. Function: Obianuju turns — rendered as
 
 # Chapter 11: The Reversal
 
-He came back to the house in the hour before dawn, and the house was the same as he had left it — the same grey walls, the same no-colour door, the same cold waiting at the edges of the rooms — but something had shifted in the air, the way the air shifts before a change of season, invisible and absolute.
+He came back to the house in the hour before dawn. It was the same as he had left it. The same grey walls, holding the same grey light. The same no-colour door. The same cold standing at the edges of the rooms the way it always stood — patient, in no hurry, waiting out the warm centre of the day. He knew the house the way you know a face, and it was that knowing that told him, before he had crossed the front room, that something had shifted. Not the cold; the cold was the same. Something else — the way the air shifts before a change of season, invisible and absolute.
 
 He had not slept. He had walked to Mama Nneoma's compound and found it dark, and he had stood at her gate until the first light touched the almond tree. The waiting had been the hardest part — not because he was impatient, but because the waiting gave him time to feel what he had done. He had left the house. He had walked out of the cold. He had chosen movement over endurance. And now he was standing at an old woman's gate in the dark, not knowing what he would say when she opened the door.
 
@@ -42,7 +42,7 @@ She asked what he had done with the sentence, and he said he was still carrying 
 
 When he rose to leave, she walked with him to the door. She stood on the step with her arms folded, looking past him toward the part of the lane from which his house could not be seen.
 
-"You have made the house notice you," she said. "That is not the same as understanding it."
+"You have made the house notice you," she said. "It will not forget that. That is not the same as knowing what to do about it."
 
 He had walked home with that sentence burning in him, and now he stood in the front room with the first grey light coming through the window, and he understood that Mama Nneoma had been right. The house had noticed him. The cold had noticed him. And so had Obianuju.
 
