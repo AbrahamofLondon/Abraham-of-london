@@ -239,8 +239,8 @@ Avoid lines that:
 
 ## Working decision
 
-**Recommended candidate to test in Ch.6:** `You can be welcomed and still be late.`
+**FINAL OWNER RULING:** `You can be welcomed and still be late.`
 
-**Lock status:** not final. Owner should approve, revise, or replace before Ch.6 is drafted.
+This is the locked Elder sentence for Ch.6.
 
-**Ch.6 remains locked.**
+Use it inside ordinary action, not as prophecy. Do not isolate it with excessive ceremony. Keep Recommendation B (`Do not call a room yours because you are allowed to sit in it.`) as a possible later echo only; do not use it in Ch.6. Do not use Recommendation C or D for now.
