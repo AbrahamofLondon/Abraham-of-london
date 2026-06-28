@@ -14,7 +14,7 @@
 - `03-market-positioning-and-strategy.md` (lane, length, comps)
 - `04-memoir-leverage-and-sequencing.md` (firewall, sibling-theme discipline)
 
-Plus the renamed-figure instruction (Adaeze → **Obianuju**), applied across the package before drafting.
+Plus the renamed-figure instruction establishing **Obianuju** as canonical, applied across the package before drafting.
 
 ---
 
