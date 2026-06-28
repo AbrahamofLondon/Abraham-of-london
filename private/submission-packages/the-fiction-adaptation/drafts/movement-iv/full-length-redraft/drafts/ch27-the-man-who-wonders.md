@@ -304,13 +304,7 @@ The cold was at the edges.
 
 And he understood that the woman who had taken the photograph had been carrying the door in her mind for thirty years, the same way she had carried the photograph. She had hidden one and tried to forget the other. And now both had been found.
 
-The protagonist sat alone in the front room.
 
-The cloth pouch was on the table.
-
-The cold was at the edges.
-
-And he understood that the woman who had taken the photograph had been carrying the door in her mind for thirty years, the same way she had carried the photograph. She had hidden one and tried to forget the other. And now both had been found.
 
 ---
 
