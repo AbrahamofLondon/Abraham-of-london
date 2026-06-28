@@ -13,9 +13,8 @@ Grep across the whole package returned these Igbo given names in use as **charac
 - **Obiefuna** (the landlord) — Ch.12, 13, 14 + reports + assemblies.
 - **Chinwe** (Mama Chinwe, a street neighbour) — Ch.13, 14 + reports + assemblies.
 
-**False positives (not characters; no action):**
-- **"Ada"** hits = the word "Adapt**a**tion" in titles/headers and historical notes — not a name.
-- **"Adaeze"** hits = historical references to the *old placeholder* for Obianuju in early meta-docs (`movement-i/README`, `movement-i-drafting-report`), documenting the prior rename. Left as rename history.
+**False positives / historical notes (not active character names):**
+- The old placeholder name for Obianuju may appear only in naming-audit reports as historical rename context, not in active fiction prose or package guidance.
 - **Ngozi, Emeka, Ifeoma, Chukwudi, Uche, Obinna, etc.:** zero occurrences.
 
 No other Igbo given names were in use.

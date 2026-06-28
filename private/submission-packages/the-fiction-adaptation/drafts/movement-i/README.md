@@ -11,7 +11,7 @@
 - `movement-i-drafting-report.md` — required report.
 
 ## Standing rules for this folder
-- Central figure is **Obianuju** (renamed from the placeholder Adaeze).
+- Central figure is **Obianuju** (canonical fiction name).
 - Protagonist remains **unnamed** in narration (architecture §B2).
 - Past tense = "real"; **present tense = trance** (architecture §D).
 - Memoir firewall: no real names, no court/contact/Home-Office/child material, no roman-à-clef key.
