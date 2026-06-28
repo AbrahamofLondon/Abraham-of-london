@@ -186,9 +186,13 @@ Brother Paul waited for an explanation. The protagonist did not give one, becaus
 
 "Don't draw on the wood," Brother Paul said. "It confuses the measurement."
 
-He rubbed out the second line with his thumb. The chalk smeared and disappeared, and the first line was left alone, curved and intact, the only one that meant anything.
+He rubbed out the second line with his thumb. The chalk smeared and disappeared, and the first line was left alone — curved, intact, the only one that meant anything.
 
-The protagonist watched the second line vanish and felt relief and shame in equal measure — relief that the evidence was gone, shame that he had needed a repairman to teach him what not to mark.
+The protagonist watched the second line vanish. The chalk dust settled into the wet grain of the wood. In a few minutes, the rain would wash it away entirely. His mark had lasted less than a day. He had acted, and the acting had been wiped away by a repairman with his thumb, and the only thing left was the shame of having marked something he did not understand.
+
+"Don't draw on the wood," Brother Paul said. "It confuses the measurement."
+
+The protagonist nodded. He did not trust himself to speak. He had wanted to leave a mark. He had left one. It had lasted less than a day. That was his first unguided action in this house: a mark that a repairman erased with his thumb.
 
 Brother Paul redrew the first line in a fresh straight stroke. "There. Now we know."
 
