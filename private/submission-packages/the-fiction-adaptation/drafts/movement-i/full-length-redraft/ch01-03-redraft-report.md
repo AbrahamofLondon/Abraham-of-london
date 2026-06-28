@@ -52,7 +52,7 @@ The old Ch.1 line "the smell of a burning that should have killed him" was a **f
 - *Cut/fix:* the fire→water continuity fix (above).
 
 **Changes (all scene/interiority, no exposition):**
-- Journal texture deepened: the swollen damp pages, the breath of old paper, the child's upright hand giving way mid-entry to the woman's slant; a pressed flower that "had pressed back… left itself twice," rhyming with the cold hour leaving itself on every room.
+- Journal texture deepened: the softened cloth cover, the single hand-reinforced spine, the damp-swollen pages, and the same recognisable hand shifting from controlled to feeling-led; a pressed flower that "had pressed back… left itself twice," rhyming with the cold hour leaving itself on every room. Later continuity pass corrected this from an overly aged object to a journal only a few years old.
 - New interiority — **the danger of the generous reading**: being read so exactly *flatters* the very lateness he is ashamed of; his generosity toward the journal is "self-interested in the deepest, least visible way." This is the brief's "loving reading can also be blindness," dramatised, not stated.
 - **The pages he avoids:** the unfinished line "*he came to the door again last night and I did not*," turned past quickly, explained away as damp. Intimacy beginning to tip into misrecognition.
 - The final sentence's misreading made explicit at the level of his deafness, not the narrator's exposition: "a sentence about being waited for can have a second person in it, and… she had not said which of them she meant. He heard only the half that loved him."
