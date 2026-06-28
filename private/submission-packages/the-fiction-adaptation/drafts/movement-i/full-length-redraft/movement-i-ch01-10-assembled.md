@@ -1,6 +1,7 @@
-<!--
-RECONCILIATION PASS. Option B hybrid opening: hook overture (para 1) → Obianuju ordinary (para 2) → the hour arrives (para 3). One Obianuju-ordinary beat, one town movement, one drowning memory (relocated into the "three accidents" paragraph; the earlier second brown-water flash removed). Added fourth beat: waiting out the hour (justified — deepens fearlessness-as-danger and presence-in-absence; chapter needed breath to reach natural length). Protected passages verbatim. Cut confirmed absent. Trance italic-present, unannounced. Target 2,350–2,600.
--->
+# The One Who Arrived First
+
+## Movement I — The Current (Chapters 1–10, full-length redraft)
+
 
 # Chapter 1: The Unreachable Hour
 
@@ -46,9 +47,6 @@ Outside, the call to evening went up from the green door and, a little after, th
 
 ---
 
-<!--
-PRECISION EXPANSION PASS. Preserve the gift framing and the two weighted lines of dialogue. Continuity fix: "burning room of his boyhood" → water/drowning (firewall + Ch.3 consistency). Expand through: journal texture, handwriting, the pages he avoids, the danger of the generous reading flattering his endurance, intimacy becoming misrecognition. No mystery-diary cliché, no exposition, no spirit-spouse explanation, no loud foreshadowing. Target 2,100–2,500.
--->
 
 # Chapter 2: The Journal That Was a Gift
 
@@ -94,9 +92,6 @@ He heard it as humility. A woman ascribing her own faithfulness to God, to her g
 
 ---
 
-<!--
-PRECISION EXPANSION PASS. Preserve the drowning origin and the trance. Expand through embodied town (salt/market/roads/thresholds/light/sea-as-neighbour), the town remembering the drowning differently from him, people treating impossibility as ordinary, and the trance rendered as a COMPETING JURISDICTION, not a dream. No magical-realism wash, no tourist texture, no prophecy language, no cosmology explanation. Target 2,200–2,700.
--->
 
 # Chapter 3: A Coastal Town That Could Be
 
@@ -124,9 +119,6 @@ He did not read it. He turned and walked back up toward the town, taking one of 
 
 ---
 
-<!--
-FULL-LENGTH DRAFT. Ch.4: The Speed of It. Function: widen after the compressed threshold; show how quickly the commitment formed and why speed felt like destiny from inside, not carelessness. No diminutive invented; Obianuju only. Gift beat: one wholly good day. Force: Spirit Husband at the edge only; no trance. Motifs: current/ribbon/market/salt/time. Target 2,800-3,500.
--->
 
 # Chapter 4: The Speed of It
 
@@ -272,9 +264,6 @@ He did not know yet that a current can carry you because it wants you somewhere.
 
 ---
 
-<!--
-FULL-LENGTH DRAFT. Ch.5: The Confidant. Function: introduce the brother/friend figure as warmth, limitation, and external witness. Force: Spirit Husband seen from outside for the first time. Turn: his calm yes frightens the confidant more than a no. No exposition device; no Ch.6 Elder material; no memoir leakage. Motifs: cold/salt/door/market/ordinary loyalty. Target 2,800-3,500.
--->
 
 # Chapter 5: The Confidant
 
@@ -508,9 +497,6 @@ He meant that too.
 
 ---
 
-<!--
-FULL-LENGTH DRAFT. Ch.6: The Elder. Function: introduce the Iyalode-function figure; she sees and neither condemns nor rescues. Locked Elder sentence: "You can be welcomed and still be late." Use it casually inside ordinary action, not prophecy. All three forces named obliquely only; no cosmology dump; no Ch.7 territory work; no diminutive invented. Target ~3,200.
--->
 
 # Chapter 6: The Elder
 
@@ -856,9 +842,6 @@ Not yet.
 
 ---
 
-<!--
-FULL-LENGTH DRAFT. Ch.7: Territory. Function: a domestic chapter wholly governed by the Spirit Husband — nothing "happens," the horror is entirely in the weather. Force: Spirit Husband as climate, full and undiluted. Turn: he stops noting the hour as strange — habituation. The Elder's sentence pressures his interpretation without being repeated. No trance, no Voice, no explanation. Motifs: cold/door/hands/threshold. Target 3,200–4,000.
--->
 
 # Chapter 7: Territory
 
@@ -1062,9 +1045,6 @@ In the morning, the kettle was boiling, and Obianuju was measuring rice into a p
 
 ---
 
-<!--
-FULL-LENGTH DRAFT. Ch.8: What He Brought Into It. Function: his own inheritance surfaces — the fearlessness as family weather, the account opened in the brown water. The rhyme between his claim (kept) and Obianuju's claim (the one who arrived first) becomes visible to the reader, not yet to him. Force: the rhyme — his claim surfaces as parallel to hers. Turn: the first faint approach to kept ≠ spared, felt not stated. Motifs: water/account/hands/salt/market. No trance, no Voice. Target 3,000–3,800.
--->
 
 # Chapter 8: What He Brought Into It
 
@@ -1286,9 +1266,6 @@ He sat at the table and she put a cup in front of him, and the steam rose, and t
 
 ---
 
-<!--
-BREAKTHROUGH PIVOT DRAFT. Ch.9: The Second Trance. Function: first full sustained trance since Ch.3 — precise, visual, active, revelatory without explanation. The cold becomes visible without being literalised. Obianuju appears with agency. The protagonist carries something back. He acts at the close. Force: Trance as messenger/jurisdiction. Motifs: door/hands/water/salt/threshold. No Voice. No cosmology. Target 2,900–3,300.
--->
 
 # Chapter 9: The Second Trance
 
@@ -1350,13 +1327,15 @@ The room did not change. The light did not change. But the air near the window h
 
 The cloth was in his hand.
 
+His feet had arrived before the rest of him. He had been sitting — at the table, with the cup — and the next thing his body knew was the wet of the yard coming up through his shoes into his soles, packed earth on the leather that he had no memory of crossing, and the cold rising in him slowly from the ground up, as though the boundary had set him down a little short of where a body was meant to land.
+
 He was standing in the kitchen yard. The basin was there, the water grey and still, the morning light the same grey it had been when he sat down with his tea. The cloth she had hung on the line was in his hand, and it was wet, and the wet was cold, and when he looked at his palm the skin was white with salt.
 
 He stood very still.
 
 The yard was the yard. The line was the line. The cloth was the cloth he had watched her hang the evening before. But it was wet, and it was cold, and the salt on his hand was real, and he had not walked to the line to take it down. He had been sitting at the table. He had set his cup down. He had watched the air move near the window. And then he was here, with the cloth in his hand and the salt on his skin and the knowledge that he had been somewhere with laws, and that the laws had let him bring something back.
 
-He looked at the cloth. It was not stiff anymore. It was ordinary wet cloth, the kind that would dry in an hour if he hung it again. But the salt on his hand was not ordinary. It was the same salt that had been on her palm in the market, the same salt that filmed the windows, the same salt that was on everything the town owned because the sea insisted. He touched his tongue to his palm. Salt. Real salt. The kind that came from the sea and stayed.
+He looked at the cloth. It was not stiff anymore. It was ordinary wet cloth, the kind that would dry in an hour if he hung it again. But the salt on his hand was not ordinary. It was the same salt that had been on her palm in the market, the same salt that filmed the windows, the same salt that was on everything the town owned because the sea insisted. He held the hand still and looked at it — the white grains caught in the lines of the palm, not the sea-damp that dries to nothing but salt that had been left there, set there, the way the tide leaves a mark on a wall to show how high it came and then withdraws and lets the mark do its remembering. He touched his tongue to his palm. Salt. Real salt. The kind that came from the sea and stayed.
 
 He had brought something back.
 
@@ -1420,7 +1399,7 @@ He stood at the edge of the market with his hands in his pockets and the salt st
 
 He would go to Kene.
 
-Not for advice. Not for rescue. Not to confess what he had seen in the trance, because he did not have the words for it and Kene would not have the framework for it. He would go to Kene because Kene had asked whether he could leave, and he had not answered, and the question had been waiting for him ever since. He would go to Kene because Kene was the only person in the town who had felt the cold from outside and had not turned it into a mystery or a monster. He would go to Kene because he needed to say one sentence aloud, to another human being, before the sentence became too heavy to carry alone.
+Not for advice. Not for rescue. Not to confess what he had seen in the trance, because he did not have the words for it and Kene would not have the framework for it. He would go to Kene because Kene had asked whether he could leave, and he had not answered, and the question had been waiting for him ever since. He would go to Kene because Kene was the only person in the town who had felt the cold from outside and had not turned it into a mystery or a monster. He would go to Kene because there was a sentence he needed to put into the air, and he could not say it to Obianuju first — to say it to her first would make it a thing between them before he understood it, and he needed it to be a thing in the world before it became a thing in his marriage. The sentence was not complicated. It was that the cold had touched him, and that he was no longer certain the house was a place a man could stay in and remain himself. He needed one person who stood outside it to hear him say so before he carried it back through his own door.
 
 He turned away from the market and walked toward Kene's road.
 
@@ -1432,9 +1411,6 @@ And for the first time in months, he was not sitting through the hour with his h
 
 ---
 
-<!--
-REWRITE — 10/10 STANDARD. Ch.10: Continuation (threshold). Function: Movement I close — continuation enters the world, the Claim reaches for what comes next, the reversal begins. Kene challenges. Shrimp woman remembers. Obianuju's knowledge costs the marriage. The protagonist acts before the chapter ends. No child on page — threshold and expectation only. Force: Spirit Husband reaching. Motifs: ribbon/threshold/hands/cold/salt. Target 4,000–4,600.
--->
 
 # Chapter 10: Continuation
 
@@ -1534,7 +1510,7 @@ The words hung between them. The protagonist felt them the way he had felt the c
 
 "You think I am staying for the wrong reason," he said.
 
-"I think you are staying for a reason you have not examined. And I think the cold knows that. I think the cold is counting on it."
+"I think you are staying for a reason you have not examined. And I think you are doing exactly what it wants."
 
 The protagonist stood up. He did not know why he stood — there was nowhere to go — but the sentence had entered him and he needed to move against it, even if the movement was only standing.
 
@@ -1568,7 +1544,7 @@ It was not a question.
 
 She was quiet for a moment. Her hands were in her lap, and he saw that they were shaking — not from age, but from something else. She pressed them flat against her thighs to still them, and the gesture was so private that he almost looked away.
 
-"I lived in that house," she said. "Thirty years ago. With my husband and my first child. We left in the middle of the night, and I have not spoken of it since. Not to anyone. Not even to myself, not in words."
+"I lived in that house," she said. "Thirty years ago. With my husband and my first child. We left in the middle of the night, and I have not spoken of it since. Not to anyone. I told myself I had forgotten."
 
 She stopped. Her hands were still pressed against her thighs. He saw her knuckles whiten.
 
@@ -1588,7 +1564,7 @@ The protagonist felt the cold in his palm return. Not as temperature. As recogni
 
 "What did you do?" he asked.
 
-"I left," she said. "But not soon enough. I left after it reached for my child. Not to harm her. To claim her. I woke one night and the cold was not above me. It was above her. It was standing where a father would stand, and I understood, in that moment, that it had not been waiting for me at all. It had been waiting for her. It wanted what came next."
+"I left," she said. "But not soon enough. I left after it reached for my child. Not to harm her. To claim her. I woke one night and the cold was not above me. It was above her. I had gone to her because she had made a sound, and when I bent over her the breath was rising off her in little clouds into air that had not been cold until I reached it, and when I took her hands they were cold in a way a child's hands should never be — not cold like weather, cold like a thing that had already been held. It was standing where a father would stand, and I understood, in that moment, that it had not been waiting for me at all. It had been waiting for her. It wanted what came next."
 
 The word hung in the air between them. *Next.* He thought of the journal, the spine resewn by hand, the thread that had been used because the household had used what it had. He thought of the ribbon of orange peel curling to the floor. He thought of Obianuju's hands, still working while the rest of her was called away.
 
@@ -1667,6 +1643,8 @@ She did not answer at once. She looked at the no-colour door, and he watched her
 "Why?"
 
 She looked at him then. Her face was unreadable in the way faces become unreadable when the person behind them has decided not to show their hand.
+
+She was quiet for the space of a breath. Her hand found the window ledge and rested there, flat, the way it rested when she was holding the rest of herself still, and she looked away from him, at the no-colour door, and then she said it — plainly, in the voice she kept for the things that cost her the most.
 
 "Because I was afraid that if I told you, you would stay."
 
@@ -1752,10 +1730,11 @@ He did not know where he was going. He only knew that he could not wait for morn
 
 He walked through the dark toward Mama Nneoma's compound.
 
-He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.
+He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had to walk.
 
 The no-colour door stayed closed behind him.
 
 The cold stayed in the house.
 
 And he walked.
+---

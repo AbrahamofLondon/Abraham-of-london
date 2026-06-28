@@ -100,7 +100,7 @@ The words hung between them. The protagonist felt them the way he had felt the c
 
 "You think I am staying for the wrong reason," he said.
 
-"I think you are staying for a reason you have not examined. And I think the cold knows that. I think the cold is counting on it."
+"I think you are staying for a reason you have not examined. And I think you are doing exactly what it wants."
 
 The protagonist stood up. He did not know why he stood — there was nowhere to go — but the sentence had entered him and he needed to move against it, even if the movement was only standing.
 
@@ -134,7 +134,7 @@ It was not a question.
 
 She was quiet for a moment. Her hands were in her lap, and he saw that they were shaking — not from age, but from something else. She pressed them flat against her thighs to still them, and the gesture was so private that he almost looked away.
 
-"I lived in that house," she said. "Thirty years ago. With my husband and my first child. We left in the middle of the night, and I have not spoken of it since. Not to anyone. Not even to myself, not in words."
+"I lived in that house," she said. "Thirty years ago. With my husband and my first child. We left in the middle of the night, and I have not spoken of it since. Not to anyone. I told myself I had forgotten."
 
 She stopped. Her hands were still pressed against her thighs. He saw her knuckles whiten.
 
@@ -154,7 +154,7 @@ The protagonist felt the cold in his palm return. Not as temperature. As recogni
 
 "What did you do?" he asked.
 
-"I left," she said. "But not soon enough. I left after it reached for my child. Not to harm her. To claim her. I woke one night and the cold was not above me. It was above her. It was standing where a father would stand, and I understood, in that moment, that it had not been waiting for me at all. It had been waiting for her. It wanted what came next."
+"I left," she said. "But not soon enough. I left after it reached for my child. Not to harm her. To claim her. I woke one night and the cold was not above me. It was above her. I had gone to her because she had made a sound, and when I bent over her the breath was rising off her in little clouds into air that had not been cold until I reached it, and when I took her hands they were cold in a way a child's hands should never be — not cold like weather, cold like a thing that had already been held. It was standing where a father would stand, and I understood, in that moment, that it had not been waiting for me at all. It had been waiting for her. It wanted what came next."
 
 The word hung in the air between them. *Next.* He thought of the journal, the spine resewn by hand, the thread that had been used because the household had used what it had. He thought of the ribbon of orange peel curling to the floor. He thought of Obianuju's hands, still working while the rest of her was called away.
 
@@ -233,6 +233,8 @@ She did not answer at once. She looked at the no-colour door, and he watched her
 "Why?"
 
 She looked at him then. Her face was unreadable in the way faces become unreadable when the person behind them has decided not to show their hand.
+
+She was quiet for the space of a breath. Her hand found the window ledge and rested there, flat, the way it rested when she was holding the rest of herself still, and she looked away from him, at the no-colour door, and then she said it — plainly, in the voice she kept for the things that cost her the most.
 
 "Because I was afraid that if I told you, you would stay."
 
@@ -318,7 +320,7 @@ He did not know where he was going. He only knew that he could not wait for morn
 
 He walked through the dark toward Mama Nneoma's compound.
 
-He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.
+He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had to walk.
 
 The no-colour door stayed closed behind him.
 
