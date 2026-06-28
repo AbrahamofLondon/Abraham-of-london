@@ -33,12 +33,11 @@ Until the owner confirms, drafting continues with the full name "Obianuju" and d
 
 ## Lock 3 — The Elder's one sentence
 
-**Status: OWNER INPUT REQUIRED before Ch.6.** Not to be invented. Ch.6 cannot carry full ancestral authority unless the sentence is one of:
-- **(i) supplied by the owner**, or
-- **(ii) discovered through a dedicated recall pass** (as the memoir's Iyalode/“preserve” material was), or
-- **(iii) deliberately withheld and structurally accounted for** — i.e., Ch.6 is drafted so the Elder gives a sentence the *reader* does not fully receive either (the protagonist hears it but it is held back from the page until its Ch.25 payoff). Option (iii) is viable and on-architecture, but it is a deliberate choice, not a default.
+**Status: RESOLVED / LOCKED before Ch.6.** Owner approved the Elder sentence after the dedicated discovery pass:
 
-**Recommendation:** owner supplies or greenlights a short recall pass. If neither is available before Ch.6, draft under Option (iii) and flag.
+> **You can be welcomed and still be late.**
+
+Use it inside ordinary action, not as prophecy. It should sound spoken, ancestral, and almost casual; the force comes later, when Ch.25 returns to it as recognition rather than solution.
 
 ---
 
@@ -68,7 +67,7 @@ No flag. The ending locks are intact in the structure. (They will need re-verifi
 
 - **Lock 1 (name):** confirm the unnamed device stands. *(Recommended: yes.)*
 - **Lock 2 (diminutive):** **decision needed before Ch.4** — supply his name for her (and optionally hers for him), or confirm none.
-- **Lock 3 (Elder's sentence):** **input needed before Ch.6** — supply, greenlight a recall pass, or accept the withheld-sentence option.
+- **Lock 3 (Elder's sentence):** resolved and locked — "You can be welcomed and still be late."
 - **Lock 4 (ending):** verified intact; no action.
 
-Drafting can proceed to **Ch.4–5** immediately on confirmation of Lock 1 and a Lock 2 decision; **Ch.6** waits on Lock 3.
+Drafting can proceed to **Ch.6** with the Elder sentence locked. Lock 2 remains unresolved; continue using "Obianuju" and direct address only unless the owner supplies or rejects the diminutive.
