@@ -130,3 +130,57 @@ The first sentence carries the whole-novel lateness/claim architecture. The seco
 ## Recommendation
 
 Leave Ch.6 as the current draft baseline. It is longer than the blueprint target but earns the length by creating the Elder's authority through scene rather than explanation. Next step should be an acceptance-gate audit before moving to Ch.7.
+
+---
+
+## Ch.6 Acceptance-Gate Audit — 2026-06-28
+
+**Verdict:** **ACCEPTED AS CURRENT.** Ch.6 widens the novel by introducing a living authority figure and a two-cosmology household. It does not merely explain the supernatural architecture.
+
+### Acceptance-gate sentence
+
+**Primary:** `You can be welcomed and still be late.`
+
+This is the chapter's load-bearing utterance. It names the protagonist's wound and the Spirit Husband's prior claim without explaining either. It can return in Ch.25 as recognition rather than answer.
+
+**Secondary protection sentence:** `Because your wife is not a road I can send you down or call you back from. She is a person.`
+
+This is the sentence that prevents the Elder chapter from reducing Obianuju to the problem being diagnosed.
+
+### Mama Nneoma as character, not oracle-device
+
+**PASS.** Mama Nneoma has ordinary life before authority: the repaired front step, almond-tree shade, beans and melon seeds, the cracked Bible, balm tin, spectacles she does not put on, pot, wrapper, rosary, key, red cloth, and food sent home. She has humour, irritation, patience, and limits. She does not exist only to deliver the line.
+
+### Elder sentence placement
+
+**PASS.** The locked sentence is buried correctly in scene. It is spoken while she divides groundnuts, half for the visitor and half for the house. It is not set on its own line, not announced as prophecy, and not framed with supernatural ceremony.
+
+### Exposition check
+
+**PASS.** The chapter refuses the noun. The protagonist asks "What is it?" and the Elder declines the explanatory route: `If you want a name so you can decide whether to respect it, you have come to the wrong woman.` This keeps the cosmology implicit and lived.
+
+### World-widening check
+
+**PASS.** The chapter widens through town and household: the blue church door, mosque lane, standpipe, Kene's pressure, the Elder's compound, the kitchen yard, a working pot, and the coexistence of Bible, key, and red cloth. The chapter adds social-spiritual authority to the world rather than pausing to explain the rules.
+
+### Protagonist misreading / delayed payoff
+
+**PASS.** He receives the sentence as something like a key but does not know which door it opens. His immediate misreading is to ask "Late to what?" and later to hold the sentence back from Obianuju. That creates a clean Ch.14/Ch.25 return path: he carries it badly before he can carry it well.
+
+### Obianuju protection
+
+**PASS.** Mama Nneoma grants both truths: Obianuju loves him, and love does not make him first. The chapter refuses to make her wicked, a road, a warning, a weather, or a wound. It returns her to personhood.
+
+### Force architecture
+
+**PASS.**
+
+- **Spirit Husband / Claim:** present through prior standing, lateness, house, room, cold, and welcome. Not named directly.
+- **Trance:** absent.
+- **Voice:** absent.
+
+The three forces remain distinct. No disguised Voice threat or Trance logic enters the chapter.
+
+### Decision
+
+Ch.6 should stand as the current draft baseline. Proceed next to **Ch.7-8 only**, not all remaining Movement I at once. Ch.7 is a pressure chapter and should receive controlled drafting and a post-draft acceptance-gate audit.
