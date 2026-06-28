@@ -12,9 +12,9 @@ These are carried forward exactly. Nothing below revises them.
 
 - **Governing premise.** A novel can only show a true thing's shape. Allegory is the protection: "I am not telling you what happened. I am telling you what it was like to be inside it." **LOCKED.**
 - **The world.** Liminal register, structural not decorative. Real-adjacent place-names; grief-and-dream time; the supernatural never explained or rationalised; "was that real?" structurally forbidden. By the second half the registers genuinely blur. **LOCKED.**
-- **The central female figure (Adaeze).** A deliberate merge of the Ch.13 spiritual material and the later-marriage pattern. Never a villain. Every harm sits near a gift. The journal-before-they-met is written as a gift, not only a retrospective warning. Duality sustained to the last page. **LOCKED.**
+- **The central female figure (Obianuju).** A deliberate merge of the Ch.13 spiritual material and the later-marriage pattern. Never a villain. Every harm sits near a gift. The journal-before-they-met is written as a gift, not only a retrospective warning. Duality sustained to the last page. **LOCKED.**
 - **The three forces.** Spirit Husband = CLAIM (felt as absence). The Voice = INTIMIDATION (speaks once or twice, names a cost). The Trance = WARNING ARRIVING TOO LATE TO PREVENT, IN TIME TO CONFIRM (morally neutral, horror is in accuracy). Distinct, in tension, none defeatable. **LOCKED.**
-- **The ending shape.** The three forces swap roles, they do not resolve: the Voice goes silent; the Trance reactivates pointing at something *new* and unspecified; the Spirit Husband's claim simply stops being the loudest thing in the room. Adaeze's unfinished business rhymes with his, is never explained. The final scene is his alone, small and ordinary, all three forces present but no longer organising his life. **LOCKED.**
+- **The ending shape.** The three forces swap roles, they do not resolve: the Voice goes silent; the Trance reactivates pointing at something *new* and unspecified; the Spirit Husband's claim simply stops being the loudest thing in the room. Obianuju's unfinished business rhymes with his, is never explained. The final scene is his alone, small and ordinary, all three forces present but no longer organising his life. **LOCKED.**
 
 ---
 
@@ -38,7 +38,7 @@ This is the right engine for four reasons:
 Follow the Iyalode instinct: function and weight, not biography. **He carries no proper name to the reader.** This is deliberate and marketable (cf. the unnamed narrator tradition; cf. *Piranesi*, named by the force that holds him).
 
 - The **Spirit Husband never names him** — to name is to grant standing, and the claim refuses him standing.
-- **Adaeze** calls him by a single tender diminutive (to be discovered in drafting), which becomes unbearable once the reversal comes.
+- **Obianuju** calls him by a single tender diminutive (to be discovered in drafting), which becomes unbearable once the reversal comes.
 - The only "true" name in the book is the **function-word the Trance finally gives him at the end** — left open until the closing chapters reveal which quality the world actually needed from him. (The source's instinct, preserved.)
 
 This keeps the protagonist question productively open *where the source wanted it open* (the final naming) while resolving it *where drafting needs it closed* (the foregrounded quality).
@@ -92,7 +92,7 @@ Recommendation: draft under *The One Who Arrived First*; hold *The Current* as t
 ## G. What remains genuinely open (and should)
 
 - The protagonist's final function-name (deliberately discovered in drafting — source's instinct preserved).
-- Adaeze's single diminutive.
+- Obianuju's single diminutive.
 - The exact content of the Trance's final reactivation (must stay unspecified to the reader; the *author* should know it).
 - Secondary cast (a confidant figure; an elder/discernment figure carrying the Iyalode function obliquely) — to be built in the chapter plan.
 

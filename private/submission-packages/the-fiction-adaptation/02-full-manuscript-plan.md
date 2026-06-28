@@ -14,7 +14,7 @@
 
 1. **In medias res, permanently.** No innocent beginning exists anywhere in the book — not even in flashback. The current is already running when the reader arrives and was running before the protagonist did.
 2. **The three forces keep their territories** (architecture §C): Spirit Husband = domestic/interior weather; Voice = the single hinge; Trance = the book's relationship to its ending.
-3. **Adaeze's duality is load-bearing in every appearance.** A scene of harm is never allowed to stand without a scene of gift within reach (not necessarily adjacent). The journal-before-they-met is a *gift* the first time we see it.
+3. **Obianuju's duality is load-bearing in every appearance.** A scene of harm is never allowed to stand without a scene of gift within reach (not necessarily adjacent). The journal-before-they-met is a *gift* the first time we see it.
 4. **"Was that real?" is forbidden.** No character asks it. The reader is left to drown in the ambiguity by design.
 5. **The supernatural has plain internal logic, never explanation.** Stated, never argued.
 6. **Continuation, never a child** (architecture §E).
@@ -32,7 +32,7 @@ A man who cannot be frightened by death walks into a love already claimed by som
 
 | Movement | Dominant force | Register | Function | Chs |
 | :------- | :------------- | :------- | :------- | :-: |
-| **I — The Current** | Spirit Husband (CLAIM) | mostly "real," past tense; first trance intrusions | Establish the world already in motion, Adaeze's duality, the protagonist's fearlessness, the claim as fact | 1–10 |
+| **I — The Current** | Spirit Husband (CLAIM) | mostly "real," past tense; first trance intrusions | Establish the world already in motion, Obianuju's duality, the protagonist's fearlessness, the claim as fact | 1–10 |
 | **II — The Cost** | The Voice (INTIMIDATION) | registers begin to blur; present tense spreads | Isolation, continuation, the Voice's single deployment, the test, the death the Trance confirms | 11–21 |
 | **III — Outliving, Not Winning** | The Trance (WARNING) | blur is total; tense no longer reliable | The forces swap roles; no resolution; the final reactivation; his solitary ordinary ending | 22–30 |
 
@@ -42,7 +42,7 @@ A man who cannot be frightened by death walks into a love already claimed by som
 
 ### MOVEMENT I — THE CURRENT (Claim)
 
-**Ch.1 — The Unreachable Hour.** Open inside the established relationship. A specific hour each day when Adaeze becomes unreachable — not absent in body, absent in some other way. He has already learned not to ask where she goes. The Spirit Husband is established as fact, not introduced. The protagonist's fearlessness flagged lightly: he finds the cold room interesting, not frightening. *Gift beat: the same chapter shows the ordinary warmth of the hour before and after.*
+**Ch.1 — The Unreachable Hour.** Open inside the established relationship. A specific hour each day when Obianuju becomes unreachable — not absent in body, absent in some other way. He has already learned not to ask where she goes. The Spirit Husband is established as fact, not introduced. The protagonist's fearlessness flagged lightly: he finds the cold room interesting, not frightening. *Gift beat: the same chapter shows the ordinary warmth of the hour before and after.*
 
 **Ch.2 — The Journal That Was a Gift.** He finds (or she shows him) the journal she kept before they ever met — pages that seem to describe him, or someone shaped like him, written before he existed to her. Rendered as **gift**: tenderness, prophecy, the uncanny grace of being written toward. The warning is invisible here; the reader will only feel it later. *Duality fully active.*
 
@@ -52,19 +52,19 @@ A man who cannot be frightened by death walks into a love already claimed by som
 
 **Ch.5 — The Confidant.** Introduce the secondary cast: a friend/brother-figure who can see the cold rooms from outside and cannot name them. He becomes the reader's proxy for the question the book forbids. He asks, obliquely, *are you alright in that house* — and the protagonist, fearless, says yes.
 
-**Ch.6 — The Elder.** The Iyalode-function character: an old woman of spiritual authority who holds two cosmologies without conflict, who *sees* what Adaeze carries and does not pretend not to. She neither condemns nor rescues. She gives the protagonist one sentence he will not understand until the end. (Carries the memoir's Iyalode register obliquely, fully fictionalised.)
+**Ch.6 — The Elder.** The Iyalode-function character: an old woman of spiritual authority who holds two cosmologies without conflict, who *sees* what Obianuju carries and does not pretend not to. She neither condemns nor rescues. She gives the protagonist one sentence he will not understand until the end. (Carries the memoir's Iyalode register obliquely, fully fictionalised.)
 
 **Ch.7 — Territory.** A domestic chapter wholly governed by the Spirit Husband. Nothing "happens." The horror is in the weather — a room that goes cold on a schedule, a silence with a shape, her hand going still. First time the reader feels the claim as a presence rather than a mood.
 
-**Ch.8 — What He Brought Into It.** His own inheritance surfaces: the fearlessness as family weather, the promise-shaped thing he carries. The novel begins to suggest his certainty of being *kept* is itself a kind of claim on him — a rhyme with Adaeze's claim he has not yet noticed.
+**Ch.8 — What He Brought Into It.** His own inheritance surfaces: the fearlessness as family weather, the promise-shaped thing he carries. The novel begins to suggest his certainty of being *kept* is itself a kind of claim on him — a rhyme with Obianuju's claim he has not yet noticed.
 
 **Ch.9 — The Second Trance.** A full trance sequence (present tense, sustained). It shows him something true he cannot yet place — an absence, a figure at a threshold. It does not threaten. Its accuracy will only land chapters later. The Trance's morally-neutral, messenger function established.
 
-**Ch.10 — Continuation (threshold).** The turn that ends Movement I: continuation enters the world — a future begins. The Spirit Husband's claim visibly *reaches* toward it. Adaeze changes; the reversal the source names begins here. **No child on the page** — only threshold and expectation. End on the first genuine cold the protagonist's fearlessness cannot find interesting.
+**Ch.10 — Continuation (threshold).** The turn that ends Movement I: continuation enters the world — a future begins. The Spirit Husband's claim visibly *reaches* toward it. Obianuju changes; the reversal the source names begins here. **No child on the page** — only threshold and expectation. End on the first genuine cold the protagonist's fearlessness cannot find interesting.
 
 ### MOVEMENT II — THE COST (Voice)
 
-**Ch.11 — The Reversal.** Adaeze turns. Rendered with full duality: the turn is also fear, also grief, also something done *to* her by the claim as much as by her will. The reader's sympathy is held even as the harm begins. The diminutive he calls her becomes painful.
+**Ch.11 — The Reversal.** Obianuju turns. Rendered with full duality: the turn is also fear, also grief, also something done *to* her by the claim as much as by her will. The reader's sympathy is held even as the harm begins. The diminutive he calls her becomes painful.
 
 **Ch.12 — Isolation.** The shared life narrows; the confidant is pushed to the edge; the elder is avoided. Present tense begins to appear in "real" scenes — the blur starting. He reads the narrowing as a test of love to be passed by staying (his fearlessness as flaw, explicit now).
 
@@ -90,9 +90,9 @@ A man who cannot be frightened by death walks into a love already claimed by som
 
 **Ch.22 — The Silence of the Voice.** The Voice does not speak again. Its threat was never defeated; it simply stops needing to. He notices the silence and mistrusts it. (The first force begins to swap role: intimidation → absence.)
 
-**Ch.23 — The Claim, No Longer Loudest.** The Spirit Husband's claim is neither broken nor honoured. It simply stops being the loudest thing in the room — the way grief stops being the loudest sound in a life that has grown louder around it. Rendered through ordinary returning life: the confidant comes back; an ordinary meal; a day with no cold hour. *Adaeze's duality sustained even here — a late gift.*
+**Ch.23 — The Claim, No Longer Loudest.** The Spirit Husband's claim is neither broken nor honoured. It simply stops being the loudest thing in the room — the way grief stops being the loudest sound in a life that has grown louder around it. Rendered through ordinary returning life: the confidant comes back; an ordinary meal; a day with no cold hour. *Obianuju's duality sustained even here — a late gift.*
 
-**Ch.24 — Adaeze's Unfinished Business (the rhyme).** One image, near the end: Adaeze walking toward something unresolved, entirely separate from him, that the novel will never show. It rhymes with his own unfinished walk; it does not explain him and is never explained itself. The reader is left to wonder about her life permanently — the way one does about someone once loved. **No tidy backstory supplied.**
+**Ch.24 — Obianuju's Unfinished Business (the rhyme).** One image, near the end: Obianuju walking toward something unresolved, entirely separate from him, that the novel will never show. It rhymes with his own unfinished walk; it does not explain him and is never explained itself. The reader is left to wonder about her life permanently — the way one does about someone once loved. **No tidy backstory supplied.**
 
 **Ch.25 — The Elder's Sentence Understood.** The one sentence from Ch.6/Ch.14 finally lands — not as solution, as *recognition*. He understands what she meant about being kept. It changes nothing external and everything internal. (The memoir's Ch.23 truth, reached through fiction.)
 
@@ -104,7 +104,7 @@ A man who cannot be frightened by death walks into a love already claimed by som
 
 **Ch.29 — The Reactivation.** The Trance turns. Once a warning about her, it becomes active again — now warning him about something or someone **new, already beginning, deliberately unspecified.** The book refuses to show it. The horror and the grace are identical: he is still inside a world governed by forces that only ever tell the truth too late.
 
-**Ch.30 — His Alone.** The final scene. Not a goodbye with Adaeze (that would still centre her as the thing resolved). The protagonist alone, doing something small and ordinary, all three forces in the room with him, unresolved, no longer the only thing there. Not victory. What real spiritual weight becomes over enough time. Last line points past the page, not toward closure.
+**Ch.30 — His Alone.** The final scene. Not a goodbye with Obianuju (that would still centre her as the thing resolved). The protagonist alone, doing something small and ordinary, all three forces in the room with him, unresolved, no longer the only thing there. Not victory. What real spiritual weight becomes over enough time. Last line points past the page, not toward closure.
 
 ---
 
@@ -112,7 +112,7 @@ A man who cannot be frightened by death walks into a love already claimed by som
 
 - **The Confidant** — reader-proxy; carries the forbidden question so the protagonist never has to. Pushed out in Movement II, returns in III as the measure of returning life.
 - **The Elder** — the Iyalode-function; two cosmologies held without conflict; gives one sentence, never a solution; the moral authority who refuses both condemnation and rescue.
-- **Adaeze** — never a villain; the merge; the duality engine; her own unfinished business.
+- **Obianuju** — never a villain; the merge; the duality engine; her own unfinished business.
 - **The three forces** — characters in their own right, with territories (architecture §C), never collapsed into one.
 
 ---
@@ -122,7 +122,7 @@ A man who cannot be frightened by death walks into a love already claimed by som
 | Phase | Work | Gate |
 | :---- | :--- | :--- |
 | **0 — Architecture lock** | Owner signs off `01` (protagonist quality, title direction, register device) | Owner approval |
-| **1 — Draft Movement I** (Chs 1–10, ~28k) | Establish world, voice, Adaeze duality, the register device in practice | Internal read: does the blur work? Is Adaeze un-hateable? |
+| **1 — Draft Movement I** (Chs 1–10, ~28k) | Establish world, voice, Obianuju duality, the register device in practice | Internal read: does the blur work? Is Obianuju un-hateable? |
 | **2 — Draft Movement II** (Chs 11–21, ~33k) | The hinge (Voice), the test, the confirmation; the registers blur | Sensitivity/legal read of the merged-figure material **before** going further |
 | **3 — Draft Movement III** (Chs 22–30, ~24k) | The forces swap roles; the reactivation; his solitary ending | Does the ending complicate rather than resolve? |
 | **4 — Revision pass** | Tense-bleed calibration; duality audit (every harm near a gift); cultural-authority read | — |
