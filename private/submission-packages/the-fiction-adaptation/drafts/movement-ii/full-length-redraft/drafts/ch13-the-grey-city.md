@@ -16,7 +16,7 @@ None of it could be sworn to. Each of it, alone, was nothing. A man cannot accus
 
 The town had not decided against him. It had decided to wait.
 
-And in the deciding it had become, in a single morning, a city — the kind of place he had only heard of, where a man could walk among thousands who knew his name and have every one of them use it like a stranger. He had lived here for love. He had stayed for it. He had thought he knew the town the way the town knew itself, which was completely and without maps. He saw now that he had never known it. He had only been let alone inside it. And the letting-alone had been a kindness, the way warmth is a kindness, and like warmth it could be withdrawn.
+And the town he had been let alone inside had, in a single morning, grown vast around him. He had heard of places where a man could walk among thousands who knew his name and have every one of them use it like a stranger, and he had pitied such places, and now he walked through one, and it wore the face of the only town he had ever known. He had lived here for love. He had stayed for it. He had thought he knew the town the way the town knew itself, which was completely and without maps. He saw now that he had never known it. He had only been let alone inside it. And the letting-alone had been a kindness, the way warmth is a kindness, and like warmth it could be withdrawn.
 
 ---
 

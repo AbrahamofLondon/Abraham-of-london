@@ -14,6 +14,8 @@
 **Blueprint drift note:** `foundation/06` had Ch.13 as a literal "Grey City" = the Norwich-that-is-any-grey-city trip. The brief reframes "The Grey City" as the *familiar town gone grey* — the displaced **Isolation** beat (Ch.12 absorbed "Social Consequence"). I followed the brief: the chapter stays in-town and earns the title metaphorically ("it had become, in a single morning, a city… where a man could walk among thousands who knew his name and have every one of them use it like a stranger"). Flagged for a later blueprint reconciliation; the literal-departure material, if still wanted, can move to a later chapter or be retired.
 
 **Final title:** Chapter 13 — The Grey City.
+
+**The title earns its weight in texture, not statement (owner note honoured).** The protagonist never says "the town has become grey." The greying is rendered entirely through texture — the correct (stranger's) price, the half-beat-late greeting, the half-drawn shutter, the withdrawn warmth, the boys' withheld rudeness, the gate Obiefuna won't cross, the door that was always ajar now shut. On a refinement pass, the one line that *declared* the metaphor ("it had become… a city") was recast so the city-vastness is **felt** through his experience and pity rather than announced. The word "grey" never appears as a statement of theme; the chapter *is* grey, it does not say so.
 **Word count:** 3,762 (target 3,600–4,400; unbloated — landed where scene and consequence ended).
 **Revised running total, Ch.1–13:** 32,653 + 4,102 + 4,000 + 3,762 = **44,517 words.**
 
