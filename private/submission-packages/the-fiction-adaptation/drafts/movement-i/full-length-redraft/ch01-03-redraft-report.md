@@ -138,3 +138,43 @@ The strategy note holds: not every early chapter must hit 3,000; the opening sed
 **Acceptance-gate sentence (Ch.1):** unchanged — "He ate the bitter half and gave her the less bitter, and that, too, was a thing he did without being able to defend it."
 
 **Recommendation:** **leave Ch.1 as current.** It is submission-grade and should not be over-handled. The seven cross-chapter principles from the brief have been adopted as standing law in `foundation/01-voice-and-style-bible.md` §10. Proceed to Ch.4–5 once Locks 1–2 are confirmed (see `structural-locks-for-owner-decision.md`).
+
+---
+
+## Ch.2-3 Acceptance-Gate Audit — 2026-06-28
+
+**Scope:** final calibration only. This was not a second expansion pass and not a word-count pass. The question was whether Ch.2 and Ch.3 already carry an irreplaceable sentence, enough ordinary life before metaphysical pressure, clean motif discipline, and voice continuity with the reconciled Ch.1.
+
+### Ch.2 — The Journal That Was a Gift
+
+**Acceptance-gate sentence:** `"Because I was not the only one waiting," she said. "I only thought I was."`
+
+This is the sentence that belongs only to this chapter's wound: it is love, warning, humility, and misrecognition in one plain exchange. It also sets the chapter's governing danger: he hears only the half that loves him.
+
+**Ordinary life before metaphysical pressure:** **PASS.** The chapter opens in table-life: bread, kettle, both hands on the journal cover, cloth spine, thread, damp paper, tea at the window. The metaphysical pressure enters through an object handled in ordinary domestic space, not through explanation or spectacle.
+
+**Motif discipline:** **PASS.** The journal, damp, pressed flower, missing seasons, cold hour, and waiting all remain story-bearing. They do not read as decorative motif deployment because each is attached to his act of reading and misreading.
+
+**Voice continuity with Ch.1:** **PASS.** The register remains grave, intimate, and exact. It carries Ch.1's domestic tenderness and threat without copying Ch.1's hour structure.
+
+**Necessary refinements made:** **None.** The chapter already clears the acceptance gate. Additional prose would risk explaining a chapter whose power comes from him choosing the generous reading too early.
+
+### Ch.3 — A Coastal Town That Could Be
+
+**Acceptance-gate sentence:** `He had not got his fearlessness only from the brown water. He had got it from a town that had never once, in his hearing, been surprised.`
+
+This sentence makes the chapter more than origin information. It turns fearlessness from a personal trait into an inheritance of place, which is the exact bridge Ch.3 needs to carry into the larger novel.
+
+**Ordinary life before metaphysical pressure:** **PASS, with chapter-specific shape.** Because Ch.3 is the origin chapter, the drowning premise necessarily arrives first. But before the trance asserts its jurisdiction, the chapter gives the town as lived life: market edges, fish-sellers, mortar, standpipe, stone games, highlife through a blown speaker, net-mending, crayfish argument, salt in the bread and hinges. The impossible is admitted through a functioning town, not through atmosphere.
+
+**Motif discipline:** **PASS.** Water, thresholds, doors, salt, town memory, and fearlessness are all load-bearing. The motifs are not over-engineered because the chapter keeps returning them to movement, market life, and bodily fact.
+
+**Voice continuity with Ch.1:** **PASS.** Ch.3 carries the same plain-grave authority as Ch.1, with a wider civic register. The trance remains italic present tense; the surrounding narration remains past tense; the supernatural is jurisdiction, not performance.
+
+**Necessary refinements made:** **None.** The chapter already clears the acceptance gate. The existing domestic fire time-measure in the town's drowning memory is not memoir-fire imagery and was not introduced in this audit; it functions as ordinary coastal household timing, not symbol.
+
+### Ch.2-3 Decision
+
+Ch.2 and Ch.3 are accepted in their current form. No prose changes were required. They should not receive another calibration pass before Ch.4-5; the next value is forward drafting, not further handling of the already-set opening movement.
+
+**Next production step:** proceed to Ch.4-5 drafting. Ch.6 remains held until the Elder's sentence is resolved.
