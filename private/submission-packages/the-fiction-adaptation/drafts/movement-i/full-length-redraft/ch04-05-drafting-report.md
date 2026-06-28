@@ -57,11 +57,11 @@ Counts use the same local regex method for Ch.1-5, excluding drafting comments.
 | Chapter | Words | Target | Status |
 | :------ | ----: | :----- | :----- |
 | Ch.1 — The Unreachable Hour | 2,463 | accepted threshold chapter | Accepted |
-| Ch.2 — The Journal That Was a Gift | 2,124 | accepted threshold chapter | Accepted |
-| Ch.3 — A Coastal Town That Could Be | 2,305 | accepted threshold chapter | Accepted |
+| Ch.2 — The Journal That Was a Gift | 2,090 | accepted threshold chapter | Accepted |
+| Ch.3 — A Coastal Town That Could Be | 2,308 | accepted threshold chapter | Accepted |
 | Ch.4 — The Speed of It | 3,272 | 2,800-3,500 | In range |
 | Ch.5 — The Confidant | 3,438 | 2,800-3,500 | In range |
-| **Total Ch.1-5** | **13,602** | — | On full-length trajectory |
+| **Total Ch.1-5** | **13,571** | — | On full-length trajectory |
 
 Ch.4-5 average **3,355 words**, which proves the post-threshold widening can support the 88k-94k architecture without padding.
 
@@ -82,7 +82,7 @@ The new width comes from lived event: market bargaining, repairs, food, weather,
 
 **Ch.4:** ordinary life comes first through the courtyard line, market day, rain under the awning, groundnuts, Obianuju's bad scarf, salt on her palm, and the commitment walk at dusk. The first cold edge arrives late and briefly, after the reader has seen the relationship as real and good.
 
-**Ch.5:** ordinary life comes first through Kene's repair visit: the scraped door, hinges, planing, plantain, jokes, the chipped glass, the kitchen court, and the town's street life. The cold arrives into a repair scene, not a supernatural set-piece.
+**Ch.5:** ordinary life comes first through Kene's repair visit: the scraped door, hinges, planing, plantain, jokes, the chipped glass, the kitchen yard, and the town's street life. The cold arrives into a repair scene, not a supernatural set-piece.
 
 ---
 
@@ -130,6 +130,38 @@ This is Ch.4's gate because it holds the chapter's whole error: he is not stupid
 **Ch.5:** `You learn that you can cross the road.`
 
 This is Ch.5's gate because it is the Confidant's whole gift: not rescue, not cosmology, not explanation, only the practical knowledge that exit remains available. The protagonist's refusal of that simple road is the chapter's turn.
+
+---
+
+## Ch.4-5 Acceptance-Gate Audit — 2026-06-28
+
+**Verdict:** **ACCEPTED AS CURRENT.** Ch.4-5 genuinely widen the novel rather than merely lengthen it. No Ch.6 drafting should begin until the Elder's sentence is resolved.
+
+### Ch.4 widening test
+
+**Result:** **PASS.** The chapter earns its length through scene: courtyard origin, town scrutiny, market movement, rain under the awning, salt on Obianuju's palm, the ordinary good day, the first brief cold edge, and the costed yes. It does not summarize "the speed" from above; it lets the reader inhabit why speed felt like mercy from inside.
+
+**Irreplaceable sentence:** `He had seen the speed and called it current. He had seen the cold and called it weather. He had seen the look on her face when she said she had already gone and come back wrong and called it sorrow, because it was sorrow, and because naming a thing accurately in part is one of the ways a man avoids naming the whole.`
+
+**Obianuju interiority:** **PASS.** She has her own competence, social standing, humour, private longing, costed consent, and the line about having already gone and come back wrong. She is not reduced to the woman claimed by the cold.
+
+**Force architecture:** **PASS.** Spirit Husband appears only as a brief cold edge at the margin of a real relationship. No Trance appears. The Voice is absent. The metaphysics remains implicit.
+
+### Ch.5 widening test
+
+**Result:** **PASS.** The chapter earns its length through repair, food, friendship, street life, and the first external witness to the cold. The plot function is carried by a lived repair visit, not by explanation.
+
+**Irreplaceable sentence:** `You learn that you can cross the road.`
+
+**Confidant function:** **PASS.** Kene is not exposition furniture. He arrives with hinges, history, humour, appetite, irritation, loyalty, and limits. He does not name the cosmology; he gives the protagonist a practical road out and watches him refuse it.
+
+**Obianuju interiority:** **PASS.** Even under Kene's witness, she remains ordinary and particular: she jokes, feeds, corrects, salts the plantain too carefully, checks her own throat, protects the room's surface, and is not turned into the cold.
+
+**Force architecture:** **PASS.** Spirit Husband is perceived from outside as cold in the house. Kene witnesses the weather but cannot name it. No Trance. No Voice. No cosmology explanation.
+
+### Audit decision
+
+Ch.4-5 should stand as the current full-length baseline. They widen through lived world, relational consequence, and spiritual pressure. They do not require another pass before the next Movement I decision.
 
 ---
 
