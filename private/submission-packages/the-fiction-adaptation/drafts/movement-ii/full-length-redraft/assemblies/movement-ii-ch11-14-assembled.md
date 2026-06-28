@@ -1,13 +1,13 @@
 # The One Who Arrived First
 
-## Movement II — The Cost (Chapters 11–14, full-length redraft)
+## Movement II — The Cost (full-length redraft)
 
 
 # Chapter 11: The Reversal
 
 He came back to the house in the hour before dawn. It was the same as he had left it. The same grey walls, holding the same grey light. The same no-colour door. The same cold standing at the edges of the rooms the way it always stood — patient, in no hurry, waiting out the warm centre of the day. He knew the house the way you know a face, and it was that knowing that told him, before he had crossed the front room, that something had shifted. Not the cold; the cold was the same. Something else — the way the air shifts before a change of season, invisible and absolute.
 
-He had not slept. He had walked to Mama Nneoma's compound and found it dark, and he had stood at her gate until the first light touched the almond tree. The waiting had been the hardest part — not because he was impatient, but because the waiting gave him time to feel what he had done. He had left the house. He had walked out of the cold. He had chosen movement over endurance. And now he was standing at an old woman's gate in the dark, not knowing what he would say when she opened the door.
+He had not slept. He had walked to Mama Agnes's compound and found it dark, and he had stood at her gate until the first light touched the almond tree. The waiting had been the hardest part — not because he was impatient, but because the waiting gave him time to feel what he had done. He had left the house. He had walked out of the cold. He had chosen movement over endurance. And now he was standing at an old woman's gate in the dark, not knowing what he would say when she opened the door.
 
 The compound was quiet. A goat shifted somewhere in the shadows. The almond tree's leaves moved in a wind he could not feel on his skin. He thought of knocking, and did not knock, because knocking would have meant he had a right to be there at this hour, and he was not certain he had that right.
 
@@ -45,7 +45,7 @@ When he rose to leave, she walked with him to the door. She stood on the step wi
 
 "You have made the house notice you," she said. "It will not forget that. That is not the same as knowing what to do about it."
 
-He had walked home with that sentence burning in him, and now he stood in the front room with the first grey light coming through the window, and he understood that Mama Nneoma had been right. The house had noticed him. The cold had noticed him. And so had Obianuju.
+He had walked home with that sentence burning in him, and now he stood in the front room with the first grey light coming through the window, and he understood that Mama Agnes had been right. The house had noticed him. The cold had noticed him. And so had Obianuju.
 
 She was in the kitchen, doing the ordinary work of the morning — the kettle, the basin, the cloth — and she did not turn when he entered. He watched her hands. They moved through the familiar tasks with the same economy they always had, measuring, wiping, folding, but there was a precision to them now that was not the precision of competence. It was the precision of a woman who was holding herself very still on the inside and letting her hands do the work so that nothing else would show.
 
@@ -61,7 +61,7 @@ It was not a question.
 
 "I woke and you were not here."
 
-"I went to Mama Nneoma."
+"I went to Mama Agnes."
 
 She did not answer. She poured water from the kettle into a cup, and the steam rose, and she set the cup on the table without looking at him. The gesture was the same as every other morning — the same cup, the same place, the same ordinary offering — but something in the way she set it down was different. She set it down as though she were placing it at a boundary she did not intend to cross.
 
@@ -85,7 +85,7 @@ He looked at her. She was still facing the kettle, her back to him, and he could
 
 She turned then. Her face was not angry. It was not afraid. It was the face of a woman who had been holding something in place for a long time and had felt it begin to shift.
 
-"You brought back evidence," she said. "You brought back salt. You brought back the knowledge that the cold can touch you. And you took that knowledge to Kene, and Kene took you to the woman in the market, and the woman in the market told you about the child. And then you took all of that to Mama Nneoma. You have been walking through the town with the cold on your hand, showing it to people, and every person who has seen it has become part of it."
+"You brought back evidence," she said. "You brought back salt. You brought back the knowledge that the cold can touch you. And you took that knowledge to Kene, and Kene took you to the woman in the market, and the woman in the market told you about the child. And then you took all of that to Mama Agnes. You have been walking through the town with the cold on your hand, showing it to people, and every person who has seen it has become part of it."
 
 He said nothing. The cup on the table was cooling. The steam had stopped rising.
 
@@ -167,7 +167,7 @@ She looked at him then, and her face did something he had never seen before. It 
 
 "Yes."
 
-"By taking the cold to Kene. By taking it to the woman in the market. By taking it to Mama Nneoma. By walking through the town with salt on your hand, telling people about the house, about the hour, about me."
+"By taking the cold to Kene. By taking it to the woman in the market. By taking it to Mama Agnes. By walking through the town with salt on your hand, telling people about the house, about the hour, about me."
 
 "I did not tell them about you."
 
@@ -215,7 +215,7 @@ She looked at him for a long moment. Her hand was still on the handle, and her h
 
 "I want you to stop trying to save me," she said.
 
-The sentence entered him and found no room prepared for it. He had thought he was saving her. He had thought the movement, the investigation, the walk to Mama Nneoma — all of it was love, was action, was the kind of staying that refused to let the cold have what it wanted without a fight. But she had not asked him to fight. She had asked him, two years ago, to hold a line while she drove a nail into a wall, and he had held it, and he had thought that holding the line was the same as understanding what the line was for.
+The sentence entered him and found no room prepared for it. He had thought he was saving her. He had thought the movement, the investigation, the walk to Mama Agnes — all of it was love, was action, was the kind of staying that refused to let the cold have what it wanted without a fight. But she had not asked him to fight. She had asked him, two years ago, to hold a line while she drove a nail into a wall, and he had held it, and he had thought that holding the line was the same as understanding what the line was for.
 
 "I was not trying to save you," he said.
 
@@ -346,7 +346,7 @@ She did it kindly, which was worse. She leaned across her heap while he was sett
 
 "I walk. Every man walks."
 
-"Not like that. They say you have been to the shrimp woman by the mosque wall. They say you have been to Mama Nneoma in the dark, at an hour when a man does not visit an old woman unless his house has frightened him." She was not unkind. Her eyes had the wet brightness of a woman handing over a thing she believes is a gift. "I am only telling you what reaches me. A thing that reaches me has already reached forty others. You understand. I sell pepper. Pepper and news travel the same road."
+"Not like that. They say you have been to the shrimp woman by the mosque wall. They say you have been to Mama Agnes in the dark, at an hour when a man does not visit an old woman unless his house has frightened him." She was not unkind. Her eyes had the wet brightness of a woman handing over a thing she believes is a gift. "I am only telling you what reaches me. A thing that reaches me has already reached forty others. You understand. I sell pepper. Pepper and news travel the same road."
 
 He felt the cold then, though there was no cold — only the recognition of it, the way you recognise a face in a crowd before you have placed the name. His visits, which had felt like a man moving at last, taking the town's knowledge into his hands one careful piece at a time, had been the whole time a man walking through a house of open windows, and the town had been at every window, and he had not once looked up.
 
@@ -370,7 +370,7 @@ Kene found him at the edge of the fish tables, and Kene was not looking for him.
 
 "You are angry."
 
-"I am eating fish so that I do not have to be angry in the market, where it would become its own story by sunset." He said it lightly, and the lightness was the work of a man holding a heavier thing flat. "I am not your witness, you understand. I felt your house go cold, once, with a plane in my hand, and I will tell that to you in a lane because you are my friend. I will not tell it to the pepper woman, or to Obiefuna, or to the standpipe. The moment I become the man who confirms the cold, I become part of the cold's address. I have my own house to keep warm."
+"I am eating fish so that I do not have to be angry in the market, where it would become its own story by sunset." He said it lightly, and the lightness was the work of a man holding a heavier thing flat. "I am not your witness, you understand. I felt your house go cold, once, with a plane in my hand, and I will tell that to you in a lane because you are my friend. I will not tell it to the pepper woman, or to Mr Stephen, or to the standpipe. The moment I become the man who confirms the cold, I become part of the cold's address. I have my own house to keep warm."
 
 It was the most Kene had ever protected himself in front of him, and it was fair, and because it was fair he felt the loss of it the way he felt every fair thing — as a door closing softly, with apology, but closing.
 
@@ -386,15 +386,15 @@ He understood, standing there, that the cold did not need to be in his house to 
 
 ---
 
-Obiefuna came to him at the fish tables, which meant Obiefuna had been told he was there, which meant the news had reached the one man in the town who turned news into arithmetic.
+Mr Stephen came to him at the fish tables, which meant Mr Stephen had been told he was there, which meant the news had reached the one man in the town who turned news into arithmetic.
 
-Obiefuna owned the house. He owned three others, and a share in a lorry, and the kind of authority that comes to a man who holds the deeds to the places other people sleep. His name meant *may the homestead not be lost*, and his mother had given it to him in a season of dying, and he had spent his life making certain that no homestead of his was ever lost, ever empty, ever earning nothing. He was not a cruel man. He was a careful one, which in a hard season can wear the same coat. He came across the market in a clean shirt that he kept clean by never doing anything that would dirty it, and he greeted the fish seller by a name, and the pepper woman by a name, and the protagonist by his relation to a house — "the husband from the lane" — because Obiefuna filed men under their addresses.
+Mr Stephen owned the house. He owned three others, and a share in a lorry, and the kind of authority that comes to a man who holds the deeds to the places other people sleep. He had not lost a house in thirty years — not to flood, not to debt, not to the slow defeat of a room left empty and earning nothing — and he carried the settled certainty of a man whose whole life had been the keeping of things full. He was not a cruel man. He was a careful one, which in a hard season can wear the same coat. He came across the market in a clean shirt that he kept clean by never doing anything that would dirty it, and he greeted the fish seller by a name, and the pepper woman by a name, and the protagonist by his relation to a house — "the husband from the lane" — because Mr Stephen filed men under their addresses.
 
-"You are well?" Obiefuna said, and did not wait for the answer, because the answer was not the purpose. "Your roof held in the last rain? The back door — I am told the back door was repaired." He smiled. He missed nothing; he had heard about Kene's plane the same week it had planed. "Good. A house should be looked after. A house that is looked after keeps its people."
+"You are well?" Mr Stephen said, and did not wait for the answer, because the answer was not the purpose. "Your roof held in the last rain? The back door — I am told the back door was repaired." He smiled. He missed nothing; he had heard about Kene's plane the same week it had planed. "Good. A house should be looked after. A house that is looked after keeps its people."
 
 "It keeps them," the protagonist agreed, and felt the second meaning arrive under the first like the cold under the door.
 
-"I will say a thing to you," Obiefuna said, "as a man who wishes you no harm, because a tenant who comes to harm is a tenant who leaves, and a house that empties is a house that talks." He took the protagonist lightly by the arm and turned him a few degrees, away from the fish seller, toward the open board, in the unconscious choreography of a man who arranges everything, including conversations, so that the valuable thing is on the inside. "There are houses in this town that have a name. You know this. Every town has them. A house gets a name the way a man gets one — from something that happened, or something people decided happened, which after enough years is the same. A house with a name is hard to fill. I have filled yours. Twice before you, I filled it, with people who did not ask the town for its memory, who paid and left quietly when it was time. I am asking you to be the third such tenancy. I am asking you to stop knocking on the town's memory, because the town has a long one, and it does not like to be reminded that it remembers."
+"I will say a thing to you," Mr Stephen said, "as a man who wishes you no harm, because a tenant who comes to harm is a tenant who leaves, and a house that empties is a house that talks." He took the protagonist lightly by the arm and turned him a few degrees, away from the fish seller, toward the open board, in the unconscious choreography of a man who arranges everything, including conversations, so that the valuable thing is on the inside. "There are houses in this town that have a name. You know this. Every town has them. A house gets a name the way a man gets one — from something that happened, or something people decided happened, which after enough years is the same. A house with a name is hard to fill. I have filled yours. Twice before you, I filled it, with people who did not ask the town for its memory, who paid and left quietly when it was time. I am asking you to be the third such tenancy. I am asking you to stop knocking on the town's memory, because the town has a long one, and it does not like to be reminded that it remembers."
 
 He should have said yes. A wiser man — Obianuju, who had lived two years saying a kind of yes to exactly this, keeping the door closed alone — would have said yes, and gone home, and let the fish be cold at the end of the row, and let the name of the house stay where names of houses stayed, in the low register, in the drift of furniture, in the things the town agreed not to say.
 
@@ -402,9 +402,9 @@ But he had learned, lately, to move. And a man who has only just learned to move
 
 "Who were they?" he said. He did not lower his voice. That was the error, and it was a small one, the size of a hand's width, the size of the empty board beside the cold fish. "The two before me. You filled it twice. Who left it, and what did they leave?"
 
-The market did not stop. Markets do not stop. But a pocket of it cooled — not the air, the attention — the way a pond cools where a cloud crosses, and the pepper woman three tables down found something to do with her hands, and the fish seller looked up, and Obiefuna's clean face did a thing that was not anger and was worse than anger. It became closed. It became a ledger shut in front of a man who had asked to see the figures.
+The market did not stop. Markets do not stop. But a pocket of it cooled — not the air, the attention — the way a pond cools where a cloud crosses, and the pepper woman three tables down found something to do with her hands, and the fish seller looked up, and Mr Stephen's clean face did a thing that was not anger and was worse than anger. It became closed. It became a ledger shut in front of a man who had asked to see the figures.
 
-"You see," Obiefuna said quietly, "this is the knocking."
+"You see," Mr Stephen said quietly, "this is the knocking."
 
 ---
 
@@ -434,7 +434,7 @@ Kene caught him at the market's edge, where the noise thinned and the lane began
 
 "You could. You should. The standing-there was Obianuju's to bear, and she had built a whole life out of bearing it quietly, and you have just told the town there is a thing she cannot bear, which is the one fact she spent two years keeping from them." Kene shook his head. "She told you to stop trying to save her. This is what she meant. Not the cold. This. The market. The saving that makes a private grief into a public name."
 
-He had no answer. The fish at the end of the row would be cold until the seller gave up and carried it home to a family that would eat it and not understand why it had kept so well. Obiefuna would fill the house a fourth time, someday, with someone who did not ask. The pepper woman would sell to him for the rest of his life with perfect courtesy and never again call him the wrong one. And somewhere behind him, in a lane that had been ordinary that morning, was a house that had stopped being private between the time he left it with an empty basket and the time he would return to it with a full one.
+He had no answer. The fish at the end of the row would be cold until the seller gave up and carried it home to a family that would eat it and not understand why it had kept so well. Mr Stephen would fill the house a fourth time, someday, with someone who did not ask. The pepper woman would sell to him for the rest of his life with perfect courtesy and never again call him the wrong one. And somewhere behind him, in a lane that had been ordinary that morning, was a house that had stopped being private between the time he left it with an empty basket and the time he would return to it with a full one.
 
 "Go home," Kene said, and the gentleness came back into him at the last, because Kene could not stay hard at a friend any longer than he could stay angry at wood. "Go home and do not tell her what they said. She will know. She always knows. But do not be the one who carries it to her. You have carried enough into that house this morning."
 
@@ -505,11 +505,11 @@ Kene's hands stopped on the hoop. For the first time he looked at him directly, 
 
 ---
 
-Obiefuna came that evening, and he came correctly, which was the whole of the threat.
+Mr Stephen came that evening, and he came correctly, which was the whole of the threat.
 
 He came at the hour when a landlord may decently call, before the dark and after the heat, and he came on foot with a small book under his arm, and he stopped at the gate and did not open it. He never opened it. In two years he had collected rent across that gate with his own hand and had never once set foot in the yard, and the protagonist had taken it, before, for the fastidiousness of a man who kept a clean shirt. He did not take it for that now. He had seen, in the market, the empty board beside the cold fish. He knew now what a hand's width of kept distance meant.
 
-"I will not keep you," Obiefuna said, which meant he intended to keep him exactly as long as he chose. "I was passing. I like to pass the houses. A man should look at what is his." He set the small book on the flat top of the gatepost, between them, and rested two fingers on it, and the book was a rent book, and his fingers on it were the fingers of a man who has all the time in the world because he owns the ground the time is standing on. "You are paid to the month. I am not here for money. I am here because money is the least of what a house earns a man, and the most of what it earns him is quiet, and I find that your house has become loud."
+"I will not keep you," Mr Stephen said, which meant he intended to keep him exactly as long as he chose. "I was passing. I like to pass the houses. A man should look at what is his." He set the small book on the flat top of the gatepost, between them, and rested two fingers on it, and the book was a rent book, and his fingers on it were the fingers of a man who has all the time in the world because he owns the ground the time is standing on. "You are paid to the month. I am not here for money. I am here because money is the least of what a house earns a man, and the most of what it earns him is quiet, and I find that your house has become loud."
 
 "The house is the same."
 
@@ -519,9 +519,9 @@ There it was, civil and complete. Not a threat — a preference. A man who would
 
 "You won't come into the yard," the protagonist said. It was not the wise thing to say. He said it anyway, because he had spent a morning being unable to name anything and here at last was a thing he could put a finger on. "In two years you have never crossed the gate."
 
-Obiefuna's fingers stilled on the book. Something moved behind his careful face, and it was not guilt and it was not fear; it was the irritation of a careful man at a question that is beneath the dignity of the arrangement.
+Mr Stephen's fingers stilled on the book. Something moved behind his careful face, and it was not guilt and it was not fear; it was the irritation of a careful man at a question that is beneath the dignity of the arrangement.
 
-"I collect rent at the gate," he said, "because a landlord who sits in a tenant's parlour is a landlord who is asked for things. Curtains. A new latch. Patience, in a hard month." He picked up the rent book and tucked it back under his arm, the audience drawing to its close. "I keep my houses by keeping my distance from them. It is a discipline. You would do well to learn the same with whatever has made yours loud." He paused, and for one moment the careful surface thinned, and underneath it was not malice but something older and more tired, a man who had filled this particular house too many times and had his own reasons, never to be spoken, for preferring the gate. "*Obiefuna*," he said, as though reading his own name off the book. "Do you know it? It is a prayer. *May the homestead not be lost.* My mother gave it to me in a year when homesteads were being lost all around her. I have spent my life answering it. I do not lose houses. I keep them full and I keep them quiet, and the ones that will not stay quiet — " he opened his hand, a small gesture, letting something invisible go from it " — those I empty, and fill again, and they forget. Houses are very good at forgetting. It is the only mercy in them."
+"I collect rent at the gate," he said, "because a landlord who sits in a tenant's parlour is a landlord who is asked for things. Curtains. A new latch. Patience, in a hard month." He picked up the rent book and tucked it back under his arm, the audience drawing to its close. "I keep my houses by keeping my distance from them. It is a discipline. You would do well to learn the same with whatever has made yours loud." He paused, and for one moment the careful surface thinned, and underneath it was not malice but something older and more tired, a man who had filled this particular house too many times and had his own reasons, never to be spoken, for preferring the gate. "I have kept houses thirty years," he said. "I keep them full and I keep them quiet. A full house pays; a quiet house keeps its tenants. And the ones that will not stay quiet — " he opened his hand, a small gesture, letting something invisible go from it " — those I empty, and fill again, and they forget. Houses are very good at forgetting. It is the only mercy in them."
 
 ---
 
@@ -531,11 +531,11 @@ But a man who has learned to move mistakes every motion for progress, and the or
 
 "The people before us," he said. "The ones you filled it with twice. What happened to them?"
 
-Obiefuna was already a step into the lane. He did not turn fully. He turned his head, the minimum a courteous man turns, and the dusk was behind him so that his clean shirt was the brightest thing in the lane.
+Mr Stephen was already a step into the lane. He did not turn fully. He turned his head, the minimum a courteous man turns, and the dusk was behind him so that his clean shirt was the brightest thing in the lane.
 
-"You are doing it again," he said, gently, and it was the gentleness of Mama Nneoma and the gentleness of the pepper woman, the town's worst gentleness, the kind that hands a man a thing and calls it a gift. "You ask me in your gateway, where Mama Chinwe at her window can hear you, the same question you asked me in the market where forty could. You think you are gathering. You are scattering. Every question you ask about that house, you ask in a voice the lane can hear, and the lane keeps it, and adds it to the others, and by the time it has gone round it is no longer your question. It is the house's answer." He settled the rent book more comfortably under his arm. "I filled it twice. They left. They are not my concern, and they are not yours, and the difference between us is that I know that and you are still learning it. Pay on time. Keep to yourself. Tell your wife I asked after no one." And he went, unhurried, a man whose name was a prayer he had never once failed to answer.
+"You are doing it again," he said, gently, and it was the gentleness of Mama Agnes and the gentleness of the pepper woman, the town's worst gentleness, the kind that hands a man a thing and calls it a gift. "You ask me in your gateway, where Mama Rose at her window can hear you, the same question you asked me in the market where forty could. You think you are gathering. You are scattering. Every question you ask about that house, you ask in a voice the lane can hear, and the lane keeps it, and adds it to the others, and by the time it has gone round it is no longer your question. It is the house's answer." He settled the rent book more comfortably under his arm. "I filled it twice. They left. They are not my concern, and they are not yours, and the difference between us is that I know that and you are still learning it. Pay on time. Keep to yourself. Tell your wife I asked after no one." And he went, unhurried, a man who in thirty years had never once failed to keep a house full.
 
-At her window, three doors up, Mama Chinwe drew her shutter half across — not all the way, never all the way, that would have been an accusation — and the half-drawn shutter was the whole town in a single slat of wood.
+At her window, three doors up, Mama Rose drew her shutter half across — not all the way, never all the way, that would have been an accusation — and the half-drawn shutter was the whole town in a single slat of wood.
 
 ---
 
@@ -588,9 +588,9 @@ That was the first thing the silence told him: not that she had not heard, but t
 
 He stood at his own door with his hand still half-raised, the knuckles he had knocked with not yet returned to his side, and he waited. The wood under his knuckles had been warm — the no-colour wood took the heat of the day and held it — and that was the cruelty of the small fact: the door was warm, and it was shut, and the warmth meant nothing because warmth had never been the question. The question was the latch.
 
-He did not knock again. A man knocks twice at a stranger's house, to be sure he has been heard. To knock twice at one's own house is to admit, out loud, in a lane where Mama Chinwe's shutter was already a finger's width open, that one is no longer certain of being let in. So he stood, and he let the seconds do their work, and he discovered that there is no humiliation in the world quite like the ordinary one of waiting to be admitted to the place where your own clothes are folded.
+He did not knock again. A man knocks twice at a stranger's house, to be sure he has been heard. To knock twice at one's own house is to admit, out loud, in a lane where Mama Rose's shutter was already a finger's width open, that one is no longer certain of being let in. So he stood, and he let the seconds do their work, and he discovered that there is no humiliation in the world quite like the ordinary one of waiting to be admitted to the place where your own clothes are folded.
 
-Down the lane a man he knew well enough to greet came carrying a ladder, and the man slowed, and looked, and understood in a single glance the whole of it — a husband at his own shut door with his hand still at the wood — and did the kindest cruel thing the town had left to offer him: he looked away, and walked on faster, and took the sight with him to wherever the town kept such sights for later. Obiefuna had said a house that becomes loud is a house he must fill again. So this was the loudness. Not shouting. A man knocking, once, at his own door, while a neighbour decided he had not seen it.
+Down the lane a man he knew well enough to greet came carrying a ladder, and the man slowed, and looked, and understood in a single glance the whole of it — a husband at his own shut door with his hand still at the wood — and did the kindest cruel thing the town had left to offer him: he looked away, and walked on faster, and took the sight with him to wherever the town kept such sights for later. Mr Stephen had said a house that becomes loud is a house he must fill again. So this was the loudness. Not shouting. A man knocking, once, at his own door, while a neighbour decided he had not seen it.
 
 Then the latch.
 
@@ -622,7 +622,7 @@ He said nothing.
 
 "I was defending you."
 
-"I know." And there it was, the same two words Mama Nneoma had given him under the almond tree, *I know*, said not as comfort but as diagnosis, and from Obianuju's mouth it had the same blade. "You were defending me. You have been defending me to the shrimp woman and to Kene and to Mama Nneoma and to the landlord at the gate and to two women at a standpipe, and every defence has been a flag planted on a hill the enemy did not know was worth taking until they saw you planting flags." She picked up the folded shirt from the chair arm, smoothed it once, set it down again, a gesture with no purpose but the discharge of a feeling she would not otherwise let show. "I did not ask you to defend me. I asked you to stop trying to save me. They are the same request. You have not heard it yet."
+"I know." And there it was, the same two words Mama Agnes had given him under the almond tree, *I know*, said not as comfort but as diagnosis, and from Obianuju's mouth it had the same blade. "You were defending me. You have been defending me to the shrimp woman and to Kene and to Mama Agnes and to the landlord at the gate and to two women at a standpipe, and every defence has been a flag planted on a hill the enemy did not know was worth taking until they saw you planting flags." She picked up the folded shirt from the chair arm, smoothed it once, set it down again, a gesture with no purpose but the discharge of a feeling she would not otherwise let show. "I did not ask you to defend me. I asked you to stop trying to save me. They are the same request. You have not heard it yet."
 
 He began to explain — the trance he had never told her of, the cloth, the salt on his hand, the woman in the market who had lived here before, the whole architecture of reasons that had made each step feel not like exposure but like care — and she let him get one sentence into it before she lifted a hand, flat, between them, the way a person stops a child or a cart.
 
@@ -644,11 +644,11 @@ She walked to the back of the room, to the no-colour door, the one that led to t
 
 ---
 
-He went to Mama Nneoma because there was nowhere else the legs would carry him, and because a man who has been told the truth by his wife will often go looking for someone to tell it to him more gently, and the old woman, of all the people in the town, had the least gentleness and was therefore the safest, the way a clean knife is safer than a rusted one.
+He went to Mama Agnes because there was nowhere else the legs would carry him, and because a man who has been told the truth by his wife will often go looking for someone to tell it to him more gently, and the old woman, of all the people in the town, had the least gentleness and was therefore the safest, the way a clean knife is safer than a rusted one.
 
 She was under the almond tree with the enamel bowl in her lap and the melon seeds going dry on the tray, and she watched him come up her road with the particular attention she gave to people who were arriving at something, and she did not get up, and she did not offer the higher stool. She nodded at the low one, the one that had made him feel nine years old, and he sat on it, and his knees came up, and he was lower than her, and he understood after a moment that she had arranged it so on purpose, the way she arranged everything, including conversations, so that the man who needed to be brought down was brought down by furniture and not by speech.
 
-"She shut the door," Mama Nneoma said. It was not a question. Nothing the old woman said was ever quite a question.
+"She shut the door," Mama Agnes said. It was not a question. Nothing the old woman said was ever quite a question.
 
 "You knew she would."
 
@@ -666,19 +666,19 @@ He drank. The water was warm and tasted of the clay pot and it was, he realised,
 
 "I have carried it badly, the way you told me to. I thought I understood it. I thought it meant — " he stopped, because saying it aloud showed him the shape of his error before he had finished the words " — I thought it meant I had come to her too late. That she had been hurt before me, claimed before me, and that I had arrived after the best of her was already spoken for, and that my work was to arrive harder, to make up the lateness by — "
 
-"By doing." Mama Nneoma's mouth did something that was not a smile. "By arriving louder. By planting your flags. Yes. That is the sentence read by a man who cannot bear to be late, so he turns *late* into a race he can still win." She tipped a handful of shells into the basket; they made their dry whisper. "Hear it the other way. You are not late to *her*. You will never be late to her; she opened a door eleven years before you came and you walked through it on time, the only thing in your life you have ever been on time for. You are late to the *other thing*. The thing in the house. The thing she has been keeping small with her two hands since before you knew her name. *That* arrived first, and it has been surviving without you, and it does not need your arrival, and it does not want your help, and when you push into the room where she keeps it small and you start to *do*, you do not save her. You crowd the only person who knows how to live there. You are a guest who has come late to a house and begun moving the host's furniture because moving furniture is the only way you know to prove you belong."
+"By doing." Mama Agnes's mouth did something that was not a smile. "By arriving louder. By planting your flags. Yes. That is the sentence read by a man who cannot bear to be late, so he turns *late* into a race he can still win." She tipped a handful of shells into the basket; they made their dry whisper. "Hear it the other way. You are not late to *her*. You will never be late to her; she opened a door eleven years before you came and you walked through it on time, the only thing in your life you have ever been on time for. You are late to the *other thing*. The thing in the house. The thing she has been keeping small with her two hands since before you knew her name. *That* arrived first, and it has been surviving without you, and it does not need your arrival, and it does not want your help, and when you push into the room where she keeps it small and you start to *do*, you do not save her. You crowd the only person who knows how to live there. You are a guest who has come late to a house and begun moving the host's furniture because moving furniture is the only way you know to prove you belong."
 
 He looked at the rosary, the key, the red cloth on the nail by her door. He did not try, this time, to make them quarrel.
 
-Across the lane the man in the white cap rode past on the bicycle whose chain the whole of Mama Nneoma's acquaintance had now watched him defeat and re-defeat for a week, and the stupid ordinary permanence of it — a man and a chain locked in their small eternal war while the world ended quietly in other houses — steadied him the way only foolish things can steady a person who has just been handed something true.
+Across the lane the man in the white cap rode past on the bicycle whose chain the whole of Mama Agnes's acquaintance had now watched him defeat and re-defeat for a week, and the stupid ordinary permanence of it — a man and a chain locked in their small eternal war while the world ended quietly in other houses — steadied him the way only foolish things can steady a person who has just been handed something true.
 
 "He will ride that chain into his grave," the protagonist said, because he could not yet speak of anything larger.
 
-"He will," Mama Nneoma agreed. "And he will go happier than you, because he has made his peace with the chain. You are still insulted that yours exists."
+"He will," Mama Agnes agreed. "And he will go happier than you, because he has made his peace with the chain. You are still insulted that yours exists."
 
 "Then what is welcome," he said. "If it is not the right to enter."
 
-"Now you have asked the chapter's question," she said, "instead of mine." She set the bowl aside and covered it with the cloth, the way she did when a thing was about to be finished. "Welcome is being let stand in the warm part of a house that is not yours to command. That is all it has ever been. You wanted welcome to mean the house was yours. It is not. Hers is not even hers; she rents her own life from the thing in the front room, the way you rent the walls from Obiefuna, and the landlord and the cold have both walked into your marriage without once crossing a threshold, and the only person who has held any ground at all is the woman you keep trying to rescue from her own competence." She looked at him, and the look had the calm of someone who had stopped needing the categories of soft and hard. "She let you in. Did she not."
+"Now you have asked the chapter's question," she said, "instead of mine." She set the bowl aside and covered it with the cloth, the way she did when a thing was about to be finished. "Welcome is being let stand in the warm part of a house that is not yours to command. That is all it has ever been. You wanted welcome to mean the house was yours. It is not. Hers is not even hers; she rents her own life from the thing in the front room, the way you rent the walls from Mr Stephen, and the landlord and the cold have both walked into your marriage without once crossing a threshold, and the only person who has held any ground at all is the woman you keep trying to rescue from her own competence." She looked at him, and the look had the calm of someone who had stopped needing the categories of soft and hard. "She let you in. Did she not."
 
 "She let me in."
 

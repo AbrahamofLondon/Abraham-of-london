@@ -15,7 +15,7 @@ Owner locked the Elder sentence before drafting:
 
 Status: **USED IN CH.6.**
 
-Placement: the sentence is spoken while Mama Nneoma divides the groundnuts he brought, half for the visitor and half for the house. It is not isolated as prophecy; it arrives inside ordinary action, in the same register as household knowledge.
+Placement: the sentence is spoken while Mama Agnes divides the groundnuts he brought, half for the visitor and half for the house. It is not isolated as prophecy; it arrives inside ordinary action, in the same register as household knowledge.
 
 Recommendation B remains reserved as a possible later echo only:
 
@@ -39,7 +39,7 @@ Counts use the same local regex method, excluding drafting comments.
 | Ch.6 — The Elder | 3,853 |
 | **Total Ch.1-6** | **17,424** |
 
-Ch.6 is above the 3,200 blueprint target. The overage is accepted for this draft because Ch.6 is a hinge of authority, not a transitional chapter: it introduces Mama Nneoma, demonstrates her two-cosmology household, gives the locked sentence, refuses both rescue and condemnation, and sends him home carrying the sentence rather than an answer.
+Ch.6 is above the 3,200 blueprint target. The overage is accepted for this draft because Ch.6 is a hinge of authority, not a transitional chapter: it introduces Mama Agnes, demonstrates her two-cosmology household, gives the locked sentence, refuses both rescue and condemnation, and sends him home carrying the sentence rather than an answer.
 
 ---
 
@@ -86,7 +86,7 @@ These acts keep the chapter ancestral and domestic, not prophetic.
 
 ## Obianuju protection
 
-The chapter explicitly refuses to make Obianuju a monster. Mama Nneoma grants both truths:
+The chapter explicitly refuses to make Obianuju a monster. Mama Agnes grants both truths:
 
 - Obianuju loves him.
 - Love does not make him first.
@@ -147,9 +147,9 @@ This is the chapter's load-bearing utterance. It names the protagonist's wound a
 
 This is the sentence that prevents the Elder chapter from reducing Obianuju to the problem being diagnosed.
 
-### Mama Nneoma as character, not oracle-device
+### Mama Agnes as character, not oracle-device
 
-**PASS.** Mama Nneoma has ordinary life before authority: the repaired front step, almond-tree shade, beans and melon seeds, the cracked Bible, balm tin, spectacles she does not put on, pot, wrapper, rosary, key, red cloth, and food sent home. She has humour, irritation, patience, and limits. She does not exist only to deliver the line.
+**PASS.** Mama Agnes has ordinary life before authority: the repaired front step, almond-tree shade, beans and melon seeds, the cracked Bible, balm tin, spectacles she does not put on, pot, wrapper, rosary, key, red cloth, and food sent home. She has humour, irritation, patience, and limits. She does not exist only to deliver the line.
 
 ### Elder sentence placement
 
@@ -169,7 +169,7 @@ This is the sentence that prevents the Elder chapter from reducing Obianuju to t
 
 ### Obianuju protection
 
-**PASS.** Mama Nneoma grants both truths: Obianuju loves him, and love does not make him first. The chapter refuses to make her wicked, a road, a warning, a weather, or a wound. It returns her to personhood.
+**PASS.** Mama Agnes grants both truths: Obianuju loves him, and love does not make him first. The chapter refuses to make her wicked, a road, a warning, a weather, or a wound. It returns her to personhood.
 
 ### Force architecture
 

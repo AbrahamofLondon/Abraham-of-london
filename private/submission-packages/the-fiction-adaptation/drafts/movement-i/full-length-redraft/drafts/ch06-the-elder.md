@@ -8,7 +8,7 @@ The woman everyone sent other people to was not difficult to find, which was the
 
 She lived behind the church with the blue door and across from the lane that bent toward the mosque before changing its mind, in a low house whose front step had been repaired with three different kinds of cement. There was nothing hidden about her. No curtain of beads, no room kept dark, no smell of leaves burning in a pot to announce that ordinary air had become insufficient. In the mornings she sat under the shallow shade of an almond tree and sorted beans on a tray, and the people who needed her passed slowly enough to be noticed and quickly enough to pretend they had not come for noticing.
 
-Her name was Nneoma, though hardly anyone used it. They called her Mama because the town had only two titles it trusted for old women: Mama, when it wanted to be comforted, and Madam, when it wanted to be obeyed. She had earned both and preferred neither. She wore a wrapper tied without display and blouses the colour of practical things — indigo, brown, once a green that had been washed into something the eye could not defend. On Sundays she entered the blue door with a Bible under her arm and sat near the back, not because she was humble, but because she liked to see who arrived late. On market days women came to her with headaches, missing money, children who would not sleep, husbands who had stopped speaking, dreams that repeated, and chickens that had begun laying in the wrong place. She did not treat these categories as separate in the way educated people did.
+Her name was Agnes, though hardly anyone used it. They called her Mama because the town had only two titles it trusted for old women: Mama, when it wanted to be comforted, and Madam, when it wanted to be obeyed. She had earned both and preferred neither. She wore a wrapper tied without display and blouses the colour of practical things — indigo, brown, once a green that had been washed into something the eye could not defend. On Sundays she entered the blue door with a Bible under her arm and sat near the back, not because she was humble, but because she liked to see who arrived late. On market days women came to her with headaches, missing money, children who would not sleep, husbands who had stopped speaking, dreams that repeated, and chickens that had begun laying in the wrong place. She did not treat these categories as separate in the way educated people did.
 
 The town did not think this strange.
 
@@ -32,7 +32,7 @@ The boy at the standpipe laughed, and Kene told him to wash faster before adulth
 
 "Go," Kene said.
 
-"To Mama Nneoma?"
+"To Mama Agnes?"
 
 "To the old woman you are pretending not to know I mean."
 
@@ -46,7 +46,7 @@ So he went.
 
 Not that day. He told himself the hour was wrong, the sun too high, Obianuju waiting for him to bring back palm oil, the market too full, the road too wet after morning rain. All of these were true in the way lesser truths volunteer themselves to protect the greater thing from being approached. He went the next morning, carrying nothing, which felt rude, so he bought groundnuts from a woman near the blue door and carried those, which felt foolish, and then arrived at the Elder's step with a paper twist of groundnuts growing damp in his hand.
 
-Mama Nneoma was shelling melon seeds into a shallow enamel bowl. Her fingers moved with an economy that made age look like practice rather than loss. Beside her, on a stool, was a Bible with a cracked black cover, a tin of balm, a small knife, and a pair of spectacles she did not put on. The bowl rested in her lap. The shells fell into another bowl by her feet with a dry, papery sound.
+Mama Agnes was shelling melon seeds into a shallow enamel bowl. Her fingers moved with an economy that made age look like practice rather than loss. Beside her, on a stool, was a Bible with a cracked black cover, a tin of balm, a small knife, and a pair of spectacles she did not put on. The bowl rested in her lap. The shells fell into another bowl by her feet with a dry, papery sound.
 
 "You brought food for a woman who has teeth," she said without looking up.
 
@@ -58,7 +58,7 @@ He stood there with the paper in his hand and felt, absurdly, nine years old.
 
 "Sit," she said.
 
-There was one low stool near the door. He sat. The stool was too low for him, and his knees rose, making him feel both large and poorly arranged. Mama Nneoma continued shelling. Across the lane the mosque wall held the morning shade, and a man in a white cap was arguing with a bicycle chain. Somewhere behind the house a radio was giving news in a voice too serious for the size of the kitchen it had entered.
+There was one low stool near the door. He sat. The stool was too low for him, and his knees rose, making him feel both large and poorly arranged. Mama Agnes continued shelling. Across the lane the mosque wall held the morning shade, and a man in a white cap was arguing with a bicycle chain. Somewhere behind the house a radio was giving news in a voice too serious for the size of the kitchen it had entered.
 
 "Kene sent you," she said.
 
@@ -78,7 +78,7 @@ He did not know how to begin.
 
 It was not the sentence he had planned. He had not planned any sentence. Still, when it came out, he disliked it. My wife's house. As though the house were hers and he were a visitor complaining of damp. As though the cold belonged to walls. As though Obianuju could be separated from the climate that moved through the rooms around her.
 
-Mama Nneoma did not correct him. She placed another seed into the bowl.
+Mama Agnes did not correct him. She placed another seed into the bowl.
 
 "Many houses go cold," she said.
 
@@ -118,7 +118,7 @@ He looked toward the lane. The man with the bicycle chain had black grease on tw
 
 "Then who is hiding it?"
 
-Mama Nneoma tipped a small handful of shells from the bowl at her feet into a wider basket. The shells made their dry whisper. "You came here to ask whether your wife is lying to you?"
+Mama Agnes tipped a small handful of shells from the bowl at her feet into a wider basket. The shells made their dry whisper. "You came here to ask whether your wife is lying to you?"
 
 "No."
 
@@ -166,7 +166,7 @@ He did not know that yet.
 
 "What is it?" he asked.
 
-Mama Nneoma broke three seeds in silence. The radio behind the house lost its station and became a field of static, then found a hymn sung by voices that did not agree on the key. She reached for the Bible on the stool, not to open it, only to move it further from the edge before it fell. The small care of it made him feel corrected.
+Mama Agnes broke three seeds in silence. The radio behind the house lost its station and became a field of static, then found a hymn sung by voices that did not agree on the key. She reached for the Bible on the stool, not to open it, only to move it further from the edge before it fell. The small care of it made him feel corrected.
 
 "If you want a name so you can decide whether to respect it," she said, "you have come to the wrong woman."
 
@@ -178,7 +178,7 @@ Mama Nneoma broke three seeds in silence. The radio behind the house lost its st
 
 "Good. It keeps him polite."
 
-He laughed once, unwillingly. Mama Nneoma did not.
+He laughed once, unwillingly. Mama Agnes did not.
 
 "Your wife is loved," she said.
 
@@ -200,7 +200,7 @@ The irritation left him then, or changed shape. He thought of Obianuju under the
 
 The second yes was the one that hurt, because she gave it freely. She did not make him fight for it. She did not take Obianuju's warmth away to make room for warning. She granted the love and, by granting it, removed the shield he had been holding. If she had denied it, he could have defended the marriage and called that defence faithfulness. But she did not deny it. She agreed, and the agreement left him exposed to the rest.
 
-Mama Nneoma folded the edge of her wrapper over one knee where it had slipped, then reached for the groundnuts he had brought. She opened the damp paper, considered them, and poured half into a small dish.
+Mama Agnes folded the edge of her wrapper over one knee where it had slipped, then reached for the groundnuts he had brought. She opened the damp paper, considered them, and poured half into a small dish.
 
 "You can be welcomed and still be late," she said.
 
@@ -224,11 +224,11 @@ Not much. Not in a way that would last. Only enough to feel the insult of being 
 
 There it was again, the corrected sentence without explanation. Love was true. His use of it was not. Welcome was true. Arrival was not. He could feel the shape of the thought and could not yet think it. The mind sometimes refuses a thing not because it is too strange but because it is too exact.
 
-Across the lane, the bicycle chain finally caught, and the man in the white cap straightened with the exhausted dignity of a person who has defeated machinery for one more day. The child with bread returned the other way, now carrying nothing, her hands free and swinging. A woman called out that Mama Nneoma's pot was boiling over. The Elder did not move quickly. She set the bowl of seeds aside, covered it with a cloth, and rose with the care of age and knees.
+Across the lane, the bicycle chain finally caught, and the man in the white cap straightened with the exhausted dignity of a person who has defeated machinery for one more day. The child with bread returned the other way, now carrying nothing, her hands free and swinging. A woman called out that Mama Agnes's pot was boiling over. The Elder did not move quickly. She set the bowl of seeds aside, covered it with a cloth, and rose with the care of age and knees.
 
 "Come," she said.
 
-He followed her through the front room into the kitchen yard. The pot was not boiling over, not yet. Foam had risen close to the rim and trembled there, white and undecided. Mama Nneoma took a cloth, lifted the lid, and shifted it a little so the steam could escape. The foam sank.
+He followed her through the front room into the kitchen yard. The pot was not boiling over, not yet. Foam had risen close to the rim and trembled there, white and undecided. Mama Agnes took a cloth, lifted the lid, and shifted it a little so the steam could escape. The foam sank.
 
 "People shout before a thing has happened," she said.
 
@@ -240,7 +240,7 @@ He did not know whether this was a joke. He decided not to ask.
 
 The kitchen yard was small and clean in the way that requires daily argument with dust. A line of washed cloths hung against the back wall. A pestle leaned in a corner. Two clay pots sat under an overturned basin. On a nail by the door hung a rosary, a key, and a strip of red cloth knotted three times. He saw all three and made the mistake of trying to arrange them into a system. Church. House. Older thing. He had almost done the arithmetic before he caught himself and stopped.
 
-Mama Nneoma saw him stop.
+Mama Agnes saw him stop.
 
 "You want things to quarrel so you can choose a side," she said.
 
@@ -258,7 +258,7 @@ She stirred the pot. It smelled of beans, pepper, and smoke, ordinary enough to 
 
 He disliked himself for asking as soon as the words left him. He had not meant to come for instruction, but the sentence had unsettled the furniture of his certainty. You can be welcomed and still be late. It was not advice. It did not tell him to stay or go. It did not tell him what the cold was, or what Obianuju knew, or what Kene had felt. It only moved the floor under the room in which he had been standing.
 
-Mama Nneoma did not answer at once. She wiped the spoon on the side of the pot and set it down.
+Mama Agnes did not answer at once. She wiped the spoon on the side of the pot and set it down.
 
 "Eat when you are given food," she said. "Do not call hunger discernment."
 

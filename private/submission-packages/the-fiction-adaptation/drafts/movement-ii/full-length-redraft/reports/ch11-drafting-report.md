@@ -45,7 +45,7 @@
 
 ## How the Chapter Begins with Ordinary Life
 
-The chapter opens with the protagonist returning from Mama Nneoma's at dawn. The first scene is domestic — the house, the grey light, the ordinary morning. Obianuju is in the kitchen doing the ordinary work: the kettle, the basin, the cloth. He watches her hands. The chapter establishes the person before the wound — her hands measuring, wiping, folding — before the conversation turns.
+The chapter opens with the protagonist returning from Mama Agnes's at dawn. The first scene is domestic — the house, the grey light, the ordinary morning. Obianuju is in the kitchen doing the ordinary work: the kettle, the basin, the cloth. He watches her hands. The chapter establishes the person before the wound — her hands measuring, wiping, folding — before the conversation turns.
 
 The opening also includes a flashback to the first time he saw her hands (the nail, the line, the cooking knife), grounding the chapter in the marriage's origin before the rupture.
 
@@ -53,10 +53,10 @@ The opening also includes a flashback to the first time he saw her hands (the na
 
 ## What Ch.10 Action Costs
 
-The protagonist's night movement toward Mama Nneoma has three immediate costs:
+The protagonist's night movement toward Mama Agnes has three immediate costs:
 
 1. **Obianuju knows he left.** She woke and he was not there. The absence is the first wound.
-2. **Mama Nneoma's involvement changes the terms.** "You have made the house notice you. That is not the same as understanding it." The cold has been acknowledged by a third party with authority.
+2. **Mama Agnes's involvement changes the terms.** "You have made the house notice you. That is not the same as understanding it." The cold has been acknowledged by a third party with authority.
 3. **The cold has been made public.** Obianuju names this directly: "You have been walking through the town with the cold on your hand, showing it to people, and every person who has seen it has become part of it."
 
 The cost is not abstract. It appears in scene — in her withdrawal, in her moved hand, in her plainest sentence: "You have taken that from me."
@@ -93,7 +93,7 @@ She is not a victim. She is a woman who has been managing a pressure he intensif
 
 He misreads in several ways:
 
-1. **He thinks his action was love.** He thought the investigation, the movement, the walk to Mama Nneoma was the kind of staying that refused to let the cold win. She shows him it was trespass.
+1. **He thinks his action was love.** He thought the investigation, the movement, the walk to Mama Agnes was the kind of staying that refused to let the cold win. She shows him it was trespass.
 2. **He thinks being kept qualifies him.** He has always believed the brown water preserved him for something. He assumed that something was this — the ability to act, to fight, to save. He never considered it might have been for the opposite: to stay still while someone else did the work he could not see.
 3. **He confuses staying with presence.** He thought sitting through the hour with open hands was love. He learns that staying is a position, not an act.
 4. **He thinks "I do not know" is failure.** She receives it as honesty.
@@ -102,9 +102,9 @@ The reader understands more than he does: she is responding to a pressure he has
 
 ---
 
-## Mama Nneoma Handling
+## Mama Agnes Handling
 
-Mama Nneoma appears in the opening. She is handled correctly:
+Mama Agnes appears in the opening. She is handled correctly:
 
 - She does not explain the cold.
 - She does not tell him what to do.
@@ -113,7 +113,7 @@ Mama Nneoma appears in the opening. She is handled correctly:
 - She gives him one sentence: "You have made the house notice you. That is not the same as understanding it."
 - She remains practical, ancestral, and limited.
 
-The full Mama Nneoma encounter is not conducted here — it is preserved for Ch.14 (per the blueprint). This is a consequence scene, not a solution scene.
+The full Mama Agnes encounter is not conducted here — it is preserved for Ch.14 (per the blueprint). This is a consequence scene, not a solution scene.
 
 ---
 
@@ -134,7 +134,7 @@ Kene's challenge from Ch.10 echoes through the chapter. The private house is no 
 The cold is rendered through:
 
 - The house's atmosphere at dawn — "the same cold waiting at the edges of the rooms"
-- Mama Nneoma's sentence: "You have made the house notice you"
+- Mama Agnes's sentence: "You have made the house notice you"
 - Obianuju's description: "It does not want my fear. It wants my presence. It wants to be acknowledged."
 - The cold cup on the table
 - The no-colour door, still closed
@@ -194,7 +194,7 @@ The secondary sentence — *"I do not know how to be married to you right now"* 
 - [x] All changes inside `private/submission-packages/the-fiction-adaptation/`
 - [x] Ch.10 rewrite confirmed canonical
 - [x] Assembled Ch.1–10 uses rewritten Ch.10
-- [x] Mama Nneoma handled correctly (practical, not oracular)
+- [x] Mama Agnes handled correctly (practical, not oracular)
 - [x] Kene felt through consequence, not appearance
 - [x] Cold remains implicit
 - [x] No Trance

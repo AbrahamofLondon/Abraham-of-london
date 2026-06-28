@@ -86,14 +86,14 @@ Stakes are embodied through:
 - He physically leaves the house. He walks to the front door, opens it, steps out.
 - The chapter ends in movement: "And he walked."
 - The action arises from his flaw: he leaves not because he is wise, but because he cannot sit still anymore.
-- It creates momentum into Ch.11. The Mama Nneoma encounter is preserved.
+- It creates momentum into Ch.11. The Mama Agnes encounter is preserved.
 - The no-colour door material is preserved and now functions as pressure toward the door he must approach elsewhere.
 
 ---
 
 ## Acceptance-Gate Sentence
 
-> *He walked through the dark toward Mama Nneoma's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
+> *He walked through the dark toward Mama Agnes's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
 
 **Verdict: ACCEPTED.**
 

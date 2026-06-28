@@ -81,7 +81,7 @@ This sentence proves the Trance has become material. The acceptance-gate sentenc
 | He seeks out the shrimp seller | Kene brings him; she says "You brought him" / "He should have come sooner" |
 | He learns the cold was there before Obianuju | The shrimp seller: "I lived in that house, thirty years ago" |
 | He learns the cold wants to continue | The shrimp seller: "It wants a life to attach itself to. It wants to continue." |
-| He decides to go to Mama Nneoma in the morning | Final paragraph: "And in the morning, he would go to Mama Nneoma." |
+| He decides to go to Mama Agnes in the morning | Final paragraph: "And in the morning, he would go to Mama Agnes." |
 | He sits with his hands not open | "He did not sit with his hands open. He sat with his hands on his knees, and his hands were not open." |
 
 ### Acceptance-Gate Sentence
@@ -111,13 +111,13 @@ The rewrite addressed all five required changes:
 2. Shrimp woman has physical reaction, reluctance, and specific remembered detail
 3. Obianuju's confession is now restrained rupture ("first week," "afraid you would stay")
 4. Stakes are felt through Kene, shrimp woman, and Obianuju
-5. Protagonist leaves that night toward Mama Nneoma
+5. Protagonist leaves that night toward Mama Agnes
 
 The continuation line was retained but softened through "it only waited for the next warmth" — testimony, not doctrine.
 
 **Revised acceptance-gate sentence (per re-audit):**
 
-> *He walked through the dark toward Mama Nneoma's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
+> *He walked through the dark toward Mama Agnes's compound. He did not rehearse the question. He did not know what he would say when he arrived. He only knew that he had spent months proving he could sit in the cold, and that tonight, for the first time, he had chosen to leave it behind him.*
 
 ---
 
@@ -198,7 +198,7 @@ The continuation line was retained but softened through "it only waited for the 
 - [x] Kene returns as full character
 - [x] Social world widens (shrimp seller, house history)
 - [x] External stake visible (continuation)
-- [x] Protagonist acts (goes to Kene, investigates, decides to seek Mama Nneoma)
+- [x] Protagonist acts (goes to Kene, investigates, decides to seek Mama Agnes)
 - [x] Emotional register varies across both chapters
 
 ---
