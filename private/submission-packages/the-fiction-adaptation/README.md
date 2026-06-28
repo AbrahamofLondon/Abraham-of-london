@@ -1,7 +1,7 @@
 # The Fiction Adaptation — Manuscript & Market Package
 
 **Created:** 2026-06-28
-**Status:** Drafting package. Movement I locked; Ch.11-19 accepted as current; Ch.20 drafted for acceptance review. This package develops the allegorical novel from architecture into a full, submittable manuscript plan and market strategy.
+**Status:** Drafting package. Movement I locked; Ch.11-19 accepted as current; Ch.20 drafted and reported; Ch.21 drafted for acceptance review. This package develops the allegorical novel from architecture into a full, submittable manuscript plan and market strategy.
 **Relationship to the memoir:** This is **Book 2** — the allegorical novel built from the marriage/Ch.13 material of *Fathering Without Fear*. It is a separate book with its own market, not a chapter of the memoir. See `04-memoir-leverage-and-sequencing.md`.
 
 ---
