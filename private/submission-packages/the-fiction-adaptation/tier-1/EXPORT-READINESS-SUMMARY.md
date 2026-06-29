@@ -32,7 +32,7 @@
 ## What each export folder contains (all six)
 - query-letter-source.md — paste-ready corrected query
 - synopsis-source.md — one-page + three-page (real text embedded)
-- sample-pages-source.md — verified opening (~13,600 words, Ch.1–5), pass-notes stripped
+- sample-pages-source.md — verified opening (~15,900 words, Ch.1–5 + opening of Ch.6), pass-notes stripped
 - materials-to-send.md (export copy) + submission-checklist.md (export copy)
 - export-readiness-report.md — verdict + folder contents + missing decisions
 - metadata-scrub-report.md — real DOCX scrub (sendable) or explicit "no DOCX because blocked"
@@ -42,7 +42,7 @@
 - `..._Query_<slug>.docx` (~408 words, single-spaced letter)
 - `..._1pSynopsis_<slug>.docx` (~550 words)
 - `..._3pSynopsis_<slug>.docx` (~1,380 words)
-- `..._<slug>_first-50-pages.docx` (~13,600 words, 5 chapters, double-spaced, header + page numbers)
+- `..._<slug>_first-50-pages.docx` (~15,900 words (Ch.1–5 + opening of Ch.6), ~50 pages, double-spaced, header + page numbers)
 
 All verified: open cleanly, author = "Abraham of London", no comments, no tracked changes, no hidden text.
 
