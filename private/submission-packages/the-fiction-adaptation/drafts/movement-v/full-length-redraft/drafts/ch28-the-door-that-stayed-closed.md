@@ -100,10 +100,6 @@ She looked at him. Her face was unreadable.
 
 Mr Stephen nodded slowly. He understood. He did not need her to explain further.
 
-"I have been thinking about this door for days," he said. "I have been thinking about it while I was eating. While I was sleeping. While I was walking through the market. I have been thinking about it the way a man thinks about a word he cannot remember — not because he needs it, but because the not-knowing has become louder than the knowing."
-
-He paused.
-
 "I came here today to hear what you would say. I did not know what I wanted you to say. But I know now that I did not want you to open it. I wanted you to tell me something I could carry without having to carry the door itself."
 
 Obianuju looked at him. Her face did not change.
