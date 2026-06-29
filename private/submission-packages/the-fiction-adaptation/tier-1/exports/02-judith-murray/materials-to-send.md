@@ -8,7 +8,7 @@
 ## Files in this export folder
 - query-letter-source.md (paste-ready, corrected)
 - synopsis-source.md (one-page + three-page, paste-ready)
-- sample-pages-source.md (verified opening, ~13,633 words)
+- sample-pages-source.md (verified opening, ~15,941 words)
 - export-readiness-report.md
 - metadata-scrub-report.md
 
