@@ -32,7 +32,7 @@
 ## What each export folder contains (all six)
 - query-letter-source.md — paste-ready corrected query
 - synopsis-source.md — one-page + three-page (real text embedded)
-- sample-pages-source.md — verified opening (~15,900 words, Ch.1–5 + opening of Ch.6), pass-notes stripped
+- sample-pages-source.md — verified opening (~15,941 words, Ch.1–5 + opening of Ch.6), pass-notes stripped
 - materials-to-send.md (export copy) + submission-checklist.md (export copy)
 - export-readiness-report.md — verdict + folder contents + missing decisions
 - metadata-scrub-report.md — real DOCX scrub (sendable) or explicit "no DOCX because blocked"
@@ -42,9 +42,11 @@
 - `..._Query_<slug>.docx` (~408 words, single-spaced letter)
 - `..._1pSynopsis_<slug>.docx` (~550 words)
 - `..._3pSynopsis_<slug>.docx` (~1,380 words)
-- `..._<slug>_first-50-pages.docx` (~15,900 words (Ch.1–5 + opening of Ch.6), ~50 pages, double-spaced, header + page numbers)
+- `..._<slug>_first-50-pages.docx` (~15,941 words (Ch.1–5 + opening of Ch.6), ~50 pages, double-spaced, header + page numbers)
 
 All verified: open cleanly, author = "Abraham of London", no comments, no tracked changes, no hidden text.
+
+**Manuscript sync (2026-06-29):** query text now reads "approximately 100,000 words" (manuscript corrected to 100,253; the trim fell after Ch.6, so the 50-page sample is unchanged and still renders at exactly 50 pages). Olivia and Sam Query + first-50-pages DOCX regenerated from the corrected, cleaned manuscript and re-verified clean.
 
 ---
 

@@ -72,6 +72,11 @@ No query has been sent. Owner must verify guidelines day-of. Owner sends manuall
 
 ---
 
+## Manuscript sync (2026-06-29)
+- Manuscript corrected to **100,253 words** (was 100,644). The 391-word trim fell **after Chapter 6**, so the first-50-pages sample content is unchanged and still renders at **exactly 50 pages**.
+- All Tier 1 query materials now use query-standard **"approximately 100,000 words."** (Exact figure 100,253 recorded here and in the checklists.)
+- Olivia Maidment and Sam Farkas **Query + first-50-pages DOCX regenerated** from the corrected, cleaned manuscript; verified clean — author "Abraham of London", no comments/tracked changes, and **no drafting/header/editorial-note text**.
+
 ## Final owner action
 1. Resolve AI-policy (`ai-policy-review.md`) before touching the Greene & Heaton / David Higham packages.
 2. For **Olivia Maidment** and **Sam Farkas**: open the export folder, run `submission-checklist.md`, **verify the agency's current guidelines today**, attach the DOCX (trim the 50-page sample if the agent wants fewer), send manually from info@abrahamoflondon.org, then log it in `submission-tracker.md`.

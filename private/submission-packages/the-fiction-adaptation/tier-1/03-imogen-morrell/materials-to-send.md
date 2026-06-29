@@ -12,7 +12,7 @@
 
 > Dear Imogen Morrell,
 >
-> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,644 words. Your stated interest in speculative and gothic novels exploring grief, repressed desire, and uncanny domestic pressure describes the exact territory of The Fiction Adaptation, in which a marriage is held under a metaphysical claim and a wife's knowledge becomes the only protection available.
+> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,000 words. Your stated interest in speculative and gothic novels exploring grief, repressed desire, and uncanny domestic pressure describes the exact territory of The Fiction Adaptation, in which a marriage is held under a metaphysical claim and a wife's knowledge becomes the only protection available.
 >
 > With thanks,
 > Abraham of London

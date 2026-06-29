@@ -31,7 +31,7 @@
 ## Materials prepared
 - Query letter: corrected (Dept. of Speculation + Our Wives Under the Sea; no Mexican Gothic; final bio; info@abrahamoflondon.org)
 - One-page + three-page synopses: present, full plot/ending disclosed
-- Sample: verified opening (~15,900 words (Ch.1–5 + opening of Ch.6), ~50 pages); trim to required length day-of
+- Sample: verified opening (~15,941 words (Ch.1–5 + opening of Ch.6), ~50 pages); trim to required length day-of
 - DOCX: not generated while blocked
 
 ## Final readiness

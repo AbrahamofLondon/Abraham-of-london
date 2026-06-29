@@ -8,7 +8,7 @@ This is the exact query text for Jemima Forrester. Comps are correct (Dept. of S
 
 Dear Jemima Forrester,
 
-I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,644 words.
+I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,000 words.
 
 Your interest in accessible literary fiction with a speculative or lightly magical edge aligns with The Fiction Adaptation, where metaphysical pressure remains emotionally real and never explained, and the wife's refusal to open one door is the centre of the book.
 

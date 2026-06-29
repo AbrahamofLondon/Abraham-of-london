@@ -12,7 +12,7 @@
 
 > Dear Olivia Maidment,
 >
-> Please find below and attached my query for *The Fiction Adaptation*, a literary novel of approximately 100,644 words. Your representation of Julia Armfield and Our Wives Under the Sea suggests you understand the market for literary fiction exploring marriage under strange, unexplained pressure.
+> Please find below and attached my query for *The Fiction Adaptation*, a literary novel of approximately 100,000 words. Your representation of Julia Armfield and Our Wives Under the Sea suggests you understand the market for literary fiction exploring marriage under strange, unexplained pressure.
 >
 > With thanks,
 > Abraham of London

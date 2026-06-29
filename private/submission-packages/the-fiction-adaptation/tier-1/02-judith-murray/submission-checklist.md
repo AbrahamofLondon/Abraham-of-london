@@ -18,7 +18,7 @@
 - [ ] Agent name spelled correctly: Judith Murray
 - [ ] Comps correct: Dept. of Speculation + Our Wives Under the Sea
 - [ ] No "Mexican Gothic" anywhere
-- [ ] Word count: 100,644
+- [ ] Word count: ~100,000 (manuscript 100,253; query rounds to 100,000)
 - [ ] Genre framing: literary / literary-speculative (not horror, fantasy, or memoir)
 - [ ] Author bio present and final
 - [ ] Sender: info@abrahamoflondon.org
