@@ -128,7 +128,7 @@ Then the warmth began to leave the room from the window, the way it did, retreat
 
 He did not cross the room to her. He did not take her wrist. He did not sit across from her with his hands open on his knees and keep her company in the only way the hour allowed, the way he had done for two years and called it love. He stood, and he went to the no-colour door she had closed, and he stopped on his own side of it, the warm side, the side he was let stand in, and he did not open it, and he did not follow her through, and he waited.
 
-It was the same waiting. It was not the same waiting at all. He had waited a thousand evenings with his hands open, certain he was being faithful, certain that to remain was to love. He stood now on the warm side of a shut door while the woman he loved went where he was not let through, and he held still, and the holding-still cost him everything the doing had never cost, and for the first time in his life he did not give the waiting a kinder name than it had earned.
+It was the same waiting. It was not the same waiting at all. He had waited a thousand evenings with his hands open, certain he was being faithful, certain that to remain was to love. He stood now on the warm side of a shut door while the woman he loved went where he was not let through, and he held still, and the holding-still cost him everything the doing had never cost. He did not give the waiting a kinder name than it had earned.
 
 He did not call it love.
 

@@ -1,5 +1,5 @@
 # The Fiction Adaptation
-## A novel
+## A novel /c/aol-check-visual/private/submission-packages/the-fiction-adaptation/full-manuscript/the-fiction-adaptation-complete-manuscript-with-movement-breaks.md
 RECONCILIATION PASS. Option B hybrid opening: hook overture (para 1) → Obianuju ordinary (para 2) → the hour arrives (para 3). One Obianuju-ordinary beat, one town movement, one drowning memory (relocated into the "three accidents" paragraph; the earlier second brown-water flash removed). Added fourth beat: waiting out the hour (justified — deepens fearlessness-as-danger and presence-in-absence; chapter needed breath to reach natural length). Protected passages verbatim. Cut confirmed absent. Trance italic-present, unannounced. Target 2,350–2,600.
 -->
 
@@ -1252,7 +1252,7 @@ He did not have an answer.
 
 He did not know whether an answer existed.
 
-But he lay in the dark with the cold above him and the woman beside him who was kept by another claim, and he felt, for the first time, that the two claims might be the same claim — that the water and the shape were the same creditor, that he and Obianuju were the same kind of held, and that his fearlessness was not the opposite of her absence but its mirror.
+But he lay in the dark with the cold above him and the woman beside him who was kept by another claim, and he felt that the two claims might be the same claim — that the water and the shape were the same creditor, that he and Obianuju were the same kind of held, and that his fearlessness was not the opposite of her absence but its mirror.
 
 He did not know what to do with this.
 
@@ -1385,7 +1385,7 @@ He had called it courtesy, respect, love. He had called it the discipline of a m
 
 He set the cold cup in the basin and walked out of the house.
 
-He did not know where he was going. He only knew that he could not sit in the kitchen while the salt dried on his hand and the cloth dripped on the line and Obianuju went on pouring water as though the morning were ordinary. He had been somewhere. He had brought something back. And for the first time since he had crossed a courtyard to learn her name, he was not content to wait for the hour to end.
+He did not know where he was going. He only knew that he could not sit in the kitchen while the salt dried on his hand and the cloth dripped on the line and Obianuju went on pouring water as though the morning were ordinary. He had been somewhere. He had brought something back. He was not content to wait for the hour to end anymore.
 
 He walked toward the market, not because he needed anything, but because the market was where the town kept its ordinary life, and he needed to be reminded that ordinary life still existed. The streets were the same streets. The standpipe had its congregation. The boys were at the wall with their stones. The tailor's machine was running. The woman with the mortar was grinding something red. All of it was the same, and none of it was the same, because he was carrying a knowledge he had not had yesterday: the cold could touch him. It could leave a mark. And it had chosen to leave that mark on the cloth she had hung, as though the cold were telling him that nothing in that house was beyond its reach.
 
@@ -1407,7 +1407,7 @@ The salt was still on his hand.
 
 The cloth was still wet on the line.
 
-And for the first time in months, he was not sitting through the hour with his hands open and his heart at its ordinary pace. He was moving. He did not know whether the movement would save him or cost him. He only knew that the cold had touched him, and that he could not pretend, anymore, that it was weather.
+He was moving. He did not know whether the movement would save him or cost him. He only knew that the cold had touched him, and that he could not pretend, anymore, that it was weather.
 
 REWRITE — 10/10 STANDARD. Ch.10: Continuation (threshold). Function: Movement I close — continuation enters the world, the Claim reaches for what comes next, the reversal begins. Kene challenges. Shrimp woman remembers. Obianuju's knowledge costs the marriage. The protagonist acts before the chapter ends. No child on page — threshold and expectation only. Force: Spirit Husband reaching. Motifs: ribbon/threshold/hands/cold/salt. Target 4,000–4,600.
 -->
@@ -2443,7 +2443,7 @@ Then the warmth began to leave the room from the window, the way it did, retreat
 
 He did not cross the room to her. He did not take her wrist. He did not sit across from her with his hands open on his knees and keep her company in the only way the hour allowed, the way he had done for two years and called it love. He stood, and he went to the no-colour door she had closed, and he stopped on his own side of it, the warm side, the side he was let stand in, and he did not open it, and he did not follow her through, and he waited.
 
-It was the same waiting. It was not the same waiting at all. He had waited a thousand evenings with his hands open, certain he was being faithful, certain that to remain was to love. He stood now on the warm side of a shut door while the woman he loved went where he was not let through, and he held still, and the holding-still cost him everything the doing had never cost, and for the first time in his life he did not give the waiting a kinder name than it had earned.
+It was the same waiting. It was not the same waiting at all. He had waited a thousand evenings with his hands open, certain he was being faithful, certain that to remain was to love. He stood now on the warm side of a shut door while the woman he loved went where he was not let through, and he held still, and the holding-still cost him everything the doing had never cost. He did not give the waiting a kinder name than it had earned.
 
 He did not call it love.
 
@@ -2574,7 +2574,7 @@ He walked home the long way that was the same length as the short way, and the t
 
 He went in. He did not announce himself. He took off his shoes at the step so the floor would not hear him. The cup was still on the table, in the neutral country, and he did not move it. He sat in the chair by the window, in the dark, on the warm side of nothing, and he did the work Mama Agnes had given him, which was no work at all, which was the refusal of work, which was the hardest thing his body had ever been asked to hold still through — to be in the room and want nothing from it, to be present and unpaid, to stop, for one evening, trying to be worth the keeping.
 
-It should have been peace. It was not peace. It was the opposite of peace; it was a man holding his own hands down. But it was, for the first time in a week, not noise.
+It should have been peace. It was not peace. It was the opposite of peace; it was a man holding his own hands down. But it was not noise.
 
 And in the not-noise, the house did a thing it had not done before.
 
@@ -3628,7 +3628,7 @@ He took his hands off the table.
 
 The rent book watched from the high shelf.
 
-The folded note from Mr Stephen lay under the cup, dry and ready for tomorrow. Obianuju had left it there deliberately, he thought, not because she forgot it, but because tomorrow would not be improved by hiding. A thing that is coming does not become smaller because you put it in a drawer.
+The folded note from Mr Stephen lay under the cup, dry and ready for tomorrow. A thing that is coming does not become smaller because you put it in a drawer.
 
 He stood, took the note, and then stopped with it in his hand.
 
@@ -3662,7 +3662,7 @@ He looked at the packet. Practical help. A repairman's kindness. Another way to 
 
 "He said a house that refuses the wet side must be given other manners."
 
-She sat then, slowly, and for the first time all day let him see she was tired before she corrected the sight. She placed her right hand on the table palm down. The grey line had almost gone. The almost was worse than the mark.
+She sat then, slowly. She let him see she was tired before she corrected the sight. She placed her right hand on the table palm down. The grey line had almost gone. The almost was worse than the mark.
 
 "May I?" he asked.
 
@@ -3705,7 +3705,7 @@ MOVEMENT II DRAFT. Ch.20: The Inspection. Function: Mr Stephen's ordinary levera
 
 Obianuju moved the cup first.
 
-That was how the inspection began, before Mr Stephen arrived, before the gate clicked, before any man outside the marriage put his eyes on the floor. She took the cup from the table and set it on the shelf, not because the cup mattered, but because the note beneath it did. Mr Stephen's folded paper had sat there all night, dry, exact, waiting under an ordinary object. In the morning she lifted the cup, smoothed the note once with the side of her thumb, folded it smaller, and placed it inside the rent book.
+That was how the inspection began, before Mr Stephen arrived, before the gate clicked, before any man outside the marriage put his eyes on the floor. She took the cup from the table and set it on the shelf. Mr Stephen's folded paper had sat there all night, dry, exact, waiting under an ordinary object. In the morning she lifted the cup, smoothed the note once with the side of her thumb, folded it smaller, and placed it inside the rent book.
 
 Then she brought the rent book down from the high shelf.
 
@@ -4620,7 +4620,7 @@ Kene closed his eyes.
 
 "This is why repairmen are dangerous," he said. "They have no respect for atmosphere."
 
-Obianuju stood before either man could move. She wiped her hands on a cloth, not because they were dirty, but because she would not meet a practical man with soup on her fingers. At the doorway she became neither host nor supplicant. She became the person who knew where things were kept.
+Obianuju stood before either man could move. She wiped her hands. At the doorway she became neither host nor supplicant. She became the person who knew where things were kept.
 
 "Tomorrow before noon," she said from the threshold.
 
@@ -5506,7 +5506,7 @@ He was at the table. The rent book was closed. The red thread was still there, b
 
 The rain increased.
 
-He stood and walked to the back of the house, not because he had permission, but because the sound of water on the lean-to roof was different from the sound of water on the main roof, and he needed to know which sound the house was making.
+He stood and walked to the back of the house. The sound of water on the lean-to roof was different from the sound of water on the main roof. He needed to know which sound the house was making.
 
 The lean-to door was closed.
 
@@ -5872,7 +5872,7 @@ He had not expected it to be. He had expected her to put it away before dawn, to
 
 He did not touch it.
 
-He stood in the doorway of the front room and looked at it the way a man looks at a thing he has been told is dangerous — not because he doubts the warning, but because he needs to see whether the danger has a shape he can recognise.
+He stood in the doorway of the front room and looked at it. He needed to see whether the danger had a shape he could recognise.
 
 It did not.
 
@@ -6094,7 +6094,7 @@ She looked at him. Her back had settled into the shape it took before she told h
 
 "When he shows the photograph to someone who recognises the woman in it."
 
-He looked at the photograph. The woman was still there, unsmiling, standing in front of a house that was not this house. She looked familiar in the way that faces from old photographs always look familiar — not because you know them, but because they belong to a time you did not live through.
+He looked at the photograph. The woman was still there, unsmiling, standing in front of a house that was not this house. She looked familiar in the way that faces from old photographs always look familiar — they belong to a time you did not live through.
 
 "Who is she?" he asked.
 
@@ -7017,7 +7017,7 @@ MOVEMENT IV DRAFT. Ch.27: The Man Who Wonders. Function: Mr Stephen's wondering 
 
 The quiet lasted three days.
 
-The market stopped talking. The pepper woman found a new story — something about a goat that had bitten a child near the mosque — and the town moved on the way towns move on, not because they had forgotten, but because there was nothing new to add. The false death story died the way Mr Stephen had said it would: slowly, then completely, replaced by the next thing that needed to be carried.
+The market stopped talking. The pepper woman found a new story — something about a goat that had bitten a child near the mosque — and the town moved on. There was nothing new to add. The false death story died the way Mr Stephen had said it would: slowly, then completely, replaced by the next thing that needed to be carried.
 
 The protagonist noticed the quiet the way a man notices the absence of a sound he had grown used to. He had not realised how much of his attention had been taken by the story until the story was gone. The market was ordinary again. The lane was ordinary again. The house was ordinary again.
 
@@ -7377,7 +7377,7 @@ She turned then. Her shoulders had settled into their closed shape. When she spo
 
 "If he asks about the door, you will tell him that it is part of the house, that it has been closed since before we arrived, and that we have chosen not to open it. You will not say more. You will not say less."
 
-He repeated the sentence in his mind. *It is part of the house. It has been closed since before we arrived. We have chosen not to open it.* He said it three times, not because he was afraid of forgetting it, but because he wanted to feel the shape of it in his mouth before he needed to speak it aloud.
+He repeated the sentence in his mind. *It is part of the house. It has been closed since before we arrived. We have chosen not to open it.* He said it three times, feeling the shape of it in his mouth before he needed to speak it aloud.
 
 Mr Stephen arrived at the hour he had named.
 

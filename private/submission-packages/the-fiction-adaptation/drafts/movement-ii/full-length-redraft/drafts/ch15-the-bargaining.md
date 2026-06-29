@@ -124,7 +124,7 @@ He walked home the long way that was the same length as the short way, and the t
 
 He went in. He did not announce himself. He took off his shoes at the step so the floor would not hear him. The cup was still on the table, in the neutral country, and he did not move it. He sat in the chair by the window, in the dark, on the warm side of nothing, and he did the work Mama Agnes had given him, which was no work at all, which was the refusal of work, which was the hardest thing his body had ever been asked to hold still through — to be in the room and want nothing from it, to be present and unpaid, to stop, for one evening, trying to be worth the keeping.
 
-It should have been peace. It was not peace. It was the opposite of peace; it was a man holding his own hands down. But it was, for the first time in a week, not noise.
+It should have been peace. It was not peace. It was the opposite of peace; it was a man holding his own hands down. But it was not noise.
 
 And in the not-noise, the house did a thing it had not done before.
 

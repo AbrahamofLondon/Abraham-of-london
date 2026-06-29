@@ -6,7 +6,7 @@ MOVEMENT IV DRAFT. Ch.27: The Man Who Wonders. Function: Mr Stephen's wondering 
 
 The quiet lasted three days.
 
-The market stopped talking. The pepper woman found a new story — something about a goat that had bitten a child near the mosque — and the town moved on the way towns move on, not because they had forgotten, but because there was nothing new to add. The false death story died the way Mr Stephen had said it would: slowly, then completely, replaced by the next thing that needed to be carried.
+The market stopped talking. The pepper woman found a new story — something about a goat that had bitten a child near the mosque — and the town moved on. There was nothing new to add. The false death story died the way Mr Stephen had said it would: slowly, then completely, replaced by the next thing that needed to be carried.
 
 The protagonist noticed the quiet the way a man notices the absence of a sound he had grown used to. He had not realised how much of his attention had been taken by the story until the story was gone. The market was ordinary again. The lane was ordinary again. The house was ordinary again.
 
