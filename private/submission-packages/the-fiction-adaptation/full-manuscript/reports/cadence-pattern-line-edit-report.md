@@ -447,4 +447,71 @@ private/submission-packages/the-fiction-adaptation/full-manuscript/reports/caden
 
 ---
 
+---
+
+# Pass II Progress Report
+## Interim Session — Partial Execution Complete
+
+**Date:** June 29, 2026 (continued)  
+**Status:** Pass II in progress; focused reductions underway  
+**Commit:** 786654460 — cadence pattern pass ii — targeted reductions  
+
+## Pass II Current State
+
+### Edits Completed
+
+**Chapters Edited in Pass II:**
+- Ch.15: Removed weak "for the first time" (Mr Stephen observation)
+- Ch.16: Removed weak "for the first time" (Kene action echo)
+- Ch.28: Removed duplicate "not because... but because" (Mr Stephen reflection)
+
+### Pattern Progress: Baseline → Current → Target
+
+| Pattern | Baseline | Pass I Final | Pass II Current | Target | Status |
+|---------|----------|------------|-----------------|--------|--------|
+| "the face of a woman/man who..." | 20 | 4 | 4 | 8–10 | ✓ EXCEEDED |
+| "he understood that" | 34 | 23 | 23 | 20–25 | ✓ ON TARGET |
+| "for the first time" | 14 | 12 | 12 | 4–6 | ⚠️ IN PROGRESS |
+| "not because... but because" | 22 | 22 | 21 | 10–12 | ⚠️ IN PROGRESS |
+| "entered him the way..." | 6 | 4 | 4 | 2–3 | ⚠️ IN PROGRESS |
+
+### Work Remaining
+
+**High Priority (Largest Impact):**
+1. **"not because... but because"**: 21 → 10-12 target
+   - Need to remove ~9-11 more instances
+   - Most are explanatory rather than verdictive
+   - Focus: identify weak conditional rhythms across full manuscript
+
+2. **"for the first time"**: 12 → 4-6 target
+   - Need to remove ~6-8 more instances  
+   - Action echoes and weak observations remain
+   - Strategy: keep only true transformation markers (boundary crossings, reversals, arc pivots)
+
+3. **"entered him the way the cold entered"**: 4 → 2-3 target
+   - Need to thin to 2-3 strongest instances
+   - Replace weak late uses with fresh imagery if possible
+
+**Medium Priority:**
+4. Light sweep of Ch.16-22 for obvious repetition (after patterns)
+
+5. Leave Ch.1-15 untouched except glaringly weak instances
+
+### Validation Status
+
+```
+✅ mdx:integrity: PASS
+✅ mdx:gate: PASS
+✅ git diff --check: CLEAN (CRLF warnings on Windows, non-structural)
+✅ All changes limited to private/submission-packages/the-fiction-adaptation/
+```
+
+### Technical Notes
+
+- Manuscript rebuild successful: both formats regenerated from canonical chapters
+- Line number mapping between full manuscript and canonical chapter files is complex due to assembly process
+- Recommend future passes prioritize canonical chapter files directly via targeted searches rather than full-manuscript line-number approach
+
+---
+
 **End of Report**
