@@ -194,7 +194,7 @@ The brief states: "Keep the final/apex uses where understanding is the point. Es
 - **Naming-realism rule:** No character names revealed or altered. Protagonist remains unnamed. Woman in photograph remains referred to by context only.
 - **Memoir firewall:** No bleeding of memoir content into novelistic frame. All changes are within the novel's narrative voice.
 - **Ending meaning:** "You can be welcomed and still be late" / "some doors stay closed" thematic anchors remain intact and now more sharply framed.
-- **Three-force architecture:** Protagonist / Obianuju / Cold remain in balanced tension. No hierarchy shift.
+- **Three-force architecture:** Claim (territorial pressure/prior occupancy), Voice (intimidation), and Trance (messenger/witness) remain distinct and functional. No conflation.
 
 ### ✅ Validation Results
 
@@ -642,15 +642,17 @@ private/submission-packages/the-fiction-adaptation/full-manuscript/reports/caden
 ✅ No changes to plot, chapter order, ending, no-colour door, true-name withholding
 ✅ Obianuju's agency preserved throughout
 ✅ Protagonist's arc intact and sharpened
-✅ Three-force architecture (Protagonist/Obianuju/Cold) maintained
+✅ Three-force architecture (Claim / Voice / Trance) preserved
 ✅ Final line preserved: "And he was still there."
 ```
 
 ### Summary: Pass II Completion
 
-**Total Changes:**
-- 11 instances removed across full manuscript
-- 8 canonical chapter files edited
+**Total Phrase-Count Reductions:**
+- 9 instances of "not because... but because" removed (22→13)
+- 8 instances of "for the first time" removed (14→6)
+- **17 total phrase removals** across full manuscript
+- 9 canonical chapter files edited
 - 2 complete manuscript files rebuilt
 - 0 structural changes
 - 0 plot alterations
@@ -662,6 +664,12 @@ private/submission-packages/the-fiction-adaptation/full-manuscript/reports/caden
 - "entered him the way": 33% reduction (6→4), strong uses retained
 - Overall pattern density: significantly reduced across full manuscript
 - Cadence: markedly improved in climax chapters; maintained in exposition
+
+**Editorial Status:**
+- Cadence Pattern Pass I (final chapters): **complete**
+- Cadence Pattern Pass II (corrective-rhythm and first-time thinning): **complete**
+- Remaining pattern counts are submission-polish acceptable
+- **No further number-chasing recommended**
 
 **Quality Gates:** All validation passing. Manuscript reads as itself.
 
