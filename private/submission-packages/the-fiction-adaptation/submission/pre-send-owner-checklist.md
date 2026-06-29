@@ -1,3 +1,5 @@
+> **⚠ SUPERSEDED.** Pre-send checks now live per agent in `tier-1/<agent>/submission-checklist.md` and `tier-1/exports/<agent>/submission-checklist.md`. This earlier copy is retained for history only.
+
 # Pre-Send Owner Checklist
 ## The Fiction Adaptation — Tier 1 Final Approval Before Any Query
 

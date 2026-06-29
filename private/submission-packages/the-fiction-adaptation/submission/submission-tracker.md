@@ -1,3 +1,5 @@
+> **⚠ SUPERSEDED.** The authoritative submission tracker is `tier-1/submission-tracker.md`. This earlier copy is retained for history only.
+
 # Submission Tracker
 ## The Fiction Adaptation — Tier 1 & Beyond
 
