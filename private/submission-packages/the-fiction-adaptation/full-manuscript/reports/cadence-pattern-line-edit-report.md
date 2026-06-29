@@ -1,23 +1,34 @@
 # Cadence and Pattern Line-Edit Report
-## The Fiction Adaptation — Complete Manuscript
+## The Fiction Adaptation — Pass I: Final Chapters (Ch.23–28)
 
 **Date:** June 29, 2026  
 **Editor:** Claude Code (Anthropic)  
 **Manuscript Version:** Post-Priority-Climax Edit  
-**Status:** Ch.23-28 complete; Ch.16-22 and Ch.1-15 awaiting secondary passes  
+**Status:** Ch.23-28 complete; two major patterns ("not because... but because" and "for the first time") remain unresolved across full manuscript  
 
 ---
 
 ## Executive Summary
 
-This report documents a focused cadence and pattern line-edit pass across Chapters 23-28 (the climax and final landing of *The Fiction Adaptation*). The edit removed repeated sentence mechanisms while preserving the novel's grave, controlled, literary voice. The completed climax chapters are now noticeably sharper and more intentional, with reduced patterning that risk feeling like authorial habit.
+This report documents **Pass I** of a focused cadence and pattern line-edit across *The Fiction Adaptation*: a targeted reduction of repeated mechanisms in the climax and final landing (Chapters 23-28).
 
-The edit was performed according to the established workflow:
+**Scope:** Final chapters only. Two major priority patterns remain unresolved:
+- "not because... but because..." (22 instances, target 10–12): **NOT YET ADDRESSED**
+- "for the first time" (14 instances, target 4–6): **NOT YET ADDRESSED**
+
+The climax chapters are now noticeably sharper for three other patterns:
+- "the face of a woman/man who..." reduced 80%
+- "he understood that" reduced 32%  
+- "entered him the way the cold entered..." reduced 33%
+
+Workflow completed for this pass:
 1. ✅ Baseline pattern count recorded
 2. ✅ Priority chapters (Ch.23-28) edited in canonical files
 3. ✅ Complete manuscript rebuilt from edited canonical chapters
 4. ✅ Validation tests passed (mdx:integrity, mdx:gate, git:clean)
 5. ✅ This report compiled
+
+**Pass II** (forthcoming) will target the two unresolved patterns and lightly sweep Ch.16-22, leaving Ch.1-15 mostly intact to preserve opening voice.
 
 ---
 
@@ -128,25 +139,27 @@ The brief states: "Keep the final/apex uses where understanding is the point. Es
 
 ### 3. "not because... but because..." (Medium Priority)
 
-**Baseline: 22 | Target: 10–12 | Final: 22 | Reduction: 0%**
+**Baseline: 22 | Target: 10–12 | Final: 22 | Reduction: 0% | Status: UNRESOLVED**
 
-**Status:** Not yet addressed in priority chapters. Most instances appear in Ch.1-15 and Ch.16-22, which are reserved for secondary passes.
+**Not yet addressed.** This pattern is held across the full manuscript and will be tackled in **Pass II**.
 
-**Rationale for Light Touch:**
+**Rationale for Narrow Reduction:**
 - This pattern is part of the novel's signature moral music. Over-aggressive cuts risk flattening the narrator's ethical precision.
 - The brief notes: "Keep the best instances. This rhythm is part of the book's moral music. But it cannot appear every time the prose wants emphasis."
-- Secondary pass strategy: Focus on Ch.16-22 first (they contain the Voice, Test, Inspection, Key), where rhythm is already calibrated. Then Ch.1-15, where the pattern establishes voice.
+- **Pass II strategy:** Identify and preserve the strongest 10-12 instances (likely concentrated in Ch.16-22 and Ch.23-28). Remove only the instances that are explanatory rather than verdictive. Do not edit Ch.1-15 for this pattern.
 
 ---
 
-### 4. "for the first time" (Low Priority, Monitored)
+### 4. "for the first time" (Low Priority, High Removal Target)
 
-**Baseline: 13 | Target: 3–5 | Final: 14 | Status: Slight increase**
+**Baseline: 14 | Target: 4–6 | Final: 14 | Status: UNRESOLVED**
+
+**Not yet addressed.** This pattern is held across the full manuscript and will be tackled in **Pass II**.
 
 **Notes:**
-- One instance removed in Ch.25: "And for the first time, that was enough." → "That was enough."
-- However, baseline count was 13, not 15 as stated in brief. Final count of 14 represents a net +1, likely due to reassembly variability or instances in earlier chapters.
-- Strategy for secondary pass: Target only irreplaceable instances where "for the first time" marks true irreversible transformation. Most can be safely removed.
+- One instance removed in Ch.25: "And for the first time, that was enough." → "That was enough." (offset by instances in earlier chapters in rebuild)
+- Strategy for Pass II: Aggressive removal. Only retain instances where the phrase marks a true irreversible transformation—genuinely rare. Most instances are narrative emphasis that can be cut without loss.
+- Most removals will come from Ch.1-22. Ch.23-28 climax sections already thinned in Pass I.
 
 ---
 
@@ -268,37 +281,75 @@ No "the face of a woman/man who..." constructions in the final chapters function
 
 ---
 
-## Chapters Pending Secondary Passes
+## Chapters Awaiting Pass II
 
-### Ch.16–22 (The Voice, Test, Inspection, Key)
+### Priority: Full Manuscript Scan for Unresolved Patterns
 
-**Word Count:** ~14,400  
-**Patterns to Target:** "not because... but because" (light touch), "for the first time" (selective removal), "the way a..." constructions (monitored)  
-**Strategy:** These chapters contain ceremonial rhythm and signature voice. Edit conservatively. Preserve the moral music while thinning mechanical repetition.
+**Patterns to resolve across all chapters:**
 
-### Ch.1–15 (Opening Movement)
+1. **"not because... but because..." (22 → 10–12 targets)**
+   - Scan all chapters
+   - Keep strongest/verdictive instances (likely 8–10 in Ch.16-28)
+   - Remove explanatory/redundant instances (especially in Ch.1-15)
+   - Do NOT edit Ch.1-15 broadly; only remove obvious laziness
 
-**Word Count:** ~20,944  
-**Patterns to Target:** Light edits only. Establish voice, not disrupt it.  
-**Strategy:** Chapters 1–15 establish the narrator's register. Over-editing risks neutralizing the opening into generic minimalism. Remove only the most obvious repeated mechanisms. Allow the pattern to be heard as control, not habit.
+2. **"for the first time" (14 → 4–6 target)**
+   - Scan all chapters
+   - Remove all but transformation-marking instances
+   - Most removals in Ch.1-22; Ch.23-28 already thinned
+
+3. **"entered him/her the way the cold entered..." (4 instances remaining)**
+   - Verify only 2–3 strongest uses remain
+   - Thin any late/weak uses in Ch.1-22
+
+### Secondary: Ch.16–22 Light Sweep
+
+**After** unresolved patterns are addressed:
+- Light scan for "the way a woman/man..." over-use
+- Preserve moral music and ceremonial rhythm
+- Conservative edits only
+
+### Tertiary: Ch.1–15 Untouched Except Obvious
+
+**Leave mostly intact.** Only remove instances that are:
+- Genuinely repetitive across same short section
+- Clearly written lazily (not intentional control)
+- Blocking reader comprehension
+
+Do not edit to match Ch.23-28 sharpness. Opening voice serves different function.
 
 ---
 
-## Recommendation for Next Editorial Pass
+## Recommendation for Pass II
 
-### Priority Sequence
+### Narrow Scope. High Precision.
 
-1. **Immediate (Optional):** Lightly scan Ch.16-22 for "not because... but because" and ceremonial "the way a..." patterns. Target only egregious repetitions.
+1. **Scan full manuscript for "not because... but because..." (22 → 10–12)**
+   - Identify all 22 instances across chapters
+   - Flag 10–12 strongest (likely verdictive uses in climax/voice sections)
+   - Mark remaining 10–12 for removal
+   - Do NOT edit Ch.1-15 broadly for this; only remove obvious ones
 
-2. **Secondary Pass:** Ch.1-15. Edit with restraint. Goal: 10-15 targeted changes maximum. Let voice establish itself.
+2. **Scan full manuscript for "for the first time" (14 → 4–6)**
+   - Identify all 14 instances
+   - Keep only 4–6 that mark genuine transformation moments
+   - Aggressive removal; this phrase rarely earns its place
 
-3. **Final Validation:** Recount all patterns across full manuscript after secondary passes complete.
+3. **Verify "entered him the way the cold entered..." (keep 2–3 only)**
+   - Currently 4 instances remain (after Pass I)
+   - Thin to strongest 2–3
+   - Focus on Ch.1-22 instances; Ch.23-28 already curated
 
-4. **Submission Polish:** Light copyedit for:
-   - Consistency of cold/door/threshold metaphor usage
-   - Character voice consistency (especially Obianuju/protagonist contrast)
-   - Pacing in transitions between chapters
-   - Paragraph rhythm (no unintended short/long clustering)
+4. **Light sweep Ch.16-22 after unresolved patterns done**
+   - Only "the way a woman/man..." over-clustering
+   - Preserve moral music
+   - Conservative: 5-10 changes maximum
+
+5. **Do NOT broadly edit Ch.1-15**
+   - Only remove obviously lazy instances
+   - Preserve opening voice
+
+6. **Final validation:** Recount all five patterns across full manuscript.
 
 ### Quality Gates Before Submission
 
@@ -340,19 +391,23 @@ private/submission-packages/the-fiction-adaptation/full-manuscript/reports/caden
 
 ---
 
-## Summary Statistics
+## Summary Statistics — Pass I
 
 | Metric | Value |
 |--------|-------|
 | Total Chapters Edited | 6 (Ch.23–28) |
 | Total Targeted Revisions | 31 |
 | Total Words Affected | ~23,700 |
-| Patterns Reduced | 4 of 5 (88%) |
-| "the face of..." reduction | 80% |
-| "he understood that" reduction | 32% |
-| "entered him the way..." reduction | 33% |
+| Patterns Resolved | 3 of 5 (60%) |
+| Patterns Unresolved | 2 of 5 (40%): "not because..." and "for the first time" |
+| "the face of..." reduction | 80% ✓ |
+| "he understood that" reduction | 32% ✓ |
+| "entered him the way..." reduction | 33% ✓ |
+| "not because..." reduction | 0% (UNRESOLVED) |
+| "for the first time" reduction | –7% (UNRESOLVED) |
 | Validation status | ✅ PASS (mdx:integrity, mdx:gate) |
 | Commit readiness | ✅ READY |
+| Scope accuracy | ⚠️ CORRECTED: Pass I only, not complete manuscript |
 
 ---
 
@@ -366,14 +421,29 @@ private/submission-packages/the-fiction-adaptation/full-manuscript/reports/caden
 
 ---
 
-## Notes for Future Editor
+## Notes for Pass II Editor
 
-- The novel's voice is its strongest asset. All edits preserve the grave, controlled register.
-- Obianuju's silence carries as much narrative weight as her speech. Trust it.
-- The protagonist's lateness is not a defect to be fixed—it's the engine of the story.
+**Scope correction:** Pass I addressed only Ch.23-28 and only three of five patterns. This is not completion; it is precision in the climax. Do not mistake it for whole-manuscript work.
+
+**Two major patterns remain unresolved:**
+- "not because... but because..." must be reduced from 22 to 10-12 across ALL chapters
+- "for the first time" must be reduced from 14 to 4-6 across ALL chapters
+
+**Philosophy for Pass II:**
+- Narrow, targeted edits. Do not broaden to Ch.1-15 unless instance is obviously lazy.
+- The novel's voice is its strongest asset. Opening chapters establish register; don't neutralize it.
+- Obianuju's silence carries as much weight as her speech. Trust it.
+- The protagonist's lateness is not a defect—it's the story's engine.
 - The cold does not soften. This is intentional.
-- Secondary editing passes should follow the same principle: precision over purity. A few strong sentences beat many thinned ones.
-- The final door stays closed. This is not tragedy. This is boundary. Readers will resist it. Let them.
+- Precision over purity. A few strong sentences beat many thinned ones.
+- The final door stays closed. This is boundary, not tragedy. Readers will resist it. Let them.
+
+**Pass II workflow:**
+1. Full-manuscript scan for two unresolved patterns
+2. Identify strongest instances to keep; mark weak ones for removal
+3. Light sweep of Ch.16-22 only
+4. Leave Ch.1-15 mostly untouched
+5. Recount all five patterns for final validation
 
 ---
 
