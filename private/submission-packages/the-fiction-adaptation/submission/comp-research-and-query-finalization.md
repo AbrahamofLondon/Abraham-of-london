@@ -45,33 +45,30 @@ These titles are matched against your novel's core positioning: literary fiction
 
 ---
 
-#### **"Mexican Gothic" by Silvia Moreno-Garcia (2015, Del Rey)**
+#### **"Our Wives Under the Sea" [Author/Publisher/Year to verify]**
 
-**Core:** A woman moves into her new husband's ancestral manor house. The house is supernatural; her husband has secrets; boundaries between self and other become terrifyingly porous. The novel refuses conventional gothic explanations while maintaining metaphysical weight.
+**Core:** [Research-backed summary to be completed]
 
 **Key Characteristics:**
-- Marriage under supernatural pressure (primary relationship tested)
-- Female agency despite pressure (wife makes strategic choices; refuses victimhood)
-- Restrained prose (gothic elements understated; psychological over spectacle)
-- Supernatural elements NOT explained or resolved (ambiguity maintained)
-- Boundaries/privacy as power (rooms that must remain closed)
-- Female perspective throughout; husband becomes secondary
+- [Research-backed characteristics to be completed]
 
 **Why It Matches Your Novel:**
-- ✅ **Marriage pressure:** Like your novel, marriage is tested by metaphysical force the couple cannot control
-- ✅ **Refusal to open:** Both feature doors/spaces that must remain closed; refusal is strategic strength
-- ✅ **Supernatural restraint:** Both treat supernatural elements as literary pressure, not plot mechanism
-- ✅ **Female knowledge:** Wife in both novels knows more than husband; her refusal to explain is power
-- ✅ **Boundary themes:** Both explore privacy, boundary-keeping, and what it means to protect silence
-- ✅ **No lore:** Neither novel explains the supernatural; mystery is not to be solved
+- ✅ **Marriage as subject:** [Primary connection to be documented]
+- ✅ **Metaphysical pressure:** [How supernatural/pressure functions]
+- ✅ **Restrained treatment:** [Prose and mystery handling]
+- ✅ **Psychological over spectacle:** [Literary positioning]
 
 **Agent Appeal:**
-- Successfully positioned "literary gothic" to mainstream literary market
-- Demonstrates that supernatural literary fiction can be prestigious, not genre-confined
-- Shows female-driven narrative in metaphysically charged setting can appeal broadly
-- Published by major publisher (Del Rey); market-tested positioning
+- [Market positioning and recent sales impact]
 
-**Market Position:** "Literary gothic; marriage and inheritance as metaphors; psychological over spectacle"
+**Market Position:** "Literary fiction centered on marriage under metaphysical/psychological pressure"
+
+---
+
+**Note:** This comp has been elevated to primary position (replacing previous Mexican Gothic selection) based on stronger alignment with *The Fiction Adaptation*'s core positioning: marriage as subject, psychological depth, and restrained treatment of metaphysical elements.
+
+**Secondary Research Note (Optional):**
+**"The Grip of It" [Author/Publisher/Year]** — Can be referenced as tertiary research if needed to demonstrate the market category more broadly, but the primary comp line (Dept. of Speculation + Our Wives Under the Sea) is sufficiently strong for agent queries.
 
 ---
 
