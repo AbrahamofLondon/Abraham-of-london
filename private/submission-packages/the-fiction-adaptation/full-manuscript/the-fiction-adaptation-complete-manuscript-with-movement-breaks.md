@@ -1,10 +1,7 @@
 # The Fiction Adaptation
 ## A novel
-
-
----
-
-# Movement I — The Current
+RECONCILIATION PASS. Option B hybrid opening: hook overture (para 1) → Obianuju ordinary (para 2) → the hour arrives (para 3). One Obianuju-ordinary beat, one town movement, one drowning memory (relocated into the "three accidents" paragraph; the earlier second brown-water flash removed). Added fourth beat: waiting out the hour (justified — deepens fearlessness-as-danger and presence-in-absence; chapter needed breath to reach natural length). Protected passages verbatim. Cut confirmed absent. Trance italic-present, unannounced. Target 2,350–2,600.
+-->
 
 # Chapter 1: The Unreachable Hour
 
@@ -48,6 +45,9 @@ He ate the bitter half and gave her the less bitter, and that, too, was a thing 
 
 Outside, the call to evening went up from the green door and, a little after, the bell from the blue, and between them the houses with doors of no colour held their families, and the water that the maps misnamed lay flat and grey and old, keeping whatever the maps could not.
 
+PRECISION EXPANSION PASS. Preserve the gift framing and the two weighted lines of dialogue. Continuity fix: "burning room of his boyhood" → water/drowning (firewall + Ch.3 consistency). Expand through: journal texture, handwriting, the pages he avoids, the danger of the generous reading flattering his endurance, intimacy becoming misrecognition. No mystery-diary cliché, no exposition, no spirit-spouse explanation, no loud foreshadowing. Target 2,100–2,500.
+-->
+
 # Chapter 2: The Journal That Was a Gift
 
 She gave him the journal on an ordinary morning, which was how he knew it was not ordinary. Obianuju did not give things lightly. She gave the way her grandmother's people had given, with a small ceremony of reluctance built into the act, so that the receiver understood the cost. She put it on the table between the bread and the kettle, both hands flat on the cover for a moment as though holding down a thing that might rise, and she said, "Before you say anything. I wrote this before I knew your name."
@@ -90,6 +90,9 @@ She was quiet long enough that he heard the kettle tick as it cooled. Then she s
 
 He heard it as humility. A woman ascribing her own faithfulness to God, to her grandmother's prayers, to the great patient watching that the devout of the town believed kept its eye on lonely women. He heard it as the loveliest kind of modesty, the kind that gives away its own virtue, and because he had already decided to be flattered by being known, he did not hear — could not, with that door walled up — that a sentence about being waited for can have a second person in it, and that she had not said which of them she meant. He heard only the half that loved him. He put his arms around her from behind and she let him, and her hands came up and held his forearms, warm, entirely warm, entirely hers, and they stood in the morning while the bread went stale on the table beside a journal only a few years old, and neither of them said the other reading of her sentence, because he did not yet know there was one, and she — this was the part he could never forgive the world for, not her, the world — she may not have fully known it either.
 
+PRECISION EXPANSION PASS. Preserve the drowning origin and the trance. Expand through embodied town (salt/market/roads/thresholds/light/sea-as-neighbour), the town remembering the drowning differently from him, people treating impossibility as ordinary, and the trance rendered as a COMPETING JURISDICTION, not a dream. No magical-realism wash, no tourist texture, no prophecy language, no cosmology explanation. Target 2,200–2,700.
+-->
+
 # Chapter 3: A Coastal Town That Could Be
 
 He had nearly drowned at nine, and it was the nearest he had ever come to the truth about himself, though he had spent the years since mistaking it for a story about water.
@@ -113,6 +116,9 @@ The water was at his feet. He had walked in to the ankles without knowing it, th
 He stepped back onto the dry. His heart kept its plain time. He noted — the way he noted everything that should have undone a man and did not — that he was not afraid, and that his not being afraid was beginning, for the first time in his life, to feel less like a gift and more like a hole through which things could enter. A frightened man at least has a door that shuts. He had no door. He thought of Obianuju asleep in the heat with the cold hour still ahead of her, and of the journal only a few years old, with the rains missing from it in small, telling places, and of the shape that had counted him late, and he came as near as he had ever come, standing in the warm shallows of a water that misnamed itself, to laying the three of them side by side and reading the sum.
 
 He did not read it. He turned and walked back up toward the town, taking one of the streets that did not connect to the others, and the salt followed him, and the church showed its blue door and the mosque its green, and the light went the particular gold it went in the half-hour before the evening calls, gilding the no-colour doors as though the town were briefly being told it was worth more than it was. Somewhere a woman was calling a child in for the evening in a voice with all the ordinary love of the world in it, and the child was not answering, the way children do not, and the not-answering was so human and so unhaunted that he let the sound of it stand in for the answer he was not yet willing to reach, and went home to be there when the hour ended.
+
+FULL-LENGTH DRAFT. Ch.4: The Speed of It. Function: widen after the compressed threshold; show how quickly the commitment formed and why speed felt like destiny from inside, not carelessness. No diminutive invented; Obianuju only. Gift beat: one wholly good day. Force: Spirit Husband at the edge only; no trance. Motifs: current/ribbon/market/salt/time. Target 2,800-3,500.
+-->
 
 # Chapter 4: The Speed of It
 
@@ -255,6 +261,9 @@ He should have been frightened by such a yes.
 Instead he was glad. Glad with his whole body, glad in the place where fear should have stood to ask its useful questions. Glad as the water had been when it gave him back to air. Glad as a man stepping into a current because the current, for once, seemed to know his name.
 
 He did not know yet that a current can carry you because it wants you somewhere.
+
+FULL-LENGTH DRAFT. Ch.5: The Confidant. Function: introduce the brother/friend figure as warmth, limitation, and external witness. Force: Spirit Husband seen from outside for the first time. Turn: his calm yes frightens the confidant more than a no. No exposition device; no Ch.6 Elder material; no memoir leakage. Motifs: cold/salt/door/market/ordinary loyalty. Target 2,800-3,500.
+-->
 
 # Chapter 5: The Confidant
 
@@ -485,6 +494,9 @@ He did not know whether she meant the door, the repair, the friend, the fact tha
 "Yes," he said.
 
 He meant that too.
+
+FULL-LENGTH DRAFT. Ch.6: The Elder. Function: introduce the Iyalode-function figure; she sees and neither condemns nor rescues. Locked Elder sentence: "You can be welcomed and still be late." Use it casually inside ordinary action, not prophecy. All three forces named obliquely only; no cosmology dump; no Ch.7 territory work; no diminutive invented. Target ~3,200.
+-->
 
 # Chapter 6: The Elder
 
@@ -828,6 +840,9 @@ The room did not answer.
 
 Not yet.
 
+FULL-LENGTH DRAFT. Ch.7: Territory. Function: a domestic chapter wholly governed by the Spirit Husband — nothing "happens," the horror is entirely in the weather. Force: Spirit Husband as climate, full and undiluted. Turn: he stops noting the hour as strange — habituation. The Elder's sentence pressures his interpretation without being repeated. No trance, no Voice, no explanation. Motifs: cold/door/hands/threshold. Target 3,200–4,000.
+-->
+
 # Chapter 7: Territory
 
 The house had seasons within its seasons, and he was learning them the way a man learns the moods of a coast he has chosen to live on — not by being told, but by being woken, cooled, waited through, and returned to.
@@ -1027,6 +1042,9 @@ The cold above him did not press harder. It did not need to. It had all the time
 He closed his eyes.
 
 In the morning, the kettle was boiling, and Obianuju was measuring rice into a pot, and the window was open to let the night out, and he did not tell her that he had lain awake in the cold and decided, again, to stay. She already knew. She had always known. The knowing was part of the territory, and the territory was his now, and he was learning, slowly, what it cost to live in a country that had never needed his permission to exist.
+
+FULL-LENGTH DRAFT. Ch.8: What He Brought Into It. Function: his own inheritance surfaces — the fearlessness as family weather, the account opened in the brown water. The rhyme between his claim (kept) and Obianuju's claim (the one who arrived first) becomes visible to the reader, not yet to him. Force: the rhyme — his claim surfaces as parallel to hers. Turn: the first faint approach to kept ≠ spared, felt not stated. Motifs: water/account/hands/salt/market. No trance, no Voice. Target 3,000–3,800.
+-->
 
 # Chapter 8: What He Brought Into It
 
@@ -1246,6 +1264,9 @@ In the morning, the kettle was boiling, and Obianuju was at the window, and the 
 
 He sat at the table and she put a cup in front of him, and the steam rose, and the ordinary day began again, and he thought of the brown water and the cold above the bed and the woman who had been kept before he arrived, and he held all three in his mind the way he held everything — without letting go, without knowing what the holding would cost, without being able to do otherwise.
 
+BREAKTHROUGH PIVOT DRAFT. Ch.9: The Second Trance. Function: first full sustained trance since Ch.3 — precise, visual, active, revelatory without explanation. The cold becomes visible without being literalised. Obianuju appears with agency. The protagonist carries something back. He acts at the close. Force: Trance as messenger/jurisdiction. Motifs: door/hands/water/salt/threshold. No Voice. No cosmology. Target 2,900–3,300.
+-->
+
 # Chapter 9: The Second Trance
 
 The evening before it happened, Obianuju laughed at something he had not meant to be funny, and the laugh was so ordinary and so complete that he forgot, for the length of it, that the house had a climate.
@@ -1387,6 +1408,9 @@ The salt was still on his hand.
 The cloth was still wet on the line.
 
 And for the first time in months, he was not sitting through the hour with his hands open and his heart at its ordinary pace. He was moving. He did not know whether the movement would save him or cost him. He only knew that the cold had touched him, and that he could not pretend, anymore, that it was weather.
+
+REWRITE — 10/10 STANDARD. Ch.10: Continuation (threshold). Function: Movement I close — continuation enters the world, the Claim reaches for what comes next, the reversal begins. Kene challenges. Shrimp woman remembers. Obianuju's knowledge costs the marriage. The protagonist acts before the chapter ends. No child on page — threshold and expectation only. Force: Spirit Husband reaching. Motifs: ribbon/threshold/hands/cold/salt. Target 4,000–4,600.
+-->
 
 # Chapter 10: Continuation
 
@@ -1713,11 +1737,15 @@ The no-colour door stayed closed behind him.
 The cold stayed in the house.
 
 And he walked.
+---
 
+# MOVEMENT II
 
 ---
 
-# Movement II — The Cost
+
+MOVEMENT II DRAFT. Ch.11: The Reversal. Function: Obianuju turns — rendered as grief, pressure, and something done to her, not sudden cruelty. The protagonist's action in Ch.10 costs the marriage. The cold remains implicit. No Trance. No Voice. No cosmology. Motifs: cold/hands/door/threshold/salt. Target 3,300–4,000.
+-->
 
 # Chapter 11: The Reversal
 
@@ -2027,6 +2055,9 @@ He held it.
 
 And he waited.
 
+MOVEMENT II DRAFT. Ch.12: Social Consequence. Function: first social widening after the marital reversal. The town lives — warmth, humour, appetite — then the private cold becomes public weather and the protagonist, now acting but unwise, makes a private matter public and pays socially. Secondary pressure point: Mr Stephen the landlord (returnable). Kene present, not softened. Obianuju absent but protected from rumour reduction. Forces: Spirit Husband implicit via cold/social avoidance. No Trance. No Voice. No cosmology. No memoir leakage. Motifs: cold/salt/door-threshold/hands/naming/market. Target 3,200–4,000.
+-->
+
 # Chapter 12: Social Consequence
 
 The pepper woman had sold to that house for two years, and she had always sold to Obianuju, and so the first thing she did when the husband came instead — alone, with a basket he carried like a man holding someone else's child — was laugh.
@@ -2169,6 +2200,9 @@ The door was open between them.
 
 He had opened it himself, in a market, in front of forty windows, and there was no plane in the world, and no friend with hinges under his arm, that could hang it shut again.
 
+MOVEMENT II DRAFT. Ch.13: The Grey City. Function: the displaced isolation beat — the consequence of Ch.12's exposure. The town does not attack; it adjusts. A thousand small withdrawals. Mr Stephen becomes a practical threat through civility (rent/quietness/an enquiry; will not cross his threshold; the name pressures). Kene under strain. Rumour reaches for Obianuju's name without owning it; she is protected and given one act. The protagonist acts publicly and makes isolation sharper. Ends on the closed door — he knocks at his own house. Cold implicit (a paper/key cold, a room unentered). No Trance. No Voice. No cosmology. No memoir leakage. Motifs: cold/door-threshold/naming/hands/salt/the unmappable. Target 3,600–4,400. Special thing: the town becoming a character against him without becoming a mob.
+-->
+
 # Chapter 13: The Grey City
 
 The market was the same market, and that was the cruelty of it.
@@ -2286,6 +2320,9 @@ He set the bucket down. He went up the path. He raised his hand to the no-colour
 He knocked.
 
 The cup, inside, went quiet.
+
+MOVEMENT II DRAFT. Ch.14: The Door Between Them. Function: action does not restore access — he can be outside even when he is home. Opens on the Ch.13 knock. Primary: the threshold/marriage scene — Obianuju welcomes without restoring access; names one term (do not speak for me outside this house; do not use my silence as permission); acts (sets a cup down without offering; closes the no-colour door; the hour is hers). He misreads (he was "defending" her) then partly understands: explanation is not repair. Then the Elder sentence returns through consequence — Mama Agnes reframes its burden (welcome is not standing; late not to love but to the thing surviving without him), practical, no cosmology, sits him lower. Ends on restriction: the hour comes, he waits outside the room and does not call the waiting love. Cold implicit. No Trance. No Voice. Firewall clean. Motifs: door/threshold, cup, salt/hands, naming, welcome/late, the hour. Special thing: the closed domestic door as the book's most intimate exile. Target 3,800–4,800.
+-->
 
 # Chapter 14: The Door Between Them
 
@@ -2418,6 +2455,9 @@ It was the same waiting. It was not the same waiting at all. He had waited a tho
 He did not call it love.
 
 He only stood, on the warm side, and let her be late to — and let himself be late to — and the cup she had not offered him sat cooling in the middle of the table, in the neutral country, reachable by either, offered to neither, while the cold came in low along the floor and the door between them stayed shut from the side she had chosen and he, at last, did not try the handle.
+
+MOVEMENT II DRAFT. Ch.15: The Bargaining. Function: test the Ch.14 restraint — what does a man do when restraint feels like surrender? He bargains through ordinary channels (Mr Stephen/rent/quiet/replacement tenants; Obianuju/terms; Kene/strained friendship; Mama Agnes/the sentence) and discovers he is bargaining against his own uselessness — he has nothing clean to offer. Mr Stephen = civility + leverage, gives a deadline (board changes). Obianuju refuses to be traded; reveals she has paid the true rent (silence/competence) for two years; sets her own term; active. Kene = pressure not shelter + one humour/appetite beat. Mama Agnes = task not answer; sentence deepens (late ≠ useless; usefulness ≠ ownership). Bargain fails productively; the house no longer protected by silence; the room becomes ready for speech (prepares Ch.16 Voice without using it). Cold implicit. No Trance. No Voice. No cosmology. Firewall clean. Motifs: cup/rent-book/key/threshold/door/silence-as-rent/warm-side. Special thing: practical negotiation becoming spiritual humiliation without leaving ordinary life. Target 3,800–4,800.
+-->
 
 # Chapter 15: The Bargaining
 
@@ -2559,6 +2599,9 @@ It was a room making room.
 
 For a voice.
 
+MOVEMENT II DRAFT — MID-BOOK HINGE. Ch.16: Leave the Door Alone. Function: the first true entry of the Voice (intimidation), the chapter that changes the book — after this, endurance is dangerous. Begins in held silence (Ch.15 aftermath). Ordinary life makes a last attempt (Kene's errand; rain threatening; the rent book/deadline on the table; Obianuju's pre-rain task). The Voice speaks PLAINLY, briefly (once, then once more), un-located, no italics (italics reserved for trance), no explanation, no lore. It names a cost: SHE pays. The protagonist's fearlessness is the danger — he answers too quick, reaches for the door, mistakes being addressed for being chosen. Obianuju active: knows before he does, stops him, refuses to let his courage become her cost, keeps her boundary. Cold = Claim (prepares the room); the Voice is NOT the cold (distinct). No Trance. No new named characters. Firewall clean. Ends with a new condition: addressed ≠ honoured; the room goes ordinary and that is worse. Voice lines: "Leave the door alone." / "Your courage is not the price. She is." Special thing: the first spoken intimidation in a book that has avoided explanation — power through plainness. Target ~3,500–4,000.
+-->
+
 # Chapter 16: Leave the Door Alone
 
 The rent book was still on the table in the morning, where Obianuju had not put it and he had not moved it, and beside it was the heel of yesterday's bread, and the two things sat together in the ordinary light — a deadline and a breakfast — as though the house could not decide which kind of day it was going to be.
@@ -2667,6 +2710,9 @@ He went to help her with the washing.
 
 And the rain came down on the roof, ordinary and enormous, and somewhere under it the cold kept its lease, and the thing that had spoken did not speak again, and the not-speaking was not relief. It was the silence of a debt that has been named and not yet called, sitting in the house between them like a third resident, quiet, patient, and entirely sure that the man who could not be frightened would, in time, reach for the door again — because that was what he was, and it had all the rains in the world to wait.
 
+MOVEMENT II DRAFT. Ch.17: The Named Debt. Function: aftermath of the Voice — its silence has entered the furniture; courage is now the danger; the chapter tests whether he is learning restraint or only staging it. No new Voice line (the line is remembered pressure, never re-uttered). No Trance. Cold distinct from Voice. Ordinary life attempts recovery (the rains have begun = Mr Stephen's clock running; a roof leak over the back room near the no-colour door). Mr Stephen's deadline tightens through a repair that demands access to the forbidden door. The protagonist's error: restraint as performance ("a man can do nothing loudly") — exposed by Kene and by Mama Agnes's "empty hands are not clean hands." Obianuju MORE alive, not less: she manages the roofer, refuses the access, makes a decision he does not control, and at the end opens the forbidden door herself (her domain, her price) while he holds still — the aftermath made flesh. Human counter-note: Kene. Firewall: no fire/burn, no court; water/rain register. Ends on object/action/restriction. Motifs: door, rent book, rain/leak, cup, water, the held silence. Acceptance-gate: restraint vs performance + danger of courage + her agency + the named-uncalled debt. Target 3,800–4,800.
+-->
+
 # Chapter 17: The Named Debt
 
 The rain stopped in the night and left the morning rinsed and ordinary, and the first thing he saw when he woke was the rent book on the table, exactly where it had been, dry, square, patient, with a bead of damp on the wood beside it where the roof had let the night in.
@@ -2774,6 +2820,9 @@ The pot took the water, drip by drip.
 The rent book sat dry and square on the table, counting.
 
 And the debt the room had named and not yet called sat with him in the chair, quiet, unhurried, certain of its lease — sure, the way the cold was sure, that a man who could not be frightened would not be able to do this every day for the rest of his life, and that one day, out of love, out of his own unkillable need to be of use, he would rise from the chair and cross the four steps and through the open door, and that on that day it would not need to speak again, because she would already be paying.
+
+MOVEMENT II DRAFT. Ch.18: The Test. Function: the Trance returns for the first time since Ch.9 to confirm the debt named by the Voice without competing with it. Begins with practical repair pressure: the roof seam has worsened, Mr Stephen's leverage is active, Brother Paul returns, and the room that most needs repair is the room no one can safely open. Obianuju acts first: sets terms, enters alone, manages the repair cost. The protagonist is tested by useful restraint: holding ladder/line/bucket outside, keeping Brother Paul ordinary, accepting public uselessness, and not crossing. Trance governing action: standing outside. Trance italic present tense. No new Voice line. Cold remains Claim, not Voice. Ends on physical residue and consequence, not explanation. Motifs: door, hands, water, rent book, ladder, threshold. Target 3,800-4,800.
+-->
 
 # Chapter 18: The Test
 
@@ -3245,6 +3294,9 @@ So did the roof.
 
 So did the mark in his hands.
 
+MOVEMENT II DRAFT. Ch.19: Obedience Is Not Innocence. Function: aftermath of Ch.18's test. No new Trance. No new Voice line. The repair holds enough to make the house habitable, not safe; obedience is shown as accurate but not cleansing. Obianuju carries practical cost and remains active; Kene brings breath and challenge; Mr Stephen's ordinary leverage tightens through inspection pressure. Cold remains Claim through damp boards, stain, rent book, and the closed room. Ends with an object/action consequence that makes Ch.20 necessary. Target 3,600-4,600.
+-->
+
 # Chapter 19: Obedience Is Not Innocence
 
 The roof held through the night, and in the morning the floorboard nearest the no-colour door made a sound it had not made before.
@@ -3652,6 +3704,9 @@ The packet of wedges sat by the no-colour door.
 The roof held.
 
 The board remembered.
+
+MOVEMENT II DRAFT. Ch.20: The Inspection. Function: Mr Stephen's ordinary leverage enters the house without melodrama. Private wound translated into property, repair, rent, access, and quietness. No new Trance. No new Voice line. Obianuju controls the inspection; protagonist fails in a new way by trying to make inspection easier and making the room more visible. Mr Stephen's civility is the threat. Ends with a practical demand/date/object that makes Ch.21 necessary. Target 3,800-4,800.
+-->
 
 # Chapter 20: The Inspection
 
@@ -4186,6 +4241,9 @@ Softly.
 Under no one's foot.
 
 On the table, the rent book stayed closed around Mr Stephen's note, and outside the first dry hour became the first dry night, and the house began to count.
+
+MOVEMENT II DRAFT. Ch.21: The Key. Function: the no-colour door becomes scheduled pressure. Practical demand, not spectacle. No new Trance. No new Voice line. Obianuju decides what can be given; protagonist is tempted to offer himself as currency again and learns the offer is not clean. Mr Stephen remains reasonable. Kene brings breath and pressure. Ends on object/date/key/demand that makes the next chapter necessary. Target 3,800-4,800.
+-->
 
 # Chapter 21: The Key
 
@@ -4799,10 +4857,8 @@ Not refused.
 
 Beside the closed rent book, under the second dry evening, waiting for the morning to ask what kind of access had been purchased by reason.
 
-
----
-
-# Movement III — Endgame
+MOVEMENT II DRAFT. Ch.22: The Wrong Key. Function: the key/demand turns into consequence. Access is not trust; possession is not authority. Obianuju chooses the shape of surrender. Protagonist is tested by holding what he is not authorised to understand. Mr Stephen gains leverage through reason, not cruelty. No new Trance. No new Voice line. Ends with a practical object/condition that makes the next chapter unavoidable. Target 3,600-4,600.
+-->
 
 # Chapter 22: The Wrong Key
 
@@ -5444,6 +5500,16 @@ Not broken.
 
 Waiting for the next rain to make sense of it.
 
+---
+
+# MOVEMENT III
+
+---
+
+
+REPAIR PASS — 10/10 STANDARD. Ch.23: What the Key Changed. Function: the wrong key's consequence becomes irreversible. Protagonist acts with consequence. Elder sentence returns as pressure. Woman with blue door trimmed. Warm domestic beat added. Obianuju's strategy costs her. Ending lands now, not tomorrow. No new Trance. No new Voice line. Motifs: key/thread/chalk/weather/hands/threshold. Target 3,500-4,500.
+-->
+
 # Chapter 23: What the Key Changed
 
 The rain came back on the fifth day.
@@ -5526,7 +5592,7 @@ The thread was dry. It was lighter than he remembered, and the red had faded in 
 
 "It means the house accepted the wrong key."
 
-The sentence entered him the way the cold entered the room — from the edges, until it had occupied the whole of him.
+The sentence found the place in him that had no answer and stayed there.
 
 "The house accepted it," he said.
 
@@ -5538,7 +5604,7 @@ The sentence entered him the way the cold entered the room — from the edges, u
 
 "Then what did it open?"
 
-She looked at him. Her face was not unkind. It was the face of a woman who had been sitting with a question for four days and had arrived at an answer she did not want to give.
+She looked at him. Her face was not unkind. Her shoulders had settled into the shape they took when she had been holding something for a long time and had decided to put it down.
 
 "It opened a path," she said. "Not a door. A path. The wrong key in the wrong lock does not open the door. But it shows the house that a key exists. It shows the house that someone is trying. And the house, after enough trying, begins to prepare for the possibility of being opened."
 
@@ -5742,7 +5808,7 @@ She stood up. She walked to the no-colour door. She put her hand on the handle, 
 
 "What do we do?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for seven days and had arrived at an answer she did not want to give.
+She looked at him. Her jaw had closed the way it closed before she made a decision. She held the red thread as though it was something she had agreed to carry.
 
 "We make the door less worth opening."
 
@@ -5794,7 +5860,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him stop waiting and start helping her give what she had chosen to give.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him stop waiting and start helping her give what she had chosen to give.
 
 He took his hand off the handle.
 
@@ -5809,6 +5875,8 @@ The red thread was beside it.
 The cold was at the edges.
 
 And in the morning, Mr Stephen would receive something he had not asked for — a piece of the house, surrendered, not because it would satisfy him, but because it would slow him down long enough for the house to decide what to do next.
+MOVEMENT II DRAFT. Ch.24: The Photograph. Function: the photograph alters the endgame. Obianuju controls the terms of exposure. Mr Stephen receives more than he asked for. The protagonist carries without owning. The room remains closed but danger moves onto the table. No new Trance. No new Voice line. Motifs: photograph/glass/table/hands/frame/threshold. Target 3,500-4,500.
+-->
 
 # Chapter 24: The Photograph
 
@@ -5930,7 +5998,7 @@ Longer than courtesy required.
 
 Longer than a man looks at a photograph he does not recognise.
 
-The protagonist stood at the door, as he had been told. He did not look at the photograph. He looked at Mr Stephen's hands — the way they held the frame, the way the thumb moved across the edge, the way the fingers adjusted the angle to catch the light. He read the photograph through the hands that held it, and he understood that Mr Stephen had seen something he recognised.
+The protagonist stood at the door, as he had been told. He did not look at the photograph. He looked at Mr Stephen's hands — the way they held the frame, the way the thumb moved across the edge, the way the fingers adjusted the angle to catch the light. He read the photograph through the hands that held it. Mr Stephen had seen something he recognised.
 
 "Who is she?" Mr Stephen asked.
 
@@ -6032,7 +6100,7 @@ Obianuju was still standing at the table. The photograph was face-up. She was lo
 
 "Will it be enough?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for eight days and had arrived at an answer she did not want to give.
+She looked at him. Her back had settled into the shape it took before she told him something she would rather have kept. The photograph lay before her like something already given.
 
 "It will be enough until it is not."
 
@@ -6054,7 +6122,7 @@ Obianuju was quiet for a long moment. Then she said, "She was the woman who live
 
 "She is the one the cold was waiting for."
 
-The sentence entered him the way the cold entered the room — from the edges, until it had occupied the whole of him.
+The sentence found the seam in him and opened it wide.
 
 "The cold was waiting for her," he said.
 
@@ -6066,7 +6134,7 @@ The sentence entered him the way the cold entered the room — from the edges, u
 
 "Then why — "
 
-She looked at him. Her face was not unkind. It was the face of a woman who had been carrying a question for longer than she had known him.
+She looked at him. Her face was not unkind. Her shoulders carried the shape of someone who had held onto the question longer than she had held onto anything else.
 
 "Because when she left, the cold did not leave with her. It stayed. And it was still waiting when I arrived. It thought I was her."
 
@@ -6092,7 +6160,7 @@ He looked at her.
 
 "Why?"
 
-She looked at him. Her face was the face of a woman who had been carrying a question for longer than she had known him.
+She looked at him. In her silence was the weight of something she had been carrying since before he arrived — something that sat in her shoulders and her hands and the way her eyes did not flinch from his.
 
 "Because I did not know whether the woman in the photograph was the one the cold was waiting for, or the one who had escaped it. I did not know whether keeping the photograph would protect me or make me visible. I did not know whether the cold knew I had it. And I was afraid that if I told you about it, you would want to use it the way you wanted to use everything — as a tool, as a key, as something to open the door with."
 
@@ -6208,7 +6276,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him stop waiting for Mr Stephen to use the photograph and start preparing for what would happen when he did.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him stop waiting for Mr Stephen to use the photograph and start preparing for what would happen when he did.
 
 He took his hand off the handle.
 
@@ -6223,6 +6291,9 @@ The cold was at the edges.
 And in the morning, the house would begin to feel the weight of what had been given away — not the photograph, not the story, but the knowledge that Obianuju had been willing to give them. That was what Mr Stephen had gained. Not a face. Not a name. The knowledge that she was afraid enough to surrender a piece of her history.
 
 And that knowledge, unlike the photograph, could not be returned to the pouch.
+
+MOVEMENT II DRAFT. Ch.25: The Story He Could Use. Function: the photograph story has left the table and entered the world. Mr Stephen uses it reasonably. Obianuju chooses under worsened conditions. The protagonist acts without owning. The room remains closed but the cost moves elsewhere. No new Trance. No new Voice line. Motifs: story/face/table/hands/threshold/rain. Target 3,800-4,800.
+-->
 
 # Chapter 25: The Story He Could Use
 
@@ -6268,7 +6339,7 @@ The protagonist stood in the doorway of the yard. The morning was ordinary. The 
 
 "It is true enough. That is what makes it dangerous."
 
-She hung the cloth on the line. She did it without ceremony, the way she did everything, and for a moment the house was only a house and the story was only a story. Then she turned, and her face was the face of a woman who had been sitting with a question for a day and had arrived at an answer she did not want to give.
+She hung the cloth on the line. She did it without ceremony, the way she did everything, and for a moment the house was only a house and the story was only a story. Then she turned. Her jaw had closed the way it closed when she was about to name something she had been keeping separate.
 
 "Mr Stephen will come today. Not for the room. For the story."
 
@@ -6290,7 +6361,7 @@ It was not a question.
 
 "Yes."
 
-Mr Stephen looked at the line for a moment longer. Then he turned, and his face was the face of a man who had been given a story and had decided to test whether it could carry weight.
+Mr Stephen looked at the line for a moment longer. Then he turned. His shoulders had settled into the shape they took when he was carrying something he had decided not to put down.
 
 "I have been thinking about the photograph," he said.
 
@@ -6346,7 +6417,7 @@ The chalk line had moved again.
 
 But the story had moved further.
 
-The protagonist stood at the side of the house, looking at the chalk line that had moved again, and he understood that Mr Stephen had done exactly what Kene had warned: he had used the face. Not by showing the photograph. By describing it. By letting the story travel without the object. By making the photograph into something that could be carried in the mouth, not the hand.
+The protagonist stood at the side of the house, looking at the chalk line that had moved again. Mr Stephen had done exactly what Kene had warned: he had used the face. Not by showing the photograph. By describing it. By letting the story travel without the object. By making the photograph into something that could be carried in the mouth, not the hand.
 
 ---
 
@@ -6364,7 +6435,7 @@ Obianuju was in the front room. She was sitting in the chair by the window, not 
 
 "How do you know?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for longer than he had been standing at the side of the house.
+She looked at him. In her silence was the shape of a question she had been carrying since before he arrived at the gate.
 
 "Because the woman he described it to came to see me this morning."
 
@@ -6538,7 +6609,7 @@ The cloth pouch was on the shelf.
 
 The cold was at the edges.
 
-And he understood that the story had become more than a story. It had become a choice. Not his choice. Obianuju's choice. Whether to destroy the photograph and let the story become just a story, or to keep it and let the story become the thing that the house was built around.
+The story had become more than a story. It had become a choice. Not his choice. Obianuju's choice. Whether to destroy the photograph and let the story become just a story, or to keep it and let the story become the thing that the house was built around.
 
 He did not know what she would choose.
 
@@ -6564,7 +6635,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him accept that the story was no longer theirs to control, and that the only thing they could still control was what they did with the photograph.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him accept that the story was no longer theirs to control, and that the only thing they could still control was what they did with the photograph.
 
 He took his hand off the handle.
 
@@ -6586,12 +6657,16 @@ That was all he could do.
 
 That was all he had ever been able to do.
 
-And for the first time, that was enough.
+That was enough.
+---
 
+# MOVEMENT IV
 
 ---
 
-# Movement IV — Final Act
+
+MOVEMENT III DRAFT. Ch.26: The Return Date. Function: the story has left the photograph and entered the social world. Mr Stephen returns early. Obianuju chooses what not to correct. The protagonist acts accurately without reward. The room remains closed but danger moves outside. No new Trance. No new Voice line. Motifs: story/face/market/hands/threshold/rain. Target 3,400-4,400.
+-->
 
 # Chapter 26: The Return Date
 
@@ -6681,7 +6756,7 @@ Obianuju did not turn. She did not answer at once. She looked at the no-colour d
 
 He hesitated. "It matters if people believe it."
 
-She turned then. Her face was the face of a woman who had been sitting with a question for four days and had arrived at an answer she did not want to give.
+She turned then. Her jaw had closed the way it closed when she was about to speak a thing she had been keeping folded.
 
 "It matters if Mr Stephen believes it. And he will not believe it, because he heard the story from me. But he will use it. He will say that the town is talking, and that the house is becoming a problem, and that he needs to be seen to be doing something."
 
@@ -6755,7 +6830,7 @@ The protagonist looked at him.
 
 Mr Stephen's face did not change. "Then I will have to tell the town that the tenants would not allow an inspection. And the story will grow."
 
-The protagonist stood very still. He understood that Mr Stephen had done exactly what Obianuju had predicted: he had used the false story as leverage. Not by believing it. By offering to disprove it. The offer was reasonable. The refusal would be unreasonable. And reasonableness, in the hands of a man like Mr Stephen, was the most dangerous tool there was.
+The protagonist stood very still. Mr Stephen had done exactly what Obianuju had predicted: he had used the false story as leverage. Not by believing it. By offering to disprove it. The offer was reasonable. The refusal would be unreasonable. And reasonableness, in the hands of a man like Mr Stephen, was the most dangerous tool there was.
 
 "You could have sent word," the protagonist said. "You did not need to come yourself."
 
@@ -6799,7 +6874,7 @@ The protagonist looked at her.
 
 "Then what do we do?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for five days and had arrived at an answer she did not want to give.
+She looked at him. In her silence was something that had been settling into shape for five days. She opened her mouth. Closed it. Then she spoke.
 
 "We let him see the room."
 
@@ -6837,7 +6912,7 @@ There was no hollow sound.
 
 The room was ordinary. It was a room. It had walls and a floor and a window and a cupboard. It had a damp seam and a board that had lifted and a smell of old rain and dust. It had nothing else.
 
-The protagonist watched him from the doorway. He watched Mr Stephen's hands move across the walls, the sill, the cupboard. He watched him look for something that was not there. And he understood that Mr Stephen was not looking for evidence of a death. He was looking for evidence of the cold. And he was not finding it, because the cold was not in the room. It was in the door. And the door was still closed.
+The protagonist watched him from the doorway. He watched Mr Stephen's hands move across the walls, the sill, the cupboard. He watched him look for something that was not there. Mr Stephen was not looking for evidence of a death. He was looking for evidence of the cold. And he was not finding it, because the cold was not in the room. It was in the door. And the door was still closed.
 
 Mr Stephen straightened. He looked at the room one more time, as though asking it to give him something he could carry. The room did not answer.
 
@@ -6905,7 +6980,7 @@ Obianuju was still in the front room, sitting in the chair by the window. The cl
 
 "He said he will not ask for the photograph again."
 
-She looked at him then. Her face was the face of a woman who had been sitting with a question for five days and had arrived at an answer she did not want to give.
+She looked at him then. Her shoulders had settled into their closed shape, the one she wore when she was carrying something that could not be handed away.
 
 "That is not a relief," she said. "That is a warning. He has stopped asking about the photograph because he has started wondering what it really means. And a man who wonders is more dangerous than a man who asks."
 
@@ -6939,7 +7014,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him accept that the cold had not weakened, only changed shape. And that the change was not a victory. It was a new kind of waiting.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him accept that the cold had not weakened, only changed shape. And that the change was not a victory. It was a new kind of waiting.
 
 He took his hand off the handle.
 
@@ -6956,6 +7031,15 @@ The room was open.
 The no-colour door was still closed.
 
 And the story, for now, was quiet.
+---
+
+# MOVEMENT V
+
+---
+
+
+MOVEMENT IV DRAFT. Ch.27: The Man Who Wonders. Function: Mr Stephen's wondering becomes final pressure. The no-colour door becomes central without being opened. Obianuju controls the final boundary. The protagonist acts accurately under final pressure. The cold has become quieter, not weaker. No new Trance. No new Voice line. Motifs: door/silence/hands/threshold/quiet. Target 3,400-4,400.
+-->
 
 # Chapter 27: The Man Who Wonders
 
@@ -6985,7 +7069,7 @@ He did not ask what she was doing. He did not need to.
 
 "I know."
 
-She turned then. Her face was the face of a woman who had been sitting with a question for three days and had arrived at an answer she did not want to give.
+She turned then. Her jaw was set in the way it set before she spoke something that would change the shape of their waiting.
 
 "I hope it is him," she said. "Because if it is not him, it will be someone else. And someone else will be harder to predict."
 
@@ -7083,7 +7167,7 @@ He paused.
 
 "I am not asking to see it. I am asking whether it is part of the house I own."
 
-The protagonist stood very still. He understood that Mr Stephen had done exactly what Obianuju had feared: he had stopped asking about the photograph and had begun wondering about the door. He had not asked to open it. He had asked whether it belonged to him. And that question, reasonable and ordinary, was more dangerous than any demand.
+The protagonist stood very still. Mr Stephen had done exactly what Obianuju had feared: he had stopped asking about the photograph and had begun wondering about the door. He had not asked to open it. He had asked whether it belonged to him. And that question, reasonable and ordinary, was more dangerous than any demand.
 
 "It is part of the house," the protagonist said.
 
@@ -7173,7 +7257,7 @@ She turned to face him.
 
 "Then what do we tell him?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for six days and had arrived at an answer she did not want to give.
+She looked at him. The silence around her had become the shape of something she had been holding for six days. She was ready to let it out.
 
 "We tell him the truth."
 
@@ -7257,7 +7341,7 @@ The cloth pouch was on the table.
 
 The cold was at the edges.
 
-And he understood that the woman who had taken the photograph had been carrying the door in her mind for thirty years, the same way she had carried the photograph. She had hidden one and tried to forget the other. And now both had been found.
+The woman who had taken the photograph had been carrying the door in her mind for thirty years, the same way she had carried the photograph. She had hidden one and tried to forget the other. And now both had been found.
 
 
 
@@ -7281,7 +7365,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him accept that the door had been noticed, and that noticing could not be undone. The only thing they could still control was what they said about it.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him accept that the door had been noticed, and that noticing could not be undone. The only thing they could still control was what they said about it.
 
 He took his hand off the handle.
 
@@ -7302,11 +7386,8 @@ The door was no longer private.
 But it was still closed.
 
 And that, for now, was all they could protect.
-
-
----
-
-# Movement V — Final Landing
+FINAL CHAPTER DRAFT. Ch.28: The Door That Stayed Closed. Function: the final truth is spoken without explaining the mystery. Mr Stephen reaches the limit of his entitlement. Obianuju controls what can be told. The protagonist acts accurately without ownership. The no-colour door remains closed. The cold does not vanish, but his courage stops feeding it. The ending feels inevitable, restrained, and alive. No new Trance. No new Voice line. Motifs: door/truth/hands/threshold/silence. Target 3,000-4,500.
+-->
 
 # Chapter 28: The Door That Stayed Closed
 
@@ -7320,7 +7401,7 @@ He nodded.
 
 "And if he asks about the door?"
 
-She turned then. Her face was the face of a woman who had been sitting with a question for seven days and had arrived at an answer she could live with.
+She turned then. Her shoulders had settled into their closed shape. When she spoke, it was with the voice of someone who had carried a question long enough to know its weight.
 
 "If he asks about the door, you will tell him that it is part of the house, that it has been closed since before we arrived, and that we have chosen not to open it. You will not say more. You will not say less."
 
@@ -7548,7 +7629,7 @@ The protagonist looked at him.
 
 "Yes."
 
-Kene looked at him for a long moment. His face was not the face of a man who had come to offer comfort. It was the face of a man who had been afraid and was only now beginning to believe that the fear might not be necessary.
+Kene looked at him for a long moment. He was not the man he had been at the beginning. He had been afraid, and the fear had taken its shape in his shoulders, his hands, the way he held his bread. Now something was loosening.
 
 "I was afraid," Kene said.
 
@@ -7604,7 +7685,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was already open. It had been open since the day he had held a line for a woman with a nail between her teeth, and he had not known it then, but he knew it now.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was already open. It had been open since the day he had held a line for a woman with a nail between her teeth. He had not known it then. He knew it now.
 
 He took his hand off the handle.
 
@@ -7633,4 +7714,3 @@ The cold was at the edges.
 The door was closed.
 
 And he was still there.
-

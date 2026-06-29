@@ -122,7 +122,7 @@ Longer than courtesy required.
 
 Longer than a man looks at a photograph he does not recognise.
 
-The protagonist stood at the door, as he had been told. He did not look at the photograph. He looked at Mr Stephen's hands — the way they held the frame, the way the thumb moved across the edge, the way the fingers adjusted the angle to catch the light. He read the photograph through the hands that held it, and he understood that Mr Stephen had seen something he recognised.
+The protagonist stood at the door, as he had been told. He did not look at the photograph. He looked at Mr Stephen's hands — the way they held the frame, the way the thumb moved across the edge, the way the fingers adjusted the angle to catch the light. He read the photograph through the hands that held it. Mr Stephen had seen something he recognised.
 
 "Who is she?" Mr Stephen asked.
 
@@ -224,7 +224,7 @@ Obianuju was still standing at the table. The photograph was face-up. She was lo
 
 "Will it be enough?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for eight days and had arrived at an answer she did not want to give.
+She looked at him. Her back had settled into the shape it took before she told him something she would rather have kept. The photograph lay before her like something already given.
 
 "It will be enough until it is not."
 
@@ -246,7 +246,7 @@ Obianuju was quiet for a long moment. Then she said, "She was the woman who live
 
 "She is the one the cold was waiting for."
 
-The sentence entered him the way the cold entered the room — from the edges, until it had occupied the whole of him.
+The sentence found the seam in him and opened it wide.
 
 "The cold was waiting for her," he said.
 
@@ -258,7 +258,7 @@ The sentence entered him the way the cold entered the room — from the edges, u
 
 "Then why — "
 
-She looked at him. Her face was not unkind. It was the face of a woman who had been carrying a question for longer than she had known him.
+She looked at him. Her face was not unkind. Her shoulders carried the shape of someone who had held onto the question longer than she had held onto anything else.
 
 "Because when she left, the cold did not leave with her. It stayed. And it was still waiting when I arrived. It thought I was her."
 
@@ -284,7 +284,7 @@ He looked at her.
 
 "Why?"
 
-She looked at him. Her face was the face of a woman who had been carrying a question for longer than she had known him.
+She looked at him. In her silence was the weight of something she had been carrying since before he arrived — something that sat in her shoulders and her hands and the way her eyes did not flinch from his.
 
 "Because I did not know whether the woman in the photograph was the one the cold was waiting for, or the one who had escaped it. I did not know whether keeping the photograph would protect me or make me visible. I did not know whether the cold knew I had it. And I was afraid that if I told you about it, you would want to use it the way you wanted to use everything — as a tool, as a key, as something to open the door with."
 
@@ -400,7 +400,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him stop waiting for Mr Stephen to use the photograph and start preparing for what would happen when he did.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him stop waiting for Mr Stephen to use the photograph and start preparing for what would happen when he did.
 
 He took his hand off the handle.
 

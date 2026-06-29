@@ -46,7 +46,7 @@ The protagonist stood in the doorway of the yard. The morning was ordinary. The 
 
 "It is true enough. That is what makes it dangerous."
 
-She hung the cloth on the line. She did it without ceremony, the way she did everything, and for a moment the house was only a house and the story was only a story. Then she turned, and her face was the face of a woman who had been sitting with a question for a day and had arrived at an answer she did not want to give.
+She hung the cloth on the line. She did it without ceremony, the way she did everything, and for a moment the house was only a house and the story was only a story. Then she turned. Her jaw had closed the way it closed when she was about to name something she had been keeping separate.
 
 "Mr Stephen will come today. Not for the room. For the story."
 
@@ -68,7 +68,7 @@ It was not a question.
 
 "Yes."
 
-Mr Stephen looked at the line for a moment longer. Then he turned, and his face was the face of a man who had been given a story and had decided to test whether it could carry weight.
+Mr Stephen looked at the line for a moment longer. Then he turned. His shoulders had settled into the shape they took when he was carrying something he had decided not to put down.
 
 "I have been thinking about the photograph," he said.
 
@@ -124,7 +124,7 @@ The chalk line had moved again.
 
 But the story had moved further.
 
-The protagonist stood at the side of the house, looking at the chalk line that had moved again, and he understood that Mr Stephen had done exactly what Kene had warned: he had used the face. Not by showing the photograph. By describing it. By letting the story travel without the object. By making the photograph into something that could be carried in the mouth, not the hand.
+The protagonist stood at the side of the house, looking at the chalk line that had moved again. Mr Stephen had done exactly what Kene had warned: he had used the face. Not by showing the photograph. By describing it. By letting the story travel without the object. By making the photograph into something that could be carried in the mouth, not the hand.
 
 ---
 
@@ -142,7 +142,7 @@ Obianuju was in the front room. She was sitting in the chair by the window, not 
 
 "How do you know?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for longer than he had been standing at the side of the house.
+She looked at him. In her silence was the shape of a question she had been carrying since before he arrived at the gate.
 
 "Because the woman he described it to came to see me this morning."
 
@@ -316,7 +316,7 @@ The cloth pouch was on the shelf.
 
 The cold was at the edges.
 
-And he understood that the story had become more than a story. It had become a choice. Not his choice. Obianuju's choice. Whether to destroy the photograph and let the story become just a story, or to keep it and let the story become the thing that the house was built around.
+The story had become more than a story. It had become a choice. Not his choice. Obianuju's choice. Whether to destroy the photograph and let the story become just a story, or to keep it and let the story become the thing that the house was built around.
 
 He did not know what she would choose.
 
@@ -342,7 +342,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him accept that the story was no longer theirs to control, and that the only thing they could still control was what they did with the photograph.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him accept that the story was no longer theirs to control, and that the only thing they could still control was what they did with the photograph.
 
 He took his hand off the handle.
 
@@ -364,4 +364,4 @@ That was all he could do.
 
 That was all he had ever been able to do.
 
-And for the first time, that was enough.
+That was enough.
