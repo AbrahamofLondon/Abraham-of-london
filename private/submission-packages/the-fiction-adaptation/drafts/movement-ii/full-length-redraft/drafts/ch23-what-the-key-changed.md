@@ -84,7 +84,7 @@ The thread was dry. It was lighter than he remembered, and the red had faded in 
 
 "It means the house accepted the wrong key."
 
-The sentence entered him the way the cold entered the room — from the edges, until it had occupied the whole of him.
+The sentence found the place in him that had no answer and stayed there.
 
 "The house accepted it," he said.
 
@@ -96,7 +96,7 @@ The sentence entered him the way the cold entered the room — from the edges, u
 
 "Then what did it open?"
 
-She looked at him. Her face was not unkind. It was the face of a woman who had been sitting with a question for four days and had arrived at an answer she did not want to give.
+She looked at him. Her face was not unkind. Her shoulders had settled into the shape they took when she had been holding something for a long time and had decided to put it down.
 
 "It opened a path," she said. "Not a door. A path. The wrong key in the wrong lock does not open the door. But it shows the house that a key exists. It shows the house that someone is trying. And the house, after enough trying, begins to prepare for the possibility of being opened."
 
@@ -300,7 +300,7 @@ She stood up. She walked to the no-colour door. She put her hand on the handle, 
 
 "What do we do?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for seven days and had arrived at an answer she did not want to give.
+She looked at him. Her jaw had closed the way it closed before she made a decision. She held the red thread as though it was something she had agreed to carry.
 
 "We make the door less worth opening."
 
@@ -352,7 +352,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him stop waiting and start helping her give what she had chosen to give.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him stop waiting and start helping her give what she had chosen to give.
 
 He took his hand off the handle.
 

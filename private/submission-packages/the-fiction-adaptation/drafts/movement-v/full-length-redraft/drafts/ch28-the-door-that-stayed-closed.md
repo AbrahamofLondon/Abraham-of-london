@@ -14,7 +14,7 @@ He nodded.
 
 "And if he asks about the door?"
 
-She turned then. Her face was the face of a woman who had been sitting with a question for seven days and had arrived at an answer she could live with.
+She turned then. Her shoulders had settled into their closed shape. When she spoke, it was with the voice of someone who had carried a question long enough to know its weight.
 
 "If he asks about the door, you will tell him that it is part of the house, that it has been closed since before we arrived, and that we have chosen not to open it. You will not say more. You will not say less."
 
@@ -242,7 +242,7 @@ The protagonist looked at him.
 
 "Yes."
 
-Kene looked at him for a long moment. His face was not the face of a man who had come to offer comfort. It was the face of a man who had been afraid and was only now beginning to believe that the fear might not be necessary.
+Kene looked at him for a long moment. He was not the man he had been at the beginning. He had been afraid, and the fear had taken its shape in his shoulders, his hands, the way he held his bread. Now something was loosening.
 
 "I was afraid," Kene said.
 
@@ -298,7 +298,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was already open. It had been open since the day he had held a line for a woman with a nail between her teeth, and he had not known it then, but he knew it now.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was already open. It had been open since the day he had held a line for a woman with a nail between her teeth. He had not known it then. He knew it now.
 
 He took his hand off the handle.
 

@@ -90,7 +90,7 @@ Obianuju did not turn. She did not answer at once. She looked at the no-colour d
 
 He hesitated. "It matters if people believe it."
 
-She turned then. Her face was the face of a woman who had been sitting with a question for four days and had arrived at an answer she did not want to give.
+She turned then. Her jaw had closed the way it closed when she was about to speak a thing she had been keeping folded.
 
 "It matters if Mr Stephen believes it. And he will not believe it, because he heard the story from me. But he will use it. He will say that the town is talking, and that the house is becoming a problem, and that he needs to be seen to be doing something."
 
@@ -164,7 +164,7 @@ The protagonist looked at him.
 
 Mr Stephen's face did not change. "Then I will have to tell the town that the tenants would not allow an inspection. And the story will grow."
 
-The protagonist stood very still. He understood that Mr Stephen had done exactly what Obianuju had predicted: he had used the false story as leverage. Not by believing it. By offering to disprove it. The offer was reasonable. The refusal would be unreasonable. And reasonableness, in the hands of a man like Mr Stephen, was the most dangerous tool there was.
+The protagonist stood very still. Mr Stephen had done exactly what Obianuju had predicted: he had used the false story as leverage. Not by believing it. By offering to disprove it. The offer was reasonable. The refusal would be unreasonable. And reasonableness, in the hands of a man like Mr Stephen, was the most dangerous tool there was.
 
 "You could have sent word," the protagonist said. "You did not need to come yourself."
 
@@ -208,7 +208,7 @@ The protagonist looked at her.
 
 "Then what do we do?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for five days and had arrived at an answer she did not want to give.
+She looked at him. In her silence was something that had been settling into shape for five days. She opened her mouth. Closed it. Then she spoke.
 
 "We let him see the room."
 
@@ -246,7 +246,7 @@ There was no hollow sound.
 
 The room was ordinary. It was a room. It had walls and a floor and a window and a cupboard. It had a damp seam and a board that had lifted and a smell of old rain and dust. It had nothing else.
 
-The protagonist watched him from the doorway. He watched Mr Stephen's hands move across the walls, the sill, the cupboard. He watched him look for something that was not there. And he understood that Mr Stephen was not looking for evidence of a death. He was looking for evidence of the cold. And he was not finding it, because the cold was not in the room. It was in the door. And the door was still closed.
+The protagonist watched him from the doorway. He watched Mr Stephen's hands move across the walls, the sill, the cupboard. He watched him look for something that was not there. Mr Stephen was not looking for evidence of a death. He was looking for evidence of the cold. And he was not finding it, because the cold was not in the room. It was in the door. And the door was still closed.
 
 Mr Stephen straightened. He looked at the room one more time, as though asking it to give him something he could carry. The room did not answer.
 
@@ -314,7 +314,7 @@ Obianuju was still in the front room, sitting in the chair by the window. The cl
 
 "He said he will not ask for the photograph again."
 
-She looked at him then. Her face was the face of a woman who had been sitting with a question for five days and had arrived at an answer she did not want to give.
+She looked at him then. Her shoulders had settled into their closed shape, the one she wore when she was carrying something that could not be handed away.
 
 "That is not a relief," she said. "That is a warning. He has stopped asking about the photograph because he has started wondering what it really means. And a man who wonders is more dangerous than a man who asks."
 
@@ -348,7 +348,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him accept that the cold had not weakened, only changed shape. And that the change was not a victory. It was a new kind of waiting.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him accept that the cold had not weakened, only changed shape. And that the change was not a victory. It was a new kind of waiting.
 
 He took his hand off the handle.
 

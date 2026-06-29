@@ -30,7 +30,7 @@ He did not ask what she was doing. He did not need to.
 
 "I know."
 
-She turned then. Her face was the face of a woman who had been sitting with a question for three days and had arrived at an answer she did not want to give.
+She turned then. Her jaw was set in the way it set before she spoke something that would change the shape of their waiting.
 
 "I hope it is him," she said. "Because if it is not him, it will be someone else. And someone else will be harder to predict."
 
@@ -128,7 +128,7 @@ He paused.
 
 "I am not asking to see it. I am asking whether it is part of the house I own."
 
-The protagonist stood very still. He understood that Mr Stephen had done exactly what Obianuju had feared: he had stopped asking about the photograph and had begun wondering about the door. He had not asked to open it. He had asked whether it belonged to him. And that question, reasonable and ordinary, was more dangerous than any demand.
+The protagonist stood very still. Mr Stephen had done exactly what Obianuju had feared: he had stopped asking about the photograph and had begun wondering about the door. He had not asked to open it. He had asked whether it belonged to him. And that question, reasonable and ordinary, was more dangerous than any demand.
 
 "It is part of the house," the protagonist said.
 
@@ -218,7 +218,7 @@ She turned to face him.
 
 "Then what do we tell him?"
 
-She looked at him. Her face was the face of a woman who had been sitting with a question for six days and had arrived at an answer she did not want to give.
+She looked at him. The silence around her had become the shape of something she had been holding for six days. She was ready to let it out.
 
 "We tell him the truth."
 
@@ -302,7 +302,7 @@ The cloth pouch was on the table.
 
 The cold was at the edges.
 
-And he understood that the woman who had taken the photograph had been carrying the door in her mind for thirty years, the same way she had carried the photograph. She had hidden one and tried to forget the other. And now both had been found.
+The woman who had taken the photograph had been carrying the door in her mind for thirty years, the same way she had carried the photograph. She had hidden one and tried to forget the other. And now both had been found.
 
 
 
@@ -326,7 +326,7 @@ He walked to the no-colour door and put his hand on the handle. The handle was c
 
 He did not open the door.
 
-He stood there with his hand on the cold handle, and he understood that the door was not the door he needed to open. The door he needed to open was the one that would let him accept that the door had been noticed, and that noticing could not be undone. The only thing they could still control was what they said about it.
+He stood there with his hand on the cold handle. The door was not the door he needed to open. The one he needed to open was the one that would let him accept that the door had been noticed, and that noticing could not be undone. The only thing they could still control was what they said about it.
 
 He took his hand off the handle.
 
