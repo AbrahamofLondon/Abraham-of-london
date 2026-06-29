@@ -1,6 +1,6 @@
 # Submission Checklist (Export Copy) — Nicola Chang
 
-**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JEMIMA FORRESTER QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY RULE APPLIES
+**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JEMIMA FORRESTER QUERY IS ACTIVE; ONE-AGENT-ONLY RULE; disclosure-ready, day-of policy check
 
 - [ ] AI-policy owner decision recorded
 - [ ] One-agent-only rule honoured

@@ -3,7 +3,7 @@
 **Date:** June 29, 2026
 **DOCX generated:** NO
 
-No DOCX generated because this agent is **ALTERNATE** (ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED). Producing attachments now would be premature: the AI-policy decision and/or same-agency sequencing must resolve first, and the required sample length must be confirmed against current guidelines.
+No DOCX generated because this agent is **ALTERNATE** (ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; disclosure-ready, day-of policy check). Producing attachments now would be premature: the AI-policy decision and/or same-agency sequencing must resolve first, and the required sample length must be confirmed against current guidelines.
 
 Paste-ready source materials are present in this folder:
 - query-letter-source.md (corrected; Our Wives Under the Sea comp; no Mexican Gothic)

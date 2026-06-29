@@ -25,20 +25,22 @@
    - Status: ✅ READY TO SEND
    - Strong MSWL match; no conflicts
 
-### HOLD — AI-POLICY OWNER DECISION REQUIRED
+### DISCLOSURE-READY — VERIFY AGENCY AI STANCE DAY-OF
+
+AI-policy is resolved: the approved disclosure line is in these queries (after the bio). Apply the practical rule in `ai-policy-review.md` on the day of sending.
 
 3. **Judith Murray** (Greene & Heaton)
    - Folder: `02-judith-murray/`
    - Export: `exports/02-judith-murray/`
-   - Status: ⏳ HOLD
+   - Status: ✅ disclosure-ready (day-of policy check; primary G&H, paste-based)
    - See: `ai-policy-review.md`
 
 4. **Jemima Forrester** (David Higham Associates)
    - Folder: `04-jemima-forrester/`
    - Export: `exports/04-jemima-forrester/`
-   - Status: ⏳ HOLD
+   - Status: ✅ disclosure-ready (day-of policy check)
    - See: `ai-policy-review.md`
-   - One-agent-only agency rule applies
+   - One-agent-only agency rule applies; if DHA wants Word attachments, generate DOCX day-of
 
 ### ALTERNATE / BACKUP (Query After Primary Same-Agency Result)
 

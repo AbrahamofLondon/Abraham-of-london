@@ -1,6 +1,6 @@
 # Materials to Send — Jemima Forrester, David Higham Associates
 
-**Status:** NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY AGENCY RULE APPLIES
+**Status:** SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK; ONE-AGENT-ONLY AGENCY RULE APPLIES
 
 **Submission method:** Email to the agent's submissions address per David Higham guidelines.
 **Subject line:** Query: The Fiction Adaptation by Abraham of London
@@ -37,7 +37,7 @@
 Jemima Forrester is the PRIMARY David Higham target. DHA operates a one-agent-only rule: do NOT also query Nicola Chang.
 
 ## AI-policy
-David Higham Associates carries AI disclosure / restriction language. This manuscript was developed with an AI-assisted editorial workflow. OWNER DECISION REQUIRED before sending: (a) disclose, (b) do not submit, or (c) submit without disclosure. See tier-1/ai-policy-review.md.
+David Higham carries AI disclosure / restriction language. DECISION MADE: disclose truthfully — the approved line is in the query after the author bio. Day-of: verify the agency's current stance and apply the practical rule (send if it requires/permits disclosure; do not submit if it prohibits AI-assisted work without clarification; ask/hold if ambiguous).
 
 ## Requirement source
 David Higham agent profile (davidhigham.co.uk/agents-dh/jemima-forrester). (Re-verify on the day of sending — see `guideline-verification.md`.)

@@ -23,16 +23,17 @@
 - Olivia Maidment — Madeleine Milburn
 - Sam Farkas — Jill Grinberg Literary Management (US)
 
-**Held — AI-policy owner decision required:**
-- Judith Murray — Greene & Heaton
-- Jemima Forrester — David Higham Associates
+**Disclosure-ready (AI disclosure included; verify agency stance day-of, apply practical rule):**
+- Judith Murray — Greene & Heaton (primary G&H)
+- Jemima Forrester — David Higham Associates (primary DH, one-agent rule)
 
 **Alternate — same-agency backup (do not send while the primary is active):**
 - Imogen Morrell — Greene & Heaton (backup to Judith Murray)
 - Nicola Chang — David Higham Associates (backup to Jemima Forrester)
 
-## AI-policy blockers
-- **Greene & Heaton** (Judith, Imogen) and **David Higham** (Jemima, Nicola) carry AI-use restrictions. Owner must decide disclose / do-not-submit / submit-without-disclosure per `ai-policy-review.md` before any send. Madeleine Milburn and Jill Grinberg: no AI flag found (re-verify day-of).
+## AI-policy — RESOLVED
+- Decision made (see `ai-policy-review.md`): **disclose truthfully.** A single approved line is included in the four flagged-agency queries (Greene & Heaton: Judith, Imogen; David Higham: Jemima, Nicola), placed after the author bio. Madeleine Milburn and Jill Grinberg have no stated policy — **no disclosure in their queries**; tell the truth only if asked.
+- Remaining step for the flagged agencies is **not a decision** but a **day-of verification**: confirm each agency's current stance and apply the practical rule — send if it requires/permits disclosure; do not submit if it prohibits AI-assisted work without clarification; ask/hold if ambiguous.
 
 ## Same-agency blockers
 - **Greene & Heaton:** Judith primary; Imogen only after Judith passes / window expires.
@@ -78,8 +79,8 @@ No query has been sent. Owner must verify guidelines day-of. Owner sends manuall
 - Olivia Maidment and Sam Farkas **Query + first-50-pages DOCX regenerated** from the corrected, cleaned manuscript; verified clean — author "Abraham of London", no comments/tracked changes, and **no drafting/header/editorial-note text**.
 
 ## Final owner action
-1. Resolve AI-policy (`ai-policy-review.md`) before touching the Greene & Heaton / David Higham packages.
-2. For **Olivia Maidment** and **Sam Farkas**: open the export folder, run `submission-checklist.md`, **verify the agency's current guidelines today**, attach the DOCX (trim the 50-page sample if the agent wants fewer), send manually from info@abrahamoflondon.org, then log it in `submission-tracker.md`.
-3. Hold the alternates until each primary same-agency query resolves; honour David Higham's one-agent rule.
+1. For **Olivia Maidment** and **Sam Farkas**: open the export folder, run `submission-checklist.md`, **verify the agency's current guidelines today**, attach the DOCX (trim the 50-page sample if the agent wants fewer), send manually from info@abrahamoflondon.org, then log it in `submission-tracker.md`. No AI disclosure in these queries (no stated policy); answer truthfully only if asked.
+2. For **Judith Murray** (G&H) and **Jemima Forrester** (DH): the AI disclosure line is already in their queries. **Verify each agency's current AI stance day-of** and apply the practical rule (`ai-policy-review.md`) — send if it requires/permits disclosure; do not submit if it prohibits AI-assisted work without clarification; ask/hold if ambiguous. (G&H is paste-based; if DH requires Word attachments, generate the DOCX with the same generator — the disclosure is in the source query.)
+3. Hold the alternates (Imogen, Nicola) until each primary same-agency query resolves; honour David Higham's one-agent rule.
 
 **Nothing is sent automatically. Every send is a deliberate, owner-performed action.**

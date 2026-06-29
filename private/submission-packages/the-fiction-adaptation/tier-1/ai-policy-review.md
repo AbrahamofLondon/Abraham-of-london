@@ -1,177 +1,59 @@
-# AI-Policy Review — Tier 1 Packages
-## The Fiction Adaptation Submission Package
+# AI-Policy Review — Tier 1 (RESOLVED)
+## The Fiction Adaptation
 
-**Date Created:** June 29, 2026  
-**Status:** AWAITING OWNER DECISION  
-**Critical:** Do not send to flagged agencies until owner reviews and decides on disclosure approach.
-
----
-
-## Manuscript Development Disclosure
-
-*The Fiction Adaptation* has been developed with AI-assisted editorial tools in:
-
-1. Cadence auditing and pattern analysis
-2. Line-edit execution (phrase removal and revision)
-3. Manuscript assembly and file management
-4. Query letter development and refinement
-5. Synopsis creation and positioning
-6. Agent research and targeting
-
-**What was NOT AI-generated:** Original manuscript prose, editorial direction, final acceptance of all edits, query letter verification, creative work.
-
-**What was AI-assisted:** Pattern identification, workflow management, research coordination, document formatting.
+**Date resolved:** June 29, 2026
+**Status:** DECISION MADE. The package now carries a single, honest disclosure line, applied per the practical rule below.
 
 ---
 
-## Flagged Agencies — AI-Policy Restrictions
+## The position (truthful, accurate, no drama)
 
-### ⚠️ Greene & Heaton
-**Agents in Tier 1:** Judith Murray (primary), Imogen Morrell (backup)
+> The manuscript is author-created and author-directed. AI tools were used as part of an editorial and production workflow — including structural review, pattern analysis, line-editing support, formatting, audit reports, and submission-package preparation. Final creative control, judgement, revision decisions, and responsibility remain with the author.
 
-**AI-Policy Status:** EXPLICIT RESTRICTION LANGUAGE
+Not "AI wrote the book." Not "no AI was involved." The clean line, above.
 
-**Owner Decision Required Before Sending:**
-- [ ] Disclose AI-assisted workflow in query letter (use provided language below)
-- [ ] Do not submit to Greene & Heaton
-- [ ] Submit with disclosure only to Judith Murray (not Imogen Morrell)
-- [ ] Submit to both (if agency permits one-agent exception)
+## Approved disclosure line (used in queries where appropriate)
 
-**Recommended Action:** Contact Greene & Heaton directly to confirm AI-assisted manuscript acceptability before sending.
+> This manuscript is author-created and author-directed. AI tools were used only as part of an editorial workflow for structural review, pattern analysis, line-editing support, formatting, and submission-package preparation. All creative decisions, revisions, and final text are my own.
+
+Placement: brief, factual, **after the author bio** (or in a form field if the agency requests one). It must not become the centre of the query — the book stands on the page.
 
 ---
 
-### ⚠️ David Higham Associates
-**Agents in Tier 1:** Jemima Forrester (primary), Nicola Chang (backup)
+## Practical rule (apply per agency, on the day of sending)
 
-**AI-Policy Status:** AI DISCLOSURE AND RESTRICTION POLICIES PRESENT
-
-**Owner Decision Required Before Sending:**
-- [ ] Disclose AI-assisted workflow in query letter (use provided language below)
-- [ ] Do not submit to David Higham
-- [ ] Submit with disclosure only to Jemima Forrester (not Nicola Chang)
-- [ ] Submit to both (if agency permits one-agent exception)
-
-**One-Agent Rule Note:** David Higham operates strict one-agent-per-author policy; also has AI policies. These combine as a serious constraint.
-
-**Recommended Action:** Contact David Higham directly to confirm AI-assisted manuscript acceptability AND one-agent-exception availability before sending.
+| Agency position | Action |
+|---|---|
+| No AI policy stated | No need to volunteer unless asked. |
+| Requires disclosure | Disclose plainly (the approved line). |
+| Prohibits AI-assisted submissions | Do not submit, unless clarification confirms this workflow is acceptable. |
+| Ambiguous policy | Ask, or hold. |
 
 ---
 
-### ✅ Madeleine Milburn
-**Agents in Tier 1:** Olivia Maidment (primary only)
+## Application to the Tier 1 agents
 
-**AI-Policy Status:** NO EXPLICIT AI RESTRICTION (verified June 28, 2026)
+| Agent | Agency | Policy (researched 2026-06-28) | Disclosure in query? | Action |
+|-------|--------|--------------------------------|----------------------|--------|
+| Olivia Maidment | Madeleine Milburn | none stated | No (don't volunteer) | Sendable; tell truth if asked |
+| Sam Farkas | Jill Grinberg | none stated | No (don't volunteer) | Sendable; tell truth if asked |
+| Judith Murray | Greene & Heaton | AI-submission language present | **Yes — line included after bio** | Day-of: verify stance, apply rule |
+| Imogen Morrell | Greene & Heaton | AI-submission language present | **Yes** | Alternate to Judith; same rule |
+| Jemima Forrester | David Higham | AI disclosure/restriction language | **Yes** | Day-of: verify; one-agent rule |
+| Nicola Chang | David Higham | AI disclosure/restriction language | **Yes** | Alternate to Jemima; one-agent rule |
 
-**Owner Decision:**
-- [ ] No disclosure required (owner confirms)
-- [ ] May send without AI language
-
----
-
-### ✅ Jill Grinberg Literary Management
-**Agents in Tier 1:** Sam Farkas (primary only)
-
-**AI-Policy Status:** NO EXPLICIT AI RESTRICTION (verified June 28, 2026)
-
-**Owner Decision:**
-- [ ] No disclosure required (owner confirms)
-- [ ] May send without AI language
+**The remaining gate for the four flagged agents is not a decision — it is a day-of verification.** Confirm each agency's current stated position and apply the practical rule: if it requires/permits disclosure, send (the line is in place); if it prohibits AI-assisted submissions, do not submit without clarification; if ambiguous, ask or hold.
 
 ---
 
-## Disclosure Language Options
-
-### Option A: Integrated Disclosure (Recommended if Disclosing)
-
-Insert after personalisation hook, before pitch:
-
-> The manuscript was developed through a traditional author-directed editorial process, with AI-assisted support for pattern analysis and manuscript assembly during revision phases. All creative work, narrative decisions, and final editorial acceptance remain author-directed.
-
-### Option B: Standalone Disclosure
-
-Insert after pitch, before closing:
-
-> Please note: This manuscript development included AI-assisted workflow support for editorial analysis and file management. All creative work, narrative content, and editorial decisions remain author-directed and author-approved.
-
-### Option C: No Disclosure
-
-Do not add AI language to query letters. If asked directly about AI use, answer honestly.
+## Owner day-of checklist (flagged agencies only)
+- [ ] Re-read Greene & Heaton / David Higham AI language on the agency site (today)
+- [ ] Classify: requires disclosure / prohibits / ambiguous
+- [ ] If requires/permits: send with the line already in the query
+- [ ] If prohibits: do not submit unless the agency confirms this workflow is acceptable
+- [ ] If ambiguous: ask the agency, or hold
+- [ ] Madeleine Milburn / Jill Grinberg: no disclosure in query; answer truthfully only if asked
 
 ---
 
-## Owner Decision Template
-
-**Before sending to any flagged agency, complete:**
-
-### Greene & Heaton (Judith Murray / Imogen Morrell)
-
-- [ ] Reviewed Greene & Heaton AI-policy language (website, current)
-- [ ] Contacted Greene & Heaton for clarification? YES / NO / UNNECESSARY
-- [ ] Decision: **DISCLOSE / DO NOT SUBMIT / SUBMIT WITHOUT DISCLOSURE**
-- [ ] If disclosing: Which disclosure language? **OPTION A / OPTION B / CUSTOM**
-- [ ] Approved language (if disclosing): _[paste or describe]_
-- [ ] Will query Judith Murray only? YES / Will request one-agent exception? YES
-- [ ] Will query Imogen Morrell (after Judith result)? YES / NO
-
-### David Higham Associates (Jemima Forrester / Nicola Chang)
-
-- [ ] Reviewed David Higham AI-policy language (website, current)
-- [ ] Contacted David Higham for clarification? YES / NO / UNNECESSARY
-- [ ] Contacted for one-agent-exception availability? YES / NO / UNNECESSARY
-- [ ] Decision: **DISCLOSE / DO NOT SUBMIT / SUBMIT WITHOUT DISCLOSURE**
-- [ ] If disclosing: Which disclosure language? **OPTION A / OPTION B / CUSTOM**
-- [ ] Approved language (if disclosing): _[paste or describe]_
-- [ ] Will query Jemima Forrester only? YES / Will request one-agent exception? YES
-- [ ] Will query Nicola Chang (after Jemima result)? YES / NO
-
-### Madeleine Milburn (Olivia Maidment)
-
-- [ ] Confirmed no AI disclosure needed? YES
-- [ ] Ready to send to Olivia Maidment? YES
-
-### Jill Grinberg (Sam Farkas)
-
-- [ ] Confirmed no AI disclosure needed? YES
-- [ ] Ready to send to Sam Farkas? YES
-
----
-
-## Current Status by Agent
-
-| Agent | Agency | Send Status | AI-Policy Status | Owner Decision |
-|-------|--------|-------------|------------------|-----------------|
-| Olivia Maidment | Madeleine Milburn | ✅ SENDABLE | ✅ No flag | APPROVED: No disclosure |
-| Judith Murray | Greene & Heaton | ⏳ HOLD | ⚠️ FLAG | **AWAITING DECISION** |
-| Imogen Morrell | Greene & Heaton | ⏳ ALT | ⚠️ FLAG | **AWAITING DECISION** |
-| Jemima Forrester | David Higham | ⏳ HOLD | ⚠️ FLAG | **AWAITING DECISION** |
-| Sam Farkas | Jill Grinberg | ✅ SENDABLE | ✅ No flag | APPROVED: No disclosure |
-| Nicola Chang | David Higham | ⏳ ALT | ⚠️ FLAG | **AWAITING DECISION** |
-
----
-
-## Verification Checklist
-
-Before finalizing ANY submission to flagged agencies:
-
-- [ ] Re-verified agency AI-policy language on their website (within 24 hours of send)
-- [ ] Confirmed policy has not changed since June 28, 2026
-- [ ] Owner has made explicit decision (see template above)
-- [ ] If disclosing: Owner has approved specific disclosure language
-- [ ] Query letter includes approved disclosure (if required)
-- [ ] No sending to flagged agencies until owner confirms all items above
-
----
-
-## Recommended Next Owner Action
-
-1. **Read this file** — Understand AI-policy issue
-2. **Review agency websites** — Check current AI-policy language for Greene & Heaton and David Higham
-3. **Consider contacting agencies** — Ask directly about AI-assisted manuscript acceptability
-4. **Make explicit decisions** — Complete template above for each flagged agency
-5. **Document decisions** — Update this file with owner choices
-6. **Mark agents as SENDABLE** — Once decisions are made, update export-readiness reports
-
----
-
-**IMPORTANT:** No queries should be sent to Greene & Heaton or David Higham until owner has completed this review and made explicit decisions.
+**No queries have been sent. The owner verifies guidelines (and AI stance) day-of and sends manually.**

@@ -1,6 +1,6 @@
 # Submission Checklist — Nicola Chang (David Higham)
 
-**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JEMIMA FORRESTER QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY RULE APPLIES
+**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JEMIMA FORRESTER QUERY IS ACTIVE; ONE-AGENT-ONLY RULE; disclosure-ready, day-of policy check
 
 ## Blockers (must clear first)
 - [ ] AI-policy owner decision made and recorded in ai-policy-review.md

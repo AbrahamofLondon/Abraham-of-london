@@ -1,6 +1,6 @@
 # Submission Checklist — Judith Murray (Greene & Heaton)
 
-**Verdict:** NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED
+**Verdict:** SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK
 
 ## Blockers (must clear first)
 - [ ] AI-policy owner decision made and recorded in ai-policy-review.md

@@ -1,6 +1,6 @@
 # Submission Checklist — Imogen Morrell (Greene & Heaton)
 
-**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED
+**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; disclosure-ready, day-of policy check
 
 ## Blockers (must clear first)
 - [ ] AI-policy owner decision made and recorded in ai-policy-review.md

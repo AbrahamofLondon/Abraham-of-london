@@ -1,6 +1,6 @@
 # Submission Checklist — Jemima Forrester (David Higham)
 
-**Verdict:** NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY AGENCY RULE APPLIES
+**Verdict:** SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK; ONE-AGENT-ONLY AGENCY RULE APPLIES
 
 ## Blockers (must clear first)
 - [ ] AI-policy owner decision made and recorded in ai-policy-review.md

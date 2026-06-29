@@ -1,6 +1,6 @@
 # Submission Checklist (Export Copy) — Imogen Morrell
 
-**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED
+**Verdict:** ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; disclosure-ready, day-of policy check
 
 - [ ] AI-policy owner decision recorded
 

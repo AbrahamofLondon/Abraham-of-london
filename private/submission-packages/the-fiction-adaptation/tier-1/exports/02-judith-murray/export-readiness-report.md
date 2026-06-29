@@ -5,7 +5,7 @@
 **Date:** June 29, 2026
 
 ## VERDICT
-**NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED**
+**SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK**
 
 ## Folder contents (this export folder)
 - query-letter-source.md
@@ -18,13 +18,13 @@
 
 ## Status detail
 - Send status: **HOLD**
-- AI-policy: ⚠ Greene & Heaton AI restriction — owner decision required (ai-policy-review.md).
+- AI-policy: DECIDED — disclose with the approved line (included after the author bio). Day-of: verify Greene & Heaton's current stance and apply the practical rule.
 - Same-agency / sequencing: PRIMARY Greene & Heaton target. Do not query Imogen Morrell simultaneously.
 - Guideline source checked: 2026-06-28 (research). **Re-verify day-of.**
 - Attachments allowed: Blocked — no DOCX generated yet (see metadata-scrub-report.md)
 
 ## Missing owner decisions
-- AI-policy decision (disclose / do not submit / submit without disclosure)
+- Day-of: classify the agency's AI policy and apply the practical rule (the disclosure text is already decided and included)
 
 
 
