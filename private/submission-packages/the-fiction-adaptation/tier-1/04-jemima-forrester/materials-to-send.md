@@ -12,7 +12,7 @@
 
 > Dear Jemima Forrester,
 >
-> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,644 words. Your interest in accessible literary fiction with a speculative or lightly magical edge aligns with The Fiction Adaptation, where metaphysical pressure remains emotionally real and never explained, and the wife's refusal to open one door is the centre of the book.
+> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,000 words. Your interest in accessible literary fiction with a speculative or lightly magical edge aligns with The Fiction Adaptation, where metaphysical pressure remains emotionally real and never explained, and the wife's refusal to open one door is the centre of the book.
 >
 > With thanks,
 > Abraham of London

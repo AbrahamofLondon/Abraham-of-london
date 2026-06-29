@@ -7,7 +7,7 @@
 
 Dear Sam Farkas,
 
-I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,644 words.
+I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,000 words.
 
 Your wish list's interest in adult literary fiction with a fabulist or speculative bent and atmospheric, unresolved dread describes The Fiction Adaptation closely: a voice-led literary novel in which the supernatural pressure stays domestic, unexplained, and emotionally exact.
 

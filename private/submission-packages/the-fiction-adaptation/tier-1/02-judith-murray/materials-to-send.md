@@ -12,7 +12,7 @@
 
 > Dear Judith Murray,
 >
-> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,644 words. Your representation of Julia Armfield, and your stated interest in eeriness, weirdness, and the uncanny, make you an excellent match for The Fiction Adaptation.
+> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,000 words. Your representation of Julia Armfield, and your stated interest in eeriness, weirdness, and the uncanny, make you an excellent match for The Fiction Adaptation.
 >
 > With thanks,
 > Abraham of London

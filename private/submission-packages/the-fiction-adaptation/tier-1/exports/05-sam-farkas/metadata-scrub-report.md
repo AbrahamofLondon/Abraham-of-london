@@ -9,7 +9,7 @@
 |---|---|---|---|---|---|
 | The-Fiction-Adaptation_1pSynopsis_sam-farkas.docx | 38,305 B | opens cleanly | Abraham of London | none | none |
 | The-Fiction-Adaptation_3pSynopsis_sam-farkas.docx | 40,138 B | opens cleanly | Abraham of London | none | none |
-| The-Fiction-Adaptation_Query_sam-farkas.docx | 38,028 B | opens cleanly | Abraham of London | none | none |
+| The-Fiction-Adaptation_Query_sam-farkas.docx | 38,029 B | opens cleanly | Abraham of London | none | none |
 | The-Fiction-Adaptation_sam-farkas_first-50-pages.docx | 69,558 B | opens cleanly | Abraham of London | none | none |
 
 ## Scrub confirmation (all files)
@@ -25,7 +25,13 @@
 - [x] No internal editorial notes (manuscript pass-notes stripped from sample)
 
 ## Sample DOCX specifics
-- The first-50-pages file: ~15,900 words (Ch.1–5 complete + the opening of Ch.6), double-spaced, 1" margins, header "THE FICTION ADAPTATION / Abraham of London", centred page numbers.
+- The first-50-pages file: ~15,941 words (Ch.1–5 complete + the opening of Ch.6), double-spaced, 1" margins, header "THE FICTION ADAPTATION / Abraham of London", centred page numbers.
 - **Day-of:** trim to the agent's currently required length (10pp / 25pp / 3 chapters / 50pp) before sending.
 
 **Verdict:** DOCX are clean and send-ready pending day-of guideline confirmation.
+
+## Manuscript sync (2026-06-29)
+- DOCX **regenerated from the corrected manuscript** (now 100,253 words; the 391-word trim fell after Chapter 6, so the first-50-pages content is unchanged).
+- Query word count updated to query-standard **"approximately 100,000 words."**
+- Sample re-extracted from the cleaned manuscript: **no drafting/header/editorial-note text present** (verified programmatically).
+- first-50-pages remains **exactly 50 pages** (content identical to the owner-confirmed render; file 69,558 B).

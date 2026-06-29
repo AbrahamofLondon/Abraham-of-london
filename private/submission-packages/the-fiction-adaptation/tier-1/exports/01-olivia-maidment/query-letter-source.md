@@ -7,7 +7,7 @@
 
 Dear Olivia Maidment,
 
-I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,644 words.
+I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,000 words.
 
 Your representation of Julia Armfield and Our Wives Under the Sea suggests you understand the market for literary fiction exploring marriage under strange, unexplained pressure. The Fiction Adaptation shares that positioning: a restrained literary narrative where metaphysical pressure tests domestic boundaries, and a wife's knowledge becomes a form of power.
 

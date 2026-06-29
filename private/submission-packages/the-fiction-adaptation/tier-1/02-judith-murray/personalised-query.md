@@ -8,7 +8,7 @@ This is the exact query text for Judith Murray. Comps are correct (Dept. of Spec
 
 Dear Judith Murray,
 
-I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,644 words.
+I am seeking representation for The Fiction Adaptation, a literary novel of approximately 100,000 words.
 
 Your representation of Julia Armfield, and your stated interest in eeriness, weirdness, and the uncanny, make you an excellent match for The Fiction Adaptation. The novel shares Our Wives Under the Sea's restrained treatment of literary-speculative pressure inside a marriage, where the wife's refusal becomes strategy rather than mystery.
 

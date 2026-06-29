@@ -12,7 +12,7 @@
 
 > Dear Nicola Chang,
 >
-> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,644 words. Your representation of literary fiction with attention to craft, clarity, and structure aligns with The Fiction Adaptation, a deliberately structured novel whose restraint is its method: the prose withholds, the ending refuses resolution, and the wife's agency drives every turn.
+> Please find below my query for *The Fiction Adaptation*, a literary novel of approximately 100,000 words. Your representation of literary fiction with attention to craft, clarity, and structure aligns with The Fiction Adaptation, a deliberately structured novel whose restraint is its method: the prose withholds, the ending refuses resolution, and the wife's agency drives every turn.
 >
 > With thanks,
 > Abraham of London
