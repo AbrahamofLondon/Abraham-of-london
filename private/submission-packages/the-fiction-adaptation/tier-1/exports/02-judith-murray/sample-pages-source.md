@@ -4,7 +4,7 @@
 **This source contains:** Chapters 1–5 complete plus the opening of Chapter 6 (6 chapter starts), ~15,941 words, rendering to ~50 pages (double-spaced, 12pt Times New Roman, 1" margins). The sample ends at a paragraph break partway into Chapter 6, as is standard for a first-50-pages submission.
 NO DOCX generated (agent blocked / sample length to be confirmed). Format only after guideline verification.
 
-**Before send:** confirm the agent's current required length and trim/extend to match (first 10pp / 25pp / 3 chapters / 50pp as applicable). Page count is **estimated** at ~50 pages, calibrated from the earlier render (13,579 words = 42 pages in LibreOffice). Confirm the exact count in your viewer before sending.
+**Before send:** confirm the agent's current required length and trim/extend to match (first 10pp / 25pp / 3 chapters / 50pp as applicable). Page count **verified at exactly 50 pages** in LibreOffice (12pt Times New Roman, double-spaced, 1" margins). Re-confirm if you change the formatting.
 
 ---
 
