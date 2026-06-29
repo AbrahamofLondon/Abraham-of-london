@@ -121,12 +121,15 @@ Contains production-ready materials for sending:
 
 - **ai-policy-review.md** — AI-policy flags, owner decision template, disclosure language options
 - **submission-tracker.md** — Live tracking table for all submissions (update as responses come)
-- **pre-send-owner-checklist.md** — Master checklist before sending any query
+- **EXPORT-READINESS-SUMMARY.md** — Per-agent readiness matrix
+- **TIER-1-CLOSEOUT.md** — Closeout status and final owner action
+
+**Per-agent pre-send checks live in:** `NN-agent/submission-checklist.md` (and the export copy `exports/NN-agent/submission-checklist.md`).
 
 **Read these first:**
 
 1. `ai-policy-review.md` — Understand AI-policy constraints
-2. `pre-send-owner-checklist.md` — Know what to verify before each send
+2. The agent's `submission-checklist.md` — Know what to verify before each send
 3. Agent-specific `materials-to-send.md` — Know what to send to each agent
 
 ---
@@ -181,4 +184,4 @@ Before sending ANY query:
 
 ---
 
-**Questions?** See pre-send-owner-checklist.md or the agent-specific materials-to-send.md file.
+**Questions?** See the agent's `submission-checklist.md` or `materials-to-send.md`, or `TIER-1-CLOSEOUT.md`.
