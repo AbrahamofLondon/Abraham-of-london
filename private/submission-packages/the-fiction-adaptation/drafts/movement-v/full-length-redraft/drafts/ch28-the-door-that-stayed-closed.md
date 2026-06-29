@@ -18,7 +18,7 @@ She turned then. Her shoulders had settled into their closed shape. When she spo
 
 "If he asks about the door, you will tell him that it is part of the house, that it has been closed since before we arrived, and that we have chosen not to open it. You will not say more. You will not say less."
 
-He repeated the sentence in his mind. *It is part of the house. It has been closed since before we arrived. We have chosen not to open it.* He said it three times, not because he was afraid of forgetting it, but because he wanted to feel the shape of it in his mouth before he needed to speak it aloud.
+He repeated the sentence in his mind. *It is part of the house. It has been closed since before we arrived. We have chosen not to open it.* He said it three times, feeling the shape of it in his mouth before he needed to speak it aloud.
 
 Mr Stephen arrived at the hour he had named.
 

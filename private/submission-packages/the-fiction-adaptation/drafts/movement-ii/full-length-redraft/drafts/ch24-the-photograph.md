@@ -10,7 +10,7 @@ He had not expected it to be. He had expected her to put it away before dawn, to
 
 He did not touch it.
 
-He stood in the doorway of the front room and looked at it the way a man looks at a thing he has been told is dangerous — not because he doubts the warning, but because he needs to see whether the danger has a shape he can recognise.
+He stood in the doorway of the front room and looked at it. He needed to see whether the danger had a shape he could recognise.
 
 It did not.
 
@@ -232,7 +232,7 @@ She looked at him. Her back had settled into the shape it took before she told h
 
 "When he shows the photograph to someone who recognises the woman in it."
 
-He looked at the photograph. The woman was still there, unsmiling, standing in front of a house that was not this house. She looked familiar in the way that faces from old photographs always look familiar — not because you know them, but because they belong to a time you did not live through.
+He looked at the photograph. The woman was still there, unsmiling, standing in front of a house that was not this house. She looked familiar in the way that faces from old photographs always look familiar — they belong to a time you did not live through.
 
 "Who is she?" he asked.
 

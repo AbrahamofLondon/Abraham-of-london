@@ -6,7 +6,7 @@ MOVEMENT II DRAFT. Ch.20: The Inspection. Function: Mr Stephen's ordinary levera
 
 Obianuju moved the cup first.
 
-That was how the inspection began, before Mr Stephen arrived, before the gate clicked, before any man outside the marriage put his eyes on the floor. She took the cup from the table and set it on the shelf, not because the cup mattered, but because the note beneath it did. Mr Stephen's folded paper had sat there all night, dry, exact, waiting under an ordinary object. In the morning she lifted the cup, smoothed the note once with the side of her thumb, folded it smaller, and placed it inside the rent book.
+That was how the inspection began, before Mr Stephen arrived, before the gate clicked, before any man outside the marriage put his eyes on the floor. She took the cup from the table and set it on the shelf. Mr Stephen's folded paper had sat there all night, dry, exact, waiting under an ordinary object. In the morning she lifted the cup, smoothed the note once with the side of her thumb, folded it smaller, and placed it inside the rent book.
 
 Then she brought the rent book down from the high shelf.
 

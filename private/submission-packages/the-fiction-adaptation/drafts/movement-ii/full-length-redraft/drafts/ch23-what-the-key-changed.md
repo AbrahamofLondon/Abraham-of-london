@@ -12,7 +12,7 @@ He was at the table. The rent book was closed. The red thread was still there, b
 
 The rain increased.
 
-He stood and walked to the back of the house, not because he had permission, but because the sound of water on the lean-to roof was different from the sound of water on the main roof, and he needed to know which sound the house was making.
+He stood and walked to the back of the house. The sound of water on the lean-to roof was different from the sound of water on the main roof. He needed to know which sound the house was making.
 
 The lean-to door was closed.
 

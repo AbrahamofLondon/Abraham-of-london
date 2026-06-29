@@ -384,7 +384,7 @@ Kene closed his eyes.
 
 "This is why repairmen are dangerous," he said. "They have no respect for atmosphere."
 
-Obianuju stood before either man could move. She wiped her hands on a cloth, not because they were dirty, but because she would not meet a practical man with soup on her fingers. At the doorway she became neither host nor supplicant. She became the person who knew where things were kept.
+Obianuju stood before either man could move. She wiped her hands. At the doorway she became neither host nor supplicant. She became the person who knew where things were kept.
 
 "Tomorrow before noon," she said from the threshold.
 

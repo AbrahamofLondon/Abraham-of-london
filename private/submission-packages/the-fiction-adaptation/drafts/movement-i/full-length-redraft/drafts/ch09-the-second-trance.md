@@ -120,7 +120,7 @@ He had called it courtesy, respect, love. He had called it the discipline of a m
 
 He set the cold cup in the basin and walked out of the house.
 
-He did not know where he was going. He only knew that he could not sit in the kitchen while the salt dried on his hand and the cloth dripped on the line and Obianuju went on pouring water as though the morning were ordinary. He had been somewhere. He had brought something back. And for the first time since he had crossed a courtyard to learn her name, he was not content to wait for the hour to end.
+He did not know where he was going. He only knew that he could not sit in the kitchen while the salt dried on his hand and the cloth dripped on the line and Obianuju went on pouring water as though the morning were ordinary. He had been somewhere. He had brought something back. He was not content to wait for the hour to end anymore.
 
 He walked toward the market, not because he needed anything, but because the market was where the town kept its ordinary life, and he needed to be reminded that ordinary life still existed. The streets were the same streets. The standpipe had its congregation. The boys were at the wall with their stones. The tailor's machine was running. The woman with the mortar was grinding something red. All of it was the same, and none of it was the same, because he was carrying a knowledge he had not had yesterday: the cold could touch him. It could leave a mark. And it had chosen to leave that mark on the cloth she had hung, as though the cold were telling him that nothing in that house was beyond its reach.
 
@@ -142,4 +142,4 @@ The salt was still on his hand.
 
 The cloth was still wet on the line.
 
-And for the first time in months, he was not sitting through the hour with his hands open and his heart at its ordinary pace. He was moving. He did not know whether the movement would save him or cost him. He only knew that the cold had touched him, and that he could not pretend, anymore, that it was weather.
+He was moving. He did not know whether the movement would save him or cost him. He only knew that the cold had touched him, and that he could not pretend, anymore, that it was weather.

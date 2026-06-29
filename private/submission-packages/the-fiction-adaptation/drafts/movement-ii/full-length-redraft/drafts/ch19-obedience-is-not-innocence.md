@@ -340,7 +340,7 @@ He took his hands off the table.
 
 The rent book watched from the high shelf.
 
-The folded note from Mr Stephen lay under the cup, dry and ready for tomorrow. Obianuju had left it there deliberately, he thought, not because she forgot it, but because tomorrow would not be improved by hiding. A thing that is coming does not become smaller because you put it in a drawer.
+The folded note from Mr Stephen lay under the cup, dry and ready for tomorrow. A thing that is coming does not become smaller because you put it in a drawer.
 
 He stood, took the note, and then stopped with it in his hand.
 
@@ -374,7 +374,7 @@ He looked at the packet. Practical help. A repairman's kindness. Another way to 
 
 "He said a house that refuses the wet side must be given other manners."
 
-She sat then, slowly, and for the first time all day let him see she was tired before she corrected the sight. She placed her right hand on the table palm down. The grey line had almost gone. The almost was worse than the mark.
+She sat then, slowly. She let him see she was tired before she corrected the sight. She placed her right hand on the table palm down. The grey line had almost gone. The almost was worse than the mark.
 
 "May I?" he asked.
 

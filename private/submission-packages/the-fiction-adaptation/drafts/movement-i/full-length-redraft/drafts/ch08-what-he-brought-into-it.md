@@ -208,7 +208,7 @@ He did not have an answer.
 
 He did not know whether an answer existed.
 
-But he lay in the dark with the cold above him and the woman beside him who was kept by another claim, and he felt, for the first time, that the two claims might be the same claim — that the water and the shape were the same creditor, that he and Obianuju were the same kind of held, and that his fearlessness was not the opposite of her absence but its mirror.
+But he lay in the dark with the cold above him and the woman beside him who was kept by another claim, and he felt that the two claims might be the same claim — that the water and the shape were the same creditor, that he and Obianuju were the same kind of held, and that his fearlessness was not the opposite of her absence but its mirror.
 
 He did not know what to do with this.
 
