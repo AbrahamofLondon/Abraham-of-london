@@ -20,7 +20,7 @@ Kene came before the rain, with a bottle of palm oil he had not been asked for a
 
 "That is the same sentence a poor man and a holy man both say, and only one of them means it." He did not sit. That, the protagonist noticed, was new; Kene had always sat. "I will not stay. The rain is coming and I do not — " he stopped, and rearranged it into something he could say " — I have a roof of my own to be under when it breaks." But they both heard the first version, the one he had not finished, the one that ended *I do not like to be in this house when the weather changes,* and Kene's not-finishing it was a kindness and a confession at once.
 
-He left the oil. He took nothing. At the gate he turned, the way he always turned, and the protagonist waited for *if it gets worse, come* — the old refrain, the open road between two houses — and Kene opened his mouth to say it and then, for the first time, did not. He looked at the sky instead, and said the rain would be heavy, and went, fast, ahead of it.
+He left the oil. He took nothing. At the gate he turned, the way he always turned, and the protagonist waited for *if it gets worse, come* — the old refrain, the open road between two houses — and Kene opened his mouth to say it and did not. He looked at the sky instead, and said the rain would be heavy, and went, fast, ahead of it.
 
 The not-saying of *come* was the loudest thing anyone had said to him all week.
 

@@ -2502,7 +2502,7 @@ He offered the obvious thing first, because the obvious thing was the easiest to
 
 So the protagonist offered the next thing, which cost him more and was therefore, he believed, worth more: himself. He would take the blame. He would let it be known — he would say it openly, undo at the standpipe what he had done at the standpipe — that the talk was his foolishness, a husband's foolishness, nothing to do with the house or the woman in it. He would carry the noise out of the house on his own back and set it down somewhere it could not be traced to her.
 
-And Mr Stephen looked at him then with something that was almost, for the first time, not courtesy — something tired, something that had seen this exact offer made at this exact gate before, more than once, by men whose faces he no longer kept — and he said: "You think the noise is something you can pick up and carry. That is the whole of your trouble. The noise is not yours. You only made it louder. A man cannot take the blame for weather. He can only stop standing in the doorway shouting at the rain."
+And Mr Stephen looked at him then with something that was almost not courtesy — something tired, something that had seen this exact offer made at this exact gate before, more than once, by men whose faces he no longer kept — and he said: "You think the noise is something you can pick up and carry. That is the whole of your trouble. The noise is not yours. You only made it louder. A man cannot take the blame for weather. He can only stop standing in the doorway shouting at the rain."
 
 The protagonist offered the last thing, the thing under the things, the thing he had been moving toward all week without letting himself see it. He would go. He would leave the house, leave the town if it came to that, if Mr Stephen would let *her* stay — let Obianuju keep the one place she had ever managed to keep the cold small, and rent it to her alone, a quiet woman, the quietest tenant he had ever had, and be rid of the husband who was the only loud thing in it.
 
@@ -2613,7 +2613,7 @@ Kene came before the rain, with a bottle of palm oil he had not been asked for a
 
 "That is the same sentence a poor man and a holy man both say, and only one of them means it." He did not sit. That, the protagonist noticed, was new; Kene had always sat. "I will not stay. The rain is coming and I do not — " he stopped, and rearranged it into something he could say " — I have a roof of my own to be under when it breaks." But they both heard the first version, the one he had not finished, the one that ended *I do not like to be in this house when the weather changes,* and Kene's not-finishing it was a kindness and a confession at once.
 
-He left the oil. He took nothing. At the gate he turned, the way he always turned, and the protagonist waited for *if it gets worse, come* — the old refrain, the open road between two houses — and Kene opened his mouth to say it and then, for the first time, did not. He looked at the sky instead, and said the rain would be heavy, and went, fast, ahead of it.
+He left the oil. He took nothing. At the gate he turned, the way he always turned, and the protagonist waited for *if it gets worse, come* — the old refrain, the open road between two houses — and Kene opened his mouth to say it and did not. He looked at the sky instead, and said the rain would be heavy, and went, fast, ahead of it.
 
 The not-saying of *come* was the loudest thing anyone had said to him all week.
 
@@ -7458,10 +7458,6 @@ She looked at him. Her face was unreadable.
 "I thought that if I opened it, I would not be able to close it again."
 
 Mr Stephen nodded slowly. He understood. He did not need her to explain further.
-
-"I have been thinking about this door for days," he said. "I have been thinking about it while I was eating. While I was sleeping. While I was walking through the market. I have been thinking about it the way a man thinks about a word he cannot remember — not because he needs it, but because the not-knowing has become louder than the knowing."
-
-He paused.
 
 "I came here today to hear what you would say. I did not know what I wanted you to say. But I know now that I did not want you to open it. I wanted you to tell me something I could carry without having to carry the door itself."
 
