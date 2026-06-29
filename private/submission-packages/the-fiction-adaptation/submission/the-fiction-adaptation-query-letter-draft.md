@@ -21,7 +21,7 @@ What follows is not a battle for the house, but a reckoning with the nature of a
 
 I have [AUTHOR POSITIONING PLACEHOLDER: brief writing credentials, if any; otherwise: "I live in [location]"].
 
-I believe *The Fiction Adaptation* will appeal to readers of *Dept. of Speculation* by Jenny Offill and *Mexican Gothic* by Silvia Moreno-Garcia—literary fiction that treats metaphysical elements as emotional and relational pressure rather than plot mechanism.
+I believe *The Fiction Adaptation* will appeal to readers of *Dept. of Speculation* by Jenny Offill and *Our Wives Under the Sea*—literary fiction that treats marriage and metaphysical pressure as emotional and psychological truth rather than plot mechanism.
 
 The complete manuscript is available upon request.
 
