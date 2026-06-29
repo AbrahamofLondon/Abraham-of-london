@@ -1,91 +1,99 @@
-# First 50 Pages Gateway Audit
+# The Fiction Adaptation - First 50 Pages Gateway Audit
 
-**Date:** 2026-06-27
-**Novel:** The Fiction Adaptation
-**Sample:** Chapters 1-5 (approximately 14,000 words / 51-56 pages in standard manuscript format)
+Source audited: `private/submission-packages/the-fiction-adaptation/full-manuscript/the-fiction-adaptation-complete-manuscript.md`
 
----
-
-## Purpose
-
-To confirm that the first 50 pages function as an honest gateway to the full manuscript — not a cosmetically elevated extract that the rest of the book cannot sustain.
-
----
-
-## Chapter-by-Chapter Gateway Assessment
-
-### Chapter 1 — The Unreachable Hour (2,485 words)
-
-**Function:** Establish the hour, the cold, the marriage, the protagonist's fearlessness.
-
-**Does it announce voice?** Yes. The opening sentence — "There was an hour, late in the afternoon, when his wife went somewhere he could not follow, and the strange thing... was that he had stopped minding" — is immediate, strange, and authoritative. It could only belong to this book.
-
-**Does it carry immediate authority?** Yes. The prose is controlled, grave, and specific. The orange peel, the cold wrist, the brown water, the trance flicker — each image is exact and earned.
-
-**Representative of the full manuscript?** Yes. The voice, pacing, and register are consistent across all 28 chapters. The pattern architecture (declarative sentences, triadic rhythm, corrective second sentences) is present here and continues throughout.
-
-**Risk:** The trance in Ch.1 is a short italic paragraph. The full trance sequences in Ch.3, Ch.9, and Ch.18 are longer and more structurally significant. An agent should not expect every chapter to contain trance material — the novel is primarily domestic and social.
-
-### Chapter 2 — The Journal That Was a Gift (2,108 words)
-
-**Function:** Establish Obianuju's interiority, the journal as gift and warning.
-
-**Does it deepen rather than explain?** Yes. The journal is rendered as gift first. The warning is invisible on first reading. The duality is fully active.
-
-**Representative of the full manuscript?** Yes. Obianuju remains this complex throughout — never reduced to victim or villain.
-
-### Chapter 3 — A Coastal Town That Could Be (2,323 words)
-
-**Function:** Establish the liminal world, the drowning origin, the first sustained Trance.
-
-**Does it widen the world without becoming backstory?** Yes. The town is rendered through sensory detail (salt, diesel, plantain, the unmappable streets). The drowning origin is delivered as memory, not exposition.
-
-**Representative of the full manuscript?** Yes. The liminal register (the town that does not confirm itself) is maintained throughout. The Trance in this chapter is the first full deployment — Ch.9 and Ch.18 follow the same rules.
-
-### Chapter 4 — The Speed of It (3,275 words)
-
-**Function:** Establish how the marriage formed, the good day, the speed as current.
-
-**Does it intensify domestic pressure?** Yes. The good day (the market in the rain, the groundnut, the salt on her palm) makes the later cold more devastating.
-
-**Representative of the full manuscript?** Yes. This chapter establishes the pattern of warmth-before-pressure that the novel uses throughout.
-
-### Chapter 5 — The Confidant (3,442 words)
-
-**Function:** Introduce Kene, external witness to the cold.
-
-**Does it leave the agent wanting the full?** Yes. Kene is the novel's first external witness. His question — "Are you all right in that house?" — and the protagonist's calm "Yes" create the central dramatic irony. The agent will want to know what happens when the cold becomes visible to more than one person.
-
-**Representative of the full manuscript?** Yes. Kene remains this sharp, this loyal, this limited throughout. Mr Stephen (who enters later) operates on a similar principle — external witness who feels the pressure without understanding it.
-
----
+Existing parallel reports were not used as authority for this audit.
 
 ## Gateway Verdict
 
-**PASS — The first 50 pages are an honest gateway.**
+**First-50-pages verdict: PASS**
 
-| Quality | Assessment |
-| :------ | :--------- |
-| Voice | Consistent across full manuscript |
-| Pacing | Deliberate, scene-driven — same throughout |
-| Obianuju | Active, mysterious, warm — remains so |
-| Protagonist | Fearless, misreading — arc completes |
-| Cold | Implicit, unexplained — never explained |
-| Pattern architecture | Present but fresh — becomes more visible later (line watch) |
+The first 50 pages are commercially strong because they honestly represent the full manuscript. They are not a cosmetically elevated extract. The same voice, pressure system, emotional restraint, and moral architecture continue through the book.
 
-**What an agent who loves the first 50 pages will find in the rest:**
-- The same grave, rhythmic voice
-- The same control of metaphysical pressure
-- A protagonist who learns, slowly and expensively, that courage is not love
-- An Obianuju who remains active and strategic throughout
-- A Kene who becomes more complex, more afraid, more loyal
-- A Mr Stephen who is the novel's finest antagonist — reasonable, patient, dangerous
-- A photograph arc that is the novel's most elegant structural achievement
-- An ending that honours the restraint of the opening
+## Page 1 / Chapter 1
 
-**What an agent who loves the first 50 pages will note as risk:**
-- The pattern architecture becomes more visible by Ch.20+
-- Movement II (Ch.11-21) is the longest section and could tighten slightly
-- The "face of a woman who..." construction appears 20 times, with highest density in the final chapters
+**Verdict: PASS**
 
-These are line-editing issues, not structural concerns. They would not prevent an agent from requesting the full manuscript.
+Page 1 announces voice immediately. The first sentence establishes retrospection, marital intimacy, metaphysical absence, and the protagonist's troubling calm. The chapter has authority because it refuses ordinary hook mechanics and instead builds trust through precision: orange peel, cold wrist, the hour, the house, the town, and the protagonist's unfrightened attention.
+
+Chapter 1 does not merely introduce mystery. It introduces the book's governing danger: the protagonist mistakes his capacity to remain near the cold for love. That misreading is the seed of the whole manuscript.
+
+Risk: low Category F/D. The opening is dense and sentence-led. It will repel readers looking for quick plot. It will attract the right literary/speculative reader.
+
+Required action: none.
+
+## Chapter 2
+
+**Verdict: PASS**
+
+Chapter 2 deepens rather than explains. The journal introduces predestination, waiting, gaps, and Obianuju's pre-knowledge without reducing the situation to exposition. The protagonist's response is also ethically useful: he is flattered by being known before he is frightened by what that knowledge implies.
+
+The chapter widens Obianuju's interiority while still preserving her privacy. She is not just an object of haunting; she has written, waited, edited, withheld, and offered.
+
+Risk: low Category D. Some interpretive narration is explicit, but it clarifies the protagonist's flaw rather than flattening the mystery.
+
+Required action: none.
+
+## Chapter 3
+
+**Verdict: PASS**
+
+Chapter 3 widens the world without becoming backstory. The town's unstable geography, the market, the sea, salt, doors, church/mosque imagery, and the water-edge trance establish a place whose rules are felt rather than explained.
+
+The chapter also confirms that the metaphysical pressure is not confined to Obianuju's body. The town itself is implicated. This prevents the opening from becoming a narrow "wife with secret affliction" premise.
+
+Risk: low Category E. The atmospheric density is high, but it remains active because the protagonist physically moves through the town and returns with altered knowledge.
+
+Required action: none.
+
+## Chapter 4
+
+**Verdict: PASS**
+
+Chapter 4 intensifies the domestic pressure by returning to the courtship and showing the speed of the marriage from inside and outside. It is not a decorative flashback. It establishes why he misread the relationship: recognition felt like mercy, belonging felt like destiny, and Obianuju's refusals were present from the beginning.
+
+The chapter also proves that Obianuju is socially embedded. She belongs to the market and town before she belongs to the protagonist's version of the marriage.
+
+Risk: low Category D/G. The chapter has several polished reflective turns. They are consistent with the voice and do not require correction.
+
+Required action: none.
+
+## Chapter 5
+
+**Verdict: PASS**
+
+Chapter 5 leaves the agent wanting the full manuscript because it externalizes the problem. Kene becomes a witness, not a solution. The cold is no longer only the protagonist's private interpretation. The house begins to have a social perimeter.
+
+The chapter also helps the sample avoid static mood. By the end of the first 50 pages, the reader has voice, marriage, town, cold, journal, trance, social witness, and a protagonist whose love is already morally unstable.
+
+Risk: low Category E. The chapter's power depends on cumulative pressure rather than a sharp cliffhanger. That is appropriate for this manuscript.
+
+Required action: none.
+
+## Sample Representativeness
+
+**Verdict: PASS**
+
+The first 50 pages accurately represent the full manuscript in:
+
+- Voice: grave, restrained, rhythmic, aphoristic but controlled.
+- Method: domestic detail carrying metaphysical pressure.
+- Character logic: protagonist misreading courage; Obianuju retaining authority.
+- Plot engine: small permissions and refusals becoming consequences.
+- Supernatural handling: pressure without lore.
+- Commercial promise: literary speculative domestic suspense rather than conventional horror.
+
+The opening is not artificially better than the rest. If anything, the later middle increases the ethical stakes and gives the opening's atmosphere a stronger moral argument.
+
+## Gateway Risk Categories
+
+| Risk | Category | Severity | Assessment | Required action |
+|---|---|---:|---|---|
+| Dense opening sentence architecture | F / D | Low | Correct for this book's register and audience. | None. |
+| Early reliance on retrospective explanation | D | Low | Works because the retrospect is part of the narrator's authority and arc. | None. |
+| Atmosphere before conventional plot | F / E | Low | A market-position risk, not a manuscript weakness. | None. |
+| Obianuju's mystery in sample | C | Low | The sample gives enough agency through action, speech, journal, and refusal. Full manuscript strengthens this. | None. |
+
+## Gateway Conclusion
+
+The first 50 pages are a legitimate gateway to the full manuscript. They do not overpromise a different book. An agent who requests the full on the strength of the sample should find the manuscript more confident, not thinner.

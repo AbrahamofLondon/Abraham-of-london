@@ -1,209 +1,202 @@
-# Full Manuscript Trust Audit
+# The Fiction Adaptation - Full Manuscript Trust Audit
 
-**Date:** 2026-06-27
-**Novel:** The Fiction Adaptation
-**Manuscript:** `full-manuscript/the-fiction-adaptation-complete-manuscript.md`
-**Final word count:** 100,253
-**Chapters:** 28
+Source audited: `private/submission-packages/the-fiction-adaptation/full-manuscript/the-fiction-adaptation-complete-manuscript.md`
 
----
+Existing parallel reports were not used as authority for this audit. This is an independent read of the assembled manuscript.
 
 ## Executive Verdict
 
-**SUBMISSION-READY — MINOR LINE WATCH ONLY**
+**Final verdict: SUBMISSION-READY - MINOR LINE WATCH ONLY**
 
-The full manuscript sustains the promise of the first 50 pages. The voice is consistent, the emotional cost escalates, the ending is earned, and the architecture holds across all five movements. No structural revision is required.
+The full manuscript sustains the promise of the first 50 pages. The book deepens after the sample rather than merely extending its premise. The middle turns the protagonist's fearlessness from atmospheric distinction into moral liability, gives Obianuju strategic authority, and converts the metaphysical pressure into consequences that are domestic, social, marital, and spiritual at once.
 
-The trust question — *Would an agent who loved the first 50 pages feel rewarded after reading the full manuscript?* — can be answered: **Yes, with one caveat.** The manuscript's greatest strength (its grave, rhythmic, declarative voice) is also its greatest risk: the pattern architecture becomes visible in the later chapters, and a sharp agent or editor will note it. This is a line-editing issue, not a structural one.
+The manuscript does not need structural revision before submission. It does carry minor line-watch risks: some late-act reflective beats repeat their own meaning after the reader already has it, and Chapter 28 contains one small repeated movement around Mr Stephen leaving that should be watched in a future line pass. These are not trust failures.
 
----
+## Does the Full Manuscript Sustain the First 50 Pages?
 
-## First 50 Pages Verdict
+**Verdict: PASS WITH MINOR LINE RISKS**
 
-**PASS — The sample honestly represents the full manuscript.**
+Yes. The first 50 pages announce the essential contract: grave voice, domestic exactness, metaphysical pressure without lore, and a protagonist whose inability to fear is not heroic but suspect. The remainder of the book pays that contract off by making the same qualities cost more.
 
-The first 50 pages (Chapters 1-5, approximately 14,000 words / 51-56 pages) are a faithful gateway to the whole book:
+The middle does not repeat the opening revelation. It transforms it. Early chapters ask what is happening to Obianuju and the house. The middle asks what the protagonist's attempts to help cost her. The late book asks whether a closed door can be an ethical ending rather than an evasion. That is a genuine escalation.
 
-| Quality | First 50 Pages | Full Manuscript | Match? |
-| :------ | :------------- | :-------------- | :----- |
-| Voice | Grave, rhythmic, declarative | Same register throughout | ✅ |
-| Pacing | Deliberate, scene-driven | Consistent across all 28 chapters | ✅ |
-| Obianuju | Active, mysterious, warm, exact | Remains active and strategic throughout | ✅ |
-| Protagonist | Fearless, misreading endurance as love | Arc completes to presence without possession | ✅ |
-| Cold | Implicit, atmospheric, unexplained | Never explained, never weakened | ✅ |
-| Metaphysical pressure | Admitted through the mundane | Same discipline holds | ✅ |
-| Pattern architecture | Present but fresh | Becomes more visible by Ch.20+ — needs line watch | ⚠️ |
+The emotional cost increases in credible increments:
 
-**The first 50 pages are not artificially elevated.** The prose quality is consistent. An agent who loves the opening will find the same voice, the same control, and the same emotional authority in every subsequent chapter.
+- From private uncertainty to witnessed danger.
+- From cold room to public consequences.
+- From supernatural pressure to marital boundary.
+- From mystery to entitlement.
+- From endurance to disciplined presence.
+- From secrecy to chosen disclosure.
+- From access as rescue to closedness as mature love.
 
----
+The ending is earned because the book has spent its whole structure teaching the protagonist that entering is not the same as loving.
+
+## Does the First 50 Pages Honestly Represent the Whole Book?
+
+**Verdict: PASS**
+
+The opening is not a cosmetic sales extract. It is representative of the full manuscript's governing strengths and risks: long controlled sentences, withheld explanation, domestic specificity, slow dread, and a narrator who understands events more clearly in retrospect than in the moment.
+
+The sample promises a serious, restrained, metaphysical marriage novel. The full manuscript remains that book.
 
 ## Top 10 Strengths
 
-1. **Opening line.** "There was an hour, late in the afternoon, when his wife went somewhere he could not follow..." — immediate, strange, irresistible.
-2. **Obianuju as character.** She is the novel's greatest asset — active, strategic, warm, exact, never reduced to mystery or victimhood.
-3. **The three-force architecture.** Distinct, unexplained, never collapsed into generic haunting. The cold, the Voice, and the Trance each have their territory.
-4. **The Elder's sentence.** "You can be welcomed and still be late" — a line that haunts the entire book and pays off in the final chapter.
-5. **The Ch.16 Voice.** "Leave the door alone" / "Your courage is not the price. She is." — rare, plain, devastating.
-6. **The photograph/story arc (Ch.24-25).** The photograph becoming a story, the story detaching from the object, the story travelling on its own — this is the novel at its most structurally elegant.
-7. **Kene.** A fully realised secondary character — loyal, irritated, hungry, afraid, socially intelligent. He prevents the novel from sealing itself inside the protagonist's mind.
-8. **Mr Stephen.** A villain of reasonableness. He never raises his voice, never threatens, never becomes melodramatic. His civility is the menace.
-9. **The ending.** The door stays closed. The cold does not vanish. The protagonist is still there. Restraint is the victory.
-10. **The prose at its best.** "He ate the bitter half and gave her the less bitter, and that, too, was a thing he did without being able to defend it." — sentences that could only belong to this book.
-
----
+1. **Voice authority.** The prose has a stable grave rhythm and does not collapse into generic suspense or supernatural exposition.
+2. **Moral escalation.** The protagonist's fearlessness evolves from charisma to flaw to discipline.
+3. **Obianuju's agency.** She decides, refuses, withholds, pays, calculates, names boundaries, and keeps authority over the door.
+4. **Domestic consequence.** Roofs, rent books, bowls, ropes, keys, cloth, and photographs carry pressure without becoming props.
+5. **Metaphysical restraint.** The book does not explain the cosmology and is stronger for refusing to do so.
+6. **Middle-book pressure.** Chapters 11-21 are not filler; they are the ethical engine of the manuscript.
+7. **Social field.** Kene, Mama Agnes, Brother Paul, Mr Stephen, market women, and former tenants widen the book without dragging it into subplot clutter.
+8. **Mr Stephen.** He is dangerous because he is correct, not because he is melodramatically villainous.
+9. **Ending logic.** The closed door is not avoidance; it is the final form of the book's argument about love and boundary.
+10. **Memorable symbolic economy.** Cold, door, rope, key, thread, rent book, photograph, and water remain distinct enough to accumulate meaning without turning into a solved code.
 
 ## Top Risks
 
-1. **Pattern architecture (D).** "The face of a woman who..." (20x), "he understood that" (40x), "not because... but because" (22x), "for the first time" (15x), "entered him the way the cold entered" (6x). These patterns are the novel's signature but become visible by the later chapters. A line editor will flag them. **Recommendation:** Thin approximately 60-80 instances across the manuscript in a dedicated line-editing pass. Do not remove the patterns entirely — they are part of the voice. Remove only the instances that feel like reflex rather than intention.
+| Risk | Category | Severity | Assessment | Required action |
+|---|---|---:|---|---|
+| Late-act repetition around door/closed/boundary language | D / G | Low | The repetition is mostly intentional and thematic, but a few reflective passages in Chapters 27-28 restate meanings the scenes already prove. | No blocking correction. Line-watch only. |
+| Chapter 28 repeated exit beat for Mr Stephen | G | Low | The chapter appears to have Mr Stephen leave, then repeats a threshold/exit exchange. It reads as a small continuity duplicate, not a structural flaw. | Future line pass recommended; not a trust hold. |
+| Expository clarity near photograph history | E / G | Low | The photograph sequence does a lot of work quickly. It remains legible, but the information density is high. | No action required before submission. |
+| Some aphoristic dialogue clusters | D | Low | Kene, Mama Agnes, Obianuju, and the narration all sometimes speak in polished maxims. The pattern fits the book's register but should not increase further. | No action. |
+| Page-one density | F | Low | The opening demands a reader who likes long controlled sentences. This is the book's market position, not a defect. | No action. |
 
-2. **Late-chapter density of "the face of a woman who..." (D).** This construction appears 20 times, with the highest concentration in Ch.23-28. In the final act, where the prose should be sharpest, this pattern can make Obianuju feel archetypal rather than particular. **Recommendation:** Replace 10-12 instances with physical description — what did her hands do? Where did she look? What changed in her breathing?
-
-3. **Movement II length (E).** At approximately 40,000 words across 11 chapters (Ch.11-21), Movement II is the longest section. The inspection arc (Ch.20-21) and the key arc (Ch.21-22) are strong, but some readers may feel the middle chapters (Ch.12-15) could be tightened. **Recommendation:** Not a structural revision, but note for the line-editing pass.
-
-4. **Occasional over-interpretation (D).** Some gestures are explained before they have fully acted. "She looked at him the way she looked at a trader who had quoted a price she considered imaginative" — strong. "Her face was the face of a woman who had been sitting with a question for seven days" — strong once, weaker by the fourth iteration. **Recommendation:** Trust the gesture more. Let the reader infer.
-
----
+No Category A structural trust issue found.
 
 ## Chapter-by-Chapter Summary
 
-| Ch | Title | Words | Function | Verdict |
-| :- | :---- | ----: | :------- | :------ |
-| 1 | The Unreachable Hour | 2,485 | Establish the hour, the cold, the marriage, the protagonist's fearlessness | ✅ Strong |
-| 2 | The Journal That Was a Gift | 2,108 | Establish Obianuju's interiority, the journal as gift/warning | ✅ Strong |
-| 3 | A Coastal Town That Could Be | 2,323 | Establish liminal world, drowning origin, first Trance | ✅ Strong |
-| 4 | The Speed of It | 3,275 | Establish how the marriage formed, the good day | ✅ Strong |
-| 5 | The Confidant | 3,442 | Introduce Kene, external witness to the cold | ✅ Strong |
-| 6 | The Elder | 3,855 | Introduce Mama Nneoma, deliver the Elder's sentence | ✅ Strong |
-| 7 | Territory | 4,058 | Cold as climate, habituation, the Elder's sentence as pressure | ✅ Strong |
-| 8 | What He Brought Into It | 3,728 | His inheritance, the brown water, the rhyme between claims | ✅ Strong |
-| 9 | The Second Trance | 3,039 | Full trance, physical evidence, pivot to action | ✅ Strong |
-| 10 | Continuation | 4,416 | Kene challenges, shrimp woman, Obianuju's confession, he leaves at night | ✅ Strong (rewritten) |
-| 11 | The Reversal | 4,107 | Obianuju turns as grief, hand withdrawal, new terms | ✅ Strong |
-| 12 | Social Consequence | 4,021 | Town pressure, Mama Agnes returns | ✅ Strong |
-| 13 | The Grey City | 3,761 | Distance does not weaken the claim | ✅ Strong |
-| 14 | The Door Between Them | 3,956 | Elder's sentence returns, cultural cosmology from inside | ✅ Strong |
-| 15 | The Bargaining | 4,193 | He tries to negotiate with the claim, hubris chapter | ✅ Strong |
-| 16 | Leave the Door Alone | 3,105 | **The Voice speaks** — hinge of the book | ✅ Exceptional |
-| 17 | The Named Debt | 3,971 | Aftermath of the Voice, he tests the cost | ✅ Strong |
-| 18 | The Test | 4,797 | Trance returns, confirmation of the cost | ✅ Strong |
-| 19 | Obedience Is Not Innocence | 3,706 | Obedience without understanding | ✅ Strong |
-| 20 | The Inspection | 4,327 | Mr Stephen's ordinary leverage enters the house | ✅ Strong |
-| 21 | The Key | 3,956 | The key as demand, access as pressure | ✅ Strong |
-| 22 | The Wrong Key | 3,618 | Key opens lean-to, not door; red thread loosens | ✅ Strong |
-| 23 | What the Key Changed | 3,607 | Protagonist draws second chalk line, Elder sentence returns | ✅ Strong (repaired) |
-| 24 | The Photograph | 3,476 | Photograph as strategy, Mr Stephen gains a face | ✅ Benchmark |
-| 25 | The Story He Could Use | 3,752 | Story detaches from photograph, travels on its own | ✅ Benchmark |
-| 26 | The Return Date | 3,290 | False story, Mr Stephen inspects the room, cold becomes quieter | ✅ Strong |
-| 27 | The Man Who Wonders | 3,241 | Mr Stephen notices the door, cannot stop wondering | ✅ Strong |
-| 28 | The Door That Stayed Closed | 3,031 | Final truth spoken, door stays closed, protagonist remains | ✅ Strong |
+Detailed table created separately in `chapter-by-chapter-trust-table.md`.
 
-**No chapter fails the necessity test.** Every chapter changes something. No chapter exists merely because the outline required it.
-
----
+Summary finding: all 28 chapters have a discernible function. No chapter reads as present merely because the outline required it. The strongest structural sequence is Chapters 11-21, where the book stops being about whether the protagonist will stay and becomes about what kind of staying is morally permissible.
 
 ## Movement-by-Movement Verdict
 
-| Movement | Chapters | Verdict | Notes |
-| :------- | :------- | :------ | :---- |
-| I — The Current | 1-10 | ✅ PASS | Strongest movement. Every chapter earns its place. |
-| II — The Cost | 11-21 | ✅ PASS WITH RISKS | The Voice (Ch.16) is the book's hinge and works. Ch.12-15 could tighten slightly. |
-| III — Endgame | 22-25 | ✅ PASS | The photograph/story arc (Ch.24-25) is the novel at its most elegant. |
-| IV — Final Act | 26-27 | ✅ PASS | Compressed, necessary, sharp. |
-| V — Final Landing | 28 | ✅ PASS | Restrained, complete, emotionally alive. |
+### Movement I: Chapters 1-5
 
----
+**Verdict: PASS**
+
+The opening establishes the cold hour, Obianuju's presence, the protagonist's damaged fearlessness, the town's unstable geography, the journal, the speed of the marriage, and Kene's first role as outside witness. The pressure is intimate before it becomes social. Chapter 5 leaves the sample with full-manuscript appetite because the problem has become witnessed but not solved.
+
+### Movement II: Chapters 6-10
+
+**Verdict: PASS**
+
+The Elder and Kene prevent the manuscript from becoming a sealed two-person mystery. The book introduces older knowledge without explaining the supernatural. The second trance raises the stakes by giving the protagonist physical evidence. The former tenant's testimony reframes the cold as continuation rather than private haunting.
+
+Required middle-book verdict: **Movement II: PASS**
+
+### Movement III: Chapters 11-17
+
+**Verdict: PASS**
+
+This is the major reversal movement. The protagonist's investigation has made the house public and has cost Obianuju control. The Voice arrives at the right pressure point: not to terrify him, but to name the price of his courage. The book's moral architecture sharpens here.
+
+### Movement IV: Chapters 18-23
+
+**Verdict: PASS WITH MINOR LINE RISKS**
+
+The roof, rope, rent book, Brother Paul, Mr Stephen, wrong key, red thread, and chalk line create strong consequence logic. Obedience is complicated rather than rewarded. The key arrives as consequence, not device. Minor risk: the chapter sequence is intentionally procedural, and its pressure depends on the reader accepting small domestic actions as high stakes. The manuscript earns that mode.
+
+### Movement V: Chapters 24-28
+
+**Verdict: PASS WITH MINOR LINE RISKS**
+
+The photograph changes the social field, then the story travels beyond Obianuju's control, then collapses into the more dangerous fact of the door itself. Mr Stephen's wondering becomes more dangerous than asking, until Obianuju's final truth gives him the only answer he is entitled to. The closed door ending rewards the whole book.
 
 ## Obianuju Agency Verdict
 
-**PASS.** Obianuju is never reduced to mystery, price, or door. She:
+**Obianuju agency: PASS**
 
-- Makes strategic choices throughout (the photograph, the truth, the boundary)
-- Knows things the protagonist does not (the cold was waiting for the woman, not her)
-- Retains interior dignity even when not fully explained
-- Controls the final truth in Ch.28
-- Is not explained by the photograph — it remains partially withheld
-- Has her own unfinished business (the cold, the door, the woman who took the photograph)
+Obianuju remains a person, not a symbol. The manuscript repeatedly protects her from being reduced to mystery, wound, possession, or prize. She knows more than the protagonist, but the book does not turn that knowledge into exoticized inscrutability. It makes her knowledge practical, strategic, costly, and partial.
 
-The risk is the "face of a woman who..." pattern, which occasionally makes her feel archetypal rather than particular. This is a line-editing issue, not a character-agency issue.
+Evidence of agency:
 
----
+- She gives the journal under terms she sets.
+- She refuses rescue and names its cost.
+- She controls access to the no-colour door.
+- She decides what can be given to Mr Stephen and what cannot.
+- She pays Brother Paul when the refusal belongs to her.
+- She instructs the protagonist in exact limits rather than asking him to save her.
+- She chooses disclosure of the photograph when concealment stops protecting her.
+- She chooses the final boundary of the door staying closed.
+- She keeps the photograph visibly rather than destroying or hiding it.
+
+The ending honours her boundary. The protagonist's maturity is measured by his ability to remain beside that boundary without claiming it.
 
 ## Unnamed Protagonist Arc Verdict
 
-**PASS.** The arc moves from:
+**Verdict: PASS**
 
-1. **Fearlessness as flaw** (Ch.1-4): He does not let go of cold things
-2. **Misreading endurance as love** (Ch.5-10): He sits through the hour with open hands
-3. **First action, first cost** (Ch.11-15): He acts, and the marriage answers
-4. **The Voice tests him** (Ch.16-17): He is addressed but not chosen
-5. **Carrying without owning** (Ch.18-25): He carries the photograph, repeats only what he is given
-6. **Presence without possession** (Ch.26-28): He stays without claiming, acts without owning
+The arc is legible and earned. His fearlessness begins as a mythic personal distinction, becomes a diagnostic absence, becomes a marital danger, and finally becomes something disciplined by attention.
 
-The final state — present, unnamed, accurate, not owner — is earned by the whole structure.
+He changes in concrete ways:
 
----
+- He stops treating not-flinching as proof of courage.
+- He learns that action can steal agency from the person he loves.
+- He learns that endurance can be vanity when it asks to be witnessed.
+- He learns to ask "What do you need me to do?" without smuggling in rescue.
+- He learns that force costs Obianuju and refusal is not innocence.
+- He accepts that the door is not his to open.
+- He ends in presence without possession.
+
+The protagonist is not merely more passive at the end. He is more precise. That distinction is essential, and the manuscript lands it.
 
 ## Three-Force Integrity Verdict
 
-**PASS.** The three forces remain distinct:
+**Verdict: PASS**
 
-| Force | Territory | Evidence |
-| :---- | :-------- | :------- |
-| **Claim (Spirit Husband)** | Cold, territorial pressure, prior occupancy | Never named in prose. Rendered as temperature, silence, the no-colour door, the loosened thread. |
-| **Voice (Intimidation)** | Speaks once (Ch.16) | "Leave the door alone." / "Your courage is not the price. She is." Never repeated. |
-| **Trance (Messenger)** | Ch.3, Ch.9, Ch.18 | Italic present tense, precise, walking as governing action, leaves physical evidence. |
+The three forces remain distinct enough for trust:
 
-No force collapses into another. No cosmology lecture. No explanation.
+- **Claim:** cold, territorial, prior occupancy, lease-like pressure, room/house/weather logic.
+- **Voice:** direct intimidation and correction, arriving rarely and with practical authority.
+- **Trance:** messenger/witness state, showing conditions and mechanisms without explaining cosmology.
 
----
+The manuscript does not collapse these into a generic supernatural system. It also avoids lore. The reader is given pressure, recurrence, consequence, and boundary, not a solved mythology. That is the right choice for this book.
 
-## Ending Verdict
+## Middle-Book Test: Chapters 11-21
 
-**PASS.** The ending is the only honest ending for this book.
+**Verdict: PASS**
 
-- The no-colour door remains closed
-- Mr Stephen reaches the limit of his entitlement
-- Obianuju controls the final truth
-- The protagonist acts accurately without ownership
-- The cold does not vanish — his courage stops feeding it
-- The Elder's sentence returns as understanding, not quote
-- Final image: lamp blown out, room dark, cold at the edges, door closed, protagonist still there
+The reversal truly alters the marriage. After Chapter 11, the central question is no longer "what is happening?" but "who pays when he tries to help?" That is a stronger middle-book engine than escalation by event alone.
 
-The ending refuses spectacle without feeling evasive. It is restrained, complete, and emotionally alive.
+The social pressure widens without subplot clutter. Mr Stephen, Brother Paul, Kene, Mama Agnes, and the lane all pressure the house from different angles while remaining tied to the central door problem.
 
----
+The Voice arrives exactly where it should: at the moment the protagonist mistakes being addressed for being chosen. "Your courage is not the price. She is." is the correct hinge for the book.
+
+Obedience is complicated in Chapters 18-20. The protagonist can obey and still want credit. He can stay outside and still desire absolution. He can help and still measure wrongly. That keeps the middle alive.
+
+The Key arrives as consequence, not device. By the time the wrong key appears, the book has established access, repair, weather, landlord pressure, and Obianuju's inventory of what may be given. The key is the logical next form of pressure.
+
+## Final Act and Ending
+
+**Ending: PASS**
+
+The wrong key creates irreversible consequence because it lets the house, Mr Stephen, and the social field understand that access can be approached indirectly. The photograph then creates another kind of access: narrative access. Once the story travels, the private mystery becomes public material.
+
+Mr Stephen's wondering becomes more dangerous than asking because asking can be refused; wondering turns the door into an idea other people can carry. Chapter 27 understands this well.
+
+The final closed door works. It feels like victory, restraint, loss, and maturity at once. It refuses spectacle without feeling evasive because the entire manuscript has taught the reader that opening the door would be the protagonist's old error in a climactic costume.
+
+Minor line-watch note: Chapter 28 repeats some of its meaning after the scene has already established it, and Mr Stephen's departure appears to include a small repeated threshold beat. This is a polish issue, not an ending failure.
 
 ## Submission Readiness Verdict
 
-**SUBMISSION-READY — MINOR LINE WATCH ONLY**
+**SUBMISSION-READY - MINOR LINE WATCH ONLY**
 
-The manuscript is structurally complete and submission-ready. The recommended next step is a dedicated line-editing pass targeting the pattern architecture (approximately 60-80 sentence-level adjustments), followed by a sensitivity read of the cultural/spiritual cosmology.
+The manuscript can sustain agent confidence beyond the query and sample. An agent who loved the first 50 pages is likely to feel rewarded and deepened by the full manuscript, because the book's later movements complicate the opening rather than merely prolonging it.
 
-No structural revision is required. No chapters need to be added or removed. The ending is locked.
+## Recommended Action
 
----
+Do not hold submission for structural revision.
 
-## Risk Classification Summary
+Do not rewrite the manuscript from this audit.
 
-| Risk | Category | Action |
-| :--- | :------- | :----- |
-| Pattern architecture visible in later chapters | D — Voice/pattern | Line-editing pass: thin 60-80 instances |
-| "Face of a woman who" density in Ch.23-28 | D — Voice/pattern | Replace 10-12 with physical description |
-| Movement II middle chapters (12-15) could tighten | E — Pacing | Note for line-editing pass |
-| Occasional over-interpretation of gesture | D — Voice/pattern | Trust the gesture more |
+Optional future line watch:
 
----
+- Check Chapter 28 for the repeated Mr Stephen exit/threshold beat.
+- Review Chapters 24-28 for any reflective sentence that restates a boundary already dramatized by the scene.
+- Preserve the grave, restrained rhythm. Do not flatten the style in pursuit of speed.
 
-## Confirmation
-
-- [x] First 50 pages honestly represent the full manuscript
-- [x] Full manuscript sustains agent trust
-- [x] Obianuju agency: PASS
-- [x] Protagonist arc: PASS
-- [x] Three-force integrity: PASS
-- [x] Ending: PASS
-- [x] No structural revision required
-- [x] No chapters need to be added or removed
-- [x] No coda required
-- [x] Submission-ready with minor line watch
+No correction plan is required because no manuscript edit is required before submission.
