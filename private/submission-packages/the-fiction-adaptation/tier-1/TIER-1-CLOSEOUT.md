@@ -52,10 +52,23 @@
 - No lock files are tracked.
 - **Tip for the owner:** when re-exporting, prefer `git add -f tier-1/exports/**/*.docx tier-1/exports/**/*.md` over `git add -f tier-1/exports/` so a lock file from an open document is never swept in.
 
-## Superseded files (deprecated, not deleted unless noted)
-- **Deleted:** the six old flat `submission/tier-1/*-query-package.md` (pre-rebuild duplicates, no external references).
-- **Deprecated with banners** (kept for history) in `submission/`: `the-fiction-adaptation-query-letter-final.md` (STALE — Mexican Gothic + placeholders), `ai-policy-review.md`, `submission-tracker.md`, `pre-send-owner-checklist.md`.
-- **Still canonical in `submission/`:** one-page synopsis, three-page synopsis, pitch-positioning, submission-package-report, agent-targeting-list/report/strategy, comp-research. (The corrected query also lives, self-contained, in each `tier-1/` folder.)
+## Superseded / stale files — DELETED
+
+All superseded flat Tier 1 query-package files have been deleted.
+The stale submission-level `the-fiction-adaptation-query-letter-final.md` has been deleted.
+The duplicated submission-level AI-policy, tracker, and pre-send checklist files have been deleted.
+The `tier-1/` directory is the sole production source of truth for Tier 1 execution.
+No query has been sent. Owner must verify guidelines day-of. Owner sends manually.
+
+**Deleted:**
+- `submission/tier-1/01..06-*-query-package.md` — six pre-rebuild flat query packages (no external references).
+- `submission/the-fiction-adaptation-query-letter-final.md` — STALE (Mexican Gothic + placeholders).
+- `submission/the-fiction-adaptation-query-letter-draft.md` — pre-rebuild query file that still held an author-bio `[PLACEHOLDER]` and a stale Mexican Gothic note; an apparent send source, now redundant. (One file beyond the correction brief's explicit list, removed to satisfy its standard that no stale query file remain as an apparent send source.)
+- `submission/ai-policy-review.md`, `submission/submission-tracker.md`, `submission/pre-send-owner-checklist.md` — duplicates of the authoritative `tier-1/` versions.
+
+**Still canonical in `submission/` (retained):** one-page synopsis, three-page synopsis, pitch-positioning, submission-package-report, agent-targeting-list, agent-targeting-report, agent-submission-strategy, comp-research-and-query-finalization, SUBMISSION_JOURNEY. The corrected, send-ready query lives self-contained in each `tier-1/<agent>/` folder.
+
+**Remaining "Mexican Gothic" / "placeholder" mentions are historical only** — they appear in narrative/reports (SUBMISSION_JOURNEY, comp-research-and-query-finalization, submission-package-report, agent-targeting-report) and in manuscript naming-audit reports, plus as guard-lines inside `tier-1/` checklists ("No Mexican Gothic anywhere"). None is an operational query send source.
 
 ---
 
