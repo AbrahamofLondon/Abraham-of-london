@@ -1,0 +1,11 @@
+# Package-local hygiene for The Fiction Adaptation submission package.
+# LibreOffice / OpenOffice write a temporary lock file next to any open
+# document (e.g. .~lock.My-File.docx#). Because the repo-root .gitignore
+# ignores any `exports/` directory, the export DOCX must be force-added —
+# and a blanket `git add -f exports/` would otherwise sweep these lock
+# files in. Ignore them here so that can't happen.
+.~lock.*#
+
+# Belt-and-braces: never want OS cruft in the package either.
+.DS_Store
+Thumbs.db

@@ -1,3 +1,5 @@
+> **⚠ DEPRECATED / STALE — DO NOT USE.** This file still names *Mexican Gothic* and contains `[PLACEHOLDER]` author/bio fields. The corrected, send-ready query (comps: *Dept. of Speculation* + *Our Wives Under the Sea*; final London bio; info@abrahamoflondon.org) lives in the production package under `tier-1/<agent>/personalised-query.md` and `tier-1/exports/<agent>/query-letter-source.md`. Kept only for history.
+
 # Query Letter — Final Version
 ## The Fiction Adaptation
 

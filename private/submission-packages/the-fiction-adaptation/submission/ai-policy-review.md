@@ -1,3 +1,5 @@
+> **⚠ SUPERSEDED.** The authoritative AI-policy review is `tier-1/ai-policy-review.md`. This earlier copy is retained for history only.
+
 # AI-Policy Review
 ## The Fiction Adaptation — Pre-Submission Disclosure & Restriction Check
 
