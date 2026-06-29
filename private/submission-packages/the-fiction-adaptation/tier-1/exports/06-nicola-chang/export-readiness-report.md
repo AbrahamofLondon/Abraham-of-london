@@ -5,7 +5,7 @@
 **Date:** June 29, 2026
 
 ## VERDICT
-**ALTERNATE ONLY — DO NOT SEND WHILE JEMIMA FORRESTER QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY RULE APPLIES**
+**ALTERNATE ONLY — DO NOT SEND WHILE JEMIMA FORRESTER QUERY IS ACTIVE; ONE-AGENT-ONLY RULE; disclosure-ready, day-of policy check**
 
 ## Folder contents (this export folder)
 - query-letter-source.md
@@ -18,13 +18,13 @@
 
 ## Status detail
 - Send status: **ALTERNATE**
-- AI-policy: ⚠ David Higham AI restriction — owner decision required (ai-policy-review.md).
+- AI-policy: DECIDED — disclose with the approved line (included after the author bio). Day-of: verify David Higham's current stance and apply the practical rule.
 - Same-agency / sequencing: BACKUP to Jemima Forrester. One-agent-only rule; approach only after Jemima passes / window expires.
 - Guideline source checked: 2026-06-28 (research). **Re-verify day-of.**
 - Attachments allowed: Blocked — no DOCX generated yet (see metadata-scrub-report.md)
 
 ## Missing owner decisions
-- AI-policy decision (disclose / do not submit / submit without disclosure)
+- Day-of: classify the agency's AI policy and apply the practical rule (the disclosure text is already decided and included)
 - Confirm primary same-agency query has passed / window expired before sending
 - Honour David Higham one-agent-only rule
 

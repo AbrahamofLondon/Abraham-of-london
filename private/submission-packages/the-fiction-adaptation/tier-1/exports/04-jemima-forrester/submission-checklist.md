@@ -1,6 +1,6 @@
 # Submission Checklist (Export Copy) — Jemima Forrester
 
-**Verdict:** NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY AGENCY RULE APPLIES
+**Verdict:** SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK; ONE-AGENT-ONLY AGENCY RULE APPLIES
 
 - [ ] AI-policy owner decision recorded
 - [ ] One-agent-only rule honoured

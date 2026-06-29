@@ -12,12 +12,12 @@
 |-------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | 01 Olivia Maidment (Madeleine Milburn) | ✅ | ✅ 6/6 | ✅ 5/5 | ✅ 4 files | ✅ verified | ✅ **yes** | — |
 | 05 Sam Farkas (Jill Grinberg) | ✅ | ✅ 6/6 | ✅ 5/5 | ✅ 4 files | ✅ verified | ✅ **yes** | — |
-| 02 Judith Murray (Greene & Heaton) | ✅ | ✅ 6/6 | ✅ 5/5 | ⛔ blocked | ✅ states why | ⛔ no | ✅ complete |
-| 03 Imogen Morrell (Greene & Heaton) | ✅ | ✅ 6/6 | ✅ 5/5 | ⛔ blocked | ✅ states why | ⛔ no | ✅ complete |
-| 04 Jemima Forrester (David Higham) | ✅ | ✅ 6/6 | ✅ 5/5 | ⛔ blocked | ✅ states why | ⛔ no | ✅ complete |
-| 06 Nicola Chang (David Higham) | ✅ | ✅ 6/6 | ✅ 5/5 | ⛔ blocked | ✅ states why | ⛔ no | ✅ complete |
+| 02 Judith Murray (Greene & Heaton) | ✅ | ✅ 6/6 | ✅ 5/5 | paste-based (G&H) | ✅ states why | ✅ disclosure-ready* | — |
+| 03 Imogen Morrell (Greene & Heaton) | ✅ | ✅ 6/6 | ✅ 5/5 | paste-based (G&H) | ✅ states why | alternate* | — |
+| 04 Jemima Forrester (David Higham) | ✅ | ✅ 6/6 | ✅ 5/5 | gen day-of if DH wants attachments | ✅ states why | ✅ disclosure-ready* | — |
+| 06 Nicola Chang (David Higham) | ✅ | ✅ 6/6 | ✅ 5/5 | gen day-of if DH wants attachments | ✅ states why | alternate* | — |
 
-"Blocked" = AI-policy owner decision and/or same-agency sequencing not yet cleared. DOCX deliberately not generated for blocked agents (sample length also unconfirmed).
+*AI-policy is **resolved** — the approved disclosure line is in each flagged query (after the bio). The only remaining gate is a **day-of agency-policy check** (apply the practical rule in `ai-policy-review.md`) plus same-agency / one-agent sequencing. Greene & Heaton is paste-based (query-letter-source.md is the deliverable); if David Higham requires Word attachments, generate the DOCX day-of with the same generator (disclosure is already in the source query).
 
 ---
 

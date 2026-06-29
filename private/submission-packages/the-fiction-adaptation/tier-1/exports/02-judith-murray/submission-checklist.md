@@ -1,6 +1,6 @@
 # Submission Checklist (Export Copy) — Judith Murray
 
-**Verdict:** NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED
+**Verdict:** SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK
 
 - [ ] AI-policy owner decision recorded
 

@@ -1,6 +1,6 @@
 # Materials to Send — Imogen Morrell, Greene & Heaton
 
-**Status:** ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; AI-POLICY OWNER DECISION REQUIRED
+**Status:** ALTERNATE ONLY — DO NOT SEND WHILE JUDITH MURRAY QUERY IS ACTIVE; disclosure-ready, day-of policy check
 
 **Submission method:** Email to Greene & Heaton submissions address, naming Imogen Morrell in the subject line.
 **Subject line:** Query: The Fiction Adaptation to Imogen Morrell
@@ -37,7 +37,7 @@
 BACKUP to Judith Murray at the same agency. Send only after Judith passes or her response window expires, and only if G&H permits a second approach.
 
 ## AI-policy
-Greene & Heaton has explicit language restricting AI-originated / AI-assisted submissions. This manuscript was developed with an AI-assisted editorial workflow. OWNER DECISION REQUIRED before sending: (a) disclose, (b) do not submit, or (c) submit without disclosure. See tier-1/ai-policy-review.md.
+Greene & Heaton has AI-submission language. DECISION MADE: disclose truthfully — the approved line is in the query after the author bio. Day-of: verify the agency's current stance and apply the practical rule (send if it requires/permits disclosure; do not submit if it prohibits AI-assisted work without clarification; ask/hold if ambiguous).
 
 ## Requirement source
 Greene & Heaton agent profile (greeneheaton.co.uk/agents/imogen-morrell). (Re-verify on the day of sending — see `guideline-verification.md`.)

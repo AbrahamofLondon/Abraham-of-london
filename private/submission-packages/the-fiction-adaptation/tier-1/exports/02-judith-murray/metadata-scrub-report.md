@@ -3,7 +3,7 @@
 **Date:** June 29, 2026
 **DOCX generated:** NO
 
-No DOCX generated because this agent is **HOLD** (NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED). Producing attachments now would be premature: the AI-policy decision and/or same-agency sequencing must resolve first, and the required sample length must be confirmed against current guidelines.
+No DOCX generated because this agent is **HOLD** (SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK). Producing attachments now would be premature: the AI-policy decision and/or same-agency sequencing must resolve first, and the required sample length must be confirmed against current guidelines.
 
 Paste-ready source materials are present in this folder:
 - query-letter-source.md (corrected; Our Wives Under the Sea comp; no Mexican Gothic)

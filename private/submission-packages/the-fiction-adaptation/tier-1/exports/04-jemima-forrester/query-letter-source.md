@@ -1,7 +1,7 @@
 # Query Letter Source — Jemima Forrester (David Higham)
 
 **NO ATTACHMENT — paste this query text into the email/form according to current guidelines.**
-**Status:** NOT SEND-READY — AI-POLICY OWNER DECISION REQUIRED; ONE-AGENT-ONLY AGENCY RULE APPLIES
+**Status:** SENDABLE WITH AI-DISCLOSURE AFTER DAY-OF POLICY CHECK; ONE-AGENT-ONLY AGENCY RULE APPLIES
 
 ---
 
@@ -23,7 +23,7 @@ The Fiction Adaptation is a novel about marriage under metaphysical pressure, ab
 
 I am a London-based writer developing two linked literary projects: a memoir on fatherhood, faith, and institutional pressure, and this novel, which transforms questions of possession, silence, and spiritual inheritance into fiction.
 
-[OWNER OPTION — AI DISCLOSURE, insert only if owner approves: see ai-policy-note.md]
+This manuscript is author-created and author-directed. AI tools were used only as part of an editorial workflow for structural review, pattern analysis, line-editing support, formatting, and submission-package preparation. All creative decisions, revisions, and final text are my own.
 
 I believe The Fiction Adaptation will appeal to readers of Dept. of Speculation by Jenny Offill and Our Wives Under the Sea by Julia Armfield—literary fiction that treats marriage and metaphysical pressure as emotional and psychological truth rather than plot mechanism.
 
@@ -37,4 +37,4 @@ info@abrahamoflondon.org
 
 ---
 
-*Comps verified (Dept. of Speculation + Our Wives Under the Sea). No Mexican Gothic. Bio final. AI-disclosure line is an OWNER OPTION.*
+*Comps verified (Dept. of Speculation + Our Wives Under the Sea). No Mexican Gothic. Bio final. AI-disclosure line included after the bio (owner-resolved).*

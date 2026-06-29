@@ -1,16 +1,20 @@
 # AI-Policy Note — Nicola Chang (David Higham)
 
-**Flag:** ⚠ RESTRICTION PRESENT — OWNER DECISION REQUIRED
+**Flag:** David Higham carries AI-submission language.
+**Decision:** RESOLVED — **disclose truthfully.** The approved disclosure line is included in the query, immediately after the author bio.
 
-David Higham Associates carries AI disclosure / restriction language. This manuscript was developed with an AI-assisted editorial workflow. OWNER DECISION REQUIRED before sending: (a) disclose, (b) do not submit, or (c) submit without disclosure. See tier-1/ai-policy-review.md.
+## The disclosure line (in the query)
+> This manuscript is author-created and author-directed. AI tools were used only as part of an editorial workflow for structural review, pattern analysis, line-editing support, formatting, and submission-package preparation. All creative decisions, revisions, and final text are my own.
 
-## Owner decision (record here)
-- [ ] Reviewed current David Higham AI language (day-of)
-- [ ] Contacted agency for clarification? YES / NO / N/A
-- [ ] Decision: DISCLOSE / DO NOT SUBMIT / SUBMIT WITHOUT DISCLOSURE
-- [ ] If DISCLOSE: approved wording pasted into personalised-query.md (replacing the marked OWNER OPTION line)
+## Practical rule (apply on the day of sending, after verifying David Higham's current policy)
+| David Higham's stated position | Action |
+|---|---|
+| No AI policy stated | Do not volunteer (but the line is harmless if left in; owner may remove). |
+| Requires disclosure | Send — the line satisfies it. |
+| Prohibits AI-assisted submissions | Do **not** submit unless you confirm with the agency that this editorial-workflow use is acceptable. |
+| Ambiguous | Ask the agency, or hold. |
 
-## Disclosure wording option (if owner approves)
-> The manuscript was developed through an author-directed editorial process, with AI-assisted support for pattern analysis and manuscript assembly during revision. All creative work, narrative content, and editorial decisions remain author-directed.
+## Position (the honest line, for any direct question)
+The manuscript is author-created and author-directed. AI tools were used as part of an editorial and production workflow (structural review, pattern analysis, line-editing support, formatting, audit reports, submission-package prep). Final creative control, judgement, revisions, and responsibility remain with the author.
 
-Until this decision is recorded, the export-readiness verdict for Nicola Chang stays: NOT SEND-READY.
+**Sequencing:** alternate to the primary same-agency target — do not send while the primary query is active.

@@ -13,11 +13,11 @@
 | # | Agent | Agency | Tier | Status | Send? | Guidelines | Sent | Deadline | Follow-up | Response | Type | Notes |
 |---|-------|--------|------|--------|-------|------------|------|----------|-----------|----------|------|-------|
 | 1 | Olivia Maidment | Madeleine Milburn | 1 | ✅ Ready | YES | TBD | TBD | TBD | TBD | — | Primary comp agent |
-| 2 | Judith Murray | Greene & Heaton | 1 | ⏳ Hold | NO | TBD | TBD | TBD | TBD | — | AI-policy hold |
-| 3 | Imogen Morrell | Greene & Heaton | 1 | ⏳ ALT | NO | TBD | TBD | TBD | TBD | — | Backup; same-agency |
-| 4 | Jemima Forrester | David Higham | 1 | ⏳ Hold | NO | TBD | TBD | TBD | TBD | — | AI-policy hold |
-| 5 | Sam Farkas | Jill Grinberg | 1 | ✅ Ready | YES | TBD | TBD | TBD | TBD | — | USA; no conflicts |
-| 6 | Nicola Chang | David Higham | 1 | ⏳ ALT | NO | TBD | TBD | TBD | TBD | — | Backup; same-agency |
+| 2 | Judith Murray | Greene & Heaton | 1 | ✅ Disclosure-ready | day-of policy check | TBD | TBD | TBD | TBD | — | AI disclosure included; verify G&H stance day-of |
+| 3 | Imogen Morrell | Greene & Heaton | 1 | ⏳ ALT | after Judith | TBD | TBD | TBD | TBD | — | Backup; same-agency; disclosure included |
+| 4 | Jemima Forrester | David Higham | 1 | ✅ Disclosure-ready | day-of policy check | TBD | TBD | TBD | TBD | — | AI disclosure included; one-agent rule; verify DHA stance day-of |
+| 5 | Sam Farkas | Jill Grinberg | 1 | ✅ Ready | YES | TBD | TBD | TBD | TBD | — | USA; no conflicts; no disclosure (no policy) |
+| 6 | Nicola Chang | David Higham | 1 | ⏳ ALT | after Jemima | TBD | TBD | TBD | TBD | — | Backup; same-agency; one-agent rule; disclosure included |
 
 ---
 
@@ -127,18 +127,20 @@
 
 ## Current Tier 1 Status Summary
 
-**✅ Sendable (no holds, no conflicts):**
+**✅ Sendable (no AI flag, no disclosure in query):**
 - Olivia Maidment
 - Sam Farkas
 
-**⏳ Hold (AI-policy decision required):**
-- Judith Murray (Greene & Heaton)
-- Jemima Forrester (David Higham)
+**✅ Disclosure-ready (AI disclosure included; verify agency stance day-of, apply practical rule):**
+- Judith Murray (Greene & Heaton) — primary G&H
+- Jemima Forrester (David Higham) — primary DH, one-agent rule
 
-**⏳ Alternate (wait for primary same-agency result):**
-- Imogen Morrell (wait for Judith Murray result)
-- Nicola Chang (wait for Jemima Forrester result)
+**⏳ Alternate (wait for primary same-agency result; disclosure included):**
+- Imogen Morrell (after Judith Murray)
+- Nicola Chang (after Jemima Forrester)
+
+AI-policy is **resolved** (see `ai-policy-review.md`): disclose truthfully where required; don't volunteer where no policy is stated; don't submit where prohibited without clarification; ask/hold if ambiguous.
 
 ---
 
-**Next step:** Owner begins with Olivia Maidment and Sam Farkas sends (Week 1); updates tracker after each send.
+**Next step:** Owner sends Olivia Maidment and Sam Farkas (Week 1, no disclosure). For Judith Murray and Jemima Forrester, verify each agency's AI stance day-of and apply the practical rule (the disclosure line is already in their queries). Update tracker after each send.
