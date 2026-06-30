@@ -354,3 +354,34 @@ Move-Item -LiteralPath 'windows-build.ps1' -Destination 'scripts/archive/'
 - `REVIEW_REQUIRED` items should be owner-confirmed before any move or deletion.
 - `DELETE_CANDIDATE` items remain review-only until separately approved.
 - Config, lock, and canonical repo files remain in place under `KEEP_ROOT`.
+
+---
+
+## Cut-2 Ledger (Five-Cut Loop)
+
+> This appendix operationalises **Cut 2** of the [Five-Cut Loop](five-cut-loop-charter.md): *try to delete it, and measure what you are forced to add back.* The classification table above is the **analysis**; this ledger records the **execution and outcome**. A classification that is never executed and never measured is not a cut — it is a note. (The table above was generated 2026-05-07 and, as of audit on 2026-06-30, none of its candidates had been actioned. That is the failure this ledger exists to close.)
+
+### How to use it
+
+1. Action a batch of moves/deletions (reversible `MOVE_*` first, then approved `DELETE_CANDIDATE`).
+2. Record each batch below with its date, owner, and outcome.
+3. After the system runs for one review cycle, record anything you were forced to **add back**.
+4. Compute the **add-back rate** for the cycle: `restored / removed`.
+   - **< 10%** → too conservative; cut harder next cycle.
+   - **10–30%** → healthy.
+   - **> 30%** → you cut load-bearing structure; improve Cut 1 (the requirement was real and under-understood).
+
+### Execution log
+
+| Date | Batch | Items removed | Removed by (owner) | Items added back | Add-back % | Notes |
+|------|-------|--------------:|--------------------|-----------------:|-----------:|-------|
+| 2026-06-30 | High-confidence (logs / junk / legacy configs / superseded fix-scripts) — branch `chore/repo-hygiene-cut2` | **40** (24 logs · 11 junk · 2 eslint `.legacy` · 3 `fix-hot-errors-v3/v4/v4_1`); root entries 220 → 182 | owner-approved (seunadaramola) | _TBD_ | _TBD — measure next cycle_ | Logs → `archive/cruft-2026-06-30/logs/` (gitignored); junk `git rm` (reversible via history); legacy + fix `git mv` → `scripts/archive/`. Commits `9754710bb`, `231be7b64`, `0917a4567`. Pre-commit MDX gates passed. |
+| _pending_ | Test-by-deletion batch (collapse `tsconfig`/`contentlayer` variants to one canonical each) | — | — | — | — | Deferred — last step. Run local build after; whatever the build demands back is the real 10%. |
+
+### Cycle summary
+
+| Review cycle | Total removed | Total added back | Add-back rate | Verdict |
+|--------------|--------------:|-----------------:|--------------:|---------|
+| Cycle 1 (opened 2026-06-30) | 40 | _TBD_ | _TBD_ | Open — add-back measured at next review. A 0% add-back here would mean this conservative first batch could have cut deeper. |
+
+*Protected from Cut 2 (never logged here for removal): the Living Intelligence layer, the EDOS decision spine, active build config, and shared config/lockfiles. See the charter's "What Is Protected From Cut 2."*
