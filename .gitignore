@@ -305,3 +305,6 @@ _ct600_working
 # Source material not for product (private working drafts)
 content/source-material/frameworks/
 content/source-material/dominion/
+
+# stray curl cookie jar — never track (a future curl run could append live cookies)
+cookies.txt
