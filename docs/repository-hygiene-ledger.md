@@ -376,12 +376,13 @@ Move-Item -LiteralPath 'windows-build.ps1' -Destination 'scripts/archive/'
 | Date | Batch | Items removed | Removed by (owner) | Items added back | Add-back % | Notes |
 |------|-------|--------------:|--------------------|-----------------:|-----------:|-------|
 | 2026-06-30 | High-confidence (logs / junk / legacy configs / superseded fix-scripts) — branch `chore/repo-hygiene-cut2` | **40** (24 logs · 11 junk · 2 eslint `.legacy` · 3 `fix-hot-errors-v3/v4/v4_1`); root entries 220 → 182 | owner-approved (seunadaramola) | _TBD_ | _TBD — measure next cycle_ | Logs → `archive/cruft-2026-06-30/logs/` (gitignored); junk `git rm` (reversible via history); legacy + fix `git mv` → `scripts/archive/`. Commits `9754710bb`, `231be7b64`, `0917a4567`. Pre-commit MDX gates passed. |
+| 2026-06-30 | Second pass — flagged stray files + dead healing-era fix-scripts — branch `chore/repo-hygiene-cut2` | **16** (`cookies.txt` empty jar removed · `_redirects.txt` archived · 14 fix-scripts archived = 13 dead + `v4_2` joined siblings); root 182 → 166 | owner-approved (seunadaramola) | _TBD_ | _TBD — measure next cycle_ | `cookies.txt` verified empty: no secrets, no history purge; gitignored. All fix-scripts dated 2026-04-12 healing campaign. 4 ambiguous `fix-*` (mdx-encoding ×2, contentlayer-windows, recaptcha) **HELD** pending import-reference check. Commits `9e2fb3e6c` + this. |
 | _pending_ | Test-by-deletion batch (collapse `tsconfig`/`contentlayer` variants to one canonical each) | — | — | — | — | Deferred — last step. Run local build after; whatever the build demands back is the real 10%. |
 
 ### Cycle summary
 
 | Review cycle | Total removed | Total added back | Add-back rate | Verdict |
 |--------------|--------------:|-----------------:|--------------:|---------|
-| Cycle 1 (opened 2026-06-30) | 40 | _TBD_ | _TBD_ | Open — add-back measured at next review. A 0% add-back here would mean this conservative first batch could have cut deeper. |
+| Cycle 1 (opened 2026-06-30) | 56 | _TBD_ | _TBD_ | Open — add-back measured at next review. A 0% add-back here would mean this conservative first batch could have cut deeper. |
 
 *Protected from Cut 2 (never logged here for removal): the Living Intelligence layer, the EDOS decision spine, active build config, and shared config/lockfiles. See the charter's "What Is Protected From Cut 2."*
