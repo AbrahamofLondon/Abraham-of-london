@@ -308,3 +308,9 @@ content/source-material/dominion/
 
 # stray curl cookie jar — never track (a future curl run could append live cookies)
 cookies.txt
+
+# Generated audit reports (Stage 2C) — manual-only generators; regenerate on demand, must not be tracked
+/content-validation-report.json
+/mdx-sanitize-report.json
+/pdf-scan-report.json
+/download-fixes-report.json
