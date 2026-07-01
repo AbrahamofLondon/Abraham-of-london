@@ -1,7 +1,7 @@
 # Abraham of London — Engineering Manual
 
-**Version:** 3.1  
-**Date:** 8 May 2026  
+**Version:** 3.2  
+**Date:** 1 July 2026  
 **Classification:** Internal — Engineering  
 **Repository:** `aol-check-visual`
 
@@ -12,11 +12,11 @@
 | Field | Detail |
 |-------|--------|
 | **Classification** | Internal — Engineering |
-| **Version** | 3.0 |
-| **Effective Date** | May 2026 |
+| **Version** | 3.2 |
+| **Effective Date** | July 2026 |
 | **Review Cycle** | Quarterly |
 | **Custodian** | Lead Engineer |
-| **Next Review** | July 2026 |
+| **Next Review** | October 2026 |
 
 ---
 
@@ -248,11 +248,14 @@ The platform is organized in five layers:
 | Decision Ledger | Production | Implicit via journey model + credit score |
 | Strategy Room | Production | Full state machine, 10+ API endpoints |
 | Outcome Verification | Production | Confidence-capped, 5 classifications |
-| Boardroom Mode | Built, untested | Dossier builder + PDF, needs real org data |
-| Case Study Pipeline | Built, untested | Eligibility + draft builder, needs verified outcomes |
+| Boardroom Mode | Production | Dossier builder + PDF; delivery state machine, entitlement, and web/PDF access under test coverage (`tests/product-estate/boardroom-*`, `tests/admin/boardroom-*`, `tests/reporting/boardroom-*`) |
+| Case Study Pipeline | Production | Eligibility + draft builder; trust/gating covered by `tests/product/case-study-trust.test.ts` |
 | AI Synthesis | Production | Claude/OpenAI integration with arbiter guard |
 | Email System | Production | Resend + templates |
 | PDF Pipeline | Production | 5 paths, 198 assets, registry |
+| North Star Metrics | Production | QER/DAR/TAR with hard thresholds (`lib/follow-up/north-star-metrics.ts`) |
+| System Integrity Mode | Production | Global kill switch — degrades surfaces when metrics breach critical (`lib/follow-up/system-integrity-mode.ts`) |
+| Founder Dashboard | Production | Operating data layer: sell/revenue/breakage/fix-now panels (`lib/analytics/founder-dashboard.ts`) |
 | Redis Caching | Optional | Graceful degradation when unavailable |
 
 ---
@@ -3015,7 +3018,7 @@ export default defineConfig({
 
 ### Test Count
 
-36 test files, 251 tests, all passing. Execution time approximately 47 seconds.
+427 vitest-scoped test files (excluding `tests/e2e/**` Playwright specs and `_tests_/components/**`), containing 6,000+ individual test cases. Counts are verified against the tree; the authoritative pass/fail signal is `npx vitest run` in CI. File-count method: all `*.{test,spec}.{ts,tsx}` matched by the default vitest include minus the exclusions in `vitest.config.ts`.
 
 ### Test Categories
 
@@ -3301,7 +3304,17 @@ Every PR must satisfy:
 | **Content Telemetry** | /api/telemetry/resonance | Content engagement and resonance scoring |
 | **Health Checks** | Netlify scheduled function | Uptime verification, dependency health |
 | **Audit Logging** | GovernanceLog, SecurityLog, SystemAuditLog | Full audit trail for compliance |
-| **Error Tracking** | Sentry-ready architecture | Not yet enabled; instrumentation hooks in place |
+| **Error Tracking** | Sentry (wired) | `sentry.client.config.ts`, `sentry.server.config.ts`, and the `instrumentation.ts` register hook are wired. Safe no-op when no DSN is set (no data sent, logs a disabled notice). Not enabled in production until `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` is configured. |
+
+### Operational Intelligence
+
+Three commercial-health systems sit above raw telemetry and govern whether the platform is allowed to sell.
+
+- **North Star Metrics** (`lib/follow-up/north-star-metrics.ts`) — reduces platform health to three numbers: QER% (Qualified ER Conversion), DAR% (Decision Activation Rate), and TAR% (Truth Acceptance Rate). Each has a hard threshold (QER ≥ 8%, DAR ≥ 60%, TAR ≥ 70%). Breaching a threshold flags the metric `weak`/`critical` and can withdraw `outreachAllowed`.
+
+- **System Integrity Mode** (`lib/follow-up/system-integrity-mode.ts`) — the global kill switch. When QER or TAR fall below critical bounds (with minimum sample sizes), the mode degrades to `degraded`/`critical`, which suppresses the Strategy Room, restricts Executive Reporting access, and surfaces a recalibration notice. It protects reputation by declining to sell rather than shipping misdiagnosis.
+
+- **Founder Dashboard** (`lib/analytics/founder-dashboard.ts`) — the founder operating data layer. It composes North Star Metrics, System Integrity status, and call-funnel analytics into revenue, pipeline, and breakage panels that answer: are we allowed to sell today, where is revenue coming from, and what must be fixed now.
 
 ### Custom Telemetry Endpoints
 
@@ -5578,7 +5591,7 @@ Before any merge to main, verify:
 - [ ] `pnpm pdf:audit` — PDF audit passes
 - [ ] `node scripts/mdx-integrity-check.mjs` — MDX integrity passes
 - [ ] `node scripts/mdx-illegal-jsx-gate.mjs` — MDX gate passes
-- [ ] `npx vitest run` — all 251 tests pass
+- [ ] `npx vitest run` — full suite passes (427 test files)
 - [ ] `next build --webpack` — build succeeds
 - [ ] No `server-only` imports in client-bundled code
 - [ ] No scoring logic, thresholds, or classification rules in client bundle
