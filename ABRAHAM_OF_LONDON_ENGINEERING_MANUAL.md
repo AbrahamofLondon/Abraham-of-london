@@ -64,6 +64,9 @@ This manual is a living document, reviewed quarterly and updated as the platform
 
 ## TABLE OF CONTENTS
 
+### Part 0 — Operating Doctrine
+- Chapter 0: The Five-Cut Loop
+
 ### Part I — System Architecture
 - Chapter 1: Platform Overview
 - Chapter 2: Technology Stack
@@ -251,6 +254,43 @@ The platform is organized in five layers:
 | Email System | Production | Resend + templates |
 | PDF Pipeline | Production | 5 paths, 198 assets, registry |
 | Redis Caching | Optional | Graceful degradation when unavailable |
+
+---
+
+# PART 0 — OPERATING DOCTRINE
+
+## Chapter 0: The Five-Cut Loop
+
+**Canonical charter:** `docs/five-cut-loop-charter.md`
+
+This chapter precedes Chapter 1 deliberately. It governs *how the requirements in every later chapter were derived*, and how every future change to this platform is reasoned about. Read it first; it outranks the implementation detail that follows.
+
+> **KEY PRINCIPLE**
+>
+> The most common mistake of smart engineers is to optimise a thing that should not exist. So you do not optimise until after you have tried to delete. The order of the five cuts is doctrine.
+
+### The five cuts, in order
+
+1. **Question the requirement.** Make the requirements less dumb. Every requirement is dumb to some degree, no matter how smart the person who set it. Each requirement must carry a **named human owner** — not "the system," not "the framework," not "we've always done it."
+2. **Try to delete the part or step.** Deletion is the default; retention must be argued. **If you are not forced to add back at least 10% of what you delete, you did not delete enough.** A 0% add-back rate means you were too conservative.
+3. **Simplify / optimise** — but only what survived Cut 2. Optimising a deletion-candidate is the cardinal sin this chapter exists to prevent.
+4. **Accelerate** — but only what has been simplified. Speeding up accidental complexity entrenches it.
+5. **Automate** — last. Automating a broken or unnecessary step makes it permanent.
+
+### Why the order matters here, concretely
+
+This repository's history is the cautionary tale. Generations of one-off recovery scripts (`fix-hot-errors-v3` → `v4` → `v4_1` → `v4_2`, `ULTIMATE-FIX.ps1`, and dozens more — see `docs/repository-hygiene-ledger.md`) were excellent engineering aimed at the wrong question: they *automated and optimised* (Cuts 4–5) a recovery process for a state the build should never have entered. Cut 1 would have asked why the state existed; Cut 2 would have deleted the need. The scripts are the monument to skipping cuts 1 and 2.
+
+### Reconciliation with "extend, don't fragment"
+
+Cut 2 is pointed at firefight residue and unowned requirements — **never** at the living core. The Living Intelligence layer (`lib/living-intelligence/*`), the EDOS decision spine, the active build configuration, and shared config/lockfiles have already survived deletion and are load-bearing; they are extended, never fragmented, never cut. Deleting *fragments* is precisely how this estate stays one living system. The two rules are the same instruction seen from two sides.
+
+### Enforcement
+
+- Every implementation plan opens by answering the five cuts for its phase.
+- Every PR completes the Five-Cut checklist (`.github/PULL_REQUEST_TEMPLATE.md`).
+- The **Definition of Clean** (Chapter 25) includes "survived Cut 2."
+- The monthly Five-Cut review reports the measured add-back rate and the net change in repository surface area.
 
 ---
 
@@ -3050,6 +3090,7 @@ Clean means reproducible under full validation, not "it compiled once."
 5. Unit tests pass (`pnpm test:unit`)
 6. No untracked TypeScript files without justification
 7. No client/server boundary violations
+8. **Survived Cut 2** — the change ran through the Five-Cut Loop (Chapter 0): the requirement has a named owner, deletion was genuinely attempted before optimisation, and nothing was sped up or automated that was not first simplified. Net new repository surface area (root files, config variants, `fix-*` scripts) is justified in the PR.
 
 ---
 

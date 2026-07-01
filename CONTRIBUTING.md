@@ -7,10 +7,11 @@ This document defines the protocols for extending the Abraham of London platform
 
 ## 1. The Development Philosophy
 
-All contributors must adhere to the three pillars of our engineering culture:
-1. **Outcome Focus:** Every PR must solve a specific business or strategic constraint. No "speculative" features.
-2. **Institutional Aesthetic:** We maintain a minimalist, high-gravity interface. Respect the `#050609` (Deep Black) and `#D4AF37` (Institutional Gold) design system.
-3. **Data Integrity:** All database interactions must be type-safe via Prisma. Direct SQL is strictly prohibited unless approved for low-level performance tuning.
+All contributors must adhere to the pillars of our engineering culture:
+1. **The Five-Cut Loop (precedes everything):** Before deciding *how* to do work well, decide *whether it should exist*. Question the requirement, then try to delete it, and only then simplify, accelerate, and automate — **in that order**. The most common mistake of smart engineers is to optimise a thing that should not exist. See [`docs/five-cut-loop-charter.md`](docs/five-cut-loop-charter.md). This is enforced in the PR template.
+2. **Outcome Focus:** Every PR must solve a specific business or strategic constraint. No "speculative" features.
+3. **Institutional Aesthetic:** We maintain a minimalist, high-gravity interface. Respect the `#050609` (Deep Black) and `#D4AF37` (Institutional Gold) design system.
+4. **Data Integrity:** All database interactions must be type-safe via Prisma. Direct SQL is strictly prohibited unless approved for low-level performance tuning.
 
 ---
 
@@ -36,9 +37,10 @@ All contributors must adhere to the three pillars of our engineering culture:
 ## 3. Pull Request Protocol
 
 To maintain institutional oversight, every PR must include:
-1. **The Strategic "Why":** What institutional constraint does this resolve?
-2. **Schema Audit:** Does this change affect the Prisma schema? If so, have indexes been verified for performance?
-3. **Outcome Proof:** Include a screenshot or log trace proving the successful outcome.
+1. **The Five-Cut Loop record:** Complete the cuts in `.github/PULL_REQUEST_TEMPLATE.md` — requirement owner (Cut 1), what you tried to delete and the add-back rate (Cut 2), and confirmation that nothing was optimised/accelerated/automated (Cuts 3–5) that was not first run through deletion. A PR that optimises without a logged delete attempt is incomplete.
+2. **The Strategic "Why":** What institutional constraint does this resolve?
+3. **Schema Audit:** Does this change affect the Prisma schema? If so, have indexes been verified for performance?
+4. **Outcome Proof:** Include a screenshot or log trace proving the successful outcome.
 
 ---
 
