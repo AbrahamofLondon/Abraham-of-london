@@ -244,4 +244,229 @@ describe("Series Resolver", () => {
       expect(result!.slug).toBe("target-series");
     });
   });
+
+  describe("scheduled / preview-visible editorial series", () => {
+    it("includes series when all parts are SCHEDULED with preview permission", () => {
+      // Simulate six editorial-series parts, all future-dated with seriesVisibility:scheduled
+      // Slug is derived from directory name: "outsourcing-our-sense-of-meaning-and-belonging"
+      mockGetDocuments.mockReturnValue([
+        {
+          type: "EditorialSeriesPart",
+          docKind: "editorial-series",
+          title: "Part One",
+          description: "First part",
+          excerpt: "First excerpt",
+          slug: "part-one",
+          slugSafe: "part-one",
+          date: "2026-07-13", // future
+          draft: false,
+          published: true,
+          category: "Special Edition",
+          tags: ["test"],
+          readTime: "10 min read",
+          readTimeSafe: "10 min read",
+          series: "Outsourcing Our Sense of Meaning and Belonging",
+          seriesOrder: 1,
+          seriesTitle: "Test Scheduled Series",
+          seriesDescription: "A scheduled series description",
+          seriesVisibility: "scheduled",
+          accessLevel: "public",
+          _id: "part-1",
+          _raw: {
+            flattenedPath: "editorial-series/outsourcing-our-sense-of-meaning-and-belonging/part-one",
+            sourceFilePath: "editorial-series/outsourcing-our-sense-of-meaning-and-belonging/part-one.mdx",
+            sourceFileName: "part-one.mdx",
+            sourceFileDir: "editorial-series/outsourcing-our-sense-of-meaning-and-belonging",
+          },
+        },
+        {
+          type: "EditorialSeriesPart",
+          docKind: "editorial-series",
+          title: "Part Two",
+          description: "Second part",
+          excerpt: "Second excerpt",
+          slug: "part-two",
+          slugSafe: "part-two",
+          date: "2026-07-20", // future
+          draft: false,
+          published: true,
+          category: "Special Edition",
+          tags: ["test"],
+          readTime: "10 min read",
+          readTimeSafe: "10 min read",
+          series: "Outsourcing Our Sense of Meaning and Belonging",
+          seriesOrder: 2,
+          seriesTitle: "Test Scheduled Series",
+          seriesDescription: "A scheduled series description",
+          seriesVisibility: "scheduled",
+          accessLevel: "public",
+          _id: "part-2",
+          _raw: {
+            flattenedPath: "editorial-series/outsourcing-our-sense-of-meaning-and-belonging/part-two",
+            sourceFilePath: "editorial-series/outsourcing-our-sense-of-meaning-and-belonging/part-two.mdx",
+            sourceFileName: "part-two.mdx",
+            sourceFileDir: "editorial-series/outsourcing-our-sense-of-meaning-and-belonging",
+          },
+        },
+      ]);
+
+      const result = resolveAllSeries("editorial");
+      const series = result.find((s) => s.slug === "outsourcing-our-sense-of-meaning-and-belonging");
+      expect(series).toBeDefined();
+      expect(series!.slug).toBe("outsourcing-our-sense-of-meaning-and-belonging");
+      // All parts are SCHEDULED → previewParts should contain both
+      expect(series!.previewParts).toHaveLength(2);
+      // No parts are PUBLIC_READABLE_NOW → published parts should be empty
+      expect(series!.parts).toHaveLength(0);
+      expect(series!.publishedPartCount).toBe(0);
+    });
+
+    it("does not fall into MIXED_REVIEW when all parts are consistently SCHEDULED", () => {
+      mockGetDocuments.mockReturnValue([
+        {
+          type: "EditorialSeriesPart",
+          docKind: "editorial-series",
+          title: "Part One",
+          description: "First part",
+          excerpt: "First excerpt",
+          slug: "part-one",
+          slugSafe: "part-one",
+          date: "2026-07-13", // future
+          draft: false,
+          published: true,
+          category: "Special Edition",
+          tags: ["test"],
+          readTime: "5 min read",
+          readTimeSafe: "5 min read",
+          series: "Consistent Scheduled Series",
+          seriesOrder: 1,
+          seriesTitle: "Consistent Scheduled Series",
+          seriesDescription: "All parts future-dated",
+          seriesVisibility: "scheduled",
+          accessLevel: "public",
+          _id: "part-1",
+          _raw: {
+            flattenedPath: "editorial-series/consistent-scheduled-series/part-one",
+            sourceFilePath: "editorial-series/consistent-scheduled-series/part-one.mdx",
+            sourceFileName: "part-one.mdx",
+            sourceFileDir: "editorial-series/consistent-scheduled-series",
+          },
+        },
+        {
+          type: "EditorialSeriesPart",
+          docKind: "editorial-series",
+          title: "Part Two",
+          description: "Second part",
+          excerpt: "Second excerpt",
+          slug: "part-two",
+          slugSafe: "part-two",
+          date: "2026-07-20", // future
+          draft: false,
+          published: true,
+          category: "Special Edition",
+          tags: ["test"],
+          readTime: "5 min read",
+          readTimeSafe: "5 min read",
+          series: "Consistent Scheduled Series",
+          seriesOrder: 2,
+          seriesTitle: "Consistent Scheduled Series",
+          seriesDescription: "All parts future-dated",
+          seriesVisibility: "scheduled",
+          accessLevel: "public",
+          _id: "part-2",
+          _raw: {
+            flattenedPath: "editorial-series/consistent-scheduled-series/part-two",
+            sourceFilePath: "editorial-series/consistent-scheduled-series/part-two.mdx",
+            sourceFileName: "part-two.mdx",
+            sourceFileDir: "editorial-series/consistent-scheduled-series",
+          },
+        },
+      ]);
+
+      const result = resolveAllSeries("editorial");
+      const series = result.find((s) => s.slug === "consistent-scheduled-series");
+      expect(series).toBeDefined();
+      // Series should NOT be skipped — it should be SCHEDULED_VISIBLE
+      expect(series!.status).toBe("DRAFT"); // SCHEDULED_VISIBLE maps to DRAFT status
+      // All parts should be in previewParts
+      expect(series!.previewParts).toHaveLength(2);
+    });
+
+    it("excludes series when all parts are DRAFT without preview permission", () => {
+      mockGetDocuments.mockReturnValue([
+        {
+          type: "EditorialSeriesPart",
+          docKind: "editorial-series",
+          title: "Draft Part",
+          description: "A draft",
+          excerpt: "Draft excerpt",
+          slug: "draft-part",
+          slugSafe: "draft-part",
+          date: "2026-01-01", // past
+          draft: true,
+          published: true,
+          category: "Special Edition",
+          tags: ["test"],
+          readTime: "5 min read",
+          readTimeSafe: "5 min read",
+          series: "Hidden Draft Series",
+          seriesOrder: 1,
+          seriesTitle: "Hidden Draft Series",
+          seriesVisibility: "hidden", // no preview permission
+          accessLevel: "public",
+          _id: "draft-1",
+          _raw: {
+            flattenedPath: "editorial-series/hidden-draft-series/draft-part",
+            sourceFilePath: "editorial-series/hidden-draft-series/draft-part.mdx",
+            sourceFileName: "draft-part.mdx",
+            sourceFileDir: "editorial-series/hidden-draft-series",
+          },
+        },
+      ]);
+
+      const result = resolveAllSeries("editorial");
+      const series = result.find((s) => s.slug === "hidden-draft-series");
+      expect(series).toBeUndefined();
+    });
+
+    it("resolves scheduled series by slug for preview", () => {
+      mockGetDocuments.mockReturnValue([
+        {
+          type: "EditorialSeriesPart",
+          docKind: "editorial-series",
+          title: "Preview Part",
+          description: "Preview",
+          excerpt: "Preview excerpt",
+          slug: "preview-part",
+          slugSafe: "preview-part",
+          date: "2026-07-13", // future
+          draft: false,
+          published: true,
+          category: "Special Edition",
+          tags: ["test"],
+          readTime: "5 min read",
+          readTimeSafe: "5 min read",
+          series: "Preview Series",
+          seriesOrder: 1,
+          seriesTitle: "Preview Series",
+          seriesVisibility: "scheduled",
+          accessLevel: "public",
+          _id: "preview-1",
+          _raw: {
+            flattenedPath: "editorial-series/preview-series/preview-part",
+            sourceFilePath: "editorial-series/preview-series/preview-part.mdx",
+            sourceFileName: "preview-part.mdx",
+            sourceFileDir: "editorial-series/preview-series",
+          },
+        },
+      ]);
+
+      const result = resolveSeriesBySlug("preview-series", "editorial");
+      expect(result).toBeDefined();
+      expect(result!.slug).toBe("preview-series");
+      // No published parts — all scheduled
+      expect(result!.publishedPartCount).toBe(0);
+      expect(result!.previewParts).toHaveLength(1);
+    });
+  });
 });
