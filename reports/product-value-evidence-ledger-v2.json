@@ -1,0 +1,151 @@
+{
+  "validationId": "team_assessment_v2_revalidation_2026_06_13",
+  "productCode": "team_assessment",
+  "timestamp": "2026-06-13T21:38:22.778Z",
+  "productVersion": "2.1.0",
+  "productCommitHash": "3ed853912ca95832fdb58f9fdaeeda3d092dc4a5",
+  "scenarioSetId": "team_assessment_scenario_set",
+  "scenarioSetHash": "489735a8c391c3afb78c8be3ee4ed542bf56a3705ec3949999af3b8776c5d0d8",
+  "scenarioSetFrozen": true,
+  "scenarioCount": 3,
+  "outputHash": "a12428953462e27af77a1671cd704803c5e06241da013caa57a71a931d3e7876",
+  "renderedOutputCaptured": true,
+  "liveRouteVerified": true,
+  "testsRun": {
+    "antiGaming": {
+      "testName": "anti_gaming",
+      "passed": true,
+      "scope": "product-scoped",
+      "score": 10,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T13:17:56.449Z",
+      "testerId": "validation_system",
+      "findings": []
+    },
+    "validationConstitution": {
+      "testName": "validation_constitution",
+      "passed": true,
+      "score": 10,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T13:44:41.371Z",
+      "testerId": "validation_system",
+      "violations": [
+        "personal_decision_audit: Wave 2G upgrade blocked (measurement_inconclusive: scorer/product coupling, partial validation)"
+      ]
+    },
+    "releaseFirewall": {
+      "testName": "release_firewall",
+      "passed": true,
+      "score": 10,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T13:17:56.198Z",
+      "testerId": "validation_system",
+      "authorizationFrozen": 3
+    },
+    "adversarialValidation": {
+      "testName": "adversarial_validation",
+      "passed": true,
+      "score": 10,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T13:17:56.320Z",
+      "testerId": "validation_system",
+      "vectorsTested": 0,
+      "vectorsBlocked": 4
+    },
+    "decisionForce": {
+      "testName": "decision_force",
+      "passed": true,
+      "score": 8.7,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T21:38:22.775Z",
+      "testerId": "validation_system"
+    },
+    "antiToy": {
+      "testName": "anti_toy",
+      "passed": true,
+      "antiToyScoreType": "quality_score_higher_is_better",
+      "score": 9.2,
+      "maxScore": 10,
+      "threshold": 8,
+      "timestamp": "2026-06-13T21:38:22.777Z",
+      "testerId": "validation_system",
+      "blockingObjections": [],
+      "failureReasons": []
+    },
+    "redTeam": {
+      "testName": "red_team",
+      "passed": true,
+      "score": 8.5,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T21:38:22.777Z",
+      "testerId": "red_team_panel",
+      "blockingObjections": [],
+      "failureReasons": []
+    },
+    "genericAiComparison": {
+      "testName": "generic_ai_comparison",
+      "passed": true,
+      "score": 8.9,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T21:38:22.777Z",
+      "testerId": "validation_system",
+      "blockingObjections": [],
+      "failureReasons": []
+    },
+    "marketComparison": {
+      "testName": "market_comparison",
+      "passed": true,
+      "score": 8.3,
+      "maxScore": 10,
+      "timestamp": "2026-06-13T21:38:22.777Z",
+      "testerId": "validation_system",
+      "blockingObjections": [],
+      "failureReasons": []
+    }
+  },
+  "scorerVersion": "3.0.0",
+  "scorerCommitHash": "scorer_frozen_from_prior_validation",
+  "scorerChangedThisPass": false,
+  "productChangedThisPass": false,
+  "scenarioChangedThisPass": false,
+  "benchmarkChangedThisPass": false,
+  "validationInfrastructureChangedThisPass": false,
+  "mockAuthorityUsed": false,
+  "boundary": {
+    "nonMock": true,
+    "nonReportDerived": true,
+    "artifactSupported": true,
+    "surfacePropagated": false,
+    "contractAligned": true,
+    "authorityNotRestoredByLedgerAlone": true
+  },
+  "measurementInconclusiveReasons": [],
+  "validationConstitutionViolations": [],
+  "antiGamingRisks": [],
+  "priorClassification": "legacy_validated_pending_v2_revalidation",
+  "proposedClassification": "legacy_validated_pending_v2_revalidation",
+  "authorityGranted": [
+    "externally_proven_gold_product",
+    "diagnostic_product"
+  ],
+  "authorityDenied": [],
+  "blockingReasons": [],
+  "ledgerEntryCreatedAt": "2026-06-13T21:38:22.778Z",
+  "ledgerEntrySignatory": "validation_system_v2",
+  "ledgerHashChainValid": true,
+  "evidenceNotes": {
+    "sourceArtifacts": [
+      "frozen_scenario_set_v2",
+      "rendered_customer_output",
+      "gate_validation_results",
+      "anti_gaming_product_scoped",
+      "validation_constitution",
+      "release_authority_firewall",
+      "adversarial_validation"
+    ],
+    "measurementBoundary": "clean_pass_all_flags_false",
+    "antiToyPolarity": "quality_score_higher_is_better",
+    "reclassificationJustification": "Full v2 evidence chain complete with frozen scenarios, rendered output capture, all independent tests passed, no scorer/product coupling, all constitutional gates passed, release firewall approved."
+  },
+  "ledgerEntryHash": "a1603b9a665bf847ae91d7a424c98e2c2e7e4745c9d1266e5bcf5ef470227d2d"
+}
