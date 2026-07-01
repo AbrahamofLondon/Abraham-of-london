@@ -104,6 +104,7 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/decision/governance", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/decision/performance", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
   { route: "/admin/decision/metadata-audit", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/feedback", domain: "intelligence", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
 
   // ── Retained Oversight ──────────────────────────────────────────────────
   { route: "/admin/retained-cadence", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: true },

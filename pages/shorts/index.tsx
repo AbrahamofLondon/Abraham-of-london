@@ -324,7 +324,7 @@ function extractShortRaw(doc: RawShortDoc): string {
 // Full model for THE daily short only. The body is rendered to STATIC HTML at
 // build time via renderDocBodyToStaticHtml (the same sanctioned path the detail
 // page uses) — we never ship compiled MDX `body.code`, which breaks SSG because
-// useMDXComponent runs `new Function(code)` on ESM-formatted code.
+// the compiled-MDX runtime evaluator runs `new Function(code)` on ESM-formatted code.
 function toTodaysShortModel(doc: RawShortDoc): TodaysShortModel | null {
   const slug = resolveShortSlug(doc);
   if (!slug) return null;

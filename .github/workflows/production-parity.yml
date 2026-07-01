@@ -78,6 +78,9 @@ jobs:
       - name: Unsafe MDX prerender
         run: node scripts/check-unsafe-mdx-prerender.mjs
 
+      - name: Route classification
+        run: node scripts/classify-routes.mjs
+
       - name: Market readiness gate
         run: node scripts/market-readiness-gate.mjs
 
