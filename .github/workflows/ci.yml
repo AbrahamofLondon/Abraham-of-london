@@ -18,6 +18,11 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      # Prisma reads DATABASE_URL during `next build` static generation of
+      # DB-backed routes. Without it the build fails with
+      # "Environment variable not found: DATABASE_URL". Same secret already
+      # used by production-parity / institutional-audit / vault-sync.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout
