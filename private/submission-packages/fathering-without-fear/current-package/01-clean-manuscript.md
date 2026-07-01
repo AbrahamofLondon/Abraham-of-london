@@ -2815,6 +2815,12 @@ The corrected reading did not make fear holy.
 
 It made discernment necessary.
 
+He had never needed the rest of the verse before. He had stopped it early — there is no fear in love — and used the half he liked as a door. But the sentence went on.
+
+Fear has to do with punishment.
+
+For years he had not let himself hear it, because hearing it meant admitting how much of his fear had been exactly that: not the clean dread of danger, but the fear of a man who has learned that to be afraid can itself be treated as a fault. He had called his refusal to feel it faith. The verse had been naming it the whole time.
+
 Fear can torment. Abraham knows that. Fear can narrow the mind until a man obeys only the need to escape pain. Fear can make him rush toward a false safety. Fear can make him accept pressure because refusal might cost him belonging. Fear can make him stay silent when speech would be costly. Fear can also make him withdraw later, when the heart has been injured and disappearance begins to feel like protection.
 
 Love corrects fear, but it does not do so by becoming reckless.
@@ -2847,15 +2853,7 @@ Before fatherhood, Abraham might have imagined courage as the dramatic thing: th
 
 The contact room had taught him that love can be real inside a narrow form. Seven years had taught him that love can continue without visible reward. Damisi had taught him that love must protect the child from becoming the meaning adults want to draw from him. By the time Abraham returned to the old verse, he was no longer reading it only as a man trying to prove he was unafraid. He was reading it as a father who had learned that some truths must be handled carefully because careless truth can still wound.
 
-Love did not ask him to be less brave.
-
-It asked him to stop confusing bravery with speed.
-
-It asked him to stop confusing restraint with fear.
-
-It asked him to stop using spiritual language to outrun discernment.
-
-It asked him to stop making certainty perform work that only wisdom could do.
+Love did not ask him to be less brave. It asked him to stop confusing bravery with speed and restraint with fear, to stop using spiritual language to outrun discernment, to stop making certainty perform the work that belonged to wisdom alone.
 
 That was the harder freedom. The old misuse had seemed to enlarge him. It let him move. It let him feel strong. It let him believe that if he was not hesitating, then perhaps God was in the absence of hesitation. The corrected reading made him smaller in the right way. It returned him to creatureliness. It allowed him to be a man who did not always know, a man who could pause without losing faith, a man who could admit that a warning was not the enemy of love.
 
@@ -2875,21 +2873,25 @@ So the correction did not make life easier.
 
 It made the burden truer.
 
-Love was not recklessness. It was not denial. It was not pretending pain had been redeemed simply because Abraham could write about it now. Love did not make death less death. It did not make Jumoke's absence smaller, or David's, or Funke's. It did not turn the years with Damisi into a price anyone should have had to pay. It did not say everything worked out.
+There was a harder question underneath the marriage, and the page had been circling it for a long time before he let it arrive. He had been a boy once who made a bargain in the dark — his life, kept, in exchange for a service he did not understand and a price he was not allowed to name. He had woken from that night, put out a fire, and lived. He had gone on living through every close thing since, carrying the private certainty that he was not finished, that something had agreed to keep him.
 
-It said fear would not be allowed to become the final interpreter.
+He had been kept.
+
+Jumoke had not. David had not. Funke, who had said she was happy with the bargain, had not.
+
+That was the fear he had never set down: that something had guarded his life with a rigour it had not spent on the people he loved. He had been preserved. They had not been spared. He did not know what to do with the distance between those two words, and he had made sure he never stood inside it.
+
+It was his son who handed him the word. *Preserve*, Damisi had said once, correcting him — the Lord preserved me, not sustained me — defending the edge of a word the way he defended the edge of every word. The boy had not known what he was giving his father. He was only being exact. But the word sat differently afterward. Preserved. Kept back from ruin. Not the same as spared the loss of everyone who mattered.
+
+He did not resolve it. He will not pretend, on this page, that the deaths arranged themselves into a meaning once he had grown wise enough to see it. They did not. The bargain of the burning room could not explain Funke's heart, or a brother gone too soon, or a sister of seven. The verse did not answer the question either. It was never going to.
+
+What it did was smaller and more durable. It refused to let the fear — something kept me and not them — become the thing that read his life back to him. He could stand at the graves with the question still open and not hand it the final word. It was not an answer. It was a refusal to be governed by the absence of one.
+
+Love was not recklessness. It was not denial. It was not pretending pain had been redeemed simply because Abraham could write about it now. Love did not make death less death. It did not turn the years with Damisi into a price anyone should have had to pay. It did not say everything worked out, and it did not need to.
 
 That was as far as Abraham could go without lying.
 
-He could not write that he understood every loss. He did not. He could not write that pain had made him grateful for pain. It had not. He could not write that the years had ended cleanly. They had not. But he could write that fear was no longer allowed to govern what love required of him, whether fear came dressed as panic or as false courage.
-
-Fear had made him rush.
-
-Fear had made him interpret speed as destiny.
-
-Fear had made him treat warnings as enemies of faith.
-
-Fear had also tempted him, later, to withdraw, to protect what remained of himself by becoming unavailable to the child who needed him.
+He could not write that he understood every loss. He did not. He could not write that pain had made him grateful for pain. It had not. He could not write that the years had ended cleanly. They had not. But he could write that fear — whether it came dressed as panic or as false courage, whether it drove him to rush forward or to withdraw — was no longer allowed to govern what love required of him.
 
 Love corrected both errors.
 
