@@ -1133,6 +1133,14 @@ export const CATALOG: Record<string, CatalogProduct> = {
   // Stripe subscription price IDs are intentionally not guessed here. These
   // products are first-class catalog identities, but inactive until contracted
   // monthly prices are created in Stripe and inserted into this SSOT.
+  //
+  // STATUS: infrastructure-ready, PENDING STRIPE PRODUCT AND PRICE IDS.
+  // To activate (CORE / OPERATIONAL / INSTITUTIONAL): create the live-mode
+  // Stripe product + recurring monthly price, then set stripeProductId,
+  // stripePriceId, amount, displayPrice, and active: true for that tier only.
+  // Do NOT set active: true while stripeProductId/stripePriceId are null.
+  // Activation is an owner-approved commercial decision. Full step-by-step:
+  //   docs/commercial/retainer-stripe-activation-checklist.md
 
   retainer_core: {
     code: "retainer_core",
