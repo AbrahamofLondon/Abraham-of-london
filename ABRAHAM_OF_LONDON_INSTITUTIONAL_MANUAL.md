@@ -1,7 +1,7 @@
 # ABRAHAM OF LONDON — INSTITUTIONAL MANUAL
 
-**Version:** 2.1
-**Date:** April 2026
+**Version:** 2.2
+**Date:** July 2026
 **Classification:** Internal — Institutional
 **Status:** Governing Document
 
@@ -12,11 +12,11 @@
 | Field | Detail |
 |-------|--------|
 | **Classification** | Internal — Restricted Distribution |
-| **Version** | 2.1 |
-| **Effective Date** | April 2026 |
+| **Version** | 2.2 |
+| **Effective Date** | July 2026 |
 | **Review Cycle** | Annual |
 | **Custodian** | Office of the Founder |
-| **Next Review** | April 2027 |
+| **Next Review** | July 2027 |
 
 ---
 
@@ -280,7 +280,7 @@ The system classifies results into alignment bands: ALIGNED, DRIFTING, MISALIGNE
 
 Pattern detection identifies recurring themes across responses. When a user completes the assessment multiple times, the system detects whether their alignment is improving, stable, or degrading across sessions. This longitudinal signal feeds into the Decision Memory system and can inform subsequent diagnostic interactions.
 
-The Purpose Alignment Assessment serves a specific function in the product ladder: it establishes personal mandate clarity before the system applies institutional pressure. A user who lacks personal clarity will not benefit from the Strategy Room. The system uses Purpose Alignment signals to restrict escalation when a mandate vacuum is detected (see Chapter 6, Decision Directive system).
+The Purpose Alignment Assessment serves a specific function in the product ladder: it establishes personal mandate clarity before the system applies institutional pressure. A user who lacks personal clarity will not benefit from the Strategy Room. The system uses Purpose Alignment signals to restrict escalation when a mandate vacuum is detected (see Chapter 6, Decision Authority system).
 
 The assessment produces a report with domain-level scores, an overall alignment band, and specific correction recommendations. Reports can be exported as PDF. Enterprise campaigns can deploy the assessment across teams to detect collective alignment patterns.
 
@@ -378,7 +378,7 @@ The Strategy Room operates on a 48-hour action-forcing model. Upon entry, the us
 - **Sequenced Moves.** The system produces a sequence of concrete actions — not goals, not aspirations, but specific moves with deadlines. Each move is tracked independently.
 - **Execution Tracking.** Post-session, the system tracks whether each move was executed. The `execution` object on the Intelligence Spine records breaches, action timestamps, blocker reports, and verified impact.
 
-The Strategy Room is gated. Not every user qualifies. The Decision Directive system evaluates whether the user's diagnostic state supports strategic intervention. If structural failure or unmanaged risk is detected, escalation to the Strategy Room is blocked. If a mandate vacuum exists, escalation is restricted. The system does not sell strategic intervention to users whose structural condition cannot support it.
+The Strategy Room is gated. Not every user qualifies. The Decision Authority system evaluates whether the user's diagnostic state supports strategic intervention. (In code, this is the Decision Authority module `lib/diagnostics/decision-authority.ts`; its `deriveDecisionDirective()` function returns the gating verdict — `allow`, `warn`, `restrict`, or `block` — which is an implementation detail of the Decision Authority system, not a separate system.) If structural failure or unmanaged risk is detected, escalation to the Strategy Room is blocked. If a mandate vacuum exists, escalation is restricted. The system does not sell strategic intervention to users whose structural condition cannot support it.
 
 Session initialisation, follow-up sequences, and conversion tracking are managed through dedicated API routes. The Strategy Room persists enforcement data through Prisma models including session state, execution milestones, and breach records (database migrations: `20260420_add_strategy_room_tables`, `20260423_add_strategy_room_enforcement_persistence`).
 
@@ -543,7 +543,7 @@ The Execution Failure Layer predicts why execution will stall. It operates on a 
 
 **Required Correction.** For each detected failure mode, the system prescribes a specific correction. These are not suggestions. They are structural requirements. If "Ambiguous decision rights" is detected, the required correction is: assign a named decision owner with explicit authority before proceeding. If "Narrative fragmentation" is detected, the required correction is: reconcile the competing internal narratives before attempting execution.
 
-**Integration with Intelligence Spine.** Failure mode assessments feed into the spine through the deterministic output layer. When failure modes are detected, they inform the signal, the contradiction set, and the blocker class. They also influence the Decision Directive system, which may restrict or block escalation to higher-order surfaces when structural failure conditions are active.
+**Integration with Intelligence Spine.** Failure mode assessments feed into the spine through the deterministic output layer. When failure modes are detected, they inform the signal, the contradiction set, and the blocker class. They also influence the Decision Authority system, which may restrict or block escalation to higher-order surfaces when structural failure conditions are active.
 
 The Execution Failure Layer is what separates this system from advisory models that assume execution will follow from good advice. This system assumes execution will fail unless the structural conditions for success are established first.
 
@@ -613,60 +613,121 @@ No stage can be skipped without degrading conversion quality. No stage can be mo
 
 ### 20.3 The Complete Product Catalog
 
-The organisation maintains eighteen canonical products across seven commercial layers:
+The canonical, machine-enforced source of truth for every commercial product is `lib/commercial/catalog.ts`. Checkout, webhooks, entitlements, and pricing surfaces all resolve through that file. This section mirrors it; where the two ever disagree, `catalog.ts` wins and this section is stale.
+
+#### How to read the catalog (plain English)
+
+Each product carries a **status** that controls exactly what a buyer can do:
+
+- **ACTIVE — PAID:** publicly purchasable now. It has a real Stripe product and price ID, and self-serve checkout is live.
+- **ACTIVE — FREE:** live and open with no payment (controlled market-entry tools and free evidence).
+- **ACTIVE — ENQUIRY / MANUAL:** live as an offer, but there is no self-serve checkout. Fulfilment is by enquiry or manual billing until Stripe metadata is added (e.g. monthly/custom reporting, additional collaborator seats).
+- **ACTIVE — CONTRACTED:** live as an offer for enterprise/retainer buyers; onboarded by contract, not by clicking Buy.
+- **ACTIVE — EVIDENCE-GATED:** live but locked until the buyer already holds a qualifying prior record (no self-serve checkout).
+- **INACTIVE:** the product exists in the catalog as a first-class identity but cannot be activated by anyone. It is **infrastructure-ready but commercially inactive** — either awaiting a commercial decision, a duplicate held in reserve, or blocked on a dependency.
+- **PENDING STRIPE IDs:** a specific inactive state — the product is ready to sell in every respect *except* that its real Stripe product/price IDs have not yet been created and inserted. It stays inactive until those IDs exist. **No Stripe IDs are ever invented to make a product appear live.**
+
+#### Entry Layer
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Fast Diagnostic | Free (controlled entry) | ACTIVE — FREE |
+| Boardroom Brief | £99 | ACTIVE — PAID |
+| Personal Decision Audit (formerly Purpose Alignment) | £49 | ACTIVE — PAID |
 
 #### A. Decision Layer (Instruments)
 
 | Product | Price | Status |
 |---------|-------|--------|
-| Decision Exposure Instrument | £29 | LIVE |
-| Mandate Clarity Framework | £49 | LIVE |
-| Intervention Path Selector | £79 | LIVE |
-| Operator Decision Pack (bundle of above three) | £129 | LIVE |
+| Decision Exposure Instrument | £29 | ACTIVE — PAID |
+| Mandate Clarity Framework | £49 | ACTIVE — PAID |
+| Intervention Path Selector | £79 | ACTIVE — PAID |
+| Escalation Readiness Scorecard | £19 | ACTIVE — PAID |
+| Structural Failure Diagnostic Canvas | £19 | ACTIVE — PAID |
+| Execution Risk Index | £49 | ACTIVE — PAID |
+| Decision Alignment Gap Map | £29 | ACTIVE — PAID |
+| Governance Drift Detector | £49 | ACTIVE — PAID |
+| Strategic Priority Stack Builder | £79 | ACTIVE — PAID |
+| Board Brief Builder | £129 | ACTIVE — PAID |
+
+#### Governed Playbooks
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Execution Integrity Protocol | £49 | ACTIVE — PAID |
+| The Alignment Audit Playbook | £49 | ACTIVE — PAID |
+| The Drift Detection Framework | £39 | ACTIVE — PAID |
+
+#### Packs (Bundles)
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Operator Decision Pack | £129 | ACTIVE — PAID |
+| Operator Essentials | £129 | INACTIVE (bundle entitlement resolution pending) |
+| Command Pack | £249 | INACTIVE (bundle entitlement resolution pending) |
+| Governance Suite | £495 | INACTIVE (bundle entitlement resolution pending) |
 
 #### B. Evidence Layer
 
 | Product | Price | Status |
 |---------|-------|--------|
-| Case Dossier — Tariff Shock | Free | LIVE |
-| Case Dossier — Team Alignment | Free | LIVE |
-| Case Dossier — Escalation Denied | Free | LIVE |
+| Case Dossier — Tariff Shock | Free | ACTIVE — FREE |
+| Case Dossier — Team Alignment | Free | ACTIVE — FREE |
+| Case Dossier — Escalation Denied | Free | ACTIVE — FREE |
 
-#### C. Intelligence Layer
+#### C. Intelligence Layer (Global Market Intelligence)
+
+GMI editions are generated from `lib/commercial/gmi/gmi-edition-registry.ts` (one entry per quarter). The current issue is **Q2 2026**. The quarterly family resolves to the dedicated GMI page.
 
 | Product | Price | Status |
 |---------|-------|--------|
-| Global Market Intelligence Report — Q1 2026 | £59 | LIVE |
+| Global Market Intelligence — Quarterly (current issue: Q2 2026) | Current-quarter access | ACTIVE — ENQUIRY / MANUAL (checkout pending Stripe metadata) |
+
+#### Corridor Stages
+
+| Product | Price | Status |
+|---------|-------|--------|
+| Team Assessment | Free | ACTIVE — FREE |
+| Enterprise Assessment | Free | ACTIVE — FREE |
+| Boardroom Mode | Evidence-gated | ACTIVE — EVIDENCE-GATED |
 
 #### D. Reporting Layer
 
 | Product | Price | Status |
 |---------|-------|--------|
-| Executive Reporting | £295 | LIVE |
-| Executive Reporting — Advanced | £295 | LIVE |
-| Diagnostic Report — Basic | £250 | RETIRED |
-| Diagnostic Report — Pro | £750 | RETIRED |
+| Executive Reporting | £295 | ACTIVE — PAID |
+| Executive Reporting — Advanced | £295 | INACTIVE (duplicate of Executive Reporting; canonical is Executive Reporting) |
+| Diagnostic Report — Basic | £250 | INACTIVE |
+| Diagnostic Report — Pro | £750 | INACTIVE |
+| Reporting — Monthly | By enquiry | ACTIVE — ENQUIRY / MANUAL (pending Stripe metadata) |
+| Reporting — Custom | By enquiry | ACTIVE — ENQUIRY / MANUAL (pending Stripe metadata) |
 
 #### E. Execution Layer
 
 | Product | Price | Status |
 |---------|-------|--------|
-| Strategy Room — Entry | £750 | LIVE |
-| Strategy Room — Active / Multi-Decision | £1,250 | LIVE |
+| Strategy Room — Entry | £750 | ACTIVE — PAID |
+| Strategy Room — Active / Multi-Decision | £1,250 | ACTIVE — PAID |
 
 #### F. Membership Layer
 
 | Product | Price | Status |
 |---------|-------|--------|
-| Inner Circle | £30/month | INACTIVE |
+| Professional | £59/month | ACTIVE — PAID |
+| Professional Annual | £590/year | ACTIVE — PAID |
+| Additional Collaborator | £15/month | ACTIVE — ENQUIRY / MANUAL |
+| Enterprise | Custom | ACTIVE — CONTRACTED |
+| Inner Circle | £30/month | INACTIVE (infrastructure-ready; reactivation is a separate, unmade commercial decision) |
 
 #### G. Enterprise Retainer Layer
 
+The three retainer tiers are first-class catalog identities but **inactive and PENDING STRIPE IDs**. They carry no `stripeProductId` and no `stripePriceId`. They remain inactive until contracted monthly prices are created in Stripe and inserted into `catalog.ts`, at which point a separate, owner-approved commercial decision activates them. No IDs are guessed to make them appear live.
+
 | Product | Price | Status |
 |---------|-------|--------|
-| Decision Authority Retainer — Core | Contracted monthly | INACTIVE (awaiting first contract) |
-| Decision Authority Retainer — Operational | Contracted monthly | INACTIVE (awaiting first contract) |
-| Decision Authority Retainer — Institutional | Contracted monthly | INACTIVE (awaiting first contract) |
+| Decision Authority Retainer — Core (CORE) | Contracted monthly | INACTIVE — PENDING STRIPE IDs |
+| Decision Authority Retainer — Operational (OPERATIONAL) | Contracted monthly | INACTIVE — PENDING STRIPE IDs |
+| Decision Authority Retainer — Institutional (INSTITUTIONAL) | Contracted monthly | INACTIVE — PENDING STRIPE IDs |
 
 ### 20.4 Product Ladder Integrity Rule
 
@@ -2103,7 +2164,7 @@ Hard violations reject the synthesis entirely. The user sees the mismatch. This 
 
 **Tier Routing.** The access tier system (public, member, inner_circle, restricted, client, legacy, architect, owner, top_secret) determines which surfaces a user can access. Implemented through `lib/access/tier-policy.ts` and `lib/access/tier-map.ts`.
 
-**Strategy Room Gate.** The Decision Directive system evaluates whether a user's diagnostic state qualifies them for Strategy Room access.
+**Strategy Room Gate.** The Decision Authority system evaluates whether a user's diagnostic state qualifies them for Strategy Room access.
 
 **Inbound Filter.** The contact form and engagement pathways use lane-aware routing (`?type` parameter). See Chapter 37.
 
@@ -2910,7 +2971,7 @@ The following prohibitions govern all institutional behaviour. Violations are tr
 | 11 | Do not describe the system as consulting, coaching, or advisory | Category positioning is non-negotiable |
 | 12 | Do not expose internal scoring thresholds or classification logic | Proprietary machinery stays server-side |
 | 13 | Do not deploy Boardroom Mode for non-board-level issues | Boardroom Mode has activation thresholds |
-| 14 | Do not proceed with Strategy Room when the Decision Directive blocks it | Gating exists for structural reasons |
+| 14 | Do not proceed with Strategy Room when the Decision Authority system blocks it | Gating exists for structural reasons |
 | 15 | Do not suppress the Do-Not-Sell flag for revenue purposes | Wrong clients degrade the system |
 | 16 | Do not promise outcomes the system has not verified | Only verified outcomes are stated |
 | 17 | Do not use client data for marketing without explicit authorisation | Data governance is absolute |
@@ -3186,26 +3247,28 @@ The boundary between public and proprietary is enforced technically through the 
 
 ## Appendix A: Product Catalog
 
+> This appendix is an abridged code map. The authoritative, complete catalog is `lib/commercial/catalog.ts`, mirrored in narrative form in §20.3 (with the full status legend). Where this appendix and `catalog.ts` disagree, `catalog.ts` wins. Decision instruments introduced after the original ladder (e.g. Escalation Readiness Scorecard, Structural Failure Diagnostic Canvas, Execution Risk Index, Decision Alignment Gap Map, Governance Drift Detector, Strategic Priority Stack Builder, Board Brief Builder, governed playbooks), the reserve bundle packs, the Professional/Enterprise membership tiers, manual-billing reporting, and the corridor stages are enumerated in §20.3.
+
 | # | Code | Name | Price | Status |
 |---|------|------|-------|--------|
-| 1 | decision_exposure_instrument | Decision Exposure Instrument | £29 | LIVE |
-| 2 | mandate_clarity_framework | Mandate Clarity Framework | £49 | LIVE |
-| 3 | intervention_path_selector | Intervention Path Selector | £79 | LIVE |
-| 4 | operator_decision_pack | Operator Decision Pack | £129 | LIVE |
-| 5 | case_dossier_tariff_shock | Case Dossier — Tariff Shock | Free | LIVE |
-| 6 | case_dossier_team_alignment | Case Dossier — Team Alignment | Free | LIVE |
-| 7 | case_dossier_escalation_denied | Case Dossier — Escalation Denied | Free | LIVE |
-| 8 | gmi_q1_2026 | Global Market Intelligence Report Q1 2026 | £59 | LIVE |
-| 9 | executive_reporting | Executive Reporting | £295 | LIVE |
-| 10 | executive_reporting_priority | Executive Reporting — Advanced | £295 | LIVE |
-| 11 | strategy_room | Strategy Room — Entry | £750 | LIVE |
-| 12 | strategy_room_extended | Strategy Room — Extended | £1,250 | LIVE |
-| 13 | diagnostic_report_basic | Diagnostic Report — Basic | £250 | RETIRED |
-| 14 | diagnostic_report_pro | Diagnostic Report — Pro | £750 | RETIRED |
+| 1 | decision_exposure_instrument | Decision Exposure Instrument | £29 | ACTIVE — PAID |
+| 2 | mandate_clarity_framework | Mandate Clarity Framework | £49 | ACTIVE — PAID |
+| 3 | intervention_path_selector | Intervention Path Selector | £79 | ACTIVE — PAID |
+| 4 | operator_decision_pack | Operator Decision Pack | £129 | ACTIVE — PAID |
+| 5 | case_dossier_tariff_shock | Case Dossier — Tariff Shock | Free | ACTIVE — FREE |
+| 6 | case_dossier_team_alignment | Case Dossier — Team Alignment | Free | ACTIVE — FREE |
+| 7 | case_dossier_escalation_denied | Case Dossier — Escalation Denied | Free | ACTIVE — FREE |
+| 8 | gmi_quarterly | Global Market Intelligence — Quarterly (current issue: Q2 2026) | Current-quarter access | ACTIVE — MANUAL (checkout pending Stripe) |
+| 9 | executive_reporting | Executive Reporting | £295 | ACTIVE — PAID |
+| 10 | executive_reporting_priority | Executive Reporting — Advanced | £295 | INACTIVE (duplicate; canonical is executive_reporting) |
+| 11 | strategy_room | Strategy Room — Entry | £750 | ACTIVE — PAID |
+| 12 | strategy_room_extended | Strategy Room — Active / Multi-Decision | £1,250 | ACTIVE — PAID |
+| 13 | diagnostic_report_basic | Diagnostic Report — Basic | £250 | INACTIVE |
+| 14 | diagnostic_report_pro | Diagnostic Report — Pro | £750 | INACTIVE |
 | 15 | inner_circle | Inner Circle | £30/month | INACTIVE |
-| 16 | retainer_core | Decision Authority Retainer — Core | Contracted | INACTIVE |
-| 17 | retainer_operational | Decision Authority Retainer — Operational | Contracted | INACTIVE |
-| 18 | retainer_institutional | Decision Authority Retainer — Institutional | Contracted | INACTIVE |
+| 16 | retainer_core | Decision Authority Retainer — Core | Contracted monthly | INACTIVE — PENDING STRIPE IDs |
+| 17 | retainer_operational | Decision Authority Retainer — Operational | Contracted monthly | INACTIVE — PENDING STRIPE IDs |
+| 18 | retainer_institutional | Decision Authority Retainer — Institutional | Contracted monthly | INACTIVE — PENDING STRIPE IDs |
 
 ---
 

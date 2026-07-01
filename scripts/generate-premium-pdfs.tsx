@@ -220,8 +220,8 @@ const CanvasDocument = ({ format, tier, quality, metadata, interactive = false }
       creator="Abraham of London Premium PDF Generator v4.0"
       producer="React-PDF + PDF-Lib"
     >
-      <Page 
-        size={format === 'Letter' ? 'LETTER' : format.toUpperCase()} 
+      <Page
+        size={(format === 'Letter' ? 'LETTER' : format.toUpperCase()) as React.ComponentProps<typeof Page>['size']}
         style={[styles.page, { backgroundColor: colors.background }]}
       >
         {/* Watermark Layer */}
@@ -341,6 +341,7 @@ const CanvasDocument = ({ format, tier, quality, metadata, interactive = false }
                   painter.drawSquare(0, 0, 40);
                   painter.fillColor('#FFFFFF');
                   painter.drawText('QR', 12, 15, { fontSize: 12 });
+                  return null;
                 }}
               />
             </View>
