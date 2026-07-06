@@ -27,13 +27,13 @@
 ### Document 2: Chapter Outline
 
 **Filename:** `Fathering-Without-Fear_ChapterOutline.docx`
-**Content:** Brief narrative outline, 2–4 sentences per chapter, all 25 chapters
+**Content:** Brief narrative outline, 2–4 sentences per chapter, all 27 chapters
 **Purpose:** Gives Evans a structural overview before deciding whether to read the sample chapters
 **Format:** Single document; .docx or PDF acceptable
 
 #### Chapter Outline Text
 
-Use the current 25-chapter outline from:
+Use the current 27-chapter outline from:
 
 `private/submission-packages/fathering-without-fear/current-package/05-long-synopsis.md`
 
@@ -41,7 +41,7 @@ For DOCX export source, use:
 
 `private/submission-packages/fathering-without-fear/wave-1/exports/02-kate-evans-pfd/chapter-outline-source.md`
 
-Do not use older embedded chapter-outline text. The manuscript now includes Ch.20 — The Available Tools, Ch.21 — The Version in His Head, Ch.22 — Damisi, Ch.23 — Love Does Not Fear, Ch.24 — Devotion, and Ch.25 — Final Room.
+Do not use older embedded chapter-outline text. The manuscript now includes Ch.20 — The Available Tools, Ch.21 — The Version in His Head, Ch.22 — Damisi, Ch.23 — Love Does Not Fear, Ch.24 — Devotion, Ch.25 — I'd Kill It, Ch.26 — Letter to Damisi, and Ch.27 — Final Room.
 
 ---
 ### Document 3: Three Sample Chapters
@@ -77,7 +77,7 @@ Do not use older embedded chapter-outline text. The manuscript now includes Ch.2
 ## Final Assembly Checklist
 
 - [ ] Three documents prepared and named correctly
-- [ ] Chapter outline reviewed for accuracy against current 25-chapter structure
+- [ ] Chapter outline reviewed for accuracy against current 27-chapter structure
 - [ ] Sample chapters are clean .docx or .pdf files
 - [ ] Subject line confirmed: **Fathering Without Fear — Abraham of London — Query**
 - [ ] Combined size of all attachments under 10MB

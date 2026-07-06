@@ -8,11 +8,11 @@ The book sits in the literary nonfiction space alongside formally compressed mem
 
 ## Word Count
 
-Approximately 49,000 words across 25 chapters.
+49,981 words across 27 chapters, rounded outward-facing to approximately 50,000 words.
 
 ## Why the Brevity Is Intentional
 
-The book's compression is its formal strategy, not a sign of incompleteness. Most chapters are between 800 and 3,800 words. Each carries a single weight — a name, a fire, a hearing date, a death, a boy's favourite animal — and sets it down before moving to the next.
+Path A is now the chosen positioning: compressed literary memoir. The book's compression is its formal strategy, not a sign of incompleteness. Most chapters are between 800 and 3,800 words. Each carries a single weight — a name, a fire, a hearing date, a death, a boy's favourite animal — and sets it down before moving to the next.
 
 This structure reflects three deliberate choices:
 
@@ -38,7 +38,7 @@ One chapter — Ch.20, "The Available Tools" — was added during the editorial 
 
 Another chapter — Ch.21, "The Version in His Head" — restores the texture of Abraham's ordinary adult life: social world, romantic desire, community, and the attempt to rebuild a life while the system still held his son. It carries the fatherhood red line — the book's strongest non-institutional proof of Abraham's refusal to disappear.
 
-A third chapter — Ch.6, "A Year Without Home" — was added to fill an early-formation gap: the year Abraham spent in Akure after Jumoke's death, displaced from home, refusing class while still passing, committing to faith, and choosing a school because he hoped to find friends who had already gone. No further new chapters should be added unless they solve a demonstrable structural absence. The 25-chapter, approximately 49,000-word manuscript is the complete book.
+A third chapter — Ch.6, "A Year Without Home" — was added to fill an early-formation gap: the year Abraham spent in Akure after Jumoke's death, displaced from home, refusing class while still passing, committing to faith, and choosing a school because he hoped to find friends who had already gone. No further new chapters should be added unless they solve a demonstrable structural absence. The 27-chapter, 49,981-word manuscript is the complete book.
 
 ## Suitable Agent / Editor Interest Profile
 

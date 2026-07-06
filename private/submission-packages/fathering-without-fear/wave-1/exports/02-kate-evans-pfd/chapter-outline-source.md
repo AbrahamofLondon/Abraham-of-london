@@ -44,18 +44,22 @@ Chapter 21 — "The Version in His Head" — shows Abraham trying to rebuild ord
 
 Chapter 22 renders his son entirely as a boy — through football, swimming, vocabulary precision, toy-car races, a favourite animal that changed from snake to tiger, a window he proposed escaping through, and a sentence: "I am not your bro. I am your son." The chapter's discipline is that it never uses the child as evidence, as proof, or as an argument.
 
-## Movement Five: Love, Devotion, and the Final Room (Chapters 23–25)
+## Movement Five: Love, Devotion, Authorship, Letter, and the Final Room (Chapters 23–27)
 
 Chapter 23 returns to faith. Abraham encounters 1 John 4:18 — "perfect love casts out fear" — not as a sermon but as a correction. The verse had always been available, but he had not been the man who could read it without turning it into justification for what he wanted. The chapter places the theological work of the book without becoming devotional literature.
 
 Chapter 24 returns to David Senior. The father who became a parent at fifteen. The father who watched Abraham with the recognition of someone who had carried the same weight a generation earlier. The chapter renders devotion not as a feeling but as a practice — the accumulated decisions of a man who remained present when remaining was costly.
 
-Chapter 25 closes the book in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
+Chapter 25 is the vocation hinge. A KPMG Commercial Manager process comes close enough to be real: the partner has found Abraham weeks earlier, the semi-final interview exposes a gap, and a second call comes before what should have been the final stage. Abraham has the evidence of capacity, but the material arrives without architecture. He says, "I'd kill it." He does not get the job. The failure becomes the beginning of *The Architecture of Human Purpose*.
+
+Chapter 26 is the sealed-envelope chapter. Before major surgery at Chelsea and Westminster Hospital, Abraham writes a private, confidential, legally privileged letter for Damisi, with passwords and access, to be given only on his eighteenth birthday. The chapter is about the act of writing and sealing the envelope, not the contents of what it says.
+
+Chapter 27 closes the book in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
 ## Structure and Form
 
-*Fathering Without Fear* is approximately 49,000 words across twenty-five chapters. Most chapters are between 800 and 3,800 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
+*Fathering Without Fear* is 49,981 words across twenty-seven chapters, rounded outward-facing to approximately 50,000 words. This is Path A: a compressed literary memoir, not a standard-length memoir padded toward 70,000-90,000 words. The compression is the book's formal strategy: each chapter carries a single weight and sets it down. The short chapters are not underdeveloped. They are complete.
 
-The book withholds legal detail deliberately. Chapter 17 is rendered in a protected, restrained register and requires specialist review before publication. Chapter 21 uses pseudonyms for privacy. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
+The book withholds legal detail deliberately. Chapters 4, 13, 17, 18, 19, 22, 25, and 26 require specialist legal review before publication or wide submission. The memoir does not narrate allegations, court findings, or institutional assessments. It holds institutional pressure as something Abraham moved through, not something the book prosecutes.
 
 The title — *Fathering Without Fear* — names the book's central correction. Fear governed the early years: fear of loss, fear of the system, fear of saying the wrong thing in the wrong room. The book's arc is toward a love that does not require fear to sustain it. Not fearlessness as bravado, but love as a practice strong enough to survive what the situation demanded.

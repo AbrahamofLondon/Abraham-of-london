@@ -8,7 +8,7 @@
 
 ## Hard Prerequisites (All Must Be Met Before Sending)
 
-- [ ] Ch.17 specialist legal review complete and cleared
+- [ ] Specialist legal review complete and cleared for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 - [ ] Author bio (`06-author-bio.md`) finalised
 - [ ] Sarah Levitt confirmed accepting submissions — her Aevitas profile notes "typically closed; extraordinary voices welcomed"; verify status on the form before submitting
 - [ ] No other Aevitas agent has been queried or is pending — Aevitas one-agent rule is absolute: do not query Levitt alongside Lauren Liebow, Lori Galvin, Erica Bauman, Justin Brouckaert, or any other Aevitas agent

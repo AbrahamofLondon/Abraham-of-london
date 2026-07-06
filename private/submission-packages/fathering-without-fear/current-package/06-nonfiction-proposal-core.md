@@ -1,8 +1,8 @@
 # Nonfiction Proposal Core — Fathering Without Fear
 
 **Author:** Abraham of London (Abraham Adaramola)
-**Word Count:** Approximately 49,000 words
-**Chapters:** 25
+**Word Count:** 49,981 words; rounded outward-facing to approximately 50,000 words
+**Chapters:** 27
 **Category:** Compressed literary memoir / short memoir-in-fragments
 
 ---
@@ -10,6 +10,8 @@
 ## Hook
 
 A compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear. The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
+
+At a time when fatherhood is often flattened into absence, authority, or grievance, *Fathering Without Fear* asks what remains when a father's only available proof of love is disciplined presence.
 
 ---
 
@@ -19,9 +21,22 @@ Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, ea
 
 When his son Damisi was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
-The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
+The book is structured as twenty-seven short chapters and is intentionally being positioned as a compressed literary memoir (Path A), not a standard-length memoir padded toward 70,000-90,000 words. Most chapters are between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
 This is not a legal memoir, a parenting guide, or a grievance text. It is a book about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
+
+---
+
+## Why Now
+
+The current memoir market has room for short, formally controlled books about grief, inheritance, and family fracture, but this book must be positioned with unusual precision because its fatherhood and legal-context material can easily be misread. *Fathering Without Fear* enters four live conversations without reducing itself to any one of them:
+
+- **Black fatherhood beyond stereotype.** The book counters easy narratives of absence, aggression, or authority by rendering fatherhood as disciplined presence under constraint.
+- **Fathers made absent by systems, not only by choice.** The book does not campaign or litigate. It shows how institutional process can narrow ordinary love into permitted fragments.
+- **Faith as inheritance and danger.** Christianity appears as family history, language, prayer, misreading, correction, and responsibility — not as devotional genre.
+- **Diaspora, class, and family duty.** The Nigerian-British arc carries land, money, naming, migration, grief, and the cost of leaving one world while remaining answerable to it.
+
+The book's public argument is carried by scene rather than thesis: a child is not evidence; love does not call recklessness courage; and disappearance is not wisdom when a son is still waiting in the city.
 
 ---
 
@@ -39,15 +54,38 @@ The book is built in six movements:
 
 **Movement Five — Ordinary Life, Fatherhood Tested, and the Child (Chapters 20–22):** The available tools chapter, the restored relationship chapter, and the child rendered entirely as a boy.
 
-**Movement Six — Love, Devotion, and the Final Room (Chapters 23–25):** The theological reckoning, the father's devotion, the final room.
+**Movement Six — Love, Devotion, Authorship, Letter, and the Final Room (Chapters 23–27):** The theological reckoning, the father's devotion, the vocation hinge that turns rejection into authorship, the sealed letter to Damisi, and the final room.
 
 ---
 
 ## Comp Titles
 
-The book sits in conversation with the compressed grief architecture of *Grief Is for People* (Sloane Crosley, ~52K) and the spare self-interrogation of *Stay True* (Hua Hsu, ~45K), while moving through fatherhood, inheritance, faith, and institutional pressure in its own register. It also shares shelf space with formally compressed memoirs that use brevity as a structural principle rather than a limitation — books in the 30,000–50,000 word range that were successfully published and positioned as complete works.
+The book sits in conversation with four tightly defined comps:
+
+- *Stay True* by Hua Hsu — compressed grief, memory, and spare self-interrogation.
+- *Grief Is for People* by Sloane Crosley — short literary grief architecture and tonal restraint.
+- *The Return* by Hisham Matar — father-son inheritance across absence, history, and diaspora.
+- *Grief of a Father* by Yomi Sode — Nigerian-British fatherhood and grief territory, though in a shorter poetry/prose register.
+
 
 Do not position as: trauma memoir, legal exposé, devotional, prescriptive parenting, or grievance narrative.
+
+---
+
+## Editorial Note on Privacy
+
+This book exercises deliberate restraint around the child and certain family members. Some details are omitted, compressed, pseudonymised, or rendered by role not to hide, but to protect. The narrative is built on lived experience, memory, and moral consequence, not legal argument.
+
+The manuscript does not reproduce sealed or restricted material, does not narrate allegations in detail, does not name the other parent, and does not turn Damisi into evidence. The child is rendered through play, language, humour, preference, appetite, and ordinary presence because the book's ethical centre is that a child should remain a child on the page.
+
+---
+
+## Why This Author
+
+Abraham is the only person who can write this book because its authority comes from the precise crossing of his life: Nigerian family inheritance, Christian formation, migration to Britain, bereavement, institutional pressure, and seven years of fatherhood practised through limited forms. He writes from inside the material, but the book's restraint shows that proximity has been disciplined into form.
+
+His existing public work at Abraham of London gives publishers a credible platform base: a serious editorial archive, a structured library of essays/frameworks, and a public voice already concerned with inheritance, decision, faith, order, and responsibility. The platform is not celebrity-scale, but it is coherent with the manuscript's intellectual and moral field.
+
 
 ---
 
@@ -59,6 +97,7 @@ Do not position as: trauma memoir, legal exposé, devotional, prescriptive paren
 - Readers interested in fatherhood, family, inheritance, grief, faith, and institutional pressure
 - Readers who appreciate restraint and negative space as literary tools
 - Book clubs seeking literary nonfiction with emotional and moral stakes
+- Faith-adjacent literary readers who want faith rendered as lived inheritance rather than instruction
 
 ---
 
@@ -100,9 +139,9 @@ Then "The Version in His Head" shows Abraham trying to rebuild ordinary adult li
 
 Then the Damisi chapter renders the boy entirely as a child — through football, swimming, vocabulary precision, toy-car races, and a sentence: "I am not your bro. I am your son."
 
-The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
+After the theological reckoning and the father's devotion chapter, a professional rejection becomes the hinge into authorship: Abraham has real evidence of capacity in a KPMG interview but fails to give it architecture, then begins the work that becomes *The Architecture of Human Purpose*. Before the final room, he writes and seals a private, confidential, legally privileged letter for Damisi, to be opened not before eighteen. The book then closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
-*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 49,000 words across twenty-five chapters.
+*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is 49,981 words across twenty-seven chapters, rounded outward-facing to approximately 50,000 words.
 
 ---
 

@@ -11,17 +11,19 @@ Dear Nicola Chang,
 
 I am writing because your stated touchstones — Janet Malcolm's moral seriousness, Annie Ernaux's compression, work at the boundary between fiction and nonfiction — name the kind of attention this manuscript asks for. *Fathering Without Fear* is a memoir built from short chapters, deliberate withholding, and scenes that render pressure rather than explain it. Your interest in narrative that approaches power, class, and culture through a distinct voice is the reason I am sending this to you first at DHA.
 
-I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 49,000 words.
+I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 50,000 words.
 
 The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
+
+At a time when fatherhood is often flattened into absence, authority, or grievance, the book asks what remains when a father's only available proof of love is disciplined presence.
 
 Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke carried the family's weight and did not set it down. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
 
 When his son was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
-The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
+The book is structured as twenty-seven short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
-The book is a compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear. It is about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
+The book is about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
 
 The complete manuscript is available on request.
 
@@ -37,4 +39,4 @@ Abraham of London
 - "Boundary between fiction and nonfiction" is a direct echo of her stated interest — do not change this phrase
 - The manuscript is identified in the second paragraph, after the personal hook, following standard practice for agents who respond to aesthetic alignment before pitch content
 - Do not add a synopsis or chapter breakdown to this query — Chang's submission requirements are cover letter + first 50pp; additional unsolicited materials are not needed
-- Word count ("approximately 49,000 words") and chapter count ("twenty-five short chapters") must match current manuscript state at time of send
+- Word count ("approximately 50,000 words") and chapter count ("twenty-seven short chapters") must match current manuscript state at time of send

@@ -8,7 +8,7 @@
 
 ## Hard Prerequisites (All Must Be Met Before Sending)
 
-- [ ] Ch.17 specialist legal review complete and cleared
+- [ ] Specialist legal review complete and cleared for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 - [ ] Author bio (`06-author-bio.md`) finalised — needed for nonfiction proposal
 - [ ] Nonfiction proposal completed — required for QueryManager submission
 - [ ] Michael Bourret confirmed open at dystel.com immediately before submitting (check his individual profile page, not just agency homepage)
@@ -41,7 +41,7 @@
 - [ ] Query does not mention court proceedings, allegations, or family court in the opening paragraph
 - [ ] Faith framing is not devotional — do not describe as Christian memoir or devotional nonfiction
 - [ ] Cultural stakes are clear: Nigerian-British, multigenerational, fatherhood and identity
-- [ ] "Offbeat" / structural unconventionality is named: 25 short chapters, each a compression, ancestral lineage to court room to legacy
+- [ ] "Offbeat" / structural unconventionality is named: 27 short chapters, each a compression, ancestral lineage to court room to legacy
 
 ---
 

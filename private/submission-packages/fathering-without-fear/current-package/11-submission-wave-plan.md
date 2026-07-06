@@ -1,7 +1,7 @@
 # Submission Wave Plan — Fathering Without Fear
 
 **Date:** 2026-06-25
-**Stage:** Pre-submission planning — legal review of Ch.17 must complete before any wave launches
+**Stage:** Pre-submission planning — legal review of Chapters 4, 13, 17, 18, 19, 22, 25, and 26 must complete before any wave launches
 **Manuscript:** *Fathering Without Fear* by Abraham of London
 **Positioning:** "A compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear."
 
@@ -9,11 +9,11 @@
 
 ## Hard Prerequisites Before Any Wave Launches
 
-1. **Ch.17 legal review complete** — this chapter requires specialist legal review before submission. No wave should launch until this is confirmed safe.
+1. **Specialist legal review complete** — Chapters 4, 13, 17, 18, 19, 22, 25, and 26 require specialist legal review before submission. No wave should launch until this is confirmed safe.
 2. **Query letter finalised** — draft is in file `03-query-letter.md`; it must be reviewed for positioning accuracy against this wave plan before use.
-3. **Synopsis finalised** — in file `04-one-page-synopsis.md` and `05-long-synopsis.md`; verify they reflect the current 25-chapter structure.
+3. **Synopsis finalised** — in file `04-one-page-synopsis.md` and `05-long-synopsis.md`; verify they reflect the current 27-chapter structure.
 4. **Author bio finalised** — in file `06-author-bio.md`.
-5. **Submission package complete** — verify all materials are current against the 25-chapter, 49,000-word baseline.
+5. **Submission package complete** — verify all materials are current against the 27-chapter, 50,000-word baseline.
 
 ---
 
@@ -30,6 +30,9 @@ Do not pitch as:
 Pitch as:
 > "A compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear."
 
+Optional public-facing sentence for query/proposal use:
+> "At a time when fatherhood is often flattened into absence, authority, or grievance, the book asks what remains when a father's only available proof of love is disciplined presence."
+
 The court material exists in the manuscript. It is not the book's centre. Do not make it the pitch's centre.
 
 ---
@@ -40,24 +43,24 @@ The court material exists in the manuscript. It is not the book's centre. Do not
 
 **Do not query Wave 2 until Wave 1 responses are known (or 8–12 weeks have passed).**
 
-**Size:** 6 agents
+**Size:** 4 core agents, with 2 optional US additions if the owner wants a wider simultaneous test.
 
-| Agent | Agency | Country | Query Method | Materials |
-| :---- | :----- | :------ | :----------- | :-------- |
-| Kate Evans | Peters Fraser & Dunlop | UK | kevans@pfd.co.uk | Cover letter + chapter outline + three sample chapters |
-| Nicola Chang | David Higham Associates | UK | nicolasubmissions@davidhigham.co.uk | Cover letter + first 50pp (Word docs only) |
-| Elise Dillsworth | Elise Dillsworth Agency | UK | elise@elisedillsworthagency.com | Cover letter + proposal + chapter outline + 30pp sample |
-| Michael Bourret | Dystel, Goderich & Bourret | US | QueryManager only (link at dystel.com) | Nonfiction proposal + sample chapter |
-| Reiko Davis | DeFiore & Company | US | reiko@defliterary.com | Query letter + author bio + first 20 pages pasted in body |
-| Sarah Levitt | Aevitas Creative Management | US | Aevitas online form — select Sarah Levitt | 50 pages |
+| Agent | Agency | Country | Query Method | Materials | Live-check status |
+| :---- | :----- | :------ | :----------- | :-------- | :---------------- |
+| Sarah Levitt | Aevitas Creative Management | US | Aevitas online form — select Sarah Levitt | 50 pages | Verify form fields same day |
+| Elise Dillsworth | Elise Dillsworth Agency | UK | elise@elisedillsworthagency.com | Cover letter + proposal + chapter outline + 30pp sample | Official page confirms memoir/autobiography; disclose AI assistance if required |
+| Nicola Chang | David Higham Associates | UK | nicolasubmissions@davidhigham.co.uk | Cover letter + first 50pp (Word docs only) | Verify current open-submission status same day |
+| Kate Evans | Peters Fraser & Dunlop | UK | kevans@pfd.co.uk | Cover letter + chapter outline + three sample chapters | Verify current open-submission status same day |
+| Michael Bourret | Dystel, Goderich & Bourret | US | QueryManager only (link at dystel.com) | Nonfiction proposal + sample chapter | Optional US expansion; verify same day |
+| Reiko Davis | DeFiore & Company | US | reiko@defliterary.com | Query letter + author bio + first 20 pages pasted in body | Optional US expansion; verify same day |
 
 **Wave 1 rationale:**
-- Covers the UK (3) and US (3) markets simultaneously
-- Includes established senior agents (Chang, Baxter, Bourret) and active list-builders (Davis, Levitt)
-- Tests both the literary-memoir positioning (Evans, Chang) and the BIPOC/underrepresented-voice positioning (Bourret, Davis)
-- Elise Dillsworth provides the international/diaspora angle specifically
+- Opens with Sarah Levitt and Elise Dillsworth because they are the clearest current memoir/narrative-nonfiction fits in the brief
+- Keeps Nicola Chang and Kate Evans in the core only after direct same-day agency verification, because roster and open-submission status can shift
+- Holds Michael Bourret and Reiko Davis as optional US expansion targets rather than mandatory first-wave sends
+- Tests the literary-memoir, diaspora, fatherhood, and public-conversation positioning without turning the book into legal advocacy
 
-**Timeline:** Send all 6 on the same day. Wait 8–12 weeks before proceeding to Wave 2.
+**Timeline:** After legal clearance, author approval, export regeneration, and live route checks, send the 4 core agents on the same day only if all four routes are confirmed open. Add the 2 optional US agents only if the owner wants a broader first test. Wait 8–12 weeks before proceeding to Wave 2.
 
 **What to watch:**
 - Any pass with specific feedback about the legal material → adjust query framing before Wave 2
@@ -130,7 +133,7 @@ The court material exists in the manuscript. It is not the book's centre. Do not
 
 | Phase | Target | Notes |
 | :---- | :----- | :---- |
-| **Pre-submission** | Legal review of Ch.17 complete | No queries before this |
+| **Pre-submission** | Legal review of Chapters 4, 13, 17, 18, 19, 22, 25, and 26 complete | No queries before this |
 | **Wave 1 launch** | Day 0 (after prerequisites met) | 6 agents simultaneously |
 | **Wave 1 wait** | Weeks 1–12 | Monitor; respond to any full-manuscript requests only |
 | **Wave 2 launch** | Week 12 (or earlier if all Wave 1 resolved) | 8–10 agents |

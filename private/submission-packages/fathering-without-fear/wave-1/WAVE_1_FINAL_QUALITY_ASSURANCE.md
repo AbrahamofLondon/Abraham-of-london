@@ -44,9 +44,9 @@ Wave 1 is ready for owner same-day route checks and owner legal review confirmat
 
 ## Current-Package QA Result
 
-- Manuscript has 25 chapters.
+- Manuscript has 27 chapters.
 - Chapter 20 is `The Available Tools`.
-- Chapter 25 is `Final Room`.
+- Chapter 27 is `Final Room`.
 - `02-first-50-pages.md` corresponds to the current manuscript opening and was not modified in this pass.
 - `03-query-letter.md` is now explicitly marked as an internal reusable template, not direct-send copy.
 - No stale 24-chapter reference remains in active current-package guidance.
@@ -111,7 +111,7 @@ Active package scan result:
 
 ## Stale Chapter / Path Search Result
 
-- Active package guidance now uses 25 chapters.
+- Active package guidance now uses 27 chapters.
 - Chapter 20 and Chapter 25 references are current.
 - No stale `24 chapters` reference remains in active current-package or Wave 1 guidance.
 - Historical audit records were left unchanged because they are dated records, not current submission instructions.

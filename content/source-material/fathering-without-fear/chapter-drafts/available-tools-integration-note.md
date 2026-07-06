@@ -2,15 +2,15 @@
 
 **Label:** `available-tools-bridge-candidate`
 **Date:** 2026-06-26
-**Status:** Final public-safe editorial candidate — not integrated
-**Recommendation:** ACCEPT — READY FOR OWNER REVIEW
+**Status:** SUPERSEDED — integrated into the 27-chapter manuscript
+**Recommendation:** HISTORICAL NOTE ONLY — no longer an active integration candidate
 **Owner-truth revision:** Completed
 
 ---
 
 ## Placement
 
-Recommended placement if later approved by the owner:
+Historical placement recommendation before integration:
 
 | Before | New candidate | After |
 |--------|---------------|-------|
@@ -72,25 +72,27 @@ This preserves Ch.20's force because the next chapter shows what happens when Ab
 
 ## Chapter-Numbering Implications
 
-If integrated later:
+SUPERSEDED. The bridge has already been integrated as Ch.20 in the current manuscript. The active final sequence is Ch.23 — Love Does Not Fear, Ch.24 — Devotion, Ch.25 — I'd Kill It, Ch.26 — Letter to Damisi, and Ch.27 — Final Room.
 
-| Current | Proposed |
-|---------|----------|
+---------|----------|
 | Ch.19 — Seven Years | Ch.19 — Seven Years |
 | *(gap)* | Ch.20 — The Available Tools |
 | Ch.20 — The Version in His Head | Ch.21 — The Version in His Head |
 | Ch.21 — Damisi | Ch.22 — Damisi |
 | Ch.22 — Love Does Not Fear | Ch.23 — Love Does Not Fear |
 | Ch.23 — Devotion | Ch.24 — Devotion |
-| Ch.24 — Final Room | Ch.25 — Final Room |
+| Ch.24 — Devotion | Ch.24 — Devotion |
+| Ch.25 — I'd Kill It | Ch.26 — I'd Kill It |
+| Ch.26 — Letter to Damisi | Ch.27 — Letter to Damisi |
+| Ch.27 — Final Room | Ch.28 — Final Room |
 
-Renumbering would require updates to all manuscript/package/query/export materials. Do not do this before owner approval.
+Renumbering would require updates to all manuscript/package/query/export materials. The table above reflects the current 27-chapter manuscript after insertion of "I'd Kill It" and "Letter to Damisi"; the Available Tools bridge itself remains unintegrated. Do not do this before owner approval.
 
 ---
 
 ## Wave 1 Recommendation
 
-Do not integrate before current Wave 1 review unless the owner explicitly decides to reopen all package materials.
+This note is historical. Do not use it to drive future renumbering.
 
 Recommended practical posture:
 
@@ -104,4 +106,4 @@ Recommended practical posture:
 
 **ACCEPT — READY FOR OWNER REVIEW**
 
-The chapter should not be treated as already admitted to the manuscript. It has earned owner review because it makes the bridge between Ch.19 and Ch.20 more emotionally inevitable and does so without exposing protected source material.
+The chapter has already been admitted to the manuscript as Ch.20. Current reconciliation should use the 27-chapter manuscript baseline, not this earlier candidate workflow.

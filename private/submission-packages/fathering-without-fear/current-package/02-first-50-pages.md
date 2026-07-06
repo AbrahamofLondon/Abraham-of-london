@@ -2,7 +2,7 @@
 
 **Abraham of London**
 
-*25 chapters. Approximately 48,700 prose-only words.*
+*27 chapters. Approximately 50,000 prose-only words (49,981 by full-manuscript count).*
 
 # Chapter 1 — Hounslow Call
 

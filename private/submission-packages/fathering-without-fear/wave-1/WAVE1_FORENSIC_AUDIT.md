@@ -2,7 +2,7 @@
 
 > **SUPERSEDED READINESS STATUS — DO NOT USE FOR SEND-DAY APPROVAL.**
 >
-> This audit records the previous Wave 1 export state before the insertion of Ch.20 — "The Available Tools" and the 25-chapter package lock. It is retained as historical forensic evidence only. Current Wave 1 readiness must be checked against `WAVE_1_CH20_INTEGRATION_LOCK_REPORT.md` and any update-required note generated after Ch.20 integration.
+> This audit records the previous Wave 1 export state before the insertion of Ch.20 — "The Available Tools" and the 27-chapter package lock. It is retained as historical forensic evidence only. Current Wave 1 readiness must be checked against `WAVE_1_CH20_INTEGRATION_LOCK_REPORT.md` and any update-required note generated after Ch.20 integration.
 
 Audit date: 2026-06-26
 
@@ -152,11 +152,11 @@ Internal checklist/legal-review reminders may remain only in internal files and 
 
 ## Stale-Fact Audit
 
-Outward-facing files and extracted DOCX text were scanned for: 23 chapters; twenty-three chapters; 45,008; 45,000 words; 45,000-word; Ch.23 Final Room; ch23-final-room; 22 chapters; 38,000; 38k; standing in his flat; girl called Jumoke; fire destroyed the family home; seven years of supervised contact.
+Outward-facing files and extracted DOCX text were scanned for: 23 chapters; twenty-three chapters; 45,008; 50,000 words; 50,000-word; Ch.23 Final Room; ch23-final-room; 22 chapters; 38,000; 38k; standing in his flat; girl called Jumoke; fire destroyed the family home; seven years of supervised contact.
 
 Exact outward-facing hits after rebuild: none.
 
-Current outward-facing facts at the time of this historical audit used: 24 chapters; approximately 47,000 words; Ch.24 Final Room where chapter numbering is referenced. This is superseded by the 25-chapter package after Ch.20 — "The Available Tools" integration.
+Current outward-facing facts at the time of this historical audit used: 24 chapters; approximately 47,000 words; Ch.24 Final Room where chapter numbering is referenced. This is superseded by the 27-chapter package after Ch.20 — "The Available Tools" integration.
 
 ## Legal/Privacy Audit
 

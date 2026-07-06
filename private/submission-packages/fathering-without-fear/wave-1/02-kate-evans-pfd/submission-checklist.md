@@ -8,9 +8,9 @@
 
 ## Hard Prerequisites (All Must Be Met Before Sending)
 
-- [ ] Ch.17 specialist legal review complete and cleared
+- [ ] Specialist legal review complete and cleared for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 - [ ] `03-query-letter.md` reviewed and confirmed current
-- [ ] `04-one-page-synopsis.md` verified against 25-chapter structure
+- [ ] `04-one-page-synopsis.md` verified against 27-chapter structure
 - [ ] Author bio (`06-author-bio.md`) finalised
 - [ ] Kate Evans confirmed open on petersfraserdunlop.com/agent/kate-evans/ immediately before sending
 - [ ] No other PFD agent has been queried or is pending (PFD one-agent-at-a-time rule: do not query Evans alongside Chandley, Gauntlett, Tim Bates, Laurie Robertson, or any other PFD agent)
