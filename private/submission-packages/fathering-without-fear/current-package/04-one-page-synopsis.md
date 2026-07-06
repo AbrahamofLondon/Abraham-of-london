@@ -14,7 +14,7 @@ As a child, Abraham survives a bedroom fire after waking into smoke and flame. T
 
 Abraham leaves Lagos for London under his father's prayer from Psalm 27. David Senior lays hands on his head and speaks provision over him. Abraham does not yet know how literal the prayer will become.
 
-After the MBA, Abraham returns to Nigeria to bury his father. Grief brings him back to London through a Facebook post and a reply from someone who had also lost a father. The marriage that follows is quick, and the book does not hide the warnings Abraham saw and made smaller.
+During the MBA, Abraham returns to Nigeria to bury his father. Grief brings him back to London through a Facebook post and a reply from someone who had also lost a father. The marriage that follows is quick, and the book does not hide the warnings Abraham saw and made smaller.
 
 The marriage brings fatherhood, but fatherhood does not begin inside a home. An allegation is made. Abraham is arrested. The case does not proceed. The consequences in family life do. Fatherhood becomes something practised through distance, permission, and time measured by others.
 
@@ -31,3 +31,4 @@ Then the Damisi chapter renders the boy entirely as a child — through football
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
 *Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 50,000 words across twenty-seven chapters.
+
