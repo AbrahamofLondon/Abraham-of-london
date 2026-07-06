@@ -81,25 +81,29 @@ describe("catalog integrity", () => {
     it("keeps Additional Collaborator on assisted billing until seat billing is automated", () => {
       expect(CATALOG.additional_collaborator!.commercialStatus).toBe("manual_billing");
       expect(CATALOG.additional_collaborator!.requiresCheckout).toBe(false);
-      expect(CATALOG.additional_collaborator!.stripePriceId).toBeNull();
+      // D006 approved: stripePriceId bound to live Price; product remains manual_billing
+      expect(CATALOG.additional_collaborator!.stripePriceId).toBe("price_1TXt28QFpelVFMXJCqiXwnxp");
     });
 
-    it("reconciles GMI editions to lifecycle authority: Q1 current published, Q2 draft/release-candidate", () => {
-      // Q1 2026 — current published issue per lifecycle (ACTIVE_UNTIL_SUPERSEDED).
-      // Retains Stripe IDs, visible on pricing, purchasable. NOT hidden.
+    it("reconciles GMI editions to lifecycle authority: Q1 current, Q2 release-candidate draft", () => {
+      // Q1 2026 remains the current published commercial edition until Q2 gets
+      // final data lock and owner release authority.
       expect(CATALOG.gmi_q1_2026!.active).toBe(true);
       expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid");
       expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false); // current published, not hidden
-      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Coverage period: Q1 2026");
+      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false);
+      expect(CATALOG.gmi_q1_2026!.hiddenReason).toBeUndefined();
+      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Current published edition");
 
-      // Q2 2026 — release candidate (lifecycle DRAFT). Hidden from pricing.
-      // No Stripe metadata. Not active. Admin in-focus only.
-      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(true);  // draft, hidden
-      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("internal_only"); // draft → internal_only
-      expect(CATALOG.gmi_q2_2026!.active).toBe(false);            // draft → not active
+      // Q2 2026 is structurally market-ready but remains draft/inactive until
+      // the future data-lock event and owner release authority.
+      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(true);
+      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("internal_only");
+      expect(CATALOG.gmi_q2_2026!.active).toBe(false);
+      expect(CATALOG.gmi_q2_2026!.requiresCheckout).toBe(false);
+      expect(CATALOG.gmi_q2_2026!.stripeProductId).toBeNull();
       expect(CATALOG.gmi_q2_2026!.stripePriceId).toBeNull();
-      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Coverage period: Q2 2026");
+      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Structurally market-ready release candidate");
     });
 
     it("resolves gmi_quarterly to the dedicated GMI family page, not an issue artifact", () => {
@@ -185,6 +189,7 @@ describe("catalog integrity", () => {
 
     it("returns precise ineligibility reasons for non-checkout commercial states", () => {
       expect(checkCheckoutEligibility("gmi_q1_2026").eligible).toBe(true);
+      expect(checkCheckoutEligibility("gmi_q2_2026")).toEqual({ eligible: false, reason: "PRODUCT_INACTIVE" });
       expect(checkCheckoutEligibility("enterprise")).toEqual({ eligible: false, reason: "PRODUCT_CONTRACTED" });
       expect(checkCheckoutEligibility("additional_collaborator")).toEqual({ eligible: false, reason: "MANUAL_BILLING_REQUIRED" });
       expect(checkCheckoutEligibility("fast_diagnostic")).toEqual({ eligible: false, reason: "CHECKOUT_NOT_AVAILABLE" });

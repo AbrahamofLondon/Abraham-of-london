@@ -4,6 +4,7 @@
  *
  * READ-ONLY commercial checkout governance verification + Stripe metadata audit.
  *
+ * Executes PRODUCTION code directly via tsx import. No mirror logic.
  * Enforces the non-negotiable: checkout-ready data is not checkout permission.
  * The resolver is the commercial authority; governance state controls
  * purchasability; blocked products stay blocked even with valid Stripe IDs.
@@ -11,10 +12,68 @@
  * Exits non-zero on any governance violation.
  */
 
-import {
-  parseCatalogProduct, allLiteralCatalogKeys, getGovernanceState,
-  resolveCommercialAction, BLOCKED, readFileSafe,
-} from "./_commercial-mirror.mjs";
+import { readFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "..");
+
+// ── Production module imports via tsx ──────────────────────────────────────
+let resolverModule, catalogModule;
+try {
+  resolverModule = await import("../lib/commercial/commercial-action-resolver.ts");
+  catalogModule = await import("../lib/commercial/catalog.ts");
+} catch (e) {
+  console.error("FATAL: Cannot import production modules. Ensure tsx is available.");
+  console.error(e.message);
+  process.exit(2);
+}
+
+const { resolveCommercialAction, PUBLIC_INTAKE_ALLOWLIST } = resolverModule;
+const { CATALOG, getAllProducts, getProduct } = catalogModule;
+
+// ── Governance state loader (reads production governance JSON files) ──────
+const readinessPath = join(ROOT, "reports", "product-release-readiness-matrix.json");
+const governancePath = join(ROOT, "reports", "product-release-governance-matrix.json");
+
+function loadGovernanceState(code) {
+  let readiness = {}, governance = {};
+  try { readiness = JSON.parse(readFileSync(readinessPath, "utf8")); } catch {}
+  try { governance = JSON.parse(readFileSync(governancePath, "utf8")); } catch {}
+  const r = readiness[code] || null;
+  const g = governance[code] || null;
+  const b = (v) => (typeof v === "boolean" ? v : null);
+  return {
+    productCode: code,
+    known: Boolean(r || g),
+    readinessStatus: r?.readinessStatus ?? null,
+    releaseReadyNow: r?.releaseReadyNow === true,
+    checkoutSafe: b(r?.checkoutSafe),
+    commercialSafe: b(r?.commercialSafe),
+    releaseLane: r?.releaseLane ?? g?.releaseLane ?? null,
+    releaseMode: r?.releaseMode ?? g?.releaseMode ?? null,
+    checkoutAllowed: b(g?.checkoutAllowed),
+    manualFulfilmentAllowed: b(g?.manualFulfilmentAllowed),
+    commercialClaimAllowed: b(g?.commercialClaimAllowed),
+  };
+}
+
+// ── BLOCKED product list (derived from governance state, not mirror) ──────
+function getBlockedProducts() {
+  let governance = {}, readiness = {};
+  try { readiness = JSON.parse(readFileSync(readinessPath, "utf8")); } catch {}
+  try { governance = JSON.parse(readFileSync(governancePath, "utf8")); } catch {}
+  const codes = Array.from(new Set([...Object.keys(readiness), ...Object.keys(governance)]));
+  return codes.filter((code) => {
+    const r = readiness[code] || null;
+    const g = governance[code] || null;
+    const lane = r?.releaseLane ?? g?.releaseLane ?? "";
+    return (r?.readinessStatus === "blocked" || g?.releaseMode === "blocked" || String(lane).startsWith("blocked"));
+  });
+}
+
+const BLOCKED = getBlockedProducts();
 
 let failures = 0;
 const check = (name, ok, detail = "") => {
@@ -22,16 +81,15 @@ const check = (name, ok, detail = "") => {
   if (!ok) failures++;
 };
 
-const keys = allLiteralCatalogKeys();
-const products = keys.map((k) => ({ key: k, p: parseCatalogProduct(k), g: getGovernanceState(k) }))
-  .filter((x) => x.p);
+const products = getAllProducts().map((p) => ({ key: p.code, p, g: loadGovernanceState(p.code) }));
 const actionFor = (x) => resolveCommercialAction(x.p, x.g);
 
 console.log("\n────────────────────────────────────────────────────────────");
 console.log("  COMMERCIAL CHECKOUT GOVERNANCE");
+console.log("  Authority: production resolver (commercial-action-resolver.ts)");
 console.log("────────────────────────────────────────────────────────────\n");
 
-// ── Stripe metadata audit (honest recording, no fabrication) ───────────────
+// ── Stripe metadata audit ──────────────────────────────────────────────────
 const audit = {
   complete: [], missingProductId: [], missingPriceId: [],
   stripePresentButGovernanceBlocked: [], checkoutSafeButMissingStripe: [],
@@ -63,9 +121,9 @@ console.log("Governance rules:");
 
 // 1. Blocked products with Stripe IDs still resolve to non-checkout
 for (const code of BLOCKED) {
-  const p = parseCatalogProduct(code);
+  const p = getProduct(code);
   if (!p) { check(`${code} present in catalog`, false, "missing"); continue; }
-  const action = resolveCommercialAction(p, getGovernanceState(code));
+  const action = resolveCommercialAction(p, loadGovernanceState(code));
   check(`blocked ${code} → non-checkout despite Stripe`, action.purchasable === false && action.state !== "checkout",
     `action=${action.state} stripePriceId=${p.stripePriceId ? "present" : "none"}`);
 }
@@ -91,11 +149,11 @@ if (audit.checkoutSafeButMissingStripe.length) {
 }
 
 // 6. All checkout buttons use the resolver (defense in depth)
-const cbText = readFileSafe("components/commercial/CheckoutButton.tsx");
+const cbText = readFileSync(join(ROOT, "components/commercial/CheckoutButton.tsx"), "utf8");
 check("CheckoutButton is resolver-gated", cbText.includes("resolveCommercialAction") && cbText.includes("checkoutPermitted"));
 
 // 7. Server checkout API enforces the governance gate
-const apiText = readFileSafe("pages/api/billing/checkout.ts");
+const apiText = readFileSync(join(ROOT, "pages/api/billing/checkout.ts"), "utf8");
 check("billing API enforces governance gate", apiText.includes("resolveCommercialAction") && apiText.includes("CHECKOUT_BLOCKED_BY_GOVERNANCE"));
 
 console.log("\n" + "=".repeat(60));

@@ -123,15 +123,28 @@ export function assertGmiRegistryAgreesWithLifecycle(
     const state = getMarketIntelligenceCommercialState(e.editionId);
     if (!state) continue;
 
-    // Public visibility must be the inverse of hiddenFromPricing.
-    if (state.publicVisible === e.hiddenFromPricing) {
+    // Pricing visibility is narrower than publication visibility: archives can
+    // remain public-visible while hidden from current pricing.
+    if (state.isArchive && !e.hiddenFromPricing) {
       errors.push({
         editionId: e.editionId,
-        error: `lifecycle publicVisible=${state.publicVisible} contradicts registry hiddenFromPricing=${e.hiddenFromPricing}`,
+        error: `lifecycle archive must be hidden from pricing`,
+      });
+    }
+    if (state.isCurrentPublished && e.hiddenFromPricing) {
+      errors.push({
+        editionId: e.editionId,
+        error: `lifecycle current-published must be visible on pricing`,
+      });
+    }
+    if (state.isReleaseCandidate && !e.hiddenFromPricing) {
+      errors.push({
+        editionId: e.editionId,
+        error: `lifecycle release-candidate must be hidden from pricing`,
       });
     }
 
-    const sellable = e.status === "active" || e.status === "manual_billing" || e.status === "archived";
+    const sellable = e.status === "active" || e.status === "manual_billing";
     if (state.purchasable && !sellable) {
       errors.push({ editionId: e.editionId, error: `lifecycle purchasable=true but registry status="${e.status}" is not sellable` });
     }
@@ -165,18 +178,18 @@ function deriveCommercialStatus(status: GmiEditionRegistryEntry["status"]): Comm
   switch (status) {
     case "active":         return "paid";
     case "manual_billing": return "manual_billing";
-    case "archived":       return "paid";       // archived editions remain purchasable
+    case "archived":       return "inactive";   // archive-visible, not current checkout
     case "draft":          return "internal_only"; // draft is admin-only; no public surface
     case "retired":        return "retired";
   }
 }
 
 function deriveRequiresCheckout(entry: GmiEditionRegistryEntry): boolean {
-  return entry.status === "active" || (entry.status === "archived" && !!(entry.stripeProductId && entry.stripePriceId));
+  return entry.status === "active";
 }
 
 function deriveActive(status: GmiEditionRegistryEntry["status"]): boolean {
-  return status !== "retired" && status !== "draft";
+  return status !== "retired" && status !== "draft" && status !== "archived";
 }
 
 function deriveDisplayPrice(entry: GmiEditionRegistryEntry): string {
@@ -192,8 +205,8 @@ function deriveDisplayPrice(entry: GmiEditionRegistryEntry): string {
 function derivePrimaryCta(status: GmiEditionRegistryEntry["status"]): string {
   switch (status) {
     case "active":         return "View report";
-    case "manual_billing": return "Access by enquiry";
-    case "archived":       return "Access archive";
+    case "manual_billing": return "Request Access";
+    case "archived":       return "View archive";
     case "draft":          return "Coming soon";
     case "retired":        return "Unavailable";
   }

@@ -58,13 +58,12 @@ describe("GMI-2 — Q1 2026 Stripe product ID is prod_UNnSL8r6DMedEH", () => {
   });
 });
 
-// ─── 3. Q1 is the current published issue (lifecycle authority) ────────────────
-// Per lifecycle reconciliation: GMI-Q1-2026 is ACTIVE_UNTIL_SUPERSEDED — the
-// current published, purchasable, public-visible issue until Q2 actually publishes.
-// It is NOT hidden from pricing. It becomes archive only after Q2 publishes.
+// ─── 3. Q1 remains current until Q2 release authority (lifecycle authority) ────────────────
+// Per lifecycle reconciliation: GMI-Q1-2026 remains active until Q2 receives final data lock and owner release authority.
+// It is not the admin in-focus edition, but it remains the current published commercial edition.
 
-describe("GMI-3 — Q1 2026 is the current published issue", () => {
-  it("gmi_q1_2026 is visible on pricing (current published issue)", () => {
+describe("GMI-3 — Q1 2026 remains current until Q2 release authority", () => {
+  it("gmi_q1_2026 remains visible on pricing", () => {
     expect(CATALOG["gmi_q1_2026"]?.hiddenFromPricing).toBe(false);
   });
 
@@ -73,22 +72,21 @@ describe("GMI-3 — Q1 2026 is the current published issue", () => {
     expect(q1Entry?.current).toBe(false);
   });
 
-  it("gmi_q1_2026 is active (purchasable, current published)", () => {
+  it("gmi_q1_2026 remains active as a commercial product", () => {
     expect(CATALOG["gmi_q1_2026"]?.active).toBe(true);
   });
 
-  it("gmi_q1_2026 has no hiddenReason (it is the current published issue)", () => {
+  it("gmi_q1_2026 has no Q2 supersession hidden reason before release", () => {
     expect(CATALOG["gmi_q1_2026"]?.hiddenReason).toBeUndefined();
   });
 });
 
-// ─── 4. Q2 is the admin in-focus edition (release candidate, lifecycle DRAFT) ──
-// Per lifecycle reconciliation: GMI-Q2-2026 is DRAFT — a release candidate,
-// not yet published. `current: true` here is the ADMIN in-preparation focus flag
-// only. Public/commercial "current published issue" is Q1 until Q2 publishes.
+// ─── 4. Q2 is the market-ready draft awaiting release authority ──
+// Per lifecycle reconciliation: GMI-Q2-2026 remains DRAFT until final data lock and owner release authority.
+// It preserves the £59 identity but is not public-visible, purchasable, or checkout-enabled yet.
 
-describe("GMI-4 — Q2 2026 is the admin in-focus edition (release candidate)", () => {
-  it("gmi_q2_2026 is the admin in-focus edition in the registry", () => {
+describe("GMI-4 — Q2 2026 is the market-ready draft awaiting release authority", () => {
+  it("gmi_q2_2026 is the current edition in the registry", () => {
     const q2Entry = GMI_EDITION_REGISTRY.find((e) => e.productCode === "gmi_q2_2026");
     expect(q2Entry?.current).toBe(true);
   });
@@ -102,12 +100,16 @@ describe("GMI-4 — Q2 2026 is the admin in-focus edition (release candidate)", 
     expect(product?.code).toBe("gmi_q2_2026");
   });
 
-  it("gmi_q2_2026 is hidden from pricing (draft/release-candidate)", () => {
+  it("gmi_q2_2026 is hidden from pricing before release authority", () => {
     expect(CATALOG["gmi_q2_2026"]?.hiddenFromPricing).toBe(true);
   });
 
-  it("gmi_q2_2026 is not active (draft — not yet published)", () => {
+  it("gmi_q2_2026 is commercially inactive with Stripe IDs null", () => {
     expect(CATALOG["gmi_q2_2026"]?.active).toBe(false);
+    expect(CATALOG["gmi_q2_2026"]?.commercialStatus).toBe("internal_only");
+    expect(CATALOG["gmi_q2_2026"]?.requiresCheckout).toBe(false);
+    expect(CATALOG["gmi_q2_2026"]?.stripeProductId).toBeNull();
+    expect(CATALOG["gmi_q2_2026"]?.stripePriceId).toBeNull();
   });
 });
 
@@ -313,14 +315,16 @@ describe("GMI-12 — product lookup by stripePriceId", () => {
 // ─── 13. Access resolver returns correct GMI route ────────────────────────────
 
 describe("GMI-13 — access resolver returns correct routes", () => {
-  it("gmi_q1_2026 resolver returns artifact route", () => {
+  it("gmi_q1_2026 resolver remains paid_checkout before supersession", () => {
     const link = resolveProductAccessLink("gmi_q1_2026");
-    expect(link.href).toContain("q1-2026");
+    expect(link.accessMode).toBe("paid_checkout");
   });
 
-  it("gmi_q2_2026 resolver returns dormant (draft — not yet published)", () => {
+  it("gmi_q2_2026 resolver remains dormant before release authority", () => {
     const link = resolveProductAccessLink("gmi_q2_2026");
     expect(link.accessMode).toBe("dormant");
+    expect(link.label).toBe("Currently unavailable");
+    expect(link.href).toBe("/products");
   });
 
   it("gmi_q3_2026 resolver does not return paid_checkout", () => {

@@ -1,16 +1,23 @@
 /**
  * scripts/_commercial-mirror.mjs
  *
- * Faithful JS mirror of the TypeScript commercial gating stack, for use by the
- * read-only verification scripts (which cannot import the .ts modules directly):
+ * @deprecated since PR D — Zero certification authority.
  *
+ * This file was a hand-maintained JS mirror of the TypeScript commercial gating
+ * stack. It is retained only for legacy report helpers that have not yet been
+ * migrated. It MUST NOT be used for certification, verification, or gating.
+ *
+ * Certification scripts now import production TypeScript modules directly via tsx:
+ *   - scripts/check-product-storefront-coverage.mjs
+ *   - scripts/check-commercial-checkout-governance.mjs
+ *
+ * New imports of this file are forbidden. A regression test enforces this.
+ *
+ * Original purpose (superseded):
  *   - lib/commercial/commercial-action-resolver.ts  (resolveCommercialAction)
  *   - lib/commercial/commercial-governance.ts        (getGovernanceState)
  *   - lib/commercial/product-code-map.ts             (PRODUCT_CODE_MAP)
  *   - lib/commercial/catalog.ts                       (parsed for product fields)
- *
- * Keep in sync with those modules. The scripts assert behaviour; this mirror is
- * the logic under test.
  */
 
 import { readFileSync, existsSync } from "fs";
@@ -120,6 +127,8 @@ export function resolveCommercialAction(product, g, options = {}) {
   if (product.commercialStatus === "manual_billing") return A("manual_fulfilment", "manual_billing", "/contact");
   const checkoutIntended = product.commercialStatus === "paid" && product.requiresCheckout === true;
   if (checkoutIntended) {
+    // FAIL-CLOSED: no governance record → never checkout (mirror of production resolver).
+    if (!g.known) return A("blocked", "governance_unknown_fail_closed");
     if (!hasValidStripe(product)) return A("unavailable", "missing_stripe_metadata");
     if (options.routeAvailable === false) return A("unavailable", "missing_route");
     return { state: "checkout", reason: undefined, href: checkoutHref, purchasable: true, label: cta || "Purchase / unlock" };

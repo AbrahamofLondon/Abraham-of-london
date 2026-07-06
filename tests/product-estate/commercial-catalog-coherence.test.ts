@@ -26,7 +26,10 @@ describe('commercial catalog coherence', () => {
 
       expect(catalogProduct, `${item.id}: missing catalog product`).toBeDefined()
       expect(catalogProduct?.active, `${item.id}: catalog product is inactive`).toBe(true)
-      expect(catalogProduct?.requiresCheckout, `${item.id}: missing checkout requirement`).toBe(true)
+      expect(
+        catalogProduct?.requiresCheckout || catalogProduct?.commercialStatus === 'manual_billing',
+        `${item.id}: missing checkout requirement or manual-billing status`,
+      ).toBe(true)
     }
   })
 

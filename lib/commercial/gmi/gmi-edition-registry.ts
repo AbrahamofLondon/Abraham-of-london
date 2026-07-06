@@ -75,11 +75,9 @@ export type GmiEditionRegistryEntry = {
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
-  // ── Q1 2026 — CURRENT PUBLISHED issue ────────────────────────────────────────
-  // Reconciled to the authoritative lifecycle (market-intelligence-lifecycle.ts):
-  // GMI-Q1-2026 is ACTIVE_UNTIL_SUPERSEDED — the current published, purchasable,
-  // public-visible issue until Q2 actually publishes. It only becomes archived
-  // after Q2 is published. Stripe IDs confirmed: prod_UNnSL8r6DMedEH.
+  // ── Q1 2026 — current published issue until Q2 release authority ─────────────
+  // Reconciled to the authoritative lifecycle: Q1 remains the current published
+  // issue until GMI-Q2-2026 completes its final data lock and owner release.
   {
     editionId: "GMI-Q1-2026",
     productCode: "gmi_q1_2026",
@@ -88,42 +86,39 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     title: "Global Market Report — Q1 2026",
     slug: "q1-2026",
     status: "active",
-    current: false, // admin in-focus flag only (Q2 is in preparation); NOT commercial truth
+    current: false,
     hiddenFromPricing: false,
     stripeProductId: "prod_UNnSL8r6DMedEH",
     stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
     amountGbp: 5900,
     displayPrice: "£59",
     releaseDate: "2026-04-08",
-    shortDescription: "Q1 2026 market report — the current published issue. Remains active for Q2 2026 operating decisions until superseded.",
-    pricingNote: "Coverage period: Q1 2026. Current decision window: Q2 2026. Remains active until superseded by Q2 2026.",
+    shortDescription: "Q1 2026 market report — current published edition until Q2 receives owner release authority.",
+    pricingNote: "Coverage period: Q1 2026. Current published edition until GMI-Q2-2026 completes final data lock and owner release authority.",
   },
 
-  // ── Q2 2026 — release candidate (DRAFT, not yet published) ────────────────────
-  // Reconciled to the authoritative lifecycle: GMI-Q2-2026 is DRAFT — a production
-  // release candidate, publication target 2026-07-08. Not purchasable, not public,
-  // hidden from pricing. `current: true` here is the ADMIN in-preparation focus
-  // flag only — it does NOT mean "current published". Public/commercial "current"
-  // is computed from the lifecycle (getCurrentPublishedMarketIntelligenceReport).
-  // To release: complete the Q2 workflow, then set status "active"/"manual_billing".
+  // ── Q2 2026 — MARKET-READY release candidate (commercial activation blocked) ──
+  // Reconciled to the authoritative lifecycle: GMI-Q2-2026 remains DRAFT until final data lock and owner release authority.
+  // It preserves the £59 edition identity but is not public-visible or purchasable yet.
+  // No Stripe product/price IDs are bound; self-serve checkout remains disabled.
   {
     editionId: "GMI-Q2-2026",
     productCode: "gmi_q2_2026",
     quarter: "Q2",
     year: 2026,
-    title: "Global Market Report — Q2 2026",
+    title: "Global Market Intelligence — Q2 2026",
     slug: "q2-2026",
     status: "draft",
-    current: true, // admin in-preparation focus only; NOT commercial/publication truth
+    current: true,
     hiddenFromPricing: true,
-    hiddenReason: "release_candidate_publication_target_2026_07_08",
+    hiddenReason: "awaiting_post_8_july_data_lock_and_owner_release_authority",
     stripeProductId: null,
     stripePriceId: null,
     amountGbp: 5900,
     displayPrice: "£59",
     releaseDate: "2026-07-08",
-    shortDescription: "Q2 2026 market report — release candidate, in preparation. Scheduled publication 8 July 2026.",
-    pricingNote: "Coverage period: Q2 2026. Release candidate — scheduled publication 8 July 2026. Not yet the current published issue.",
+    shortDescription: "Quarterly decision intelligence for leaders operating under structural uncertainty.",
+    pricingNote: "Coverage period: Q2 2026. Structurally market-ready release candidate at £59; commercial activation awaits post-8-July data lock and owner release authority. No self-serve checkout.",
   },
 
   // ── Q3 2026 — draft (blocked) ───────────────────────────────────────────────

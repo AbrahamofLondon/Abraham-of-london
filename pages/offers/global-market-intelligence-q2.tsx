@@ -8,31 +8,31 @@ import {
 } from '@/lib/product/product-release-governance';
 import { useProductReleaseGovernance } from '@/hooks/useProductReleaseGovernance';
 
-const PRODUCT_CODE = 'gmi_quarterly';
+const PRODUCT_CODE = 'gmi_q2_2026';
 
 const DEFAULT_OFFER: EvidenceLimitedOffer = {
   code: PRODUCT_CODE,
   slug: 'global-market-intelligence-q2',
   title: 'Global Market Intelligence — Q2 2026',
-  eyebrow: 'Evidence-limited market intelligence',
+  eyebrow: 'Quarterly decision intelligence',
   heroPromise:
-    'Quarterly market intelligence that reviews prior-quarter material calls before issuing the next report.',
+    'Quarterly decision intelligence for leaders operating under structural uncertainty — the market report that scores its own prior-quarter calls before it issues new ones.',
   summary:
-    'Evidence-limited quarterly market analysis designed for board and executive decision-support. Compounds understanding through quarterly verification, not just publication.',
-  variant: 'advisory_review',
+    'Global Market Intelligence is quarterly decision intelligence for leaders governing under structural uncertainty. The difference is not more news — it is accountable judgement: every issue reviews and scores the previous quarter’s material calls against outcomes before making new ones.',
+  variant: 'decision_support',
   buyer: [
-    'Board and executive decision-makers requiring structured market perspective',
-    'Strategic planning teams needing quarterly market calibration',
-    'Organizational intelligence teams monitoring market evidence',
-    'Professional research contexts requiring decision-support material',
+    'Boards and executives who must act under uncertainty, not wait for clarity',
+    'Strategy and planning teams needing quarterly market calibration',
+    'Risk, finance, and investment functions pricing structural (not just cyclical) risk',
+    'Operators who value a report that publishes its own scorecard',
   ],
   receives: [
-    'Quarterly PDF report with complete analysis and evidence-based scenarios',
-    'Web-accessible intelligence dashboard with interactive market data',
-    'Board presentation deck (30–45 minutes) with prior-quarter verification',
-    'Falsification register showing Q1 calls vs. actual outcomes',
-    'Methodology boundary documentation and evidence sources',
-    'Quarterly access until 2026-09-30',
+    'Quarterly PDF report: full analysis, scored prior-quarter call review, and scenario framework',
+    'Web-accessible edition with the protected report artifact and full source appendix',
+    'Prior-quarter call scorecard and falsification review inside the report',
+    'Falsification register: prior-quarter calls scored openly against outcomes',
+    'Methodology and governance documentation with confidence classes',
+    'Access to the current issue and the verified archive for the quarter',
   ],
   cannotClaim: [
     'It cannot claim investment advice or trading recommendations.',
@@ -42,11 +42,11 @@ const DEFAULT_OFFER: EvidenceLimitedOffer = {
     'It cannot provide price targets or outcome guarantees.',
     'It cannot claim exclusive market authority or privileged signals.',
   ],
-  price: 'GBP 15,000 – 25,000 per quarter',
+  price: '£59 single-issue access',
   timeline:
-    'Delivery within 5 business days of request approval. Prior-quarter review requirement verified before shipment.',
+    'Q2 2026 is structurally market-ready for the 8 July 2026 publication transition, pending the final post-8-July data lock and owner release authority. Until then, Q1 remains the current published edition.',
   manualFulfilmentNote:
-    'All Q2 Intelligence purchases are handled through manual fulfillment to ensure prior-quarter review verification, boundary acceptance, and human review completion before delivery. No automated checkout.',
+    'No self-serve checkout, manual billing fulfilment, or Stripe binding is enabled for this release candidate. Not investment advice.',
   ctas: [
     {
       label: 'Request Access',
@@ -57,24 +57,24 @@ const DEFAULT_OFFER: EvidenceLimitedOffer = {
   ],
   faq: [
     {
-      question: 'Is this the same as restored GMI authority?',
+      question: 'What makes this different from other market reports?',
       answer:
-        'No. This is evidence-limited market intelligence for decision-support. It does not restore authority and does not claim external validation or market proof.',
+        'It scores itself. Every quarter, GMI reviews its prior material calls against what actually happened and publishes the verdicts — including the misses — before issuing new ones. The difference is not more news. It is accountable judgement.',
     },
     {
-      question: 'Why is prior-quarter review required?',
+      question: 'Is this investment advice?',
       answer:
-        'Prior-quarter review prevents moving-goalpost language, maintains accountability through documented calls vs. outcomes, and compounds understanding through verified evidence.',
+        'No. GMI is strategic decision-support for governing under uncertainty. It is not investment, trading, or financial advice; all decisions remain the responsibility of your organisation and its qualified professional advisers.',
     },
     {
-      question: 'What does "evidence-limited" mean?',
+      question: 'What is the methodology boundary?',
       answer:
-        'Evidence-limited means the intelligence is based on published sources and market data, not proprietary algorithms or insider signals. All claims are bounded by available evidence.',
+        'GMI is built on published sources and market-implied data, not proprietary algorithms or insider signals. Claims are governed by source class, confidence class, and falsification review so the judgement remains accountable.',
     },
     {
-      question: 'Why manual fulfillment?',
+      question: 'How is access governed?',
       answer:
-        'Manual fulfillment ensures human verification of prior-quarter review status, boundary acceptance, and content compliance before delivery.',
+        'Editions follow a publication lifecycle: Q2 becomes current only after final data lock and owner release authority. Until then, Q1 remains current and Q2 access fails closed.',
     },
   ],
 };
@@ -105,10 +105,10 @@ export default function GlobalMarketIntelligenceQ2Offer() {
   return (
     <>
       <Head>
-        <title>Global Market Intelligence Q2 — Evidence-Limited Market Intelligence</title>
+        <title>Global Market Intelligence — Quarterly Decision Intelligence</title>
         <meta
           name="description"
-          content="Quarterly market intelligence reviewing prior-quarter calls before issuing the next report."
+          content="Quarterly decision intelligence for leaders governing under structural uncertainty. The report that scores its own prior-quarter calls before issuing new ones. Not investment advice."
         />
       </Head>
       <EvidenceLimitedOfferPage

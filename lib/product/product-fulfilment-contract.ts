@@ -762,10 +762,10 @@ export const GMI_Q1_2026_CONTRACT = contract({
   proofRunCompleted: false,
   hardFailures: [],
   warnings: [
-    "Archived edition — superseded by Q2. Checkout still possible for historical reference.",
+    "Current published edition until Q2 completes final data lock and owner release authority.",
     "No automated post-purchase delivery email for GMI access confirmation",
   ],
-  notes: "Archived Q1 2026 edition. Has active Stripe price. Report delivered as entitlement-gated artifact route.",
+  notes: "Current published Q1 2026 edition. Has active Stripe price. Report delivered as entitlement-gated artifact route until Q2 supersession is authorised.",
 });
 
 export const GMI_Q2_2026_CONTRACT = contract({
@@ -773,7 +773,7 @@ export const GMI_Q2_2026_CONTRACT = contract({
   displayName: "Global Market Intelligence Report — Q2 2026",
   entitlementSlug: "global-market-intelligence-report-q2-2026",
   stripePriceId: null,
-  commercialStatus: "manual_billing",
+  commercialStatus: "inactive",
   checkoutRoute: null,
   intakeRoute: "/artifacts/global-market-intelligence-report-q2-2026",
   successRoute: "/artifacts/global-market-intelligence-report-q2-2026",
@@ -781,7 +781,7 @@ export const GMI_Q2_2026_CONTRACT = contract({
   adminRoute: "/admin/intelligence/gmi-control-plane",
   fulfilmentType: "executive_report_artifact",
   artifactModel: "ProductArtifact",
-  deliveryModel: "immediate_access",
+  deliveryModel: "evidence_gate_review",
   dashboardVisibility: false,
   caseStudyEligible: false,
   feedbackSurface: null,
@@ -790,10 +790,10 @@ export const GMI_Q2_2026_CONTRACT = contract({
   proofRunCompleted: false,
   hardFailures: [],
   warnings: [
-    "Current edition — no self-serve checkout yet (manual_billing). Add Stripe IDs to enable paid checkout.",
-    "Access is currently open or manual — no entitlement gate on the artifact route",
+    "Market-ready release candidate — final post-8-July data lock and owner release authority pending.",
+    "No self-serve checkout, manual billing, or Stripe binding is active before release authority.",
   ],
-  notes: "Current published Q2 2026 edition. Status: manual_billing. No self-serve checkout until Stripe IDs added to registry.",
+  notes: "Q2 2026 release candidate. Structurally market-ready; not commercially active. Stripe Product ID and Price ID remain null.",
 });
 
 export const GMI_Q3_2026_CONTRACT = contract({

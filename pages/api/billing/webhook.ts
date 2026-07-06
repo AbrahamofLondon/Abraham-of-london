@@ -1,30 +1,18 @@
-// pages/api/billing/webhook.ts — CANONICAL PRODUCT WEBHOOK
+// pages/api/billing/webhook.ts — CANONICAL PRODUCT WEBHOOK (thin adapter)
+//
+// PR E: Thin adapter. Verifies Stripe signature, normalizes the event,
+// and delegates to the canonical payment event processor.
+// No independent business logic.
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
 import {
-  grantEntitlement,
-  PRODUCT_CODES,
-  type ProductCode,
-} from "@/lib/server/billing/entitlements";
-import { prisma } from "@/lib/prisma.server";
-import { hubspotSync } from "@/lib/hubspot/sync";
-import { ensureEntitlementAfterPayment } from "@/lib/commercial/payment-verification";
-import {
-  resolveProductCode,
-  resolveEntitlementSlugs,
-  getProductByStripePriceId,
-} from "@/lib/commercial/catalog";
-import { syncRetainerContractFromSubscription } from "@/lib/retainers/retainer-service";
-import { generatePaidExecutiveReport } from "@/lib/commercial/paid-er-generation";
-import { trackServerLaunch } from "@/lib/analytics/server-launch-event";
-import { sendBoardroomAdminNotification } from "@/lib/boardroom/admin-notification";
-
-const VALID_PRODUCT_CODES = new Set<string>(Object.values(PRODUCT_CODES));
-
-function isProductCode(value: string): value is ProductCode {
-  return VALID_PRODUCT_CODES.has(value);
-}
+  processCheckoutCompleted,
+  processSubscriptionEvent,
+  processRefundEvent,
+  processCheckoutFailureEvent,
+} from "@/lib/commercial/payment-event-processor";
 
 export const config = {
   api: {
@@ -35,141 +23,6 @@ export const config = {
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" as any }) : null;
-
-async function recordBoardroomOrderEvent(input: {
-  orderId: string;
-  actorEmail?: string | null;
-  eventType: string;
-  previousStatus?: string | null;
-  newStatus?: string | null;
-  note?: string | null;
-}) {
-  await prisma.accessAuditLog.create({
-    data: {
-      actorType: "SYSTEM",
-      actorEmail: input.actorEmail ?? null,
-      action: "boardroom_brief_order.event",
-      targetType: "boardroom_brief_order",
-      targetKey: input.orderId,
-      success: true,
-      reason: input.eventType,
-      metadata: {
-        previousStatus: input.previousStatus ?? null,
-        newStatus: input.newStatus ?? null,
-        note: input.note ?? null,
-      },
-    },
-  });
-}
-
-async function recordCheckoutCompletion(input: {
-  sessionId: string;
-  email: string;
-  productCode: string;
-  priceCode: string;
-  tier: string;
-  paymentStatus: string | null;
-}) {
-  try {
-    await prisma.accessAuditLog.create({
-      data: {
-        actorType: "SYSTEM",
-        actorEmail: input.email || null,
-        action: "billing.checkout.completed",
-        targetType: "checkout_session",
-        targetKey: input.sessionId,
-        success: input.paymentStatus === "paid",
-        reason: input.paymentStatus || null,
-        metadata: {
-          session_id: input.sessionId,
-          email: input.email,
-          product: input.productCode,
-          priceCode: input.priceCode,
-          tier: input.tier,
-          payment_status: input.paymentStatus,
-        },
-      },
-    });
-  } catch (error) {
-    console.warn("[BILLING_WEBHOOK] Failed to persist checkout audit record", error);
-  }
-}
-
-async function markBoardroomOrderBySession(input: {
-  stripeSessionId: string;
-  paymentStatus: "failed" | "refunded";
-  deliveryStatus: "failed" | "refunded";
-  eventType: string;
-  reason?: string | null;
-}) {
-  const order = await prisma.boardroomBriefOrder.findUnique({
-    where: { stripeSessionId: input.stripeSessionId },
-    select: { id: true, paymentStatus: true, deliveryStatus: true, metadata: true },
-  }).catch(() => null);
-
-  if (!order) return;
-
-  await prisma.boardroomBriefOrder.update({
-    where: { id: order.id },
-    data: {
-      paymentStatus: input.paymentStatus,
-      deliveryStatus: input.deliveryStatus,
-      metadata: {
-        ...((order.metadata as Record<string, unknown> | null) ?? {}),
-        lastPaymentEvent: input.eventType,
-        lastPaymentReason: input.reason ?? null,
-      },
-      updatedAt: new Date(),
-    },
-  });
-
-  await recordBoardroomOrderEvent({
-    orderId: order.id,
-    actorEmail: "stripe:webhook",
-    eventType: input.eventType,
-    previousStatus: `${order.paymentStatus}/${order.deliveryStatus}`,
-    newStatus: `${input.paymentStatus}/${input.deliveryStatus}`,
-    note: input.reason ?? null,
-  }).catch(() => undefined);
-}
-
-async function markBoardroomOrderByPaymentIntent(input: {
-  paymentIntentId: string;
-  paymentStatus: "failed" | "refunded";
-  deliveryStatus: "failed" | "refunded";
-  eventType: string;
-  reason?: string | null;
-}) {
-  const order = await prisma.boardroomBriefOrder.findFirst({
-    where: { stripePaymentIntentId: input.paymentIntentId },
-    select: { id: true, paymentStatus: true, deliveryStatus: true, metadata: true },
-  }).catch(() => null);
-
-  if (!order) return;
-
-  await prisma.boardroomBriefOrder.update({
-    where: { id: order.id },
-    data: {
-      paymentStatus: input.paymentStatus,
-      deliveryStatus: input.deliveryStatus,
-      metadata: {
-        ...((order.metadata as Record<string, unknown> | null) ?? {}),
-        lastPaymentEvent: input.eventType,
-        lastPaymentReason: input.reason ?? null,
-      },
-      updatedAt: new Date(),
-    },
-  });
-
-  await recordBoardroomOrderEvent({
-    orderId: order.id,
-    actorEmail: "stripe:webhook",
-    eventType: input.eventType,
-    previousStatus: `${order.paymentStatus}/${order.deliveryStatus}`,
-    newStatus: `${input.paymentStatus}/${input.deliveryStatus}`,
-    note: input.reason ?? null,
-  }).catch(() => undefined);
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
@@ -187,484 +40,74 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // ── Idempotency check ──────────────────────────────────────────────────────
-  // Record the event only after processing succeeds. If processing fails,
-  // Stripe can retry and the unique Boardroom/entitlement writes remain the
-  // state-level idempotency guard.
+  // ── Route to canonical processor ──────────────────────────────────────────
   try {
-    const existing = await prisma.processedWebhookEvent.findUnique({
-      where: { id: event.id },
-      select: { id: true },
-    });
-    if (existing) {
-      return res.json({ received: true, replay: true });
-    }
-  } catch (idempotencyError: any) {
-    console.warn("[BILLING_WEBHOOK] Idempotency check failed, proceeding", idempotencyError);
-  }
-
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const email = String(session.metadata?.email || session.customer_details?.email || "").toLowerCase();
-    const productCode = String(session.metadata?.productCode || "");
-    const priceCode = String(session.metadata?.priceCode || "");
-    const tier = String(session.metadata?.tier || "report-basic");
-    const paymentStatus = session.payment_status || null;
-    const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
-    const contractId = String(session.metadata?.contractId || "");
-
-    await recordCheckoutCompletion({
-      sessionId: session.id,
-      email,
-      productCode,
-      priceCode,
-      tier,
-      paymentStatus,
-    });
-
-    if (email && productCode && isProductCode(productCode)) {
-      // Grant primary entitlement
-      await grantEntitlement({
-        email,
-        productCode,
-        tier,
-        source: "stripe",
-        externalRef: session.id,
-      });
-
-      // Resolve bundle entitlements from catalog SSOT
-      const bundleMeta = session.metadata?.bundleEntitlements;
-      const catalogProduct = resolveProductCode(priceCode) ?? resolveProductCode(productCode);
-      const allSlugs = bundleMeta
-        ? bundleMeta.split(",").filter(Boolean)
-        : catalogProduct
-          ? resolveEntitlementSlugs(catalogProduct.code)
-          : [productCode];
-
-      // Grant each included entitlement (for bundles)
-      for (const slug of allSlugs) {
-        if (slug !== productCode) {
-          try {
-            await grantEntitlement({ email, productCode: slug as ProductCode, tier, source: "stripe", externalRef: session.id });
-          } catch {
-            console.error("[BILLING_WEBHOOK_BUNDLE_GRANT_PARTIAL_FAILURE]", { slug, email });
-          }
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const result = await processCheckoutCompleted(event, session);
+        if (!result.ok && result.quarantined) {
+          console.warn("[BILLING_WEBHOOK_QUARANTINED]", { eventId: event.id, error: result.error });
         }
+        break;
       }
 
-      const verified = await ensureEntitlementAfterPayment({
-        checkoutSessionId: session.id,
-        slug: productCode,
-        email,
-      });
-
-      if (!verified.ok || !verified.entitlement?.granted) {
-        console.error("[BILLING_WEBHOOK_ENTITLEMENT_SYNC_FAILED]", {
-          sessionId: session.id,
-          email,
-          productCode,
-        });
-        return res.status(500).json({
-          error: "ENTITLEMENT_SYNC_FAILED",
-        });
+      case "checkout.session.expired":
+      case "checkout.session.async_payment_failed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await processCheckoutFailureEvent(event, session);
+        break;
       }
 
-      // ── Launch analytics on successful payment completion ──
-      const pc: string = productCode
-      if (pc === "boardroom-brief" || pc === "boardroom_brief") {
-        trackServerLaunch("boardroom_checkout_completed", "/api/billing/webhook", {
-          productCode: pc,
-          route: catalogProduct?.successPath ?? "/boardroom-brief",
-        });
-
-        // Create BoardroomBriefOrder record
-        try {
-          const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
-          const existingOrder = await prisma.boardroomBriefOrder.findUnique({
-            where: { stripeSessionId: session.id },
-          }).catch(() => null);
-
-          let canonicalOrderId: string;
-
-          if (!existingOrder) {
-            const order = await prisma.boardroomBriefOrder.create({
-              data: {
-                userId: session.metadata?.userId || email,
-                email,
-                diagnosticId: session.metadata?.diagnosticId || null,
-                handoffId: session.metadata?.handoffId || null,
-                stripeSessionId: session.id,
-                stripePaymentIntentId: paymentIntentId,
-                paymentStatus: "paid",
-                deliveryStatus: "paid",
-                source: session.metadata?.source || "direct",
-                riskLevel: session.metadata?.riskLevel || null,
-                score: session.metadata?.score ? parseInt(session.metadata.score) : null,
-                metadata: {
-                  customerName: session.customer_details?.name || null,
-                  customerEmail: email,
-                  originPath: session.metadata?.originPath || null,
-                },
-              },
-            });
-            canonicalOrderId = order.id;
-            await recordBoardroomOrderEvent({
-              orderId: order.id,
-              actorEmail: "stripe:webhook",
-              eventType: "checkout.session.completed",
-              previousStatus: "none",
-              newStatus: "paid/paid",
-              note: "Stripe checkout completed.",
-            }).catch(() => undefined);
-
-            // Emit governed boardroom_order_paid event
-            try {
-              const { routeGovernanceEvent } = await import("@/lib/platform/governance-event-bus");
-              await routeGovernanceEvent({
-                eventType: "BOARDROOM_ORDER_PAID",
-                sourceSurface: "billing-webhook",
-                canonicalRecordType: "BoardroomBriefOrder",
-                canonicalRecordId: order.id,
-                actorEmail: "stripe:webhook",
-                severity: "HIGH",
-                payload: {
-                  email,
-                  stripeSessionId: session.id,
-                  source: session.metadata?.source || "direct",
-                },
-                shouldWriteAudit: true,
-                shouldWriteLineage: true,
-              });
-            } catch (govErr) {
-              console.warn("[BILLING_WEBHOOK_BOARDROOM_ORDER_PAID_GOV_EVENT_FAILED]", govErr);
-            }
-          } else {
-            canonicalOrderId = existingOrder.id;
+      case "payment_intent.payment_failed": {
+        const intent = event.data.object as Stripe.PaymentIntent;
+        // Map to checkout failure via payment_intent
+        const sessionId = intent.metadata?.checkout_session_id || null;
+        if (sessionId) {
+          // We don't have the full session object, but we can still mark the order
+          const { prisma } = await import("@/lib/prisma.server");
+          const order = await prisma.boardroomBriefOrder.findFirst({
+            where: { stripePaymentIntentId: intent.id },
+          });
+          if (order) {
             await prisma.boardroomBriefOrder.update({
-              where: { id: existingOrder.id },
+              where: { id: order.id },
               data: {
-                paymentStatus: "paid",
-                deliveryStatus: "in_review",
-                stripePaymentIntentId: paymentIntentId || existingOrder.stripePaymentIntentId,
+                paymentStatus: "failed",
+                deliveryStatus: "failed",
+                metadata: {
+                  ...((order.metadata as Record<string, unknown>) ?? {}),
+                  lastPaymentEvent: event.type,
+                  lastPaymentReason: intent.last_payment_error?.message || "Payment intent failed",
+                },
                 updatedAt: new Date(),
               },
             });
-            await recordBoardroomOrderEvent({
-              orderId: existingOrder.id,
-              actorEmail: "stripe:webhook",
-              eventType: "checkout.session.completed.replay_update",
-              previousStatus: `${existingOrder.paymentStatus}/${existingOrder.deliveryStatus}`,
-              newStatus: "paid/in_review",
-              note: "Stripe checkout replay updated existing order.",
-            }).catch(() => undefined);
-          }
-
-          // ── Durable fulfilment stubs ───────────────────────────────────────
-          // These stubs ensure the fulfilment trail exists immediately after payment.
-          // Idempotent: stable IDs derived from order ID; repeated webhook is safe.
-
-          // ProductArtifact stub
-          try {
-            const artifactId = `pa_boardroom_${canonicalOrderId}`;
-            await prisma.productArtifact.upsert({
-              where: { artifactId },
-              create: {
-                artifactId,
-                productCode: "boardroom-brief",
-                sourceEntityType: "boardroom_brief_order",
-                sourceEntityId: canonicalOrderId,
-                userId: session.metadata?.userId || null,
-                userEmail: email,
-                status: "PENDING",
-                deliveryStatus: "PENDING",
-              },
-              update: {},
-            });
-          } catch (artifactError) {
-            console.error("[BILLING_WEBHOOK_BOARDROOM_ARTIFACT_STUB_FAILED]", artifactError);
-          }
-
-          // FalsificationEntry stub
-          try {
-            const existingFalsification = await prisma.falsificationEntry.findFirst({
-              where: { sourceEntityType: "boardroom_brief_order", sourceEntityId: canonicalOrderId },
-              select: { id: true },
-            });
-            if (!existingFalsification) {
-              await prisma.falsificationEntry.create({
-                data: {
-                  productCode: "boardroom-brief",
-                  sourceEntityType: "boardroom_brief_order",
-                  sourceEntityId: canonicalOrderId,
-                  claimOrRecommendation: "PENDING_REVIEW — awaiting human analysis",
-                  confidenceLevel: "LOW",
-                  whatWouldChangeThisView: "PENDING — to be completed during analysis",
-                  observableIndicator: "PENDING — to be defined",
-                  status: "MONITORING",
-                },
-              });
-            }
-          } catch (falsificationError) {
-            console.error("[BILLING_WEBHOOK_BOARDROOM_FALSIFICATION_STUB_FAILED]", falsificationError);
-          }
-
-          // OutcomeHypothesis stub
-          try {
-            const hypothesisId = `oh_boardroom_${canonicalOrderId}`;
-            await prisma.outcomeHypothesis.upsert({
-              where: { hypothesisId },
-              create: {
-                hypothesisId,
-                productCode: "boardroom-brief",
-                sourceRunId: canonicalOrderId,
-                userEmail: email,
-                predictedDecisionMove: "PENDING_REVIEW — awaiting human analysis",
-                expectedObservableChange: "PENDING_REVIEW — awaiting analysis",
-                reviewDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-                status: "OPEN",
-              },
-              update: {},
-            });
-          } catch (hypothesisError) {
-            console.error("[BILLING_WEBHOOK_BOARDROOM_HYPOTHESIS_STUB_FAILED]", hypothesisError);
-          }
-
-          // Emit governed boardroom_case_stubs_created event
-          try {
-            const { routeGovernanceEvent } = await import("@/lib/platform/governance-event-bus");
-            await routeGovernanceEvent({
-              eventType: "BOARDROOM_CASE_STUBS_CREATED",
-              sourceSurface: "billing-webhook",
-              canonicalRecordType: "BoardroomBriefOrder",
-              canonicalRecordId: canonicalOrderId,
-              actorEmail: "stripe:webhook",
-              severity: "MEDIUM",
-              payload: {
-                email,
-                artifactStub: true,
-                falsificationStub: true,
-                hypothesisStub: true,
-              },
-              shouldWriteAudit: true,
-              shouldWriteLineage: true,
-            });
-          } catch (govErr) {
-            console.warn("[BILLING_WEBHOOK_BOARDROOM_STUBS_GOV_EVENT_FAILED]", govErr);
-          }
-        } catch (orderError) {
-          console.error("[BILLING_WEBHOOK_BOARDROOM_ORDER_FAILED]", orderError);
-        }
-
-        // P8 — Admin notification: non-blocking, fire-and-forget after stub creation
-        sendBoardroomAdminNotification({
-          orderId: session.metadata?.orderId || session.id.slice(0, 24),
-          customerEmail: email,
-          sessionId: session.id,
-          proofMode: session.metadata?.proofMode === "true",
-          orderCreatedAt: new Date(),
-        }).then((notifResult) => {
-          if (!notifResult.ok) {
-            console.error("[BILLING_WEBHOOK_BOARDROOM_ADMIN_NOTIFICATION_FAILED]", {
-              sessionId: session.id,
-              error: notifResult.error,
-            });
-          } else {
-            console.info("[BILLING_WEBHOOK_BOARDROOM_ADMIN_NOTIFICATION_SENT]", {
-              sessionId: session.id,
-              emailId: notifResult.emailId,
-            });
-          }
-        }).catch((err) => {
-          console.error("[BILLING_WEBHOOK_BOARDROOM_ADMIN_NOTIFICATION_EXCEPTION]", err);
-        });
-
-        if (session.metadata?.handoffId) {
-          try {
-            await prisma.$executeRaw`
-              UPDATE boardroom_bridge_handoffs
-              SET used_at = COALESCE(used_at, NOW())
-              WHERE id = ${session.metadata.handoffId}
-            `;
-          } catch (handoffError) {
-            console.warn("[BILLING_WEBHOOK_BOARDROOM_HANDOFF_MARK_FAILED]", handoffError);
           }
         }
-
-        // Update advisory queue
-        try {
-          const userId = session.metadata?.userId || "";
-          if (userId) {
-            await prisma.$executeRaw`
-              UPDATE inner_circle_advisory_qualifications
-              SET status = 'BOARDROOM_PAID', updated_at = NOW()
-              WHERE user_id = ${userId}
-                AND status IN ('BOARDROOM_CLICKED', 'BOARDROOM_REQUESTED')
-            `;
-          }
-        } catch (qualError) {
-          console.error("[BILLING_WEBHOOK_BOARDROOM_QUAL_UPDATE_FAILED]", qualError);
-        }
-      } else if (pc === "global-market-intelligence-report-q1-2026" || pc === "gmi_q1_2026") {
-        trackServerLaunch("gmi_full_report_purchase_completed", "/api/billing/webhook", {
-          productCode: pc,
-          route: catalogProduct?.successPath ?? "/artifacts/global-market-intelligence-report-q1-2026",
-        });
+        break;
       }
 
-      if (catalogProduct?.code === "executive_reporting") {
-        const generation = await generatePaidExecutiveReport({
-          checkoutSessionId: session.id,
-          stripeEventId: event.id,
-          email,
-          clientName: session.customer_details?.name ?? undefined,
-          caseRef: session.metadata?.caseRef ?? null,
-        });
-
-        if (!generation.ok || !generation.reportId) {
-          console.error("[BILLING_WEBHOOK_PAID_ER_GENERATION_FAILED]", {
-            sessionId: session.id,
-            email,
-            error: generation.error,
-          });
-          return res.status(500).json({
-            error: "PAID_ER_GENERATION_FAILED",
-          });
-        }
-
-        await prisma.stripeWebhookEvent.upsert({
-          where: { id: event.id },
-          create: {
-            id: event.id,
-            type: event.type,
-            sessionId: session.id,
-            reportId: generation.reportId,
-            status: "processed",
-          },
-          update: {
-            reportId: generation.reportId,
-            status: "processed",
-          },
-        }).catch(() => undefined);
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        await processRefundEvent(event, charge);
+        break;
       }
 
-      if (subscriptionId && contractId) {
-        await prisma.retainerContract.updateMany({
-          where: { id: contractId },
-          data: {
-            stripeSubscriptionId: subscriptionId,
-            status: "ACTIVE",
-          },
-        });
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as Stripe.Subscription;
+        await processSubscriptionEvent(event, subscription);
+        break;
       }
-    } else if (email && productCode) {
-      console.warn(
-        `[BILLING_WEBHOOK] Rejected unknown productCode from Stripe metadata: ${productCode}`,
-      );
+
+      default:
+        // Unhandled event type — acknowledge receipt
+        break;
     }
-  }
-
-  if (event.type === "checkout.session.expired") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    await markBoardroomOrderBySession({
-      stripeSessionId: session.id,
-      paymentStatus: "failed",
-      deliveryStatus: "failed",
-      eventType: event.type,
-      reason: "Checkout session expired before payment completion.",
-    });
-  }
-
-  if (event.type === "checkout.session.async_payment_failed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    await markBoardroomOrderBySession({
-      stripeSessionId: session.id,
-      paymentStatus: "failed",
-      deliveryStatus: "failed",
-      eventType: event.type,
-      reason: "Async payment failed.",
-    });
-  }
-
-  if (event.type === "payment_intent.payment_failed") {
-    const intent = event.data.object as Stripe.PaymentIntent;
-    await markBoardroomOrderByPaymentIntent({
-      paymentIntentId: intent.id,
-      paymentStatus: "failed",
-      deliveryStatus: "failed",
-      eventType: event.type,
-      reason: intent.last_payment_error?.message || "Payment intent failed.",
-    });
-  }
-
-  if (event.type === "charge.refunded") {
-    const charge = event.data.object as Stripe.Charge;
-    const paymentIntentId =
-      typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
-    if (paymentIntentId) {
-      await markBoardroomOrderByPaymentIntent({
-        paymentIntentId,
-        paymentStatus: "refunded",
-        deliveryStatus: "refunded",
-        eventType: event.type,
-        reason: "Stripe charge refunded.",
-      });
-    }
-  }
-
-  if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
-    const subscription = event.data.object as Stripe.Subscription;
-    if (subscription.id) {
-      await syncRetainerContractFromSubscription({
-        stripeSubscriptionId: subscription.id,
-        status: subscription.status,
-      });
-    }
-
-    // Audit log for Professional subscription payment failure — makes past_due
-    // visible to admin via AccessAuditLog even when no RetainerContract exists.
-    if (
-      event.type === "customer.subscription.updated" &&
-      subscription.status === "past_due"
-    ) {
-      const priceId = subscription.items.data[0]?.price.id ?? null;
-      const customerId = typeof subscription.customer === "string" ? subscription.customer : null;
-      await prisma.accessAuditLog.create({
-        data: {
-          actorType: "SYSTEM",
-          actorEmail: customerId ?? "stripe:subscription",
-          action: "subscription_payment_failed",
-          targetType: "stripe_subscription",
-          targetKey: subscription.id,
-          success: false,
-          reason: "past_due",
-          metadata: { priceId, customerId, subscriptionId: subscription.id, status: "past_due" },
-        },
-      }).catch(() => {
-        // Audit write failure must never mask webhook handling.
-      });
-    }
-  }
-
-  // HubSpot sync on successful checkout
-  if (event.type === "checkout.session.completed") {
-    const s = event.data.object as Stripe.Checkout.Session;
-    const hsEmail = String(s.metadata?.email || s.customer_details?.email || "").toLowerCase();
-    const hsAmount = typeof s.amount_total === "number" ? s.amount_total / 100 : undefined;
-    if (hsEmail) {
-      hubspotSync({
-        event: "payment_confirmed",
-        email: hsEmail,
-        data: { amount: hsAmount },
-      }).catch(() => {});
-    }
-  }
-
-  try {
-    await prisma.processedWebhookEvent.create({ data: { id: event.id } });
-  } catch (idempotencyError: any) {
-    if (idempotencyError?.code !== "P2002") {
-      console.warn("[BILLING_WEBHOOK] Failed to record processed event", idempotencyError);
-    }
+  } catch (error) {
+    console.error("[BILLING_WEBHOOK_PROCESSOR_ERROR]", { eventId: event.id, error });
+    return res.status(500).json({ error: "Processing failed" });
   }
 
   return res.json({ received: true });

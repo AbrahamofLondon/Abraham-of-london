@@ -89,22 +89,21 @@
   },
   "gmi_quarterly": {
     "productCode": "gmi_quarterly",
-    "productName": "Global Market Intelligence (Quarterly)",
-    "currentAuthorityState": "diagnostic_product_pending_evidence_validation",
-    "publicClaimAllowed": false,
+    "productName": "Global Market Intelligence — Q2 2026",
+    "currentAuthorityState": "market_ready_release_candidate_pending_data_lock",
+    "publicClaimAllowed": true,
     "canGrantAuthority": false,
     "commercialClaimAllowed": true,
-    "blockingReasons": [
-      "Evidence package exists and validated"
-    ],
-    "nextEvidenceAction": "Monitor for false claims, maintain falsification register, prepare Q3 workflow",
-    "targetReleaseLane": "evidence_limited_commercial_product",
+    "blockingReasons": [],
+    "nextEvidenceAction": "Complete post-8-July data lock, then seek owner release authority before commercial activation",
+    "targetReleaseLane": "quarterly_decision_intelligence",
     "allowedClaims": [
-      "evidence-limited quarterly intelligence",
+      "quarterly decision intelligence",
       "market research summary",
       "prior-quarter call verification",
       "forward scenario calibration",
-      "decision-support material"
+      "decision-support material",
+      "accountable judgement under structural uncertainty"
     ],
     "forbiddenClaims": [
       "AI predicts markets",
@@ -117,10 +116,10 @@
     "methodologyBoundaryPath": "artifacts/validation/market_intelligence_q2/methodology-boundary.md",
     "allowedClaimsPath": "artifacts/validation/market_intelligence_q2/allowed-claims.txt",
     "forbiddenClaimsPath": "artifacts/validation/market_intelligence_q2/forbidden-claims.txt",
-    "commercialClaimBounded": "evidence-limited-only",
-    "manualFulfilmentAllowed": true,
+    "commercialClaimBounded": "methodology_governed_decision_intelligence",
+    "manualFulfilmentAllowed": false,
     "checkoutAllowed": false,
-    "requiredBoundaryVariant": "advisory_review",
+    "requiredBoundaryVariant": "methodology_governance",
     "priorQuarterReviewRequired": true,
     "humanReviewRequired": true,
     "positiveAuthorityGranted": false
@@ -159,25 +158,32 @@
   },
   "market_intelligence_q2": {
     "productCode": "market_intelligence_q2",
-    "productName": "Market Intelligence Q2",
-    "currentAuthorityState": "insufficient_information_requires_review",
-    "publicClaimAllowed": false,
+    "productName": "Global Market Intelligence — Q2 2026",
+    "currentAuthorityState": "market_ready_release_candidate_pending_data_lock",
+    "publicClaimAllowed": true,
     "canGrantAuthority": false,
-    "commercialClaimAllowed": false,
-    "blockingReasons": [
-      "Requires Q2 intelligence scope definition"
-    ],
-    "nextEvidenceAction": "Define Q2 intelligence scope, evidence boundary, then advance",
-    "targetReleaseLane": "evidence_limited_commercial_product",
+    "commercialClaimAllowed": true,
+    "blockingReasons": [],
+    "nextEvidenceAction": "Complete post-8-July data lock, then seek owner release authority before commercial activation",
+    "targetReleaseLane": "quarterly_decision_intelligence",
     "allowedClaims": [
-      "evidence-limited quarterly intelligence",
-      "market research summary"
+      "quarterly decision intelligence",
+      "market research summary",
+      "prior-quarter call verification",
+      "forward scenario calibration",
+      "decision-support material"
     ],
     "forbiddenClaims": [
-      "AI predicts",
+      "AI predicts markets",
       "guaranteed forecast",
-      "certified intelligence"
-    ]
+      "investment advice",
+      "certified market intelligence",
+      "externally verified prediction",
+      "self-serve checkout"
+    ],
+    "manualFulfilmentAllowed": false,
+    "checkoutAllowed": false,
+    "commercialClaimBounded": "methodology_governed_decision_intelligence"
   },
   "market_intelligence_q3": {
     "productCode": "market_intelligence_q3",

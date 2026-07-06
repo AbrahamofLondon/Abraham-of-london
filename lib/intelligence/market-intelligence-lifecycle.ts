@@ -50,10 +50,10 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     coveragePeriod: "Q1 2026",
     decisionWindow: "Q2 2026",
     publishedAt: "2026-04-08",
-    updatedAt: "2026-04-08",
+    updatedAt: "2026-07-06",
     version: "2.0.0",
     lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
-    currentUntil: "Superseded by GMI-Q2-2026",
+    currentUntil: "Active until GMI-Q2-2026 receives owner release authority",
     supersededBy: null,
     replaces: null,
     nextExpected: "GMI-Q2-2026",
@@ -64,7 +64,7 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     publicVisible: true,
     archiveVisible: true,
     freshnessNote:
-      "This report reviews Q1 2026 conditions and remains active for Q2 decision use because it includes April 2026 tariff escalation, market repricing, and Q2 scenario implications. It will remain current until superseded by the Q2 2026 Market Intelligence Report.",
+      "This report reviews Q1 2026 conditions and remains the current published GMI edition until GMI-Q2-2026 receives owner release authority after the final data lock.",
   },
   {
     id: "GMI-Q2-2026",
@@ -75,15 +75,21 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     coveragePeriod: "Q2 2026",
     decisionWindow: "Q3 2026",
     publicationTarget: "2026-07-08",
+    updatedAt: "2026-07-06",
+    version: "1.0.0-rc",
     lifecycleState: "DRAFT",
+    currentUntil: "Pending owner release authority after post-8-July data lock",
     supersededBy: null,
     replaces: "GMI-Q1-2026",
-    nextExpected: null,
+    nextExpected: "GMI-Q3-2026",
+    publicHref: "/offers/global-market-intelligence-q2",
+    institutionalHref: "/artifacts/global-market-intelligence-report-q2-2026",
+    boardHref: "/artifacts/global-market-intelligence-report-q2-2026",
     purchasable: false,
     publicVisible: false,
     archiveVisible: false,
     freshnessNote:
-      "The Q2 2026 Market Intelligence Report is in preparation and is not public, purchasable, or indexed as an active report.",
+      "Pre-release market readiness is complete, but final release clearance remains pending the post-8-July data lock and owner release authority. No publication, Q1 supersession, self-serve checkout, manual fulfilment, or commercial activation is enabled.",
   },
 ] as const;
 
@@ -132,8 +138,7 @@ export function getCurrentPublishedMarketIntelligenceReport(
   const candidates = MARKET_INTELLIGENCE_LIFECYCLE.filter(
     (r) =>
       isPublishedState(r.lifecycleState) &&
-      !r.supersededBy &&
-      (!r.publishedAt || new Date(r.publishedAt) <= asOf),
+      !r.supersededBy,
   );
   return (
     [...candidates].sort(
@@ -153,8 +158,7 @@ export function getUpcomingMarketIntelligenceReport(
   const candidates = MARKET_INTELLIGENCE_LIFECYCLE.filter(
     (r) =>
       r.lifecycleState === "DRAFT" ||
-      r.lifecycleState === "SCHEDULED" ||
-      (isPublishedState(r.lifecycleState) && !!r.publishedAt && new Date(r.publishedAt) > asOf),
+      r.lifecycleState === "SCHEDULED",
   );
   return candidates[0] ?? null;
 }

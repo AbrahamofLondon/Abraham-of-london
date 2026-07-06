@@ -1,0 +1,845 @@
+
+> abraham-of-london@1.0.0 audit:access C:\aol-check-visual
+> tsx scripts/audit-access-consistency.ts
+
+
+=== ACCESS CONSISTENCY AUDIT ===
+
+app/api/downloads/[slug]/route.ts
+  L99  [manual-tier-compare]  if (requiredTier === "public") {
+
+app/api/library/download/route.ts
+  L158  [manual-tier-compare]  if (requiredTier !== "public") {
+
+app/api/vault/[...slug]/route.ts
+  L88  [manual-tier-compare]  if (requiredTier !== "public") {
+
+app/__pdf/[slug]/page.tsx
+  L53  [raw-normalization]  const t = String(tierRaw || "").toLowerCase();
+
+components/analytics/AnalyticsDashboard.tsx
+  L387  [manual-tier-compare]  tier === "architect" ? "bg-purple-500/20 text-purple-400" : "bg-blue-500/20 text-blue-400"
+
+components/blog/ClassicBlogReader.tsx
+  L252  [manual-tier-compare]  {requiredTier !== "public" && (
+
+components/content/DirectorateOversight.tsx
+  L370  [manual-tier-compare]  {requiredTier !== "public" && (
+
+components/MemberClearanceBanner.tsx
+  L15  [manual-tier-compare]  if (userTier === 'public' || !userTier) {
+  L21  [manual-tier-compare]  if (!isVisible || userTier !== 'public') return null;
+
+contentlayer.config.ts
+  L379  [manual-tier-compare]  return tier !== "public" || safeBoolean(doc?.requiresAuth, false);
+  L369  [direct-accessTier-usage]  doc?.accessTier ?? doc?.accessLevel ?? doc?.tier ?? doc?.classification
+  L377  [direct-accessTier-usage]  doc?.accessTier ?? doc?.accessLevel ?? doc?.tier ?? doc?.classification
+
+lib/access/logic.ts
+  L406  [manual-tier-compare]  if (requiredTier === "public") return { ok: true };
+
+lib/access/SecurityMiddleware.ts
+  L13  [manual-tier-compare]  if (requiredTier === "public") return NextResponse.next();
+
+lib/admin/access-diagnostics.test.ts
+  L132  [manual-tier-compare]  const check = diagnoseTiers(access({ tier: "public" })).find((c) => c.tier === "public");
+  L137  [manual-tier-compare]  const check = diagnoseTiers(access({ tier: "owner" })).find((c) => c.tier === "owner");
+  L142  [manual-tier-compare]  const check = diagnoseTiers(access({ tier: "member" })).find((c) => c.tier === "restricted");
+
+lib/auth/config.ts
+  L322  [direct-accessTier-usage]  session.user.accessTier = access.tier;
+  L338  [direct-accessTier-usage]  session.user.accessTier = isBootstrapAdmin ? "architect" : "public";
+
+lib/auth/guards.ts
+  L100  [manual-tier-compare]  if (requiredTier === "architect" || requiredTier === "owner") {
+  L100  [manual-tier-compare]  if (requiredTier === "architect" || requiredTier === "owner") {
+  L104  [manual-tier-compare]  requiredTier === "client"
+  L107  [manual-tier-compare]  } else if (requiredTier === "member") {
+
+lib/auth/resolve-identity.ts
+  L168  [manual-tier-compare]  if (!identity.authenticated) return requiredTier === "public";
+
+lib/auth/server.ts
+  L93  [manual-tier-compare]  if (IS_BUILD) return requiredTier === "public";
+  L96  [manual-tier-compare]  if (!sess.valid || !sess.tier) return requiredTier === "public";
+
+lib/benchmarks/benchmark-context-authority.ts
+  L252  [direct-accessTier-usage]  const specTierIndex = tierOrder.indexOf(spec.accessTier);
+
+lib/benchmarks/benchmark-metric-registry.ts
+  L318  [direct-accessTier-usage]  return profile.metrics.filter((m) => tierOrder.indexOf(m.accessTier) <= tierIndex);
+
+lib/benchmarks/benchmark-narrative.ts
+  L218  [direct-accessTier-usage]  (m) => m.accessTier === "professional",
+
+lib/briefs/registry.ts
+  L98  [manual-tier-compare]  if (requiredTier === "public") return { ok: true, userTier, requiredTier, requiredLabel };
+  L99  [manual-tier-compare]  if (userTier === "public") return { ok: false, userTier, requiredTier, requiredLabel, reason: "requires_auth" };
+
+lib/content/access.ts
+  L44  [manual-tier-compare]  requiresAuth: requiredTier !== "public",
+
+lib/content/index.ts
+  L107  [manual-tier-compare]  requiresAuth: tier !== "public",
+
+lib/content/public-content-resolver.ts
+  L184  [manual-tier-compare]  return tier === "public" || tier === "open" || tier === "free" || tier === "unclassified";
+  L175  [direct-accessTier-usage]  anyDoc.accessTier ??
+
+lib/content/publication-eligibility.ts
+  L129  [direct-accessTier-usage]  const tier = safeStr(doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || doc.classification || "public").toLowerCase();
+
+lib/db/tier-mapping.ts
+  L42  [raw-normalization]  const t = String(tier || "public").trim().toLowerCase();
+
+lib/downloads/asset-registry.ts
+  L148  [manual-tier-compare]  isPublic: requiredTier === "public",
+  L193  [manual-tier-compare]  isPublic: requiredTier === "public",
+
+lib/gating.ts
+  L147  [manual-tier-compare]  requiresAuth: tier !== "public",
+
+lib/inner-circle/access.server.ts
+  L91  [manual-tier-compare]  if (requiredTier === "public") return { hasAccess: true, reason: "no_request", tier: userTier };
+  L100  [manual-tier-compare]  if (requiredTier === "public") return { hasAccess: true, reason: "no_request", tier: "public" };
+
+lib/inner-circle/middleware.ts
+  L34  [manual-tier-compare]  if (!hasSession || userTier === "public") {
+
+lib/intelligence/watermark-delegate.ts
+  L142  [manual-tier-array]  ["member", "restricted"].includes(String(tier).toLowerCase())
+  L131  [raw-normalization]  const directMatch = allowed.find((tier) => String(tier).toLowerCase() === raw);
+  L135  [raw-normalization]  const label = safeString(TIER_LABELS[tier]).toLowerCase();
+  L142  [raw-normalization]  ["member", "restricted"].includes(String(tier).toLowerCase())
+
+lib/library/library-index.ts
+  L335  [direct-accessTier-usage]  const accessRaw = doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || doc.classification || "public";
+
+lib/library/normalise-library-item.ts
+  L248  [direct-accessTier-usage]  const accessRaw = raw.accessTierSafe || raw.accessTier || raw.accessLevel || raw.tier || raw.classification || raw.access || "public";
+
+lib/living-intelligence/estate-snapshot-loader.ts
+  L524  [manual-tier-compare]  return tier === "public" || tier === "open" || tier === "free" || tier === "unclassified";
+  L523  [raw-normalization]  const tier = String(d.accessTierSafe ?? d.accessLevel ?? d.accessTier ?? d.tier ?? d.classification ?? "public").toLowerCase();
+  L523  [direct-accessTier-usage]  const tier = String(d.accessTierSafe ?? d.accessLevel ?? d.accessTier ?? d.tier ?? d.classification ?? "public").toLowerCase();
+
+lib/pdf/registry.ts
+  L83  [manual-tier-compare]  return tier !== "public" && Boolean(item.qualityFlag) && !isExplicitlyAllowedLowQuality(pdf);
+
+lib/pdf/runtime.ts
+  L135  [manual-tier-compare]  const requiresAuth = requiredTier !== "public";
+  L198  [manual-tier-compare]  requiresAuth: requiredTier !== "public",
+
+lib/premium/content-registry.ts
+  L363  [raw-normalization]  const normalizedTier = String(tier || "").trim().toLowerCase();
+  L504  [raw-normalization]  const normalizedUserTier = String(userTier || "").trim().toLowerCase();
+
+lib/resources/strategic-frameworks.access.server.ts
+  L30  [direct-accessTier-usage]  ctx.accessTier ??
+
+lib/resources/strategic-frameworks.server.ts
+  L97  [manual-tier-compare]  if (userTier === "public") {
+
+lib/server/current-access-binding.ts
+  L183  [manual-tier-compare]  return requiredTier === "public";
+
+lib/server/diagnostics/report-engine.ts
+  L248  [manual-tier-compare]  tier === "inner-circle" ||
+  L252  [manual-tier-compare]  tier === "restricted" ||
+  L253  [manual-tier-compare]  tier === "top-secret"
+  L245  [raw-normalization]  const tier = safeString(args.userTier).toLowerCase();
+
+lib/server/inner-circle-access.ts
+  L263  [raw-normalization]  const tier = String(member.tier || "").toLowerCase() as AccessTier | string;
+
+lib/shared/strings.ts
+  L68  [raw-normalization]  const s = safeString(tier).toLowerCase().trim();
+
+lib/surrender/surrender-assets.ts
+  L60  [manual-tier-compare]  isPublic: requiredTier === "public",
+
+middleware/vault-security.ts
+  L35  [manual-tier-compare]  if (requiredTier === "public") {
+
+netlify/functions_src/functions/gmi-boardroom-pdf.tsx
+  L77  [raw-normalization]  const tier = String(payload.tier || payload.accessTier || "").toLowerCase();
+  L77  [direct-accessTier-usage]  const tier = String(payload.tier || payload.accessTier || "").toLowerCase();
+
+pages/api/blog/[slug].ts
+  L78  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/books/[slug].ts
+  L160  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/briefs/[slug].ts
+  L116  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/canon/[slug].ts
+  L187  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/content/[...slug].ts
+  L42  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/dispatches/[slug].ts
+  L96  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/api/downloads/mdx.ts
+  L186  [manual-tier-compare]  requiredTier === "public"
+  L199  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/events/[slug].ts
+  L45  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/frameworks/surrender/[slug].ts
+  L120  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/library/[slug].ts
+  L131  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/pdf-data.ts
+  L57  [raw-normalization]  const tier = String(req.body?.tier ?? process.env.PDF_TIER ?? "premium").toLowerCase();
+
+pages/api/premium/content/index.ts
+  L214  [manual-tier-compare]  const isPublicContent = requiredTier === "public";
+
+pages/api/private/vault/[...path].ts
+  L212  [manual-tier-compare]  if (vaultRuntimeConfig.enforceAuth && requiredTier !== "public") {
+
+pages/api/resources/mdx.ts
+  L99  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/resources/strategic-frameworks/[...slug].ts
+  L126  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/resources/[...slug].ts
+  L138  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/api/shorts/[slug].ts
+  L79  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L52  [direct-accessTier-usage]  d?.accessTier ??
+  L54  [direct-accessTier-usage]  d?.metadata?.accessTier ??
+
+pages/api/surrender/download/[id].ts
+  L60  [manual-tier-compare]  if (requiredTier === "public") {
+
+pages/blog/[...slug].tsx
+  L350  [manual-tier-compare]  const code = requiredTier === "public" ? renderBody.code : "";
+
+pages/books/[slug].tsx
+  L384  [manual-tier-compare]  const locked = requiredTier !== "public";
+
+pages/briefs/index.tsx
+  L78  [manual-tier-compare]  return requiredTier === "public";
+
+pages/briefs/[slug].tsx
+  L134  [manual-tier-compare]  return requiredTier === "public";
+
+pages/canon/[slug].tsx
+  L78  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L183  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/content/[...slug].tsx
+  L31  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L85  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/editorials/[slug].tsx
+  L82  [manual-tier-compare]  const isPublic = item.tier === "public";
+  L847  [manual-tier-compare]  const isPublic = item.tier === "public";
+
+pages/events/[slug].tsx
+  L56  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/frameworks/index.tsx
+  L52  [manual-tier-compare]  const isFree = !tier || tier === "public" || tier === "member";
+  L52  [manual-tier-compare]  const isFree = !tier || tier === "public" || tier === "member";
+  L53  [manual-tier-compare]  const label = isFree ? "Free method brief" : tier === "architect" || tier === "owner" ? "Restricted architect material" : "Governed playbook";
+  L53  [manual-tier-compare]  const label = isFree ? "Free method brief" : tier === "architect" || tier === "owner" ? "Restricted architect material" : "Governed playbook";
+  L109  [direct-accessTier-usage]  tier: safeString(doc.tier || doc.accessTier, "public"),
+  L119  [direct-accessTier-usage]  tier: safeString(doc.tier || doc.accessTier, "public"),
+
+pages/inner-circle/briefs/index.tsx
+  L60  [direct-accessTier-usage]  {brief.title} · {brief.accessTier}
+  L127  [direct-accessTier-usage]  const accessTier = String(b?.accessTier ?? "public").toLowerCase();
+  L137  [direct-accessTier-usage]  const accessTier = String(brief?.accessTier ?? "inner-circle");
+
+pages/intelligence/market.tsx
+  L114  [manual-tier-compare]  return tier === "public";
+  L119  [manual-tier-compare]  if (tier === "public")  return "public";
+  L120  [manual-tier-compare]  if (tier === "member")  return "member";
+  L121  [manual-tier-compare]  if (tier === "restricted") return "restricted";
+
+pages/intelligence/[slug].tsx
+  L71  [manual-tier-compare]  return requiredTier === "public";
+
+pages/library/[slug].tsx
+  L224  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L115  [raw-normalization]  String(x.tier || "").toLowerCase() === "public" ||
+
+pages/playbooks/[slug].tsx
+  L172  [manual-tier-compare]  const isPublic = tier === "public";
+  L204  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/prints/[slug].tsx
+  L38  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L111  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/registry/[type]/[slug].tsx
+  L280  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/resources/strategic-frameworks/[slug].tsx
+  L54  [manual-tier-compare]  content={requiredTier === "public" ? "index,follow" : "noindex,nofollow"}
+
+pages/resources/surrender-framework/[slug].tsx
+  L41  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L113  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/resources/[...slug].tsx
+  L58  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L143  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/strategy/[...slug].tsx
+  L63  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L236  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/toolkits/index.tsx
+  L58  [manual-tier-compare]  {toolkit.tier !== "public" && <Lock style={{ width: 10, height: 10, color: tierInfo.color }} />}
+
+pages/toolkits/[slug].tsx
+  L63  [manual-tier-compare]  {toolkit.tier !== "public" && (
+
+pages/vault/briefs/index.tsx
+  L326  [manual-tier-compare]  const restricted = brief.requiredTier !== "public";
+
+pages/vault/briefs/[slug].tsx
+  L243  [manual-tier-compare]  requiredTier === "public" ? safeString(brief?.bodyCode) : "",
+  L645  [manual-tier-compare]  const locked = requiredTier !== "public";
+
+pages/vault/index.tsx
+  L112  [manual-tier-compare]  requiresAuth: tier !== "public",
+  L136  [manual-tier-compare]  requiresAuth: tier !== "public",
+
+pages/vault/[...slug].tsx
+  L48  [manual-tier-compare]  const isPublic = requiredTier === "public";
+  L131  [manual-tier-compare]  const isPublic = requiredTier === "public";
+
+pages/vault-sitemap.xml.ts
+  L7  [raw-normalization]  const level = String(doc?.tier || doc?.accessLevel || "public").toLowerCase().trim();
+
+pages/[slug].tsx
+  L292  [manual-tier-compare]  const staticHtml = requiredTier === "public" ? renderDocBodyToStaticHtml(rawDoc).html : "";
+
+prisma/seed.ts
+  L70  [manual-tier-compare]  if (asset.tier === 'architect' || asset.tier === 'private') {
+  L84  [manual-tier-compare]  classification: asset.tier === 'architect' ? Classification.RESTRICTED : Classification.PUBLIC
+  L91  [manual-tier-compare]  classification: asset.tier === 'architect' ? Classification.RESTRICTED : Classification.PUBLIC
+  L70  [manual-tier-if-chain]  if (asset.tier === 'architect' || asset.tier === 'private') {
+
+proxy.ts
+  L1494  [manual-tier-compare]  if (requiredTier === "architect" || requiredTier === "owner") {
+  L1494  [manual-tier-compare]  if (requiredTier === "architect" || requiredTier === "owner") {
+  L1499  [manual-tier-compare]  if (requiredTier === "inner_circle" || requiredTier === "client") {
+
+scripts/audit-access-consistency.ts
+  L45  [direct-accessTier-usage]  regex: /\.accessTier\b/g,
+
+scripts/audit-public-route-coverage.mjs
+  L43  [manual-tier-compare]  tier === "public" &&
+  L40  [direct-accessTier-usage]  const tier = String(data.accessTier ?? data.accessLevel ?? "").toLowerCase();
+
+scripts/build-mdx-route-manifest.mjs
+  L241  [manual-tier-compare]  if (!isInternal && collection && isPub && tier === "public") {
+  L248  [manual-tier-compare]  } else if (tier !== "public") reasonIfNotPublic = `Tier: ${tier}`;
+  L83  [direct-accessTier-usage]  const raw = safeStr(doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || doc.classification || "public");
+
+scripts/check-content-visibility-regression.mjs
+  L84  [manual-tier-compare]  if (tier && tier !== "public") return false;
+
+scripts/check-editorial-series-display-contract.mjs
+  L116  [direct-accessTier-usage]  doc.accessTier ||
+
+scripts/check-mdx-publication-eligibility.mjs
+  L84  [direct-accessTier-usage]  const tier = safeStr(doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || "public").toLowerCase();
+
+scripts/check-public-content-routes.mjs
+  L99  [manual-tier-compare]  return tier === "public" || tier === "open" || tier === "free" || tier === "unclassified";
+  L96  [direct-accessTier-usage]  doc.accessTierSafe ?? doc.accessLevel ?? doc.accessTier ?? doc.tier ?? doc.classification ?? "public",
+
+scripts/check-public-link-integrity.mjs
+  L77  [direct-accessTier-usage]  const tier = safeStr(doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || "public").toLowerCase();
+
+scripts/fix-sitemap-future-urls.mjs
+  L91  [direct-accessTier-usage]  doc.accessTierSafe || doc.accessTier || doc.accessLevel || doc.tier || "public"
+
+scripts/generate-legacy-canvas.tsx
+  L207  [manual-tier-compare]  if (!(tier === "premium" || tier === "enterprise" || tier === "restricted")) return;
+  L209  [manual-tier-compare]  const txt = tier === "restricted" ? "Private" : "Signed";
+  L229  [manual-tier-compare]  if (tier === "premium" || tier === "enterprise" || tier === "restricted") return;
+  L442  [manual-tier-compare]  if ((tier === "public" || tier === "basic") && f.placeholder) {
+
+scripts/generate-premium-pdfs.tsx
+  L417  [manual-tier-compare]  if (tier === 'architect' || tier === 'inner-circle') {
+  L417  [manual-tier-compare]  if (tier === 'architect' || tier === 'inner-circle') {
+  L501  [manual-tier-compare]  backgroundColor: tier === 'architect' ? rgb(0.98, 0.98, 0.98) : rgb(1, 1, 1)
+  L507  [manual-tier-compare]  if (tier === 'architect' || tier === 'inner-circle') {
+  L507  [manual-tier-compare]  if (tier === 'architect' || tier === 'inner-circle') {
+
+scripts/pdf/build-pdf-registry-generated.ts
+  L508  [manual-tier-compare]  priority: tier === "architect" ? 5 : tier === "inner-circle" ? 3 : 10,
+  L508  [manual-tier-compare]  priority: tier === "architect" ? 5 : tier === "inner-circle" ? 3 : 10,
+
+scripts/pdf/build-vault-pack.ts
+  L114  [raw-normalization]  const eTier = String(e.tier || "free").toLowerCase();
+
+scripts/pdf/enhanced-puppeteer-generator.ts
+  L354  [manual-tier-compare]  <p class="confidential">${metadata.tier === 'architect' ? 'CONFIDENTIAL - INNER CIRCLE PLUS ONLY' : 'For authorized use only'}</p>
+
+scripts/pdf/file-pdf-converter/converters/base-converter.ts
+  L126  [raw-normalization]  const slug = String(tier?.slug || "free").toLowerCase();
+
+scripts/pdf/generate-from-generated-registry.ts
+  L359  [manual-tier-compare]  priority: Number(metadata.priority ?? (tier === "architect" ? 5 : 10)),
+
+scripts/pdf/generate-interactive-pdf.ts
+  L509  [manual-tier-compare]  if (watermarked && (tier === "architect" || tier === "inner-circle")) {
+  L509  [manual-tier-compare]  if (watermarked && (tier === "architect" || tier === "inner-circle")) {
+
+scripts/pdf/generators/alignment-assessment.ts
+  L53  [manual-tier-compare]  return tier === "free" || tier === "member";
+
+scripts/pdf/generators/surrender-framework.ts
+  L137  [manual-tier-compare]  if (tier === "public" || tier === "member") {
+  L137  [manual-tier-compare]  if (tier === "public" || tier === "member") {
+
+scripts/pdf/intelligent-pdf-generator-bridge.ts
+  L61  [manual-tier-compare]  (tier === 'architect' && f.includes('-alt.pdf'))
+
+scripts/pdf/mdx-pdf-converter/config.ts
+  L46  [raw-normalization]  const safeTier = String(tier || "free").trim().toLowerCase();
+
+scripts/pdf/scan-content-for-registry.ts
+  L332  [manual-tier-compare]  priority: frontmatter.priority || (tier === 'architect' ? 5 : 10),
+
+scripts/pdf/secure-puppeteer-generator.ts
+  L232  [raw-normalization]  const s = String(tier || "free").trim().toLowerCase();
+
+scripts/pdf/templates/index.ts
+  L121  [manual-tier-compare]  if (tier === "member") return "MEMBER";
+  L122  [manual-tier-compare]  if (tier === "architect") return "ARCHITECT";
+  L128  [manual-tier-compare]  if (tier === "member") return COLORS.tierMember;
+  L129  [manual-tier-compare]  if (tier === "architect") return COLORS.tierArchitect;
+
+scripts/pdf/unified-pdf-generator.ts
+  L437  [raw-normalization]  const m = String(meta?.tier || meta?.accessLevel || "").toLowerCase();
+
+scripts/playbook-commercial-guard.mjs
+  L93  [manual-tier-compare]  if (tier === "public") return true; // public briefs don't need catalog entries
+  L105  [manual-tier-compare]  if (tier === "architect") {
+  L174  [manual-tier-compare]  if (fm.tier === "public" || fm.tier === "architect") return true;
+  L174  [manual-tier-compare]  if (fm.tier === "public" || fm.tier === "architect") return true;
+  L193  [manual-tier-compare]  if (fm.tier === "public" || fm.tier === "architect") return true;
+  L193  [manual-tier-compare]  if (fm.tier === "public" || fm.tier === "architect") return true;
+  L174  [manual-tier-if-chain]  if (fm.tier === "public" || fm.tier === "architect") return true;
+  L193  [manual-tier-if-chain]  if (fm.tier === "public" || fm.tier === "architect") return true;
+
+scripts/seed-metadata.mjs
+  L18  [direct-accessTier-usage]  const tier = (doc.accessTier === 'restricted' || doc.accessLevel === 'restricted')
+
+scripts/sync-vault.ts
+  L130  [raw-normalization]  return safeString(doc.tier || doc.accessTierSafe, "public").toLowerCase();
+
+tests/benchmarks/benchmark-productisation.test.ts
+  L131  [direct-accessTier-usage]  expect(m.accessTier).toBe("free");
+  L386  [direct-accessTier-usage]  expect(BENCHMARK_DIMENSIONS[d].accessTier).toBe("free");
+  L393  [direct-accessTier-usage]  expect(BENCHMARK_DIMENSIONS[d].accessTier).toBe("professional");
+  L408  [direct-accessTier-usage]  expect(d.accessTier).toBe("free");
+
+tests/content/briefs-publication.test.ts
+  L280  [direct-accessTier-usage]  return readFrontmatter(path.join(BRIEFS_CONTENT, f)).accessTier !== "public";
+
+=== ACCESS FILES USING SSOT HELPERS ===
+
+app/(dashboard)/layout.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/(dashboard)/portfolio/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/actions/log-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/actions/request-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/admin/access/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/admin/intelligence-foundry/promotion/dashboard/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/admin/organisations/[id]/dashboard/intervention-modal.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/admin/organisations/[id]/dashboard/ogr-interactive-view.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/admin/organisations/[id]/dashboard/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/admin/boardroom-delivery/grant-access/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/admin/boardroom-delivery/revoke-access/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/editorials/[slug]/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/inner-circle/admin/export/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/inner-circle/issue/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/inner-circle/verify/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/api/premium/forensics/attribution/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+app/dashboard/controls.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/dashboard/pdf-analytics/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/dashboard/pdf-analytics/PdfAnalyticsClient.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/pdf-dashboard/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+app/pdf-dashboard/PdfDashboardClient.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/AccessGate.tsx  ->  hasAccess, normalizeUserTier
+components/admin/AuditDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/admin/decision/SecurityDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/admin/PdfSyncDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/admin/SecurityDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/alignment/EnterpriseDashboardContainer.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/alignment/EnterpriseDashboardController.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/alignment/EnterpriseIntelligenceDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/alignment/ExecutiveSynthesisDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/alignment/MarketCaptureDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/analytics/AnalyticsDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/analytics/predicted-impact-dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/AuditDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/BriefAccessGuard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/admin/AdminJobsPanel.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/admin/BillingEntitlementsPanel.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/admin/BriefSearch.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/admin/MyReportsPanel.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/admin/SessionDebugger.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/archive/ConnectionStatus.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/archive/PdfAnalyticsWidget.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/archive/StockPriceCard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/archive/VaultAudit.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/ChartContent.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/DashboardDrilldownPanel.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/DiagnosticLineagePanel.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/GrowthChart.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/index.ts  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/LiveDataDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/PDFDataDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/PortfolioSummary.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/dashboard/types.ts  ->  missing-hasAccess, missing-normalizeUserTier
+components/DashboardHeader.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/DashboardStats.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/editorial/PublicationCard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/editorial/SeriesBand.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/homepage/EditorialIntelligenceBand.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/inner-circle/ContentGrid.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/inner-circle/DashboardHeader.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/inner-circle/EmptyState.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/inner-circle/IntelligenceBriefsClient.tsx  ->  hasAccess, normalizeUserTier
+components/inner-circle/QuickActions.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/inner-circle/StatsOverview.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/inner-circle/WorkspaceNav.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/Header.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFActionsBar.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFAnnotations.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFComparisonView.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFExportPanel.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFQuickActions.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFRecentActivity.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFShareModal.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/PDFViewer.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/Sidebar.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard/StatusMessage.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/PDFDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/premium/DownloadButton.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/premium/PremiumAssetCard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/premium/PremiumAssetLaunchButton.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/product/AccessPostureBadge.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/product/FreeTierUpgradeModal.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/trust/EvidenceTierBadge.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/vault/VaultAccessGate.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+components/vault/VaultTierCard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+config/pdfDashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+contexts/PDFDashboardContext.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+hooks/use-inner-circle.ts  ->  missing-hasAccess, missing-normalizeUserTier
+hooks/useAccess.ts  ->  hasAccess, normalizeUserTier
+hooks/useFortifiedAccess.ts  ->  missing-hasAccess, missing-normalizeUserTier
+hooks/useInnerCircleAccess.ts  ->  missing-hasAccess, missing-normalizeUserTier
+hooks/usePDFAccessControl.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+hooks/usePDFDashboard-impl.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+hooks/usePDFDashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/access-key.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/admin-authority.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/admin-email-resolver.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/admin-email-resolver.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/admin-emails.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/admin-guard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/admin-service.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/aol-tier-bridge.ts  ->  hasAccess, missing-normalizeUserTier
+lib/access/audit.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/bridge.ts  ->  hasAccess, missing-normalizeUserTier
+lib/access/checks.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/db-tier-mapper.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/downloads.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/entitlement-service.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/get-user-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/invite-mail.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/invite-service.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/logic.ts  ->  hasAccess, missing-normalizeUserTier
+lib/access/professional-tier.test.ts  ->  missing-hasAccess, normalizeUserTier
+lib/access/public.ts  ->  hasAccess, missing-normalizeUserTier
+lib/access/require-admin-app.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/require-admin.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/require-role.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/role-contract.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/role-resolver.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/SecurityMiddleware.ts  ->  hasAccess, missing-normalizeUserTier
+lib/access/server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/tier-map.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/tier-policy.ts  ->  hasAccess, normalizeUserTier
+lib/access/tier.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/tiers.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/types.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/access/vault-policy.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/admin/access-diagnostics.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/admin/access-diagnostics.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/admin/provenance-access-policy.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/admin/provenance-access-policy.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/admin/report-state-dashboard.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/admin/report-state-dashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/alignment/dashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/analytics/founder-dashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/archive-accessor.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/artifacts/access-token.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/assets/pdf-access.ts  ->  hasAccess, normalizeUserTier
+lib/auth/tiers.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/boardroom/boardroom-access-token.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/commercial/premium-decision-assets.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/commercial/professional-tier-invariants.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/components/ai/SovereignDashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+lib/constitution/observability-dashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/content/access-engine.ts  ->  hasAccess, normalizeUserTier
+lib/content/access.ts  ->  hasAccess, missing-normalizeUserTier
+lib/content/homepage-editorial-series.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/content/publication-eligibility.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/dashboard/dashboard-status.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/dashboard/drilldowns.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/db/tier-mapping.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/decision/spine-accessors.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/access.ts  ->  hasAccess, normalizeUserTier
+lib/editorial/catalogue.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/discovery.ts  ->  hasAccess, normalizeUserTier
+lib/editorial/editorial-catalogue.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/legacy-catalogue.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/series-content.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/series.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/server-readers.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/editorial/types.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/access.client.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/access.server.ts  ->  hasAccess, missing-normalizeUserTier
+lib/inner-circle/access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/commercial-bridge.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/config.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/email-triggers.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/email.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/exports.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/exports.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/feature-flags.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/index.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/InnerCircleContext.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/jwt.ts  ->  missing-hasAccess, normalizeUserTier
+lib/inner-circle/keys.client.ts  ->  missing-hasAccess, normalizeUserTier
+lib/inner-circle/keys.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/keys.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/middleware.ts  ->  hasAccess, normalizeUserTier
+lib/inner-circle/operating-layer.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/operating-repository.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/rate-limit.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/safe-utils.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/server-auth.ts  ->  hasAccess, missing-normalizeUserTier
+lib/inner-circle/server-utils.ts  ->  missing-hasAccess, normalizeUserTier
+lib/inner-circle/store.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle/validation.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/inner-circle.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/intelligence/gmi-publication-service.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/intelligence/tiered-disclosure.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/content-registry.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/download-audit.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/download-token.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/fingerprint-profile.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/forensics/pdf-attribution.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/private-asset-store.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/sanitize.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/temp-files.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/token-validation.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/premium/watermark.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/client-safe-provenance-access.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/client-safe-provenance-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/evidence-tier-derivation.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/free-tier-limits.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/free-tier-limits.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/operator-role-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/organisation-access-contract.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/organisation-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/product/product-access-link-resolver.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/research/engines/editorial-style-checker-adapter.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/resources/strategic-frameworks.access.server.ts  ->  missing-hasAccess, normalizeUserTier
+lib/resources/tier-metadata.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/access/session.ts  ->  hasAccess, missing-normalizeUserTier
+lib/server/access/tokenStore.memory.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/access/tokenStore.postgres.ts  ->  missing-hasAccess, normalizeUserTier
+lib/server/access/tokenStore.redis.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/access/tokenStore.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/access/types.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/access/verify-token.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/billing/commercial-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/billing/executive-report-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/current-access-binding.ts  ->  hasAccess, normalizeUserTier
+lib/server/diagnostics/artifact-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle/keys.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-cache.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-export.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-guards.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-queries.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-simple.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle-store.ts  ->  hasAccess, normalizeUserTier
+lib/server/inner-circle-utils.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/inner-circle.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/strategy-room/access.server.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/server/with-inner-circle-access.ts  ->  hasAccess, normalizeUserTier
+lib/server/withInnerCircleAccess.ts  ->  missing-hasAccess, missing-normalizeUserTier
+lib/sovereign/require-sovereign-api-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/access/accept.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/access/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/access/redeem.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/accessibility-statement.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/accessibility.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/access-diagnostics.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/access-keys.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/access-revoke.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/conversion-dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/inner-circle/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/intelligence/gmi/publication-readiness.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/launch-dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/admin/pdf-dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/accept-invite.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/check.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/clear.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/download.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/logout.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/me.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/redeem.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/serve.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/access/verify.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/access-keys/create.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/access-keys/index.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/access-keys/[id]/revoke.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/access-keys/[id]/uses.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/boardroom/orders/[id]/customer-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/inner-circle/export/route.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/inner-circle/export.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/inner-circle/issue.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/admin/inner-circle/revoke.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/boardroom-funnel.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/feedback-health.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/fulfilment-state.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/metrics.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/my-reports.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/operational-summary.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/outcome-distribution.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/oversight-reviews.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/pressure-trend.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/recent-activity.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/retainer-health.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/risk-suppression.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/dashboard/snapshot.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/editorials/citation/[slug].ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/editorials/preview/[slug].ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/boardroom-bridge.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/council-request.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/email-trigger.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/generate-link.ts  ->  missing-hasAccess, normalizeUserTier
+pages/api/inner-circle/lexicon.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/register.ts  ->  missing-hasAccess, normalizeUserTier
+pages/api/inner-circle/resend.ts  ->  missing-hasAccess, normalizeUserTier
+pages/api/inner-circle/retrieve/[briefId].ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/rise-decay-scorecard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/self-revoke.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/unlock.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/inner-circle/worksheet-action.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/premium/admin/cleanup-expired-tokens.ts  ->  hasAccess, normalizeUserTier
+pages/api/premium/admin/download-anomalies.ts  ->  hasAccess, normalizeUserTier
+pages/api/premium/admin/download-ledger.ts  ->  hasAccess, normalizeUserTier
+pages/api/premium/admin/revoke-by-content.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/premium/admin/revoke-by-user.ts  ->  hasAccess, normalizeUserTier
+pages/api/premium/admin/revoke-token.ts  ->  hasAccess, normalizeUserTier
+pages/api/premium/admin/verify-watermark.ts  ->  hasAccess, normalizeUserTier
+pages/api/premium/content/download/[id].ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/api/premium/content/index.ts  ->  missing-hasAccess, normalizeUserTier
+pages/api/premium/dashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/auth/access-denied.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/board/dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/client/dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/dashboard/diagnostics.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/dev/dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/catalogue.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/discovery.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/intelligence-briefs.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/series/[seriesSlug]/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/series/[seriesSlug]/[partSlug].tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/editorials/[slug].tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/account.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/admin/artifacts.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/admin/dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/admin/reports/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/admin/reports/[id].tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/admin.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/briefings.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/briefs/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/briefs/[...slug].tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/council-request.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/insufficient-clearance.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/locked.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/login.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/reports/index.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/reports/[ref].tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/resend.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/tools/rise-decay-scorecard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle/unlock.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle-portal.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/inner-circle-sitemap.xml.ts  ->  missing-hasAccess, missing-normalizeUserTier
+pages/my-access.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/premium/library.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+pages/private/admin/premium-downloads.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/audit-access-consistency.ts  ->  hasAccess, normalizeUserTier
+scripts/audit-access.ts  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/audit-editorial-series-cover-layout.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/audit-product-access-links.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/check-auth-access-symmetry.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/check-editorial-series-display-contract.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/check-editorial-style.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/check-mdx-publication-eligibility.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/generate-premium-pdfs.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/migrate-tiers.ts  ->  missing-hasAccess, normalizeUserTier
+scripts/prove-premium-artefact-generation.ts  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/seed-gmi-dashboard-alert.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/setup-inner-circle.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/setup-inner-circle.ts  ->  missing-hasAccess, missing-normalizeUserTier
+scripts/wave-2a-tier-1-test-runner.ts  ->  missing-hasAccess, missing-normalizeUserTier
+src/app/dashboard/campaigns/[id]/page.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+src/components/dashboard/CampaignOverview.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+src/components/dashboard/TeamIntelligenceTable.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+tests/content/briefs-publication.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/content/editorials-series.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/e2e/editorial-series-reader.spec.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/inner-circle/operating-layer.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/lib/access/admin-page-guard.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/lib/intelligence/gmi-publication-service.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/product/evidence-tier-derivation.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/product/living-case-store-evidence-tier.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/product/tiered-disclosure.spec.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/product-estate/dashboard-truth.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/reporting/boardroom-web-dossier-access.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tests/series/editorial-series-wrapper.test.ts  ->  missing-hasAccess, missing-normalizeUserTier
+tools/pdf-dashboard.tsx  ->  missing-hasAccess, missing-normalizeUserTier
+types/dashboard-extensions.ts  ->  missing-hasAccess, missing-normalizeUserTier
+types/inner-circle.d.ts  ->  missing-hasAccess, missing-normalizeUserTier
+types/pdf-dashboard.ts  ->  missing-hasAccess, missing-normalizeUserTier
+verify-sovereign-access.js  ->  missing-hasAccess, missing-normalizeUserTier
+verify-tier-imports.mjs  ->  missing-hasAccess, missing-normalizeUserTier
+
+=== RECOMMENDATION ===
+Prefer normalizeUserTier() + hasAccess() everywhere.
+Avoid manual tier arrays, raw .toLowerCase() tier logic, and requireTier.
+

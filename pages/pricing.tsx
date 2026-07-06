@@ -1101,27 +1101,36 @@ export default function PricingPage() {
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
                     {CATALOG.professional_annual.shortDescription}
                   </p>
-                  <CheckoutButton
-                    productCode="professional_annual"
-                    originPath="/pricing"
-                    onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
-                    style={{
-                      ...mono,
-                      fontSize: "8px",
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                      color: "#0A0A0A",
-                      backgroundColor: GOLD,
-                      padding: "12px 20px",
-                      textDecoration: "none",
-                      display: "inline-block",
-                      alignSelf: "flex-start",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {CATALOG.professional_annual.primaryCta}
-                  </CheckoutButton>
+                  {resolvePricingAction(CATALOG.professional_annual).purchasable ? (
+                    <CheckoutButton
+                      productCode="professional_annual"
+                      originPath="/pricing"
+                      onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
+                      style={{
+                        ...mono,
+                        fontSize: "8px",
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        color: "#0A0A0A",
+                        backgroundColor: GOLD,
+                        padding: "12px 20px",
+                        textDecoration: "none",
+                        display: "inline-block",
+                        alignSelf: "flex-start",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {CATALOG.professional_annual.primaryCta}
+                    </CheckoutButton>
+                  ) : (
+                    // Fail-closed / governance-gated: not a public checkout surface.
+                    <span
+                      style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", alignSelf: "flex-start" }}
+                    >
+                      Not currently available
+                    </span>
+                  )}
                 </div>
               )}
 
