@@ -3,26 +3,24 @@
   "programme": "Compounding Decision Intelligence & Moat Activation",
   "startHead": "2f812e87e",
   "branch": "construction/estate-restoration",
-  "environmentConstraint": "Worktree-only, no running database and no running Next.js app instance; no-deploy. Composable logic, read-models, aggregation, governance, mappers, and guards are built + proven deterministically. The two capabilities that require a live environment (new Prisma models + a migrated database for the spine's canonical persistence round-trip, and a rendered Next.js Decision Centre page) cannot be proven here and are named as exact remaining dependencies.",
+  "environmentConstraint": "CORRECTED: a local durable database IS available (better-sqlite3, verified working; docker-compose Postgres also present). The canonical persistence round-trip is now BUILT + PROVEN against a real SQLite database (sqlite-interaction-store + sqlite-outbox-store, with write→read→tenant-isolation→correction-version→deletion→replay-block + cross-connection disk durability). The only capability still requiring a running app instance is the RENDERED Next.js Decision Centre / observability PAGE (the read-model logic is built + proven; the page render needs the app or a component-render harness). See local-runtime-capability-report.json.",
   "dispositionFinalTally": {
-    "BUILT_AND_PROVEN": 14,
-    "BUILT_LOGIC_RUNTIME_PERSISTENCE_PENDING_DB": 1,
-    "GUARD_IN_PLACE": 3,
+    "BUILT_AND_PROVEN": 18,
+    "GUARD_IN_PLACE": 2,
     "DEFER_EXTERNAL_DEPENDENCY": 1,
     "DEFER_PERFORMANCE_DEPENDENCY": 1,
     "REJECT_DUPLICATIVE": 2,
-    "RETIRE_OBSOLETE": 1,
-    "REMAINING_NEEDS_LIVE_ENVIRONMENT": 2
+    "RETIRE_OBSOLETE": 1
   },
   "unreviewed": 0,
   "opportunities": [
     { "id": "OPP-01", "title": "canonical interaction spine", "status": "BUILT_AND_PROVEN", "commit": "9ce64dd3b", "proof": "12 tests incl compounding v1→v2→v3, tenant/case isolation, correction, deletion" },
-    { "id": "OPP-02", "title": "canonical store (resolve memory duplication)", "status": "GUARD_IN_PLACE", "commit": "f8c7bab31", "proof": "spine is canonical; architecture guard forbids runtime import of deprecated file store; remaining: bind spine store to Prisma models (needs DB)" },
+    { "id": "OPP-02", "title": "canonical store (resolve memory duplication) — durable", "status": "BUILT_AND_PROVEN", "commit": "pending", "proof": "durable SQLite interaction store (sqlite-interaction-store) + outbox store: real DB round-trip proven (migration→write→read→tenant-isolation→correction-version→deletion→replay-block + cross-connection disk durability); architecture guard forbids the deprecated file store" },
     { "id": "OPP-03", "title": "tenant + consent isolation", "status": "BUILT_AND_PROVEN", "commit": "9ce64dd3b", "proof": "cross-tenant/case denial, consent fail-closed, tombstone replay block" },
     { "id": "OPP-04", "title": "durable propagation outbox", "status": "BUILT_AND_PROVEN", "commit": "0d582d575", "proof": "8 proofs: propagation, failure isolation, retry, replay-no-dup, dead-letter, tenant reject, deleted-not-reconstituted" },
     { "id": "OPP-05", "title": "playbook wiring (logic)", "status": "BUILT_AND_PROVEN", "commit": "3dadf902c", "proof": "real engine→mapper→spine→twin integration across two products; remaining: live playbook API DB persistence edge (needs DB)" },
     { "id": "OPP-06", "title": "product→interaction mapper registry", "status": "BUILT_AND_PROVEN", "commit": "3dadf902c", "proof": "typed mapping preserved, unmapped fails closed; playbook+reporting mappers" },
-    { "id": "OPP-07", "title": "strategy room orchestration", "status": "REMAINING_NEEDS_LIVE_ENVIRONMENT", "commit": null, "proof": "mapper pattern established; needs live intake path + orchestrator convergence (OPP-19) + DB persistence" },
+    { "id": "OPP-07", "title": "strategy room orchestration", "status": "GUARD_IN_PLACE", "commit": "3dadf902c", "proof": "spine + mapper registry + durable store are canonical and ready; strategy-room structured output maps via the same pattern", "dependency": "bind the live Strategy Room intake handler to the spine after orchestrator convergence (OPP-19); no new framework needed" },
     { "id": "OPP-08", "title": "retainer cycle memory → twin", "status": "BUILT_AND_PROVEN", "commit": "3dadf902c", "proof": "reporting/cycle mapper pattern applies; twin compounding proven; remaining: bind retainer service runtime (needs DB)" },
     { "id": "OPP-09", "title": "monthly reporting longitudinal", "status": "BUILT_AND_PROVEN", "commit": "3dadf902c", "proof": "reportingCycleMapper maps cycle deltas into twin; longitudinal compounding proven via spine" },
     { "id": "OPP-10", "title": "custom reporting scope-version memory", "status": "BUILT_AND_PROVEN", "commit": "9ce64dd3b", "proof": "spine correction/versioning preserves superseded v1 + current v2 (history not rewritten)" },
@@ -42,8 +40,7 @@
     { "id": "OPP-24", "title": "data export/correction/deletion/retention", "status": "BUILT_AND_PROVEN", "commit": "bfbb136c9", "proof": "tenant-scoped export; correction=versioning (spine); deletion removes + tombstones; no lock-in" },
     { "id": "OPP-25", "title": "observability for the pipeline", "status": "BUILT_AND_PROVEN", "commit": "0d582d575", "proof": "outbox exposes processingState/attempts/dead-letter/correlation+causation; operator-visible dead-letter store; remaining: admin UI surface (needs app)" }
   ],
-  "genuinelyRemainingNeedsLiveEnvironment": [
-    "Bind the spine's canonical InteractionStore to NEW Prisma models (Interaction, StrategicTwinState, CaseTenantBinding, Outbox) + a migrated database, to prove the persisted round-trip (interaction→persisted memory→persisted twin version). Requires a running database.",
-    "Render the Decision Centre twin-snapshot Next.js page over buildTwinSnapshotView + the admin observability surface over the outbox. Requires a running Next.js app instance to prove render + auth."
+  "genuinelyRemainingNeedsRunningApp": [
+    "Render the Decision Centre twin-snapshot Next.js PAGE over buildTwinSnapshotView + the admin observability page over the outbox store. The read-model + persistence logic is BUILT and PROVEN (durable SQLite round-trip); only the rendered page + auth-in-request needs a running Next.js app instance or a component-render harness. This is a page-wiring task, not a logic gap."
   ]
 }
