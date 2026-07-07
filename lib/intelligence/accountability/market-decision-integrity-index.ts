@@ -21,7 +21,7 @@ export interface DecisionIntegrityIndex { headlineScore: number | null; componen
 
 const DII_METHODOLOGY: DiiMethodology = {
   version: "1.0.0",
-  scoringFormula: "weighted_sum(component_scores) where each component is 0-100 and weights sum to 1.0. NULL if coverage insufficient.",
+  scoringFormula: "weighted_sum(component_scores) where each component is 0-100 and weights sum to 1.0. NULL if coverage insufficient. Weights: call_accuracy=0.35 (primary signal of judgement quality), falsification_discipline=0.25 (willingness to track and learn from errors), calibration_quality=0.25 (whether confidence levels match outcomes), revision_discipline=0.15 (rigour of maintaining version history).",
   exclusions: ["Calls with PENDING_REVIEW excluded from scoring", "TOO_EARLY_TO_ASSESS excluded from accuracy scoring but count toward coverage", "Editions with fewer than minimum required scored calls produce NULL headline"],
   uncertainty: "Scores derived from manually reviewed calls. Review lag may affect timeliness. Small sample sizes increase uncertainty.",
   minimumSampleRequirements: "Minimum 5 scored calls per edition for headline DII. Minimum 3 scored calls per component.",
