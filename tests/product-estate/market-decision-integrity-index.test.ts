@@ -5,6 +5,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { calculateDecisionIntegrityIndex, calculateEditionDii } from "../../lib/intelligence/accountability/market-decision-integrity-index";
+import { resolveMarketAccountabilityEvidence } from "../../lib/intelligence/accountability/market-accountability-evidence";
 
 describe("Market Decision Integrity Index", () => {
   it("calculates a DII from canonical call ledger", () => {
@@ -60,8 +61,17 @@ describe("Market Decision Integrity Index", () => {
     }
   });
 
-  it("publicationStatus is set correctly", () => {
+  it("publicationStatus defaults to PREVIEW on seed evidence (governance gate — no fabricated public metric)", () => {
     const dii = calculateDecisionIntegrityIndex();
+    // seed evidence is NOT a runtime source of truth: it may only ever preview, never publish.
+    expect(dii.publicationStatus).toBe("PREVIEW");
+    expect(dii.headlineScore).toBeNull();
+  });
+
+  it("publicationStatus reflects coverage once evidence is AUTHORITATIVE", () => {
+    const authoritativeCalls = resolveMarketAccountabilityEvidence().calls; // treat seed set as authoritative for this test
+    const dii = calculateDecisionIntegrityIndex({ authoritativeCalls });
+    expect(dii.evidenceMode).toBe("AUTHORITATIVE");
     expect(["INSUFFICIENT_COVERAGE", "PRELIMINARY", "PUBLISHABLE", "METHODOLOGY_TRANSITION"]).toContain(dii.publicationStatus);
   });
 });

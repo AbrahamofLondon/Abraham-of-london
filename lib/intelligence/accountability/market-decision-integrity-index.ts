@@ -7,17 +7,19 @@
  * Derives from canonical call-ledger evidence and versioned methodology authority.
  * Coverage-aware: no headline score from insufficient evidence.
  */
-import { MARKET_CALL_LEDGER, type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
+import { type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
 import { DII_METHODOLOGY, getOutcomeTreatment, getCoverageStatus, getComponentWeight } from "./dii-methodology-authority";
+import { resolveMarketAccountabilityEvidence, type EvidenceMode, type ResolveEvidenceOptions } from "./market-accountability-evidence";
 
 export type DiicomponentMeasure = "call_accuracy" | "falsification_discipline" | "calibration_quality" | "revision_discipline";
 export type CoverageStatus = "INSUFFICIENT_COVERAGE" | "PRELIMINARY" | "PUBLISHABLE";
-export type PublicationStatus = "INSUFFICIENT_COVERAGE" | "PRELIMINARY" | "PUBLISHABLE" | "METHODOLOGY_TRANSITION";
+/** PREVIEW = mechanics shown from non-authoritative (seed) evidence; never a public score. */
+export type PublicationStatus = "PREVIEW" | "INSUFFICIENT_COVERAGE" | "PRELIMINARY" | "PUBLISHABLE" | "METHODOLOGY_TRANSITION";
 
 export interface DiiComponentScore { measure: DiicomponentMeasure; score: number; weight: number; weightRationale: string; rationale: string; }
 export interface DiiCoverage { status: CoverageStatus; totalCalls: number; scoredCalls: number; pendingCalls: number; minRequired: number; }
 export interface EditionTrend { editionId: string; editionLabel: string; diiScore: number | null; publicationStatus: PublicationStatus; componentScores: DiiComponentScore[]; coverage: DiiCoverage; callCount: number; }
-export interface DecisionIntegrityIndex { headlineScore: number | null; publicationStatus: PublicationStatus; componentScores: DiiComponentScore[]; coverage: DiiCoverage; methodologyVersion: string; editionTrend: EditionTrend[]; generatedAt: string; }
+export interface DecisionIntegrityIndex { headlineScore: number | null; publicationStatus: PublicationStatus; evidenceMode: EvidenceMode; evidenceModeReason: string; componentScores: DiiComponentScore[]; coverage: DiiCoverage; methodologyVersion: string; editionTrend: EditionTrend[]; generatedAt: string; }
 
 const SCOREABLE: MarketCallOutcomeStatus[] = ["CONFIRMED_STRONGLY","DIRECTIONALLY_CONFIRMED","PARTIALLY_CONFIRMED","WEAKLY_SUPPORTED","NOT_CONFIRMED","DISCONFIRMED"];
 const RESOLVED: MarketCallOutcomeStatus[] = [...SCOREABLE, "TOO_EARLY_TO_ASSESS"];
@@ -86,29 +88,41 @@ function buildComponentScores(calls: MarketCallRecord[]): DiiComponentScore[] {
   ];
 }
 
-function buildEditionTrend(calls: MarketCallRecord[], editionLabel: string): EditionTrend {
+function buildEditionTrend(calls: MarketCallRecord[], editionLabel: string, publishable: boolean): EditionTrend {
   const coverage = calculateCoverage(calls);
   const components = buildComponentScores(calls);
   const allScored = components.every(c => c.score !== null);
-  const headlineScore = coverage.status === "PUBLISHABLE" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
-  const pubStatus: PublicationStatus = coverage.status === "INSUFFICIENT_COVERAGE" ? "INSUFFICIENT_COVERAGE" : coverage.status === "PRELIMINARY" ? "PRELIMINARY" : "PUBLISHABLE";
+  // PUBLIC GATE: a headline number is only ever emitted on AUTHORITATIVE evidence.
+  const headlineScore = publishable && coverage.status === "PUBLISHABLE" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
+  const pubStatus: PublicationStatus = !publishable
+    ? "PREVIEW"
+    : coverage.status === "INSUFFICIENT_COVERAGE" ? "INSUFFICIENT_COVERAGE" : coverage.status === "PRELIMINARY" ? "PRELIMINARY" : "PUBLISHABLE";
   return { editionId: calls[0]?.reportId ?? "unknown", editionLabel, diiScore: headlineScore, publicationStatus: pubStatus, componentScores: components, coverage, callCount: calls.length };
 }
 
-export function calculateDecisionIntegrityIndex(): DecisionIntegrityIndex {
-  const allCalls = [...MARKET_CALL_LEDGER], coverage = calculateCoverage(allCalls);
+/**
+ * Compute the Market DII. `opts.authoritativeCalls` (persisted, human-reviewed calls,
+ * injected by the server route) unlocks a PUBLISHABLE headline; without it the index
+ * runs in PREVIEW mode from seed fixtures — mechanics visible, NO published score.
+ */
+export function calculateDecisionIntegrityIndex(opts: ResolveEvidenceOptions = {}): DecisionIntegrityIndex {
+  const evidence = resolveMarketAccountabilityEvidence(opts);
+  const allCalls = evidence.calls, coverage = calculateCoverage(allCalls);
   const editionMap = new Map<string, MarketCallRecord[]>();
   for (const call of allCalls) { const existing = editionMap.get(call.reportId) || []; existing.push(call); editionMap.set(call.reportId, existing); }
   const editionTrend: EditionTrend[] = [];
-  for (const [editionId, calls] of editionMap) editionTrend.push(buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId));
+  for (const [editionId, calls] of editionMap) editionTrend.push(buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId, evidence.publicPublishable));
   const components = buildComponentScores(allCalls);
   const allScored = components.every(c => c.score !== null);
-  const headlineScore = coverage.status === "PUBLISHABLE" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
-  const pubStatus: PublicationStatus = coverage.status === "INSUFFICIENT_COVERAGE" ? "INSUFFICIENT_COVERAGE" : coverage.status === "PRELIMINARY" ? "PRELIMINARY" : "PUBLISHABLE";
-  return { headlineScore, publicationStatus: pubStatus, componentScores: components, coverage, methodologyVersion: DII_METHODOLOGY.methodologyVersion, editionTrend, generatedAt: new Date().toISOString() };
+  const headlineScore = evidence.publicPublishable && coverage.status === "PUBLISHABLE" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
+  const pubStatus: PublicationStatus = !evidence.publicPublishable
+    ? "PREVIEW"
+    : coverage.status === "INSUFFICIENT_COVERAGE" ? "INSUFFICIENT_COVERAGE" : coverage.status === "PRELIMINARY" ? "PRELIMINARY" : "PUBLISHABLE";
+  return { headlineScore, publicationStatus: pubStatus, evidenceMode: evidence.mode, evidenceModeReason: evidence.modeReason, componentScores: components, coverage, methodologyVersion: DII_METHODOLOGY.methodologyVersion, editionTrend, generatedAt: new Date().toISOString() };
 }
 
-export function calculateEditionDii(editionId: string): EditionTrend | null {
-  const calls = MARKET_CALL_LEDGER.filter(c => c.reportId === editionId);
-  return calls.length === 0 ? null : buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId);
+export function calculateEditionDii(editionId: string, opts: ResolveEvidenceOptions = {}): EditionTrend | null {
+  const evidence = resolveMarketAccountabilityEvidence(opts);
+  const calls = evidence.calls.filter(c => c.reportId === editionId);
+  return calls.length === 0 ? null : buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId, evidence.publicPublishable);
 }
