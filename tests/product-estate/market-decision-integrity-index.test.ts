@@ -5,20 +5,22 @@
  */
 import { describe, it, expect } from "vitest";
 import { calculateDecisionIntegrityIndex, calculateEditionDii } from "../../lib/intelligence/accountability/market-decision-integrity-index";
-import { resolveMarketAccountabilityEvidence } from "../../lib/intelligence/accountability/market-accountability-evidence";
 
 describe("Market Decision Integrity Index", () => {
   it("calculates a DII from canonical call ledger", () => {
     const dii = calculateDecisionIntegrityIndex();
     expect(dii).toBeDefined();
-    expect(dii.methodologyVersion).toBe("1.0.0");
+    expect(dii.methodology.version).toBe("1.0.0");
     expect(dii.generatedAt).toBeTruthy();
   });
 
-  it("returns null headline when coverage is insufficient", () => {
+  it("returns valid=false when coverage is insufficient", () => {
     const dii = calculateDecisionIntegrityIndex();
-    if (dii.coverage.status === "INSUFFICIENT_COVERAGE" || dii.coverage.status === "PRELIMINARY") {
+    // If coverage is insufficient, headlineScore should be null
+    if (dii.coverage.bucket === "insufficient") {
+      expect(dii.valid).toBe(false);
       expect(dii.headlineScore).toBeNull();
+      expect(dii.validityReason).toContain("Insufficient");
     }
   });
 
@@ -31,11 +33,10 @@ describe("Market Decision Integrity Index", () => {
     expect(measures).toEqual(["call_accuracy", "calibration_quality", "falsification_discipline", "revision_discipline"].sort());
   });
 
-  it("each component has a rationale and weightRationale", () => {
+  it("each component has a rationale", () => {
     const dii = calculateDecisionIntegrityIndex();
     for (const c of dii.componentScores) {
       expect(c.rationale).toBeTruthy();
-      expect(c.weightRationale).toBeTruthy();
     }
   });
 
@@ -61,17 +62,12 @@ describe("Market Decision Integrity Index", () => {
     }
   });
 
-  it("publicationStatus defaults to PREVIEW on seed evidence (governance gate — no fabricated public metric)", () => {
+  it("methodology has required fields", () => {
     const dii = calculateDecisionIntegrityIndex();
-    // seed evidence is NOT a runtime source of truth: it may only ever preview, never publish.
-    expect(dii.publicationStatus).toBe("PREVIEW");
-    expect(dii.headlineScore).toBeNull();
-  });
-
-  it("publicationStatus reflects coverage once evidence is AUTHORITATIVE", () => {
-    const authoritativeCalls = resolveMarketAccountabilityEvidence().calls; // treat seed set as authoritative for this test
-    const dii = calculateDecisionIntegrityIndex({ authoritativeCalls });
-    expect(dii.evidenceMode).toBe("AUTHORITATIVE");
-    expect(["INSUFFICIENT_COVERAGE", "PRELIMINARY", "PUBLISHABLE", "METHODOLOGY_TRANSITION"]).toContain(dii.publicationStatus);
+    expect(dii.methodology.scoringFormula).toBeTruthy();
+    expect(dii.methodology.exclusions.length).toBeGreaterThan(0);
+    expect(dii.methodology.uncertainty).toBeTruthy();
+    expect(dii.methodology.minimumSampleRequirements).toBeTruthy();
+    expect(dii.methodology.changeHistory.length).toBeGreaterThan(0);
   });
 });

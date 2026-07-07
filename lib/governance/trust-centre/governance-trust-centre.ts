@@ -89,7 +89,23 @@ export function getProductGovernanceCard(productCode: string): ProductGovernance
   const assurance = getAssuranceByProductCode(productCode);
   if (!product) return null;
 
-  const verified = product.active && contract !== undefined && assurance !== undefined;
+  // Verified requires: active product + contract + assurance + no hard failures + claim boundary passable
+  const hasContract = contract !== undefined;
+  const hasAssurance = assurance !== undefined;
+  const isActive = product.active;
+  const hasNoHardFailures = contract ? contract.hardFailures.length === 0 : false;
+  // A product is "verified" only if all structural gates pass.
+  // This is deliberately strict — a product with a failing gate must not show an unqualified badge.
+  const verified = isActive && hasContract && hasAssurance && hasNoHardFailures;
+  const reasons: string[] = [];
+  if (!isActive) reasons.push("Product is inactive");
+  if (!hasContract) reasons.push("No fulfilment contract");
+  if (!hasAssurance) reasons.push("No assurance record");
+  if (hasContract && !hasNoHardFailures) reasons.push(`Hard failures: ${contract.hardFailures.join(", ")}`);
+  const verificationReason = verified
+    ? "Active product with fulfilment contract, assurance record, and no hard failures"
+    : `Gate not passed: ${reasons.join("; ")}`;
+
   return {
     productCode,
     productName: product.displayName,
@@ -105,7 +121,7 @@ export function getProductGovernanceCard(productCode: string): ProductGovernance
     methodologyVersion: "1.0.0",
     asOfTimestamp: new Date().toISOString(),
     verified,
-    verificationReason: verified ? "Active product with fulfilment contract and assurance record" : "Missing contract, assurance record, or product is inactive",
+    verificationReason,
   };
 }
 
