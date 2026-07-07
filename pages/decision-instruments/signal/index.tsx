@@ -1,36 +1,38 @@
 /**
- * Decision Signal — free governed first reading (flagship-entry instrument).
+ * Decision Signal — free governed FIRST DIAGNOSIS (flagship-entry instrument).
  *
- * A real, input-sensitive first measurement with a clear boundary. Computation lives in
- * lib/decision-instruments/decision-signal-engine (deterministic + tested). Two explicit
- * modes (§5): "Try the instrument" (your input → real computed result) and "View an
- * example" (a clearly-labelled synthetic scenario). The result shows the corridor: what
- * the system sees, the next admissible move AND what is not yet admissible + why (§9).
+ * Enterprise-grade presentation of a real, input-sensitive governed reading. Computation
+ * lives in lib/decision-instruments/decision-signal-engine (deterministic + tested). Two
+ * honest modes: "Try the instrument" and a clearly-labelled "Example". The result reads
+ * as a governed diagnosis: pressure verdict, the reading, any contradiction, the evidence
+ * gap, and the corridor — the next admissible move AND what is deliberately not yet
+ * appropriate. Design tokens: lib/demo/journey-design.
  */
 
 import * as React from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight, ShieldCheck, AlertTriangle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 import {
   runDecisionSignal,
+  SIGNAL_ENGINE_VERSION,
   type SignalInput,
   type SignalResult,
 } from "@/lib/decision-instruments/decision-signal-engine";
 import { DECISION_SIGNAL_SAMPLES, SAMPLE_LABEL } from "@/lib/decision-instruments/decision-signal-samples";
-
-const GOLD = "#C9A96E";
-const AMBER = "#F59E0B";
-const EMERALD = "#6EE7B7";
-const ROSE = "#FCA5A5";
-const VOID = "rgb(3 3 5)";
-const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
-const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
+import { COLORS, FONTS, BAND, eyebrow, caption, display, bodyText, bodyTextSm, card, primaryButton, ghostButton, field, hexA } from "@/lib/demo/journey-design";
 
 const DEFAULT_INPUT: SignalInput = { decisionStatement: "", delayCostBand: "MODERATE", confidenceLevel: 5, consequenceIfWrong: "COSTLY", urgencyBand: "MODERATE" };
+
+const VERDICT: Record<SignalResult["pressureBand"], string> = {
+  LOW: "A decision condition exists, but the evidence does not yet justify intervention.",
+  MODERATE: "A real decision is forming. Acting deliberately now is cheaper than reacting later.",
+  HIGH: "This decision is approaching a threshold where the cost of delay compounds.",
+  CRITICAL: "This decision appears overdue. Delay is likely compounding and should be treated as active risk.",
+};
 
 const DecisionSignalPage: NextPage = () => {
   const [mode, setMode] = React.useState<"try" | "example">("try");
@@ -38,221 +40,226 @@ const DecisionSignalPage: NextPage = () => {
   const [result, setResult] = React.useState<SignalResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isExample, setIsExample] = React.useState(false);
-  const startedRef = React.useRef(false);
+  const started = React.useRef(false);
 
   React.useEffect(() => { track("decision_signal_landing_viewed", {}); }, []);
+  function markStarted() { if (!started.current) { started.current = true; track("decision_signal_started", {}); } }
 
-  function markStarted() {
-    if (!startedRef.current) { startedRef.current = true; track("decision_signal_started", {}); }
-  }
-
-  function handleSubmit() {
+  function submit() {
     const outcome = runDecisionSignal(input);
     if (!outcome.ok) { setError(outcome.message); setResult(null); return; }
-    setError(null);
-    setIsExample(false);
-    setResult(outcome.result);
-    track("decision_signal_completed", { pressureBand: outcome.result.pressureBand, mode: "try" });
+    setError(null); setIsExample(false); setResult(outcome.result);
+    track("decision_signal_completed", { pressureBand: outcome.result.pressureBand });
     track("decision_signal_result_viewed", { pressureBand: outcome.result.pressureBand });
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
-
-  function loadExample(sampleId: string) {
-    const sample = DECISION_SIGNAL_SAMPLES.find((s) => s.id === sampleId);
-    if (!sample) return;
-    const outcome = runDecisionSignal(sample.input);
-    if (!outcome.ok) return;
-    setInput(sample.input);
-    setResult(outcome.result);
-    setIsExample(true);
-    setError(null);
-    track("decision_signal_example_viewed", { sampleId, pressureBand: outcome.result.pressureBand });
+  function loadExample(id: string) {
+    const s = DECISION_SIGNAL_SAMPLES.find((x) => x.id === id); if (!s) return;
+    const outcome = runDecisionSignal(s.input); if (!outcome.ok) return;
+    setInput(s.input); setResult(outcome.result); setIsExample(true); setError(null);
+    track("decision_signal_example_viewed", { sampleId: id, pressureBand: outcome.result.pressureBand });
   }
+  function reset() { setResult(null); setError(null); setIsExample(false); setInput(DEFAULT_INPUT); started.current = false; }
 
-  function reset() { setResult(null); setError(null); setIsExample(false); setInput(DEFAULT_INPUT); startedRef.current = false; }
-
-  const band = result?.pressureBand;
-  const bandColor = band === "CRITICAL" ? "rgba(252,165,165,0.75)" : band === "HIGH" ? "rgba(253,186,116,0.75)" : band === "MODERATE" ? `${GOLD}CC` : "rgba(110,231,183,0.65)";
+  const band = result ? BAND[result.pressureBand] : null;
 
   return (
-    <Layout title="Decision Signal | Abraham of London" description="Free governed first reading — detect whether a decision condition exists. Classifies pressure, names one signal, surfaces contradictions, and identifies the next admissible move.">
+    <Layout title="Decision Signal — governed first diagnosis | Abraham of London" description="A free, governed first diagnosis of a decision under pressure. Classifies pressure, surfaces contradictions in your own inputs, names the evidence gap, and shows the next admissible move.">
       <Head><meta name="robots" content="index,follow" /></Head>
-      <main className="min-h-screen px-6 py-16" style={{ backgroundColor: VOID }}>
-        <div className="mx-auto max-w-xl">
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
-            Decision Signal · Free · 2 minutes
-          </span>
-          <h1 className="mt-4" style={{ ...serif, fontSize: "2.2rem", color: "white", lineHeight: 1.2 }}>
-            Detect whether a decision condition exists.
+      <main style={{ background: COLORS.canvas, minHeight: "100vh", padding: "72px 24px 120px" }}>
+        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+
+          {/* ── Masthead ── */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <ShieldCheck style={{ width: 15, height: 15, color: COLORS.gold }} />
+            <span style={eyebrow()}>Decision Signal · Governed diagnosis · Free · 2 min</span>
+          </div>
+          <h1 style={{ ...display, fontSize: "clamp(2.2rem, 5vw, 3.1rem)", marginTop: 18 }}>
+            A first diagnosis of the decision<br />you are carrying.
           </h1>
-          <p className="mt-3 text-sm leading-7 text-white/50">
-            A first signal, not a full diagnosis. It classifies pressure, names one signal, surfaces any contradiction in what you told us, and identifies the next admissible action. No account required.
+          <p style={{ ...bodyText, marginTop: 16, maxWidth: 560 }}>
+            Not a lead form and not a generic AI answer. A governed reading that classifies decision pressure,
+            surfaces contradictions implied by your own inputs, names the single most material evidence gap, and
+            shows the next admissible move — including what is <em>not</em> yet worth doing. No account required.
           </p>
 
-          {/* Mode toggle (§5) */}
           {!result && (
-            <div className="mt-6 flex gap-2">
+            <div style={{ display: "flex", gap: 8, marginTop: 28 }}>
               {(["try", "example"] as const).map((m) => (
-                <button key={m} onClick={() => { setMode(m); setError(null); }} style={{ padding: "8px 14px", border: `1px solid ${mode === m ? `${GOLD}60` : "rgba(255,255,255,0.10)"}`, backgroundColor: mode === m ? `${GOLD}10` : "transparent", color: mode === m ? `${GOLD}CC` : "rgba(255,255,255,0.4)", ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>
+                <button key={m} onClick={() => { setMode(m); setError(null); }}
+                  style={{ ...ghostButton(), borderColor: mode === m ? COLORS.gold : COLORS.hairStrong, color: mode === m ? COLORS.gold : COLORS.body, background: mode === m ? hexA(COLORS.gold, 0.08) : "transparent" }}>
                   {m === "try" ? "Try the instrument" : "View an example"}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Example picker */}
+          {/* ── Example picker ── */}
           {!result && mode === "example" && (
-            <div className="mt-6 space-y-2">
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: `${AMBER}88` }}>{SAMPLE_LABEL}</p>
-              {DECISION_SIGNAL_SAMPLES.map((s) => (
-                <button key={s.id} onClick={() => loadExample(s.id)} style={{ display: "block", width: "100%", textAlign: "left", padding: "12px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: "0.85rem" }}>
-                  {s.title} <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
-                </button>
-              ))}
+            <div style={{ marginTop: 24 }}>
+              <div style={{ ...eyebrow(hexA(COLORS.amber, 0.9)), display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <AlertTriangle style={{ width: 12, height: 12 }} /> {SAMPLE_LABEL}
+              </div>
+              <div style={{ display: "grid", gap: 10 }}>
+                {DECISION_SIGNAL_SAMPLES.map((s) => (
+                  <button key={s.id} onClick={() => loadExample(s.id)} style={{ ...card(), textAlign: "left", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", ...bodyTextSm, color: COLORS.body }}>
+                    <span>{s.title}</span><ArrowRight style={{ width: 14, height: 14, color: COLORS.gold }} />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
-          {!result && mode === "try" ? (
-            <div className="mt-8 space-y-6">
-              <div>
-                <label style={labelStyle}>What decision is being delayed or avoided?</label>
-                <textarea
-                  value={input.decisionStatement}
-                  onFocus={markStarted}
+          {/* ── Input form ── */}
+          {!result && mode === "try" && (
+            <div style={{ marginTop: 32, display: "grid", gap: 26 }}>
+              <Field label="What decision is being delayed or avoided?">
+                <textarea value={input.decisionStatement} onFocus={markStarted}
                   onChange={(e) => setInput((p) => ({ ...p, decisionStatement: e.target.value }))}
-                  placeholder="Describe the decision in one or two sentences..."
-                  rows={3}
-                  className="mt-2 w-full resize-none rounded-none border border-white/10 bg-white/5 p-3 text-sm text-white/70 placeholder:text-white/20 focus:border-amber-500/40 focus:outline-none"
-                />
-              </div>
-
-              <BandPicker label="Estimated cost of delay" options={["LOW", "MODERATE", "HIGH", "CRITICAL"]} value={input.delayCostBand} onPick={(v) => { markStarted(); setInput((p) => ({ ...p, delayCostBand: v as SignalInput["delayCostBand"] })); }} />
-
+                  placeholder="Describe the decision in one or two sentences — the more specific, the sharper the reading."
+                  rows={3} style={{ ...field(), resize: "none" }} />
+              </Field>
+              <Segmented label="Estimated cost of delay" options={["LOW", "MODERATE", "HIGH", "CRITICAL"]} value={input.delayCostBand}
+                onPick={(v) => { markStarted(); setInput((p) => ({ ...p, delayCostBand: v as SignalInput["delayCostBand"] })); }} />
               <div>
-                <div className="flex items-baseline justify-between mb-1">
-                  <label style={labelStyle}>Confidence in current path</label>
-                  <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{input.confidenceLevel}/10</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <label style={caption(COLORS.muted)}>Confidence in the current path</label>
+                  <span style={{ fontFamily: FONTS.mono, fontSize: 14, color: COLORS.gold }}>{input.confidenceLevel}/10</span>
                 </div>
-                <input type="range" min={0} max={10} step={1} value={input.confidenceLevel} onChange={(e) => { markStarted(); setInput((p) => ({ ...p, confidenceLevel: parseInt(e.target.value) })); }} className="w-full" style={{ accentColor: GOLD }} />
+                <input type="range" min={0} max={10} value={input.confidenceLevel}
+                  onChange={(e) => { markStarted(); setInput((p) => ({ ...p, confidenceLevel: parseInt(e.target.value) })); }}
+                  style={{ width: "100%", marginTop: 12, accentColor: COLORS.gold }} />
               </div>
-
-              <BandPicker label="Consequence if the decision is wrong" options={["REVERSIBLE", "COSTLY", "STRUCTURAL", "IRREVERSIBLE"]} value={input.consequenceIfWrong} onPick={(v) => { markStarted(); setInput((p) => ({ ...p, consequenceIfWrong: v as SignalInput["consequenceIfWrong"] })); }} small />
-
-              <BandPicker label="Urgency" options={["LOW", "MODERATE", "HIGH", "IMMEDIATE"]} value={input.urgencyBand} onPick={(v) => { markStarted(); setInput((p) => ({ ...p, urgencyBand: v as SignalInput["urgencyBand"] })); }} />
-
-              {error && <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.05em", color: ROSE, lineHeight: 1.6 }}>{error}</p>}
-
-              <button onClick={handleSubmit} style={{ width: "100%", padding: "16px", border: `1px solid ${GOLD}50`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
-                Generate signal
-              </button>
+              <Segmented label="Consequence if the decision is wrong" options={["REVERSIBLE", "COSTLY", "STRUCTURAL", "IRREVERSIBLE"]} value={input.consequenceIfWrong}
+                onPick={(v) => { markStarted(); setInput((p) => ({ ...p, consequenceIfWrong: v as SignalInput["consequenceIfWrong"] })); }} small />
+              <Segmented label="Urgency" options={["LOW", "MODERATE", "HIGH", "IMMEDIATE"]} value={input.urgencyBand}
+                onPick={(v) => { markStarted(); setInput((p) => ({ ...p, urgencyBand: v as SignalInput["urgencyBand"] })); }} />
+              {error && <p style={{ fontFamily: FONTS.sans, fontSize: 13.5, lineHeight: 1.6, color: COLORS.rose }}>{error}</p>}
+              <button onClick={submit} style={{ ...primaryButton(), width: "100%" }}>Generate governed diagnosis</button>
             </div>
-          ) : result ? (
-            <div className="mt-8 space-y-6">
+          )}
+
+          {/* ── Result: the governed diagnosis ── */}
+          {result && band && (
+            <div style={{ marginTop: 40, display: "grid", gap: 22 }}>
               {isExample && (
-                <div style={{ border: `1px solid ${AMBER}40`, backgroundColor: `${AMBER}08`, padding: "0.75rem" }}>
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${AMBER}` }}>{SAMPLE_LABEL}</span>
+                <div style={{ ...card(COLORS.amber), padding: "12px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <AlertTriangle style={{ width: 13, height: 13, color: COLORS.amber }} />
+                  <span style={{ ...eyebrow(COLORS.amber), fontSize: 10.5 }}>{SAMPLE_LABEL}</span>
                 </div>
               )}
 
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <span style={captionStyle}>Decision pressure band</span>
-                  <div style={{ ...serif, fontSize: "2.5rem", color: bandColor }}>{result.pressureBand}</div>
+              {/* Diagnosis masthead */}
+              <div style={{ borderBottom: `1px solid ${COLORS.hair}`, paddingBottom: 24 }}>
+                <span style={caption()}>Decision pressure — governed reading</span>
+                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20, marginTop: 10, flexWrap: "wrap" }}>
+                  <div style={{ ...display, fontSize: "clamp(2.6rem, 7vw, 4rem)", color: band.color }}>{band.label}</div>
+                  <div style={{ textAlign: "right", fontFamily: FONTS.mono, fontSize: 11, color: COLORS.faint, lineHeight: 1.8 }}>
+                    <div>PRESSURE INDEX &nbsp;<span style={{ color: COLORS.body }}>{result.compositeScore}</span></div>
+                    <div>EVIDENCE &nbsp;<span style={{ color: COLORS.body }}>{result.evidenceConfidence}</span></div>
+                    <div>ENGINE v{SIGNAL_ENGINE_VERSION}</div>
+                  </div>
                 </div>
-                <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.3)" }}>score {result.compositeScore} · {result.evidenceConfidence} confidence</span>
+                <p style={{ ...display, fontSize: "1.5rem", color: COLORS.ink, marginTop: 16, lineHeight: 1.4 }}>{VERDICT[result.pressureBand]}</p>
               </div>
 
-              <ResultCard caption="Named signal" body={result.namedSignal} borderColor="rgba(255,255,255,0.08)" />
-              <ResultCard caption="Consequence warning" body={result.consequenceWarning} borderColor={`${AMBER}20`} bg={`${AMBER}04`} captionColor={`${AMBER}77`} />
+              {/* The reading */}
+              <section>
+                <span style={caption()}>The reading</span>
+                <p style={{ ...bodyText, marginTop: 8 }}>{result.namedSignal}</p>
+                <p style={{ ...bodyText, marginTop: 10, color: COLORS.muted }}>{result.consequenceWarning}</p>
+              </section>
 
+              {/* Contradiction — the differentiator */}
               {result.contradictions.length > 0 && (
-                <div style={{ border: `1px solid ${ROSE}30`, backgroundColor: `${ROSE}06`, padding: "1rem" }}>
-                  <span style={{ ...captionStyle, color: ROSE }}>Contradiction detected</span>
+                <div style={card(COLORS.rose)}>
+                  <div style={{ ...caption(COLORS.rose), display: "flex", alignItems: "center", gap: 8 }}>
+                    <AlertTriangle style={{ width: 13, height: 13 }} /> Contradiction in your own inputs
+                  </div>
                   {result.contradictions.map((c) => (
-                    <p key={c.key} style={{ fontSize: "0.9rem", lineHeight: 1.7, color: "rgba(255,255,255,0.62)", marginTop: "0.4rem" }}>{c.detail}</p>
+                    <p key={c.key} style={{ ...bodyText, marginTop: 10 }}>{c.detail}</p>
                   ))}
                 </div>
               )}
 
-              <ResultCard caption="Evidence gap" body={result.evidenceGap} borderColor="rgba(255,255,255,0.08)" />
-              <ResultCard caption="Immediate correction question" body={result.correctionQuestion} borderColor={`${GOLD}20`} bg={`${GOLD}04`} captionColor={`${GOLD}55`} serifBody />
+              {/* Evidence gap + correction */}
+              <div style={{ display: "grid", gap: 14, gridTemplateColumns: "1fr" }}>
+                <div style={card()}>
+                  <span style={caption()}>Evidence gap</span>
+                  <p style={{ ...bodyTextSm, marginTop: 8, color: COLORS.body }}>{result.evidenceGap}</p>
+                </div>
+                <div style={card(COLORS.gold)}>
+                  <span style={caption(COLORS.goldSoft)}>The question to resolve first</span>
+                  <p style={{ ...display, fontSize: "1.25rem", color: COLORS.ink, marginTop: 8, lineHeight: 1.45 }}>{result.correctionQuestion}</p>
+                </div>
+              </div>
 
-              {/* Next admissible move + WHY (§9) */}
-              <div style={{ border: `1px solid ${EMERALD}20`, backgroundColor: `${EMERALD}04`, padding: "1rem" }}>
-                <span style={{ ...captionStyle, color: `${EMERALD}88` }}>Next admissible move</span>
-                <p style={{ fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.66)", marginTop: "0.35rem" }}>{result.nextAdmissibleMove.move}</p>
-                <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "rgba(255,255,255,0.42)", marginTop: "0.5rem" }}>
-                  <strong style={{ color: `${EMERALD}88` }}>Why this is admissible:</strong> {result.nextAdmissibleMove.whyAdmissible}
-                </p>
+              {/* Corridor — next admissible move + not yet */}
+              <div style={{ ...card(COLORS.emerald) }}>
+                <span style={caption(hexA(COLORS.emerald, 0.9))}>Next admissible move</span>
+                <p style={{ ...bodyText, marginTop: 8, color: COLORS.ink }}>{result.nextAdmissibleMove.move}</p>
+                <p style={{ ...bodyTextSm, marginTop: 10 }}><strong style={{ color: hexA(COLORS.emerald, 0.95) }}>Why this is admissible — </strong>{result.nextAdmissibleMove.whyAdmissible}</p>
                 {!isExample && result.nextAdmissibleMove.targetRoute !== "/decision-instruments/signal" && (
-                  <div className="mt-3">
-                    <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute })} className="inline-flex items-center gap-1" style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: GOLD, textDecoration: "underline", textUnderlineOffset: 3 }}>
-                      {result.nextAdmissibleMove.targetLabel} <ArrowRight style={{ width: 9, height: 9 }} />
-                    </Link>
-                  </div>
+                  <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute })}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16, fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: COLORS.emerald, textDecoration: "none" }}>
+                    {result.nextAdmissibleMove.targetLabel} <ArrowRight style={{ width: 12, height: 12 }} />
+                  </Link>
                 )}
               </div>
 
-              {/* What is NOT yet admissible (§9 — willingness not to up-sell) */}
               {result.notYetAdmissible && (
-                <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem" }}>
-                  <span style={captionStyle}>Not yet appropriate</span>
-                  <p style={{ fontSize: "0.85rem", lineHeight: 1.7, color: "rgba(255,255,255,0.5)", marginTop: "0.35rem" }}>
-                    <strong style={{ color: "rgba(255,255,255,0.62)" }}>{result.notYetAdmissible.move}</strong> — {result.notYetAdmissible.whyNotYet}
-                  </p>
+                <div style={card()}>
+                  <span style={caption()}>Deliberately not yet appropriate</span>
+                  <p style={{ ...bodyTextSm, marginTop: 8 }}><strong style={{ color: COLORS.body }}>{result.notYetAdmissible.move}.</strong> {result.notYetAdmissible.whyNotYet}</p>
                 </div>
               )}
 
-              {/* Governed continuation to Operator Pilot for material live decisions */}
-              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Lock style={{ width: 12, height: 12, color: GOLD }} />
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88` }}>For a live, material decision</span>
-                </div>
-                <p className="text-sm leading-7 text-white/50">
-                  This signal is a first reading held in your browser only — nothing is written to a customer record. For a live decision with real stakeholders and checkpoints, the controlled path is the Operator Pilot.
+              {/* Operator Pilot continuation */}
+              <div style={{ ...card(COLORS.gold), display: "flex", flexDirection: "column", gap: 12 }}>
+                <span style={eyebrow()}>For a live, material decision</span>
+                <p style={bodyTextSm}>
+                  This diagnosis is held in your browser only — nothing is written to a customer record. For a live decision
+                  with real stakeholders and checkpoints, the controlled path is the Operator Pilot: a governed engagement,
+                  qualified by a human before anything is accepted.
                 </p>
-                <div className="mt-3">
-                  <Link href="/engagements/operator-pilot" onClick={() => track("decision_signal_pilot_clicked", { pressureBand: result.pressureBand })} className="inline-flex items-center gap-1" style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: GOLD, textDecoration: "underline", textUnderlineOffset: 3 }}>
-                    Operator Pilot — controlled qualification <ArrowRight style={{ width: 9, height: 9 }} />
-                  </Link>
-                </div>
+                <Link href="/engagements/operator-pilot" onClick={() => track("decision_signal_pilot_clicked", { pressureBand: result.pressureBand })}
+                  style={{ ...primaryButton(), textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, alignSelf: "flex-start" }}>
+                  Enter the Operator Pilot <ArrowRight style={{ width: 13, height: 13 }} />
+                </Link>
               </div>
 
-              <div className="flex items-center justify-between">
-                <button onClick={reset} style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer" }}>← Run another signal</button>
-                <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)" }}>{result.evidencePosture}</span>
+              {/* Governance footer */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${COLORS.hair}`, paddingTop: 16, flexWrap: "wrap", gap: 12 }}>
+                <button onClick={reset} style={{ ...ghostButton(), padding: "10px 16px" }}>← Run another diagnosis</button>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.faint, letterSpacing: "0.08em" }}>{result.evidencePosture}</span>
               </div>
             </div>
-          ) : null}
+          )}
         </div>
       </main>
     </Layout>
   );
 };
 
-const labelStyle: React.CSSProperties = { ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" };
-const captionStyle: React.CSSProperties = { ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" };
-
-function BandPicker({ label, options, value, onPick, small }: { label: string; options: readonly string[]; value: string; onPick: (v: string) => void; small?: boolean }) {
-  return (
-    <div>
-      <label style={labelStyle}>{label}</label>
-      <div className="mt-2 grid grid-cols-4 gap-2">
-        {options.map((o) => (
-          <button key={o} onClick={() => onPick(o)} style={{ padding: "8px", border: `1px solid ${value === o ? `${GOLD}60` : "rgba(255,255,255,0.08)"}`, backgroundColor: value === o ? `${GOLD}10` : "transparent", color: value === o ? `${GOLD}CC` : "rgba(255,255,255,0.35)", ...mono, fontSize: small ? "7px" : "8px", letterSpacing: small ? "0.10em" : "0.12em", cursor: "pointer" }}>
-            {o}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (<div><label style={caption(COLORS.muted)}>{label}</label>{children}</div>);
 }
 
-function ResultCard({ caption, body, borderColor, bg, captionColor, serifBody }: { caption: string; body: string; borderColor: string; bg?: string; captionColor?: string; serifBody?: boolean }) {
+function Segmented({ label, options, value, onPick, small }: { label: string; options: readonly string[]; value: string; onPick: (v: string) => void; small?: boolean }) {
   return (
-    <div style={{ border: `1px solid ${borderColor}`, backgroundColor: bg ?? "rgba(255,255,255,0.02)", padding: "1rem" }}>
-      <span style={{ ...captionStyle, color: captionColor ?? "rgba(255,255,255,0.25)" }}>{caption}</span>
-      <p style={{ ...(serifBody ? serif : {}), fontSize: serifBody ? "1.05rem" : "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.62)", marginTop: "0.3rem" }}>{body}</p>
+    <div>
+      <label style={caption(COLORS.muted)}>{label}</label>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 12 }}>
+        {options.map((o) => {
+          const active = value === o;
+          return (
+            <button key={o} onClick={() => onPick(o)}
+              style={{ padding: "11px 6px", border: `1px solid ${active ? COLORS.gold : COLORS.hair}`, background: active ? hexA(COLORS.gold, 0.1) : "transparent", color: active ? COLORS.gold : COLORS.muted, fontFamily: FONTS.mono, fontSize: small ? 9.5 : 10.5, letterSpacing: "0.08em", cursor: "pointer", borderRadius: 4 }}>
+              {o}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
