@@ -1127,6 +1127,41 @@ export const REPORTING_CUSTOM_CONTRACT = contract({
     "completion = final approval of the agreed deliverable (not a period boundary).",
 });
 
+export const GMI_QUARTERLY_FAMILY_CONTRACT = contract({
+  productCode: "gmi_quarterly",
+  displayName: "Global Market Intelligence — Quarterly",
+  entitlementSlug: "gmi-quarterly",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/intelligence/gmi",
+  successRoute: "/intelligence/gmi",
+  customerAccessRoute: "/intelligence/gmi",
+  adminRoute: "/admin/intelligence/gmi-control-plane",
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "evidence_gate_review",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: "product_artifact",
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [
+    "CONTROLLED_RELEASE_READY by permanent design — each edition is temporally gated by mandatory data lock, mandatory editorial human review, and owner publication authority; self-serve checkout is not authorised. This is an intentional governance boundary, not an implementation deficit.",
+  ],
+  notes:
+    "Reusable GMI quarterly product FAMILY. Fulfilment infrastructure " +
+    "(lib/fulfilment/gmi/gmi-quarterly-fulfilment.ts) COMPOSES the existing GMI release controls " +
+    "(lifecycle authority, release-candidate checklist / source blockers, prior-call review, " +
+    "DII / quality gate, owner release authority) into a release gate + edition-bound delivery " +
+    "proof, plugged into the PR F execution authority via createGmiQuarterlyHandler. Publication " +
+    "authority NEVER infers checkout activation or Stripe identity. Per-edition governance lives on " +
+    "the edition contracts (gmi_q1_2026 current; gmi_q2_2026 pre-release/controlled until post-8-July " +
+    "data lock + owner authority). The family infrastructure is complete while editions stay gated.",
+});
+
 export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   // Human-reviewed
   BOARDROOM_BRIEF_CONTRACT,
@@ -1173,6 +1208,7 @@ export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   PROFESSIONAL_ANNUAL_CONTRACT,
 
   // GMI intelligence reports
+  GMI_QUARTERLY_FAMILY_CONTRACT,
   GMI_Q1_2026_CONTRACT,
   GMI_Q2_2026_CONTRACT,
   GMI_Q3_2026_CONTRACT,
