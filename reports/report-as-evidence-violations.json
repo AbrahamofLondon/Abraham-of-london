@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-14T11:58:15.433Z",
+  "generatedAt": "2026-07-07T10:12:11.221Z",
   "gate": "passed_with_descriptive_report_references",
-  "scriptsScanned": 3849,
+  "scriptsScanned": 4087,
   "trueViolationCount": 0,
   "blockingCount": 0,
-  "totalFindings": 471,
+  "totalFindings": 517,
   "blockingFindings": [],
   "findings": [
     {
@@ -1112,6 +1112,38 @@
       "context": "console.log(`Live-route proof missing for gold: ${evidenceCounts.liveRouteProofMissingForGold}`);"
     },
     {
+      "file": "scripts/check-living-estate-intelligence.mjs",
+      "line": 142,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "const readiness = readJson(\"reports/product-release-readiness-matrix.json\") || {};"
+    },
+    {
+      "file": "scripts/check-living-estate-intelligence.mjs",
+      "line": 143,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "const governance = readJson(\"reports/product-release-governance-matrix.json\") || {};"
+    },
+    {
+      "file": "scripts/check-living-estate-intelligence.mjs",
+      "line": 144,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
+      "context": "const authority = readJson(\"data/ProductAuthorityContract.json\") || {};"
+    },
+    {
+      "file": "scripts/check-living-estate-intelligence.mjs",
+      "line": 145,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
+      "context": "const allCodes = Array.from(new Set([...Object.keys(readiness), ...Object.keys(governance)]));"
+    },
+    {
       "file": "scripts/check-report-as-evidence-violations.mjs",
       "line": 65,
       "classification": "guard_pattern_or_test_fixture",
@@ -1726,6 +1758,30 @@
       "blocking": false,
       "reason": "Script generates report output — descriptive only",
       "context": "\"WaveOneUniversalOutput\","
+    },
+    {
+      "file": "scripts/lib/run-truth-claim-firewall.ts",
+      "line": 280,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": ""
+    },
+    {
+      "file": "scripts/lib/run-truth-claim-firewall.ts",
+      "line": 281,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "function inferSurface(filePath: string): TruthClaimSurface {"
+    },
+    {
+      "file": "scripts/lib/run-truth-claim-firewall.ts",
+      "line": 282,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "const normalized = normalize(filePath);"
     },
     {
       "file": "scripts/reconcile-product-authority-truth.mjs",
@@ -2406,6 +2462,46 @@
       "blocking": false,
       "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
       "context": "{"
+    },
+    {
+      "file": "scripts/test-product-system-integrity-negative-cases.mjs",
+      "line": 58,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
+      "context": "const contractPath = path.join(projectRoot, 'data', 'ProductAuthorityContract.json');"
+    },
+    {
+      "file": "scripts/test-product-system-integrity-negative-cases.mjs",
+      "line": 59,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "const govPath = path.join(projectRoot, 'reports', 'product-release-governance-matrix.json');"
+    },
+    {
+      "file": "scripts/test-product-system-integrity-negative-cases.mjs",
+      "line": 60,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check/audit script — references reports as audit subjects",
+      "context": "const readinessPath = path.join(projectRoot, 'reports', 'product-release-readiness-matrix.json');"
+    },
+    {
+      "file": "scripts/test-product-system-integrity-negative-cases.mjs",
+      "line": 61,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
+      "context": ""
+    },
+    {
+      "file": "scripts/test-product-system-integrity-negative-cases.mjs",
+      "line": 63,
+      "classification": "guard_pattern_or_test_fixture",
+      "blocking": false,
+      "reason": "Guard/check script on authority path — reads report data for audit/verification, not to grant authority.",
+      "context": "const governance = readJSON(govPath);"
     },
     {
       "file": "scripts/update-executive-reporting-grade.mjs",
@@ -3112,12 +3208,132 @@
       "context": ""
     },
     {
+      "file": "lib/fulfilment/controlled-release-proof-matrix.ts",
+      "line": 45,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "if (productCode === \"gmi_quarterly\") return \"Edition-specific source blockers, data lock, prior-call review, human editorial review, owner authority, and artifact-hash binding are permanent governance gates.\";"
+    },
+    {
+      "file": "lib/fulfilment/controlled-release-proof-matrix.ts",
+      "line": 46,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "if (commercialStatus === \"contracted\") return \"Enterprise/retainer scope must be contracted and provisioned intentionally; no self-serve purchase authority.\";"
+    },
+    {
+      "file": "lib/fulfilment/controlled-release-proof-matrix.ts",
+      "line": 47,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "if (commercialStatus === \"manual_billing\") return \"Manual billing and scope/recipient approval are intentional access boundaries.\";"
+    },
+    {
+      "file": "lib/fulfilment/controlled-release-proof-matrix.ts",
+      "line": 48,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script generates report output — descriptive only",
+      "context": "if (fulfilmentType === \"human_reviewed_dossier\" || fulfilmentType === \"executive_report_artifact\") return \"High-risk or judgment-bearing output requires review, approval, and delivery proof before claims.\";"
+    },
+    {
+      "file": "lib/fulfilment/controlled-release-proof-matrix.ts",
+      "line": 49,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "return \"Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.\";"
+    },
+    {
       "file": "lib/intelligence/constitutional-orchestrator-adapter.ts",
       "line": 58,
       "classification": "report_descriptive_only",
       "blocking": false,
       "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
       "context": "const posture = derivePosture(report)"
+    },
+    {
+      "file": "lib/living-intelligence/estate-snapshot-loader.ts",
+      "line": 386,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "const readinessMatrix = (readJsonSafe(\"reports/product-release-readiness-matrix.json\") as Record<string, Record<string, unknown>> | null) ?? {};"
+    },
+    {
+      "file": "lib/living-intelligence/estate-snapshot-loader.ts",
+      "line": 387,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "const governanceMatrix = (readJsonSafe(\"reports/product-release-governance-matrix.json\") as Record<string, Record<string, unknown>> | null) ?? {};"
+    },
+    {
+      "file": "lib/living-intelligence/estate-snapshot-loader.ts",
+      "line": 388,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "const authorityContract = (readJsonSafe(\"data/ProductAuthorityContract.json\") as Record<string, Record<string, unknown>> | null) ?? {};"
+    },
+    {
+      "file": "lib/living-intelligence/estate-snapshot-loader.ts",
+      "line": 389,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": ""
+    },
+    {
+      "file": "lib/living-intelligence/source-of-truth-map.ts",
+      "line": 70,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "governed_billing_api: \"pages/api/billing/checkout.ts — server-side checkout gate that enforces the resolver\","
+    },
+    {
+      "file": "lib/living-intelligence/source-of-truth-map.ts",
+      "line": 71,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "CATALOG: \"lib/commercial/catalog.ts — canonical commercial product metadata (Stripe IDs, prices, statuses)\","
+    },
+    {
+      "file": "lib/living-intelligence/source-of-truth-map.ts",
+      "line": 72,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "ProductAuthorityContract: \"data/ProductAuthorityContract.json — 43 products with authority states and claim boundaries\","
+    },
+    {
+      "file": "lib/living-intelligence/source-of-truth-map.ts",
+      "line": 73,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "product_release_readiness_matrix: \"reports/product-release-readiness-matrix.json — release readiness per product\","
+    },
+    {
+      "file": "lib/living-intelligence/source-of-truth-map.ts",
+      "line": 74,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "product_release_governance_matrix: \"reports/product-release-governance-matrix.json — governance rules per product\","
+    },
+    {
+      "file": "lib/living-intelligence/source-of-truth-map.ts",
+      "line": 75,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "market_intelligence_lifecycle: \"lib/intelligence/market-intelligence-lifecycle.ts — static lifecycle records (PUBLICATION TRUTH)\","
     },
     {
       "file": "lib/product/authority-evidence-source-policy.ts",
@@ -3408,6 +3624,54 @@
       "context": "newEvidence.push(`Approving authority: ${constitutionalStructural.approvingAuthority}`)"
     },
     {
+      "file": "lib/product/evidence-package-registry.ts",
+      "line": 51,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script generates report output — descriptive only",
+      "context": "methodologyBoundaryPath: 'artifacts/validation/reporting_output_layer/methodology-boundary.md',"
+    },
+    {
+      "file": "lib/product/evidence-package-registry.ts",
+      "line": 52,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script generates report output — descriptive only",
+      "context": "allowedClaimsPath: 'artifacts/validation/reporting_output_layer/allowed-claims.txt',"
+    },
+    {
+      "file": "lib/product/evidence-package-registry.ts",
+      "line": 53,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script generates report output — descriptive only",
+      "context": "forbiddenClaimsPath: 'artifacts/validation/reporting_output_layer/forbidden-claims.txt',"
+    },
+    {
+      "file": "lib/product/evidence-package-registry.ts",
+      "line": 54,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "authorityRole: 'shared_layer_non_authority',"
+    },
+    {
+      "file": "lib/product/evidence-package-registry.ts",
+      "line": 55,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "requiredForReadiness: true,"
+    },
+    {
+      "file": "lib/product/evidence-package-registry.ts",
+      "line": 56,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "registrationDate: '2026-06-14',"
+    },
+    {
       "file": "lib/product/live-route-output-capture.ts",
       "line": 48,
       "classification": "report_descriptive_only",
@@ -3446,6 +3710,110 @@
       "blocking": false,
       "reason": "Route capture — defines route discovery constants, does not read reports for authority.",
       "context": "{"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 71,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "export const FORBIDDEN_REPORT_CLAIMS = ["
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 72,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "'validated authority',"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 73,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "'certified finding',"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 74,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "'externally proven conclusion',"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 231,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "humanReviewCompletedDate: new Date().toISOString(),"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 232,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "evidenceBoundary: params.evidenceBoundary,"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 233,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "nonAuthorityDeclaration:"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 234,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "'This report is a delivery artifact and is not authority-granting evidence. It does not validate, certify, or externally verify any product claim.',"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 235,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "forbiddenClaimsChecked: true,"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 236,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "forbiddenClaimsDetected: params.forbiddenClaimsDetected,"
+    },
+    {
+      "file": "lib/product/reporting-artifact-schema.ts",
+      "line": 237,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "forbiddenClaimsRemoved: params.forbiddenClaimsDetected.length === 0,"
+    },
+    {
+      "file": "lib/product/reporting-output-contract.ts",
+      "line": 45,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": "export const REPORT_BOUNDARY_NOTICE = `This report is a delivery and interpretation artifact. It may describe evidence, source material, and findings, but it is not itself authority-granting evidence and does not validate, certify, or externally verify any product claim.`;"
+    },
+    {
+      "file": "lib/product/reporting-output-contract.ts",
+      "line": 46,
+      "classification": "report_descriptive_only",
+      "blocking": false,
+      "reason": "Script references reports in authority-adjacent logic (non-authority path) — low priority refactor.",
+      "context": ""
     },
     {
       "file": "lib/product/wave-one-gold-standard.ts",
@@ -3777,8 +4145,8 @@
     }
   ],
   "classificationSummary": {
-    "guard_pattern_or_test_fixture": 191,
-    "report_descriptive_only": 238,
+    "guard_pattern_or_test_fixture": 200,
+    "report_descriptive_only": 275,
     "correction_notice": 33,
     "historical_report_reference": 9
   },
@@ -4079,401 +4447,6 @@
       "context": "5. Migrate public, checkout, report, and admin surfaces to display effective authority state, not declared authority state."
     },
     {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 1,
-      "context": "# Authority Surface Integration — Completion Report"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 4,
-      "context": "**Status:** COMPLETE ✓"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 10,
-      "context": "**Objective:** Make evidence-governed authority visible and binding across all user-facing surfaces"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 12,
-      "context": "**Result:** Authority UI components deployed and integrated"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 14,
-      "context": "All surfaces can now consume ProductAuthorityContract to display authority state. No surface may claim authority except through the contract."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 20,
-      "context": "### 1. ProductAuthorityBadge.tsx"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 21,
-      "context": "**Location:** `components/product/ProductAuthorityBadge.tsx`"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 23,
-      "context": "Displays product authority state as a colored badge."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 26,
-      "context": "- `ProductAuthorityState` from contract"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 29,
-      "context": "- Green badge for `externally_proven_gold_product`"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 31,
-      "context": "- Orange badge for `legacy_validated_pending_v2_revalidation`"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 36,
-      "context": "**Does NOT accept hardcoded strings** like \"gold\", \"proven\", \"validated\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 40,
-      "context": "### 2. ProductAuthorityPanel.tsx"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 41,
-      "context": "**Location:** `components/product/ProductAuthorityPanel.tsx`"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 43,
-      "context": "Displays complete authority details with expandable detail section."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 46,
-      "context": "- Authority state (with title)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 76,
-      "context": "### 4. ProductAuthorityNotice.tsx"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 77,
-      "context": "**Location:** `components/product/ProductAuthorityNotice.tsx`"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 79,
-      "context": "Displays notices about authority limitations and required actions."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 82,
-      "context": "- Authority is limited or blocked"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 89,
-      "context": "- Info style (blue) for limited authority"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 101,
-      "context": "**File:** `scripts/check-authority-surface-integration.mjs`"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 111,
-      "context": "- Hardcoded authority claims (paired with product name + authority language)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 112,
-      "context": "- Unsupported authority terms in descriptions (board-grade, market-leading, etc.)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 127,
-      "context": "## Product Authority States — Display Ready"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 132,
-      "context": "Badge:  Externally Proven"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 134,
-      "context": "Panel:  Authority State: externally_proven_gold_product"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 137,
-      "context": "Language: \"fast_diagnostic is externally proven under v2 evidence validation.\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 146,
-      "context": "Panel:  Authority State: legacy_validated_pending_v2_revalidation"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 149,
-      "context": "Language: \"team_assessment is legacy validated; pending v2 revalidation.\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 150,
-      "context": "Notice:   \"Legacy Authority — Requires v2 revalidation for continued claims\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 152,
-      "context": "Action:   Run v2 revalidation to upgrade from legacy status"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 160,
-      "context": "Panel:  Authority State: legacy_validated_pending_v2_revalidation"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 163,
-      "context": "Language: \"enterprise_assessment is legacy validated; pending v2 revalidation.\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 164,
-      "context": "Notice:   \"Legacy Authority — Requires v2 revalidation for continued claims\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 166,
-      "context": "Action:   Run v2 revalidation to upgrade from legacy status"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 174,
-      "context": "Panel:  Authority State: blocked_until_claim_evidenced"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 179,
-      "context": "Notice:   \"Authority Blocked — No authority to make diagnostic/intelligence claims\""
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 192,
-      "context": "import { ProductAuthorityPanel } from \"@/components/product/ProductAuthorityPanel\";"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 193,
-      "context": "import { resolveProductAuthority } from \"@/lib/product/resolve-product-authority\";"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 196,
-      "context": "const contract = resolveProductAuthority({"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 205,
-      "context": "<ProductAuthorityPanel contract={contract} />"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 207,
-      "context": "<ProductAuthorityNotice contract={contract} />"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 212,
-      "context": "// ✗ INCORRECT: Hardcoded authority"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 214,
-      "context": "return <div>Fast Diagnostic is proven</div>; // BLOCKED by integration gate"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 222,
-      "context": "### ✓ Product Authority Contract Gate"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 230,
-      "context": "### ✓ Authority Surface Integration Gate"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 239,
-      "context": "### ✓ No-Mock Authority Gate"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 241,
-      "context": "Mock authority patterns: 0 found in library code"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 242,
-      "context": "Hardcoded authority: 0 in library code"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 246,
-      "context": "### ✓ Surface Claim Authority Gate"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 277,
-      "context": "1. **components/product/ProductAuthorityBadge.tsx** (65 lines)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 278,
-      "context": "- Authority state badge component"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 279,
-      "context": "- Color-coded by authority state"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 282,
-      "context": "2. **components/product/ProductAuthorityPanel.tsx** (200+ lines)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 283,
-      "context": "- Detailed authority information display"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 292,
-      "context": "4. **components/product/ProductAuthorityNotice.tsx** (180+ lines)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 293,
-      "context": "- Authority limitation notices"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 297,
-      "context": "5. **scripts/check-authority-surface-integration.mjs** (230+ lines)"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 304,
-      "context": "1. **scripts/check-no-mock-authority.mjs**"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 310,
-      "context": "## Authority Display Rules"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 313,
-      "context": "All authority language must come from `ProductAuthorityContract.publicClaimLanguage` or `ProductAuthorityContract.currentAuthorityState`."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 319,
-      "context": "When `contract.blockingReasons.length > 0`, display `ProductAuthorityNotice`."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 322,
-      "context": "When showing authority state, include evidence source and validation status."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 332,
-      "context": "1. ✓ Authority UI components exist"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 333,
-      "context": "2. ✓ Product surfaces can consume ProductAuthorityContract"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 334,
-      "context": "3. ✓ Components do not accept arbitrary authority strings"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 335,
-      "context": "4. ✓ fast_diagnostic can display v2-proven authority"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 339,
-      "context": "8. ✓ Admin/dashboard surfaces can expose authority state"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 340,
-      "context": "9. ✓ Authority surface integration gate passes"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 341,
-      "context": "10. ✓ No critical violations of authority display rules"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 348,
-      "context": "- Add ProductAuthorityPanel to admin product detail pages"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 353,
-      "context": "- Add Authority Status block to all generated reports"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 358,
-      "context": "- Update product cards to use ProductAuthorityBadge"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 360,
-      "context": "- Add ProductAuthorityNotice for limited authority products"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 368,
-      "context": "- Alert when product authority changes"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 376,
-      "context": "**No surface may independently decide a product's authority.**"
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 378,
-      "context": "Every claim about product validation, proof, diagnostic capability, or intelligence must derive from and be accountable to the ProductAuthorityContract."
-    },
-    {
-      "file": "reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md",
-      "line": 380,
-      "context": "The user, buyer, operator, admin, and reader now encounter evidence-governed authority wherever they see a product, claim, report, or diagnostic artifact."
-    },
-    {
       "file": "reports/category-demonstration-readiness.md",
       "line": 13,
       "context": "- Final Authority Position: Estate category demonstration may be claimed."
@@ -4509,279 +4482,674 @@
       "context": "- Reduce duplication between validation reports and actual authority resolvers; gates should read the same source of truth routes consume."
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 20,
-      "context": "**Can Grant Authority from Synthetic Context:** NO"
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 27,
+      "context": "- ⚠ \"boardroom_brief\" has not completed a proof run — fulfilment path unverified in production"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 28,
+      "context": "- ℹ Proof run not yet completed end-to-end in production (paid → review → dossier_generated → delivered)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 151,
+      "context": "- ⚠ \"operator_decision_pack\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 161,
+      "context": "- ⚠ \"executive_reporting\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 188,
+      "context": "- ⚠ \"strategy_room\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 200,
+      "context": "- ⚠ \"strategy_room_extended\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 267,
+      "context": "- ⚠ \"professional\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 279,
+      "context": "- ⚠ \"professional_annual\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 289,
+      "context": "- ℹ CONTROLLED_RELEASE_READY by permanent design — each edition is temporally gated by mandatory data lock, mandatory editorial human review, and owner publication authority; self-serve checkout is not authorised. This i"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 298,
+      "context": "- ⚠ \"gmi_q1_2026\" has not completed a proof run — fulfilment path unverified in production"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 299,
+      "context": "- ℹ Current published edition until Q2 completes final data lock and owner release authority."
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 308,
+      "context": "- ℹ Market-ready release candidate — final post-8-July data lock and owner release authority pending."
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 309,
+      "context": "- ℹ No self-serve checkout, manual billing, or Stripe binding is active before release authority."
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 321,
+      "context": "### Decision Authority Retainer — Core (`retainer_core`)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 329,
+      "context": "### Decision Authority Retainer — Operational (`retainer_operational`)"
+    },
+    {
+      "file": "reports/product-fulfilment-readiness.md",
+      "line": 337,
+      "context": "### Decision Authority Retainer — Institutional (`retainer_institutional`)"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 21,
+      "context": "| reports/adversarial-free-signal-adoption-layer.md | 90 | complete | requires_evidence_check | \\| Complete fallback path \\| ❌ Forbidden \\| ✅ Included \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 23,
+      "context": "| reports/anti-gaming-validation-hardening.md | 4 | complete | requires_evidence_check | **Status**: HARDENING COMPLETE; WAVE 2G UPGRADE REJECTED |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 24,
+      "context": "| reports/anti-gaming-validation-hardening.md | 72 | complete | requires_evidence_check | - evidenceLedgerComplete !== true |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 25,
+      "context": "| reports/anti-gaming-validation-hardening.md | 107 | complete | requires_evidence_check | - ✓ Full validation chain complete (anti-toy + red-team + generic-AI + market) |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 26,
+      "context": "| reports/anti-gaming-validation-hardening.md | 111 | complete | requires_evidence_check | - ✓ Evidence ledger complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 27,
+      "context": "| reports/anti-gaming-validation-hardening.md | 189 | complete | requires_evidence_check | - Validation chain incomplete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 28,
+      "context": "| reports/anti-gaming-validation-hardening.md | 359 | complete | requires_evidence_check | **Status**: Anti-Gaming Hardening COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 29,
+      "context": "| reports/authority-grant-firewall-results.md | 5 | verified | requires_evidence_check | Gate: PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 30,
-      "context": "- Isolated testing cannot establish authority"
+      "context": "| reports/authority-surface-integration.md | 29 | complete | requires_evidence_check | - **ProductAuthorityPanel** — Shows complete authority details and evidence |"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 31,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 9 | complete | requires_evidence_check | **Status:** ✓ ENFORCEMENT INFRASTRUCTURE COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 32,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 81 | complete | requires_evidence_check | **Purpose:** Prevent reports from claiming authority restoration is complete or authority is safe when gates fail. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 33,
-      "context": "**Authority Grant Eligible:** blocked_until_full_flow_complete"
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 85 | ready | requires_evidence_check | - \"market ready\" (without acknowledging remaining blockers) |"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 41,
-      "context": "**Can Grant Authority from Synthetic Context:** YES"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 34,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 90 | complete | requires_evidence_check | - \"authority restoration complete\" (without acknowledging remaining blockers) |"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 43,
-      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 35,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 189 | all gates passing | requires_evidence_check | \"All gates passing\" language: sanitized/rejected |"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 51,
-      "context": "**Can Grant Authority from Synthetic Context:** YES"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 36,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 214 | ready | requires_evidence_check | **Authority Language:** ✓ SANITIZER READY |"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 53,
-      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 37,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 293 | complete | requires_evidence_check | **Authority Blocking Gate Enforcement:** ✓ COMPLETE |"
     },
     {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 61,
-      "context": "**Can Grant Authority from Synthetic Context:** YES"
-    },
-    {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 63,
-      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
-    },
-    {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 71,
-      "context": "**Can Grant Authority from Synthetic Context:** YES"
-    },
-    {
-      "file": "reports/context-bound-validation-readiness.md",
-      "line": 73,
-      "context": "**Authority Grant Eligible:** eligible_from_isolated_validation"
-    },
-    {
-      "file": "reports/living-case-admin-fulfilment-readiness.md",
-      "line": 53,
-      "context": "The fulfilment workflow has been proven through tests:"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 5,
-      "context": "**Status:** ✓ COMPLETE"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 7,
-      "context": "**Authority Preservation:** All product states unchanged"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 16,
-      "context": "**Scope:** Messaging and language improvements only. No component refactoring, no authority upgrades."
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 18,
-      "context": "**Result:** Two high-impact surfaces improved; blockers identified and documented for future work; all authority gates remain passing."
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 38,
-      "context": "| team_assessment | credible_but_too_complex | authority_contract_not_visible | /diagnostics/team-assessment |"
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_REPORT.md | 309 | complete | requires_evidence_check | **Enforcement Status:** ✓ Complete and Operational |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 39,
-      "context": "| enterprise_assessment | credible_but_too_complex | authority_contract_not_visible | /diagnostics/enterprise-assessment, /enterprise-decision-scan |"
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 9 | complete | requires_evidence_check | **Status:** ✓ VERIFICATION COMPLETE |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 40,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 16 | verified | requires_evidence_check | **STATUS: ENFORCEMENT INFRASTRUCTURE VERIFIED AND OPERATIONAL** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 41,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 18 | complete | requires_evidence_check | All verification layers complete. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 42,
-      "context": "| boardroom_mode | credible_but_too_complex | authority_contract_not_visible, generic_ai_contrast_weak | Boardroom Brief |"
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 26 | verified | requires_evidence_check | ## Core Infrastructure Verified |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 43,
-      "context": "| global_market_reports | credible_but_too_complex | authority_contract_not_visible, limitations_not_visible, generic_ai_contrast_weak | /artifacts, /intelligence/market |"
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 106 | all gates passing | requires_evidence_check | - \"all gates passing\" (without acknowledging remaining blockers) |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 44,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 173 | verified | requires_evidence_check | ## Blocking Gate Failures (Expected and Verified) |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 45,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 212 | verified | requires_evidence_check | - ✓ Estate integrity gates verified |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 46,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 228 | verified | requires_evidence_check | \\| 4 blocking gates fail \\| ✓ \\| Verified in gate output \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 47,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 254 | complete | requires_evidence_check | ### Enforcement Infrastructure: ✓ COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 48,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 291 | complete | requires_evidence_check | ✓ **ENFORCEMENT INFRASTRUCTURE VERIFIED AND COMPLETE** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 49,
+      "context": "| reports/AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md | 305 | complete | requires_evidence_check | **Verification Status:** ✓ Complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 50,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 4 | complete | requires_evidence_check | **Challenge Status:** ✓ COMPLETE WITH PROOF |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 51,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 11 | ready | requires_evidence_check | This report documents **adversarial verification** of the authority blocking gate enforcement layer. Rather than c"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 52,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 23 | complete | requires_evidence_check | \\| Surface scan proves migration status \\| ✓ \\| Migration complete, surfaces use effective resolver \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 53,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 101 | all gates passing | requires_evidence_check | - \"all gates passing\" — 40 violations |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 54,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 103 | ready | requires_evidence_check | - \"market ready\" — 10 violations |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 55,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 104 | ready | requires_evidence_check | - \"estate ready\" — 8 violations |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 56,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 105 | fully operational | requires_evidence_check | - \"fully operational\" — 4 violations |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 57,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 111 | all gates passing | requires_evidence_check | ❌ reports\\AUTHORITY_BLOCKING_GATE_ENFORCEMENT_VERIFICATION_REPORT.md:101 — Unsafe phrase: \"all gates "
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 58,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 113 | all gates passing | requires_evidence_check | ❌ reports\\WAVE_2C_ENTERPRISE_AUTHORITY_UPGRADE_CLOSURE_REPORT.md:42 — Unsafe phrase: \"all gates passi"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 59,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 114 | all gates passing | requires_evidence_check | ❌ reports\\WAVE_2D_TEAM_ASSESSMENT_AUTHORITY_UPGRADE_CLOSURE_REPORT.md:43 — Unsafe phrase: \"all gates "
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 60,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 144 | complete | requires_evidence_check | Migration Status: COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 61,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 286 | ready | requires_evidence_check | Line 4: \"board-ready\" without evidence context |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 62,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 287 | ready | requires_evidence_check | * Turns a decision record into a board-ready structured brief with |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 63,
-      "context": "a decision has enough evidence, authority, and"
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 301 | ready | requires_evidence_check | - Detects unsupported authority language (\"board-ready\") |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 64,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 346 | ready | requires_evidence_check | \\| Board-Facing Authority Language Guard \\| FAILED \\| \"board-ready\" claim unsupported \\| BOARD_FACING_GUARD_FAILI"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 65,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 384 | verified | requires_evidence_check | **Worktree Integrity:** ✓ Verified |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 66,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 395 | complete | requires_evidence_check | \\| `check-effective-authority-surfaces.mjs` \\| 0 \\| ℹ INFO \\| Surface migration complete \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 67,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 406 | verified | requires_evidence_check | **Current (Verified):** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 68,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 429 | verified | requires_evidence_check | ## Enforcement Mechanisms Verified |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 69,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 471 | complete | requires_evidence_check | - ✓ Migration from declared to effective authority complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 70,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 498 | complete | requires_evidence_check | - Migration complete: all surfaces use resolver |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 71,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 562 | verified | requires_evidence_check | ### Authority Enforcement Infrastructure: ✓ VERIFIED AND OPERATIONAL |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 72,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 568 | complete | requires_evidence_check | 3. ✓ **Surface Scan** — Migration complete, effective resolver in place |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 73,
-      "context": "- Maintains authority visibility (already present from Stage 2E)"
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 582 | verified | requires_evidence_check | ✓ Products allowed positive authority: 0 (VERIFIED) |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 74,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 600 | verified | requires_evidence_check | ✓ **ENFORCEMENT INFRASTRUCTURE VERIFIED AND OPERATIONAL** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 75,
-      "context": "**Entry Point Status:** Now shows pain (implicit), proof (authority panel), and action (test your decision)."
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 617 | complete | requires_evidence_check | **Challenge Status:** ✓ COMPLETE WITH PROOF |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 76,
+      "context": "| reports/AUTHORITY_ENFORCEMENT_VERIFICATION_CHALLENGE_REPORT.md | 619 | verified | requires_evidence_check | **Authority Safety:** ✓ Gate Enforcement Verified Through Adversarial Testing |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 77,
+      "context": "| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 36 | verified | requires_evidence_check | Result: `PASSED_NO_UNVERIFIED_POSITIVE_AUTHORITY`. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 78,
+      "context": "| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 131 | ready | requires_evidence_check | - `lib/instruments/board-brief-template/engine.ts:4` contains `board-ready` without sufficient evidence context. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 79,
+      "context": "| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 153 | ready | requires_evidence_check | No currently declared positive-authority products required suppression, because the current contracts already avoid positi"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 80,
+      "context": "| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 155 | complete | requires_evidence_check | Fraud simulation confirms positive authority would be suppressed if declared without complete proof. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 81,
-      "context": "**Current Issue:** authority_contract_not_visible (and missing next-action clarity)"
+      "context": "| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 174 | complete | requires_evidence_check | 6. No product has complete agreement across contract, ledger, rendered output, scenario artifact, hashes, route proof, "
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 82,
-      "context": "**Fix Applied:** Added authority context section after ProductAuthorityPanel"
+      "context": "| reports/AUTHORITY_FRAUD_PROOFING_COMPLETION_REPORT.md | 214 | ready | requires_evidence_check | 3. Expand board-facing guard coverage and fix the current unsupported `board-ready` leakage. |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 83,
+      "context": "| reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 4 | complete | requires_evidence_check | **Status:** COMPLETE ✓ |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 84,
+      "context": "| reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 43 | complete | requires_evidence_check | Displays complete authority details with expandable detail section. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 85,
+      "context": "| reports/AUTHORITY_SURFACE_INTEGRATION_COMPLETION.md | 127 | ready | requires_evidence_check | ## Product Authority States — Display Ready |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 86,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1B_REPORT.md | 244 | complete | requires_evidence_check | **Phase 1B remediation is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 87,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1B_REPORT.md | 246 | complete | requires_evidence_check | **Completed:** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 88,
-      "context": "This scan surfaces risks and dependencies. Authority"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1B_REPORT.md | 268 | complete | requires_evidence_check | **Execution Status:** Phase 1B complete |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 89,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 5 | complete | requires_evidence_check | **Status:** CLOSE COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 90,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 187 | complete | requires_evidence_check | **Phase 1C Close is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 91,
-      "context": "(externally proven) for governed decisions."
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 189 | complete | requires_evidence_check | **Completed:** |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 92,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 199 | complete | requires_evidence_check | **Governance Hygiene Complete (Phases 1A, 1B, 1C):** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 93,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 219 | complete | requires_evidence_check | **Execution Status:** Phase 1C Close complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 94,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_CLOSE_REPORT.md | 220 | complete | requires_evidence_check | **Governance Hygiene:** Complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 95,
-      "context": "- Makes authority state explicit and actionable"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 113 | ready | requires_evidence_check | 1. `scripts/reconcile-product-authority-truth.mjs` (24 findings) — Already correctly treats reports as descriptive |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 96,
-      "context": "- Shows what the assessment does (surfaces risks) vs what it doesn't do (prove authority)"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 204 | complete | requires_evidence_check | **Phase 1C remediation is complete.** |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 97,
-      "context": "- Links users to v2-proven product (fast_diagnostic) for authority-based decisions"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 206 | complete | requires_evidence_check | **Completed:** |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 98,
-      "context": "- Prevents overclaiming: \"authority depends on v2 validation\""
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1C_REPORT.md | 227 | complete | requires_evidence_check | **Execution Status:** Phase 1C complete |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 99,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_EXECUTION_REPORT.md | 157 | complete | requires_evidence_check | Phase 1 remediation is **partially complete**: |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 100,
-      "context": "**Entry Point Status:** Now shows pain (enterprise risks), proof (authority state visible), action (use with fast_diagnostic)."
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_EXECUTION_REPORT.md | 159 | complete | requires_evidence_check | **Completed:** |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 110,
-      "context": "| /diagnostics/team-assessment | authority_contract_not_visible | Medium | Diagnostic page restructure (Wave 2) |"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 102,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_REPORT.md | 107 | ready | requires_evidence_check | OLD (unsafe): \"All gates passing. System ready.\" |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 113,
-      "context": "| /boardroom-brief | authority_contract + AI contrast | Medium | Multiple issues, requires Wave 2 |"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 104,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_1_REPORT.md | 256 | complete | requires_evidence_check | Phase 1 is complete when: |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 114,
-      "context": "| /artifacts/GMI | authority + limitations + AI contrast | High | Complex multi-surface issue |"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 105,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 106,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 238 | complete | requires_evidence_check | **Phase 2 is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 107,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 240 | complete | requires_evidence_check | **Completed:** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 108,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_2_NO_MOCK_REPORT.md | 262 | complete | requires_evidence_check | **Execution Status:** Phase 2 complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 109,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 129,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 226 | complete | requires_evidence_check | **Phase 3 is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 130,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 228 | complete | requires_evidence_check | **Completed:** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 132,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_3_BOARD_LANGUAGE_REPORT.md | 250 | complete | requires_evidence_check | **Execution Status:** Phase 3 complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 133,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 134,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 74 | verified | requires_evidence_check | **Authority-supporting types (may support authority only when verified):** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 135,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 208 | complete | requires_evidence_check | **Phase 4 is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 136,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 210 | complete | requires_evidence_check | **Completed:** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 137,
-      "context": "- Authority boundary constraints (what NOT to claim)"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_4_REPORT_AS_EVIDENCE_REPORT.md | 238 | complete | requires_evidence_check | **Execution Status:** Phase 4 complete |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 142,
-      "context": "- Ensures future work preserves authority boundaries"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 138,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 144,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 228 | complete | requires_evidence_check | **Phase 5B is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 145,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 230 | complete | requires_evidence_check | **Completed:** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 146,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5B_RENDERED_OUTPUT_REPORT.md | 268 | complete | requires_evidence_check | **Execution Status:** Phase 5B complete |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 147,
-      "context": "## AUTHORITY PRESERVATION VERIFICATION"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 5 | complete | requires_evidence_check | **Status:** REMEDIATION COMPLETE |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 149,
-      "context": "### Product Authority States (All Unchanged)"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 148,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 86 | complete | requires_evidence_check | 1. Complete rewrite with strict classification (10 levels) |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 152,
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 236 | complete | requires_evidence_check | **Phase 5 is complete.** |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 153,
-      "context": "| fast_diagnostic | externally_proven_gold_product | externally_proven_gold_product | ✓ UNCHANGED |"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 238 | complete | requires_evidence_check | **Completed:** |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 154,
-      "context": "| foundry_decision_test | externally_proven_gold_product | externally_proven_gold_product | ✓ UNCHANGED |"
+      "context": "| reports/BLOCKING_GATE_REMEDIATION_PHASE_5_EVIDENCE_LEDGER_REPORT.md | 268 | complete | requires_evidence_check | **Execution Status:** Phase 5 complete |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 155,
-      "context": "| team_assessment | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | ✓ UNCHANGED |"
+      "context": "| reports/board-facing-authority-language-findings.md | 24 | ready | requires_evidence_check | \\| `lib/instruments/board-brief-template/engine.ts` \\| \"board-ready\" → \"board-facing\"; \"BOARD_READY\" → \"EVIDENCE_LIMITED_BOAR"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 156,
-      "context": "| enterprise_assessment | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | ✓ UNCHANGED |"
+      "context": "| reports/board-facing-authority-language-findings.md | 26 | ready | requires_evidence_check | \\| `lib/commercial/catalog.ts` \\| \"board-ready structured brief\" → \"board-facing structured brief (user-supplied inputs)\" \\| "
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 157,
-      "context": "| personal_decision_audit | legacy_validated_pending_v2_revalidation | legacy_validated_pending_v2_revalidation | ✓ UNCHANGED |"
+      "context": "| reports/board-facing-authority-language-findings.md | 27 | ready | requires_evidence_check | \\| `lib/commercial/premium-decision-assets.ts` \\| \"board-ready decision brief\" → \"board-facing decision brief (user-supplied "
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 158,
+      "context": "| reports/board-facing-authority-language-findings.md | 29 | ready | requires_evidence_check | \\| `lib/admin/reporting/report-pdf.tsx` \\| \"BOARD-READY PDF DOCUMENT\" → \"BOARD-FACING PDF DOCUMENT (user-supplied)\" \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 159,
+      "context": "| reports/board-facing-authority-language-findings.md | 31 | ready | requires_evidence_check | \\| `lib/intelligence/gmi-instrument.ts` \\| \"Board-ready challenge dossier\" → \"Board-facing challenge dossier (user-supplied i"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 160,
+      "context": "| reports/board-facing-authority-language-findings.md | 32 | ready | requires_evidence_check | \\| `app/api/admin/boardroom-delivery/generate/route.ts` \\| \"board-ready commitment\" → \"board-facing commitment (user-supplied"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 161,
+      "context": "| reports/board-facing-authority-language-findings.md | 33 | verified | requires_evidence_check | \\| `lib/pdf/oversight-brief-pdf.tsx` \\| \"verified cost\" → \"independently verified cost (user-supplied estimates)\" \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 162,
+      "context": "| reports/board-facing-authority-language-findings.md | 35 | ready | requires_evidence_check | \\| `components/instruments/BoardBriefBuilderRunner.tsx` \\| \"BOARD_READY\" → \"EVIDENCE_LIMITED_BOARD_DRAFT\" \\| |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 163,
+      "context": "| reports/board-facing-authority-language-findings.md | 66 | ready | requires_evidence_check | - `app/api/admin/boardroom-delivery/generate/route.ts` — \"board-ready\" in bounded context |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 164,
-      "context": "- ✓ \"externally proven\""
+      "context": "| reports/board-facing-authority-language-findings.md | 67 | verified | requires_evidence_check | - `lib/pdf/oversight-brief-pdf.tsx` — \"verified cost\" in bounded context |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 165,
-      "context": "- ✓ \"legacy validated, pending v2 revalidation\""
+      "context": "| reports/board-facing-authority-language-findings.md | 68 | ready | requires_evidence_check | - `lib/commercial/premium-decision-assets.ts` — \"board-ready\" in bounded context |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 166,
+      "context": "| reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 4 | complete | requires_evidence_check | **Status:** INFRASTRUCTURE COMPLETE, VISIBILITY GAP IDENTIFIED |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 167,
+      "context": "| reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 10 | complete | requires_evidence_check | The Evidence-Governed Decision Infrastructure is **complete and operational** at the code and validation level. |"
+    },
+    {
+      "file": "reports/system-truth-completion-claim-audit.md",
       "line": 168,
-      "context": "- ✗ No claims that legacy products are v2-proven"
+      "context": "| reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 33 | complete | requires_evidence_check | ## Infrastructure Assessment — ✓ COMPLETE |"
     },
     {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 169,
-      "context": "- ✗ No false authority upgrades"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 175,
-      "context": "### Estate Integrity Gates Passing (scoped — authority remains blocked by authority-safety gates)"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 181,
-      "context": "✓ Estate Authority Integrity Lock      PASSED (estate_category_demonstrated)"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 182,
-      "context": "✓ Checkout Authority Coverage          PASSED (0 failures, 22 products audited)"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 183,
-      "context": "✓ Report Authority Coverage            PASSED (0 failures, 12 products audited)"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 184,
-      "context": "✓ Admin Authority Coverage             PASSED (0 failures, 33 products audited)"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 185,
-      "context": "✓ No Mock Authority Validation         PASSED (0 mock sources)"
-    },
-    {
-      "file": "reports/MARKET_CLARITY_PASS_2_COMPLETION_REPORT.md",
-      "line": 186,
-      "context": "✓ Surface Claim Authority              PASSED (0 unsupported claims)"
+      "file": "reports/system-truth-completion-claim-audit.md",
+      "line": 171,
+      "context": "| reports/CATEGORY_DEMONSTRATION_BUILD_HONEST_ASSESSMENT.md | 211 | verified | requires_evidence_check | - Verified all product authority states are correct |"
     }
   ],
   "evidenceSourcePolicy": {

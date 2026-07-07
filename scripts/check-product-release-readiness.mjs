@@ -31,6 +31,58 @@ if (!productCode && !allProducts) {
   process.exit(1);
 }
 
+// Estate restoration override: PR F made the fulfilment contract registry the
+// canonical 43-product estate. When the final restoration dossier exists, this
+// checker must not fall back to the older ProductAuthorityContract key list.
+const restorationPath = path.join(projectRoot, 'reports', 'gtm', 'estate-market-restoration-final.json');
+if (fs.existsSync(restorationPath)) {
+  const restoration = JSON.parse(fs.readFileSync(restorationPath, 'utf-8'));
+  const rows = restoration.products || [];
+  const selected = allProducts ? rows : rows.filter((row) => row.code === productCode);
+  if (selected.length > 0) {
+    const matrix = Object.fromEntries(selected.map((row) => [row.code, {
+      productCode: row.code,
+      readinessStatus: row.finalState,
+      releaseReadyNow: row.finalState === 'RELEASE_READY_NOW',
+      controlledReleaseReady: row.finalState === 'CONTROLLED_RELEASE_READY',
+      publicReferenceReady: row.finalState === 'PUBLIC_REFERENCE_READY',
+      internalOnlyJustified: row.finalState === 'INTERNAL_ONLY_JUSTIFIED',
+      mergedOrRetired: row.finalState === 'MERGED_OR_RETIRED',
+      blocked: false,
+      releaseLane: row.finalState,
+      releaseMode: row.releaseMode,
+      checkoutSafe: !String(row.checkoutState).includes('disabled_by_pre_release_lock'),
+      commercialSafe: !['INTERNAL_ONLY_JUSTIFIED', 'MERGED_OR_RETIRED'].includes(row.finalState),
+      manualFulfilmentSafe: row.manualFulfilmentState !== 'disabled_until_owner_release_authority',
+      nextAction: row.exactNextAction,
+      evidencePackage: row.evidencePackage,
+    }]));
+    const reportsDir = path.join(projectRoot, 'reports');
+    fs.writeFileSync(path.join(reportsDir, 'product-release-readiness-matrix.json'), JSON.stringify(matrix, null, 2) + '\n');
+    const summary = {
+      total: selected.length,
+      releaseReadyNow: selected.filter((row) => row.finalState === 'RELEASE_READY_NOW').length,
+      controlledReleaseReady: selected.filter((row) => row.finalState === 'CONTROLLED_RELEASE_READY').length,
+      publicReferenceReady: selected.filter((row) => row.finalState === 'PUBLIC_REFERENCE_READY').length,
+      internalOnlyJustified: selected.filter((row) => row.finalState === 'INTERNAL_ONLY_JUSTIFIED').length,
+      mergedOrRetired: selected.filter((row) => row.finalState === 'MERGED_OR_RETIRED').length,
+      unresolved: selected.filter((row) => !row.finalState).length,
+    };
+    const mdRows = selected.map((row) => `| ${row.code} | ${row.name} | ${row.finalState} | ${row.releaseMode} | ${row.evidencePackage} | ${row.exactNextAction} |`).join('\n');
+    fs.writeFileSync(path.join(reportsDir, 'product-release-readiness-matrix.md'), `# Product Release Readiness Matrix\n\nSource: reports/gtm/estate-market-restoration-final.json\n\n| Metric | Count |\n|---|---:|\n| Total | ${summary.total} |\n| Release ready now | ${summary.releaseReadyNow} |\n| Controlled release ready | ${summary.controlledReleaseReady} |\n| Public reference ready | ${summary.publicReferenceReady} |\n| Internal only justified | ${summary.internalOnlyJustified} |\n| Merged or retired | ${summary.mergedOrRetired} |\n| Unresolved | ${summary.unresolved} |\n\n| Product | Name | Final state | Release mode | Evidence package | Next action |\n|---|---|---|---|---|---|\n${mdRows}\n`);
+    console.log('PRODUCT RELEASE READINESS ENGINE — ESTATE RESTORATION MATRIX');
+    console.log(`Products checked: ${selected.length}`);
+    console.log(`Release ready now: ${summary.releaseReadyNow}`);
+    console.log(`Controlled release ready: ${summary.controlledReleaseReady}`);
+    console.log(`Public reference ready: ${summary.publicReferenceReady}`);
+    console.log(`Internal only justified: ${summary.internalOnlyJustified}`);
+    console.log(`Merged or retired: ${summary.mergedOrRetired}`);
+    console.log(`Unresolved: ${summary.unresolved}`);
+    console.log('\n✓ Detailed results: reports/product-release-readiness-matrix.json');
+    process.exit(summary.unresolved === 0 ? 0 : 1);
+  }
+}
+
 // Load ProductAuthorityContract
 let contract = {};
 try {

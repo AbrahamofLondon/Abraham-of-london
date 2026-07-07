@@ -1,14 +1,14 @@
 # Report-As-Evidence Violations
 
-Generated: 2026-06-14T11:58:15.433Z
+Generated: 2026-07-07T10:12:11.221Z
 
 Gate: passed_with_descriptive_report_references
 
-Scripts scanned: 3849
+Scripts scanned: 4087
 
 True violations (report-as-evidence): 0
 Blocking findings: 0
-Total findings (all categories): 471
+Total findings (all categories): 517
 
 ## Evidence Source Policy
 
@@ -32,8 +32,8 @@ Authority-supporting types (may support authority only when verified):
 
 | Classification | Count | Blocks Authority? |
 |---|---|---|
-| report_descriptive_only | 238 | No |
-| guard_pattern_or_test_fixture | 191 | No |
+| report_descriptive_only | 275 | No |
+| guard_pattern_or_test_fixture | 200 | No |
 | correction_notice | 33 | No |
 | historical_report_reference | 9 | No |
 
@@ -185,6 +185,10 @@ Authority-supporting types (may support authority only when verified):
 | scripts/check-external-product-value-benchmark.mjs | 216 | report_descriptive_only | Script generates report output — descriptive only | console.log(`External benchmarks missing: ${evidenceCounts.benchmarksMissingForGold}`); |
 | scripts/check-external-product-value-benchmark.mjs | 217 | report_descriptive_only | Script generates report output — descriptive only | console.log(`Rendered-output reviews missing: ${evidenceCounts.renderedReviewsMissingForGold}`); |
 | scripts/check-external-product-value-benchmark.mjs | 218 | report_descriptive_only | Script generates report output — descriptive only | console.log(`Live-route proof missing for gold: ${evidenceCounts.liveRouteProofMissingForGold}`); |
+| scripts/check-living-estate-intelligence.mjs | 142 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | const readiness = readJson("reports/product-release-readiness-matrix.json") \|\| {}; |
+| scripts/check-living-estate-intelligence.mjs | 143 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | const governance = readJson("reports/product-release-governance-matrix.json") \|\| {}; |
+| scripts/check-living-estate-intelligence.mjs | 144 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const authority = readJson("data/ProductAuthorityContract.json") \|\| {}; |
+| scripts/check-living-estate-intelligence.mjs | 145 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const allCodes = Array.from(new Set([...Object.keys(readiness), ...Object.keys(governance)])); |
 | scripts/check-report-as-evidence-violations.mjs | 65 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | ]; |
 | scripts/check-report-as-evidence-violations.mjs | 66 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. |  |
 | scripts/check-report-as-evidence-violations.mjs | 68 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | const REPORT_PATTERNS = [/WAVE_/i, /COMPLETION_REPORT/i, /CLOSURE_REPORT/i, /readiness.*report/i, /report.*claim/i]; |
@@ -262,6 +266,9 @@ Authority-supporting types (may support authority only when verified):
 | scripts/check-wave-one-gold-standard.mjs | 127 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const ENGINE_REQUIRED_MARKERS = [ |
 | scripts/check-wave-one-gold-standard.mjs | 128 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | "WAVE_ONE_PRODUCTS", |
 | scripts/check-wave-one-gold-standard.mjs | 129 | report_descriptive_only | Script generates report output — descriptive only | "WaveOneUniversalOutput", |
+| scripts/lib/run-truth-claim-firewall.ts | 280 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. |  |
+| scripts/lib/run-truth-claim-firewall.ts | 281 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | function inferSurface(filePath: string): TruthClaimSurface { |
+| scripts/lib/run-truth-claim-firewall.ts | 282 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | const normalized = normalize(filePath); |
 | scripts/reconcile-product-authority-truth.mjs | 40 | correction_notice | Correction or superseded notice |  |
 | scripts/reconcile-product-authority-truth.mjs | 41 | correction_notice | Correction or superseded notice | const REPORT_CORRECTIONS = [ |
 | scripts/reconcile-product-authority-truth.mjs | 42 | correction_notice | Correction or superseded notice | { |
@@ -347,6 +354,11 @@ Authority-supporting types (may support authority only when verified):
 | scripts/test-authority-fraud-scenarios.mjs | 49 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | checks: checksExcept([]), |
 | scripts/test-authority-fraud-scenarios.mjs | 50 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | }, |
 | scripts/test-authority-fraud-scenarios.mjs | 51 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | { |
+| scripts/test-product-system-integrity-negative-cases.mjs | 58 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const contractPath = path.join(projectRoot, 'data', 'ProductAuthorityContract.json'); |
+| scripts/test-product-system-integrity-negative-cases.mjs | 59 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | const govPath = path.join(projectRoot, 'reports', 'product-release-governance-matrix.json'); |
+| scripts/test-product-system-integrity-negative-cases.mjs | 60 | guard_pattern_or_test_fixture | Guard/check/audit script — references reports as audit subjects | const readinessPath = path.join(projectRoot, 'reports', 'product-release-readiness-matrix.json'); |
+| scripts/test-product-system-integrity-negative-cases.mjs | 61 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. |  |
+| scripts/test-product-system-integrity-negative-cases.mjs | 63 | guard_pattern_or_test_fixture | Guard/check script on authority path — reads report data for audit/verification, not to grant authority. | const governance = readJSON(govPath); |
 | scripts/update-executive-reporting-grade.mjs | 20 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | er.knownBlockers = []; |
 | scripts/update-executive-reporting-grade.mjs | 21 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | if (!er.testsCoveringIt) er.testsCoveringIt = []; |
 | scripts/update-executive-reporting-grade.mjs | 22 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | er.testsCoveringIt.push( |
@@ -435,7 +447,22 @@ Authority-supporting types (may support authority only when verified):
 | lib/diagnostics/constitutional-evidence-bridge.ts | 391 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. |  |
 | lib/diagnostics/constitutional-evidence-bridge.ts | 402 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | }, |
 | lib/diagnostics/constitutional-evidence-bridge.ts | 403 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. |  |
+| lib/fulfilment/controlled-release-proof-matrix.ts | 45 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | if (productCode === "gmi_quarterly") return "Edition-specific source blockers, data lock, prior-call review, human editorial review, owner authority, and artifact-hash binding are permanent governance gates."; |
+| lib/fulfilment/controlled-release-proof-matrix.ts | 46 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | if (commercialStatus === "contracted") return "Enterprise/retainer scope must be contracted and provisioned intentionally; no self-serve purchase authority."; |
+| lib/fulfilment/controlled-release-proof-matrix.ts | 47 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | if (commercialStatus === "manual_billing") return "Manual billing and scope/recipient approval are intentional access boundaries."; |
+| lib/fulfilment/controlled-release-proof-matrix.ts | 48 | report_descriptive_only | Script generates report output — descriptive only | if (fulfilmentType === "human_reviewed_dossier" \|\| fulfilmentType === "executive_report_artifact") return "High-risk or judgment-bearing output requires review, approval, and delivery proof before claims."; |
+| lib/fulfilment/controlled-release-proof-matrix.ts | 49 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | return "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present."; |
 | lib/intelligence/constitutional-orchestrator-adapter.ts | 58 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | const posture = derivePosture(report) |
+| lib/living-intelligence/estate-snapshot-loader.ts | 386 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | const readinessMatrix = (readJsonSafe("reports/product-release-readiness-matrix.json") as Record<string, Record<string, unknown>> \| null) ?? {}; |
+| lib/living-intelligence/estate-snapshot-loader.ts | 387 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | const governanceMatrix = (readJsonSafe("reports/product-release-governance-matrix.json") as Record<string, Record<string, unknown>> \| null) ?? {}; |
+| lib/living-intelligence/estate-snapshot-loader.ts | 388 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | const authorityContract = (readJsonSafe("data/ProductAuthorityContract.json") as Record<string, Record<string, unknown>> \| null) ?? {}; |
+| lib/living-intelligence/estate-snapshot-loader.ts | 389 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. |  |
+| lib/living-intelligence/source-of-truth-map.ts | 70 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | governed_billing_api: "pages/api/billing/checkout.ts — server-side checkout gate that enforces the resolver", |
+| lib/living-intelligence/source-of-truth-map.ts | 71 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | CATALOG: "lib/commercial/catalog.ts — canonical commercial product metadata (Stripe IDs, prices, statuses)", |
+| lib/living-intelligence/source-of-truth-map.ts | 72 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | ProductAuthorityContract: "data/ProductAuthorityContract.json — 43 products with authority states and claim boundaries", |
+| lib/living-intelligence/source-of-truth-map.ts | 73 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | product_release_readiness_matrix: "reports/product-release-readiness-matrix.json — release readiness per product", |
+| lib/living-intelligence/source-of-truth-map.ts | 74 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | product_release_governance_matrix: "reports/product-release-governance-matrix.json — governance rules per product", |
+| lib/living-intelligence/source-of-truth-map.ts | 75 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | market_intelligence_lifecycle: "lib/intelligence/market-intelligence-lifecycle.ts — static lifecycle records (PUBLICATION TRUTH)", |
 | lib/product/authority-evidence-source-policy.ts | 24 | report_descriptive_only | Evidence source policy definition — defines rules, does not use reports as evidence. |  |
 | lib/product/authority-evidence-source-policy.ts | 32 | report_descriptive_only | Evidence source policy definition — defines rules, does not use reports as evidence. | \| "surface_propagation_artifact" |
 | lib/product/authority-evidence-source-policy.ts | 33 | report_descriptive_only | Evidence source policy definition — defines rules, does not use reports as evidence. | \| "guard_result_artifact" |
@@ -472,11 +499,30 @@ Authority-supporting types (may support authority only when verified):
 | lib/product/constitutional-living-adapter.ts | 377 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. |  |
 | lib/product/constitutional-living-adapter.ts | 378 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | if (constitutionalStructural?.approvingAuthority) { |
 | lib/product/constitutional-living-adapter.ts | 379 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | newEvidence.push(`Approving authority: ${constitutionalStructural.approvingAuthority}`) |
+| lib/product/evidence-package-registry.ts | 51 | report_descriptive_only | Script generates report output — descriptive only | methodologyBoundaryPath: 'artifacts/validation/reporting_output_layer/methodology-boundary.md', |
+| lib/product/evidence-package-registry.ts | 52 | report_descriptive_only | Script generates report output — descriptive only | allowedClaimsPath: 'artifacts/validation/reporting_output_layer/allowed-claims.txt', |
+| lib/product/evidence-package-registry.ts | 53 | report_descriptive_only | Script generates report output — descriptive only | forbiddenClaimsPath: 'artifacts/validation/reporting_output_layer/forbidden-claims.txt', |
+| lib/product/evidence-package-registry.ts | 54 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | authorityRole: 'shared_layer_non_authority', |
+| lib/product/evidence-package-registry.ts | 55 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | requiredForReadiness: true, |
+| lib/product/evidence-package-registry.ts | 56 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | registrationDate: '2026-06-14', |
 | lib/product/live-route-output-capture.ts | 48 | report_descriptive_only | Route capture — defines route discovery constants, does not read reports for authority. |  |
 | lib/product/live-route-output-capture.ts | 49 | report_descriptive_only | Route capture — defines route discovery constants, does not read reports for authority. | const SCENARIOS_BY_ID = new Map(GOLDEN_DECISION_SCENARIOS.map((scenario) => [scenario.id, scenario])); |
 | lib/product/live-route-output-capture.ts | 50 | report_descriptive_only | Route capture — defines route discovery constants, does not read reports for authority. |  |
 | lib/product/live-route-output-capture.ts | 51 | report_descriptive_only | Route capture — defines route discovery constants, does not read reports for authority. | export const WAVE_ONE_ROUTE_DISCOVERY: WaveOneRouteDiscovery[] = [ |
 | lib/product/live-route-output-capture.ts | 52 | report_descriptive_only | Route capture — defines route discovery constants, does not read reports for authority. | { |
+| lib/product/reporting-artifact-schema.ts | 71 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | export const FORBIDDEN_REPORT_CLAIMS = [ |
+| lib/product/reporting-artifact-schema.ts | 72 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | 'validated authority', |
+| lib/product/reporting-artifact-schema.ts | 73 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | 'certified finding', |
+| lib/product/reporting-artifact-schema.ts | 74 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | 'externally proven conclusion', |
+| lib/product/reporting-artifact-schema.ts | 231 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | humanReviewCompletedDate: new Date().toISOString(), |
+| lib/product/reporting-artifact-schema.ts | 232 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | evidenceBoundary: params.evidenceBoundary, |
+| lib/product/reporting-artifact-schema.ts | 233 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | nonAuthorityDeclaration: |
+| lib/product/reporting-artifact-schema.ts | 234 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | 'This report is a delivery artifact and is not authority-granting evidence. It does not validate, certify, or externally verify any product claim.', |
+| lib/product/reporting-artifact-schema.ts | 235 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | forbiddenClaimsChecked: true, |
+| lib/product/reporting-artifact-schema.ts | 236 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | forbiddenClaimsDetected: params.forbiddenClaimsDetected, |
+| lib/product/reporting-artifact-schema.ts | 237 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | forbiddenClaimsRemoved: params.forbiddenClaimsDetected.length === 0, |
+| lib/product/reporting-output-contract.ts | 45 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | export const REPORT_BOUNDARY_NOTICE = `This report is a delivery and interpretation artifact. It may describe evidence, source material, and findings, but it is not itself authority-granting evidence and does not validate, certify, or externally verify any product claim.`; |
+| lib/product/reporting-output-contract.ts | 46 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. |  |
 | lib/product/wave-one-gold-standard.ts | 146 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | \| "time_value_surplus" |
 | lib/product/wave-one-gold-standard.ts | 147 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | \| "reuse_value"; |
 | lib/product/wave-one-gold-standard.ts | 159 | report_descriptive_only | Script references reports in authority-adjacent logic (non-authority path) — low priority refactor. | "reuse_value", |
