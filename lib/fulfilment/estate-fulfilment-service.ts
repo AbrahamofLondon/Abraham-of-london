@@ -33,7 +33,7 @@ export type FulfilmentItem = {
   id: string;
   sourceType: FulfilmentSourceType;
   sourceId: string;
-  productCode: string;
+  productCode: string | null;
   customerEmail: string | null;
   organisationId: string | null;
   paymentStatus: string | null;
@@ -390,7 +390,7 @@ async function fetchCaseStudies(includeArchive: boolean): Promise<FulfilmentItem
     id: `cs_${cs.id}`,
     sourceType: "case_study" as const,
     sourceId: cs.id,
-    productCode: "case_study",
+    productCode: null,
     customerEmail: null,
     organisationId: null,
     paymentStatus: null,
@@ -458,7 +458,7 @@ async function fetchOversightDeliveries(includeArchive: boolean): Promise<Fulfil
         id: `od_${e.id}`,
         sourceType: "oversight_delivery" as const,
         sourceId: e.id,
-        productCode: "oversight_brief",
+        productCode: null,
         customerEmail: email,
         organisationId: null,
         paymentStatus: null,

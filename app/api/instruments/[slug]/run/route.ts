@@ -25,6 +25,7 @@ import {
   InstrumentEntitlementError,
   InstrumentRunPersistenceError,
 } from "@/lib/decision-instruments/instrument-run-authority";
+import { requireCatalogCodeFromSlug } from "@/lib/decision-instruments/instrument-catalog-bridge";
 import { createPaidRuntimeArtifact } from "@/lib/artifacts/paid-product-runtime";
 import crypto from "node:crypto";
 
@@ -140,7 +141,7 @@ export async function POST(
   let runtime: Awaited<ReturnType<typeof createPaidRuntimeArtifact>>;
   try {
     runtime = await createPaidRuntimeArtifact({
-      productCode: "decision_instruments",
+      productCode: requireCatalogCodeFromSlug(instrumentSlug) as any,
       sourceEntityType: "INSTRUMENT_RUN",
       sourceEntityId: runId,
       userId: userId ?? null,

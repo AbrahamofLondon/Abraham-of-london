@@ -118,7 +118,7 @@ export default function EstateFulfilmentPage({ items, counts, fetchError }: Prop
         (i) =>
           i.sourceId.toLowerCase().includes(q) ||
           (i.customerEmail ?? "").toLowerCase().includes(q) ||
-          i.productCode.toLowerCase().includes(q) ||
+          (i.productCode ?? "").toLowerCase().includes(q) ||
           i.nextAction.toLowerCase().includes(q),
       );
     }

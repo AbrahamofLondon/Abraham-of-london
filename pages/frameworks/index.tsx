@@ -197,9 +197,9 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
               <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Operator packs</p>
               <p className="mt-2 text-xs text-white/35">Bundled instrument access. Pack checkout is controlled — available when bundle entitlement resolution is verified.</p>
               <div className="mt-4 space-y-3">
-                <PackCard name="Operator Essentials" price="£129" count={4} status="Checkout controlled" />
-                <PackCard name="Command Pack" price="£249" count={6} status="Checkout controlled" />
-                <PackCard name="Governance Suite" price="£495" count={10} status="Checkout controlled" />
+                <PackCard name="Operator Essentials" price={getProductDisplayPrice("operator_essentials_pack")} count={4} status="Checkout controlled" />
+                <PackCard name="Command Pack" price={getProductDisplayPrice("command_pack")} count={6} status="Checkout controlled" />
+                <PackCard name="Governance Suite" price={getProductDisplayPrice("governance_suite")} count={10} status="Checkout controlled" />
               </div>
             </section>
 

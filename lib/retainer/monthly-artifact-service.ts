@@ -34,6 +34,8 @@ import {
 } from "@/lib/falsification/product-falsification";
 import type { OversightReviewCycle } from "@prisma/client";
 
+const RETAINER_ARTIFACT_PRODUCT_CODE = "retainer_core" as ProductCode;
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface MonthlyArtifactInput {
@@ -97,7 +99,7 @@ export async function generateMonthlyArtifact(
 
   // Register the artifact
   const artifact = await registerArtifact({
-    productCode: "retainer_oversight" as ProductCode,
+    productCode: RETAINER_ARTIFACT_PRODUCT_CODE,
     sourceEntityType: "RETAINER_CYCLE",
     sourceEntityId: input.cycleId,
     userId: null,
@@ -124,7 +126,7 @@ export async function generateMonthlyArtifact(
   const falsificationInputs: CreateFalsificationInput[] = [];
   for (const intervention of input.interventionsRecommended) {
     falsificationInputs.push({
-      productCode: "retainer_oversight",
+      productCode: RETAINER_ARTIFACT_PRODUCT_CODE,
       artifactId: artifact.artifactId,
       sourceEntityType: "RETAINER_CYCLE",
       sourceEntityId: input.cycleId,
@@ -148,7 +150,7 @@ export async function generateMonthlyArtifact(
 
   // Create outcome hypothesis
   const outcomeHypothesis = await createOutcomeHypothesis({
-    productCode: "retainer_oversight",
+    productCode: RETAINER_ARTIFACT_PRODUCT_CODE,
     sourceRunId: input.cycleId,
     productArtifactId: artifact.artifactId,
     userEmail: input.userEmail ?? null,

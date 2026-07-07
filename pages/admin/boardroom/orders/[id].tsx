@@ -541,7 +541,7 @@ export default function BoardroomOrderDetailPage({
         : "";
     const record: Record<string, unknown> = {
       orderId: order.id,
-      productCode: "BOARDROOM_BRIEF",
+      productCode: "boardroom_brief",
       deliveryStatus: currentStatus || order.deliveryStatus,
       artifactStatus: artifact?.status,
       adminPreviewUrl: typeof artifact?.downloadUrl === "string" ? artifact.downloadUrl : "",

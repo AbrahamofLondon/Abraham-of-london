@@ -8,7 +8,7 @@ interface FrictionPoint {
   symptom: string;
   rootCause: string;
   impactScore: number;
-  inertiaCost: string; // The "Resonance Tax"
+  inertiaBurden: string; // The "Resonance Tax"
   contagionTarget: string; // Where the friction leaks to
   status: "identified" | "analyzing" | "resolved";
 }
@@ -22,7 +22,7 @@ export default function DomainDeepDiveModule({ domainName = "Operational_Integri
       symptom: "Decision Latency",
       rootCause: "Over-centralized authorization vectors creating a 14-day bottleneck.",
       impactScore: 88,
-      inertiaCost: "$12,400 / week",
+      inertiaBurden: "$12,400 / week",
       contagionTarget: "Strategic Agility",
       status: "analyzing"
     },
@@ -31,7 +31,7 @@ export default function DomainDeepDiveModule({ domainName = "Operational_Integri
       symptom: "Knowledge Siloing",
       rootCause: "Asymmetric information flow between Strategy and Execution units.",
       impactScore: 72,
-      inertiaCost: "15% Talent Attrition Risk",
+      inertiaBurden: "15% Talent Attrition Risk",
       contagionTarget: "Institutional Trust",
       status: "identified"
     }
@@ -126,7 +126,7 @@ export default function DomainDeepDiveModule({ domainName = "Operational_Integri
                   </div>
                   <div className="p-4 border border-[#F5F2EA] bg-[#FFF8F8] text-[#C44D4D]">
                     <span className="font-serif text-xl font-bold">
-                      {frictionPoints.find(f => f.id === activeFriction)?.inertiaCost}
+                      {frictionPoints.find(f => f.id === activeFriction)?.inertiaBurden}
                     </span>
                   </div>
                   <p className="font-sans text-[10px] text-neutral-400">The calculated weekly loss of institutional capital by maintaining the status quo.</p>

@@ -7,6 +7,7 @@ import {
   type ProductReleaseGovernance,
 } from '@/lib/product/product-release-governance';
 import { useProductReleaseGovernance } from '@/hooks/useProductReleaseGovernance';
+import { getProductDisplayPrice } from '@/lib/commercial/catalog';
 
 const PRODUCT_CODE = 'gmi_q2_2026';
 
@@ -42,7 +43,7 @@ const DEFAULT_OFFER: EvidenceLimitedOffer = {
     'It cannot provide price targets or outcome guarantees.',
     'It cannot claim exclusive market authority or privileged signals.',
   ],
-  price: '£59 single-issue access',
+  price: getProductDisplayPrice(PRODUCT_CODE) + ' single-issue access',
   timeline:
     'Q2 2026 is structurally market-ready for the 8 July 2026 publication transition, pending the final post-8-July data lock and owner release authority. Until then, Q1 remains the current published edition.',
   manualFulfilmentNote:

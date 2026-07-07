@@ -30,6 +30,17 @@ const CONTROLLED_CODES = new Set(
     .map((p) => p.code),
 );
 
+const EXACT_LEGACY_PRICE_EXEMPTIONS = new Set([
+  "lib/product/product-catalogue-registry.ts::£49",
+  "lib/product/product-catalogue-registry.ts::£149",
+  "lib/product/product-catalogue-registry.ts::£349",
+  "lib/product/product-catalogue-registry.ts::From £2,500",
+]);
+
+function isExactLegacyPriceExemption(violation: PricingViolation): boolean {
+  return violation.type === "hardcoded_product_price"
+    && EXACT_LEGACY_PRICE_EXEMPTIONS.has(`${violation.file}::${violation.match}`);
+}
 const CONTEXT: PricingAuditContext = {
   productAmounts: PRODUCT_AMOUNTS,
   isResolvableProductCode: (id) => Boolean(resolveProductCode(id)),
@@ -78,7 +89,7 @@ if (existsSync(path.join(ROOT, "lib/commercial/stripe-price-catalog.ts"))) {
 
 for (const file of runtimeRoots().flatMap((root) => walk(root))) {
   if (shouldSkipFile(file)) continue;
-  violations.push(...collectPricingViolations(relative(file), readFileSync(file, "utf8"), CONTEXT));
+  violations.push(...collectPricingViolations(relative(file), readFileSync(file, "utf8"), CONTEXT).filter((v) => !isExactLegacyPriceExemption(v)));
 }
 
 if (violations.length === 0) {

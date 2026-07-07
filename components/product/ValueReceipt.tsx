@@ -7,7 +7,7 @@
  *
  * Usage:
  *   <ValueReceipt
- *     price="£49"
+ *     price={getProductDisplayPrice("personal_decision_audit")}
  *     deliveryFormat="Interactive instrument + PDF dossier"
  *     includes={["Mandate clarity reading", "Obligation conflict map"]}
  *     memoryWrite={true}

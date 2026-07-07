@@ -6,6 +6,8 @@
  * The buyer pays for access depth, review level, record durability, and continuity.
  */
 
+import { getProductDisplayPrice } from './catalog'
+
 export type LadderTier =
   | 'free_signal'
   | 'basic_brief'
@@ -46,13 +48,13 @@ export const COMMERCIAL_LADDER: Record<LadderTier, LadderProduct> = {
     deliveryFormat: 'web',
     writesToMemory: false,
     dossierEligible: false,
-    nextAdmissibleMove: 'Basic Brief (£49–£95)',
+    nextAdmissibleMove: 'Basic Brief or assisted review',
   },
 
   basic_brief: {
     tier: 'basic_brief',
     price: 4900,
-    displayPrice: '£49',
+    displayPrice: getProductDisplayPrice('personal_decision_audit'),
     accessType: 'one_time',
     duration: 'lifetime',
     includes: [
@@ -65,13 +67,13 @@ export const COMMERCIAL_LADDER: Record<LadderTier, LadderProduct> = {
     deliveryFormat: 'web',
     writesToMemory: true,
     dossierEligible: true,
-    nextAdmissibleMove: 'Full Dossier (£295–£495)',
+    nextAdmissibleMove: 'Full Dossier or controlled review',
   },
 
   full_dossier: {
     tier: 'full_dossier',
     price: 29500,
-    displayPrice: '£295',
+    displayPrice: getProductDisplayPrice('executive_reporting'),
     accessType: 'one_time',
     duration: 'lifetime',
     includes: [
@@ -93,13 +95,13 @@ export const COMMERCIAL_LADDER: Record<LadderTier, LadderProduct> = {
     deliveryFormat: 'combined',
     writesToMemory: true,
     dossierEligible: true,
-    nextAdmissibleMove: 'Urgent Operational (£750–£1,250) or Executive Board (from £2,500)',
+    nextAdmissibleMove: 'Urgent Operational or qualified Executive Board review',
   },
 
   urgent_operational: {
     tier: 'urgent_operational',
     price: 75000,
-    displayPrice: '£750',
+    displayPrice: getProductDisplayPrice('strategy_room'),
     accessType: 'one_time',
     duration: 'lifetime',
     includes: [
@@ -112,13 +114,13 @@ export const COMMERCIAL_LADDER: Record<LadderTier, LadderProduct> = {
     deliveryFormat: 'combined',
     writesToMemory: true,
     dossierEligible: true,
-    nextAdmissibleMove: 'Executive Board (from £2,500)',
+    nextAdmissibleMove: 'Qualified Executive Board review',
   },
 
   executive_board: {
     tier: 'executive_board',
     price: 250000,
-    displayPrice: 'From £2,500',
+    displayPrice: 'Qualified review',
     accessType: 'one_time',
     duration: 'lifetime',
     includes: [

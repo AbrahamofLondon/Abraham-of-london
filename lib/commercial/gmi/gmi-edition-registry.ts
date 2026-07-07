@@ -60,9 +60,9 @@ export type GmiEditionRegistryEntry = {
   stripeProductId?: string | null;
   /** Required if status === "active" (paid_checkout). Null for manual_billing/draft. */
   stripePriceId?: string | null;
-  /** Price in pence GBP. Default 5900 (£59) if omitted. */
+  /** Price in pence GBP. Default 5900 pence if omitted. */
   amountGbp?: number;
-  /** Display price string e.g. "£59". Derived from amountGbp if omitted. */
+  /** Display price string. Derived from amountGbp if omitted. */
   displayPrice?: string;
   /** ISO date when this edition was or will be released */
   releaseDate?: string;
@@ -91,7 +91,6 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     stripeProductId: "prod_UNnSL8r6DMedEH",
     stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
     amountGbp: 5900,
-    displayPrice: "£59",
     releaseDate: "2026-04-08",
     shortDescription: "Q1 2026 market report — current published edition until Q2 receives owner release authority.",
     pricingNote: "Coverage period: Q1 2026. Current published edition until GMI-Q2-2026 completes final data lock and owner release authority.",
@@ -99,7 +98,7 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
 
   // ── Q2 2026 — MARKET-READY release candidate (commercial activation blocked) ──
   // Reconciled to the authoritative lifecycle: GMI-Q2-2026 remains DRAFT until final data lock and owner release authority.
-  // It preserves the £59 edition identity but is not public-visible or purchasable yet.
+  // It preserves the edition amount identity but is not public-visible or purchasable yet.
   // No Stripe product/price IDs are bound; self-serve checkout remains disabled.
   {
     editionId: "GMI-Q2-2026",
@@ -115,10 +114,9 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     stripeProductId: null,
     stripePriceId: null,
     amountGbp: 5900,
-    displayPrice: "£59",
     releaseDate: "2026-07-08",
     shortDescription: "Quarterly decision intelligence for leaders operating under structural uncertainty.",
-    pricingNote: "Coverage period: Q2 2026. Structurally market-ready release candidate at £59; commercial activation awaits post-8-July data lock and owner release authority. No self-serve checkout.",
+    pricingNote: "Coverage period: Q2 2026. Structurally market-ready release candidate; commercial activation awaits post-8-July data lock and owner release authority. No self-serve checkout.",
   },
 
   // ── Q3 2026 — draft (blocked) ───────────────────────────────────────────────
@@ -138,7 +136,6 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     stripeProductId: null,
     stripePriceId: null,
     amountGbp: 5900,
-    displayPrice: "£59",
     releaseDate: undefined,
     shortDescription: "Q3 2026 market report — not yet released.",
     pricingNote: "Draft — not yet available.",

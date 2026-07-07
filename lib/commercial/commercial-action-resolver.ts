@@ -132,12 +132,8 @@ export function resolveCommercialAction(
     return { state: "review_gated", label: cta ?? "Request access", href: successPath, purchasable: false, reason: "commercial_not_safe" };
   }
 
-  // (4) Explicit governance checkout denial (governance matrix). (Rule 2/12)
-  if (g.known && g.checkoutAllowed === false && g.releaseMode !== "manual_fulfilment_only") {
-    return { state: "review_gated", label: cta ?? "Request review", href: successPath, purchasable: false, reason: "checkout_not_allowed" };
-  }
-
   // (5) Contracted / enterprise — enquiry only. (Rule 7)
+
   if (product.commercialStatus === "contracted" || product.requiresContract === true) {
     return { state: "contact_sales", label: cta ?? "Discuss access", href: successPath || "/contact", purchasable: false, reason: "contracted" };
   }
@@ -157,6 +153,12 @@ export function resolveCommercialAction(
     return { state: "manual_fulfilment", label: cta ?? "Request access", href: "/contact", purchasable: false, reason: "manual_billing" };
   }
 
+  // (4) Explicit governance checkout denial for products not already handled by
+  // intentional catalog states above. Checkout denial is still non-purchasable,
+  // but it must not erase free/contract/manual-billing semantics.
+  if (g.known && g.checkoutAllowed === false && g.releaseMode !== "manual_fulfilment_only") {
+    return { state: "review_gated", label: cta ?? "Request review", href: successPath, purchasable: false, reason: "checkout_not_allowed" };
+  }
   // (9) Paid + checkout-intended: enforce governance FIRST, then Stripe metadata.
   const checkoutIntended = product.commercialStatus === "paid" && product.requiresCheckout === true;
   if (checkoutIntended) {

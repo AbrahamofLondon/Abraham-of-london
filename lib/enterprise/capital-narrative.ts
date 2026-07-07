@@ -8,6 +8,8 @@
  *  They fail from unresolved contradictions in decision-making."
  */
 
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
+
 export const CAPITAL_NARRATIVE = {
   category: "Decision Authority Infrastructure (DAI)",
 
@@ -53,14 +55,14 @@ export const CAPITAL_NARRATIVE = {
 
   monetisation: {
     transactional: [
-      { product: "Executive Reporting", price: "£295", description: "Priced consequence + decision framing" },
-      { product: "Strategy Room (Entry)", price: "£750", description: "Single decision enforcement" },
-      { product: "Strategy Room (Active)", price: "£1,250", description: "Multi-decision enforcement" },
+      { product: "Executive Reporting", commercialLabel: getProductDisplayPrice("executive_reporting"), description: "Priced consequence + decision framing" },
+      { product: "Strategy Room (Entry)", commercialLabel: getProductDisplayPrice("strategy_room"), description: "Single decision enforcement" },
+      { product: "Strategy Room (Active)", commercialLabel: getProductDisplayPrice("strategy_room_extended"), description: "Multi-decision enforcement" },
     ],
     enterprise: [
-      { tier: "Entry", price: "£5k–£10k/month", scope: "1–2 critical decision streams" },
-      { tier: "Core", price: "£10k–£25k/month", scope: "Cross-functional enforcement" },
-      { tier: "Extended", price: "£25k–£50k/month", scope: "Board-level integration" },
+      { tier: "Entry", indicativeRange: "£5k–£10k/month", scope: "1–2 critical decision streams" },
+      { tier: "Core", indicativeRange: "£10k–£25k/month", scope: "Cross-functional enforcement" },
+      { tier: "Extended", indicativeRange: "£25k–£50k/month", scope: "Board-level integration" },
     ],
   },
 
