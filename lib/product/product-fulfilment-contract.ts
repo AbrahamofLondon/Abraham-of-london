@@ -1083,7 +1083,48 @@ export const REPORTING_MONTHLY_CONTRACT = contract({
   hardFailures: [],
   warnings: [],
   notes:
-    "Recurring monthly reporting. Manual billing — no self-serve checkout. Fulfilment is a governed recurring cycle (lib/fulfilment/reporting/monthly-reporting-service.ts) plugged into the PR F execution authority via createMonthlyReportingHandler. Cadence: monthly; delivery gated on human review + output validation; durable DeliveryProof per cycle.",
+    "Recurring monthly reporting. Manual billing — no self-serve checkout. " +
+    "readinessStatus=not_applicable here means ONLY that the self-serve checkout-readiness " +
+    "computation does not apply (this is manual billing, so the paid checkout/route structural " +
+    "gate is not evaluated). It does NOT mean there is no fulfilment obligation: the obligation " +
+    "is real and is discharged by the governed recurring cycle " +
+    "(lib/fulfilment/reporting/monthly-reporting-service.ts) plugged into the PR F execution " +
+    "authority via createMonthlyReportingHandler. Cadence: monthly; delivery gated on output " +
+    "validation + human review; durable DeliveryProof per cycle; missed cycles operator-visible.",
+});
+
+export const REPORTING_CUSTOM_CONTRACT = contract({
+  productCode: "reporting_custom",
+  displayName: "Reporting — Custom",
+  entitlementSlug: "reporting-custom",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/reporting/custom",
+  successRoute: "/reporting/custom",
+  customerAccessRoute: "/reporting/custom",
+  adminRoute: "/admin/reporting/custom",
+  fulfilmentType: "human_reviewed_dossier",
+  artifactModel: null,
+  deliveryModel: "analyst_review_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes:
+    "Bespoke custom reporting. Manual billing — no self-serve checkout. readinessStatus=not_applicable " +
+    "means only that the self-serve checkout-readiness computation does not apply; the fulfilment obligation " +
+    "is real and is discharged by the governed ENGAGEMENT service " +
+    "(lib/fulfilment/reporting/custom-reporting-service.ts) via createCustomReportingHandler on the PR F " +
+    "authority. Operationally DISTINCT from reporting_monthly: trigger = inquiry-driven (not cadence); " +
+    "scope = negotiated brief + explicit scope lock (not standard); inputs = engagement-specific required " +
+    "sources; output = one bespoke deliverable per agreed scope; review = internal + client review loop; " +
+    "revisions = included in-scope revisions plus out-of-scope change control with versioned scope amendments; " +
+    "completion = final approval of the agreed deliverable (not a period boundary).",
 });
 
 export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
@@ -1114,6 +1155,7 @@ export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   // Reporting + execution
   EXECUTIVE_REPORTING_CONTRACT,
   REPORTING_MONTHLY_CONTRACT,
+  REPORTING_CUSTOM_CONTRACT,
   STRATEGY_ROOM_CONTRACT,
   STRATEGY_ROOM_EXTENDED_CONTRACT,
 

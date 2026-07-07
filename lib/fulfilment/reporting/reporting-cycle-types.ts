@@ -63,7 +63,7 @@ export function toCanonicalState(state: ReportingCycleState): CanonicalFulfilmen
 /** The generated report artifact (real content — not a "delivered" flag). */
 export interface ReportOutput {
   reportCode: string;
-  outputType: "monthly_report";
+  outputType: "monthly_report" | "custom_report";
   periodLabel: string;
   sections: { heading: string; body: string }[];
   disclosures: string[];
