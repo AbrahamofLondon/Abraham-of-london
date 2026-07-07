@@ -31,10 +31,17 @@ versions of the same work or clobber each other. Read this before editing.
 - `tests/product-estate/**` proof-matrix + estate hygiene (except `tests/demo-journey/**`).
 - Secondary-branch reconciliation.
 
-## Protocol
-- Commit small and often on canonical; never `git reset`/force another agent's commits.
+## Protocol — SHARED WORKING TREE
+Both agents operate in the **same worktree** (`C:/Dev/aol-estate-construction`) → we share
+one working tree and one git index. Therefore:
+- **Never `git add -A` / `git add .`** — it stages the other agent's in-progress files too.
+  Stage only your own paths explicitly, e.g. `git add lib/demo pages/decision-instruments`.
+- Commit small and often to keep the shared tree clean; a clean tree is a safe handoff point.
+- Never `git reset`/force/`checkout --` a path the other agent may have uncommitted work in.
 - If you must touch a file the other owns, coordinate first (leave a note here) — do not
   overwrite a committed version with a parallel rewrite.
+- If sustained parallel work is needed, split physically with `git worktree add` rather than
+  sharing this one tree.
 - The Decision Signal richer output model (evidence links, uncertainty, stable
   recommendation identity, carry-forward) is **already committed on canonical** at
   `839268809`; the durable funnel store at `93f0f0ecf`. Do not re-commit these elsewhere.
