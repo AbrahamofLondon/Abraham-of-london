@@ -32,6 +32,37 @@ export interface SignalContradiction {
   detail: string;
 }
 
+/** structured evidence linkage — a finding traced to the specific inputs it derives from. */
+export interface EvidenceLink { finding: string; derivedFrom: string[]; }
+
+/** what the reading knows vs infers vs cannot see — so a buyer separates observation from inference. */
+export interface UncertaintyBreakdown { known: string[]; inferred: string[]; unknown: string[]; }
+
+export type AccessMode = "free" | "self_serve" | "controlled" | "none";
+
+/** the next move as an operational state transition, not a decorative CTA. */
+export interface NextMove {
+  recommendationId: string;
+  recommendationVersion: string;
+  move: string;
+  targetRoute: string;
+  targetLabel: string;
+  whyAdmissible: string;
+  price: string | null;
+  durationMinutes: number | null;
+  accessMode: AccessMode;
+  willReceive: string;
+  carriesForward: string[];
+}
+
+export interface InstrumentHeader {
+  mode: "LIVE" | "EXAMPLE";
+  methodVersion: string;
+  evidencePosture: "USER_REPORTED";
+  inputCompleteness: "PARTIAL" | "COMPLETE";
+  diagnosisConfidence: "LOW" | "MODERATE";
+}
+
 export interface SignalResult {
   pressureBand: Band4;
   compositeScore: number;
@@ -42,11 +73,19 @@ export interface SignalResult {
   /** the single most material missing evidence for a first reading. */
   evidenceGap: string;
   correctionQuestion: string;
-  nextAdmissibleMove: { move: string; targetRoute: string; targetLabel: string; whyAdmissible: string };
+  nextAdmissibleMove: NextMove;
   /** an intervention that is deliberately NOT recommended yet, with the reason. */
   notYetAdmissible: { move: string; whyNotYet: string } | null;
   evidencePosture: string;
   evidenceConfidence: "LOW" | "MODERATE";
+  /** §3.1 instrument header. */
+  instrument: InstrumentHeader;
+  /** §3.2 evidence traceability for the major conclusions. */
+  evidenceLinks: EvidenceLink[];
+  /** §3.4 explicit known / inferred / unknown. */
+  uncertainty: UncertaintyBreakdown;
+  /** §7 what the system can carry forward if the customer continues (consent-gated). */
+  carryForward: string[];
 }
 
 export interface SignalValidationError {
@@ -145,12 +184,25 @@ export function computeSignal(input: SignalInput): SignalResult {
   const evidenceGap: string = EVIDENCE_GAP_BY_THEME[theme]
     ?? "The single most material missing input is the evidence that would change your mind — the falsification condition is not yet stated.";
 
-  const nextMoveByBand: Record<Band4, SignalResult["nextAdmissibleMove"]> = {
-    LOW: { move: "Monitor. No paid instrument is warranted by this signal alone.", targetRoute: "/decision-instruments/signal", targetLabel: "Re-check when conditions change", whyAdmissible: "The evidence does not yet justify a paid intervention — recommending one would be selling ahead of the signal." },
-    MODERATE: { move: "Run the Decision Exposure Instrument to price the full consequence before it compounds.", targetRoute: "/decision-instruments/decision-exposure-instrument", targetLabel: "Decision Exposure Instrument (£29)", whyAdmissible: "Moderate, measurable pressure with an unpriced downside is exactly what the exposure instrument is scoped to quantify." },
-    HIGH: { move: "Run the Escalation Readiness Scorecard — this decision may need executive-level attention.", targetRoute: "/decision-instruments/escalation-readiness-scorecard", targetLabel: "Escalation Readiness Scorecard (£19)", whyAdmissible: "High pressure with structural consequence is the threshold at which escalation readiness, not further analysis, is the binding constraint." },
-    CRITICAL: { move: "Executive Reporting is warranted — the delay cost is likely compounding.", targetRoute: "/diagnostics/executive-reporting", targetLabel: "Executive Reporting (£295)", whyAdmissible: "Critical, compounding pressure on an irreversible decision justifies a governed executive reading with a checkpoint." },
+  type MoveMeta = Omit<NextMove, "recommendationId" | "recommendationVersion" | "carriesForward">;
+  const nextMoveByBand: Record<Band4, MoveMeta> = {
+    LOW: { move: "Monitor. No paid instrument is warranted by this signal alone.", targetRoute: "/decision-instruments/signal", targetLabel: "Re-check when conditions change", whyAdmissible: "The evidence does not yet justify a paid intervention — recommending one would be selling ahead of the signal.", price: null, durationMinutes: null, accessMode: "none", willReceive: "Nothing to purchase yet — return when the conditions change." },
+    MODERATE: { move: "Run the Decision Exposure Instrument to price the full consequence before it compounds.", targetRoute: "/decision-instruments/decision-exposure-instrument", targetLabel: "Decision Exposure Instrument", whyAdmissible: "Moderate, measurable pressure with an unpriced downside is exactly what the exposure instrument is scoped to quantify.", price: "£29", durationMinutes: 15, accessMode: "self_serve", willReceive: "A priced exposure reading across the decision's downside scenarios." },
+    HIGH: { move: "Run the Escalation Readiness Scorecard — this decision may need executive-level attention.", targetRoute: "/decision-instruments/escalation-readiness-scorecard", targetLabel: "Escalation Readiness Scorecard", whyAdmissible: "High pressure with structural consequence is the threshold at which escalation readiness, not further analysis, is the binding constraint.", price: "£19", durationMinutes: 5, accessMode: "self_serve", willReceive: "A scored readiness read on whether this needs to escalate, and to whom." },
+    CRITICAL: { move: "Executive Reporting is warranted — the delay cost is likely compounding.", targetRoute: "/diagnostics/executive-reporting", targetLabel: "Executive Reporting", whyAdmissible: "Critical, compounding pressure on an irreversible decision justifies a governed executive reading with a checkpoint.", price: "£295", durationMinutes: 30, accessMode: "controlled", willReceive: "A governed executive reading with a checkpoint and a decision record." },
   };
+
+  const firstContradiction = contradictions[0] ?? null;
+  // §7 what can be carried forward if the customer continues (consent-gated at runtime).
+  const carryForward: string[] = [];
+  if (firstContradiction) carryForward.push(`the contradiction identified here (${firstContradiction.key.replace(/_/g, " ")})`);
+  carryForward.push("the unresolved evidence gap");
+  if (input.urgencyBand === "HIGH" || input.urgencyBand === "IMMEDIATE") carryForward.push("the decision deadline pressure");
+  carryForward.push("the next checkpoint");
+
+  const moveMeta = nextMoveByBand[pressureBand];
+  const recommendationId = `rec_${djb2(canonicalInput(input))}`;
+  const nextAdmissibleMove: NextMove = { ...moveMeta, recommendationId, recommendationVersion: SIGNAL_ENGINE_VERSION, carriesForward: moveMeta.accessMode === "none" ? [] : carryForward };
 
   // What is deliberately NOT recommended yet — the willingness to not up-sell.
   const notYetAdmissible: SignalResult["notYetAdmissible"] =
@@ -163,6 +215,20 @@ export function computeSignal(input: SignalInput): SignalResult {
   const evidenceConfidence: SignalResult["evidenceConfidence"] =
     (input.delayCostBand === "LOW" && input.consequenceIfWrong === "REVERSIBLE") ? "LOW" : "MODERATE";
 
+  // §3.2 evidence traceability — each conclusion linked to the inputs it derives from.
+  const evidenceLinks: EvidenceLink[] = [
+    { finding: `Pressure verdict: ${pressureBand}`, derivedFrom: [`Cost of delay: ${input.delayCostBand}`, `Consequence: ${input.consequenceIfWrong}`, `Urgency: ${input.urgencyBand}`, `Confidence: ${input.confidenceLevel}/10`] },
+    ...(firstContradiction ? [{ finding: "Contradiction in your inputs", derivedFrom: firstContradiction.key === "confidence_vs_stakes" ? [`Confidence: ${input.confidenceLevel}/10 (high)`, `Consequence: ${input.consequenceIfWrong}`, `Urgency: ${input.urgencyBand}`] : firstContradiction.key === "urgency_vs_cost" ? [`Urgency: ${input.urgencyBand}`, `Cost of delay: ${input.delayCostBand}`] : [`Consequence: ${input.consequenceIfWrong}`, `Urgency: ${input.urgencyBand}`, `Cost of delay: ${input.delayCostBand}`] }] : []),
+    { finding: "Recommended next move", derivedFrom: [`Pressure verdict: ${pressureBand}`, `Consequence: ${input.consequenceIfWrong}`] },
+  ];
+
+  // §3.4 explicit known / inferred / unknown.
+  const uncertainty: UncertaintyBreakdown = {
+    known: [`Your reported cost of delay (${input.delayCostBand}), consequence (${input.consequenceIfWrong}), urgency (${input.urgencyBand}) and confidence (${input.confidenceLevel}/10)`],
+    inferred: [`The pressure band and the proportionate next move — inferred from those inputs, not measured independently`, ...(contradictions.length ? ["The contradiction — inferred from the combination of your inputs"] : [])],
+    unknown: ["The actual evidence behind your estimates", "The real reversibility and stakeholder map of this decision", "Anything not captured by the five inputs above"],
+  };
+
   return {
     pressureBand,
     compositeScore: effective,
@@ -171,11 +237,41 @@ export function computeSignal(input: SignalInput): SignalResult {
     contradictions,
     evidenceGap,
     correctionQuestion: correctionQuestion[pressureBand],
-    nextAdmissibleMove: nextMoveByBand[pressureBand],
+    nextAdmissibleMove,
     notYetAdmissible,
     evidencePosture: "USER_REPORTED — this is a first signal, not a full diagnosis.",
     evidenceConfidence,
+    instrument: {
+      mode: "LIVE",
+      methodVersion: SIGNAL_ENGINE_VERSION,
+      evidencePosture: "USER_REPORTED",
+      inputCompleteness: input.decisionStatement.trim().length >= 24 ? "COMPLETE" : "PARTIAL",
+      diagnosisConfidence: evidenceConfidence,
+    },
+    evidenceLinks,
+    uncertainty,
+    carryForward,
   };
+}
+
+/** deterministic canonical input key (recommendation identity is stable for stable input). */
+function canonicalInput(input: SignalInput): string {
+  return JSON.stringify({ c: input.delayCostBand, k: input.confidenceLevel, q: input.consequenceIfWrong, u: input.urgencyBand, s: input.decisionStatement.trim().toLowerCase() });
+}
+function djb2(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h.toString(16).padStart(8, "0");
+}
+
+/** §3.3 diff two readings — what changed since the last run (session-scoped). */
+export interface ReadingDiff { changed: boolean; pressure: { from: Band4; to: Band4 } | null; recommendationChanged: { from: string; to: string } | null; }
+export function diffReadings(prev: SignalResult | null, next: SignalResult): ReadingDiff {
+  if (!prev) return { changed: false, pressure: null, recommendationChanged: null };
+  const pressure = prev.pressureBand !== next.pressureBand ? { from: prev.pressureBand, to: next.pressureBand } : null;
+  const recommendationChanged = prev.nextAdmissibleMove.recommendationId !== next.nextAdmissibleMove.recommendationId
+    ? { from: prev.nextAdmissibleMove.targetLabel, to: next.nextAdmissibleMove.targetLabel } : null;
+  return { changed: Boolean(pressure || recommendationChanged), pressure, recommendationChanged };
 }
 
 /** Validate then compute. The single entry point a surface should call. */
