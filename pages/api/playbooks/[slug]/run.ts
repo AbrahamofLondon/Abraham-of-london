@@ -25,6 +25,8 @@ import {
   PlaybookRunAuthorityError,
 } from "@/lib/playbooks/playbook-run-authority";
 import { PlaybookInputError } from "@/lib/playbooks/playbook-run-types";
+import { recordPlaybookRunInteraction, resolveTenantCase } from "@/lib/intelligence/interaction-spine/runtime-binding";
+import { resolveRuntimeSpine } from "@/lib/intelligence/interaction-spine/runtime-spine-provider";
 
 function slugOf(req: NextApiRequest): string {
   const raw = req.query.slug;
@@ -132,6 +134,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (persistErr) {
       console.error("[playbook-run] persistence failed — run abandoned:", persistErr);
       return res.status(500).json({ error: "Run could not be recorded; not returned.", code: "PERSISTENCE_FAILED" });
+    }
+
+    // §3 on-switch: feed the AUTHORITATIVE run into the compounding system. Fail-safe:
+    // the run is already persisted + will be returned; a binding failure never breaks it.
+    const tc = resolveTenantCase({ subjectId: userId, email });
+    if (tc) {
+      await recordPlaybookRunInteraction(resolveRuntimeSpine, {
+        productCode: config.code,
+        tenantId: tc.tenantId,
+        caseId: tc.caseId,
+        runId,
+        inputHash,
+        result,
+      });
     }
 
     return res.status(200).json({ runId, slug, code: config.code, result });

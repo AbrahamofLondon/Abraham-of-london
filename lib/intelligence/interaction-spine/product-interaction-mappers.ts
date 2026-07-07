@@ -65,11 +65,59 @@ export const reportingCycleMapper: ProductMapper = (native: unknown): MappedInte
   };
 };
 
+/**
+ * Decision-instrument mapper (OPP-05, §3.2) — shared by all governed instruments.
+ * Instruments emit numeric scores + an optional typed result carrying contradictions,
+ * evidence gaps and exposure state. We preserve those dimensions (not a prose blob);
+ * numeric scores become signals so the twin can track movement across runs. The
+ * result may name explicit exposures (e.g. regime/dependency exposure) — recorded as
+ * signals prefixed `exposure_` so the cross-moat brief can intersect them with GMI.
+ */
+export const instrumentMapper: ProductMapper = (native: unknown): MappedInteraction => {
+  const p = native as {
+    instrumentSlug?: string;
+    scores?: Record<string, unknown> | number[];
+    result?: {
+      contradictions?: { key?: string; ref?: string; detail?: string }[];
+      evidenceGaps?: (string | { key: string; detail?: string })[];
+      exposures?: (string | { key: string; detail?: string })[];
+    };
+  };
+  if (!p || typeof p !== "object") throw new MapperError("INVALID_INSTRUMENT_RESULT", "Native result is not an instrument run.");
+  const name = p.instrumentSlug ? slug(p.instrumentSlug) : "instrument";
+  const result = p.result ?? {};
+  const signals: NonNullable<StructuredResult["signals"]> = [];
+  if (Array.isArray(p.scores)) {
+    p.scores.forEach((v, i) => { if (typeof v === "number") signals.push({ key: `${name}_score_${i}` }); });
+  } else if (p.scores && typeof p.scores === "object") {
+    for (const [k, v] of Object.entries(p.scores)) if (typeof v === "number") signals.push({ key: slug(`${name}_${k}`), value: v });
+  }
+  for (const ex of result.exposures ?? []) {
+    const key = typeof ex === "string" ? ex : ex.key;
+    if (key) signals.push({ key: slug(`exposure_${key}`) });
+  }
+  const contradictions = (result.contradictions ?? []).map((c) => ({ key: slug(c.key ?? c.ref ?? "contradiction"), detail: c.detail }));
+  const evidenceGaps = (result.evidenceGaps ?? []).map((g) => (typeof g === "string" ? { key: slug(g), detail: g } : { key: slug(g.key), detail: g.detail }));
+  return {
+    interactionType: "instrument_run",
+    structuredResult: { summary: `${name} · instrument`, contradictions, evidenceGaps, signals },
+  };
+};
+
+/** The 11 governed decision instruments (slugs from instrument-run-authority). */
+const INSTRUMENT_SLUGS = [
+  "decision-exposure-instrument", "mandate-clarity-framework", "intervention-path-selector",
+  "escalation-readiness-scorecard", "structural-failure-diagnostic-canvas", "execution-risk-index",
+  "team-alignment-gap-map", "governance-drift-detector", "strategic-priority-stack-builder",
+  "board-brief-builder", "operator-decision-pack",
+] as const;
+
 export const PRODUCT_MAPPERS: Record<string, ProductMapper> = {
   execution_integrity_protocol: playbookMapper("execution_integrity_run"),
   alignment_audit_playbook: playbookMapper("alignment_audit_run"),
   drift_detection_framework: playbookMapper("drift_detection_run"),
   reporting_monthly: reportingCycleMapper,
+  ...Object.fromEntries(INSTRUMENT_SLUGS.map((s) => [s, instrumentMapper])),
 };
 
 export function isMappedProduct(productCode: string): boolean {
