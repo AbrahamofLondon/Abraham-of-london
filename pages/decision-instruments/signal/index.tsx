@@ -18,9 +18,11 @@ import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
 import {
   runDecisionSignal,
+  diffReadings,
   SIGNAL_ENGINE_VERSION,
   type SignalInput,
   type SignalResult,
+  type ReadingDiff,
 } from "@/lib/decision-instruments/decision-signal-engine";
 import { DECISION_SIGNAL_SAMPLES, SAMPLE_LABEL } from "@/lib/decision-instruments/decision-signal-samples";
 import { COLORS, FONTS, BAND, eyebrow, caption, display, bodyText, bodyTextSm, card, primaryButton, ghostButton, field, hexA } from "@/lib/demo/journey-design";
@@ -40,7 +42,10 @@ const DecisionSignalPage: NextPage = () => {
   const [result, setResult] = React.useState<SignalResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isExample, setIsExample] = React.useState(false);
+  const [diff, setDiff] = React.useState<ReadingDiff | null>(null);
+  const [showTrace, setShowTrace] = React.useState(false);
   const started = React.useRef(false);
+  const prevReading = React.useRef<SignalResult | null>(null); // §3.3 session-scoped prior reading
 
   React.useEffect(() => { track("decision_signal_landing_viewed", {}); }, []);
   function markStarted() { if (!started.current) { started.current = true; track("decision_signal_started", {}); } }
@@ -48,6 +53,9 @@ const DecisionSignalPage: NextPage = () => {
   function submit() {
     const outcome = runDecisionSignal(input);
     if (!outcome.ok) { setError(outcome.message); setResult(null); return; }
+    const d = diffReadings(prevReading.current, outcome.result);
+    setDiff(d.changed ? d : null);
+    prevReading.current = outcome.result;
     setError(null); setIsExample(false); setResult(outcome.result);
     track("decision_signal_completed", { pressureBand: outcome.result.pressureBand });
     track("decision_signal_result_viewed", { pressureBand: outcome.result.pressureBand });
@@ -56,10 +64,10 @@ const DecisionSignalPage: NextPage = () => {
   function loadExample(id: string) {
     const s = DECISION_SIGNAL_SAMPLES.find((x) => x.id === id); if (!s) return;
     const outcome = runDecisionSignal(s.input); if (!outcome.ok) return;
-    setInput(s.input); setResult(outcome.result); setIsExample(true); setError(null);
+    setInput(s.input); setResult(outcome.result); setIsExample(true); setError(null); setDiff(null); prevReading.current = null;
     track("decision_signal_example_viewed", { sampleId: id, pressureBand: outcome.result.pressureBand });
   }
-  function reset() { setResult(null); setError(null); setIsExample(false); setInput(DEFAULT_INPUT); started.current = false; }
+  function reset() { setResult(null); setError(null); setIsExample(false); setDiff(null); setShowTrace(false); prevReading.current = null; setInput(DEFAULT_INPUT); started.current = false; }
 
   const band = result ? BAND[result.pressureBand] : null;
 
@@ -142,10 +150,29 @@ const DecisionSignalPage: NextPage = () => {
           {/* ── Result: the governed diagnosis ── */}
           {result && band && (
             <div style={{ marginTop: 40, display: "grid", gap: 22 }}>
+              {/* §3.1 instrument header */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", borderBottom: `1px solid ${COLORS.hair}`, paddingBottom: 12 }}>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.16em", color: COLORS.gold }}>DECISION SIGNAL</span>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 10.5, letterSpacing: "0.1em", color: COLORS.faint }}>
+                  {isExample ? "EXAMPLE READING" : "LIVE READING"} · EVIDENCE {result.instrument.evidencePosture} · INPUT {result.instrument.inputCompleteness} · METHOD v{result.instrument.methodVersion}
+                </span>
+              </div>
+
               {isExample && (
                 <div style={{ ...card(COLORS.amber), padding: "12px 16px", display: "flex", alignItems: "center", gap: 8 }}>
                   <AlertTriangle style={{ width: 13, height: 13, color: COLORS.amber }} />
                   <span style={{ ...eyebrow(COLORS.amber), fontSize: 10.5 }}>{SAMPLE_LABEL}</span>
+                </div>
+              )}
+
+              {/* §3.3 why this changed since the last reading (session-scoped) */}
+              {diff && (
+                <div style={{ ...card(COLORS.gold), padding: "14px 18px" }}>
+                  <span style={caption(COLORS.goldSoft)}>Changed since your last reading</span>
+                  <div style={{ marginTop: 8, display: "grid", gap: 4 }}>
+                    {diff.pressure && <p style={{ ...bodyTextSm, margin: 0, color: COLORS.body }}>Pressure: {BAND[diff.pressure.from].label} → <strong style={{ color: COLORS.ink }}>{BAND[diff.pressure.to].label}</strong></p>}
+                    {diff.recommendationChanged && <p style={{ ...bodyTextSm, margin: 0, color: COLORS.body }}>Next move: {diff.recommendationChanged.from} → <strong style={{ color: COLORS.ink }}>{diff.recommendationChanged.to}</strong></p>}
+                  </div>
                 </div>
               )}
 
@@ -194,17 +221,36 @@ const DecisionSignalPage: NextPage = () => {
                 </div>
               </div>
 
-              {/* Corridor — next admissible move + not yet */}
+              {/* Corridor — next admissible move as a real state transition (§6) */}
               <div style={{ ...card(COLORS.emerald) }}>
-                <span style={caption(hexA(COLORS.emerald, 0.9))}>Next admissible move</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+                  <span style={caption(hexA(COLORS.emerald, 0.9))}>Next admissible move</span>
+                  {result.nextAdmissibleMove.price && (
+                    <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: hexA(COLORS.emerald, 0.95) }}>
+                      {result.nextAdmissibleMove.price}{result.nextAdmissibleMove.durationMinutes ? ` · ${result.nextAdmissibleMove.durationMinutes} MIN` : ""} · {result.nextAdmissibleMove.accessMode.replace("_", "-").toUpperCase()}
+                    </span>
+                  )}
+                </div>
                 <p style={{ ...bodyText, marginTop: 8, color: COLORS.ink }}>{result.nextAdmissibleMove.move}</p>
                 <p style={{ ...bodyTextSm, marginTop: 10 }}><strong style={{ color: hexA(COLORS.emerald, 0.95) }}>Why this is admissible — </strong>{result.nextAdmissibleMove.whyAdmissible}</p>
+                {result.nextAdmissibleMove.accessMode !== "none" && (
+                  <p style={{ ...bodyTextSm, marginTop: 8 }}><strong style={{ color: COLORS.body }}>You receive — </strong>{result.nextAdmissibleMove.willReceive}</p>
+                )}
+                {result.nextAdmissibleMove.carriesForward.length > 0 && (
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${hexA(COLORS.emerald, 0.18)}` }}>
+                    <span style={caption(COLORS.faint)}>Carries forward</span>
+                    <ul style={{ margin: "6px 0 0", paddingLeft: 18, ...bodyTextSm }}>
+                      {result.nextAdmissibleMove.carriesForward.map((c, i) => <li key={i} style={{ marginBottom: 2 }}>{c}</li>)}
+                    </ul>
+                  </div>
+                )}
                 {!isExample && result.nextAdmissibleMove.targetRoute !== "/decision-instruments/signal" && (
-                  <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute })}
+                  <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute, recommendationId: result.nextAdmissibleMove.recommendationId })}
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16, fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: COLORS.emerald, textDecoration: "none" }}>
                     {result.nextAdmissibleMove.targetLabel} <ArrowRight style={{ width: 12, height: 12 }} />
                   </Link>
                 )}
+                <div style={{ marginTop: 12, fontFamily: FONTS.mono, fontSize: 9.5, color: COLORS.faint, letterSpacing: "0.06em" }}>REC {result.nextAdmissibleMove.recommendationId} · v{result.nextAdmissibleMove.recommendationVersion}</div>
               </div>
 
               {result.notYetAdmissible && (
@@ -213,6 +259,48 @@ const DecisionSignalPage: NextPage = () => {
                   <p style={{ ...bodyTextSm, marginTop: 8 }}><strong style={{ color: COLORS.body }}>{result.notYetAdmissible.move}.</strong> {result.notYetAdmissible.whyNotYet}</p>
                 </div>
               )}
+
+              {/* §7 the trust moment — what will be remembered, and the consent boundary */}
+              {result.carryForward.length > 0 && (
+                <div style={card()}>
+                  <span style={caption()}>If you continue</span>
+                  <p style={{ ...bodyTextSm, marginTop: 8 }}>The system can carry forward:</p>
+                  <ul style={{ margin: "6px 0 0", paddingLeft: 18, ...bodyTextSm }}>
+                    {result.carryForward.map((c, i) => <li key={i} style={{ marginBottom: 2 }}>{c}</li>)}
+                  </ul>
+                  <p style={{ ...bodyTextSm, marginTop: 12, color: COLORS.muted, borderTop: `1px solid ${COLORS.hair}`, paddingTop: 12 }}>
+                    Nothing is added to a persistent decision history until you choose to continue and the required consent is established. This reading is held in your browser only.
+                  </p>
+                </div>
+              )}
+
+              {/* §3.2/§3.4 how this was derived — evidence trace + uncertainty (progressive) */}
+              <div style={card()}>
+                <button onClick={() => setShowTrace((s) => !s)} style={{ ...ghostButton(), width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderColor: COLORS.hair }}>
+                  <span>How this reading was derived</span>
+                  <span style={{ color: COLORS.gold }}>{showTrace ? "–" : "+"}</span>
+                </button>
+                {showTrace && (
+                  <div style={{ marginTop: 16, display: "grid", gap: 16 }}>
+                    <div>
+                      <span style={caption()}>Evidence trace</span>
+                      <div style={{ marginTop: 8, display: "grid", gap: 10 }}>
+                        {result.evidenceLinks.map((l, i) => (
+                          <div key={i}>
+                            <p style={{ ...bodyTextSm, margin: 0, color: COLORS.body }}>{l.finding}</p>
+                            <p style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.faint, margin: "3px 0 0", lineHeight: 1.6 }}>← {l.derivedFrom.join(" · ")}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ display: "grid", gap: 10, gridTemplateColumns: "1fr" }}>
+                      <TraceList title="Known" color={COLORS.emerald} items={result.uncertainty.known} />
+                      <TraceList title="Inferred" color={COLORS.amber} items={result.uncertainty.inferred} />
+                      <TraceList title="Not known" color={COLORS.muted} items={result.uncertainty.unknown} />
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Operator Pilot continuation */}
               <div style={{ ...card(COLORS.gold), display: "flex", flexDirection: "column", gap: 12 }}>
@@ -243,6 +331,17 @@ const DecisionSignalPage: NextPage = () => {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (<div><label style={caption(COLORS.muted)}>{label}</label>{children}</div>);
+}
+
+function TraceList({ title, color, items }: { title: string; color: string; items: string[] }) {
+  return (
+    <div>
+      <span style={{ fontFamily: FONTS.mono, fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color }}>{title}</span>
+      <ul style={{ margin: "5px 0 0", paddingLeft: 18, ...bodyTextSm }}>
+        {items.map((it, i) => <li key={i} style={{ marginBottom: 2 }}>{it}</li>)}
+      </ul>
+    </div>
+  );
 }
 
 function Segmented({ label, options, value, onPick, small }: { label: string; options: readonly string[]; value: string; onPick: (v: string) => void; small?: boolean }) {
