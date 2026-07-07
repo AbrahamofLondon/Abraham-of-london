@@ -17,6 +17,7 @@ import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import PlainEnglishDecisionLayer from "@/components/trust/PlainEnglishDecisionLayer";
 import WorkedDecisionExample from "@/components/trust/WorkedDecisionExample";
 import { track } from "@/lib/analytics/track";
+import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
 import { COLORS, FONTS, caption as dsCaption, bodyTextSm as dsBodySm, field as dsField, primaryButton as dsPrimary, hexA } from "@/lib/demo/journey-design";
 
 const GOLD = "#C9A96E";
@@ -37,6 +38,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 }
 
 const OperatorPilotPage: NextPage = () => {
+  React.useEffect(() => { recordJourneyEvent("PILOT_VIEWED"); }, []);
   return (
     <Layout
       title="Selective Operator Pilot | Abraham of London"
@@ -256,6 +258,7 @@ const INTAKE_DEFAULT: IntakeState = {
 function PilotIntakeForm() {
   const [f, setF] = React.useState<IntakeState>(INTAKE_DEFAULT);
   const [submitting, setSubmitting] = React.useState(false);
+  const startedRef = React.useRef(false);
   const [outcome, setOutcome] = React.useState<{ reference?: string; qualificationStatus: string; reviewStatus?: string; nextStep: string; reasons?: string[] } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const fieldStyle: React.CSSProperties = dsField();
@@ -269,6 +272,7 @@ function PilotIntakeForm() {
       if (res.status === 422) { setError("Some required fields are missing — please complete them: " + (data?.qualification?.missingFields ?? []).join(", ")); return; }
       if (!res.ok) { setError(data?.error ?? "Submission failed."); return; }
       track("operator_pilot_intake_result_viewed", { qualificationStatus: data?.qualificationStatus });
+      recordJourneyEvent(data?.qualificationStatus === "MORE_INFO_REQUIRED" ? "PILOT_MORE_INFO_REQUIRED" : "PILOT_SUBMITTED");
       setOutcome(data);
     } catch { setError("Network error — please try again."); }
     finally { setSubmitting(false); }
@@ -289,7 +293,7 @@ function PilotIntakeForm() {
 
   return (
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
-      <div><label style={lbl}>Organisation</label><input style={fieldStyle} value={f.organisation} onChange={(e) => setF({ ...f, organisation: e.target.value })} /></div>
+      <div><label style={lbl}>Organisation</label><input style={fieldStyle} value={f.organisation} onChange={(e) => { if (!startedRef.current) { startedRef.current = true; recordJourneyEvent("PILOT_STARTED"); } setF({ ...f, organisation: e.target.value }); }} /></div>
       <div><label style={lbl}>Your role</label><input style={fieldStyle} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} /></div>
       <div><label style={lbl}>Decision domain</label><input style={fieldStyle} value={f.decisionDomain} onChange={(e) => setF({ ...f, decisionDomain: e.target.value })} /></div>
       <div><label style={lbl}>Contact email</label><input style={fieldStyle} value={f.contactEmail} onChange={(e) => setF({ ...f, contactEmail: e.target.value })} /></div>

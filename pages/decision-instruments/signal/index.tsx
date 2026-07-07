@@ -25,6 +25,7 @@ import {
   type ReadingDiff,
 } from "@/lib/decision-instruments/decision-signal-engine";
 import { DECISION_SIGNAL_SAMPLES, SAMPLE_LABEL } from "@/lib/decision-instruments/decision-signal-samples";
+import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
 import { COLORS, FONTS, BAND, eyebrow, caption, display, bodyText, bodyTextSm, card, primaryButton, ghostButton, field, hexA } from "@/lib/demo/journey-design";
 
 const DEFAULT_INPUT: SignalInput = { decisionStatement: "", delayCostBand: "MODERATE", confidenceLevel: 5, consequenceIfWrong: "COSTLY", urgencyBand: "MODERATE" };
@@ -47,8 +48,8 @@ const DecisionSignalPage: NextPage = () => {
   const started = React.useRef(false);
   const prevReading = React.useRef<SignalResult | null>(null); // §3.3 session-scoped prior reading
 
-  React.useEffect(() => { track("decision_signal_landing_viewed", {}); }, []);
-  function markStarted() { if (!started.current) { started.current = true; track("decision_signal_started", {}); } }
+  React.useEffect(() => { track("decision_signal_landing_viewed", {}); recordJourneyEvent("SIGNAL_LANDING_VIEWED"); }, []);
+  function markStarted() { if (!started.current) { started.current = true; track("decision_signal_started", {}); recordJourneyEvent("SIGNAL_STARTED"); } }
 
   function submit() {
     const outcome = runDecisionSignal(input);
@@ -59,6 +60,8 @@ const DecisionSignalPage: NextPage = () => {
     setError(null); setIsExample(false); setResult(outcome.result);
     track("decision_signal_completed", { pressureBand: outcome.result.pressureBand });
     track("decision_signal_result_viewed", { pressureBand: outcome.result.pressureBand });
+    recordJourneyEvent("SIGNAL_COMPLETED", { recommendationId: outcome.result.nextAdmissibleMove.recommendationId });
+    recordJourneyEvent("SIGNAL_RESULT_VIEWED");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function loadExample(id: string) {
@@ -66,6 +69,7 @@ const DecisionSignalPage: NextPage = () => {
     const outcome = runDecisionSignal(s.input); if (!outcome.ok) return;
     setInput(s.input); setResult(outcome.result); setIsExample(true); setError(null); setDiff(null); prevReading.current = null;
     track("decision_signal_example_viewed", { sampleId: id, pressureBand: outcome.result.pressureBand });
+    recordJourneyEvent("EXAMPLE_VIEWED");
   }
   function reset() { setResult(null); setError(null); setIsExample(false); setDiff(null); setShowTrace(false); prevReading.current = null; setInput(DEFAULT_INPUT); started.current = false; }
 
@@ -245,7 +249,7 @@ const DecisionSignalPage: NextPage = () => {
                   </div>
                 )}
                 {!isExample && result.nextAdmissibleMove.targetRoute !== "/decision-instruments/signal" && (
-                  <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute, recommendationId: result.nextAdmissibleMove.recommendationId })}
+                  <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => { track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute, recommendationId: result.nextAdmissibleMove.recommendationId }); recordJourneyEvent("NEXT_MOVE_ACCEPTED", { recommendationId: result.nextAdmissibleMove.recommendationId }); }}
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16, fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: COLORS.emerald, textDecoration: "none" }}>
                     {result.nextAdmissibleMove.targetLabel} <ArrowRight style={{ width: 12, height: 12 }} />
                   </Link>
