@@ -25,7 +25,7 @@ import {
   PlaybookRunAuthorityError,
 } from "@/lib/playbooks/playbook-run-authority";
 import { PlaybookInputError } from "@/lib/playbooks/playbook-run-types";
-import { recordPlaybookRunInteraction, resolveTenantCase } from "@/lib/intelligence/interaction-spine/runtime-binding";
+import { recordPlaybookRunInteraction, readContinuityForCase, resolveTenantCase } from "@/lib/intelligence/interaction-spine/runtime-binding";
 import { resolveRuntimeSpine } from "@/lib/intelligence/interaction-spine/runtime-spine-provider";
 
 function slugOf(req: NextApiRequest): string {
@@ -136,10 +136,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: "Run could not be recorded; not returned.", code: "PERSISTENCE_FAILED" });
     }
 
-    // §3 on-switch: feed the AUTHORITATIVE run into the compounding system. Fail-safe:
-    // the run is already persisted + will be returned; a binding failure never breaks it.
+    // §3/§4: read PRIOR relevant continuity, then feed the AUTHORITATIVE run into the
+    // compounding system. Both are fail-safe: the run is already persisted + returned,
+    // so neither a continuity read nor a binding write can break the product response.
     const tc = resolveTenantCase({ subjectId: userId, email });
+    let continuity: { statement: string; items: unknown[]; informedByInteractionCount: number } | undefined;
     if (tc) {
+      const r = result as { contradictions?: { ref?: string }[]; evidenceGaps?: string[] };
+      const topicTags = [
+        ...(r.contradictions ?? []).map((c) => c.ref ?? "").filter(Boolean),
+        ...(r.evidenceGaps ?? []),
+      ];
+      // read-before-run: continuity reflects state PRIOR to this run being recorded
+      const ctx = await readContinuityForCase(resolveRuntimeSpine, { productCode: config.code, tenantId: tc.tenantId, caseId: tc.caseId, topicTags });
+      if (ctx?.hasContinuity) continuity = { statement: ctx.customerStatement, items: ctx.items, informedByInteractionCount: ctx.informedByInteractionCount };
       await recordPlaybookRunInteraction(resolveRuntimeSpine, {
         productCode: config.code,
         tenantId: tc.tenantId,
@@ -150,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    return res.status(200).json({ runId, slug, code: config.code, result });
+    return res.status(200).json({ runId, slug, code: config.code, result, continuity });
   } catch (err) {
     console.error("[playbook-run] unexpected error:", err);
     return res.status(500).json({ error: "Unexpected error executing playbook run." });

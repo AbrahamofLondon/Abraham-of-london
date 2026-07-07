@@ -32,6 +32,7 @@ import {
 } from "./product-interaction-spine";
 import { isMappedProduct, mapProductResultToInteraction } from "./product-interaction-mappers";
 import { enqueueInteractionEvent, type OutboxStore } from "./interaction-outbox";
+import { buildPreRunContextForCase, type PreRunContext } from "./pre-run-context";
 
 /** A resolved durable spine for one case: the record deps + optional durable outbox. */
 export interface RuntimeSpine {
@@ -181,6 +182,36 @@ export function recordInstrumentRunInteraction(
     occurredAt: args.occurredAt,
     nativeResult: args.scoreJson,
   });
+}
+
+/**
+ * §4 read-before-run: resolve the RELEVANT prior continuity for a case, fail-safe.
+ * Reads the tenant-isolated twin through the durable spine and selects bounded relevant
+ * prior state. Returns null if no durable store is configured or on any failure (the
+ * product run proceeds regardless — continuity is additive). Call this BEFORE recording
+ * the new interaction so it reflects PRIOR state.
+ */
+export async function readContinuityForCase(
+  resolver: RuntimeSpineResolver,
+  args: { productCode: string; tenantId: string; caseId: string; topicTags: string[]; maxItems?: number },
+): Promise<PreRunContext | null> {
+  if (!args.tenantId || !args.caseId) return null;
+  let spine: RuntimeSpine | null = null;
+  try {
+    spine = await resolver(args.caseId);
+    if (!spine) return null;
+    return buildPreRunContextForCase(spine.deps, args.tenantId, args.caseId, {
+      productCode: args.productCode,
+      topicTags: args.topicTags,
+      maxItems: args.maxItems,
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("[interaction-spine] continuity read failed (product flow unaffected):", err);
+    return null;
+  } finally {
+    try { spine?.close?.(); } catch { /* ignore */ }
+  }
 }
 
 /**
