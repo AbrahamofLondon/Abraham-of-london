@@ -16,6 +16,8 @@ import Layout from "@/components/Layout";
 import LegalIdentityBlock from "@/components/trust/LegalIdentityBlock";
 import PlainEnglishDecisionLayer from "@/components/trust/PlainEnglishDecisionLayer";
 import WorkedDecisionExample from "@/components/trust/WorkedDecisionExample";
+import { track } from "@/lib/analytics/track";
+import { COLORS, FONTS, caption as dsCaption, bodyTextSm as dsBodySm, field as dsField, primaryButton as dsPrimary, hexA } from "@/lib/demo/journey-design";
 
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
@@ -256,8 +258,8 @@ function PilotIntakeForm() {
   const [submitting, setSubmitting] = React.useState(false);
   const [outcome, setOutcome] = React.useState<{ reference?: string; qualificationStatus: string; reviewStatus?: string; nextStep: string; reasons?: string[] } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const fieldStyle: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.8)", padding: "8px 10px", fontSize: "0.85rem", marginTop: 4 };
-  const lbl: React.CSSProperties = { ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" };
+  const fieldStyle: React.CSSProperties = dsField();
+  const lbl: React.CSSProperties = dsCaption(COLORS.muted);
 
   async function submit() {
     setSubmitting(true); setError(null);
@@ -266,6 +268,7 @@ function PilotIntakeForm() {
       const data = await res.json();
       if (res.status === 422) { setError("Some required fields are missing — please complete them: " + (data?.qualification?.missingFields ?? []).join(", ")); return; }
       if (!res.ok) { setError(data?.error ?? "Submission failed."); return; }
+      track("operator_pilot_intake_result_viewed", { qualificationStatus: data?.qualificationStatus });
       setOutcome(data);
     } catch { setError("Network error — please try again."); }
     finally { setSubmitting(false); }
@@ -305,7 +308,7 @@ function PilotIntakeForm() {
       <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.confidentialityRequired} onChange={(e) => setF({ ...f, confidentialityRequired: e.target.checked })} /> This decision requires confidentiality.</label>
       {error && <p className="sm:col-span-2" style={{ ...mono, fontSize: "9px", color: "#FCA5A5", lineHeight: 1.6 }}>{error}</p>}
       <div className="sm:col-span-2">
-        <button onClick={submit} disabled={submitting} style={{ padding: "14px 24px", border: `1px solid ${GOLD}50`, background: `${GOLD}18`, color: GOLD, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: submitting ? "wait" : "pointer" }}>
+        <button onClick={submit} disabled={submitting} style={{ ...dsPrimary(), opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }}>
           {submitting ? "Submitting…" : "Submit for governed qualification"}
         </button>
       </div>
