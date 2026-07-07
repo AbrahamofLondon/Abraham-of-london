@@ -1,0 +1,9 @@
+{
+  "productCode": "board_brief_builder",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

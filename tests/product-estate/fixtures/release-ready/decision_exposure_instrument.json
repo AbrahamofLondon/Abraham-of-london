@@ -1,0 +1,9 @@
+{
+  "productCode": "decision_exposure_instrument",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

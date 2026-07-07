@@ -1,0 +1,9 @@
+{
+  "productCode": "personal_decision_audit",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

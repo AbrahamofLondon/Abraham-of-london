@@ -1,0 +1,9 @@
+{
+  "productCode": "intervention_path_selector",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

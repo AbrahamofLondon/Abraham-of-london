@@ -1,0 +1,9 @@
+{
+  "productCode": "drift_detection_framework",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}
