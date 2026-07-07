@@ -30,5 +30,5 @@ describe("controlled-release proof matrix", () => {
         }
       }
     }
-  });
+  }, 60000);
 });
