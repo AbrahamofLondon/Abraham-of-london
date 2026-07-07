@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { CATALOG } from "@/lib/commercial/catalog";
 
 const reportPath = "reports/gtm/estate-market-restoration-final.json";
@@ -22,8 +22,13 @@ function runGenerator() {
 }
 
 describe("estate market restoration final disposition", () => {
+  let report: any;
+
+  beforeAll(() => {
+    report = runGenerator();
+  }, 60_000);
+
   it("generates the final report from tracked source in a clean worktree", () => {
-    const report = runGenerator();
     const expectedTotal = Object.keys(CATALOG).length;
 
     expect(report.schemaVersion).toBe("estate-market-restoration-final.v2");
@@ -35,7 +40,6 @@ describe("estate market restoration final disposition", () => {
   });
 
   it("writes product evidence packages with source fingerprints and no report-as-evidence dependency", () => {
-    const report = runGenerator();
 
     for (const product of report.products) {
       expect(existsSync(product.evidencePackage), `${product.code}: missing evidence package`).toBe(true);
@@ -49,7 +53,6 @@ describe("estate market restoration final disposition", () => {
   });
 
   it("preserves the GMI Q2 controlled pre-release boundary", () => {
-    const report = runGenerator();
 
     expect(report.gmiBoundary.q2State).toBe("controlled_pre_release");
     expect(report.gmiBoundary.q2CheckoutAllowed).toBe(false);
@@ -62,3 +65,5 @@ describe("estate market restoration final disposition", () => {
     expect(q2.authorityBoundary).toContain("No publication");
   });
 });
+
+
