@@ -3,13 +3,12 @@
  *
  * §11 — Public Decision Learning Log / Falsification Register.
  *
- * Surfaces the market-side falsification record publicly.
  * Append-only accountability: a correction must not erase the original call.
+ * Uses proper falsification semantics — does not manufacture conditions from URLs.
  * Every entry is derived from recorded evidence and editorially approved interpretation.
- *
- * Relationship: ORIGINAL CALL → FALSIFICATION CONDITION → OBSERVED EVIDENCE → REVIEW → RESULT → REVISION/LEARNING
  */
 import { MARKET_CALL_LEDGER, type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
+import { buildFalsificationCondition, type FalsificationCondition } from "./falsification-semantics";
 
 export interface LearningLogEntry {
   originalCallId: string;
@@ -17,7 +16,7 @@ export interface LearningLogEntry {
   originalDate: string;
   edition: string;
   originalConfidence: string;
-  falsificationCondition: string;
+  falsificationCondition: FalsificationCondition;
   observedEvidence: string;
   outcomeStatus: MarketCallOutcomeStatus | "PENDING_REVIEW";
   score: number | null;
@@ -29,12 +28,7 @@ export interface LearningLogEntry {
   publicationTimestamp: string;
 }
 
-export interface LearningLogFilter {
-  edition?: string;
-  theme?: string;
-  status?: MarketCallOutcomeStatus;
-  region?: string;
-}
+export interface LearningLogFilter { edition?: string; theme?: string; status?: MarketCallOutcomeStatus; region?: string; }
 
 export function buildLearningLogEntry(call: MarketCallRecord): LearningLogEntry {
   return {
@@ -43,7 +37,7 @@ export function buildLearningLogEntry(call: MarketCallRecord): LearningLogEntry 
     originalDate: call.lastReviewedAt ?? call.expectedReviewWindow,
     edition: call.reportId,
     originalConfidence: call.originalConfidence,
-    falsificationCondition: call.scenarioLink ?? "Not specified",
+    falsificationCondition: buildFalsificationCondition({ scenarioLink: call.scenarioLink, statement: call.statement, outcomeSummary: call.outcomeSummary }),
     observedEvidence: call.outcomeSummary ?? "Pending review",
     outcomeStatus: call.outcomeStatus ?? "PENDING_REVIEW",
     score: call.score ?? null,
@@ -79,6 +73,9 @@ export function getLearningLogSummary() {
     notConfirmed: entries.filter(e => e.outcomeStatus === "NOT_CONFIRMED" || e.outcomeStatus === "DISCONFIRMED").length,
     pendingReview: entries.filter(e => e.outcomeStatus === "PENDING_REVIEW" || e.outcomeStatus === "TOO_EARLY_TO_ASSESS").length,
     byEdition: Object.entries(groupBy(entries, e => e.edition)).map(([edition, entries]) => ({ edition, count: entries.length })),
+    specifiedConditions: entries.filter(e => e.falsificationCondition.status === "SPECIFIED").length,
+    referenceOnlyConditions: entries.filter(e => e.falsificationCondition.status === "REFERENCE_ONLY").length,
+    notSpecified: entries.filter(e => e.falsificationCondition.status === "NOT_SPECIFIED_IN_SOURCE").length,
   };
 }
 

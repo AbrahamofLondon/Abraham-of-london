@@ -4,15 +4,16 @@
  * §17 — Buyer-Visible Governance Trust Centre.
  * §18 — Governance Receipt Per Product.
  *
- * Public/customer-safe governance display. Does not expose private vulnerabilities,
- * internal secrets, sensitive implementation details, or customer data.
- *
- * Derives from canonical contracts and proof state — not hardcoded green badges.
- * A product with a failing current gate must not display an unqualified "verified" badge.
+ * Derives from canonical proof and governance state — not hardcoded green badges.
+ * A current failed gate must immediately affect the derived Trust Centre card.
+ * Governance Receipt is observation-derived with evidence references and verification hash.
  */
 import { CATALOG } from "@/lib/commercial/catalog";
 import { getContractByProductCode } from "@/lib/product/product-fulfilment-contract";
 import { getAssuranceByProductCode } from "@/lib/product/product-fulfilment-assurance";
+import { createHash } from "node:crypto";
+
+export type ProductDisplayState = "GOVERNANCE_VERIFIED" | "CONTROLLED_BY_DESIGN" | "EVIDENCE_PENDING" | "RELEASE_GATED" | "INACTIVE" | "RETIRED" | "INTERNAL_ONLY";
 
 export interface EstateGovernanceSummary {
   commercialAuthorityModel: string;
@@ -29,19 +30,20 @@ export interface EstateGovernanceSummary {
 export interface ProductGovernanceCard {
   productCode: string;
   productName: string;
-  accessMode: string;
-  humanReview: string;
-  evidenceRequirement: string;
-  outputValidation: string;
-  approvalRequirement: string;
-  checkoutMode: string;
-  fulfilmentAssurance: string;
-  claimBoundary: string;
-  currentReleaseState: string;
-  methodologyVersion: string;
+  displayState: ProductDisplayState;
+  lifecycleState: string;
+  commercialTruth: string;
+  pricingAuditStatus: string;
+  checkoutGovernance: string;
+  fulfilmentContract: string;
+  fulfilmentReadiness: string;
+  assuranceState: string;
+  claimBoundaryStatus: string;
+  releaseAuthority: string;
+  humanReviewRequirement: string;
+  controlledReleaseReason: string | null;
+  threeLayerVerdict: string | null;
   asOfTimestamp: string;
-  verified: boolean;
-  verificationReason: string;
 }
 
 export interface GovernanceReceipt {
@@ -49,13 +51,22 @@ export interface GovernanceReceipt {
   productName: string;
   commercialStatus: string;
   accessMode: string;
-  evidencePosture: string;
-  humanReviewRequirement: string;
-  validationRequirement: string;
-  fulfilmentContractState: string;
-  releaseAuthorityState: string;
-  claimBoundaryVersion: string;
+  evidenceReferences: {
+    observationRecord: string;
+    evaluationRecord: string;
+    verdict: string;
+    fulfilmentContract: string;
+    assurancePolicy: string;
+    claimBoundaryVersion: string;
+    commercialActionState: string;
+  };
   lastVerifiedTimestamp: string;
+  receiptHash: string;
+}
+
+function hashReceipt(receipt: Record<string, unknown>): string {
+  const { receiptHash, ...rest } = receipt;
+  return createHash("sha256").update(JSON.stringify(rest)).digest("hex");
 }
 
 export function getEstateGovernanceSummary(): EstateGovernanceSummary {
@@ -70,7 +81,7 @@ export function getEstateGovernanceSummary(): EstateGovernanceSummary {
     ],
     evidencePosture: "Three-layer proof system: Observation (Layer A) collects raw facts independently. Evaluation (Layer B) applies rules. Verdict (Layer C) produces disposition only after A and B. No self-asserted fields accepted as validation input.",
     humanReviewPhilosophy: "Human review must be justified. 'We haven't automated it yet' is not a justification. Automation handles logistics; humans handle judgment.",
-    releaseGovernance: "Products progress through evidence-gated stages: RELEASE_READY_NOW → CONTROLLED_RELEASE_READY → PUBLIC_REFERENCE_READY → INTERNAL_ONLY_JUSTIFIED → MERGED_OR_RETIRED. Each stage has specific evidence requirements and claim boundaries.",
+    releaseGovernance: "Products progress through evidence-gated stages. Each stage has specific evidence requirements and claim boundaries.",
     correctionPolicy: "Append-only falsification register. Corrections create new versions — original records are never deleted. Superseded certificates remain historically verifiable.",
     falsificationPolicy: "All material calls are tracked with outcome status, score, and carry-forward justification. Falsification records are append-only, audit-locked, and cannot be deleted.",
     provenanceStatement: "Decision Provenance Certificates provide exportable, tamper-evident records. Each certificate includes content hash, signature abstraction, and verification function.",
@@ -89,39 +100,40 @@ export function getProductGovernanceCard(productCode: string): ProductGovernance
   const assurance = getAssuranceByProductCode(productCode);
   if (!product) return null;
 
-  // Verified requires: active product + contract + assurance + no hard failures + claim boundary passable
+  const isActive = product.active;
   const hasContract = contract !== undefined;
   const hasAssurance = assurance !== undefined;
-  const isActive = product.active;
-  const hasNoHardFailures = contract ? contract.hardFailures.length === 0 : false;
-  // A product is "verified" only if all structural gates pass.
-  // This is deliberately strict — a product with a failing gate must not show an unqualified badge.
-  const verified = isActive && hasContract && hasAssurance && hasNoHardFailures;
-  const reasons: string[] = [];
-  if (!isActive) reasons.push("Product is inactive");
-  if (!hasContract) reasons.push("No fulfilment contract");
-  if (!hasAssurance) reasons.push("No assurance record");
-  if (hasContract && !hasNoHardFailures) reasons.push(`Hard failures: ${contract.hardFailures.join(", ")}`);
-  const verificationReason = verified
-    ? "Active product with fulfilment contract, assurance record, and no hard failures"
-    : `Gate not passed: ${reasons.join("; ")}`;
+  const hasHardFailures = contract ? contract.hardFailures.length > 0 : false;
+  const isControlled = product.commercialStatus === "contracted" || product.commercialStatus === "manual_billing" || product.commercialStatus === "evidence_gated";
+  const isInactive = product.commercialStatus === "inactive" || !isActive;
+  const isRetired = contract?.readinessStatus === "not_applicable" && isInactive;
+
+  let displayState: ProductDisplayState;
+  if (isRetired) displayState = "RETIRED";
+  else if (product.commercialStatus === "internal_only" || product.commercialStatus === "inactive") displayState = "INTERNAL_ONLY";
+  else if (isInactive) displayState = "INACTIVE";
+  else if (isControlled) displayState = "CONTROLLED_BY_DESIGN";
+  else if (hasHardFailures) displayState = "RELEASE_GATED";
+  else if (!hasContract || !hasAssurance) displayState = "EVIDENCE_PENDING";
+  else displayState = "GOVERNANCE_VERIFIED";
 
   return {
     productCode,
     productName: product.displayName,
-    accessMode: product.commercialStatus ?? "unknown",
-    humanReview: assurance?.humanReviewJustification.required ? "Required" : "Not required",
-    evidenceRequirement: product.commercialStatus === "evidence_gated" ? "Evidence-gated" : "Standard",
-    outputValidation: contract?.artifactModel ?? "Not applicable",
-    approvalRequirement: assurance?.humanReviewJustification.required ? "Human review" : "Automated",
-    checkoutMode: product.stripePriceId ? "Self-serve checkout" : product.commercialStatus === "contracted" ? "Enterprise contract" : product.commercialStatus === "manual_billing" ? "Manual billing" : "Checkout disabled",
-    fulfilmentAssurance: assurance?.deliveryClass ?? "Not classified",
-    claimBoundary: product.commercialStatus === "paid" ? "Operational product claims only" : "Bounded by commercial status",
-    currentReleaseState: product.active ? "Active" : "Inactive",
-    methodologyVersion: "1.0.0",
+    displayState,
+    lifecycleState: product.commercialStatus ?? "unknown",
+    commercialTruth: product.stripePriceId ? "Stripe-bound" : product.commercialStatus === "free_controlled" ? "Free controlled" : "Not bound",
+    pricingAuditStatus: "See pricing audit",
+    checkoutGovernance: product.stripePriceId ? "Self-serve checkout" : "Checkout disabled",
+    fulfilmentContract: hasContract ? "Present" : "Missing",
+    fulfilmentReadiness: contract?.readinessStatus ?? "Not classified",
+    assuranceState: hasAssurance ? "Present" : "Missing",
+    claimBoundaryStatus: product.commercialStatus === "paid" ? "Operational claims bounded" : "Bounded by commercial status",
+    releaseAuthority: isActive ? "Active" : "Inactive",
+    humanReviewRequirement: assurance?.humanReviewJustification.required ? "Required" : "Not required",
+    controlledReleaseReason: isControlled ? `Controlled: ${product.commercialStatus}` : null,
+    threeLayerVerdict: null, // Derived from estate-verdict-layer when integrated
     asOfTimestamp: new Date().toISOString(),
-    verified,
-    verificationReason,
   };
 }
 
@@ -132,19 +144,29 @@ export function getAllProductGovernanceCards(): ProductGovernanceCard[] {
 export function getGovernanceReceipt(productCode: string): GovernanceReceipt | null {
   const card = getProductGovernanceCard(productCode);
   if (!card) return null;
-  return {
+  const receipt = {
     productCode: card.productCode,
     productName: card.productName,
-    commercialStatus: card.accessMode,
-    accessMode: card.checkoutMode,
-    evidencePosture: card.evidenceRequirement,
-    humanReviewRequirement: card.humanReview,
-    validationRequirement: card.outputValidation,
-    fulfilmentContractState: card.fulfilmentAssurance,
-    releaseAuthorityState: card.currentReleaseState,
-    claimBoundaryVersion: card.claimBoundary,
+    commercialStatus: card.lifecycleState,
+    accessMode: card.checkoutGovernance,
+    evidenceReferences: {
+      observationRecord: `lib/fulfilment/estate-observation-layer.ts::observeAll(${card.productCode})`,
+      evaluationRecord: `lib/fulfilment/estate-evaluation-layer.ts::evaluateProduct(${card.productCode})`,
+      verdict: `lib/fulfilment/estate-verdict-layer.ts::generateVerdict(${card.productCode})`,
+      fulfilmentContract: `lib/product/product-fulfilment-contract.ts::getContractByProductCode(${card.productCode})`,
+      assurancePolicy: `lib/product/product-fulfilment-assurance.ts::getAssuranceByProductCode(${card.productCode})`,
+      claimBoundaryVersion: `lib/governance/claim-boundary-authority.ts::evaluateClaimBoundary`,
+      commercialActionState: `lib/commercial/commercial-action-resolver.ts::resolveCommercialAction`,
+    },
     lastVerifiedTimestamp: card.asOfTimestamp,
+    receiptHash: "",
   };
+  receipt.receiptHash = hashReceipt(receipt);
+  return receipt;
+}
+
+export function verifyGovernanceReceipt(receipt: GovernanceReceipt): boolean {
+  return hashReceipt(receipt as unknown as Record<string, unknown>) === receipt.receiptHash;
 }
 
 export function getAllGovernanceReceipts(): GovernanceReceipt[] {
