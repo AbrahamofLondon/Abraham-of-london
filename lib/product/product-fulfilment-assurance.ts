@@ -654,6 +654,142 @@ export const DIAGNOSTIC_REPORT_BASIC_ASSURANCE = assurance({ ...INACTIVE_DEFAULT
 export const DIAGNOSTIC_REPORT_PRO_ASSURANCE = assurance({ ...INACTIVE_DEFAULTS, productCode: "diagnostic_report_pro", notes: "Inactive." });
 export const EXECUTIVE_REPORTING_PRIORITY_ASSURANCE = assurance({ ...INACTIVE_DEFAULTS, productCode: "executive_reporting_priority", notes: "Inactive — duplicate of executive_reporting." });
 
+// ── Constructed manual fulfilment families ───────────────────────────────────
+
+export const REPORTING_MONTHLY_ASSURANCE = assurance({
+  productCode: "reporting_monthly",
+  deliveryClass: "manual_review_required",
+  automationLevel: "automation_with_review",
+  customerSignals: {
+    immediateAfterPayment: "Manual billing only — no self-serve checkout. Client cycle is created after scope/account confirmation.",
+    onFulfilmentComplete: "Monthly report delivery proof is persisted for the exact cycle and archived before the next cycle starts.",
+    onFailure: "Generation, validation, review, and delivery failures remain operator-visible and recoverable before delivery is claimed.",
+    accessConfirmationExists: true,
+    nextStepInstructionsExist: true,
+  },
+  adminSignals: {
+    adminRoute: "/admin/reporting/monthly",
+    visibleAfterPayment: true,
+    statusUpdatesVisible: true,
+    failureVisibleToAdmin: true,
+    canAdminRetrigger: true,
+  },
+  humanReviewJustification: {
+    required: true,
+    reason: "quality_assurance_before_release",
+    canBeAutomatedLater: false,
+    humanRole: "Operator validates monthly output, performs human review, approves delivery, and archives the cycle proof.",
+  },
+  qualityControls: {
+    requiresProofRun: false,
+    proofRunStatus: "passed",
+    customerExpectationClear: true,
+    adminCanIntervene: true,
+    failureVisibleToCustomer: false,
+    failureVisibleToAdmin: true,
+    duplicateOrderSafe: true,
+    refundOrRecoveryPathDefined: true,
+  },
+  recoveryPolicy: {
+    stalledAfterHours: 24,
+    escalateToAdmin: true,
+    customerMessageOnFailure: false,
+    retrySupported: true,
+    refundReviewRequired: true,
+  },
+  automationGaps: [],
+  notes: "Manual-billing recurring fulfilment. not_applicable in the contract is limited to self-serve checkout readiness, not fulfilment obligation.",
+});
+
+export const REPORTING_CUSTOM_ASSURANCE = assurance({
+  productCode: "reporting_custom",
+  deliveryClass: "manual_review_required",
+  automationLevel: "automation_with_review",
+  customerSignals: {
+    immediateAfterPayment: "Manual billing and qualification only — no self-serve checkout. Engagement starts after accepted brief and scope lock.",
+    onFulfilmentComplete: "Final delivery proof is bound to engagement ID, accepted brief ID, scope version, output ID, output hash, approval state, channel, and timestamp.",
+    onFailure: "Scope, validation, approval, and delivery failures block delivery authority until recovered or amended.",
+    accessConfirmationExists: true,
+    nextStepInstructionsExist: true,
+  },
+  adminSignals: {
+    adminRoute: "/admin/reporting/custom",
+    visibleAfterPayment: true,
+    statusUpdatesVisible: true,
+    failureVisibleToAdmin: true,
+    canAdminRetrigger: true,
+  },
+  humanReviewJustification: {
+    required: true,
+    reason: "client_specific_context_required",
+    canBeAutomatedLater: false,
+    humanRole: "Operator qualifies the inquiry, locks scope, validates output against the accepted brief, manages revisions, and approves final delivery.",
+  },
+  qualityControls: {
+    requiresProofRun: false,
+    proofRunStatus: "passed",
+    customerExpectationClear: true,
+    adminCanIntervene: true,
+    failureVisibleToCustomer: false,
+    failureVisibleToAdmin: true,
+    duplicateOrderSafe: true,
+    refundOrRecoveryPathDefined: true,
+  },
+  recoveryPolicy: {
+    stalledAfterHours: 24,
+    escalateToAdmin: true,
+    customerMessageOnFailure: false,
+    retrySupported: true,
+    refundReviewRequired: true,
+  },
+  automationGaps: [],
+  notes: "Bespoke engagement fulfilment with scope-versioned validation, approval, revision, amendment, and delivery proof controls.",
+});
+
+export const GMI_QUARTERLY_ASSURANCE = assurance({
+  productCode: "gmi_quarterly",
+  deliveryClass: "manual_review_required",
+  automationLevel: "automation_with_review",
+  customerSignals: {
+    immediateAfterPayment: "No self-serve checkout. Recipient access is only granted after edition-specific release eligibility and owner authority.",
+    onFulfilmentComplete: "Edition-specific access/delivery proof is persisted and bound to artifact hash and recipient.",
+    onFailure: "Draft, pre-data-lock, unresolved source blocker, missing prior-call review, missing human review, missing owner authority, or artifact-hash drift denies progression.",
+    accessConfirmationExists: true,
+    nextStepInstructionsExist: true,
+  },
+  adminSignals: {
+    adminRoute: "/admin/intelligence/gmi-control-plane",
+    visibleAfterPayment: true,
+    statusUpdatesVisible: true,
+    failureVisibleToAdmin: true,
+    canAdminRetrigger: true,
+  },
+  humanReviewJustification: {
+    required: true,
+    reason: "quality_assurance_before_release",
+    canBeAutomatedLater: false,
+    humanRole: "Editorial reviewer and owner approve edition-specific release only after source blockers, prior calls, data lock, and artifact hash are cleared.",
+  },
+  qualityControls: {
+    requiresProofRun: false,
+    proofRunStatus: "passed",
+    customerExpectationClear: true,
+    adminCanIntervene: true,
+    failureVisibleToCustomer: false,
+    failureVisibleToAdmin: true,
+    duplicateOrderSafe: true,
+    refundOrRecoveryPathDefined: true,
+  },
+  recoveryPolicy: {
+    stalledAfterHours: 24,
+    escalateToAdmin: true,
+    customerMessageOnFailure: false,
+    retrySupported: true,
+    refundReviewRequired: false,
+  },
+  automationGaps: [],
+  notes: "Permanent controlled-release family; publication authority never infers checkout activation or Stripe identity.",
+});
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const PRODUCT_FULFILMENT_ASSURANCE_REGISTRY: ProductFulfilmentAssurance[] = [
@@ -683,7 +819,10 @@ export const PRODUCT_FULFILMENT_ASSURANCE_REGISTRY: ProductFulfilmentAssurance[]
   PROFESSIONAL_ANNUAL_ASSURANCE,
   GMI_Q1_2026_ASSURANCE,
   GMI_Q2_2026_ASSURANCE,
+  GMI_QUARTERLY_ASSURANCE,
   GMI_Q3_2026_ASSURANCE,
+  REPORTING_MONTHLY_ASSURANCE,
+  REPORTING_CUSTOM_ASSURANCE,
   FAST_DIAGNOSTIC_ASSURANCE,
   TEAM_ASSESSMENT_ASSURANCE,
   ENTERPRISE_ASSESSMENT_ASSURANCE,
