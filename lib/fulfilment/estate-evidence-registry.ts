@@ -21,8 +21,9 @@
  * Every claimed delivery-proof mechanism must exist or be explicitly not applicable.
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { getContractByProductCode } from "../product/product-fulfilment-contract";
 
 // ── Evidence disposition types ─────────────────────────────────────────────
 
@@ -73,7 +74,7 @@ export type ProductEvidenceRecord = {
 
 const CWD = process.cwd();
 
-function pathExists(p: string): boolean {
+export function pathExists(p: string): boolean {
   try {
     return existsSync(join(CWD, p));
   } catch {
@@ -86,7 +87,7 @@ function pathExists(p: string): boolean {
  * Next.js uses filesystem routing, so /boardroom-brief would map to
  * pages/boardroom-brief.tsx or app/boardroom-brief/page.tsx.
  */
-function routePathExists(routePath: string): boolean {
+export function routePathExists(routePath: string): boolean {
   // Strip leading slash
   const clean = routePath.replace(/^\//, "");
   if (!clean) return true; // root route always exists
@@ -107,55 +108,158 @@ function routePathExists(routePath: string): boolean {
     if (pathExists(pattern)) return true;
   }
 
-  // Check for dynamic route segments
+  // Check for dynamic route segments.
   const segments = clean.split("/");
+  const paramNames = ["slug", "id", "param", "name", "key", "token", "caseId", "runId", "instrument"];
   for (let i = 0; i < segments.length; i++) {
-    const dynamicPatterns = [
-      `pages/${segments.slice(0, i).join("/")}/[${segments[i]}]/${segments.slice(i + 1).join("/")}.tsx`,
-      `pages/${segments.slice(0, i).join("/")}/[${segments[i]}]/index.tsx`,
-      `app/${segments.slice(0, i).join("/")}/[${segments[i]}]/page.tsx`,
-    ];
-    for (const dp of dynamicPatterns) {
-      if (pathExists(dp)) return true;
+    for (const paramName of paramNames) {
+      const before = segments.slice(0, i).join("/");
+      const after = segments.slice(i + 1).join("/");
+      const prefix = before ? `${before}/` : "";
+      const suffix = after ? `/${after}` : "";
+      const dynamicPatterns = [
+        `pages/${prefix}[${paramName}]${suffix}.tsx`,
+        `pages/${prefix}[${paramName}]${suffix}.ts`,
+        `pages/${prefix}[${paramName}]${suffix}/index.tsx`,
+        `pages/${prefix}[${paramName}]${suffix}/index.ts`,
+        `app/${prefix}[${paramName}]${suffix}/page.tsx`,
+        `app/${prefix}[${paramName}]${suffix}/page.ts`,
+        `app/${prefix}[${paramName}]${suffix}/route.tsx`,
+        `app/${prefix}[${paramName}]${suffix}/route.ts`,
+      ];
+      for (const dp of dynamicPatterns) {
+        if (pathExists(dp)) return true;
+      }
     }
   }
 
   return false;
 }
 
-function validateEvidencePaths(record: ProductEvidenceRecord): string[] {
-  const errors: string[] = [];
-  for (const p of record.evidencePaths) {
-    // Skip route paths — they're validated differently
-    if (p.startsWith("/")) {
-      if (!routePathExists(p)) {
-        errors.push(`Route path not found: ${p} for product ${record.productCode}`);
-      }
-    } else if (p.endsWith("/")) {
-      // Directory path — check if directory exists
-      if (!pathExists(p.replace(/\/$/, ""))) {
-        errors.push(`Evidence directory not found: ${p} for product ${record.productCode}`);
-      }
-    } else if (!pathExists(p)) {
-      errors.push(`Evidence path not found: ${p} for product ${record.productCode}`);
-    }
+function directoryHasFiles(p: string): boolean {
+  try {
+    const full = join(CWD, p.replace(/\/$/, ""));
+    return existsSync(full) && statSync(full).isDirectory() && readdirSync(full).length > 0;
+  } catch {
+    return false;
   }
-  for (const entry of record.evidenceBasis) {
-    // Respect the pathExists field from the evidence basis entry
-    if (entry.pathExists === false) continue;
-    if (entry.path.startsWith("/")) {
-      if (!routePathExists(entry.path)) {
-        errors.push(`Evidence basis route path not found: ${entry.path} for product ${record.productCode}`);
-      }
-    } else if (entry.path.endsWith("/")) {
-      if (!pathExists(entry.path.replace(/\/$/, ""))) {
-        errors.push(`Evidence basis directory not found: ${entry.path} for product ${record.productCode}`);
-      }
-    } else if (!pathExists(entry.path)) {
-      errors.push(`Evidence basis path not found: ${entry.path} for product ${record.productCode}`);
+}
+
+function isGeneratedVerdictPath(p: string): boolean {
+  return p.includes("estate-market-restoration-final")
+    || p.includes("estate-restoration-final-verdict")
+    || p.startsWith("reports/gtm/estate-evidence-packages/");
+}
+
+function productSlug(productCode: string): string {
+  return productCode.replace(/_/g, "-");
+}
+
+function routeMatchesContract(productCode: string, route: string): boolean {
+  const contract = getContractByProductCode(productCode);
+  if (!contract) return false;
+  return [contract.intakeRoute, contract.successRoute, contract.customerAccessRoute, contract.adminRoute]
+    .filter((p): p is string => Boolean(p))
+    .includes(route);
+}
+
+function validatePathReference(productCode: string, label: string, p: string): string[] {
+  const errors: string[] = [];
+
+  if (isGeneratedVerdictPath(p)) {
+    errors.push(`${label} uses generated verdict/package evidence: ${p} for product ${productCode}`);
+    return errors;
+  }
+
+  if (p.startsWith("/")) {
+    if (!routePathExists(p)) errors.push(`${label} route path not found: ${p} for product ${productCode}`);
+    return errors;
+  }
+
+  if (p.endsWith("/")) {
+    if (!directoryHasFiles(p)) errors.push(`${label} directory has no observed files: ${p} for product ${productCode}`);
+    return errors;
+  }
+
+  if (!pathExists(p)) {
+    const routeCandidate = p.startsWith("pages/")
+      ? `/${p.replace(/^pages\//, "")}`
+      : p.startsWith("app/")
+        ? `/${p.replace(/^app\//, "").replace(/\/page$/, "").replace(/\/route$/, "")}`
+        : null;
+    if (!routeCandidate || !routePathExists(routeCandidate)) {
+      errors.push(`${label} path not found: ${p} for product ${productCode}`);
     }
   }
   return errors;
+}
+
+function categoryMatchesPath(category: string, p: string): boolean {
+  if (p.startsWith("/")) return category === "route";
+  if (category === "commercial") return p.includes("lib/commercial/") || p.includes("commercial");
+  if (category === "fulfilment") return p.includes("fulfilment") || p.includes("fulfillment") || p.includes("product-fulfilment");
+  if (category === "test") return p.startsWith("tests/") || /\.(test|spec)\.[tj]sx?$/.test(p);
+  if (category === "route") return p.startsWith("pages/") || p.startsWith("app/");
+  if (category === "execution") return p.includes("run") || p.includes("engine") || p.includes("service") || p.includes("fulfilment");
+  return true;
+}
+
+function validateEvidenceRelevance(record: ProductEvidenceRecord): string[] {
+  const errors: string[] = [];
+  const slug = productSlug(record.productCode);
+  const contract = getContractByProductCode(record.productCode);
+
+  for (const entry of record.evidenceBasis) {
+    if (!categoryMatchesPath(entry.category, entry.path)) {
+      errors.push(`Evidence category/path mismatch for ${record.productCode}: ${entry.category} cannot be proven by ${entry.path}`);
+    }
+  }
+
+  for (const route of record.routeEvidence) {
+    if (!routeMatchesContract(record.productCode, route) && !route.includes(slug)) {
+      errors.push(`Route evidence does not match product identity for ${record.productCode}: ${route}`);
+    }
+  }
+
+  if ((record.finalDisposition === "RELEASE_READY_NOW" || record.finalDisposition === "CONTROLLED_RELEASE_READY") && !contract) {
+    errors.push(`Fulfilment registration missing for market-facing product ${record.productCode}`);
+  }
+
+  if (record.evidenceClass === "VALID_PRODUCT_EVIDENCE_PACKAGE") {
+    if (record.commercialEvidence.length === 0) errors.push(`Product-specific commercial evidence missing for ${record.productCode}`);
+    if (record.fulfilmentEvidence.length === 0) errors.push(`Product-specific fulfilment evidence missing for ${record.productCode}`);
+    if (record.routeEvidence.length === 0) errors.push(`Product-specific route evidence missing for ${record.productCode}`);
+    if (record.testEvidence.length === 0) errors.push(`Product-specific execution/test evidence missing for ${record.productCode}`);
+  }
+
+  return errors;
+}
+
+export function validateProductEvidenceRecord(record: ProductEvidenceRecord): string[] {
+  const errors: string[] = [];
+
+  for (const p of record.evidencePaths) {
+    errors.push(...validatePathReference(record.productCode, "Evidence", p));
+  }
+
+  for (const entry of record.evidenceBasis) {
+    errors.push(...validatePathReference(record.productCode, "Evidence basis", entry.path));
+  }
+
+  for (const route of record.routeEvidence) {
+    errors.push(...validatePathReference(record.productCode, "Route evidence", route));
+  }
+
+  for (const test of record.testEvidence) {
+    errors.push(...validatePathReference(record.productCode, "Test evidence", test));
+  }
+
+  errors.push(...validateEvidenceRelevance(record));
+  return errors;
+}
+
+function validateEvidencePaths(record: ProductEvidenceRecord): string[] {
+  return validateProductEvidenceRecord(record);
 }
 
 // ── Registry ───────────────────────────────────────────────────────────────
@@ -447,7 +551,7 @@ export function initialiseEvidenceRegistry(): void {
       { category: "commercial", claim: "Stripe Price ID bound in catalog", path: "lib/commercial/catalog.ts", pathExists: true },
       { category: "fulfilment", claim: "Fulfilment contract exists", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
       { category: "fulfilment", claim: "Assurance policy exists", path: "lib/product/product-fulfilment-assurance.ts", pathExists: true },
-      { category: "route", claim: "Customer access route exists", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "route", claim: "Customer access route exists", path: "/diagnostics/purpose-alignment", pathExists: true },
       { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
     ],
     ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
@@ -792,6 +896,72 @@ export function initialiseEvidenceRegistry(): void {
     ["manual billing", "controlled access"],
   ));
 
+  // Reporting Monthly — constructed recurring fulfilment, manual billing.
+  registerProductEvidence(evidenceRecord(
+    "reporting_monthly",
+    "Reporting — Monthly",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing — self-serve checkout readiness not applicable", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Recurring monthly reporting handler exists", path: "lib/fulfilment/reporting/monthly-reporting-handler.ts", pathExists: true },
+      { category: "fulfilment", claim: "Recurring cycle service exists", path: "lib/fulfilment/reporting/monthly-reporting-service.ts", pathExists: true },
+      { category: "test", claim: "Monthly reporting fulfilment tests pass", path: "lib/fulfilment/reporting/__tests__/monthly-reporting.test.ts", pathExists: true },
+      { category: "test", claim: "Monthly reporting handler tests pass", path: "lib/fulfilment/reporting/__tests__/monthly-reporting-handler.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/fulfilment/reporting/monthly-reporting-service.ts", "lib/fulfilment/reporting/monthly-reporting-handler.ts"],
+    ["lib/fulfilment/reporting/__tests__/monthly-reporting.test.ts", "lib/fulfilment/reporting/__tests__/monthly-reporting-handler.test.ts"],
+    [],
+    ["retainer_cycle / analyst_review_and_send"],
+    ["Manual billing — no self-serve checkout"],
+    "Manual-billing recurring fulfilment only. not_applicable means automated self-serve checkout-readiness computation does not apply; the fulfilment obligation remains real.",
+    ["recurring reporting", "human-reviewed delivery", "delivery proof required"],
+  ));
+
+  // Reporting Custom — constructed engagement fulfilment, manual billing.
+  registerProductEvidence(evidenceRecord(
+    "reporting_custom",
+    "Reporting — Custom",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing — negotiated scope", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Custom reporting handler exists", path: "lib/fulfilment/reporting/custom-reporting-handler.ts", pathExists: true },
+      { category: "fulfilment", claim: "Custom engagement service exists", path: "lib/fulfilment/reporting/custom-reporting-service.ts", pathExists: true },
+      { category: "test", claim: "Custom reporting fulfilment tests pass", path: "lib/fulfilment/reporting/__tests__/custom-reporting.test.ts", pathExists: true },
+      { category: "test", claim: "Custom reporting handler tests pass", path: "lib/fulfilment/reporting/__tests__/custom-reporting-handler.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/fulfilment/reporting/custom-reporting-service.ts", "lib/fulfilment/reporting/custom-reporting-handler.ts"],
+    ["lib/fulfilment/reporting/__tests__/custom-reporting.test.ts", "lib/fulfilment/reporting/__tests__/custom-reporting-handler.test.ts"],
+    [],
+    ["human_reviewed_dossier / analyst_review_and_send"],
+    ["Manual billing — negotiated scope"],
+    "Manual-billing bespoke fulfilment only. Scope lock, scope versioning, validation, review, revision and delivery proof are engagement-bound.",
+    ["custom reporting", "scope-bound delivery", "human-reviewed delivery", "delivery proof required"],
+  ));
+
+  // GMI Quarterly family — controlled governance family, not a self-serve edition.
+  registerProductEvidence(evidenceRecord(
+    "gmi_quarterly",
+    "Global Market Intelligence — Quarterly",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing family — publication does not activate checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "GMI quarterly handler exists", path: "lib/fulfilment/gmi/gmi-quarterly-handler.ts", pathExists: true },
+      { category: "fulfilment", claim: "GMI quarterly release-gated fulfilment exists", path: "lib/fulfilment/gmi/gmi-quarterly-fulfilment.ts", pathExists: true },
+      { category: "test", claim: "GMI quarterly fulfilment tests pass", path: "lib/fulfilment/gmi/__tests__/gmi-quarterly-fulfilment.test.ts", pathExists: true },
+      { category: "test", claim: "GMI quarterly handler tests pass", path: "lib/fulfilment/gmi/__tests__/gmi-quarterly-handler.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/fulfilment/gmi/gmi-quarterly-fulfilment.ts", "lib/fulfilment/gmi/gmi-quarterly-handler.ts"],
+    ["lib/fulfilment/gmi/__tests__/gmi-quarterly-fulfilment.test.ts", "lib/fulfilment/gmi/__tests__/gmi-quarterly-handler.test.ts"],
+    ["/intelligence/gmi", "/admin/intelligence/gmi-control-plane"],
+    ["executive_report_artifact / evidence_gate_review"],
+    ["Manual billing family — no inferred checkout or Stripe identity"],
+    "Controlled release family. Edition delivery requires data lock, source blocker clearance, prior-call review, human review, owner authority and artifact-hash binding.",
+    ["controlled access", "edition-specific governance", "owner authority required", "no self-serve checkout inference"],
+    "Future edition data locks and owner release authority are edition-specific external/temporal dependencies",
+  ));
   // ══════════════════════════════════════════════════════════════════════════
   // PUBLIC_REFERENCE_READY — 3 products
   // ══════════════════════════════════════════════════════════════════════════
