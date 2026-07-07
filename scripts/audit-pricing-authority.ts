@@ -1,12 +1,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { CATALOG, resolveProductCode } from "../lib/commercial/catalog";
-
-type Violation = {
-  file: string;
-  type: string;
-  match: string;
-};
+import {
+  collectPricingViolations,
+  type PricingAuditContext,
+  type PricingViolation,
+} from "../lib/commercial/pricing-audit-core";
 
 const ROOT = process.cwd();
 const CATALOG_PATH = "lib/commercial/catalog.ts";
@@ -15,25 +14,40 @@ const SKIP_DIRS = new Set([".git", ".next", ".netlify", "node_modules", "out", "
 const EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".md", ".mdx"]);
 
 const ACTIVE_PRODUCTS = Object.values(CATALOG).filter((product) => product.active);
-const PRODUCT_PRICE_DISPLAYS = new Set(
-  ACTIVE_PRODUCTS
-    .map((product) => product.displayPrice)
-    .filter((price) => price !== "Free" && price !== "Paid"),
+const PRODUCT_AMOUNTS = Array.from(
+  new Set(ACTIVE_PRODUCTS.map((p) => String(p.amount)).filter((a) => a !== "0" && a !== "undefined")),
 );
-const PRODUCT_AMOUNTS = new Set(
-  ACTIVE_PRODUCTS
-    .map((product) => String(product.amount))
-    .filter((amount) => amount !== "0"),
+
+// Controlled = not self-serve-checkout-eligible (manual/contracted/inactive/
+// retired/evidence-gated, or explicitly requiresCheckout !== true).
+const CONTROLLED_CODES = new Set(
+  Object.values(CATALOG)
+    .filter((p) => {
+      const status = p.commercialStatus;
+      const controlledStatus = ["manual_billing", "contracted", "inactive", "retired", "evidence_gated"].includes(status ?? "");
+      return controlledStatus || p.requiresCheckout !== true;
+    })
+    .map((p) => p.code),
 );
+
+const CONTEXT: PricingAuditContext = {
+  productAmounts: PRODUCT_AMOUNTS,
+  isResolvableProductCode: (id) => Boolean(resolveProductCode(id)),
+  retiredCodes: RETIRED_CODES,
+  controlledProductCodes: CONTROLLED_CODES,
+};
 
 function relative(file: string): string {
   return path.relative(ROOT, file).replace(/\\/g, "/");
 }
 
+// Narrow, exact skips only — the catalogue authority itself, the audit + its core,
+// this detector's own tests, and non-runtime content corpora. No broad app/pages/lib skip.
 function shouldSkipFile(file: string): boolean {
   const rel = relative(file);
   if (rel === CATALOG_PATH) return true;
   if (rel === "scripts/audit-pricing-authority.ts") return true;
+  if (rel === "lib/commercial/pricing-audit-core.ts") return true;
   if (rel.startsWith("content/evidence/")) return true;
   if (rel.startsWith("content/outbound/")) return true;
   if (rel.startsWith("content/shorts/")) return true;
@@ -53,76 +67,19 @@ function walk(dir: string, files: string[] = []): string[] {
 }
 
 function runtimeRoots(): string[] {
-  return ["app", "pages", "components", "lib"]
-    .map((dir) => path.join(ROOT, dir))
-    .filter(existsSync);
+  return ["app", "pages", "components", "lib"].map((dir) => path.join(ROOT, dir)).filter(existsSync);
 }
 
-function collect(file: string): Violation[] {
-  const rel = relative(file);
-  const text = readFileSync(file, "utf8");
-  const violations: Violation[] = [];
-  const skipped = shouldSkipFile(file);
-
-  if (!skipped) {
-    for (const price of PRODUCT_PRICE_DISPLAYS) {
-      if (text.includes(price) || text.includes(price.replace("£", "&pound;"))) {
-        violations.push({ file: rel, type: "hardcoded_product_price", match: price });
-      }
-    }
-
-    for (const amount of PRODUCT_AMOUNTS) {
-      const amountPattern = new RegExp(`(?:amount|unit_amount|priceGBP|unitAmountGbp)\\s*:\\s*${amount}(?![0-9])`);
-      if (amountPattern.test(text)) {
-        violations.push({ file: rel, type: "hardcoded_product_amount", match: amount });
-      }
-    }
-  }
-
-  if (!skipped && rel !== CATALOG_PATH) {
-    for (const retired of RETIRED_CODES) {
-      if (text.includes(retired)) {
-        violations.push({ file: rel, type: "retired_product_reference", match: retired });
-      }
-    }
-  }
-
-  const checkoutProductPatterns = [
-    /productCode=["']([^"']+)["']/g,
-    /productCode:\s*["']([^"']+)["']/g,
-    /priceCode:\s*["']([^"']+)["']/g,
-    /checkoutCode:\s*["']([^"']+)["']/g,
-  ];
-  if (!skipped) {
-    for (const pattern of checkoutProductPatterns) {
-      for (const match of text.matchAll(pattern)) {
-        const identifier = match[1];
-        if (!identifier || identifier.includes("${")) continue;
-        if (!resolveProductCode(identifier)) {
-          violations.push({ file: rel, type: "unknown_product_identifier", match: identifier });
-        }
-      }
-    }
-  }
-
-  if (!skipped && (/amount:\s*(95|395)\b/.test(text) || /return\s+.*\?\s*25000\s*:\s*9500/.test(text))) {
-    violations.push({ file: rel, type: "fallback_pricing_logic", match: "hardcoded fallback amount" });
-  }
-
-  return violations;
-}
-
-const violations: Violation[] = [];
+const violations: PricingViolation[] = [];
 
 if (existsSync(path.join(ROOT, "lib/commercial/stripe-price-catalog.ts"))) {
-  violations.push({
-    file: "lib/commercial/stripe-price-catalog.ts",
-    type: "multiple_pricing_authorities",
-    match: "secondary catalog exists",
-  });
+  violations.push({ file: "lib/commercial/stripe-price-catalog.ts", type: "multiple_pricing_authorities", match: "secondary catalog exists" });
 }
 
-violations.push(...runtimeRoots().flatMap((root) => walk(root)).flatMap(collect));
+for (const file of runtimeRoots().flatMap((root) => walk(root))) {
+  if (shouldSkipFile(file)) continue;
+  violations.push(...collectPricingViolations(relative(file), readFileSync(file, "utf8"), CONTEXT));
+}
 
 if (violations.length === 0) {
   console.log("Pricing authority audit passed.");
@@ -132,5 +89,5 @@ if (violations.length === 0) {
 for (const violation of violations) {
   console.error(`${violation.file}: ${violation.type}: ${violation.match}`);
 }
-
+console.error(`\n${violations.length} pricing-authority finding(s).`);
 process.exit(1);
