@@ -19,7 +19,10 @@
  * verdicts) + reports/product-release-readiness-matrix.json. No hand truth.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
 import path from "node:path";
+
+const HISTORICAL_COMMIT = "6945d54b1"; // last tracked readiness matrix with the legacy 43 taxonomy
 
 const ROOT = process.cwd();
 const estate = JSON.parse(readFileSync(path.join(ROOT, "reports/gtm/estate-market-restoration-final.json"), "utf8"));
@@ -79,9 +82,46 @@ for (const i of identities) byFinalState[i.finalState] = (byFinalState[i.finalSt
 
 const denominator = identities.filter((i) => i.counted).length;
 
+// ── 43→46 lineage, computed from the tracked legacy readiness matrix ──────────
+let lineage;
+try {
+  const oldKeys = Object.keys(JSON.parse(execSync(`git show ${HISTORICAL_COMMIT}:reports/product-release-readiness-matrix.json`).toString()));
+  const curKeys = identities.map((i) => i.code);
+  const added = curKeys.filter((k) => !oldKeys.includes(k));
+  const removed = oldKeys.filter((k) => !curKeys.includes(k));
+  const renamedCandidates = [
+    { from: "market_intelligence_q1", to: "gmi_q1_2026" },
+    { from: "market_intelligence_q2", to: "gmi_q2_2026" },
+    { from: "market_intelligence_q3", to: "gmi_q3_2026" },
+  ];
+  const renamed = renamedCandidates.filter((r) => removed.includes(r.from) && added.includes(r.to));
+  lineage = {
+    schemaVersion: "1.0.0",
+    historicalBaselineCount: oldKeys.length,
+    historicalBaselineCommit: HISTORICAL_COMMIT,
+    historicalIdentitySet: oldKeys,
+    currentIdentitySet: curKeys,
+    addedIdentities: added,
+    removedIdentities: removed,
+    renamedIdentities: renamed,
+    aliasRelationships: renamed.map((r) => ({ legacy: r.from, canonical: r.to, kind: "rename" })),
+    familyEditionRelationships: identities
+      .filter((i) => i.identityType === "EDITION_INSTANCE")
+      .map((i) => ({ edition: i.code, parentFamily: i.parentFamily })),
+    netDelta: curKeys.length - oldKeys.length,
+    countingRule:
+      "Count each CANONICAL_COMMERCIAL_PRODUCT once. Count the GMI PRODUCT_FAMILY (gmi_quarterly) AND each EDITION_INSTANCE (gmi_qN_YYYY) because governance defines them as separately-governed estate products (own lifecycle/data-lock/owner-authority/contract).",
+    reasonNetDeltaIsNotSimpleAddition:
+      "The historical 43 was a legacy/placeholder taxonomy. The current 46 is the reconciled real commercial estate. The net +3 is a reconciliation artifact (this many added, this many removed, incl. GMI edition renames market_intelligence_qN → gmi_qN_2026), NOT a simple addition of three GMI editions. The directive's illustrative '43 + gmi_q1/q2/q3 = 46' does NOT hold for this repository; the real churn is reported above.",
+  };
+} catch (e) {
+  lineage = { error: String(e) };
+}
+
 const out = {
   generatedAt: new Date().toISOString(),
   canonicalDenominator: denominator,
+  lineage,
   denominatorRationale:
     "The GMI product family (gmi_quarterly) and each edition (gmi_qN_YYYY) are counted separately because the governance model explicitly governs them as distinct estate products: editions carry their own lifecycle record, data-lock, prior-call review, owner release authority, and fulfilment contract; the family carries its own reusable fulfilment contract + release gate. Counting family + editions = 46. The historical 43 predates the family/edition split and is superseded. One denominator (46) is used by every estate validator and the final report.",
   supersedesHistoricalDenominator: 43,
