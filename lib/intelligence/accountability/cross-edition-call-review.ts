@@ -3,19 +3,18 @@
  *
  * §12 — Automated Cross-Edition Call Review.
  *
- * Q1 call → Q2 evidence → Q2 review → Q3 follow-up.
- * Prevents each edition from manually reinventing call lineage.
- * Input to: public DII, Decision Learning Log, cross-moat brief.
+ * Uses explicit edition lineage fields — not versionHistory.note as edition identity.
+ * Free-form notes remain commentary; they do not define lineage.
  */
-import { MARKET_CALL_LEDGER, type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
+import { MARKET_CALL_LEDGER, type MarketCallRecord } from "../market-intelligence-call-ledger";
+import { buildLineageFromCall, type CallLineageRecord, type LineageStatus } from "./edition-lineage";
 
 export interface CallLineage {
   originalCallId: string;
   originalStatement: string;
   firstEdition: string;
   currentEdition: string;
-  editionsTraversed: string[];
-  carryForwardStatus: "carried_forward" | "resolved" | "dropped";
+  lineageStatus: LineageStatus;
   currentEvidence: string;
   falsificationConditionTriggered: boolean;
   scoreState: number | null;
@@ -27,40 +26,33 @@ export interface CallLineage {
 
 export interface CrossEditionSummary {
   totalCalls: number;
+  originated: number;
   carriedForward: number;
-  resolved: number;
-  dropped: number;
-  falsificationTriggered: number;
-  byEdition: Array<{ edition: string; calls: number; carriedForward: number; resolved: number }>;
+  revised: number;
+  superseded: number;
+  closed: number;
+  falsified: number;
+  unresolved: number;
+  byEdition: Array<{ edition: string; calls: number }>;
 }
 
 export function buildCallLineage(call: MarketCallRecord): CallLineage {
-  const allVersions = call.versionHistory ?? [];
-  const editionsTraversed = [call.reportId];
-  for (const v of allVersions) { if (!editionsTraversed.includes(v.note)) editionsTraversed.push(v.note); }
-
+  const lineage = buildLineageFromCall(call);
   const falsificationConditionTriggered = call.outcomeStatus === "DISCONFIRMED" || call.outcomeStatus === "NOT_CONFIRMED";
-  const isResolved = call.outcomeStatus === "CONFIRMED_STRONGLY" || call.outcomeStatus === "DIRECTIONALLY_CONFIRMED" || call.outcomeStatus === "DISCONFIRMED";
-  const isDropped = call.outcomeStatus === undefined || call.outcomeStatus === null;
-
-  let carryForwardStatus: CallLineage["carryForwardStatus"] = "carried_forward";
-  if (isResolved) carryForwardStatus = "resolved";
-  if (isDropped) carryForwardStatus = "dropped";
-
   const scoreState = call.score ?? null;
+  const allVersions = call.versionHistory ?? [];
 
   let confidenceMovement: CallLineage["confidenceMovement"] = "stable";
-  if (allVersions.length > 0) confidenceMovement = "improved";
+  if (allVersions.length > 0 && !falsificationConditionTriggered) confidenceMovement = "improved";
   if (falsificationConditionTriggered) confidenceMovement = "declined";
-  if (scoreState === null && allVersions.length === 0) confidenceMovement = "insufficient_data";
+  if (scoreState === null && allVersions.length === 0 && !call.outcomeStatus) confidenceMovement = "insufficient_data";
 
   return {
     originalCallId: call.id,
     originalStatement: call.statement,
     firstEdition: call.reportId,
     currentEdition: call.reportId,
-    editionsTraversed,
-    carryForwardStatus,
+    lineageStatus: lineage.lineageStatus,
     currentEvidence: call.outcomeSummary ?? "Pending review",
     falsificationConditionTriggered,
     scoreState,
@@ -77,22 +69,21 @@ export function getCrossEditionReview(): CallLineage[] {
 
 export function getCrossEditionSummary(): CrossEditionSummary {
   const lineages = getCrossEditionReview();
-  const byEditionMap = new Map<string, { calls: number; carriedForward: number; resolved: number }>();
-  for (const l of lineages) {
-    for (const ed of l.editionsTraversed) {
-      const existing = byEditionMap.get(ed) || { calls: 0, carriedForward: 0, resolved: 0 };
-      existing.calls++;
-      if (l.carryForwardStatus === "carried_forward") existing.carriedForward++;
-      if (l.carryForwardStatus === "resolved") existing.resolved++;
-      byEditionMap.set(ed, existing);
-    }
-  }
   return {
     totalCalls: lineages.length,
-    carriedForward: lineages.filter(l => l.carryForwardStatus === "carried_forward").length,
-    resolved: lineages.filter(l => l.carryForwardStatus === "resolved").length,
-    dropped: lineages.filter(l => l.carryForwardStatus === "dropped").length,
-    falsificationTriggered: lineages.filter(l => l.falsificationConditionTriggered).length,
-    byEdition: Array.from(byEditionMap.entries()).map(([edition, data]) => ({ edition, ...data })),
+    originated: lineages.filter(l => l.lineageStatus === "ORIGINATED").length,
+    carriedForward: lineages.filter(l => l.lineageStatus === "CARRIED_FORWARD").length,
+    revised: lineages.filter(l => l.lineageStatus === "REVISED").length,
+    superseded: lineages.filter(l => l.lineageStatus === "SUPERSEDED").length,
+    closed: lineages.filter(l => l.lineageStatus === "CLOSED").length,
+    falsified: lineages.filter(l => l.lineageStatus === "FALSIFIED").length,
+    unresolved: lineages.filter(l => l.lineageStatus === "UNRESOLVED").length,
+    byEdition: Object.entries(groupBy(lineages, l => l.firstEdition)).map(([edition, calls]) => ({ edition, calls: calls.length })),
   };
+}
+
+function groupBy<T>(items: T[], fn: (item: T) => string): Record<string, T[]> {
+  const result: Record<string, T[]> = {};
+  for (const item of items) { const key = fn(item); if (!result[key]) result[key] = []; result[key].push(item); }
+  return result;
 }

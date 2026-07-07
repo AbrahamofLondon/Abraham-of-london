@@ -10,17 +10,14 @@ describe("Market Decision Integrity Index", () => {
   it("calculates a DII from canonical call ledger", () => {
     const dii = calculateDecisionIntegrityIndex();
     expect(dii).toBeDefined();
-    expect(dii.methodology.version).toBe("1.0.0");
+    expect(dii.methodologyVersion).toBe("1.0.0");
     expect(dii.generatedAt).toBeTruthy();
   });
 
-  it("returns valid=false when coverage is insufficient", () => {
+  it("returns null headline when coverage is insufficient", () => {
     const dii = calculateDecisionIntegrityIndex();
-    // If coverage is insufficient, headlineScore should be null
-    if (dii.coverage.bucket === "insufficient") {
-      expect(dii.valid).toBe(false);
+    if (dii.coverage.status === "INSUFFICIENT_COVERAGE" || dii.coverage.status === "PRELIMINARY") {
       expect(dii.headlineScore).toBeNull();
-      expect(dii.validityReason).toContain("Insufficient");
     }
   });
 
@@ -33,10 +30,11 @@ describe("Market Decision Integrity Index", () => {
     expect(measures).toEqual(["call_accuracy", "calibration_quality", "falsification_discipline", "revision_discipline"].sort());
   });
 
-  it("each component has a rationale", () => {
+  it("each component has a rationale and weightRationale", () => {
     const dii = calculateDecisionIntegrityIndex();
     for (const c of dii.componentScores) {
       expect(c.rationale).toBeTruthy();
+      expect(c.weightRationale).toBeTruthy();
     }
   });
 
@@ -62,12 +60,8 @@ describe("Market Decision Integrity Index", () => {
     }
   });
 
-  it("methodology has required fields", () => {
+  it("publicationStatus is set correctly", () => {
     const dii = calculateDecisionIntegrityIndex();
-    expect(dii.methodology.scoringFormula).toBeTruthy();
-    expect(dii.methodology.exclusions.length).toBeGreaterThan(0);
-    expect(dii.methodology.uncertainty).toBeTruthy();
-    expect(dii.methodology.minimumSampleRequirements).toBeTruthy();
-    expect(dii.methodology.changeHistory.length).toBeGreaterThan(0);
+    expect(["INSUFFICIENT_COVERAGE", "PRELIMINARY", "PUBLISHABLE", "METHODOLOGY_TRANSITION"]).toContain(dii.publicationStatus);
   });
 });

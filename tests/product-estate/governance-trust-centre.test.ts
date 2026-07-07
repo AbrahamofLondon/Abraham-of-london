@@ -4,7 +4,7 @@
  * §17/18 — Trust Centre and Governance Receipt tests.
  */
 import { describe, it, expect } from "vitest";
-import { getEstateGovernanceSummary, getProductGovernanceCard, getGovernanceReceipt, getAllProductGovernanceCards, getAllGovernanceReceipts } from "../../lib/governance/trust-centre/governance-trust-centre";
+import { getEstateGovernanceSummary, getProductGovernanceCard, getGovernanceReceipt, getAllProductGovernanceCards, getAllGovernanceReceipts, verifyGovernanceReceipt } from "../../lib/governance/trust-centre/governance-trust-centre";
 
 describe("Governance Trust Centre", () => {
   it("getEstateGovernanceSummary returns all required fields", () => {
@@ -25,8 +25,8 @@ describe("Governance Trust Centre", () => {
     expect(card).not.toBeNull();
     expect(card!.productCode).toBe("boardroom_brief");
     expect(card!.productName).toBeTruthy();
-    expect(card!.accessMode).toBeTruthy();
-    expect(card!.checkoutMode).toBeTruthy();
+    expect(card!.displayState).toBeTruthy();
+    expect(card!.checkoutGovernance).toBeTruthy();
   });
 
   it("getProductGovernanceCard returns null for unknown product", () => {
@@ -39,8 +39,8 @@ describe("Governance Trust Centre", () => {
     expect(receipt).not.toBeNull();
     expect(receipt!.productCode).toBe("boardroom_brief");
     expect(receipt!.commercialStatus).toBeTruthy();
-    expect(receipt!.accessMode).toBeTruthy();
     expect(receipt!.lastVerifiedTimestamp).toBeTruthy();
+    expect(receipt!.receiptHash).toBeTruthy();
   });
 
   it("getAllProductGovernanceCards returns cards for all catalog products", () => {
@@ -58,11 +58,20 @@ describe("Governance Trust Centre", () => {
     expect(receipts.length).toBe(getAllProductGovernanceCards().length);
   });
 
-  it("verified status is based on contract and assurance existence", () => {
+  it("Governance Receipt verification detects tampering", () => {
+    const receipt = getGovernanceReceipt("boardroom_brief");
+    expect(receipt).not.toBeNull();
+    // Original receipt verifies
+    expect(verifyGovernanceReceipt(receipt!)).toBe(true);
+    // Tampered receipt fails
+    const tampered = { ...receipt!, productName: "Tampered Name" };
+    expect(verifyGovernanceReceipt(tampered)).toBe(false);
+  });
+
+  it("displayState is one of the valid states", () => {
     const card = getProductGovernanceCard("boardroom_brief");
     expect(card).not.toBeNull();
-    // boardroom_brief is active and has a contract + assurance
-    expect(typeof card!.verified).toBe("boolean");
-    expect(card!.verificationReason).toBeTruthy();
+    const validStates = ["GOVERNANCE_VERIFIED", "CONTROLLED_BY_DESIGN", "EVIDENCE_PENDING", "RELEASE_GATED", "INACTIVE", "RETIRED", "INTERNAL_ONLY"];
+    expect(validStates).toContain(card!.displayState);
   });
 });
