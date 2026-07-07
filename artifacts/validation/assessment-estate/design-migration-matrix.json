@@ -1,0 +1,347 @@
+{
+  "generatedAt": "2026-07-07T22:46:36.501Z",
+  "surfaces": [
+    {
+      "route": "/diagnostics/fast",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/purpose-alignment",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/purpose-alignment",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/enterprise",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/enterprise-assessment",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/team-assessment",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/assessment/[token]",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/constitutional-diagnostic",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/directional-integrity",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/diagnostics/executive-reporting",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/signal",
+      "oldSystem": "Claude flagship journey system",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/decision-exposure-instrument/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/mandate-clarity-framework/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/intervention-path-selector/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/escalation-readiness-scorecard/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/structural-failure-diagnostic-canvas/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/execution-risk-index/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/team-alignment-gap-map/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/governance-drift-detector/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/strategic-priority-stack-builder/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/board-brief-builder/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/board-brief-template/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-instruments/operator-decision-pack/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/playbooks",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/playbooks/execution-integrity-protocol/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/playbooks/alignment-audit-playbook/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/playbooks/drift-detection-framework/run",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/foundry/decision-test",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/foundry/release-risk-test",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/foundry/market-signal-test",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/engagements/operator-pilot",
+      "oldSystem": "Claude flagship journey system",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/strategy-room",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/corridor",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-centre",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/decision-centre/case/[caseId]",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    }
+  ]
+}

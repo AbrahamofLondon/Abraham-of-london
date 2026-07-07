@@ -267,7 +267,8 @@
     "outbound:content:strict": "node scripts/validate-outbound-content.mjs --strict",
     "check:product-system": "node scripts/check-product-system-integrity.mjs",
     "test:product-system-negative": "node scripts/test-product-system-integrity-negative-cases.mjs",
-    "verify:predeploy": "pnpm exec tsc --noEmit --pretty false --incremental false && node scripts/check-product-system-integrity.mjs"
+    "verify:predeploy": "pnpm exec tsc --noEmit --pretty false --incremental false && node scripts/check-product-system-integrity.mjs",
+    "audit:assessment-estate": "node scripts/audit-assessment-estate.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",

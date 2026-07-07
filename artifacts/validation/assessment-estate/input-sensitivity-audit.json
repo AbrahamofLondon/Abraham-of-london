@@ -1,0 +1,341 @@
+{
+  "generatedAt": "2026-07-07T22:46:36.501Z",
+  "counts": {
+    "INPUT_SENSITIVE_PROVEN": 37
+  },
+  "surfaces": [
+    {
+      "route": "/diagnostics/fast",
+      "productCode": "fast_diagnostic",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/purpose-alignment",
+      "productCode": "purpose_alignment",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/purpose-alignment",
+      "productCode": "purpose_alignment",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/checkout/personal-decision-audit",
+      "productCode": "personal_decision_audit",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/enterprise",
+      "productCode": "enterprise_assessment",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/enterprise-assessment",
+      "productCode": "enterprise_assessment",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "productCode": "enterprise_decision_scan",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/team-assessment",
+      "productCode": "team_assessment",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/assessment/[token]",
+      "productCode": "team_assessment",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/constitutional-diagnostic",
+      "productCode": "constitutional_diagnostic",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/directional-integrity",
+      "productCode": "directional_integrity",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/diagnostics/executive-reporting",
+      "productCode": "executive_reporting",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments",
+      "productCode": "decision_instruments_directory",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/signal",
+      "productCode": "decision_signal",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "Claude-owned journey tests and committed engine contract",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/decision-exposure-instrument/run",
+      "productCode": "decision_exposure_instrument",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/mandate-clarity-framework/run",
+      "productCode": "mandate_clarity_framework",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/intervention-path-selector/run",
+      "productCode": "intervention_path_selector",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/escalation-readiness-scorecard/run",
+      "productCode": "escalation_readiness_scorecard",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/structural-failure-diagnostic-canvas/run",
+      "productCode": "structural_failure_diagnostic_canvas",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/execution-risk-index/run",
+      "productCode": "execution_risk_index",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/team-alignment-gap-map/run",
+      "productCode": "team_alignment_gap_map",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/governance-drift-detector/run",
+      "productCode": "governance_drift_detector",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/strategic-priority-stack-builder/run",
+      "productCode": "strategic_priority_stack_builder",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/board-brief-builder/run",
+      "productCode": "board_brief_builder",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/board-brief-template/run",
+      "productCode": "board_brief_template",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-instruments/operator-decision-pack/run",
+      "productCode": "operator_decision_pack",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/playbooks",
+      "productCode": "playbooks_directory",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/playbooks/execution-integrity-protocol/run",
+      "productCode": "execution_integrity_protocol",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/playbooks/alignment-audit-playbook/run",
+      "productCode": "alignment_audit_playbook",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/playbooks/drift-detection-framework/run",
+      "productCode": "drift_detection_framework",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/foundry/decision-test",
+      "productCode": "foundry_decision_test",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/foundry/release-risk-test",
+      "productCode": "foundry_release_risk_test",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/foundry/market-signal-test",
+      "productCode": "foundry_market_signal_test",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/engagements/operator-pilot",
+      "productCode": "operator_pilot",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "Claude-owned journey tests and committed engine contract",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/strategy-room",
+      "productCode": "strategy_room",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "Claude-owned journey tests and committed engine contract",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/corridor",
+      "productCode": "customer_corridor",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "Claude-owned journey tests and committed engine contract",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    },
+    {
+      "route": "/decision-centre/case/[caseId]",
+      "productCode": "decision_centre_case",
+      "classification": "INPUT_SENSITIVE_PROVEN",
+      "evidence": "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+      "materialInputAffectsOutput": true,
+      "insufficientEvidenceQualified": true,
+      "contradictoryInputSurfaced": true
+    }
+  ]
+}
