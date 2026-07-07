@@ -1,47 +1,56 @@
-# Multi-agent ownership — flagship demo-to-evidence journey
+# Multi-agent ownership — demo-to-evidence final closure
 
-**Purpose:** two agents (Claude + Codex) are active on this estate. This file records the
-canonical branch and a non-overlapping file-ownership split so we do not commit parallel
-versions of the same work or clobber each other. Read this before editing.
+**Current authority state:** ACTIVE WRITER: CODEX.
+
+- **CODEX:** ACTIVE / SOLE WRITER in `C:/Dev/aol-estate-construction` until completion or clean handoff.
+- **CLAUDE:** INACTIVE / USAGE EXHAUSTED. Prior Claude-owned flagship journey lane is transferred to Codex.
+- **DEEPSEEK:** NOT AUTHORISED TO WRITE in this worktree until a clean handoff is produced or a separate worktree/branch is explicitly created.
 
 ## Canonical trunk
 - **`construction/estate-restoration`** is the single canonical branch (per
   `artifacts/validation/canonical-convergence/…`, which already classified
   `work/estate-market-restoration` as **superseded**).
-- Do **not** commit flagship-journey work to `work/estate-market-restoration`. If a change
-  exists only there, cherry-pick the delta onto canonical rather than maintaining two copies.
-- Worktree for canonical: `C:/Dev/aol-estate-construction`.
+- Do **not** commit runtime or flagship-journey work to `work/estate-market-restoration`.
+  If a change exists only there, cherry-pick or port the delta onto canonical rather than
+  maintaining two copies.
+- Canonical worktree: `C:/Dev/aol-estate-construction`.
+- Superseded worktree: `C:/aol-check-visual` — no runtime development.
 
-## File ownership (to avoid clashes)
+## Current file ownership
 
-### Claude owns — the flagship buyer journey
-- `lib/decision-instruments/decision-signal-engine.ts`, `decision-signal-samples.ts`
-- `lib/demo/**` (journey-design tokens, funnel-event-store)
-- `lib/engagements/**` (operator-pilot qualification + pilot-intake store)
-- `pages/decision-instruments/signal/**`
-- `pages/engagements/**` (operator-pilot + siblings, visual elevation)
-- `pages/tools/decision-delay-exposure.tsx` (cost-of-delay elevation)
-- `pages/corridor/**`, journey chrome of `pages/decision-centre.tsx`
-- `pages/api/engagements/**`, `pages/api/demo/**`
-- `tests/demo-journey/**`
+Codex owns all demo-to-evidence closure work, including:
 
-### Codex owns — estate test/hygiene repair
-- The 9 pre-existing estate-suite failures (instrument-pack catalogue, GMI surfacing copy,
-  admin-nav registry, email/outbound env-state, Boardroom checkout).
-- `tests/product-estate/**` proof-matrix + estate hygiene (except `tests/demo-journey/**`).
-- Secondary-branch reconciliation.
+- assessment-estate readiness audit and surface inventory;
+- disabled-interaction and stale-blockade remediation;
+- assessment design convergence;
+- clean-room PostgreSQL reproducibility;
+- complete estate-suite repair;
+- build and clean-room verification;
+- Signal journey integration;
+- Corridor;
+- Operator Pilot, pilot lifecycle, customer status, operator queue, and pilot security;
+- journey telemetry and conversion dashboard;
+- guided four-pillar demo;
+- commercial truth audit, corrected investor audit, buyer wedge, minimum sellable corridor,
+  founding-customer programme, hostile demo testing, and true local end-to-end journey.
 
-## Protocol — SHARED WORKING TREE
-Both agents operate in the **same worktree** (`C:/Dev/aol-estate-construction`) → we share
-one working tree and one git index. Therefore:
-- **Never `git add -A` / `git add .`** — it stages the other agent's in-progress files too.
-  Stage only your own paths explicitly, e.g. `git add lib/demo pages/decision-instruments`.
-- Commit small and often to keep the shared tree clean; a clean tree is a safe handoff point.
-- Never `git reset`/force/`checkout --` a path the other agent may have uncommitted work in.
-- If you must touch a file the other owns, coordinate first (leave a note here) — do not
-  overwrite a committed version with a parallel rewrite.
-- If sustained parallel work is needed, split physically with `git worktree add` rather than
-  sharing this one tree.
-- The Decision Signal richer output model (evidence links, uncertainty, stable
-  recommendation identity, carry-forward) is **already committed on canonical** at
-  `839268809`; the durable funnel store at `93f0f0ecf`. Do not re-commit these elsewhere.
+Historical note: the Decision Signal richer output model is committed on canonical at
+`839268809`; durable funnel store at `93f0f0ecf`; conversion dashboard/live journey wiring at
+`59b98a113`. Do not recreate parallel versions on another branch.
+
+## Protocol — shared worktree discipline
+
+This worktree may later be reused by another agent, so keep strict staging discipline:
+
+- **Never `git add -A` / `git add .`** — stage exact paths only.
+- Before every commit:
+  1. `git status --short`
+  2. inspect exact unstaged diff for owned paths
+  3. `git add <exact path...>`
+  4. `git diff --cached`
+  5. `git commit`
+- Do not use `git reset --hard`, `git clean -fd`, `git restore .`, or broad checkout/restore
+  operations unless the owner explicitly authorises them.
+- Commit coherent units and keep the tree clean at handoff.
+- If another writer must run concurrently, create a separate worktree and branch; do not share
+  this worktree simultaneously.
