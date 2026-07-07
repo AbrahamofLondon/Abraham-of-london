@@ -205,6 +205,15 @@ const OperatorPilotPage: NextPage = () => {
             </div>
           </section>
 
+          {/* ── STRUCTURED INTAKE (§6/§7) ── */}
+          <section id="pilot-intake" style={{ border: `1px solid ${GOLD}24`, background: `${GOLD}03`, padding: "1.5rem" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Structured pilot intake</p>
+            <p className="mt-2 text-sm leading-7 text-white/55">
+              This is a qualification, not a checkout. Nothing is accepted automatically — a strong submission reaches a human reviewer, who decides suitability and scope. You will receive a reference to check your status.
+            </p>
+            <PilotIntakeForm />
+          </section>
+
           {/* ── VALUE RECEIPT ── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
             <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
@@ -225,5 +234,83 @@ const OperatorPilotPage: NextPage = () => {
     </Layout>
   );
 };
+
+// ── §6/§7 structured intake form (client) ────────────────────────────────────
+type IntakeState = {
+  organisation: string; role: string; authorityToEngage: boolean; decisionDomain: string;
+  materiality: "LOW" | "MODERATE" | "HIGH" | "CRITICAL"; decisionStage: "EXPLORING" | "FRAMING" | "DECIDING" | "COMMITTED";
+  affectedStakeholders: string; existingEvidence: string; knownContradictions: string;
+  governanceSensitivity: "NONE" | "SOME" | "HIGH" | "REGULATED"; confidentialityRequired: boolean;
+  desiredOutcome: string; willingToParticipateInCheckpoints: boolean; contactEmail: string;
+};
+
+const INTAKE_DEFAULT: IntakeState = {
+  organisation: "", role: "", authorityToEngage: false, decisionDomain: "", materiality: "HIGH",
+  decisionStage: "FRAMING", affectedStakeholders: "", existingEvidence: "", knownContradictions: "",
+  governanceSensitivity: "SOME", confidentialityRequired: false, desiredOutcome: "",
+  willingToParticipateInCheckpoints: false, contactEmail: "",
+};
+
+function PilotIntakeForm() {
+  const [f, setF] = React.useState<IntakeState>(INTAKE_DEFAULT);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [outcome, setOutcome] = React.useState<{ reference?: string; qualificationStatus: string; reviewStatus?: string; nextStep: string; reasons?: string[] } | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const fieldStyle: React.CSSProperties = { width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.8)", padding: "8px 10px", fontSize: "0.85rem", marginTop: 4 };
+  const lbl: React.CSSProperties = { ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" };
+
+  async function submit() {
+    setSubmitting(true); setError(null);
+    try {
+      const res = await fetch("/api/engagements/operator-pilot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...f, decisionDeadline: null }) });
+      const data = await res.json();
+      if (res.status === 422) { setError("Some required fields are missing — please complete them: " + (data?.qualification?.missingFields ?? []).join(", ")); return; }
+      if (!res.ok) { setError(data?.error ?? "Submission failed."); return; }
+      setOutcome(data);
+    } catch { setError("Network error — please try again."); }
+    finally { setSubmitting(false); }
+  }
+
+  if (outcome) {
+    return (
+      <div style={{ marginTop: "1rem", border: `1px solid ${EMERALD}30`, background: `${EMERALD}05`, padding: "1rem" }}>
+        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${EMERALD}` }}>Submitted · {outcome.qualificationStatus}</p>
+        {outcome.reference && <p className="mt-2 text-sm text-white/70">Your reference: <strong style={{ color: GOLD }}>{outcome.reference}</strong> — keep this to check your status.</p>}
+        <p className="mt-2 text-sm leading-7 text-white/60">{outcome.nextStep}</p>
+        {outcome.reasons && outcome.reasons.length > 0 && (
+          <ul className="mt-2 text-xs text-white/45" style={{ listStyle: "disc", paddingLeft: 18 }}>{outcome.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div><label style={lbl}>Organisation</label><input style={fieldStyle} value={f.organisation} onChange={(e) => setF({ ...f, organisation: e.target.value })} /></div>
+      <div><label style={lbl}>Your role</label><input style={fieldStyle} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} /></div>
+      <div><label style={lbl}>Decision domain</label><input style={fieldStyle} value={f.decisionDomain} onChange={(e) => setF({ ...f, decisionDomain: e.target.value })} /></div>
+      <div><label style={lbl}>Contact email</label><input style={fieldStyle} value={f.contactEmail} onChange={(e) => setF({ ...f, contactEmail: e.target.value })} /></div>
+      <div><label style={lbl}>Materiality</label>
+        <select style={fieldStyle} value={f.materiality} onChange={(e) => setF({ ...f, materiality: e.target.value as IntakeState["materiality"] })}>{["LOW","MODERATE","HIGH","CRITICAL"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div><label style={lbl}>Decision stage</label>
+        <select style={fieldStyle} value={f.decisionStage} onChange={(e) => setF({ ...f, decisionStage: e.target.value as IntakeState["decisionStage"] })}>{["EXPLORING","FRAMING","DECIDING","COMMITTED"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div><label style={lbl}>Governance sensitivity</label>
+        <select style={fieldStyle} value={f.governanceSensitivity} onChange={(e) => setF({ ...f, governanceSensitivity: e.target.value as IntakeState["governanceSensitivity"] })}>{["NONE","SOME","HIGH","REGULATED"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div className="sm:col-span-2"><label style={lbl}>Affected stakeholders</label><input style={fieldStyle} value={f.affectedStakeholders} onChange={(e) => setF({ ...f, affectedStakeholders: e.target.value })} /></div>
+      <div className="sm:col-span-2"><label style={lbl}>Existing evidence</label><textarea style={fieldStyle} rows={2} value={f.existingEvidence} onChange={(e) => setF({ ...f, existingEvidence: e.target.value })} /></div>
+      <div className="sm:col-span-2"><label style={lbl}>Known contradictions / competing obligations</label><textarea style={fieldStyle} rows={2} value={f.knownContradictions} onChange={(e) => setF({ ...f, knownContradictions: e.target.value })} /></div>
+      <div className="sm:col-span-2"><label style={lbl}>Desired outcome</label><textarea style={fieldStyle} rows={2} value={f.desiredOutcome} onChange={(e) => setF({ ...f, desiredOutcome: e.target.value })} /></div>
+      <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.authorityToEngage} onChange={(e) => setF({ ...f, authorityToEngage: e.target.checked })} /> I have authority to engage on this decision.</label>
+      <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.willingToParticipateInCheckpoints} onChange={(e) => setF({ ...f, willingToParticipateInCheckpoints: e.target.checked })} /> I am willing to participate in checkpoints.</label>
+      <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.confidentialityRequired} onChange={(e) => setF({ ...f, confidentialityRequired: e.target.checked })} /> This decision requires confidentiality.</label>
+      {error && <p className="sm:col-span-2" style={{ ...mono, fontSize: "9px", color: "#FCA5A5", lineHeight: 1.6 }}>{error}</p>}
+      <div className="sm:col-span-2">
+        <button onClick={submit} disabled={submitting} style={{ padding: "14px 24px", border: `1px solid ${GOLD}50`, background: `${GOLD}18`, color: GOLD, ...mono, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: submitting ? "wait" : "pointer" }}>
+          {submitting ? "Submitting…" : "Submit for governed qualification"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default OperatorPilotPage;
