@@ -161,7 +161,7 @@ function mapOne(
         ? "missing"
         : "not_required";
 
-  const productCode = readString(record, "productCode") ?? "BOARDROOM_BRIEF";
+  const productCode = readString(record, "productCode") ?? "boardroom_brief";
   const statusLabel = DELIVERY_STATUS_LABELS[delivery];
 
   const artifactIds = adminPreviewUrl ? [adminPreviewUrl] : [];

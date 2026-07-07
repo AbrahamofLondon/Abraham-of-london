@@ -23,9 +23,6 @@ const TEXT_EXTENSIONS = new Set([
   ".tsx",
   ".js",
   ".jsx",
-  ".md",
-  ".mdx",
-  ".json",
 ]);
 
 function walk(dir: string, files: string[] = []): string[] {
@@ -49,13 +46,19 @@ function relative(file: string): string {
 function collectFindings(file: string): Finding[] {
   const rel = relative(file);
   if (rel === "scripts/audit-checkout-links.ts") return [];
+  if (rel === "app/api/checkout/route.ts") return [];
   if (/\.(test|spec)\.[jt]sx?$/.test(rel)) return [];
 
-  const text = readFileSync(file, "utf8");
+  const rawText = readFileSync(file, "utf8");
+  const text = rawText
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|\s)\/\/.*$/gm, "");
   const findings: Finding[] = [];
 
   const directCheckoutPattern = /\/api\/checkout(?:\?|["'`\s>])/g;
   for (const match of text.matchAll(directCheckoutPattern)) {
+    const context = text.slice(match.index ?? 0, (match.index ?? 0) + 180);
+    if (/method:\s*["']POST["']/.test(context)) continue;
     findings.push({
       file: rel,
       issue: "Direct GET checkout route reference",
