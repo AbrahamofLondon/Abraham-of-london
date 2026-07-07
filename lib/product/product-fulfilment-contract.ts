@@ -1060,6 +1060,32 @@ export const EXECUTIVE_REPORTING_PRIORITY_CONTRACT = contract({
  * Add a new entry here before enabling checkout for any new product.
  * The build gate (scripts/check-product-fulfilment-readiness.mjs) reads this list.
  */
+export const REPORTING_MONTHLY_CONTRACT = contract({
+  productCode: "reporting_monthly",
+  displayName: "Reporting — Monthly",
+  entitlementSlug: "reporting-monthly",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/reporting",
+  successRoute: "/reporting",
+  customerAccessRoute: "/reporting",
+  adminRoute: "/admin/reporting/monthly",
+  fulfilmentType: "retainer_cycle",
+  artifactModel: null,
+  deliveryModel: "analyst_review_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes:
+    "Recurring monthly reporting. Manual billing — no self-serve checkout. Fulfilment is a governed recurring cycle (lib/fulfilment/reporting/monthly-reporting-service.ts) plugged into the PR F execution authority via createMonthlyReportingHandler. Cadence: monthly; delivery gated on human review + output validation; durable DeliveryProof per cycle.",
+});
+
 export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   // Human-reviewed
   BOARDROOM_BRIEF_CONTRACT,
@@ -1087,6 +1113,7 @@ export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
 
   // Reporting + execution
   EXECUTIVE_REPORTING_CONTRACT,
+  REPORTING_MONTHLY_CONTRACT,
   STRATEGY_ROOM_CONTRACT,
   STRATEGY_ROOM_EXTENDED_CONTRACT,
 
