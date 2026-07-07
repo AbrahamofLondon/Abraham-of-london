@@ -2,48 +2,47 @@
  * lib/intelligence/accountability/market-decision-integrity-index.ts
  *
  * §9 — Public Market Decision Integrity Index (DII).
- * MARKET accountability — NOT Customer Decision Integrity Trend.
+ * MARKET accountability (organisation's published record of its own market judgement).
+ * NOT the Customer Decision Integrity Trend (§15) — those are in compounding-intelligence.ts.
  *
- * Derives from canonical call-ledger evidence and versioned methodology authority.
- * Coverage-aware: no headline score from insufficient evidence.
+ * Derived from canonical call-ledger evidence. NOT a magic number.
+ * Every component score is traceable to specific calls, outcomes, and methodology.
  */
-import { type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
-import { DII_METHODOLOGY, getOutcomeTreatment, getCoverageStatus, getComponentWeight } from "./dii-methodology-authority";
-import { resolveMarketAccountabilityEvidence, type EvidenceMode, type ResolveEvidenceOptions } from "./market-accountability-evidence";
+import { MARKET_CALL_LEDGER, type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
 
 export type DiicomponentMeasure = "call_accuracy" | "falsification_discipline" | "calibration_quality" | "revision_discipline";
-export type CoverageStatus = "INSUFFICIENT_COVERAGE" | "PRELIMINARY" | "PUBLISHABLE";
-/** PREVIEW = mechanics shown from non-authoritative (seed) evidence; never a public score. */
-export type PublicationStatus = "PREVIEW" | "INSUFFICIENT_COVERAGE" | "PRELIMINARY" | "PUBLISHABLE" | "METHODOLOGY_TRANSITION";
+export type DiiCoverageBucket = "sufficient" | "moderate" | "insufficient";
 
-export interface DiiComponentScore { measure: DiicomponentMeasure; score: number; weight: number; weightRationale: string; rationale: string; }
-export interface DiiCoverage { status: CoverageStatus; totalCalls: number; scoredCalls: number; pendingCalls: number; minRequired: number; }
-export interface EditionTrend { editionId: string; editionLabel: string; diiScore: number | null; publicationStatus: PublicationStatus; componentScores: DiiComponentScore[]; coverage: DiiCoverage; callCount: number; }
-export interface DecisionIntegrityIndex { headlineScore: number | null; publicationStatus: PublicationStatus; evidenceMode: EvidenceMode; evidenceModeReason: string; componentScores: DiiComponentScore[]; coverage: DiiCoverage; methodologyVersion: string; editionTrend: EditionTrend[]; generatedAt: string; }
+export interface DiiMethodology { version: string; scoringFormula: string; exclusions: string[]; uncertainty: string; minimumSampleRequirements: string; changeHistory: Array<{ version: string; date: string; change: string }>; }
+export interface DiiComponentScore { measure: DiicomponentMeasure; score: number; weight: number; rationale: string; }
+export interface DiiCoverage { bucket: DiiCoverageBucket; totalCalls: number; scoredCalls: number; pendingCalls: number; minRequired: number; }
+export interface EditionTrend { editionId: string; editionLabel: string; diiScore: number | null; componentScores: DiiComponentScore[]; coverage: DiiCoverage; callCount: number; }
+export interface DecisionIntegrityIndex { headlineScore: number | null; componentScores: DiiComponentScore[]; coverage: DiiCoverage; methodology: DiiMethodology; editionTrend: EditionTrend[]; generatedAt: string; valid: boolean; validityReason: string; }
 
+const DII_METHODOLOGY: DiiMethodology = {
+  version: "1.0.0",
+  scoringFormula: "weighted_sum(component_scores) where each component is 0-100 and weights sum to 1.0. NULL if coverage insufficient.",
+  exclusions: ["Calls with PENDING_REVIEW excluded from scoring", "TOO_EARLY_TO_ASSESS excluded from accuracy scoring but count toward coverage", "Editions with fewer than minimum required scored calls produce NULL headline"],
+  uncertainty: "Scores derived from manually reviewed calls. Review lag may affect timeliness. Small sample sizes increase uncertainty.",
+  minimumSampleRequirements: "Minimum 5 scored calls per edition for headline DII. Minimum 3 scored calls per component.",
+  changeHistory: [{ version: "1.0.0", date: "2026-07-07", change: "Initial DII methodology" }],
+};
+
+const OUTCOME_SCORES: Record<MarketCallOutcomeStatus, number | null> = { CONFIRMED_STRONGLY: 100, DIRECTIONALLY_CONFIRMED: 75, PARTIALLY_CONFIRMED: 50, WEAKLY_SUPPORTED: 25, NOT_CONFIRMED: 0, DISCONFIRMED: 0, TOO_EARLY_TO_ASSESS: null, PENDING_REVIEW: null };
 const SCOREABLE: MarketCallOutcomeStatus[] = ["CONFIRMED_STRONGLY","DIRECTIONALLY_CONFIRMED","PARTIALLY_CONFIRMED","WEAKLY_SUPPORTED","NOT_CONFIRMED","DISCONFIRMED"];
 const RESOLVED: MarketCallOutcomeStatus[] = [...SCOREABLE, "TOO_EARLY_TO_ASSESS"];
 
-function getAccuracyScore(status: MarketCallOutcomeStatus): number | null {
-  const treatment = getOutcomeTreatment(status);
-  if (!treatment) return null;
-  if (treatment.accuracyTreatment === "exclude_from_scoring" || treatment.accuracyTreatment === "exclude_from_accuracy") return null;
-  return treatment.accuracyScore;
-}
-
 function calculateCallAccuracy(calls: MarketCallRecord[]): { score: number | null; rationale: string; scoredCount: number } {
   const scoreable = calls.filter(c => c.outcomeStatus && SCOREABLE.includes(c.outcomeStatus));
-  const minSample = DII_METHODOLOGY.components.find(c => c.measure === "call_accuracy")?.minSample ?? 3;
-  if (scoreable.length < minSample) return { score: null, rationale: `Insufficient scored calls: ${scoreable.length} < ${minSample}`, scoredCount: 0 };
-  const scores = scoreable.map(c => getAccuracyScore(c.outcomeStatus!) ?? 0);
+  if (scoreable.length < 3) return { score: null, rationale: `Insufficient scored calls: ${scoreable.length} < 3`, scoredCount: 0 };
+  const scores = scoreable.map(c => OUTCOME_SCORES[c.outcomeStatus!] ?? 0);
   const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
   return { score: Math.round(avg), rationale: `Mean outcome score across ${scoreable.length} resolved calls. Range: ${Math.min(...scores)}-${Math.max(...scores)}.`, scoredCount: scoreable.length };
 }
 
 function calculateFalsificationDiscipline(calls: MarketCallRecord[]): { score: number | null; rationale: string } {
   const resolved = calls.filter(c => c.outcomeStatus && RESOLVED.includes(c.outcomeStatus));
-  const minSample = DII_METHODOLOGY.components.find(c => c.measure === "falsification_discipline")?.minSample ?? 3;
-  if (resolved.length < minSample) return { score: null, rationale: `Insufficient resolved calls: ${resolved.length} < ${minSample}` };
+  if (resolved.length < 3) return { score: null, rationale: `Insufficient resolved calls: ${resolved.length} < 3` };
   const carryForwardRate = resolved.filter(c => c.carryForwardJustification).length / resolved.length;
   const learningRate = resolved.filter(c => c.learning).length / resolved.length;
   const versionRate = resolved.filter(c => (c.versionHistory?.length ?? 0) > 0).length / resolved.length;
@@ -52,9 +51,8 @@ function calculateFalsificationDiscipline(calls: MarketCallRecord[]): { score: n
 
 function calculateCalibrationQuality(calls: MarketCallRecord[]): { score: number | null; rationale: string } {
   const scoreable = calls.filter(c => c.outcomeStatus && SCOREABLE.includes(c.outcomeStatus));
-  const minSample = DII_METHODOLOGY.components.find(c => c.measure === "calibration_quality")?.minSample ?? 3;
-  if (scoreable.length < minSample) return { score: null, rationale: `Insufficient scored calls: ${scoreable.length} < ${minSample}` };
-  const byConfidence = (conf: string) => { const f = scoreable.filter(c => c.originalConfidence === conf); return f.length ? f.reduce((a, c) => a + (getAccuracyScore(c.outcomeStatus!) ?? 0), 0) / f.length : null; };
+  if (scoreable.length < 3) return { score: null, rationale: `Insufficient scored calls: ${scoreable.length} < 3` };
+  const byConfidence = (conf: string) => { const f = scoreable.filter(c => c.originalConfidence === conf); return f.length ? f.reduce((a, c) => a + (OUTCOME_SCORES[c.outcomeStatus!] ?? 0), 0) / f.length : null; };
   const highAvg = byConfidence("HIGH"), medAvg = byConfidence("MEDIUM"), lowAvg = byConfidence("LOW");
   let penalty = 0;
   if (highAvg !== null && medAvg !== null && highAvg < medAvg) penalty += 15;
@@ -65,8 +63,7 @@ function calculateCalibrationQuality(calls: MarketCallRecord[]): { score: number
 }
 
 function calculateRevisionDiscipline(calls: MarketCallRecord[]): { score: number | null; rationale: string } {
-  const minSample = DII_METHODOLOGY.components.find(c => c.measure === "revision_discipline")?.minSample ?? 3;
-  if (calls.length < minSample) return { score: null, rationale: `Insufficient calls: ${calls.length} < ${minSample}` };
+  if (calls.length < 3) return { score: null, rationale: `Insufficient calls: ${calls.length} < 3` };
   const withHistory = calls.filter(c => (c.versionHistory?.length ?? 0) > 0);
   const revisionRate = withHistory.length / calls.length;
   const avgRevisions = withHistory.length > 0 ? withHistory.reduce((a, c) => a + (c.versionHistory?.length ?? 0), 0) / withHistory.length : 0;
@@ -75,54 +72,45 @@ function calculateRevisionDiscipline(calls: MarketCallRecord[]): { score: number
 
 function calculateCoverage(calls: MarketCallRecord[]): DiiCoverage {
   const totalCalls = calls.length, scoredCalls = calls.filter(c => c.outcomeStatus && SCOREABLE.includes(c.outcomeStatus)).length, pendingCalls = calls.filter(c => c.outcomeStatus === "PENDING_REVIEW").length;
-  return { status: getCoverageStatus(scoredCalls), totalCalls, scoredCalls, pendingCalls, minRequired: DII_METHODOLOGY.coverage.minScoredForHeadline };
+  let bucket: DiiCoverageBucket = "insufficient";
+  if (scoredCalls >= 5) bucket = "sufficient"; else if (scoredCalls >= 3) bucket = "moderate";
+  return { bucket, totalCalls, scoredCalls, pendingCalls, minRequired: 5 };
 }
 
-function buildComponentScores(calls: MarketCallRecord[]): DiiComponentScore[] {
-  const accuracy = calculateCallAccuracy(calls), falsification = calculateFalsificationDiscipline(calls), calibration = calculateCalibrationQuality(calls), revision = calculateRevisionDiscipline(calls);
-  return [
-    { measure: "call_accuracy", score: accuracy.score ?? 0, weight: getComponentWeight("call_accuracy") ?? 0.35, weightRationale: DII_METHODOLOGY.components.find(c => c.measure === "call_accuracy")?.weightRationale ?? "", rationale: accuracy.rationale },
-    { measure: "falsification_discipline", score: falsification.score ?? 0, weight: getComponentWeight("falsification_discipline") ?? 0.25, weightRationale: DII_METHODOLOGY.components.find(c => c.measure === "falsification_discipline")?.weightRationale ?? "", rationale: falsification.rationale },
-    { measure: "calibration_quality", score: calibration.score ?? 0, weight: getComponentWeight("calibration_quality") ?? 0.25, weightRationale: DII_METHODOLOGY.components.find(c => c.measure === "calibration_quality")?.weightRationale ?? "", rationale: calibration.rationale },
-    { measure: "revision_discipline", score: revision.score ?? 0, weight: getComponentWeight("revision_discipline") ?? 0.15, weightRationale: DII_METHODOLOGY.components.find(c => c.measure === "revision_discipline")?.weightRationale ?? "", rationale: revision.rationale },
-  ];
-}
-
-function buildEditionTrend(calls: MarketCallRecord[], editionLabel: string, publishable: boolean): EditionTrend {
+function buildEditionTrend(calls: MarketCallRecord[], editionLabel: string): EditionTrend {
   const coverage = calculateCoverage(calls);
-  const components = buildComponentScores(calls);
+  const accuracy = calculateCallAccuracy(calls), falsification = calculateFalsificationDiscipline(calls), calibration = calculateCalibrationQuality(calls), revision = calculateRevisionDiscipline(calls);
+  const components: DiiComponentScore[] = [
+    { measure: "call_accuracy", score: accuracy.score ?? 0, weight: 0.35, rationale: accuracy.rationale },
+    { measure: "falsification_discipline", score: falsification.score ?? 0, weight: 0.25, rationale: falsification.rationale },
+    { measure: "calibration_quality", score: calibration.score ?? 0, weight: 0.25, rationale: calibration.rationale },
+    { measure: "revision_discipline", score: revision.score ?? 0, weight: 0.15, rationale: revision.rationale },
+  ];
   const allScored = components.every(c => c.score !== null);
-  // PUBLIC GATE: a headline number is only ever emitted on AUTHORITATIVE evidence.
-  const headlineScore = publishable && coverage.status === "PUBLISHABLE" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
-  const pubStatus: PublicationStatus = !publishable
-    ? "PREVIEW"
-    : coverage.status === "INSUFFICIENT_COVERAGE" ? "INSUFFICIENT_COVERAGE" : coverage.status === "PRELIMINARY" ? "PRELIMINARY" : "PUBLISHABLE";
-  return { editionId: calls[0]?.reportId ?? "unknown", editionLabel, diiScore: headlineScore, publicationStatus: pubStatus, componentScores: components, coverage, callCount: calls.length };
+  const headlineScore = coverage.bucket === "sufficient" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
+  return { editionId: calls[0]?.reportId ?? "unknown", editionLabel, diiScore: headlineScore, componentScores: components, coverage, callCount: calls.length };
 }
 
-/**
- * Compute the Market DII. `opts.authoritativeCalls` (persisted, human-reviewed calls,
- * injected by the server route) unlocks a PUBLISHABLE headline; without it the index
- * runs in PREVIEW mode from seed fixtures — mechanics visible, NO published score.
- */
-export function calculateDecisionIntegrityIndex(opts: ResolveEvidenceOptions = {}): DecisionIntegrityIndex {
-  const evidence = resolveMarketAccountabilityEvidence(opts);
-  const allCalls = evidence.calls, coverage = calculateCoverage(allCalls);
+export function calculateDecisionIntegrityIndex(): DecisionIntegrityIndex {
+  const allCalls = [...MARKET_CALL_LEDGER], coverage = calculateCoverage(allCalls);
   const editionMap = new Map<string, MarketCallRecord[]>();
   for (const call of allCalls) { const existing = editionMap.get(call.reportId) || []; existing.push(call); editionMap.set(call.reportId, existing); }
   const editionTrend: EditionTrend[] = [];
-  for (const [editionId, calls] of editionMap) editionTrend.push(buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId, evidence.publicPublishable));
-  const components = buildComponentScores(allCalls);
+  for (const [editionId, calls] of editionMap) editionTrend.push(buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId));
+  const accuracy = calculateCallAccuracy(allCalls), falsification = calculateFalsificationDiscipline(allCalls), calibration = calculateCalibrationQuality(allCalls), revision = calculateRevisionDiscipline(allCalls);
+  const components: DiiComponentScore[] = [
+    { measure: "call_accuracy", score: accuracy.score ?? 0, weight: 0.35, rationale: accuracy.rationale },
+    { measure: "falsification_discipline", score: falsification.score ?? 0, weight: 0.25, rationale: falsification.rationale },
+    { measure: "calibration_quality", score: calibration.score ?? 0, weight: 0.25, rationale: calibration.rationale },
+    { measure: "revision_discipline", score: revision.score ?? 0, weight: 0.15, rationale: revision.rationale },
+  ];
   const allScored = components.every(c => c.score !== null);
-  const headlineScore = evidence.publicPublishable && coverage.status === "PUBLISHABLE" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
-  const pubStatus: PublicationStatus = !evidence.publicPublishable
-    ? "PREVIEW"
-    : coverage.status === "INSUFFICIENT_COVERAGE" ? "INSUFFICIENT_COVERAGE" : coverage.status === "PRELIMINARY" ? "PRELIMINARY" : "PUBLISHABLE";
-  return { headlineScore, publicationStatus: pubStatus, evidenceMode: evidence.mode, evidenceModeReason: evidence.modeReason, componentScores: components, coverage, methodologyVersion: DII_METHODOLOGY.methodologyVersion, editionTrend, generatedAt: new Date().toISOString() };
+  const headlineScore = coverage.bucket === "sufficient" && allScored ? Math.round(components.reduce((a, c) => a + c.score * c.weight, 0)) : null;
+  const valid = coverage.bucket !== "insufficient";
+  return { headlineScore, componentScores: components, coverage, methodology: DII_METHODOLOGY, editionTrend, generatedAt: new Date().toISOString(), valid, validityReason: !valid ? `Insufficient scored calls: ${coverage.scoredCalls} < ${coverage.minRequired}` : "Sufficient evidence for scoring" };
 }
 
-export function calculateEditionDii(editionId: string, opts: ResolveEvidenceOptions = {}): EditionTrend | null {
-  const evidence = resolveMarketAccountabilityEvidence(opts);
-  const calls = evidence.calls.filter(c => c.reportId === editionId);
-  return calls.length === 0 ? null : buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId, evidence.publicPublishable);
+export function calculateEditionDii(editionId: string): EditionTrend | null {
+  const calls = MARKET_CALL_LEDGER.filter(c => c.reportId === editionId);
+  return calls.length === 0 ? null : buildEditionTrend(calls, editionId === "GMI-Q1-2026" ? "GMI Q1 2026" : editionId);
 }

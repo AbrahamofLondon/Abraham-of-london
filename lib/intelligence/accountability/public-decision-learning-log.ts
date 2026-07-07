@@ -3,13 +3,13 @@
  *
  * §11 — Public Decision Learning Log / Falsification Register.
  *
+ * Surfaces the market-side falsification record publicly.
  * Append-only accountability: a correction must not erase the original call.
- * Uses proper falsification semantics — does not manufacture conditions from URLs.
  * Every entry is derived from recorded evidence and editorially approved interpretation.
+ *
+ * Relationship: ORIGINAL CALL → FALSIFICATION CONDITION → OBSERVED EVIDENCE → REVIEW → RESULT → REVISION/LEARNING
  */
 import { MARKET_CALL_LEDGER, type MarketCallRecord, type MarketCallOutcomeStatus } from "../market-intelligence-call-ledger";
-import { buildFalsificationCondition, type FalsificationCondition } from "./falsification-semantics";
-import { resolveMarketAccountabilityEvidence, type EvidenceMode, type ResolveEvidenceOptions } from "./market-accountability-evidence";
 
 export interface LearningLogEntry {
   originalCallId: string;
@@ -17,7 +17,7 @@ export interface LearningLogEntry {
   originalDate: string;
   edition: string;
   originalConfidence: string;
-  falsificationCondition: FalsificationCondition;
+  falsificationCondition: string;
   observedEvidence: string;
   outcomeStatus: MarketCallOutcomeStatus | "PENDING_REVIEW";
   score: number | null;
@@ -29,7 +29,12 @@ export interface LearningLogEntry {
   publicationTimestamp: string;
 }
 
-export interface LearningLogFilter { edition?: string; theme?: string; status?: MarketCallOutcomeStatus; region?: string; }
+export interface LearningLogFilter {
+  edition?: string;
+  theme?: string;
+  status?: MarketCallOutcomeStatus;
+  region?: string;
+}
 
 export function buildLearningLogEntry(call: MarketCallRecord): LearningLogEntry {
   return {
@@ -38,7 +43,7 @@ export function buildLearningLogEntry(call: MarketCallRecord): LearningLogEntry 
     originalDate: call.lastReviewedAt ?? call.expectedReviewWindow,
     edition: call.reportId,
     originalConfidence: call.originalConfidence,
-    falsificationCondition: buildFalsificationCondition({ scenarioLink: call.scenarioLink, statement: call.statement, outcomeSummary: call.outcomeSummary }),
+    falsificationCondition: call.scenarioLink ?? "Not specified",
     observedEvidence: call.outcomeSummary ?? "Pending review",
     outcomeStatus: call.outcomeStatus ?? "PENDING_REVIEW",
     score: call.score ?? null,
@@ -65,20 +70,8 @@ export function getLearningLogEntry(callId: string): LearningLogEntry | null {
   return call ? buildLearningLogEntry(call) : null;
 }
 
-/**
- * §11 PUBLIC gate — the surface-facing learning log. In PREVIEW mode (no authoritative
- * persisted ledger) entries are drawn from seed fixtures and MUST be labelled as an
- * illustration of the register, not a published accountability record.
- */
-export function getPublicLearningLog(opts: ResolveEvidenceOptions = {}): {
-  mode: EvidenceMode; preview: boolean; entries: LearningLogEntry[]; summary: ReturnType<typeof summarizeLearningLog>;
-} {
-  const evidence = resolveMarketAccountabilityEvidence(opts);
-  const entries = evidence.calls.map(buildLearningLogEntry);
-  return { mode: evidence.mode, preview: !evidence.publicPublishable, entries, summary: summarizeLearningLog(entries) };
-}
-
-export function summarizeLearningLog(entries: LearningLogEntry[]) {
+export function getLearningLogSummary() {
+  const entries = getLearningLog();
   return {
     totalEntries: entries.length,
     confirmed: entries.filter(e => e.outcomeStatus === "CONFIRMED_STRONGLY" || e.outcomeStatus === "DIRECTIONALLY_CONFIRMED").length,
@@ -86,15 +79,7 @@ export function summarizeLearningLog(entries: LearningLogEntry[]) {
     notConfirmed: entries.filter(e => e.outcomeStatus === "NOT_CONFIRMED" || e.outcomeStatus === "DISCONFIRMED").length,
     pendingReview: entries.filter(e => e.outcomeStatus === "PENDING_REVIEW" || e.outcomeStatus === "TOO_EARLY_TO_ASSESS").length,
     byEdition: Object.entries(groupBy(entries, e => e.edition)).map(([edition, entries]) => ({ edition, count: entries.length })),
-    specifiedConditions: entries.filter(e => e.falsificationCondition.status === "SPECIFIED").length,
-    referenceOnlyConditions: entries.filter(e => e.falsificationCondition.status === "REFERENCE_ONLY").length,
-    notSpecified: entries.filter(e => e.falsificationCondition.status === "NOT_SPECIFIED_IN_SOURCE").length,
   };
-}
-
-/** Backward-compatible summary over the full (seed/preview) log. */
-export function getLearningLogSummary() {
-  return summarizeLearningLog(getLearningLog());
 }
 
 function groupBy<T>(items: T[], fn: (item: T) => string): Record<string, T[]> {
