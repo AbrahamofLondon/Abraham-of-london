@@ -52,9 +52,10 @@ describe("Durable End-to-End Integration", () => {
   });
 
   it("Recommendations: create → close/reopen → retrieve preserves recommendations and actions", () => {
-    const rec = storeRecommendation({ tenantId: "e2e-rec", caseId: "rec-001", twinVersion: 1, targetProductCode: "boardroom_brief", evidenceBasis: ["E2E test"], governanceResult: "admissible", commercialAction: "paid_checkout" });
+    const uid = `e2e-rec-${Date.now()}`;
+    const rec = storeRecommendation({ tenantId: uid, caseId: "rec-001", twinVersion: 1, targetProductCode: "boardroom_brief", evidenceBasis: ["E2E test"], governanceResult: "admissible", commercialAction: "paid_checkout" });
     closeRecommendationDatabase();
-    const retrieved = getRecommendations("e2e-rec", "rec-001");
+    const retrieved = getRecommendations(uid, "rec-001");
     expect(retrieved.length).toBe(1);
     expect(retrieved[0].targetProductCode).toBe("boardroom_brief");
   });

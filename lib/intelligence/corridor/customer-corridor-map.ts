@@ -115,7 +115,7 @@ export function buildCorridorMap(customerId: string, twin: TwinState): CorridorM
   return {
     customerId,
     twinVersion: twin.completedProductCodes.length,
-    currentPosition: twin.completedProductCodes.length > 0 ? twin.completedProductCodes[twin.completedProductCodes.length - 1] : null,
+    currentPosition: twin.completedProductCodes.length > 0 ? (twin.completedProductCodes[twin.completedProductCodes.length - 1] ?? null) : null,
     admissibleNextMoves: admissibleMoves,
     inadmissibleMoves,
     controlledMoves,
