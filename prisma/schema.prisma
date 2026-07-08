@@ -5729,3 +5729,42 @@ model PublicDecisionRegistryEntry {
   @@index([publishable])
   @@map("public_decision_registry_entries")
 }
+
+// ── Operator Pilot production persistence (§11/§14) ──────────────────────────
+// Durable, history-preserving Postgres authority for the Operator Pilot lifecycle,
+// backing the PilotIntakeStore interface (SQLite adapter remains for local/test).
+model OperatorPilotIntake {
+  reference             String   @id
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  intakeJson            Json
+  qualificationJson     Json
+  qualificationStatus   String
+  reviewStatus          String
+  owner                 String?
+  operatorNote          String?
+  requestedInformation  String?
+  finalDecision         String?
+  intakeFingerprint     String
+  transitions           OperatorPilotTransition[]
+
+  @@index([reviewStatus])
+  @@index([intakeFingerprint])
+  @@map("operator_pilot_intakes")
+}
+
+// Append-only lifecycle history — how the decision moved, who moved it, under what authority.
+model OperatorPilotTransition {
+  id             String   @id @default(cuid())
+  intakeRef      String
+  intake         OperatorPilotIntake @relation(fields: [intakeRef], references: [reference], onDelete: Cascade)
+  fromState      String
+  toState        String
+  actorEmail     String?
+  humanAuthority Boolean  @default(false)
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  @@index([intakeRef])
+  @@map("operator_pilot_transitions")
+}
