@@ -108,14 +108,35 @@ export function _setPilotDbForTest(db: Database.Database): void { _db = db; sche
 
 function newReference(): string { return `pilot_${crypto.randomBytes(16).toString("hex")}`; }
 
+function canonicalText(value: string | null | undefined): string {
+  return String(value ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function canonicalDate(value: string | null | undefined): string | null {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  const parsed = new Date(raw);
+  return Number.isFinite(parsed.getTime()) ? parsed.toISOString().slice(0, 10) : raw;
+}
+
 export function fingerprintPilotIntake(intake: PilotIntake): string {
   return crypto.createHash("sha256").update(JSON.stringify({
-    organisation: intake.organisation.trim().toLowerCase(),
-    role: intake.role.trim().toLowerCase(),
-    decisionDomain: intake.decisionDomain.trim().toLowerCase(),
-    contactEmail: intake.contactEmail.trim().toLowerCase(),
-    existingEvidence: intake.existingEvidence.trim().toLowerCase(),
-    desiredOutcome: intake.desiredOutcome.trim().toLowerCase(),
+    version: "pilot-intake-fingerprint-v2",
+    organisation: canonicalText(intake.organisation),
+    role: canonicalText(intake.role),
+    authorityToEngage: Boolean(intake.authorityToEngage),
+    decisionDomain: canonicalText(intake.decisionDomain),
+    materiality: intake.materiality,
+    decisionStage: intake.decisionStage,
+    affectedStakeholders: canonicalText(intake.affectedStakeholders),
+    decisionDeadline: canonicalDate(intake.decisionDeadline),
+    existingEvidence: canonicalText(intake.existingEvidence),
+    knownContradictions: canonicalText(intake.knownContradictions),
+    governanceSensitivity: intake.governanceSensitivity,
+    confidentialityRequired: Boolean(intake.confidentialityRequired),
+    desiredOutcome: canonicalText(intake.desiredOutcome),
+    willingToParticipateInCheckpoints: Boolean(intake.willingToParticipateInCheckpoints),
+    contactEmail: canonicalText(intake.contactEmail),
   })).digest("hex");
 }
 

@@ -35,6 +35,16 @@ describe("Operator Pilot lifecycle store", () => {
     expect(listPilotQueue()).toHaveLength(1);
   });
 
+
+  it("does not treat materially changed resubmissions as exact retries", () => {
+    const q = qualifyPilotIntake(intake);
+    const first = savePilotIntake(intake, q);
+    const changedDeadline = savePilotIntake({ ...intake, decisionDeadline: "2026-10-15" }, q);
+    const changedMateriality = savePilotIntake({ ...intake, materiality: "CRITICAL" }, qualifyPilotIntake({ ...intake, materiality: "CRITICAL" }));
+    const changedContradiction = savePilotIntake({ ...intake, knownContradictions: "cost versus resilience plus supplier exit risk" }, qualifyPilotIntake({ ...intake, knownContradictions: "cost versus resilience plus supplier exit risk" }));
+    expect(new Set([first.reference, changedDeadline.reference, changedMateriality.reference, changedContradiction.reference]).size).toBe(4);
+    expect(listPilotQueue()).toHaveLength(4);
+  });
   it("appears in the operator queue with status, ageing, evidence posture and next operation", () => {
     const rec = savePilotIntake(intake, qualifyPilotIntake(intake), "2026-07-07T00:00:00.000Z");
     const row = listPilotQueue().find((r) => r.reference === rec.reference)!;
