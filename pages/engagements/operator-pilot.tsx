@@ -260,6 +260,8 @@ function PilotIntakeForm() {
   const [f, setF] = React.useState<IntakeState>(INTAKE_DEFAULT);
   const [submitting, setSubmitting] = React.useState(false);
   const startedRef = React.useRef(false);
+  const inputIdPrefix = React.useId();
+  const inputId = React.useCallback((name: string) => `${inputIdPrefix}-${name}`, [inputIdPrefix]);
   const idempotencyKeyRef = React.useRef<string>(typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `pilot-${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const [outcome, setOutcome] = React.useState<PilotIntakeSuccessResponse | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -304,26 +306,26 @@ function PilotIntakeForm() {
 
   return (
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
-      <div><label style={lbl}>Organisation</label><input style={fieldStyle} value={f.organisation} onChange={(e) => { if (!startedRef.current) { startedRef.current = true; recordJourneyEvent("PILOT_STARTED"); } setF({ ...f, organisation: e.target.value }); }} /></div>
-      <div><label style={lbl}>Your role</label><input style={fieldStyle} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} /></div>
-      <div><label style={lbl}>Decision domain</label><input style={fieldStyle} value={f.decisionDomain} onChange={(e) => setF({ ...f, decisionDomain: e.target.value })} /></div>
-      <div><label style={lbl}>Contact email</label><input style={fieldStyle} value={f.contactEmail} onChange={(e) => setF({ ...f, contactEmail: e.target.value })} /></div>
-      <div><label style={lbl}>Materiality</label>
-        <select style={fieldStyle} value={f.materiality} onChange={(e) => setF({ ...f, materiality: e.target.value as IntakeState["materiality"] })}>{["LOW","MODERATE","HIGH","CRITICAL"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
-      <div><label style={lbl}>Decision stage</label>
-        <select style={fieldStyle} value={f.decisionStage} onChange={(e) => setF({ ...f, decisionStage: e.target.value as IntakeState["decisionStage"] })}>{["EXPLORING","FRAMING","DECIDING","COMMITTED"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
-      <div><label style={lbl}>Governance sensitivity</label>
-        <select style={fieldStyle} value={f.governanceSensitivity} onChange={(e) => setF({ ...f, governanceSensitivity: e.target.value as IntakeState["governanceSensitivity"] })}>{["NONE","SOME","HIGH","REGULATED"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
-      <div className="sm:col-span-2"><label style={lbl}>Affected stakeholders</label><input style={fieldStyle} value={f.affectedStakeholders} onChange={(e) => setF({ ...f, affectedStakeholders: e.target.value })} /></div>
-      <div className="sm:col-span-2"><label style={lbl}>Existing evidence</label><textarea style={fieldStyle} rows={2} value={f.existingEvidence} onChange={(e) => setF({ ...f, existingEvidence: e.target.value })} /></div>
-      <div className="sm:col-span-2"><label style={lbl}>Known contradictions / competing obligations</label><textarea style={fieldStyle} rows={2} value={f.knownContradictions} onChange={(e) => setF({ ...f, knownContradictions: e.target.value })} /></div>
-      <div className="sm:col-span-2"><label style={lbl}>Desired outcome</label><textarea style={fieldStyle} rows={2} value={f.desiredOutcome} onChange={(e) => setF({ ...f, desiredOutcome: e.target.value })} /></div>
+      <div><label htmlFor={inputId("organisation")} style={lbl}>Organisation</label><input id={inputId("organisation")} style={fieldStyle} value={f.organisation} onChange={(e) => { if (!startedRef.current) { startedRef.current = true; recordJourneyEvent("PILOT_STARTED"); } setF({ ...f, organisation: e.target.value }); }} /></div>
+      <div><label htmlFor={inputId("role")} style={lbl}>Your role</label><input id={inputId("role")} style={fieldStyle} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} /></div>
+      <div><label htmlFor={inputId("decision-domain")} style={lbl}>Decision domain</label><input id={inputId("decision-domain")} style={fieldStyle} value={f.decisionDomain} onChange={(e) => setF({ ...f, decisionDomain: e.target.value })} /></div>
+      <div><label htmlFor={inputId("contact-email")} style={lbl}>Contact email</label><input id={inputId("contact-email")} type="email" style={fieldStyle} value={f.contactEmail} onChange={(e) => setF({ ...f, contactEmail: e.target.value })} /></div>
+      <div><label htmlFor={inputId("materiality")} style={lbl}>Materiality</label>
+        <select id={inputId("materiality")} style={fieldStyle} value={f.materiality} onChange={(e) => setF({ ...f, materiality: e.target.value as IntakeState["materiality"] })}>{["LOW","MODERATE","HIGH","CRITICAL"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div><label htmlFor={inputId("decision-stage")} style={lbl}>Decision stage</label>
+        <select id={inputId("decision-stage")} style={fieldStyle} value={f.decisionStage} onChange={(e) => setF({ ...f, decisionStage: e.target.value as IntakeState["decisionStage"] })}>{["EXPLORING","FRAMING","DECIDING","COMMITTED"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div><label htmlFor={inputId("governance-sensitivity")} style={lbl}>Governance sensitivity</label>
+        <select id={inputId("governance-sensitivity")} style={fieldStyle} value={f.governanceSensitivity} onChange={(e) => setF({ ...f, governanceSensitivity: e.target.value as IntakeState["governanceSensitivity"] })}>{["NONE","SOME","HIGH","REGULATED"].map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div className="sm:col-span-2"><label htmlFor={inputId("affected-stakeholders")} style={lbl}>Affected stakeholders</label><input id={inputId("affected-stakeholders")} style={fieldStyle} value={f.affectedStakeholders} onChange={(e) => setF({ ...f, affectedStakeholders: e.target.value })} /></div>
+      <div className="sm:col-span-2"><label htmlFor={inputId("existing-evidence")} style={lbl}>Existing evidence</label><textarea id={inputId("existing-evidence")} style={fieldStyle} rows={2} value={f.existingEvidence} onChange={(e) => setF({ ...f, existingEvidence: e.target.value })} /></div>
+      <div className="sm:col-span-2"><label htmlFor={inputId("known-contradictions")} style={lbl}>Known contradictions / competing obligations</label><textarea id={inputId("known-contradictions")} style={fieldStyle} rows={2} value={f.knownContradictions} onChange={(e) => setF({ ...f, knownContradictions: e.target.value })} /></div>
+      <div className="sm:col-span-2"><label htmlFor={inputId("desired-outcome")} style={lbl}>Desired outcome</label><textarea id={inputId("desired-outcome")} style={fieldStyle} rows={2} value={f.desiredOutcome} onChange={(e) => setF({ ...f, desiredOutcome: e.target.value })} /></div>
       <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.authorityToEngage} onChange={(e) => setF({ ...f, authorityToEngage: e.target.checked })} /> I have authority to engage on this decision.</label>
       <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.willingToParticipateInCheckpoints} onChange={(e) => setF({ ...f, willingToParticipateInCheckpoints: e.target.checked })} /> I am willing to participate in checkpoints.</label>
       <label className="text-xs text-white/55" style={{ display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" checked={f.confidentialityRequired} onChange={(e) => setF({ ...f, confidentialityRequired: e.target.checked })} /> This decision requires confidentiality.</label>
-      {error && <p className="sm:col-span-2" style={{ ...mono, fontSize: "9px", color: "#FCA5A5", lineHeight: 1.6 }}>{error}</p>}
+      {error && <p role="alert" aria-live="polite" className="sm:col-span-2" style={{ ...mono, fontSize: "9px", color: "#FCA5A5", lineHeight: 1.6 }}>{error}</p>}
       <div className="sm:col-span-2">
-        <button onClick={submit} disabled={submitting} style={{ ...dsPrimary(), opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }}>
+        <button type="button" onClick={submit} disabled={submitting} style={{ ...dsPrimary(), opacity: submitting ? 0.6 : 1, cursor: submitting ? "wait" : "pointer" }}>
           {submitting ? "Submitting…" : "Submit for governed qualification"}
         </button>
       </div>
