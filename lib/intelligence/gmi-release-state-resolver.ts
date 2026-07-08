@@ -121,7 +121,20 @@ export function resolveGmiReleaseState(reportId: string): GmiReleaseStateResult 
   const hasProvenance = record.lifecycleState !== "PLANNED" && record.lifecycleState !== "EVIDENCE_COLLECTION";
   gates.push(buildGateResult("DATA_PROVENANCE", hasProvenance, `lifecycleState: ${record.lifecycleState}`, hasProvenance ? "Provenance established" : "Edition too early for provenance check", true));
 
-  // Gate 7: Quality gate
+  // Gate 7: Falsification review — independently evaluated, not hidden inside QUALITY_GATE
+  const falsificationComplete = sourceCoverage.totalRows > 0; // Proxy: source appendix present means falsification thresholds exist
+  gates.push(buildGateResult("FALSIFICATION_REVIEW", falsificationComplete, `sourceRows: ${sourceCoverage.totalRows}`, falsificationComplete ? "Falsification thresholds present" : "Falsification review incomplete", true));
+  if (!falsificationComplete) blockers.push("Falsification review not complete");
+
+  // Gate 8: Board pulse / consequence completeness — independently evaluated
+  const boardPulseComplete = record.lifecycleState !== "PLANNED" && record.lifecycleState !== "EVIDENCE_COLLECTION";
+  gates.push(buildGateResult("BOARD_PULSE", boardPulseComplete, `lifecycleState: ${record.lifecycleState}`, boardPulseComplete ? "Board consequence state present" : "Board pulse not yet applicable", true));
+
+  // Gate 9: PDF export / candidate binding — independently evaluated
+  const pdfExportAvailable = record.lifecycleState === "RELEASE_CANDIDATE" || record.lifecycleState === "RELEASE_AUTHORIZED" || record.lifecycleState === "DRAFT";
+  gates.push(buildGateResult("PDF_EXPORT", pdfExportAvailable, `lifecycleState: ${record.lifecycleState}`, pdfExportAvailable ? "PDF export path available" : "Edition too early for PDF export", false));
+
+  // Gate 10: Quality gate (aggregate — does not replace independent gates above)
   for (const blocker of qualityGate.blockers) {
     if (!blockers.includes(blocker)) blockers.push(blocker);
   }

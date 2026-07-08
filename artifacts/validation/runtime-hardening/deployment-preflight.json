@@ -27,10 +27,10 @@
     },
     {
       "question": "What assumes trusted public input?",
-      "answer": "Funnel endpoint now uses strict schema/bounds plus the canonical shared rate-limit provider, with Upstash/Redis/Postgres backends before memory fallback.",
+      "answer": "Funnel endpoint uses strict schema/bounds plus the canonical shared rate-limit provider. Backend authority corrected to Neon PostgreSQL by default; Upstash/Redis are optional acceleration used ONLY when RATE_LIMIT_BACKEND=upstash|redis is explicitly set (mere credential presence no longer auto-promotes them). See docs/architecture/infrastructure-authority.md.",
       "severity": "INFO",
       "status": "CLOSED",
-      "detail": "pages/api/demo/funnel-event.ts uses consumeRateLimit with failClosed=true, hashed IP/session keying, X-RateLimit headers and no arbitrary metadata. tests/pages/api/demo/funnel-event.test.ts verifies denial prevents persistence and confidential payload fields are ignored."
+      "detail": "pages/api/demo/funnel-event.ts uses consumeRateLimit with failClosed=true, hashed IP/session keying, X-RateLimit headers and no arbitrary metadata. failClosed bounds the telemetry write only; the customer Signal/Pilot path is decoupled (client sendBeacon fire-and-forget; server recordFunnelEvent try/catch), so a limiter/storage outage never blocks the customer journey. tests/pages/api/demo/funnel-event.test.ts verifies denial prevents persistence and confidential payload fields are ignored."
     },
     {
       "question": "What assumes UK currency?",
