@@ -259,7 +259,7 @@ function PilotIntakeForm() {
   const [f, setF] = React.useState<IntakeState>(INTAKE_DEFAULT);
   const [submitting, setSubmitting] = React.useState(false);
   const startedRef = React.useRef(false);
-  const [outcome, setOutcome] = React.useState<{ reference?: string; qualificationStatus: string; reviewStatus?: string; nextStep: string; reasons?: string[] } | null>(null);
+  const [outcome, setOutcome] = React.useState<{ reference?: string; qualificationStatus: string; reviewStatus?: string; nextStep: string; reasons?: string[]; statusAccess?: { statusUrl: string; secret: string; expiresAt: string | null } | null } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const fieldStyle: React.CSSProperties = dsField();
   const lbl: React.CSSProperties = dsCaption(COLORS.muted);
@@ -282,7 +282,15 @@ function PilotIntakeForm() {
     return (
       <div style={{ marginTop: "1rem", border: `1px solid ${EMERALD}30`, background: `${EMERALD}05`, padding: "1rem" }}>
         <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${EMERALD}` }}>Submitted · {outcome.qualificationStatus}</p>
-        {outcome.reference && <p className="mt-2 text-sm text-white/70">Your reference: <strong style={{ color: GOLD }}>{outcome.reference}</strong> — keep this to check your status.</p>}
+                {outcome.reference && <p className="mt-2 text-sm text-white/70">Your reference: <strong style={{ color: GOLD }}>{outcome.reference}</strong>.</p>}
+        {outcome.statusAccess && (
+          <div className="mt-3" style={{ border: `1px solid ${GOLD}24`, background: `${GOLD}06`, padding: "0.85rem" }}>
+            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}` }}>Private status access</p>
+            <p className="mt-2 text-xs leading-6 text-white/55">Keep this status secret somewhere safe. It is not placed in the status URL and it opens a short-lived secure status session.</p>
+            <code className="mt-2 block break-all text-xs text-white/75">{outcome.statusAccess.secret}</code>
+            <Link href={outcome.statusAccess.statusUrl} className="mt-3 inline-flex text-xs underline" style={{ color: GOLD, textUnderlineOffset: 4 }}>Open status page</Link>
+          </div>
+        )}
         <p className="mt-2 text-sm leading-7 text-white/60">{outcome.nextStep}</p>
         {outcome.reasons && outcome.reasons.length > 0 && (
           <ul className="mt-2 text-xs text-white/45" style={{ listStyle: "disc", paddingLeft: 18 }}>{outcome.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>

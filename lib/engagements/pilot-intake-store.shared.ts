@@ -7,6 +7,7 @@
  */
 
 import crypto from "node:crypto";
+import { hashPilotStatusSecret, newPilotStatusSecret } from "./pilot-status-security";
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
 
 export type PilotLifecycleState =
@@ -35,6 +36,10 @@ export interface PilotIntakeRecord {
   requestedInformation: string | null;
   finalDecision: string | null;
   fingerprint: string;
+  statusSecretHash: string | null;
+  statusSecretExpiresAt: string | null;
+  statusSecretRevokedAt: string | null;
+  statusSecret?: string;
 }
 
 export interface PilotCustomerStatus {
@@ -57,6 +62,18 @@ export function newPilotReference(): string {
   return `pilot_${crypto.randomBytes(16).toString("hex")}`;
 }
 
+
+export interface PilotStatusSecretIssue {
+  secret: string;
+  hash: string;
+  expiresAt: string;
+}
+
+export function issuePilotStatusSecret(now = new Date()): PilotStatusSecretIssue {
+  const secret = newPilotStatusSecret();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  return { secret, hash: hashPilotStatusSecret(secret), expiresAt };
+}
 export const PILOT_REFERENCE_RE = /^pilot_[a-f0-9]{32}$/;
 
 export function fingerprintPilotIntake(intake: PilotIntake): string {

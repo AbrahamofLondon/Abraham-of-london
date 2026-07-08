@@ -1,11 +1,11 @@
 /**
  * POST /api/engagements/operator-pilot — submit a pilot intake.
- * GET  /api/engagements/operator-pilot?ref=... — customer-safe status lookup.
+ * Customer status lookup is handled by /api/engagements/operator-pilot-status-session and /api/engagements/operator-pilot-status; secrets are never accepted in URLs.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { qualifyPilotIntake, type PilotIntake } from "@/lib/engagements/operator-pilot-qualification";
-import { savePilotIntake, getPilotIntakeByRef, toCustomerStatus } from "@/lib/engagements/pilot-intake-store.composed";
+import { savePilotIntake, toCustomerStatus } from "@/lib/engagements/pilot-intake-store.composed";
 import { track } from "@/lib/analytics/track";
 import { recordFunnelEvent } from "@/lib/demo/funnel-event-store.composed";
 
@@ -30,16 +30,8 @@ function coerceIntake(body: any): PilotIntake {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    const ref = typeof req.query.ref === "string" ? req.query.ref : "";
-    if (!ref) return res.status(400).json({ error: "reference required" });
-    const record = await getPilotIntakeByRef(ref);
-    if (!record) return res.status(404).json({ error: "not found" });
-    return res.status(200).json(toCustomerStatus(record));
-  }
-
   if (req.method !== "POST") {
-    res.setHeader("Allow", "GET, POST");
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
@@ -64,6 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       reviewStatus: record.reviewStatus,
       currentState: record.reviewStatus,
       nextStep: toCustomerStatus(record).nextExpectedStep,
+      statusAccess: record.statusSecret ? { statusUrl: "/engagements/operator-pilot-status", secret: record.statusSecret, expiresAt: record.statusSecretExpiresAt } : null,
       reasons: qualification.reasons,
     });
   } catch (err) {

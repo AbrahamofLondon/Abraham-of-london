@@ -5746,7 +5746,11 @@ model OperatorPilotIntake {
   requestedInformation  String?
   finalDecision         String?
   intakeFingerprint     String
+  statusSecretHash      String?  @unique
+  statusSecretExpiresAt DateTime?
+  statusSecretRevokedAt DateTime?
   transitions           OperatorPilotTransition[]
+  statusAccessAudits    OperatorPilotStatusAccessAudit[]
 
   @@index([reviewStatus])
   @@index([intakeFingerprint])
@@ -5754,6 +5758,22 @@ model OperatorPilotIntake {
 }
 
 // Append-only lifecycle history — how the decision moved, who moved it, under what authority.
+
+model OperatorPilotStatusAccessAudit {
+  id            String   @id @default(cuid())
+  intakeRef     String?
+  attemptedHash String
+  result        String
+  ipHash        String?
+  createdAt     DateTime @default(now())
+
+  intake OperatorPilotIntake? @relation(fields: [intakeRef], references: [reference], onDelete: SetNull)
+
+  @@index([intakeRef])
+  @@index([attemptedHash])
+  @@index([createdAt])
+  @@map("operator_pilot_status_access_audits")
+}
 model OperatorPilotTransition {
   id             String   @id @default(cuid())
   intakeRef      String

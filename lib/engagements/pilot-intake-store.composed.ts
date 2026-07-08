@@ -40,3 +40,7 @@ export async function transitionPilotState(
 ): Promise<PilotIntakeRecord | null> {
   return (await adapter()).transitionPilotState(reference, nextState, actor, details);
 }
+
+export async function getPilotIntakeByStatusSecret(secret: string, context: { ip?: string | null } = {}): Promise<PilotIntakeRecord | null> {
+  return (await adapter()).getPilotIntakeByStatusSecret(secret, context);
+}

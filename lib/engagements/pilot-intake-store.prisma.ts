@@ -8,7 +8,6 @@
  * ALLOWED) from the canonical store module so business rules are not forked.
  */
 
-import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
 import {
@@ -18,17 +17,19 @@ import {
   nextOperation,
   newPilotReference,
   PILOT_REFERENCE_RE,
+  issuePilotStatusSecret,
   type PilotIntakeRecord,
   type PilotLifecycleState,
   type PilotQueueItem,
 } from "./pilot-intake-store.shared";
+import { hashPilotStatusAccessIdentifier, hashPilotStatusSecret } from "./pilot-status-security";
 
 const newReference = newPilotReference;
 
 function toRecord(r: {
   reference: string; createdAt: Date; updatedAt: Date; intakeJson: unknown; qualificationJson: unknown;
   reviewStatus: string; owner: string | null; operatorNote: string | null; requestedInformation: string | null;
-  finalDecision: string | null; intakeFingerprint: string;
+  finalDecision: string | null; intakeFingerprint: string; statusSecretHash: string | null; statusSecretExpiresAt: Date | null; statusSecretRevokedAt: Date | null;
 }): PilotIntakeRecord {
   return {
     reference: r.reference,
@@ -42,6 +43,9 @@ function toRecord(r: {
     requestedInformation: r.requestedInformation ?? null,
     finalDecision: r.finalDecision ?? null,
     fingerprint: r.intakeFingerprint,
+    statusSecretHash: r.statusSecretHash,
+    statusSecretExpiresAt: r.statusSecretExpiresAt?.toISOString() ?? null,
+    statusSecretRevokedAt: r.statusSecretRevokedAt?.toISOString() ?? null,
   };
 }
 
@@ -51,6 +55,7 @@ export async function savePilotIntake(intake: PilotIntake, qualification: Qualif
   const existing = await prisma.operatorPilotIntake.findFirst({ where: { intakeFingerprint: fp }, orderBy: { createdAt: "desc" } });
   if (existing) return toRecord(existing);
   const state = initialState(qualification);
+  const statusSecret = issuePilotStatusSecret();
   const created = await prisma.operatorPilotIntake.create({
     data: {
       reference: newReference(),
@@ -61,9 +66,11 @@ export async function savePilotIntake(intake: PilotIntake, qualification: Qualif
       requestedInformation: state === "MORE_INFORMATION_REQUIRED" ? qualification.reasons.join(" ") : null,
       finalDecision: state === "DECLINED" ? qualification.reasons.join(" ") : null,
       intakeFingerprint: fp,
+      statusSecretHash: statusSecret.hash,
+      statusSecretExpiresAt: new Date(statusSecret.expiresAt),
     },
   });
-  return toRecord(created);
+  return { ...toRecord(created), statusSecret: statusSecret.secret };
 }
 
 export async function getPilotIntakeByRef(reference: string): Promise<PilotIntakeRecord | null> {
@@ -120,4 +127,31 @@ export async function transitionPilotState(
     });
     return toRecord(updated);
   });
+}
+
+export async function getPilotIntakeByStatusSecret(secret: string, context: { ip?: string | null } = {}, now = new Date()): Promise<PilotIntakeRecord | null> {
+  let attemptedHash = "invalid";
+  try {
+    attemptedHash = hashPilotStatusSecret(secret);
+  } catch {
+    await prisma.operatorPilotStatusAccessAudit.create({ data: { attemptedHash, result: "INVALID_FORMAT", ipHash: context.ip ? hashPilotStatusAccessIdentifier(context.ip) : null } }).catch(() => null);
+    return null;
+  }
+
+  const row = await prisma.operatorPilotIntake.findUnique({ where: { statusSecretHash: attemptedHash } });
+  const expired = row?.statusSecretExpiresAt ? row.statusSecretExpiresAt.getTime() <= now.getTime() : true;
+  const revoked = Boolean(row?.statusSecretRevokedAt);
+  const result = !row ? "NOT_FOUND" : expired ? "EXPIRED" : revoked ? "REVOKED" : "GRANTED";
+
+  await prisma.operatorPilotStatusAccessAudit.create({
+    data: {
+      intakeRef: row?.reference ?? null,
+      attemptedHash,
+      result,
+      ipHash: context.ip ? hashPilotStatusAccessIdentifier(context.ip) : null,
+    },
+  }).catch(() => null);
+
+  if (!row || expired || revoked) return null;
+  return toRecord(row);
 }

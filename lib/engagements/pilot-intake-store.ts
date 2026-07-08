@@ -10,6 +10,7 @@ import Database from "better-sqlite3";
 import { join } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
 import crypto from "node:crypto";
+import { hashPilotStatusAccessIdentifier, hashPilotStatusSecret, newPilotStatusSecret } from "./pilot-status-security";
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
 import { assertSqliteRuntimeAllowed } from "@/lib/runtime/sqlite-runtime-guard";
 
@@ -39,6 +40,10 @@ export interface PilotIntakeRecord {
   requestedInformation: string | null;
   finalDecision: string | null;
   fingerprint: string;
+  statusSecretHash: string | null;
+  statusSecretExpiresAt: string | null;
+  statusSecretRevokedAt: string | null;
+  statusSecret?: string;
 }
 
 export interface PilotCustomerStatus {
@@ -80,8 +85,12 @@ function schema(db: Database.Database): void {
   if (!cols.has("requested_information")) db.exec(`ALTER TABLE pilot_intakes ADD COLUMN requested_information TEXT`);
   if (!cols.has("final_decision")) db.exec(`ALTER TABLE pilot_intakes ADD COLUMN final_decision TEXT`);
   if (!cols.has("intake_fingerprint")) db.exec(`ALTER TABLE pilot_intakes ADD COLUMN intake_fingerprint TEXT NOT NULL DEFAULT ''`);
+  if (!cols.has("status_secret_hash")) db.exec(`ALTER TABLE pilot_intakes ADD COLUMN status_secret_hash TEXT`);
+  if (!cols.has("status_secret_expires_at")) db.exec(`ALTER TABLE pilot_intakes ADD COLUMN status_secret_expires_at TEXT`);
+  if (!cols.has("status_secret_revoked_at")) db.exec(`ALTER TABLE pilot_intakes ADD COLUMN status_secret_revoked_at TEXT`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_pilot_review_status ON pilot_intakes(review_status)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_pilot_fingerprint ON pilot_intakes(intake_fingerprint)`);
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_pilot_status_secret ON pilot_intakes(status_secret_hash)`);
 }
 
 function getDb(): Database.Database {
@@ -131,6 +140,9 @@ function rowToRecord(r: any): PilotIntakeRecord {
     requestedInformation: r.requested_information ?? null,
     finalDecision: r.final_decision ?? null,
     fingerprint: r.intake_fingerprint ?? "",
+    statusSecretHash: r.status_secret_hash ?? null,
+    statusSecretExpiresAt: r.status_secret_expires_at ?? null,
+    statusSecretRevokedAt: r.status_secret_revoked_at ?? null,
   };
 }
 
@@ -141,14 +153,20 @@ export function savePilotIntake(intake: PilotIntake, qualification: Qualificatio
   if (replay) return rowToRecord(replay);
   const reference = newReference();
   const state = initialState(qualification);
-  db.prepare(`INSERT INTO pilot_intakes (reference, created_at, updated_at, intake_json, qualification_json, qualification_status, review_status, owner, operator_note, requested_information, final_decision, intake_fingerprint)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+  const statusSecret = newPilotStatusSecret();
+  const statusSecretHash = hashPilotStatusSecret(statusSecret);
+  const statusSecretExpiresAt = new Date(Date.parse(now) + 30 * 24 * 60 * 60 * 1000).toISOString();
+  db.prepare(`INSERT INTO pilot_intakes (reference, created_at, updated_at, intake_json, qualification_json, qualification_status, review_status, owner, operator_note, requested_information, final_decision, intake_fingerprint, status_secret_hash, status_secret_expires_at, status_secret_revoked_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
     reference, now, now, JSON.stringify(intake), JSON.stringify(qualification), qualification.status, state, null, null,
     state === "MORE_INFORMATION_REQUIRED" ? qualification.reasons.join(" ") : null,
     state === "DECLINED" ? qualification.reasons.join(" ") : null,
     fp,
+    statusSecretHash,
+    statusSecretExpiresAt,
+    null,
   );
-  return getPilotIntakeByRef(reference)!;
+  return { ...getPilotIntakeByRef(reference)!, statusSecret };
 }
 
 export function getPilotIntakeByRef(reference: string): PilotIntakeRecord | null {
@@ -227,4 +245,17 @@ export function transitionPilotState(reference: string, nextState: PilotLifecycl
 
 export function updateReviewStatus(reference: string, reviewStatus: ReviewStatus, owner: string | null, operatorNote: string | null, now = new Date().toISOString()): PilotIntakeRecord | null {
   return transitionPilotState(reference, reviewStatus, { email: owner, humanAuthority: reviewStatus !== "ACCEPTED" && reviewStatus !== "DECLINED" ? true : Boolean(owner) }, { operatorNote }, now);
+}
+
+export function getPilotIntakeByStatusSecret(secret: string, context: { ip?: string | null } = {}, now = new Date()): PilotIntakeRecord | null {
+  let attemptedHash = "invalid";
+  try { attemptedHash = hashPilotStatusSecret(secret); } catch { return null; }
+  const row = getDb().prepare(`SELECT * FROM pilot_intakes WHERE status_secret_hash = ?`).get(attemptedHash) as any;
+  const result = !row ? "NOT_FOUND" : row.status_secret_revoked_at ? "REVOKED" : Date.parse(row.status_secret_expires_at || "") <= now.getTime() ? "EXPIRED" : "GRANTED";
+  getDb().exec(`CREATE TABLE IF NOT EXISTS pilot_status_access_audits (id TEXT PRIMARY KEY, intake_ref TEXT, attempted_hash TEXT NOT NULL, result TEXT NOT NULL, ip_hash TEXT, created_at TEXT NOT NULL)`);
+  getDb().prepare(`INSERT INTO pilot_status_access_audits (id, intake_ref, attempted_hash, result, ip_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)`).run(
+    crypto.randomUUID(), row?.reference ?? null, attemptedHash, result, context.ip ? hashPilotStatusAccessIdentifier(context.ip) : null, new Date().toISOString(),
+  );
+  if (!row || result !== "GRANTED") return null;
+  return rowToRecord(row);
 }

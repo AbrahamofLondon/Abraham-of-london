@@ -1,61 +1,85 @@
 import * as React from "react";
-import type { NextPage } from "next";
+import Head from "next/head";
 import Layout from "@/components/Layout";
-import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
-import { COLORS, caption, display, bodyText, bodyTextSm, card, primaryButton, field } from "@/lib/demo/journey-design";
+import { COLORS, FONTS, caption, field, primaryButton, bodyTextSm, card } from "@/lib/demo/journey-design";
 
-type Status = { reference: string; currentState: string; lastUpdate: string; requestedInformation: string | null; nextExpectedStep: string; finalDecision: string | null };
+type Status = {
+  reference: string;
+  currentState: string;
+  lastUpdate: string;
+  requestedInformation: string | null;
+  nextExpectedStep: string;
+  finalDecision: string | null;
+};
 
-const StatusPage: NextPage = () => {
-  const [reference, setReference] = React.useState("");
+export default function OperatorPilotStatusPage() {
+  const [secret, setSecret] = React.useState("");
   const [status, setStatus] = React.useState<Status | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  React.useEffect(() => { recordJourneyEvent("PILOT_STATUS_VIEWED"); }, []);
+  async function loadExistingSession() {
+    const res = await fetch("/api/engagements/operator-pilot-status");
+    if (!res.ok) return;
+    const data = await res.json();
+    setStatus(data.status);
+  }
 
-  async function lookup() {
-    setLoading(true); setError(null); setStatus(null);
+  React.useEffect(() => { void loadExistingSession(); }, []);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/engagements/operator-pilot?ref=${encodeURIComponent(reference.trim())}`);
+      const res = await fetch("/api/engagements/operator-pilot-status-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret }),
+      });
       const data = await res.json();
-      if (!res.ok) { setError(data?.error === "not found" ? "No intake matches that reference." : data?.error ?? "Lookup failed."); return; }
-      setStatus(data);
-    } catch { setError("Status could not be loaded."); }
-    finally { setLoading(false); }
+      if (!res.ok) { setError(data?.error ?? "Unable to validate status access."); return; }
+      setStatus(data.status);
+      setSecret("");
+    } catch {
+      setError("Status could not be loaded. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <Layout title="Operator Pilot Status | Abraham of London" description="Check the status of a governed Operator Pilot intake.">
-      <main style={{ minHeight: "100vh", background: COLORS.canvas, color: COLORS.ink, padding: "72px 24px 120px" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto", display: "grid", gap: 22 }}>
+    <Layout title="Operator Pilot Status | Abraham of London" description="Securely check the current state of an Operator Pilot intake.">
+      <Head><meta name="robots" content="noindex,nofollow" /></Head>
+      <main style={{ minHeight: "100vh", background: COLORS.canvas, color: COLORS.ink, padding: "80px 24px" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto", display: "grid", gap: 20 }}>
           <div>
-            <span style={caption(COLORS.goldSoft)}>Operator Pilot · customer status</span>
-            <h1 style={{ ...display, fontSize: "clamp(2.2rem,5vw,3.2rem)", marginTop: 12 }}>Check your pilot review state.</h1>
-            <p style={{ ...bodyText, marginTop: 14 }}>Use the reference returned after submission. The status view exposes only customer-safe state: no operator notes, no queue internals, and no other submissions.</p>
+            <span style={caption(COLORS.goldSoft)}>Operator Pilot · secure status</span>
+            <h1 style={{ fontFamily: FONTS.display, fontWeight: 300, fontSize: "clamp(2rem,5vw,3.2rem)", margin: "10px 0 0" }}>Check the state of your pilot review.</h1>
+            <p style={{ ...bodyTextSm, marginTop: 12 }}>Enter the private status secret shown after submission. It is sent in the request body, not placed in the URL, and opens a short-lived secure status session.</p>
           </div>
-          <section style={card()}>
-            <label style={caption()}>Pilot reference</label>
-            <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="pilot_..." style={field()} />
-            {error && <p style={{ ...bodyTextSm, color: COLORS.rose, marginTop: 10 }}>{error}</p>}
-            <button onClick={lookup} disabled={loading || reference.trim().length < 12} style={{ ...primaryButton(), marginTop: 14, opacity: loading || reference.trim().length < 12 ? 0.6 : 1 }}>
-              {loading ? "Checking" : "Check status"}
-            </button>
-          </section>
+
+          <form onSubmit={submit} style={{ ...card(COLORS.gold), display: "grid", gap: 12 }}>
+            <label style={{ display: "grid", gap: 8 }}>
+              <span style={caption(COLORS.goldSoft)}>Status secret</span>
+              <input value={secret} onChange={(e) => setSecret(e.target.value)} style={field()} autoComplete="off" spellCheck={false} />
+            </label>
+            {error && <p role="alert" style={{ ...bodyTextSm, color: COLORS.rose }}>{error}</p>}
+            <button type="submit" disabled={loading || !secret.trim()} style={{ ...primaryButton(), opacity: loading || !secret.trim() ? 0.55 : 1 }}>{loading ? "Checking..." : "Open status"}</button>
+          </form>
+
           {status && (
             <section style={card(COLORS.emerald)}>
               <span style={caption(COLORS.emerald)}>Current state</span>
-              <p style={{ ...display, fontSize: "1.6rem", marginTop: 8 }}>{status.currentState}</p>
-              <p style={{ ...bodyTextSm, marginTop: 8 }}>Reference: {status.reference} · Last update: {new Date(status.lastUpdate).toLocaleString()}</p>
-              <p style={{ ...bodyText, marginTop: 12 }}>{status.nextExpectedStep}</p>
-              {status.requestedInformation && <p style={{ ...bodyTextSm, marginTop: 10 }}><strong style={{ color: COLORS.gold }}>Requested information: </strong>{status.requestedInformation}</p>}
-              {status.finalDecision && <p style={{ ...bodyTextSm, marginTop: 10 }}><strong style={{ color: COLORS.gold }}>Final decision: </strong>{status.finalDecision}</p>}
+              <p style={{ fontFamily: FONTS.display, fontSize: "1.6rem", marginTop: 8 }}>{status.currentState.replace(/_/g, " ")}</p>
+              <p style={{ ...bodyTextSm, marginTop: 8 }}>Reference {status.reference} · Last update {new Date(status.lastUpdate).toLocaleString("en-GB")}</p>
+              <p style={{ ...bodyTextSm, marginTop: 12 }}>{status.nextExpectedStep}</p>
+              {status.requestedInformation && <p style={{ ...bodyTextSm, marginTop: 12, color: COLORS.amber }}>Requested information: {status.requestedInformation}</p>}
+              {status.finalDecision && <p style={{ ...bodyTextSm, marginTop: 12 }}>Decision: {status.finalDecision}</p>}
             </section>
           )}
         </div>
       </main>
     </Layout>
   );
-};
-
-export default StatusPage;
+}

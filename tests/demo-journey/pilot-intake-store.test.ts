@@ -2,13 +2,13 @@
  * tests/demo-journey/pilot-intake-store.test.ts
  *
  * Durable Pilot lifecycle: exact-reference customer lookup, operator queue, replay safety,
- * customer-safe status, and human-authority transition controls.
+ * customer-safe status, private status secret, and human-authority transition controls.
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
 import Database from "better-sqlite3";
 import { qualifyPilotIntake, type PilotIntake } from "@/lib/engagements/operator-pilot-qualification";
-import { _setPilotDbForTest, savePilotIntake, getPilotIntakeByRef, listPilotQueue, transitionPilotState, toCustomerStatus } from "@/lib/engagements/pilot-intake-store";
+import { _setPilotDbForTest, savePilotIntake, getPilotIntakeByRef, getPilotIntakeByStatusSecret, listPilotQueue, transitionPilotState, toCustomerStatus } from "@/lib/engagements/pilot-intake-store";
 
 const intake: PilotIntake = {
   organisation: "Meridian Components Ltd", role: "COO", authorityToEngage: true, decisionDomain: "supply chain",
@@ -42,6 +42,15 @@ describe("Operator Pilot lifecycle store", () => {
     expect(row.evidencePosture).toBe("DETAILED");
     expect(row.nextOperation).toMatch(/Human authority/i);
     expect(row.ageHours).toBeGreaterThanOrEqual(0);
+  });
+
+  it("issues a private status secret and validates status access without URL references", () => {
+    const rec = savePilotIntake(intake, qualifyPilotIntake(intake));
+    expect(rec.statusSecret).toMatch(/^pstat_[a-f0-9]{64}$/);
+    expect(rec.statusSecretHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(rec.statusSecretHash).not.toContain(rec.statusSecret!);
+    expect(getPilotIntakeByStatusSecret(rec.statusSecret!, { ip: "203.0.113.9" })?.reference).toBe(rec.reference);
+    expect(getPilotIntakeByStatusSecret("pilot_bad_reference", { ip: "203.0.113.9" })).toBeNull();
   });
 
   it("customer status does not expose operator owner or notes", () => {
