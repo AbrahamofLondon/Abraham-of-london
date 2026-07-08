@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "runtime-hardening.handoff.v1",
+  "generatedAt": "2026-07-08T10:36:00Z",
+  "canonicalBranch": "construction/estate-restoration",
+  "canonicalHead": "956a983ff",
+  "worktreeClean": true,
+  "activeWriter": "CLAUDE (from 828aa4f09; Codex handed off at 878874a2f)",
+  "completedSections": [
+    "§0 ownership flip + exact-path protocol",
+    "§1 persistence-authority-matrix.json (census; PRODUCTION_FILESYSTEM_STATE=5 documented)",
+    "§2 fail-closed sqlite runtime doctrine (guard wired into pilot/funnel/consent/recommendation-context stores + tests)",
+    "§10 funnel endpoint hardening (size cap, content-type, field bounds, rate limit + tests)",
+    "§34 deployment-preflight.json"
+  ],
+  "openSections": [
+    "§3 audit remaining durable stores for prod adapters",
+    "§4-9 migrate Pilot intake+lifecycle to Prisma/Postgres (models, versions, transitions, review decisions, idempotency vs duplicate, typed API contract, secure status return, optimistic concurrency)",
+    "§11 telemetry≠customer-truth architecture test",
+    "§12/§33 static serverless guard test (no NEW production API import of a local-file store) + full serverless suite",
+    "§13 native module (better-sqlite3) deployment compatibility audit",
+    "§14 serverless Postgres connection hardening",
+    "§15 clean-room Postgres reproducibility (env template, docker, docs)",
+    "§16 estate-wide disabled-interaction audit",
+    "§17 estate-wide assessment engine input-sensitivity audit",
+    "§18-20 assessment design convergence + accessibility (WCAG 2.2 AA) + hit targets",
+    "§21 real-app breakpoint QA (screenshots)",
+    "§22 currency/i18n via catalogue authority (remove hardcoded £)",
+    "§23 pilot page IA (action above fold)",
+    "§24 loading/error/recovery states everywhere",
+    "§25-26 notification/follow-up + data privacy/retention",
+    "§27 security headers / public form hardening",
+    "§28-30 complete operator workflow + Signal→Corridor→Pilot continuity + funnel end-to-end",
+    "§31 repair full-suite (8 failing files) → 0",
+    "§32 final-HEAD production build proof",
+    "§35 commercial/GTM layer (needs real production data)",
+    "§36-37 final real journey proof + all gates"
+  ],
+  "currentExactTask": "runtime persistence hardening core delivered; next is §4 Pilot→Prisma migration",
+  "nextExactTask": "§4 model PilotIntake/PilotIntakeVersion/PilotStateTransition/PilotReviewDecision in prisma/schema.prisma, generate migration, build a Prisma-backed PilotIntakeStore behind the existing store interface, rewire the 2 pilot API routes",
+  "filesTouched": [
+    "OWNERSHIP.md", "artifacts/validation/runtime-hardening/persistence-authority-matrix.json",
+    "artifacts/validation/runtime-hardening/deployment-preflight.json",
+    "lib/runtime/sqlite-runtime-guard.ts", "lib/runtime/simple-rate-limit.ts",
+    "lib/engagements/pilot-intake-store.ts", "lib/demo/funnel-event-store.ts",
+    "lib/demo/signal-consent-transition-store.ts", "lib/intelligence/corridor/recommendation-context-store.ts",
+    "pages/api/demo/funnel-event.ts",
+    "tests/demo-journey/sqlite-runtime-guard.test.ts", "tests/demo-journey/simple-rate-limit.test.ts"
+  ],
+  "knownFailures": {
+    "fullSuite": "8 failing files at prior full run (instrument-catalog-bridge ×3, gmi-surfacing ×2, boardroom-first-brief ×1, email/links ×1, outbound-content-loader ×1). Codex was repairing these; recheck. NOT re-run at this HEAD.",
+    "note": "New runtime-hardening tests pass; full estate suite NOT re-run at 956a983ff."
+  },
+  "lastCommands": ["npx tsc --noEmit", "npx vitest run tests/demo-journey/sqlite-runtime-guard.test.ts tests/demo-journey/simple-rate-limit.test.ts"],
+  "lastExitCodes": { "tsc": 0, "scopedVitest": 0 },
+  "cleanRoomState": "not run this session",
+  "postgresState": "schema present (provider=postgresql); Pilot NOT yet modelled/migrated",
+  "buildState": "last green build EXIT 0 / 783 pages at an EARLIER HEAD; NOT re-run at 956a983ff",
+  "prohibitedActions": ["git add -A", "git add .", "git reset --hard", "git clean -fd", "no push/deploy without owner approval", "no production DB mutation", "no fabricated production/revenue data"]
+}

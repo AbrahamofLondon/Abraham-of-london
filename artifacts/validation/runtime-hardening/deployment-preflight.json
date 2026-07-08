@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "runtime-hardening.deployment-preflight.v1",
+  "generatedAt": "2026-07-08T10:35:00Z",
+  "head": "956a983ff",
+  "scope": "Serverless deployment preflight for the flagship journey + adjacent runtime. Answers §34 questions from actual code inspection, not assumption.",
+  "findings": [
+    { "question": "What works locally only?", "answer": "Pilot intake+lifecycle, consent continuation, recommendation-context, and funnel telemetry — all local-file SQLite.", "severity": "CRITICAL", "status": "MITIGATED_FAIL_CLOSED", "detail": "As of 956a983ff these stores throw in NODE_ENV=production unless ALLOW_SQLITE_RUNTIME=1. They no longer silently lose data — but they are still NOT migrated to Postgres, so the journey is non-functional in a stateless serverless deploy until §4 is done." },
+    { "question": "What assumes one process / one filesystem / one writer?", "answer": "Every better-sqlite3 store (single connection, single file).", "severity": "CRITICAL", "status": "OPEN", "detail": "Requires Postgres/Prisma migration (§4-9,§14)." },
+    { "question": "What assumes no retry / no concurrency?", "answer": "Pilot state transitions have no optimistic concurrency (two operators can overwrite).", "severity": "HIGH", "status": "OPEN", "detail": "§9 not implemented." },
+    { "question": "What assumes trusted public input?", "answer": "Funnel endpoint.", "severity": "HIGH", "status": "MITIGATED", "detail": "§10 done: 4kb cap, json content-type, strict bounds, 60/min per-(session+ip) limit. Residual: per-instance limiter (needs shared store for a global limit); no signed journey token yet." },
+    { "question": "What assumes UK currency?", "answer": "Signal engine + CTAs hardcode £/GBP.", "severity": "MEDIUM", "status": "OPEN", "detail": "§22 not done — pricing presentation should derive from catalogue/commercial authority." },
+    { "question": "What assumes mouse input / visual perception?", "answer": "All journey pages — segmented controls lack radiogroup/aria-checked, no htmlFor, sub-44px targets.", "severity": "HIGH", "status": "OPEN", "detail": "§19-20 accessibility not implemented (global :focus-visible only)." },
+    { "question": "What assumes env vars exist?", "answer": "Prisma DATABASE_URL; interaction-spine INTERACTION_STORE_PATH (safely optional).", "severity": "MEDIUM", "status": "PARTIAL", "detail": "Clean-room env template (§15) not finished." },
+    { "question": "What assumes state never changes between read and write?", "answer": "Pilot transitions, recommendation-context.", "severity": "HIGH", "status": "OPEN", "detail": "No version/ETag guard (§9)." },
+    { "question": "Status token in URL?", "answer": "GET /api/engagements/operator-pilot?ref=<128-bit>.", "severity": "MEDIUM", "status": "OPEN", "detail": "§7 secure return flow (POST secret → HttpOnly session) not implemented; token still in query string." }
+  ],
+  "unresolvedCritical": 2,
+  "unresolvedHigh": 4,
+  "verdict": "BLOCKED — not serverless-deployable for durable customer state. The controlling-mission #1 risk is contained (fail-closed, no silent loss) but not resolved (no Postgres migration)."
+}
