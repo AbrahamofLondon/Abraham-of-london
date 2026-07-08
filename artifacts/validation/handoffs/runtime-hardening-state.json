@@ -1,9 +1,15 @@
 {
-  "schemaVersion": "runtime-hardening.handoff.v2",
-  "generatedAt": "2026-07-08T11:10:00Z",
+  "schemaVersion": "runtime-hardening.handoff.v3",
+  "generatedAt": "2026-07-08T11:35:00Z",
   "canonicalBranch": "construction/estate-restoration",
-  "canonicalHead": "a5c13bf9b",
+  "canonicalHead": "a9de33bfd",
   "worktreeClean": true,
+  "migrationTruth": {
+    "p3018Reproduced": "yes, on empty Postgres 15.18 (aol_migcheck1, dropped)",
+    "criticalFinding": "221 schema models vs ~90 migration-created tables = 131 untracked db-push baseline tables. 3 FK-exposed (DiagnosticJourney/Organisation/research_runs) + 1 ordering defect (RetainedDecision). A narrow 3-table bridge is WRONG; a full baseline of the pre-migration state is required.",
+    "nextTaskExact": "Author baseline migration from the git-historical schema.prisma as of just-before-20260413 (NOT current schema): create the 131 baseline tables in HISTORICAL shape (DiagnosticJourney WITHOUT the 7 columns 20260423 adds), handle FK ordering (tables first, then satisfiable FKs), fix RetainedDecision ordering. Prove `prisma migrate deploy` exit 0 on empty DB (§6) + upgrade sim via `migrate resolve --applied` (§7). Postgres available at postgresql://aol:aol_local@localhost:55433.",
+    "validator": "tests/database/migration-history.test.ts gates against NEW referenced-before-created tables."
+  },
   "activeWriter": "CLAUDE (Codex inactive — usage exhausted; handed off at 878874a2f)",
   "completedSections": [
     "§0 ownership flip + exact-path staging protocol",
