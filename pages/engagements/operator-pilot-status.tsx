@@ -55,11 +55,11 @@ export default function OperatorPilotStatusPage() {
           </div>
 
           <form onSubmit={submit} style={{ ...card(COLORS.gold), display: "grid", gap: 12 }}>
-            <label style={{ display: "grid", gap: 8 }}>
+            <label htmlFor="operator-pilot-status-secret" style={{ display: "grid", gap: 8 }}>
               <span style={caption(COLORS.goldSoft)}>Status secret</span>
-              <input value={secret} onChange={(e) => setSecret(e.target.value)} style={field()} autoComplete="off" spellCheck={false} />
+              <input id="operator-pilot-status-secret" value={secret} onChange={(e) => setSecret(e.target.value)} style={field()} autoComplete="off" spellCheck={false} />
             </label>
-            {error && <p role="alert" style={{ ...bodyTextSm, color: COLORS.rose }}>{error}</p>}
+            {error && <p role="alert" aria-live="polite" style={{ ...bodyTextSm, color: COLORS.rose }}>{error}</p>}
             <button type="submit" disabled={loading || !secret.trim()} style={{ ...primaryButton(), opacity: loading || !secret.trim() ? 0.55 : 1 }}>{loading ? "Checking..." : "Open status"}</button>
           </form>
 
