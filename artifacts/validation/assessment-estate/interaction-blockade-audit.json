@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-07T22:46:36.501Z",
+  "generatedAt": "2026-07-08T05:56:35.937Z",
   "counts": {
-    "CONTROLLED_ACCESS_ROUTE": 10,
-    "AUTHENTICATION_DEPENDENT": 3,
+    "CONTROLLED_ACCESS_ROUTE": 11,
+    "AUTHENTICATION_DEPENDENT": 4,
     "ENTITLEMENT_DEPENDENT": 3
   },
   "staleReadinessBlock": 0,
@@ -125,6 +125,24 @@
       "reason": "CONTROLLED_ACCESS_ROUTE",
       "authoritySource": "commercial resolver/governance",
       "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/engagements/operator-pilot-status",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/admin/operator-pilot",
+      "control": "present_or_gated",
+      "reason": "AUTHENTICATION_DEPENDENT",
+      "authoritySource": "route/auth contract",
+      "evidence": "Account or signed token required",
       "disposition": "keep",
       "fixCommit": null
     },

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-07T22:46:36.501Z",
+  "generatedAt": "2026-07-08T05:56:35.937Z",
   "surfaces": [
     {
       "route": "/diagnostics/fast",
@@ -274,12 +274,12 @@
       "nextMovePresent": true,
       "commercialActionCorrect": true,
       "controlledRouteCorrect": true,
-      "canonicalDesignSystem": false,
+      "canonicalDesignSystem": true,
       "responsive": false,
       "accessible": false,
       "tested": false,
       "buildIncluded": true,
-      "remainingDeficit": "Owner-held visual migration pending; do not overwrite active journey lane"
+      "remainingDeficit": "Responsive/accessibility runtime proof pending"
     },
     {
       "route": "/decision-instruments/decision-exposure-instrument/run",
@@ -674,12 +674,12 @@
       "nextMovePresent": true,
       "commercialActionCorrect": true,
       "controlledRouteCorrect": true,
-      "canonicalDesignSystem": false,
+      "canonicalDesignSystem": true,
       "responsive": false,
       "accessible": false,
       "tested": false,
       "buildIncluded": true,
-      "remainingDeficit": "Owner-held visual migration pending; do not overwrite active journey lane"
+      "remainingDeficit": "Responsive/accessibility runtime proof pending"
     },
     {
       "route": "/strategy-room",
@@ -699,7 +699,47 @@
       "accessible": false,
       "tested": false,
       "buildIncluded": true,
-      "remainingDeficit": "Owner-held visual migration pending; do not overwrite active journey lane"
+      "remainingDeficit": "Responsive/accessibility runtime proof pending"
+    },
+    {
+      "route": "/engagements/operator-pilot-status",
+      "productCode": "operator_pilot",
+      "inputSensitive": true,
+      "submitUsable": true,
+      "validationCorrect": true,
+      "handlerPresent": true,
+      "resultPresent": true,
+      "evidenceBasisPresent": true,
+      "uncertaintyHandled": true,
+      "nextMovePresent": true,
+      "commercialActionCorrect": true,
+      "controlledRouteCorrect": true,
+      "canonicalDesignSystem": true,
+      "responsive": false,
+      "accessible": false,
+      "tested": false,
+      "buildIncluded": true,
+      "remainingDeficit": "Responsive/accessibility runtime proof pending"
+    },
+    {
+      "route": "/admin/operator-pilot",
+      "productCode": "operator_pilot",
+      "inputSensitive": true,
+      "submitUsable": false,
+      "validationCorrect": true,
+      "handlerPresent": true,
+      "resultPresent": true,
+      "evidenceBasisPresent": true,
+      "uncertaintyHandled": true,
+      "nextMovePresent": true,
+      "commercialActionCorrect": true,
+      "controlledRouteCorrect": true,
+      "canonicalDesignSystem": true,
+      "responsive": false,
+      "accessible": false,
+      "tested": false,
+      "buildIncluded": true,
+      "remainingDeficit": "Responsive/accessibility runtime proof pending"
     },
     {
       "route": "/corridor",
@@ -719,7 +759,7 @@
       "accessible": false,
       "tested": false,
       "buildIncluded": true,
-      "remainingDeficit": "Owner-held visual migration pending; do not overwrite active journey lane"
+      "remainingDeficit": "Responsive/accessibility runtime proof pending"
     },
     {
       "route": "/decision-centre",

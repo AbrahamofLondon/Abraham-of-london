@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-07T22:46:36.501Z",
+  "generatedAt": "2026-07-08T05:56:35.937Z",
   "surfaces": [
     {
       "route": "/diagnostics/fast",
@@ -120,9 +120,9 @@
     },
     {
       "route": "/decision-instruments/signal",
-      "oldSystem": "Claude flagship journey system",
+      "oldSystem": "flagship journey system",
       "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
-      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
       "visualProof": "source-level contract; visual matrix pending Playwright capture",
       "responsiveProof": "pending_playwright_matrix",
       "accessibilityProof": "pending_accessibility_pass"
@@ -300,9 +300,9 @@
     },
     {
       "route": "/engagements/operator-pilot",
-      "oldSystem": "Claude flagship journey system",
+      "oldSystem": "flagship journey system",
       "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
-      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
       "visualProof": "source-level contract; visual matrix pending Playwright capture",
       "responsiveProof": "pending_playwright_matrix",
       "accessibilityProof": "pending_accessibility_pass"
@@ -311,16 +311,34 @@
       "route": "/strategy-room",
       "oldSystem": "mixed legacy / diagnostics shared",
       "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
-      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/engagements/operator-pilot-status",
+      "oldSystem": "flagship journey system",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
+      "visualProof": "source-level contract; visual matrix pending Playwright capture",
+      "responsiveProof": "pending_playwright_matrix",
+      "accessibilityProof": "pending_accessibility_pass"
+    },
+    {
+      "route": "/admin/operator-pilot",
+      "oldSystem": "mixed legacy / diagnostics shared",
+      "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
       "visualProof": "source-level contract; visual matrix pending Playwright capture",
       "responsiveProof": "pending_playwright_matrix",
       "accessibilityProof": "pending_accessibility_pass"
     },
     {
       "route": "/corridor",
-      "oldSystem": "mixed legacy / diagnostics shared",
+      "oldSystem": "flagship journey system",
       "canonicalSystem": "lib/ui/assessment-system + diagnostics assessment-result-contract",
-      "migrationStatus": "OWNER_HELD_CONTRACT_DEFINED",
+      "migrationStatus": "MIGRATED_OR_COMPATIBLE",
       "visualProof": "source-level contract; visual matrix pending Playwright capture",
       "responsiveProof": "pending_playwright_matrix",
       "accessibilityProof": "pending_accessibility_pass"

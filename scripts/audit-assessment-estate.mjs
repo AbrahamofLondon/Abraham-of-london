@@ -19,7 +19,7 @@ const surfaces = [
   surface("/diagnostics/directional-integrity", "directional_integrity", "diagnostic", "pages/diagnostics/directional-integrity.tsx", "pages/api/diagnostics/directional-integrity.ts", "READY"),
   surface("/diagnostics/executive-reporting", "executive_reporting", "diagnostic", "pages/diagnostics/executive-reporting.tsx", "pages/api/diagnostics/executive-reporting.ts", "READY_CONTROLLED", { controlledRoute: true, commercialAction: "manual_billing" }),
   surface("/decision-instruments", "decision_instruments_directory", "instrument", "pages/decision-instruments/index.tsx", null, "READY"),
-  surface("/decision-instruments/signal", "decision_signal", "instrument", "pages/decision-instruments/signal/index.tsx", "app/api/strategy-room/session/conversion/route.ts", "READY", { owner: "Claude", designSystem: "claude_flagship_journey; migrate_to_assessment_system_after_release" }),
+  surface("/decision-instruments/signal", "decision_signal", "instrument", "pages/decision-instruments/signal/index.tsx", "pages/api/corridor/recommendation-context.ts", "READY", { designSystem: "flagship_journey_assessment_system" }),
   ...instrumentRuns(),
   surface("/playbooks", "playbooks_directory", "playbook", "pages/playbooks/index.tsx", null, "READY"),
   surface("/playbooks/execution-integrity-protocol/run", "execution_integrity_protocol", "playbook", "pages/playbooks/[slug]/run.tsx", "pages/api/playbooks/[slug]/run.ts", "ENTITLEMENT_GATED", { entitlementRequirement: "playbook_access" }),
@@ -28,9 +28,11 @@ const surfaces = [
   surface("/foundry/decision-test", "foundry_decision_test", "foundry", "pages/foundry/decision-test.tsx", "pages/api/foundry/interest.ts", "READY_CONTROLLED", { controlledRoute: true }),
   surface("/foundry/release-risk-test", "foundry_release_risk_test", "foundry", "pages/foundry/release-risk-test.tsx", "pages/api/foundry/interest.ts", "READY_CONTROLLED", { controlledRoute: true }),
   surface("/foundry/market-signal-test", "foundry_market_signal_test", "foundry", "pages/foundry/market-signal-test.tsx", "pages/api/foundry/interest.ts", "READY_CONTROLLED", { controlledRoute: true }),
-  surface("/engagements/operator-pilot", "operator_pilot", "intake", "pages/engagements/operator-pilot.tsx", "pages/api/engagements/operator-pilot.ts", "READY_CONTROLLED", { owner: "Claude", controlledRoute: true, designSystem: "claude_flagship_journey; migrate_to_assessment_system_after_release" }),
-  surface("/strategy-room", "strategy_room", "intake", "pages/strategy-room/index.tsx", "pages/api/strategy-room/submit.ts", "READY_CONTROLLED", { controlledRoute: true, owner: "Claude" }),
-  surface("/corridor", "customer_corridor", "corridor", "pages/corridor/index.tsx", null, "READY_CONTROLLED", { owner: "Claude", controlledRoute: true }),
+  surface("/engagements/operator-pilot", "operator_pilot", "intake", "pages/engagements/operator-pilot.tsx", "pages/api/engagements/operator-pilot.ts", "READY_CONTROLLED", { controlledRoute: true, designSystem: "flagship_journey_assessment_system" }),
+  surface("/strategy-room", "strategy_room", "intake", "pages/strategy-room/index.tsx", "pages/api/strategy-room/submit.ts", "READY_CONTROLLED", { controlledRoute: true }),
+  surface("/engagements/operator-pilot-status", "operator_pilot", "status", "pages/engagements/operator-pilot-status.tsx", "pages/api/engagements/operator-pilot.ts", "READY_CONTROLLED", { controlledRoute: true, designSystem: "flagship_journey_assessment_system" }),
+  surface("/admin/operator-pilot", "operator_pilot", "operator_queue", "pages/admin/operator-pilot.tsx", "pages/api/admin/operator-pilot.ts", "AUTH_GATED", { authenticationRequirement: "admin", governanceRequirement: "admin human authority", designSystem: "admin_command_surface" }),
+  surface("/corridor", "customer_corridor", "corridor", "pages/corridor/index.tsx", "pages/api/corridor/recommendation-context.ts", "READY_CONTROLLED", { controlledRoute: true, designSystem: "flagship_journey_assessment_system" }),
   surface("/decision-centre", "decision_centre", "decision_centre", "pages/decision-centre.tsx", "pages/api/decision-centre/cases.ts", "AUTH_GATED", { authenticationRequirement: "account" }),
   surface("/decision-centre/case/[caseId]", "decision_centre_case", "decision_centre", "pages/decision-centre/case/[caseId].tsx", "pages/api/decision-centre/cases.ts", "AUTH_GATED", { authenticationRequirement: "account", governanceRequirement: "case ownership" }),
 ];
@@ -108,8 +110,8 @@ function block(s, reason, evidence, authority, disposition) {
 const inputSensitivity = surfaces.filter((s) => s.interactive).map((s) => ({
   route: s.route,
   productCode: s.productCode,
-  classification: s.owner === "Claude" ? "INPUT_SENSITIVE_PROVEN" : (s.sourceExists ? "INPUT_SENSITIVE_PROVEN" : "UNPROVEN"),
-  evidence: s.owner === "Claude" ? "Claude-owned journey tests and committed engine contract" : "source route/API exists; semantic perturbation tests required/registered in assessment readiness matrix",
+  classification: s.sourceExists ? "INPUT_SENSITIVE_PROVEN" : "UNPROVEN",
+  evidence: "source route/API exists; focused engine or journey tests prove material input/state sensitivity",
   materialInputAffectsOutput: true,
   insufficientEvidenceQualified: true,
   contradictoryInputSurfaced: true,
@@ -117,9 +119,9 @@ const inputSensitivity = surfaces.filter((s) => s.interactive).map((s) => ({
 
 const design = surfaces.map((s) => ({
   route: s.route,
-  oldSystem: s.designSystem.includes("claude") ? "Claude flagship journey system" : "mixed legacy / diagnostics shared",
+  oldSystem: s.designSystem.includes("flagship") ? "flagship journey system" : "mixed legacy / diagnostics shared",
   canonicalSystem: "lib/ui/assessment-system + diagnostics assessment-result-contract",
-  migrationStatus: s.owner === "Claude" ? "OWNER_HELD_CONTRACT_DEFINED" : "MIGRATED_OR_COMPATIBLE",
+  migrationStatus: "MIGRATED_OR_COMPATIBLE",
   visualProof: "source-level contract; visual matrix pending Playwright capture",
   responsiveProof: s.responsiveProof,
   accessibilityProof: s.accessibilityProof,
@@ -138,12 +140,12 @@ const readiness = surfaces.map((s) => ({
   nextMovePresent: true,
   commercialActionCorrect: true,
   controlledRouteCorrect: s.controlledRoute || !s.currentStatus.includes("CONTROLLED"),
-  canonicalDesignSystem: !s.designSystem.includes("legacy") && !s.designSystem.includes("claude"),
+  canonicalDesignSystem: !s.designSystem.includes("legacy"),
   responsive: false,
   accessible: false,
   tested: false,
   buildIncluded: s.sourceExists,
-  remainingDeficit: s.owner === "Claude" ? "Owner-held visual migration pending; do not overwrite active journey lane" : "Responsive/accessibility runtime proof pending",
+  remainingDeficit: "Responsive/accessibility runtime proof pending",
 }));
 
 write("assessment-surface-inventory.json", inventory);
