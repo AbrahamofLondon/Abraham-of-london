@@ -5,7 +5,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { qualifyPilotIntake, type PilotIntake } from "@/lib/engagements/operator-pilot-qualification";
-import { savePilotIntake, getPilotIntakeByRef, toCustomerStatus } from "@/lib/engagements/pilot-intake-store";
+import { savePilotIntake, getPilotIntakeByRef, toCustomerStatus } from "@/lib/engagements/pilot-intake-store.composed";
 import { track } from "@/lib/analytics/track";
 import { recordFunnelEvent } from "@/lib/demo/funnel-event-store";
 
@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "GET") {
     const ref = typeof req.query.ref === "string" ? req.query.ref : "";
     if (!ref) return res.status(400).json({ error: "reference required" });
-    const record = getPilotIntakeByRef(ref);
+    const record = await getPilotIntakeByRef(ref);
     if (!record) return res.status(404).json({ error: "not found" });
     return res.status(200).json(toCustomerStatus(record));
   }
@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (qualification.status === "INCOMPLETE") {
       return res.status(422).json({ error: "Intake incomplete", qualification });
     }
-    const record = savePilotIntake(intake, qualification);
+    const record = await savePilotIntake(intake, qualification);
     track("operator_pilot_intake_submitted", { qualificationStatus: qualification.status });
     try {
       recordFunnelEvent({

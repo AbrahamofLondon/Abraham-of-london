@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdmin } from "@/lib/access/require-admin";
-import { listPilotQueue, transitionPilotState, type PilotLifecycleState } from "@/lib/engagements/pilot-intake-store";
+import { listPilotQueue, transitionPilotState, type PilotLifecycleState } from "@/lib/engagements/pilot-intake-store.composed";
 import { recordFunnelEvent } from "@/lib/demo/funnel-event-store";
 
 const STATES: PilotLifecycleState[] = ["SUBMITTED", "UNDER_REVIEW", "MORE_INFORMATION_REQUIRED", "RESUBMITTED", "HUMAN_REVIEW", "POTENTIALLY_SUITABLE", "ACCEPTED", "DECLINED", "SCOPING", "COMMERCIAL_CONTINUATION"];
@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     const status = typeof req.query.status === "string" && STATES.includes(req.query.status as PilotLifecycleState) ? req.query.status as PilotLifecycleState : undefined;
-    return res.status(200).json({ items: listPilotQueue({ status }) });
+    return res.status(200).json({ items: await listPilotQueue({ status }) });
   }
 
   if (req.method === "PATCH") {
@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const nextState = req.body?.nextState as PilotLifecycleState;
     if (!reference || !STATES.includes(nextState)) return res.status(400).json({ error: "valid reference and nextState required" });
     try {
-      const record = transitionPilotState(reference, nextState, { email: admin.email, humanAuthority: true }, {
+      const record = await transitionPilotState(reference, nextState, { email: admin.email, humanAuthority: true }, {
         requestedInformation: typeof req.body?.requestedInformation === "string" ? req.body.requestedInformation : null,
         finalDecision: typeof req.body?.finalDecision === "string" ? req.body.finalDecision : null,
         operatorNote: typeof req.body?.operatorNote === "string" ? req.body.operatorNote : null,

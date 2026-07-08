@@ -110,7 +110,7 @@ export function fingerprintPilotIntake(intake: PilotIntake): string {
   })).digest("hex");
 }
 
-function initialState(qualification: QualificationResult): PilotLifecycleState {
+export function initialState(qualification: QualificationResult): PilotLifecycleState {
   if (qualification.status === "MORE_INFO_REQUIRED" || qualification.status === "INCOMPLETE") return "MORE_INFORMATION_REQUIRED";
   if (qualification.status === "HUMAN_REVIEW_REQUIRED") return "HUMAN_REVIEW";
   if (qualification.status === "POTENTIALLY_SUITABLE") return "POTENTIALLY_SUITABLE";
@@ -184,7 +184,7 @@ export function listPilotQueue(opts: { status?: PilotLifecycleState; limit?: num
   });
 }
 
-function nextOperation(record: PilotIntakeRecord): string {
+export function nextOperation(record: PilotIntakeRecord): string {
   if (record.reviewStatus === "SUBMITTED" || record.reviewStatus === "RESUBMITTED") return "Triage and assign reviewer";
   if (record.reviewStatus === "UNDER_REVIEW") return "Decide whether more information or human review is required";
   if (record.reviewStatus === "MORE_INFORMATION_REQUIRED") return "Wait for applicant resubmission";
@@ -194,7 +194,7 @@ function nextOperation(record: PilotIntakeRecord): string {
   return "No operator action";
 }
 
-const ALLOWED: Record<PilotLifecycleState, PilotLifecycleState[]> = {
+export const ALLOWED: Record<PilotLifecycleState, PilotLifecycleState[]> = {
   SUBMITTED: ["UNDER_REVIEW", "MORE_INFORMATION_REQUIRED", "HUMAN_REVIEW", "DECLINED"],
   UNDER_REVIEW: ["MORE_INFORMATION_REQUIRED", "HUMAN_REVIEW", "POTENTIALLY_SUITABLE", "DECLINED"],
   MORE_INFORMATION_REQUIRED: ["RESUBMITTED", "DECLINED"],
