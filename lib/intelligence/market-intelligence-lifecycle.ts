@@ -1,11 +1,15 @@
 export type MarketIntelligenceLifecycleState =
+  | "PLANNED"
+  | "EVIDENCE_COLLECTION"
   | "DRAFT"
-  | "SCHEDULED"
+  | "RELEASE_CANDIDATE"
+  | "RELEASE_AUTHORIZED"
   | "ACTIVE"
   | "ACTIVE_UNTIL_SUPERSEDED"
   | "SUPERSEDED"
   | "ARCHIVED"
-  | "RETIRED";
+  | "RETIRED"
+  | "SCHEDULED";
 
 export type MarketIntelligenceEdition =
   | "PUBLIC_SURFACE"
@@ -21,9 +25,19 @@ export type MarketIntelligenceLifecycleRecord = {
   year: number;
   coveragePeriod: string;
   decisionWindow: string;
+  periodStart?: string;
+  periodEnd?: string;
   publishedAt?: string;
   /** For drafts/release candidates: the scheduled publication date (ISO). */
   publicationTarget?: string;
+  /** Date after which data must be locked before release. */
+  dataLockRequiredAfter?: string;
+  /** When the data was actually locked. */
+  dataLockedAt?: string | null;
+  /** When the edition became a release candidate. */
+  releaseCandidateAt?: string | null;
+  /** When owner explicitly authorised release. */
+  ownerAuthorizedAt?: string | null;
   updatedAt?: string;
   version?: string;
   lifecycleState: MarketIntelligenceLifecycleState;
@@ -49,6 +63,8 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     year: 2026,
     coveragePeriod: "Q1 2026",
     decisionWindow: "Q2 2026",
+    periodStart: "2026-01-01",
+    periodEnd: "2026-03-31",
     publishedAt: "2026-04-08",
     updatedAt: "2026-07-06",
     version: "2.0.0",
@@ -74,7 +90,13 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     year: 2026,
     coveragePeriod: "Q2 2026",
     decisionWindow: "Q3 2026",
+    periodStart: "2026-04-01",
+    periodEnd: "2026-06-30",
     publicationTarget: "2026-07-08",
+    dataLockRequiredAfter: "2026-07-01",
+    dataLockedAt: null,
+    releaseCandidateAt: null,
+    ownerAuthorizedAt: null,
     updatedAt: "2026-07-06",
     version: "1.0.0-rc",
     lifecycleState: "DRAFT",

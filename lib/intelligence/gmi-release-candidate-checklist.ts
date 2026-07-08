@@ -5,6 +5,7 @@ import {
 } from "./market-intelligence-call-ledger";
 import { getMarketIntelligenceRecord } from "./market-intelligence-lifecycle";
 import { getConfidencePostureForReport } from "./market-intelligence-confidence-posture";
+import { getPriorReviewWindow } from "./gmi-edition-lifecycle";
 
 export type GmiChecklistCategory =
   | "SECTION_COMPLETENESS"
@@ -59,8 +60,8 @@ export function buildGmiReleaseChecklist(reportId: string): GmiReleaseChecklist 
     record?.lifecycleState === "ACTIVE_UNTIL_SUPERSEDED";
   const isDraft = !record || record.lifecycleState === "DRAFT";
 
-  // Prior-call review window for this report
-  const reviewWindow = reportId === "GMI-Q2-2026" ? "Q2 2026" : null;
+  // Prior-call review window derived generically from edition ID (no hardcoded edition IDs)
+  const reviewWindow = record ? getPriorReviewWindow(record as any) : null;
   const priorCalls = reviewWindow ? getCallsPendingReview(reviewWindow) : [];
   const callsForPrior = record?.replaces
     ? getCallsForReport(record.replaces)
