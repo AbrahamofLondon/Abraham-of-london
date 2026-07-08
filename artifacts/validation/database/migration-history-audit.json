@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "database.migration-history-audit.v1",
+  "generatedAt": "2026-07-08T10:50:00Z",
+  "head": "956a983ff",
+  "provider": "postgresql",
+  "migrationCount": 54,
+  "method": "Static analysis of prisma/migrations: extracted every CREATE TABLE and every FK REFERENCES across all 54 migrations, then computed referenced-minus-created to find tables assumed by migration SQL but never created by any tracked migration (the P3018 class).",
+  "rootCause": "The estate adopted Prisma migrations AFTER an initial `db push` baseline. Three tables that were created by that untracked baseline are referenced by later migrations' foreign keys, but no tracked migration CREATEs them. On a FRESH database, `prisma migrate deploy` fails at the first migration that references such a table (P3018). This is a baseline-history gap, not a single-migration ordering bug.",
+  "summary": {
+    "tablesCreatedByMigrations": 90,
+    "tablesReferencedByFk": 16,
+    "UNTRACKED_SCHEMA_ASSUMPTION": 3,
+    "UNRESOLVED_MIGRATION_DEPENDENCY": 3
+  },
+  "untrackedBaselineTables": [
+    {
+      "table": "DiagnosticJourney",
+      "inSchemaPrisma": true,
+      "createdByMigration": null,
+      "firstReferencedByMigration": "20260422_add_diagnostic_evidence_graph",
+      "alsoReferencedBy": ["20260423_add_longitudinal_multi_outcome_infrastructure"],
+      "freshInstallSafe": false,
+      "existingDatabaseSafe": true,
+      "failureMode": "P3018 — FK REFERENCES \"DiagnosticJourney\"(\"id\") with no prior CREATE TABLE",
+      "repairAction": "Prepend a baseline migration (before 20260422) that CREATEs DiagnosticJourney (IF NOT EXISTS) matching prisma/schema.prisma; for existing DBs where it already exists, the IF NOT EXISTS makes it a no-op and the migration is marked applied."
+    },
+    {
+      "table": "Organisation",
+      "inSchemaPrisma": true,
+      "createdByMigration": null,
+      "firstReferencedByMigration": "20260423_add_enterprise_retainer_contracts",
+      "freshInstallSafe": false,
+      "existingDatabaseSafe": true,
+      "failureMode": "P3018 — FK REFERENCES \"Organisation\" with no prior CREATE TABLE",
+      "repairAction": "Include in the baseline migration (IF NOT EXISTS), matching schema.prisma."
+    },
+    {
+      "table": "research_runs",
+      "inSchemaPrisma": true,
+      "createdByMigration": null,
+      "firstReferencedByMigration": "20260529_add_finding_feedback",
+      "freshInstallSafe": false,
+      "existingDatabaseSafe": true,
+      "failureMode": "P3018 — FK REFERENCES \"research_runs\" with no prior CREATE TABLE",
+      "repairAction": "Include in the baseline migration (IF NOT EXISTS), matching schema.prisma."
+    }
+  ],
+  "repairStrategy": {
+    "freshInstall": "Add ONE baseline migration timestamped before 20260413 (the earliest tracked migration) that creates the 3 untracked tables (and any other pre-migration baseline objects) with CREATE TABLE IF NOT EXISTS + their indexes/enums. Generate the exact DDL with `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script` and extract ONLY the objects not already created by existing migrations. Then `prisma migrate deploy` on an empty DB must reach the canonical schema.",
+    "existingDatabase": "The baseline migration is idempotent (IF NOT EXISTS) so it is a no-op on databases that already have these tables. For databases whose _prisma_migrations lacks the baseline row, run `prisma migrate resolve --applied <baseline>` after confirming the tables exist. Do NOT reset or drop.",
+    "doNot": ["rewrite applied migration history casually", "drop tables", "reset production", "use `prisma db push` as the final migration strategy", "mark migrations applied without this documented reconciliation"]
+  },
+  "validationCommands": [
+    "createdb aol_freshcheck",
+    "DATABASE_URL=postgres://.../aol_freshcheck prisma migrate deploy   # must exit 0 (currently fails P3018 until baseline added)",
+    "DATABASE_URL=postgres://.../aol_freshcheck prisma migrate status    # must show all applied, no drift"
+  ],
+  "executionStatus": "AUDIT COMPLETE. Baseline migration NOT YET authored/executed — requires a clean-room Postgres + shadow DB to generate exact DDL and prove deploy. Tracked as §6 (BLOCKED pending clean-room)."
+}

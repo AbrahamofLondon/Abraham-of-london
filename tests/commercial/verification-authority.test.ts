@@ -41,7 +41,9 @@ describe("verification authority — no mirror imports in certification scripts"
       const content = readFileSync(join(scriptsDir, entry.name), "utf8");
       expect(content, `${entry.name} must not import _commercial-mirror.mjs`).not.toContain("_commercial-mirror");
     }
-  }, 30000);
+    // fs-walk of the large scripts/ dir; generous timeout so it survives starvation under
+    // full-suite concurrency (passes in <1s in isolation) — assertion unchanged.
+  }, 120000);
 });
 
 describe("verification authority — production resolver is the authority", () => {

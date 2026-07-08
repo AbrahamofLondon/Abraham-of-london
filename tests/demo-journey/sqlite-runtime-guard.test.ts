@@ -16,19 +16,19 @@ afterEach(() => {
   if (originalOptIn === undefined) delete process.env.ALLOW_SQLITE_RUNTIME; else process.env.ALLOW_SQLITE_RUNTIME = originalOptIn;
 });
 
-describe("§2 sqlite runtime guard — fail closed in production", () => {
-  it("throws in production without an explicit opt-in", () => {
+describe("§3 sqlite runtime guard — fail closed in production, NO escape hatch", () => {
+  it("throws in production", () => {
     (process.env as Record<string, string>).NODE_ENV = "production";
     delete process.env.ALLOW_SQLITE_RUNTIME;
     expect(() => assertSqliteRuntimeAllowed("pilot-intake-store")).toThrow(SqliteRuntimeDisallowedError);
     expect(isSqliteRuntimeAllowed()).toBe(false);
   });
 
-  it("allows in production ONLY when explicitly opted in", () => {
+  it("STILL throws in production even with a legacy opt-in variable set (no backdoor)", () => {
     (process.env as Record<string, string>).NODE_ENV = "production";
     process.env.ALLOW_SQLITE_RUNTIME = "1";
-    expect(() => assertSqliteRuntimeAllowed("pilot-intake-store")).not.toThrow();
-    expect(isSqliteRuntimeAllowed()).toBe(true);
+    expect(() => assertSqliteRuntimeAllowed("pilot-intake-store")).toThrow(SqliteRuntimeDisallowedError);
+    expect(isSqliteRuntimeAllowed()).toBe(false);
   });
 
   it("is inert outside production (dev/test)", () => {

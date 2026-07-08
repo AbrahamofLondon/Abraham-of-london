@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "runtime-hardening.route-store-edges.v1",
+  "generatedAt": "2026-07-08T11:05:00Z",
+  "head": "956a983ff",
+  "purpose": "§2 — explain the 5-routes-vs-4-stores count explicitly. One store can serve multiple routes; one route can touch multiple stores.",
+  "edges": [
+    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "savePilotIntake / getPilotIntakeByRef / toCustomerStatus", "storeInterface": "PilotIntakeStore", "adapter": "sqlite (pilot-intakes.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
+    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "recordFunnelEvent (PILOT_SUBMITTED / PILOT_MORE_INFO_REQUIRED)", "storeInterface": "FunnelEventStore", "adapter": "sqlite (funnel-events.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
+    { "route": "pages/api/admin/operator-pilot.ts", "runtimeService": "listPilotQueue / transitionPilotState", "storeInterface": "PilotIntakeStore", "adapter": "sqlite (pilot-intakes.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
+    { "route": "pages/api/demo/funnel-event.ts", "runtimeService": "recordFunnelEvent", "storeInterface": "FunnelEventStore", "adapter": "sqlite (funnel-events.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
+    { "route": "pages/api/demo/signal-consent-continuation.ts", "runtimeService": "signal-consent-transition-store", "storeInterface": "SignalConsentTransitionStore", "adapter": "sqlite", "authority": "LOCAL_FILE_SQLITE" },
+    { "route": "pages/api/corridor/recommendation-context.ts", "runtimeService": "recommendation-context-store", "storeInterface": "RecommendationContextStore", "adapter": "sqlite", "authority": "LOCAL_FILE_SQLITE" }
+  ],
+  "reconciliation": {
+    "distinctProductionRoutesUsingSqlite": 5,
+    "routesList": [
+      "pages/api/engagements/operator-pilot.ts",
+      "pages/api/admin/operator-pilot.ts",
+      "pages/api/demo/funnel-event.ts",
+      "pages/api/demo/signal-consent-continuation.ts",
+      "pages/api/corridor/recommendation-context.ts"
+    ],
+    "distinctSqliteStoreAuthorities": 4,
+    "storesList": ["PilotIntakeStore", "FunnelEventStore", "SignalConsentTransitionStore", "RecommendationContextStore"],
+    "explanationOf5vs4": "PilotIntakeStore is used by 2 routes (engagements + admin). FunnelEventStore is used by 2 routes (demo/funnel-event + engagements/operator-pilot, which also writes the pilot store). So 6 route→store EDGES across 5 distinct routes and 4 distinct stores.",
+    "PRODUCTION_ROUTES_USING_SQLITE": 5,
+    "SQLITE_STORE_AUTHORITIES": 4,
+    "UNMAPPED_ROUTE_STORE_EDGE": 0
+  },
+  "guardCoverage": "All 4 stores now call assertSqliteRuntimeAllowed() in getDb() → fail closed in NODE_ENV=production with no escape hatch (§3)."
+}
