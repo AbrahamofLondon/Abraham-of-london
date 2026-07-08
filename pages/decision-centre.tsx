@@ -97,6 +97,8 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
   const [submitting, setSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const formIdPrefix = React.useId();
+  const formId = React.useCallback((name: string) => `${formIdPrefix}-${name}`, [formIdPrefix]);
 
   const canReport = rec.status === 'RECOMMENDED' || rec.status === 'ACCEPTED' || rec.status === 'ACTED_ON';
 
@@ -212,17 +214,18 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
       {reporting && (
         <form onSubmit={handleSubmit} style={{ marginTop: "8px", borderTop: `1px solid ${GOLD}18`, paddingTop: "8px" }}>
           {error && (
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(252,165,165,0.62)", marginBottom: "6px" }}>
+            <p role="alert" aria-live="polite" style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(252,165,165,0.62)", marginBottom: "6px" }}>
               {error}
             </p>
           )}
 
           <div style={{ display: "grid", gap: "6px" }}>
             <div>
-              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "2px" }}>
+              <label htmlFor={formId("signal")} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
                 Outcome
               </label>
               <select
+                id={formId("signal")}
                 name="signal"
                 required
                 style={{
@@ -246,10 +249,11 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
             </div>
 
             <div>
-              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "2px" }}>
+              <label htmlFor={formId("what-changed")} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
                 What changed
               </label>
               <textarea
+                id={formId("what-changed")}
                 name="whatChanged"
                 rows={2}
                 style={{
@@ -266,10 +270,11 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
             </div>
 
             <div>
-              <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "2px" }}>
+              <label htmlFor={formId("blocker")} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
                 Blocker (optional)
               </label>
               <select
+                id={formId("blocker")}
                 name="blocker"
                 style={{
                   ...mono,

@@ -127,8 +127,12 @@ export default function DecisionTestPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="mt-10">
+            <label htmlFor="foundry-decision-test-situation" className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
+              Decision situation
+            </label>
             <div className="border border-white/[0.10] bg-white/[0.02]">
               <textarea
+                id="foundry-decision-test-situation"
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Describe your situation — what is the decision, what is at stake, what is the deadline or pressure, who is involved, and what constraints exist?"
@@ -139,7 +143,7 @@ export default function DecisionTestPage() {
             </div>
 
             {error && (
-              <p className="mt-3 text-[13px] leading-[1.6] text-red-400/80">{error}</p>
+              <p role="alert" aria-live="polite" className="mt-3 text-[13px] leading-[1.6] text-red-400/80">{error}</p>
             )}
 
             <div className="mt-5 flex flex-wrap gap-3">
