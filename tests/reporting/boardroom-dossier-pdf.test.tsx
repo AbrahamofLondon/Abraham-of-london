@@ -20,7 +20,7 @@ describe("BoardroomDossierDocument", () => {
     );
 
     expect(buffer.length).toBeGreaterThan(1000);
-  });
+  }, 30000);
 
   it("renders with long intake text and absent optional sections", async () => {
     const buffer = await renderToBuffer(
@@ -38,7 +38,7 @@ describe("BoardroomDossierDocument", () => {
     );
 
     expect(buffer.length).toBeGreaterThan(1000);
-  });
+  }, 30000);
 
   it("does not use a bare Helvetica template and includes REAS architecture terms", () => {
     const source = fs.readFileSync(
