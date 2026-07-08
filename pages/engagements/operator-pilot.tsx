@@ -19,6 +19,7 @@ import WorkedDecisionExample from "@/components/trust/WorkedDecisionExample";
 import { track } from "@/lib/analytics/track";
 import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
 import { COLORS, FONTS, caption as dsCaption, bodyTextSm as dsBodySm, field as dsField, primaryButton as dsPrimary, hexA } from "@/lib/demo/journey-design";
+import { isPilotApiErrorResponse, isPilotIntakeSuccessResponse, isPilotIntakeValidationErrorResponse, type PilotIntakeSuccessResponse } from "@/lib/engagements/operator-pilot-api-contract";
 
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
@@ -259,7 +260,8 @@ function PilotIntakeForm() {
   const [f, setF] = React.useState<IntakeState>(INTAKE_DEFAULT);
   const [submitting, setSubmitting] = React.useState(false);
   const startedRef = React.useRef(false);
-  const [outcome, setOutcome] = React.useState<{ reference?: string; qualificationStatus: string; reviewStatus?: string; nextStep: string; reasons?: string[]; statusAccess?: { statusUrl: string; secret: string; expiresAt: string | null } | null } | null>(null);
+  const idempotencyKeyRef = React.useRef<string>(typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `pilot-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const [outcome, setOutcome] = React.useState<PilotIntakeSuccessResponse | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const fieldStyle: React.CSSProperties = dsField();
   const lbl: React.CSSProperties = dsCaption(COLORS.muted);
@@ -267,12 +269,13 @@ function PilotIntakeForm() {
   async function submit() {
     setSubmitting(true); setError(null);
     try {
-      const res = await fetch("/api/engagements/operator-pilot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...f, decisionDeadline: null }) });
-      const data = await res.json();
-      if (res.status === 422) { setError("Some required fields are missing — please complete them: " + (data?.qualification?.missingFields ?? []).join(", ")); return; }
-      if (!res.ok) { setError(data?.error ?? "Submission failed."); return; }
-      track("operator_pilot_intake_result_viewed", { qualificationStatus: data?.qualificationStatus });
-      recordJourneyEvent(data?.qualificationStatus === "MORE_INFO_REQUIRED" ? "PILOT_MORE_INFO_REQUIRED" : "PILOT_SUBMITTED");
+      const res = await fetch("/api/engagements/operator-pilot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...f, decisionDeadline: null, idempotencyKey: idempotencyKeyRef.current }) });
+      const data: unknown = await res.json().catch(() => null);
+      if (res.status === 422 && isPilotIntakeValidationErrorResponse(data)) { setError("Some required fields are missing — please complete them: " + data.qualification.missingFields.join(", ")); return; }
+      if (!res.ok) { setError(isPilotApiErrorResponse(data) ? data.error : "Submission failed."); return; }
+      if (!isPilotIntakeSuccessResponse(data)) { setError("Submission response was not recognised. Please retry."); return; }
+      track("operator_pilot_intake_result_viewed", { qualificationStatus: data.qualificationStatus });
+      recordJourneyEvent(data.qualificationStatus === "MORE_INFO_REQUIRED" ? "PILOT_MORE_INFO_REQUIRED" : "PILOT_SUBMITTED");
       setOutcome(data);
     } catch { setError("Network error — please try again."); }
     finally { setSubmitting(false); }

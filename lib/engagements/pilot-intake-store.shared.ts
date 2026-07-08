@@ -40,6 +40,13 @@ export interface PilotIntakeRecord {
   statusSecretExpiresAt: string | null;
   statusSecretRevokedAt: string | null;
   statusSecret?: string;
+  duplicateClassification?: PilotDuplicateClassification;
+}
+
+export type PilotDuplicateClassification = "EXACT_RETRY" | "POSSIBLE_DUPLICATE" | "MATERIAL_RESUBMISSION" | "NEW_INTAKE";
+
+export interface SavePilotIntakeOptions {
+  idempotencyKey?: string | null;
 }
 
 export interface PilotCustomerStatus {
@@ -106,6 +113,12 @@ export function fingerprintPilotIntake(intake: PilotIntake): string {
     willingToParticipateInCheckpoints: Boolean(intake.willingToParticipateInCheckpoints),
     contactEmail: canonicalText(intake.contactEmail),
   })).digest("hex");
+}
+
+export function hashPilotIdempotencyKey(key: string): string {
+  const normalized = String(key ?? "").normalize("NFKC").trim();
+  if (normalized.length < 12 || normalized.length > 160) throw new Error("INVALID_PILOT_IDEMPOTENCY_KEY");
+  return crypto.createHash("sha256").update(`operator-pilot-idempotency-v1:${normalized}`).digest("hex");
 }
 
 export function initialState(qualification: QualificationResult): PilotLifecycleState {

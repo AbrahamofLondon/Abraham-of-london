@@ -13,6 +13,7 @@ import crypto from "node:crypto";
 import { hashPilotStatusAccessIdentifier, hashPilotStatusSecret, newPilotStatusSecret } from "./pilot-status-security";
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
 import { assertSqliteRuntimeAllowed } from "@/lib/runtime/sqlite-runtime-guard";
+import { hashPilotIdempotencyKey, type SavePilotIntakeOptions } from "./pilot-intake-store.shared";
 
 export type PilotLifecycleState =
   | "SUBMITTED"
@@ -44,6 +45,7 @@ export interface PilotIntakeRecord {
   statusSecretExpiresAt: string | null;
   statusSecretRevokedAt: string | null;
   statusSecret?: string;
+  duplicateClassification?: "EXACT_RETRY" | "POSSIBLE_DUPLICATE" | "MATERIAL_RESUBMISSION" | "NEW_INTAKE";
 }
 
 export interface PilotCustomerStatus {
@@ -91,6 +93,14 @@ function schema(db: Database.Database): void {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_pilot_review_status ON pilot_intakes(review_status)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_pilot_fingerprint ON pilot_intakes(intake_fingerprint)`);
   db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_pilot_status_secret ON pilot_intakes(status_secret_hash)`);
+  db.exec(`CREATE TABLE IF NOT EXISTS pilot_submission_idempotency (
+    idempotency_hash TEXT PRIMARY KEY,
+    request_fingerprint TEXT NOT NULL,
+    intake_ref TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_pilot_idempotency_intake ON pilot_submission_idempotency(intake_ref)`);
 }
 
 function getDb(): Database.Database {
@@ -167,11 +177,30 @@ function rowToRecord(r: any): PilotIntakeRecord {
   };
 }
 
-export function savePilotIntake(intake: PilotIntake, qualification: QualificationResult, now = new Date().toISOString()): PilotIntakeRecord {
+export function savePilotIntake(intake: PilotIntake, qualification: QualificationResult, optionsOrNow: SavePilotIntakeOptions | string = {}, maybeNow?: string): PilotIntakeRecord {
+  const now = typeof optionsOrNow === "string" ? optionsOrNow : (maybeNow ?? new Date().toISOString());
+  const options = typeof optionsOrNow === "string" ? {} : optionsOrNow;
   const db = getDb();
   const fp = fingerprintPilotIntake(intake);
+  const idempotencyHash = options.idempotencyKey ? hashPilotIdempotencyKey(options.idempotencyKey) : null;
+  if (idempotencyHash) {
+    const retry = db.prepare(`SELECT * FROM pilot_submission_idempotency WHERE idempotency_hash = ?`).get(idempotencyHash) as any;
+    if (retry && Date.parse(retry.expires_at) > Date.parse(now)) {
+      if (retry.request_fingerprint !== fp) throw new Error("PILOT_IDEMPOTENCY_CONFLICT");
+      const existingRetry = getPilotIntakeByRef(retry.intake_ref);
+      if (existingRetry) return { ...existingRetry, duplicateClassification: "EXACT_RETRY" };
+    }
+  }
   const replay = db.prepare(`SELECT * FROM pilot_intakes WHERE intake_fingerprint = ? ORDER BY created_at DESC LIMIT 1`).get(fp);
-  if (replay) return rowToRecord(replay);
+  if (replay) {
+    const existing = rowToRecord(replay);
+    if (idempotencyHash) {
+      db.prepare(`INSERT OR IGNORE INTO pilot_submission_idempotency (idempotency_hash, request_fingerprint, intake_ref, created_at, expires_at) VALUES (?, ?, ?, ?, ?)`).run(
+        idempotencyHash, fp, existing.reference, now, new Date(Date.parse(now) + 24 * 60 * 60 * 1000).toISOString(),
+      );
+    }
+    return { ...existing, duplicateClassification: idempotencyHash ? "EXACT_RETRY" : "POSSIBLE_DUPLICATE" };
+  }
   const reference = newReference();
   const state = initialState(qualification);
   const statusSecret = newPilotStatusSecret();
@@ -187,9 +216,13 @@ export function savePilotIntake(intake: PilotIntake, qualification: Qualificatio
     statusSecretExpiresAt,
     null,
   );
-  return { ...getPilotIntakeByRef(reference)!, statusSecret };
+  if (idempotencyHash) {
+    db.prepare(`INSERT OR IGNORE INTO pilot_submission_idempotency (idempotency_hash, request_fingerprint, intake_ref, created_at, expires_at) VALUES (?, ?, ?, ?, ?)`).run(
+      idempotencyHash, fp, reference, now, new Date(Date.parse(now) + 24 * 60 * 60 * 1000).toISOString(),
+    );
+  }
+  return { ...getPilotIntakeByRef(reference)!, statusSecret, duplicateClassification: "NEW_INTAKE" };
 }
-
 export function getPilotIntakeByRef(reference: string): PilotIntakeRecord | null {
   if (!/^pilot_[a-f0-9]{32}$/.test(reference)) return null;
   const r = getDb().prepare(`SELECT * FROM pilot_intakes WHERE reference = ?`).get(reference);

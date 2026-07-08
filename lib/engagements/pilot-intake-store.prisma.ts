@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
 import {
   fingerprintPilotIntake,
+  hashPilotIdempotencyKey,
   initialState,
   ALLOWED,
   nextOperation,
@@ -21,6 +22,7 @@ import {
   type PilotIntakeRecord,
   type PilotLifecycleState,
   type PilotQueueItem,
+  type SavePilotIntakeOptions,
 } from "./pilot-intake-store.shared";
 import { hashPilotStatusAccessIdentifier, hashPilotStatusSecret } from "./pilot-status-security";
 
@@ -49,30 +51,51 @@ function toRecord(r: {
   };
 }
 
-export async function savePilotIntake(intake: PilotIntake, qualification: QualificationResult): Promise<PilotIntakeRecord> {
+export async function savePilotIntake(intake: PilotIntake, qualification: QualificationResult, options: SavePilotIntakeOptions = {}): Promise<PilotIntakeRecord> {
   const fp = fingerprintPilotIntake(intake);
-  // business duplicate/replay: exact fingerprint returns the existing active intake.
-  const existing = await prisma.operatorPilotIntake.findFirst({ where: { intakeFingerprint: fp }, orderBy: { createdAt: "desc" } });
-  if (existing) return toRecord(existing);
-  const state = initialState(qualification);
-  const statusSecret = issuePilotStatusSecret();
-  const created = await prisma.operatorPilotIntake.create({
-    data: {
-      reference: newReference(),
-      intakeJson: intake as object,
-      qualificationJson: qualification as object,
-      qualificationStatus: qualification.status,
-      reviewStatus: state,
-      requestedInformation: state === "MORE_INFORMATION_REQUIRED" ? qualification.reasons.join(" ") : null,
-      finalDecision: state === "DECLINED" ? qualification.reasons.join(" ") : null,
-      intakeFingerprint: fp,
-      statusSecretHash: statusSecret.hash,
-      statusSecretExpiresAt: new Date(statusSecret.expiresAt),
-    },
-  });
-  return { ...toRecord(created), statusSecret: statusSecret.secret };
-}
+  const idempotencyHash = options.idempotencyKey ? hashPilotIdempotencyKey(options.idempotencyKey) : null;
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+  return prisma.$transaction(async (tx) => {
+    if (idempotencyHash) {
+      const replay = await tx.operatorPilotSubmissionIdempotency.findUnique({ where: { idempotencyHash } });
+      if (replay && replay.expiresAt.getTime() > Date.now()) {
+        if (replay.requestFingerprint !== fp) throw new Error("PILOT_IDEMPOTENCY_CONFLICT");
+        const row = await tx.operatorPilotIntake.findUnique({ where: { reference: replay.intakeRef } });
+        if (row) return { ...toRecord(row), duplicateClassification: "EXACT_RETRY" };
+      }
+    }
+
+    const existing = await tx.operatorPilotIntake.findFirst({ where: { intakeFingerprint: fp }, orderBy: { createdAt: "desc" } });
+    if (existing) {
+      if (idempotencyHash) {
+        await tx.operatorPilotSubmissionIdempotency.create({ data: { idempotencyHash, requestFingerprint: fp, intakeRef: existing.reference, expiresAt } }).catch(() => null);
+      }
+      return { ...toRecord(existing), duplicateClassification: idempotencyHash ? "EXACT_RETRY" : "POSSIBLE_DUPLICATE" };
+    }
+
+    const state = initialState(qualification);
+    const statusSecret = issuePilotStatusSecret();
+    const created = await tx.operatorPilotIntake.create({
+      data: {
+        reference: newReference(),
+        intakeJson: intake as object,
+        qualificationJson: qualification as object,
+        qualificationStatus: qualification.status,
+        reviewStatus: state,
+        requestedInformation: state === "MORE_INFORMATION_REQUIRED" ? qualification.reasons.join(" ") : null,
+        finalDecision: state === "DECLINED" ? qualification.reasons.join(" ") : null,
+        intakeFingerprint: fp,
+        statusSecretHash: statusSecret.hash,
+        statusSecretExpiresAt: new Date(statusSecret.expiresAt),
+      },
+    });
+    if (idempotencyHash) {
+      await tx.operatorPilotSubmissionIdempotency.create({ data: { idempotencyHash, requestFingerprint: fp, intakeRef: created.reference, expiresAt } });
+    }
+    return { ...toRecord(created), statusSecret: statusSecret.secret, duplicateClassification: "NEW_INTAKE" };
+  });
+}
 export async function getPilotIntakeByRef(reference: string): Promise<PilotIntakeRecord | null> {
   if (!PILOT_REFERENCE_RE.test(reference)) return null;
   const r = await prisma.operatorPilotIntake.findUnique({ where: { reference } });

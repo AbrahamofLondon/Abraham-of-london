@@ -10,7 +10,7 @@
  */
 
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
-import type { PilotIntakeRecord, PilotLifecycleState, PilotQueueItem } from "./pilot-intake-store.shared";
+import type { PilotIntakeRecord, PilotLifecycleState, PilotQueueItem, SavePilotIntakeOptions } from "./pilot-intake-store.shared";
 export { toCustomerStatus } from "./pilot-intake-store.shared";
 export type { PilotIntakeRecord, PilotLifecycleState, PilotQueueItem, PilotCustomerStatus } from "./pilot-intake-store.shared";
 
@@ -20,8 +20,8 @@ async function adapter() {
   return isProd() ? import("./pilot-intake-store.prisma") : import("./pilot-intake-store");
 }
 
-export async function savePilotIntake(intake: PilotIntake, qualification: QualificationResult): Promise<PilotIntakeRecord> {
-  return (await adapter()).savePilotIntake(intake, qualification);
+export async function savePilotIntake(intake: PilotIntake, qualification: QualificationResult, options: SavePilotIntakeOptions = {}): Promise<PilotIntakeRecord> {
+  return (await adapter()).savePilotIntake(intake, qualification, options);
 }
 
 export async function getPilotIntakeByRef(reference: string): Promise<PilotIntakeRecord | null> {

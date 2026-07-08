@@ -74,6 +74,21 @@ describe("Operator Pilot secure status APIs", () => {
     expect((response.body as any).statusAccess.statusUrl).toBe("/engagements/operator-pilot-status");
   });
 
+
+  it("passes request idempotency key into the Pilot store", async () => {
+    const response = res();
+    await intakeHandler(req({ organisation: "Acme Ltd", role: "CEO", authorityToEngage: true, decisionDomain: "supply chain", materiality: "HIGH", decisionStage: "FRAMING", affectedStakeholders: "ops", existingEvidence: "Detailed operating evidence with supplier concentration and timing pressure", knownContradictions: "cost versus resilience", governanceSensitivity: "SOME", confidentialityRequired: false, desiredOutcome: "governed decision", willingToParticipateInCheckpoints: true, contactEmail: "a@example.com", idempotencyKey: "pilot-request-key-001" }), response);
+    expect(mocks.savePilotIntake).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), { idempotencyKey: "pilot-request-key-001" });
+    expect((response.body as any).duplicateClassification).toBe("NEW_INTAKE");
+  });
+
+  it("returns a typed conflict when an idempotency key is reused for changed content", async () => {
+    mocks.savePilotIntake.mockRejectedValueOnce(new Error("PILOT_IDEMPOTENCY_CONFLICT"));
+    const response = res();
+    await intakeHandler(req({ organisation: "Acme Ltd", role: "CEO", authorityToEngage: true, decisionDomain: "supply chain", materiality: "HIGH", decisionStage: "FRAMING", affectedStakeholders: "ops", existingEvidence: "Detailed operating evidence with supplier concentration and timing pressure", knownContradictions: "cost versus resilience", governanceSensitivity: "SOME", confidentialityRequired: false, desiredOutcome: "governed decision", willingToParticipateInCheckpoints: true, contactEmail: "a@example.com", idempotencyKey: "pilot-request-key-001" }), response);
+    expect(response.status).toHaveBeenCalledWith(409);
+    expect(response.body).toMatchObject({ code: "PILOT_IDEMPOTENCY_CONFLICT" });
+  });
   it("validates status secret by POST body and sets HttpOnly cookie", async () => {
     const response = res();
     await statusSessionHandler(req({ secret: record.statusSecret }), response);

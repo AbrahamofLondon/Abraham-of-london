@@ -45,6 +45,22 @@ describe("Operator Pilot lifecycle store", () => {
     expect(new Set([first.reference, changedDeadline.reference, changedMateriality.reference, changedContradiction.reference]).size).toBe(4);
     expect(listPilotQueue()).toHaveLength(4);
   });
+
+  it("separates request idempotency from material business resubmission", () => {
+    const q = qualifyPilotIntake(intake);
+    const key = "pilot-intake-request-key-001";
+    const first = savePilotIntake(intake, q, { idempotencyKey: key });
+    const retry = savePilotIntake(intake, q, { idempotencyKey: key });
+    expect(retry.reference).toBe(first.reference);
+    expect(retry.duplicateClassification).toBe("EXACT_RETRY");
+    expect(listPilotQueue()).toHaveLength(1);
+
+    expect(() => savePilotIntake({ ...intake, decisionDeadline: "2026-10-31" }, q, { idempotencyKey: key })).toThrow(/PILOT_IDEMPOTENCY_CONFLICT/);
+
+    const changed = savePilotIntake({ ...intake, decisionDeadline: "2026-10-31" }, q, { idempotencyKey: "pilot-intake-request-key-002" });
+    expect(changed.reference).not.toBe(first.reference);
+    expect(listPilotQueue()).toHaveLength(2);
+  });
   it("appears in the operator queue with status, ageing, evidence posture and next operation", () => {
     const rec = savePilotIntake(intake, qualifyPilotIntake(intake), "2026-07-07T00:00:00.000Z");
     const row = listPilotQueue().find((r) => r.reference === rec.reference)!;

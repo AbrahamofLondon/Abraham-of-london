@@ -5751,6 +5751,7 @@ model OperatorPilotIntake {
   statusSecretRevokedAt DateTime?
   transitions           OperatorPilotTransition[]
   statusAccessAudits    OperatorPilotStatusAccessAudit[]
+  submissionIdempotency OperatorPilotSubmissionIdempotency[]
 
   @@index([reviewStatus])
   @@index([intakeFingerprint])
@@ -5759,6 +5760,21 @@ model OperatorPilotIntake {
 
 // Append-only lifecycle history — how the decision moved, who moved it, under what authority.
 
+
+model OperatorPilotSubmissionIdempotency {
+  id               String   @id @default(cuid())
+  idempotencyHash  String   @unique
+  requestFingerprint String
+  intakeRef        String
+  createdAt        DateTime @default(now())
+  expiresAt        DateTime
+
+  intake OperatorPilotIntake @relation(fields: [intakeRef], references: [reference], onDelete: Cascade)
+
+  @@index([intakeRef])
+  @@index([expiresAt])
+  @@map("operator_pilot_submission_idempotency")
+}
 model OperatorPilotStatusAccessAudit {
   id            String   @id @default(cuid())
   intakeRef     String?
