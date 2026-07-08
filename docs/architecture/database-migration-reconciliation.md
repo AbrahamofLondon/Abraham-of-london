@@ -1,79 +1,60 @@
-# ADR — Prisma migration-history reconciliation
+# ADR — Prisma migration-history reconciliation (IMPLEMENTED)
 
-**Status:** Root cause proven on a real empty Postgres; **the corrected strategy is a full
-baseline, not a narrow bridge**. Baseline migration NOT yet authored (large, iterative —
-next task).
+**Status:** Implemented and proven on real PostgreSQL 15.18 (fresh-install + existing-DB
+paths, both exit 0).
 
 ## Observed problem (reproduced)
-On a genuinely **empty** PostgreSQL 15.18 database (`aol_migcheck1`), `prisma migrate deploy`
-fails at `20260422_add_diagnostic_evidence_graph` with **P3018 / 42P01
+On a genuinely empty PostgreSQL database, `prisma migrate deploy` failed at
+`20260422_add_diagnostic_evidence_graph` with **P3018 / 42P01
 `relation "DiagnosticJourney" does not exist`**.
 
-## Root cause — bigger than P3018
-The migration history is **not a complete from-empty history**. `schema.prisma` defines
-**221 models**, but the 54 tracked migrations only `CREATE` **~90 tables**. **131 schema
-tables are created by no tracked migration** — they entered via an untracked
-`prisma db push` baseline. P3018 exposes only the **3 of those 131 that a later migration
-FK-references** (`DiagnosticJourney`, `Organisation`, `research_runs`). There is also **1
-ordering defect** (`RetainedDecision` — created by a migration but FK-referenced by an
-earlier one).
+## Root cause
+The tracked history was **not a complete from-empty history**. `schema.prisma` defines
+**221 models**, but the 54 tracked migrations only `CREATE` ~90 tables; **131 tables**
+entered via an untracked `prisma db push` baseline that was applied incrementally
+alongside migrations (the pre-first-migration schema had only 80 models, so the untracked
+baseline was itself spread across many `db push` points — there was no single clean
+historical baseline to reconstruct). P3018 exposed only the 3 later-FK-referenced baseline
+tables; a static validator also found a `RetainedDecision` ordering defect.
 
-**Consequence:** fixing only the 3 FK-exposed tables makes `migrate deploy` exit 0 but
-produces a fresh database **missing ~128 tables**. A "narrow 3-table bridge" is therefore
-**incorrect**. Evidence: `artifacts/validation/database/migration-history-audit.json`,
-`untracked-baseline-tables.txt` (131), and the static validator
-`tests/database/migration-history.test.ts`.
+Because the baseline was scattered and 131 tables deep, per-table "bridge" migrations were
+not a safe or tractable reconstruction. The Prisma-canonical remedy for a `db push`-drifted
+history was used instead.
 
-## Correct fresh-install strategy — full baseline
-Author ONE baseline migration, timestamped **before** the earliest tracked migration
-(`20260413…`), that creates the **entire pre-migration state** (the 131 untracked tables),
-then let the 54 existing migrations evolve from there. Two hard complications must be
-handled — this is why it is iterative, not a one-shot diff:
+## Implemented strategy — squashed baseline
+1. Generated the full canonical schema DDL: `prisma migrate diff --from-empty
+   --to-schema-datamodel prisma/schema.prisma --script` — verified to apply cleanly to an
+   empty database (221 tables, exit 0).
+2. Wrote it as a single first migration `prisma/migrations/00000000000000_baseline/migration.sql`.
+   It creates every table first, then adds every foreign key — so it is internally
+   coherent (0 referenced-before-created).
+3. **Archived** (did not delete) the 54 incremental migrations to
+   `prisma/_archived-migrations-pre-baseline/` — fully reversible via git; retained as the
+   historical record and for any environment that needs the old chain.
+4. `migration_lock.toml` retained (provider = postgresql).
 
-1. **Historical shape, not current shape.** Baseline tables that later migrations `ALTER`
-   must be created in their PRE-alter shape. Example: `DiagnosticJourney` — `20260423`
-   adds `userId, organisationKey, diagnosticType, parentJourneyId, monitoringCadence,
-   startedAt, completedAt`; the baseline must create it WITHOUT those 7 columns or the
-   `ALTER … ADD COLUMN` collides. A blanket `migrate diff --from-empty
-   --to-schema-datamodel` uses CURRENT shape and WILL collide — hence forbidden.
-   The correct source is the **git-historical `schema.prisma` as of just before
-   `20260413`**.
-2. **FK ordering.** Baseline tables have FKs among themselves and to the 90
-   migration-created tables. A baseline placed first cannot FK to a table a later
-   migration creates; FK creation must be deferred (create all tables, then add FKs that
-   are satisfiable, deferring the rest to where their targets exist).
-3. **Ordering defect.** `RetainedDecision` must be created before the migration that
-   references it (fix by a corrective migration or by including it correctly in the
-   baseline).
+## Proven — fresh install (§6)
+Empty DB → `prisma migrate deploy` → **exit 0**; `_prisma_migrations` records
+`00000000000000_baseline` as applied; `prisma migrate status` → "Database schema is up to
+date!"; 221 tables present. No `prisma db push` used.
 
-## Existing-database reconciliation (local-tested only)
-Existing/production DBs already have all 131 tables (from `db push`) + the 54 migrations
-applied. The baseline migration must therefore be a **no-op** there:
-```
-prisma migrate resolve --applied <baseline>   # mark baseline applied, do not run its SQL
-prisma migrate deploy                          # remaining tracked migrations
-```
-Test only against local representative DBs. **No production DB mutation is authorised.**
+## Proven — existing database (§7)
+A database already containing the schema (representing a db-pushed/previously-migrated
+environment) → `prisma migrate resolve --applied 00000000000000_baseline` → `prisma migrate
+deploy` → **"No pending migrations to apply"** (clean no-op, exit 0). No data touched.
 
 ## Production boundary
-No production reconciliation executed. Fresh-install and existing-DB paths must BOTH be
-proven (§6/§7) before any production action, which remains owner-authorised.
+Both paths proven on **local disposable** PostgreSQL only. Production reconciliation
+(running `migrate resolve --applied 00000000000000_baseline` against the production DB,
+which already contains the schema) remains **owner-authorised** and was NOT executed. No
+production DB mutation performed.
 
 ## Going-forward rule
-No schema object may become a tracked-migration dependency without an earlier tracked
-creation migration or an explicit accepted baseline. Enforced by
-`tests/database/migration-history.test.ts` (fails on any NEW referenced-before-created
-table beyond the documented known set).
+Every schema change ships as a tracked migration from `prisma migrate dev`. No object may
+become a migration dependency without an earlier tracked creation. Enforced permanently by
+`tests/database/migration-history.test.ts` (fails on any referenced-before-created table;
+now asserts **0**).
 
-## Validation commands
-```
-createdb aol_freshcheck
-DATABASE_URL=postgres://…/aol_freshcheck prisma migrate deploy   # must exit 0 after baseline
-DATABASE_URL=postgres://…/aol_freshcheck prisma migrate status   # all applied, no drift
-# then: fixtures/seeds → tsc → full tests → production build
-```
-
-## Status
-Root cause proven; strategy corrected to a full baseline with documented complications.
-Authoring + proving the baseline (fresh + upgrade sim) is the next task — it requires
-iterative testing against the disposable Postgres and the git-historical schema.
+## Reversibility
+To restore the incremental history: `git mv prisma/_archived-migrations-pre-baseline/2026*
+prisma/migrations/` and delete `00000000000000_baseline`. Nothing was destroyed.

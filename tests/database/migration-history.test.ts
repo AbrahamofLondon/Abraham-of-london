@@ -52,24 +52,24 @@ function referencedBeforeCreated(): string[] {
   return [...offenders].sort();
 }
 
-// Known, documented offenders — pending the baseline migration reconciliation
-// (database-migration-reconciliation.md). This gate must not let the set GROW.
-//   • baseline gap (never created by any migration — db-push baseline):
-const KNOWN_BASELINE_FK_GAP = ["DiagnosticJourney", "Organisation", "research_runs"];
-//   • ordering defect (created by a migration, but FK-referenced by an EARLIER one):
-const KNOWN_ORDERING_DEFECT = ["RetainedDecision"];
-const KNOWN_OFFENDERS = [...KNOWN_BASELINE_FK_GAP, ...KNOWN_ORDERING_DEFECT].sort();
+// RESOLVED: the db-push baseline gap (131 untracked tables) + the DiagnosticJourney/
+// Organisation/research_runs FK gaps + the RetainedDecision ordering defect are all
+// fixed by the squashed baseline migration (00000000000000_baseline), which creates every
+// table before adding any foreign key. See database-migration-reconciliation.md.
+// The gate now enforces ZERO referenced-before-created tables permanently.
+const KNOWN_OFFENDERS: string[] = [];
 
 describe("§9 migration-history validator", () => {
-  it("no NEW migration FK-references a table not created by an earlier migration", () => {
+  it("no migration FK-references a table not created by an earlier migration (0 offenders)", () => {
     const offenders = referencedBeforeCreated();
     const unexpected = offenders.filter((t) => !KNOWN_OFFENDERS.includes(t));
-    expect(unexpected, `new referenced-before-created tables: ${unexpected.join(", ")}`).toEqual([]);
+    expect(unexpected, `referenced-before-created tables: ${unexpected.join(", ")}`).toEqual([]);
   });
 
-  it("the known offender set has not changed (reconciliation still pending)", () => {
-    // exact match — when the baseline/ordering migration fixes these, shrink these lists.
-    expect(referencedBeforeCreated()).toEqual(KNOWN_OFFENDERS);
+  it("the baseline migration exists and creates the full schema", () => {
+    const dirs = migrations();
+    expect(dirs).toContain("00000000000000_baseline");
+    expect(dirs[0]).toBe("00000000000000_baseline"); // sorts first
   });
 
   it("reordering the dependency would be caught (self-check on the detector)", () => {

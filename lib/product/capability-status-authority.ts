@@ -363,7 +363,7 @@ export const CAPABILITY_STATUS_RECORDS: CapabilityRecord[] = [
     outputDestination: ['operator review queue entries'],
     outputProduced: ['RetainerReviewQueueEntry with PENDING_REVIEW, APPROVED_FOR_CONTACT, DECLINED, NEEDS_MORE_HISTORY transitions'],
     dataRequired: ['REVIEW_READY or OVERSIGHT_READY readiness status', 'available signals', 'missing requirements'],
-    recommendation: 'Migration SQL at prisma/migrations/20260601000000_add_retainer_review_queue_entry/migration.sql. Deploy with: pnpm exec prisma migrate deploy',
+    recommendation: 'Migration SQL at prisma/_archived-migrations-pre-baseline/20260601000000_add_retainer_review_queue_entry/migration.sql. Deploy with: pnpm exec prisma migrate deploy',
     lastVerifiedCommit: VERIFIED_COMMIT,
   },
   {
