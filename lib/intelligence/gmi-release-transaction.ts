@@ -11,7 +11,7 @@
  */
 import { getMarketIntelligenceRecord, type MarketIntelligenceLifecycleRecord } from "./market-intelligence-lifecycle";
 import { resolveGmiReleaseState } from "./gmi-release-state-resolver";
-import { assertValidTransition, getPredecessorEditionId, type ReleaseReceipt, type ReleaseAuthorityRecord } from "./gmi-edition-lifecycle";
+import { assertValidTransition, getPredecessorEditionId, getOwnerAuthority, registerOwnerAuthority, type ReleaseReceipt, type ReleaseAuthorityRecord } from "./gmi-edition-lifecycle";
 import crypto from "node:crypto";
 
 export interface ReleaseTransactionInput {
@@ -32,16 +32,20 @@ export interface ReleaseTransactionResult {
   successorState: string | null;
 }
 
-// In-memory store for release authorities (would be DB in production)
-const authorityStore = new Map<string, ReleaseAuthorityRecord>();
+// Receipt store (authority store is shared from gmi-edition-lifecycle)
 const receiptStore = new Map<string, ReleaseReceipt>();
 
-export function registerOwnerAuthority(authority: ReleaseAuthorityRecord): void {
-  authorityStore.set(authority.editionId, authority);
+// Concurrent release safety: simple in-flight lock per edition
+const releaseLocks = new Set<string>();
+
+function acquireReleaseLock(editionId: string): boolean {
+  if (releaseLocks.has(editionId)) return false;
+  releaseLocks.add(editionId);
+  return true;
 }
 
-export function getOwnerAuthority(editionId: string): ReleaseAuthorityRecord | null {
-  return authorityStore.get(editionId) ?? null;
+function releaseReleaseLock(editionId: string): void {
+  releaseLocks.delete(editionId);
 }
 
 export function getReleaseReceipt(editionId: string): ReleaseReceipt | null {
@@ -67,6 +71,21 @@ export function getReleaseReceipt(editionId: string): ReleaseReceipt | null {
  * All or nothing. If any step fails, no state changes persist.
  */
 export function releaseGmiEdition(input: ReleaseTransactionInput): ReleaseTransactionResult {
+  const errors: string[] = [];
+  const editionId = input.editionId;
+
+  // Step 0: Acquire concurrent release lock — prevents two simultaneous releases
+  if (!acquireReleaseLock(editionId)) {
+    return { ok: false, receipt: null, errors: ["Concurrent release attempt blocked — another release is in progress for this edition"], predecessorState: null, successorState: null };
+  }
+  try {
+    return releaseGmiEditionInternal(input);
+  } finally {
+    releaseReleaseLock(editionId);
+  }
+}
+
+function releaseGmiEditionInternal(input: ReleaseTransactionInput): ReleaseTransactionResult {
   const errors: string[] = [];
   const editionId = input.editionId;
   const record = getMarketIntelligenceRecord(editionId);

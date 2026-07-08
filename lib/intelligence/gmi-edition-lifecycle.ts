@@ -134,6 +134,30 @@ export function isOwnerAuthorized(record: GmiEditionRecord): boolean {
   return record.ownerAuthorizedAt !== null && record.ownerAuthorizedAt.length > 0;
 }
 
+// ── Owner authority record ─────────────────────────────────────────────────
+
+export interface ReleaseAuthorityRecord {
+  editionId: string;
+  authorizedBy: string;
+  authorizedAt: string;
+  authorityScope: string;
+  candidateHash: string;
+}
+
+const authorityStore = new Map<string, ReleaseAuthorityRecord>();
+
+export function registerOwnerAuthority(authority: ReleaseAuthorityRecord): void {
+  authorityStore.set(authority.editionId, authority);
+}
+
+export function getOwnerAuthority(editionId: string): ReleaseAuthorityRecord | null {
+  return authorityStore.get(editionId) ?? null;
+}
+
+export function clearOwnerAuthority(editionId: string): void {
+  authorityStore.delete(editionId);
+}
+
 // ── Release gate result ────────────────────────────────────────────────────
 
 export interface ReleaseGateResult {
