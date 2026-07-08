@@ -2,15 +2,10 @@
  * lib/intelligence/gmi-release-state-resolver.ts
  *
  * Edition-generic release state resolver. No hardcoded Q1/Q2/Q3/Q4 logic.
- * Derives state from actual edition records and lifecycle state machine.
+ * All gates use actual evidence providers — no proxy checks.
  *
- * Gate semantics:
- *   Independent evidence gates (10): each evaluates a specific evidence requirement.
- *     TEMPORAL_NOT_BEFORE, DATA_LOCK, OWNER_RELEASE_AUTHORITY, LIFECYCLE_STATE,
- *     CALL_REVIEW, SOURCE_APPENDIX, DATA_PROVENANCE, FALSIFICATION_REVIEW,
- *     BOARD_PULSE, PDF_EXPORT
- *   Derived aggregate (1): QUALITY_GATE — computed from quality gate scores, not a separate evidence source.
- *     Not counted as an independent evidence gate.
+ * Independent evidence gates (10): each evaluates a specific evidence requirement.
+ * Derived aggregate (1): QUALITY_GATE — computed from quality gate scores.
  */
 import { getMarketIntelligenceRecord } from "./market-intelligence-lifecycle";
 import { calculateGmiSourceCoverageScore } from "./gmi-source-coverage-score";
@@ -27,19 +22,25 @@ import {
   buildGateResult,
   type ReleaseGateResult,
 } from "./gmi-edition-lifecycle";
+import {
+  getPdfExportEvidence,
+  getBoardPulseEvidence,
+  getFalsificationEvidence,
+  getDataProvenanceEvidence,
+} from "./gmi-release-evidence";
 
 export interface GmiReleaseStateResult {
   reportId: string;
   state: GmiReportState;
   releaseReady: boolean;
-  /** 10 independent evidence gates. QUALITY_GATE is derived, not an evidence gate. */
+  /** 10 independent evidence gates. */
   gates: ReleaseGateResult[];
-  /** Derived aggregate release quality — not an evidence gate. */
+  /** Derived aggregate release quality. */
   aggregateQuality: { releaseReady: boolean; overallScore: number; blockers: string[] };
   blockers: string[];
   requiredActions: string[];
   nextAction: string;
-  /** @deprecated Use gates array instead. Kept for backward compatibility. */
+  /** @deprecated Use gates array instead. */
   qualityGate: { releaseReady: boolean; overallScore: number; blockers: string[]; scores: number[]; criticalFailures: string[] };
   /** @deprecated Use gates array instead. */
   nextEligibleTransition: string | null;
@@ -109,39 +110,37 @@ export function resolveGmiReleaseState(reportId: string): GmiReleaseStateResult 
 
   // ── Independent evidence gates (10) ──────────────────────────────────────
 
-  // Gate 1: TEMPORAL_NOT_BEFORE — publication target date reached
+  // Gate 1: TEMPORAL_NOT_BEFORE
   const targetReached = isPublicationTargetReached(record as any);
   gates.push(buildGateResult("TEMPORAL_NOT_BEFORE", targetReached,
     `publicationTarget: ${record.publicationTarget}`,
     targetReached ? "Target date reached" : "Target date not yet reached", true));
   if (!targetReached) blockers.push("Publication target date not reached");
 
-  // Gate 2: DATA_LOCK — data lock completed
+  // Gate 2: DATA_LOCK
   const dataLocked = isDataLockComplete(record as any);
   gates.push(buildGateResult("DATA_LOCK", dataLocked,
     `dataLockedAt: ${record.dataLockedAt ?? "not set"}`,
     dataLocked ? "Data lock complete" : "Data lock not complete", true));
   if (!dataLocked) blockers.push("Data lock not complete");
 
-  // Gate 3: OWNER_RELEASE_AUTHORITY — valid ReleaseAuthorityRecord exists for current candidate hash
+  // Gate 3: OWNER_RELEASE_AUTHORITY
   const ownerAuth = isOwnerAuthorized(record as any);
   const authorityRecord = getOwnerAuthority(reportId);
-  const authorityValid = ownerAuth && authorityRecord !== null;
-  // If registry has ownerAuthorizedAt but no valid ReleaseAuthorityRecord, the gate fails
   const ownerGatePassed = ownerAuth && authorityRecord !== null;
   gates.push(buildGateResult("OWNER_RELEASE_AUTHORITY", ownerGatePassed,
     `ownerAuthorizedAt: ${record.ownerAuthorizedAt ?? "not set"}, authorityRecord: ${authorityRecord ? "present" : "absent"}`,
     ownerGatePassed ? "Owner authority granted with valid authority record" : "Owner authority not granted or no valid authority record", true));
   if (!ownerGatePassed) blockers.push("Owner release authority not granted");
 
-  // Gate 4: LIFECYCLE_STATE — edition must be in RELEASE_CANDIDATE or RELEASE_AUTHORIZED
+  // Gate 4: LIFECYCLE_STATE
   const isReleaseCandidate = record.lifecycleState === "RELEASE_CANDIDATE" || record.lifecycleState === "RELEASE_AUTHORIZED";
   gates.push(buildGateResult("LIFECYCLE_STATE", isReleaseCandidate,
     `state: ${record.lifecycleState}`,
-    isReleaseCandidate ? "Edition is in release-candidate state" : `Edition is in ${record.lifecycleState} state, not yet release-candidate`, true));
+    isReleaseCandidate ? "Edition is in release-candidate state" : `Edition is in ${record.lifecycleState} state`, true));
   if (!isReleaseCandidate) blockers.push(`Edition is in ${record.lifecycleState} state, not RELEASE_CANDIDATE`);
 
-  // Gate 5: CALL_REVIEW — prior-quarter calls reviewed
+  // Gate 5: CALL_REVIEW
   const reviewWindow = getPriorReviewWindow(record as any);
   const pendingCalls = reviewWindow ? getCallsPendingReview(reviewWindow) : [];
   const callsReviewed = pendingCalls.length === 0;
@@ -150,51 +149,60 @@ export function resolveGmiReleaseState(reportId: string): GmiReleaseStateResult 
     callsReviewed ? "All prior calls reviewed" : `${pendingCalls.length} calls pending review`, true));
   if (!callsReviewed) blockers.push("Prior-quarter calls not reviewed");
 
-  // Gate 6: SOURCE_APPENDIX — source coverage release-safe
+  // Gate 6: SOURCE_APPENDIX
   const sourceSafe = sourceCoverage.releaseSafe;
   gates.push(buildGateResult("SOURCE_APPENDIX", sourceSafe,
     `coverage: ${sourceCoverage.coverageScore}%, blockers: ${sourceCoverage.blockerRows}`,
     sourceSafe ? "Source appendix release-safe" : "Source appendix has release blockers", true));
   if (!sourceSafe) blockers.push("Source appendix incomplete");
 
-  // Gate 7: DATA_PROVENANCE — authoritative source rows exist, no fixture/seed authority
-  // Evidence: sourceCoverage.totalRows > 0 proves authoritative source rows exist.
-  // lifecycleState past PLANNED proves edition has progressed beyond initial planning.
-  const hasSourceRows = sourceCoverage.totalRows > 0;
-  const pastPlanning = record.lifecycleState !== "PLANNED" && record.lifecycleState !== "EVIDENCE_COLLECTION";
-  const provenanceEstablished = hasSourceRows && pastPlanning;
-  gates.push(buildGateResult("DATA_PROVENANCE", provenanceEstablished,
-    `sourceRows: ${sourceCoverage.totalRows}, lifecycleState: ${record.lifecycleState}`,
-    provenanceEstablished ? "Authoritative source rows exist, edition past planning stage" : "Insufficient provenance: no source rows or edition too early", true));
-  if (!provenanceEstablished && pastPlanning) blockers.push("Data provenance not established — no authoritative source rows");
+  // Gate 7: DATA_PROVENANCE — uses actual evidence provider
+  const provenanceEvidence = getDataProvenanceEvidence(reportId);
+  const provenancePassed = provenanceEvidence.releaseCriticalSourceCoverageComplete
+    && provenanceEvidence.authoritativeSourceBindingsPresent
+    && provenanceEvidence.fixtureOrSeedCannotSatisfy
+    && provenanceEvidence.unresolvedProvenanceBlockers === 0
+    && provenanceEvidence.currentSourceSnapshotHash !== null;
+  gates.push(buildGateResult("DATA_PROVENANCE", provenancePassed,
+    `coverageComplete: ${provenanceEvidence.releaseCriticalSourceCoverageComplete}, bindingsPresent: ${provenanceEvidence.authoritativeSourceBindingsPresent}, fixtureSafe: ${provenanceEvidence.fixtureOrSeedCannotSatisfy}, blockers: ${provenanceEvidence.unresolvedProvenanceBlockers}, snapshotHash: ${provenanceEvidence.currentSourceSnapshotHash ?? "none"}`,
+    provenancePassed ? "Data provenance established: release-critical coverage complete, authoritative bindings present, no fixture/seed authority, no blockers, snapshot hash available" : "Data provenance insufficient", true));
+  if (!provenancePassed) blockers.push("Data provenance not established");
 
-  // Gate 8: FALSIFICATION_REVIEW — high-conviction theses have falsification conditions
-  // Evidence: sourceCoverage.totalRows > 0 means source appendix exists with falsification thresholds.
-  // blockerRows === 0 means no unresolved falsification exceptions.
-  const falsificationComplete = sourceCoverage.totalRows > 0 && sourceCoverage.blockerRows === 0;
-  gates.push(buildGateResult("FALSIFICATION_REVIEW", falsificationComplete,
-    `sourceRows: ${sourceCoverage.totalRows}, blockerRows: ${sourceCoverage.blockerRows}`,
-    falsificationComplete ? "Falsification conditions defined, no unresolved blockers" : "Falsification review incomplete", true));
-  if (!falsificationComplete) blockers.push("Falsification review not complete");
+  // Gate 8: FALSIFICATION_REVIEW — uses actual evidence provider
+  const falsificationEvidence = getFalsificationEvidence(reportId);
+  const falsificationPassed = falsificationEvidence.highConvictionThesesIdentified
+    && falsificationEvidence.falsificationConditionsPresent
+    && falsificationEvidence.reviewCompleted
+    && falsificationEvidence.reviewBoundToCurrentEdition
+    && falsificationEvidence.unresolvedBlockingFindings === 0;
+  gates.push(buildGateResult("FALSIFICATION_REVIEW", falsificationPassed,
+    `thesesIdentified: ${falsificationEvidence.highConvictionThesesIdentified}, conditionsPresent: ${falsificationEvidence.falsificationConditionsPresent}, reviewCompleted: ${falsificationEvidence.reviewCompleted}, boundToEdition: ${falsificationEvidence.reviewBoundToCurrentEdition}, unresolvedBlockers: ${falsificationEvidence.unresolvedBlockingFindings}`,
+    falsificationPassed ? "Falsification review complete: theses identified, conditions present, review completed, bound to current edition, no unresolved blockers" : "Falsification review incomplete", true));
+  if (!falsificationPassed) blockers.push("Falsification review not complete");
 
-  // Gate 9: BOARD_PULSE — board consequence fields complete
-  // Evidence: lifecycleState past DRAFT means board relevance assessment is applicable.
-  // sourceCoverage.totalRows > 0 means consequence data exists.
-  const boardPulseComplete = pastPlanning && hasSourceRows;
-  gates.push(buildGateResult("BOARD_PULSE", boardPulseComplete,
-    `lifecycleState: ${record.lifecycleState}, sourceRows: ${sourceCoverage.totalRows}`,
-    boardPulseComplete ? "Board consequence fields present, edition past planning" : "Board pulse not yet applicable or incomplete", false));
+  // Gate 9: BOARD_PULSE — uses actual evidence provider
+  const boardPulseEvidence = getBoardPulseEvidence(reportId);
+  const boardPulsePassed = boardPulseEvidence.consequenceFieldsComplete
+    && boardPulseEvidence.boardRelevanceComplete
+    && boardPulseEvidence.currentCandidateMatch
+    && boardPulseEvidence.recordExists;
+  gates.push(buildGateResult("BOARD_PULSE", boardPulsePassed,
+    `consequenceFieldsComplete: ${boardPulseEvidence.consequenceFieldsComplete}, boardRelevanceComplete: ${boardPulseEvidence.boardRelevanceComplete}, candidateMatch: ${boardPulseEvidence.currentCandidateMatch}, recordExists: ${boardPulseEvidence.recordExists}`,
+    boardPulsePassed ? "Board pulse complete: consequence fields present, board relevance assessed, candidate matches" : "Board pulse incomplete", false));
 
-  // Gate 10: PDF_EXPORT — PDF generated, hash exists, matches current candidate
-  // Evidence: lifecycleState in DRAFT or later means PDF generation is applicable.
-  // Source coverage > 0 means candidate content exists to generate PDF from.
-  const pdfApplicable = record.lifecycleState === "RELEASE_CANDIDATE" || record.lifecycleState === "RELEASE_AUTHORIZED" || record.lifecycleState === "DRAFT";
-  const pdfExportReady = pdfApplicable && hasSourceRows;
-  gates.push(buildGateResult("PDF_EXPORT", pdfExportReady,
-    `lifecycleState: ${record.lifecycleState}, sourceRows: ${sourceCoverage.totalRows}`,
-    pdfExportReady ? "PDF export path available with source content" : "PDF export not yet available", false));
+  // Gate 10: PDF_EXPORT — uses actual evidence provider
+  const pdfEvidence = getPdfExportEvidence(reportId);
+  const pdfPassed = pdfEvidence.exists
+    && pdfEvidence.hash !== null
+    && pdfEvidence.generatedAt !== null
+    && pdfEvidence.reportContentHash !== null
+    && pdfEvidence.sourceSnapshotHash !== null
+    && pdfEvidence.matchesCurrentCandidate;
+  gates.push(buildGateResult("PDF_EXPORT", pdfPassed,
+    `exists: ${pdfEvidence.exists}, hash: ${pdfEvidence.hash ?? "none"}, generatedAt: ${pdfEvidence.generatedAt ?? "none"}, contentHash: ${pdfEvidence.reportContentHash ?? "none"}, sourceHash: ${pdfEvidence.sourceSnapshotHash ?? "none"}, matchesCandidate: ${pdfEvidence.matchesCurrentCandidate}`,
+    pdfPassed ? "PDF export exists, hash matches current candidate" : "PDF export not available or does not match current candidate", false));
 
-  // ── Derived aggregate (not an independent evidence gate) ──────────────────
+  // ── Derived aggregate ────────────────────────────────────────────────────
   for (const blocker of qualityGate.blockers) {
     if (!blockers.includes(blocker)) blockers.push(blocker);
   }
