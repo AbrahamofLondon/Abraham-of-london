@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdmin } from "@/lib/access/require-admin";
 import { listPilotQueue, transitionPilotState, type PilotLifecycleState } from "@/lib/engagements/pilot-intake-store.composed";
 import { recordFunnelEvent } from "@/lib/demo/funnel-event-store.composed";
+import { parsePilotOperatorTransitionRequest } from "@/lib/engagements/operator-pilot-api-contract";
 
 const STATES: PilotLifecycleState[] = ["SUBMITTED", "UNDER_REVIEW", "MORE_INFORMATION_REQUIRED", "RESUBMITTED", "HUMAN_REVIEW", "POTENTIALLY_SUITABLE", "ACCEPTED", "DECLINED", "SCOPING", "COMMERCIAL_CONTINUATION"];
 
@@ -15,14 +16,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "PATCH") {
-    const reference = typeof req.body?.reference === "string" ? req.body.reference : "";
-    const nextState = req.body?.nextState as PilotLifecycleState;
-    if (!reference || !STATES.includes(nextState)) return res.status(400).json({ error: "valid reference and nextState required" });
+    const parsed = parsePilotOperatorTransitionRequest(req.body);
+    if (!parsed) return res.status(400).json({ error: "valid reference and nextState required" });
+    const { reference, nextState } = parsed;
     try {
       const record = await transitionPilotState(reference, nextState, { email: admin.email, humanAuthority: true }, {
-        requestedInformation: typeof req.body?.requestedInformation === "string" ? req.body.requestedInformation : null,
-        finalDecision: typeof req.body?.finalDecision === "string" ? req.body.finalDecision : null,
-        operatorNote: typeof req.body?.operatorNote === "string" ? req.body.operatorNote : null,
+        requestedInformation: parsed.requestedInformation,
+        finalDecision: parsed.finalDecision,
+        operatorNote: parsed.operatorNote,
+        expectedUpdatedAt: parsed.expectedUpdatedAt ?? undefined,
       });
       if (!record) return res.status(404).json({ error: "not found" });
       if (nextState === "ACCEPTED" || nextState === "DECLINED") {

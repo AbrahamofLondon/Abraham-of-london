@@ -2,7 +2,7 @@ import * as React from "react";
 import type { GetServerSideProps } from "next";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { requireAdminPage } from "@/lib/access/server";
-import { listPilotQueue, type PilotLifecycleState, type PilotQueueItem } from "@/lib/engagements/pilot-intake-store";
+import type { PilotLifecycleState, PilotQueueItem } from "@/lib/engagements/pilot-intake-store.shared";
 
 const STATES: PilotLifecycleState[] = ["SUBMITTED", "UNDER_REVIEW", "MORE_INFORMATION_REQUIRED", "RESUBMITTED", "HUMAN_REVIEW", "POTENTIALLY_SUITABLE", "ACCEPTED", "DECLINED", "SCOPING", "COMMERCIAL_CONTINUATION"];
 
@@ -11,7 +11,7 @@ type Props = { items: PilotQueueItem[]; activeStatus: PilotLifecycleState | "ALL
 export default function OperatorPilotAdmin({ items, activeStatus }: Props) {
   const [rows, setRows] = React.useState(items);
   async function transition(reference: string, nextState: PilotLifecycleState) {
-    const res = await fetch("/api/admin/operator-pilot", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reference, nextState, operatorNote: `Moved to ${nextState} from queue`, finalDecision: nextState }) });
+    const res = await fetch("/api/admin/operator-pilot", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reference, nextState, operatorNote: `Moved to ${nextState} from queue`, finalDecision: nextState, expectedUpdatedAt: rows.find((r) => r.reference === reference)?.updatedAt ?? null }) });
     if (res.ok) setRows((prev) => prev.map((r) => r.reference === reference ? { ...r, reviewStatus: nextState, updatedAt: new Date().toISOString(), nextOperation: "State updated" } : r));
   }
   return (
@@ -61,5 +61,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const guard = await requireAdminPage<Props>(ctx);
   if (!guard.authorized) return guard.redirect;
   const status = typeof ctx.query.status === "string" && STATES.includes(ctx.query.status as PilotLifecycleState) ? ctx.query.status as PilotLifecycleState : undefined;
-  return { props: { items: JSON.parse(JSON.stringify(listPilotQueue({ status }))), activeStatus: status ?? "ALL" } };
+  const { listPilotQueue } = await import("@/lib/engagements/pilot-intake-store.composed");
+  return { props: { items: JSON.parse(JSON.stringify(await listPilotQueue({ status }))), activeStatus: status ?? "ALL" } };
 };

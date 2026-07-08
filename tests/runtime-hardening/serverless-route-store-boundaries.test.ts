@@ -10,12 +10,14 @@ const productionEntrypoints = [
   "pages/admin/demo-conversion.tsx",
   "pages/api/engagements/operator-pilot.ts",
   "pages/api/admin/operator-pilot.ts",
+  "pages/admin/operator-pilot.tsx",
 ];
 
 const forbiddenDirectStores = [
   "@/lib/demo/signal-consent-transition-store\"",
   "@/lib/intelligence/corridor/recommendation-context-store\"",
   "@/lib/demo/funnel-event-store\"",
+  "@/lib/engagements/pilot-intake-store\"",
 ];
 
 describe("serverless production route store boundaries", () => {

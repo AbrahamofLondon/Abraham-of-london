@@ -2,15 +2,9 @@ import * as React from "react";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 import { COLORS, FONTS, caption, field, primaryButton, bodyTextSm, card } from "@/lib/demo/journey-design";
+import { isPilotApiErrorResponse, isPilotStatusSessionResponse, type PilotStatusSessionResponse } from "@/lib/engagements/operator-pilot-api-contract";
 
-type Status = {
-  reference: string;
-  currentState: string;
-  lastUpdate: string;
-  requestedInformation: string | null;
-  nextExpectedStep: string;
-  finalDecision: string | null;
-};
+type Status = PilotStatusSessionResponse["status"];
 
 export default function OperatorPilotStatusPage() {
   const [secret, setSecret] = React.useState("");
@@ -21,8 +15,8 @@ export default function OperatorPilotStatusPage() {
   async function loadExistingSession() {
     const res = await fetch("/api/engagements/operator-pilot-status");
     if (!res.ok) return;
-    const data = await res.json();
-    setStatus(data.status);
+    const data: unknown = await res.json().catch(() => null);
+    if (isPilotStatusSessionResponse(data)) setStatus(data.status);
   }
 
   React.useEffect(() => { void loadExistingSession(); }, []);
@@ -37,8 +31,9 @@ export default function OperatorPilotStatusPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ secret }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data?.error ?? "Unable to validate status access."); return; }
+      const data: unknown = await res.json().catch(() => null);
+      if (!res.ok) { setError(isPilotApiErrorResponse(data) ? data.error : "Unable to validate status access."); return; }
+      if (!isPilotStatusSessionResponse(data)) { setError("Status response was not recognised. Please retry."); return; }
       setStatus(data.status);
       setSecret("");
     } catch {

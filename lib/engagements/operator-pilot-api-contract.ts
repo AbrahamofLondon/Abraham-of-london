@@ -54,6 +54,19 @@ export interface PilotStatusSessionResponse {
   status: PilotCustomerStatus;
 }
 
+export interface PilotOperatorTransitionRequest {
+  reference: string;
+  nextState: PilotLifecycleState;
+  requestedInformation?: string | null;
+  finalDecision?: string | null;
+  operatorNote?: string | null;
+  expectedUpdatedAt?: string | null;
+}
+
+export interface PilotOperatorTransitionResponse {
+  item: unknown;
+}
+
 function text(value: unknown): string {
   return String(value ?? "").trim();
 }
@@ -96,6 +109,22 @@ export function parsePilotStatusSessionRequest(body: unknown): PilotStatusSessio
   return secret ? { secret } : null;
 }
 
+export function parsePilotOperatorTransitionRequest(body: unknown): PilotOperatorTransitionRequest | null {
+  const input = (body && typeof body === "object") ? (body as Record<string, unknown>) : {};
+  const reference = text(input.reference);
+  const nextState = text(input.nextState) as PilotLifecycleState;
+  const states: PilotLifecycleState[] = ["SUBMITTED", "UNDER_REVIEW", "MORE_INFORMATION_REQUIRED", "RESUBMITTED", "HUMAN_REVIEW", "POTENTIALLY_SUITABLE", "ACCEPTED", "DECLINED", "SCOPING", "COMMERCIAL_CONTINUATION"];
+  if (!reference || !states.includes(nextState)) return null;
+  return {
+    reference,
+    nextState,
+    requestedInformation: optionalText(input.requestedInformation) ?? null,
+    finalDecision: optionalText(input.finalDecision) ?? null,
+    operatorNote: optionalText(input.operatorNote) ?? null,
+    expectedUpdatedAt: optionalText(input.expectedUpdatedAt) ?? null,
+  };
+}
+
 export function isPilotIntakeSuccessResponse(value: unknown): value is PilotIntakeSuccessResponse {
   const v = value as Partial<PilotIntakeSuccessResponse> | null;
   return Boolean(v && typeof v.reference === "string" && typeof v.qualificationStatus === "string" && typeof v.nextStep === "string" && Array.isArray(v.reasons));
@@ -104,6 +133,11 @@ export function isPilotIntakeSuccessResponse(value: unknown): value is PilotInta
 export function isPilotIntakeValidationErrorResponse(value: unknown): value is PilotIntakeValidationErrorResponse {
   const v = value as Partial<PilotIntakeValidationErrorResponse> | null;
   return Boolean(v && v.error === "Intake incomplete" && v.qualification && Array.isArray(v.qualification.missingFields));
+}
+
+export function isPilotStatusSessionResponse(value: unknown): value is PilotStatusSessionResponse {
+  const v = value as Partial<PilotStatusSessionResponse> | null;
+  return Boolean(v && v.ok === true && v.status && typeof v.status.reference === "string" && typeof v.status.nextExpectedStep === "string");
 }
 
 export function isPilotApiErrorResponse(value: unknown): value is PilotApiErrorResponse {
