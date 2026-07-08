@@ -61,6 +61,7 @@ export const ADMIN_NAVIGATION: AdminNavSection[] = [
     items: [
       { id: "calibration", label: "Calibration", href: "/admin/calibration", router: "pages", visibility: "admin", status: "rough", description: "Calibration state viewer — live data only populated once calibration model is seeded" },
       { id: "institutional-analytics", label: "Institutional Analytics", href: "/admin/institutional-analytics", router: "pages", visibility: "admin", status: "active", description: "Institutional analytics dashboard" },
+      { id: "operator-pilot", label: "Operator Pilot Queue", href: "/admin/operator-pilot", router: "pages", visibility: "operator", status: "active", description: "Controlled Operator Pilot intake queue, lifecycle state, ageing, and next-action surface" },
     ],
   },
   {

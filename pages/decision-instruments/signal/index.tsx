@@ -25,7 +25,7 @@ import {
   type ReadingDiff,
 } from "@/lib/decision-instruments/decision-signal-engine";
 import { DECISION_SIGNAL_SAMPLES, SAMPLE_LABEL } from "@/lib/decision-instruments/decision-signal-samples";
-import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
+import { getJourneySessionId, recordJourneyEvent } from "@/lib/demo/record-journey-event";
 import { COLORS, FONTS, BAND, eyebrow, caption, display, bodyText, bodyTextSm, card, primaryButton, ghostButton, field, hexA } from "@/lib/demo/journey-design";
 
 const DEFAULT_INPUT: SignalInput = { decisionStatement: "", delayCostBand: "MODERATE", confidenceLevel: 5, consequenceIfWrong: "COSTLY", urgencyBand: "MODERATE" };
@@ -51,6 +51,40 @@ const DecisionSignalPage: NextPage = () => {
   React.useEffect(() => { track("decision_signal_landing_viewed", {}); recordJourneyEvent("SIGNAL_LANDING_VIEWED"); }, []);
   function markStarted() { if (!started.current) { started.current = true; track("decision_signal_started", {}); recordJourneyEvent("SIGNAL_STARTED"); } }
 
+  async function persistCorridorContext(outcome: SignalResult) {
+    try {
+      const sessionId = getJourneySessionId();
+      await fetch("/api/corridor/recommendation-context", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recommendationId: outcome.nextAdmissibleMove.recommendationId,
+          sessionId,
+          sessionVersion: outcome.nextAdmissibleMove.recommendationVersion,
+          pressureBand: outcome.pressureBand,
+          targetProductCode: outcome.nextAdmissibleMove.targetRoute.split("/").filter(Boolean).pop() ?? "decision-signal",
+          targetLabel: outcome.nextAdmissibleMove.targetLabel,
+          targetRoute: outcome.nextAdmissibleMove.targetRoute,
+          accessMode: outcome.nextAdmissibleMove.accessMode === "none" ? "none" : outcome.nextAdmissibleMove.accessMode,
+          whyAdmissible: outcome.nextAdmissibleMove.whyAdmissible,
+          evidenceBasis: outcome.evidenceLinks.map((link) => link.finding),
+          established: [outcome.namedSignal, outcome.consequenceWarning],
+          unresolved: {
+            contradiction: outcome.contradictions[0]?.detail ?? null,
+            evidenceGap: outcome.evidenceGap,
+            ownershipGap: outcome.pressureBand === "HIGH" || outcome.pressureBand === "CRITICAL" ? "The accountable decision owner must be confirmed before escalation." : null,
+            timingPressure: outcome.pressureBand === "HIGH" || outcome.pressureBand === "CRITICAL" ? outcome.consequenceWarning : null,
+            unresolvedCommitment: outcome.correctionQuestion,
+          },
+          notYetAppropriate: outcome.notYetAdmissible ? `${outcome.notYetAdmissible.move}: ${outcome.notYetAdmissible.whyNotYet}` : null,
+          carryForward: outcome.carryForward,
+        }),
+      });
+    } catch {
+      // Corridor persistence is best-effort for anonymous Signal; consent-gated history remains explicit.
+    }
+  }
+
   function submit() {
     const outcome = runDecisionSignal(input);
     if (!outcome.ok) { setError(outcome.message); setResult(null); return; }
@@ -62,6 +96,7 @@ const DecisionSignalPage: NextPage = () => {
     track("decision_signal_result_viewed", { pressureBand: outcome.result.pressureBand });
     recordJourneyEvent("SIGNAL_COMPLETED", { recommendationId: outcome.result.nextAdmissibleMove.recommendationId });
     recordJourneyEvent("SIGNAL_RESULT_VIEWED");
+    void persistCorridorContext(outcome.result);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function loadExample(id: string) {
@@ -249,7 +284,7 @@ const DecisionSignalPage: NextPage = () => {
                   </div>
                 )}
                 {!isExample && result.nextAdmissibleMove.targetRoute !== "/decision-instruments/signal" && (
-                  <Link href={result.nextAdmissibleMove.targetRoute} onClick={() => { track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute, recommendationId: result.nextAdmissibleMove.recommendationId }); recordJourneyEvent("NEXT_MOVE_ACCEPTED", { recommendationId: result.nextAdmissibleMove.recommendationId }); }}
+                  <Link href={`${result.nextAdmissibleMove.targetRoute}?rec=${encodeURIComponent(result.nextAdmissibleMove.recommendationId)}`} onClick={() => { track("decision_signal_next_move_clicked", { pressureBand: result.pressureBand, target: result.nextAdmissibleMove.targetRoute, recommendationId: result.nextAdmissibleMove.recommendationId }); recordJourneyEvent("NEXT_MOVE_ACCEPTED", { recommendationId: result.nextAdmissibleMove.recommendationId }); }}
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16, fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: COLORS.emerald, textDecoration: "none" }}>
                     {result.nextAdmissibleMove.targetLabel} <ArrowRight style={{ width: 12, height: 12 }} />
                   </Link>

@@ -50,6 +50,7 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/campaign", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "EnterpriseCampaign", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/calibration", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
   { route: "/admin/institutional-analytics", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
+  { route: "/admin/operator-pilot", domain: "product-operations", requiredRole: "ADMIN", productSurface: "operator-pilot", canonicalRecord: "PilotIntake", riskLevel: "HIGH", emitsAudit: true },
 
   // ── Intelligence Foundry ────────────────────────────────────────────────
   { route: "/admin/intelligence-foundry", domain: "foundry", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: false },
@@ -117,6 +118,7 @@ export const ADMIN_ROUTES: AdminRouteEntry[] = [
   { route: "/admin/delivery-queue", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "LineageEvent", riskLevel: "MEDIUM", emitsAudit: true },
   { route: "/admin/proof", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "HIGH", emitsAudit: true },
   { route: "/admin/outcome-verification", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "MEDIUM", emitsAudit: true },
+  { route: "/admin/feedback", domain: "product-operations", requiredRole: "ADMIN", canonicalRecord: "ProductFeedback", riskLevel: "MEDIUM", emitsAudit: true },
   { route: "/admin/pdf-dashboard", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
   { route: "/admin/pdf-status", domain: "product-operations", requiredRole: "ADMIN", riskLevel: "LOW", emitsAudit: false },
   { route: "/admin/boardroom-delivery", domain: "product-operations", requiredRole: "ADMIN", productSurface: "boardroom-mode", canonicalRecord: "BoardroomDossier", riskLevel: "CRITICAL", emitsAudit: true },

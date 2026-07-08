@@ -9,7 +9,7 @@
 
 import type { FunnelEventType } from "./funnel-event-store";
 
-function sessionId(): string {
+export function getJourneySessionId(): string {
   if (typeof window === "undefined") return "ssr";
   try {
     let id = window.sessionStorage.getItem("aol_journey_sid");
@@ -30,7 +30,7 @@ export interface JourneyEventExtra {
 
 export function recordJourneyEvent(eventType: FunnelEventType, extra: JourneyEventExtra = {}): void {
   if (typeof window === "undefined") return;
-  const body = JSON.stringify({ eventType, sessionId: sessionId(), sourceRoute: window.location.pathname, ...extra });
+  const body = JSON.stringify({ eventType, sessionId: getJourneySessionId(), sourceRoute: window.location.pathname, ...extra });
   try {
     if (navigator.sendBeacon) {
       navigator.sendBeacon("/api/demo/funnel-event", new Blob([body], { type: "application/json" }));

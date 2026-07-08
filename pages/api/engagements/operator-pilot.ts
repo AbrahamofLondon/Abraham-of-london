@@ -1,17 +1,13 @@
 /**
- * POST /api/engagements/operator-pilot — submit a pilot intake (server-side qualification
- *   + durable persistence). Returns a reference the applicant uses to check status.
- * GET  /api/engagements/operator-pilot?ref=... — customer status lookup (requires the
- *   exact reference; no enumeration of others' submissions).
- *
- * Qualification is re-run server-side (never trust a client-declared status), and an
- * INCOMPLETE intake is rejected with 422 — it is not a real submission.
+ * POST /api/engagements/operator-pilot — submit a pilot intake.
+ * GET  /api/engagements/operator-pilot?ref=... — customer-safe status lookup.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { qualifyPilotIntake, type PilotIntake } from "@/lib/engagements/operator-pilot-qualification";
-import { savePilotIntake, getPilotIntakeByRef } from "@/lib/engagements/pilot-intake-store";
+import { savePilotIntake, getPilotIntakeByRef, toCustomerStatus } from "@/lib/engagements/pilot-intake-store";
 import { track } from "@/lib/analytics/track";
+import { recordFunnelEvent } from "@/lib/demo/funnel-event-store";
 
 function coerceIntake(body: any): PilotIntake {
   return {
@@ -39,15 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!ref) return res.status(400).json({ error: "reference required" });
     const record = getPilotIntakeByRef(ref);
     if (!record) return res.status(404).json({ error: "not found" });
-    // customer-safe projection — do not leak operator note/owner internals
-    return res.status(200).json({
-      reference: record.reference,
-      qualificationStatus: record.qualification.status,
-      reviewStatus: record.reviewStatus,
-      nextStep: record.qualification.nextStep,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-    });
+    return res.status(200).json(toCustomerStatus(record));
   }
 
   if (req.method !== "POST") {
@@ -57,17 +45,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const intake = coerceIntake(req.body);
-    const qualification = qualifyPilotIntake(intake); // authoritative, server-side
+    const qualification = qualifyPilotIntake(intake);
     if (qualification.status === "INCOMPLETE") {
       return res.status(422).json({ error: "Intake incomplete", qualification });
     }
     const record = savePilotIntake(intake, qualification);
     track("operator_pilot_intake_submitted", { qualificationStatus: qualification.status });
+    try {
+      recordFunnelEvent({
+        eventType: record.reviewStatus === "MORE_INFORMATION_REQUIRED" ? "PILOT_MORE_INFO_REQUIRED" : "PILOT_SUBMITTED",
+        sessionId: typeof req.body?.sessionId === "string" ? req.body.sessionId.slice(0, 64) : `api_${record.reference}`,
+        sourceRoute: "/engagements/operator-pilot",
+        productCode: "operator_pilot",
+      });
+    } catch { /* analytics cannot block intake */ }
     return res.status(201).json({
       reference: record.reference,
       qualificationStatus: qualification.status,
       reviewStatus: record.reviewStatus,
-      nextStep: qualification.nextStep,
+      currentState: record.reviewStatus,
+      nextStep: toCustomerStatus(record).nextExpectedStep,
       reasons: qualification.reasons,
     });
   } catch (err) {
