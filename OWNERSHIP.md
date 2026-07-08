@@ -1,9 +1,9 @@
 # Multi-agent ownership — demo-to-evidence final closure
 
-**Current authority state:** ACTIVE WRITER: CODEX.
+**Current authority state:** ACTIVE WRITER: CLAUDE (re-assigned 2026-07-08 — Codex usage exhausted).
 
-- **CODEX:** ACTIVE / SOLE WRITER in `C:/Dev/aol-estate-construction` until completion or clean handoff.
-- **CLAUDE:** INACTIVE / USAGE EXHAUSTED. Prior Claude-owned flagship journey lane is transferred to Codex.
+- **CLAUDE:** ACTIVE / SOLE WRITER in `C:/Dev/aol-estate-construction` for the serverless-hardening programme until completion or clean handoff. Exact-path staging only.
+- **CODEX:** INACTIVE / USAGE EXHAUSTED. Handed off at clean HEAD `878874a2f`.
 - **DEEPSEEK:** NOT AUTHORISED TO WRITE in this worktree until a clean handoff is produced or a separate worktree/branch is explicitly created.
 
 ## Canonical trunk
