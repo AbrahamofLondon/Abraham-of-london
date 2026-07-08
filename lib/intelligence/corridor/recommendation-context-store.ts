@@ -11,6 +11,7 @@ import Database from "better-sqlite3";
 import crypto from "node:crypto";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { assertSqliteRuntimeAllowed } from "@/lib/runtime/sqlite-runtime-guard";
 
 export type CorridorAccessMode = "free" | "self_serve" | "controlled" | "manual_billing" | "unavailable" | "none";
 
@@ -75,6 +76,7 @@ function schema(db: Database.Database): void {
 
 function getDb(): Database.Database {
   if (_db) return _db;
+  assertSqliteRuntimeAllowed("recommendation-context-store"); // §2 fail closed in production
   if (!existsSync(DB_DIR)) mkdirSync(DB_DIR, { recursive: true });
   const db = new Database(DB_PATH);
   db.pragma("journal_mode = WAL");

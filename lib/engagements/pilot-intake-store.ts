@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
 import crypto from "node:crypto";
 import type { PilotIntake, QualificationResult } from "./operator-pilot-qualification";
+import { assertSqliteRuntimeAllowed } from "@/lib/runtime/sqlite-runtime-guard";
 
 export type PilotLifecycleState =
   | "SUBMITTED"
@@ -85,6 +86,7 @@ function schema(db: Database.Database): void {
 
 function getDb(): Database.Database {
   if (_db) return _db;
+  assertSqliteRuntimeAllowed("pilot-intake-store"); // §2 fail closed in production
   if (!existsSync(DB_DIR)) mkdirSync(DB_DIR, { recursive: true });
   const db = new Database(DB_PATH);
   db.pragma("journal_mode = WAL");

@@ -16,6 +16,7 @@ import Database from "better-sqlite3";
 import { join } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
 import crypto from "node:crypto";
+import { assertSqliteRuntimeAllowed } from "@/lib/runtime/sqlite-runtime-guard";
 
 export const FUNNEL_EVENTS = [
   "SIGNAL_LANDING_VIEWED", "SIGNAL_STARTED", "SIGNAL_COMPLETED", "SIGNAL_RESULT_VIEWED",
@@ -62,6 +63,7 @@ function schema(db: Database.Database) {
 }
 function getDb(): Database.Database {
   if (_db) return _db;
+  assertSqliteRuntimeAllowed("funnel-event-store"); // §2 fail closed in production
   if (!existsSync(DB_DIR)) mkdirSync(DB_DIR, { recursive: true });
   const db = new Database(DB_PATH);
   db.pragma("journal_mode = WAL");

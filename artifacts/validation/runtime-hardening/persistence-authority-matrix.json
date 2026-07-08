@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "runtime-hardening.persistence-authority-matrix.v1",
+  "generatedAt": "2026-07-08T09:30:00Z",
+  "canonicalHead": "828aa4f09",
+  "method": "Static census of runtime persistence: grep better-sqlite3 / fs.write* / data-path across lib + pages/api, then trace each store to its runtime caller (API route / server loader). Non-test only.",
+  "criticalFinding": "Five production API routes persist customer or telemetry state to LOCAL better-sqlite3 files under data/. On serverless (Netlify/Vercel) each invocation gets a fresh ephemeral filesystem: writes are lost, never shared across instances, not concurrency-safe. This is 'local proof mistaken for production durability' — the controlling-mission #1 risk, PRESENT.",
+  "requiredConditions": {
+    "UNKNOWN_RUNTIME_PERSISTENCE": 0,
+    "PRODUCTION_FILESYSTEM_STATE": 5,
+    "SILENT_LOCAL_FALLBACK_IN_PRODUCTION": 5,
+    "note": "PRODUCTION_FILESYSTEM_STATE and SILENT_LOCAL_FALLBACK must reach 0 before a PASS. They are non-zero today."
+  },
+  "stores": [
+    {
+      "capability": "Operator Pilot intake + lifecycle (customer state)",
+      "module": "lib/engagements/pilot-intake-store.ts",
+      "runtimeCaller": ["pages/api/engagements/operator-pilot.ts", "pages/api/admin/operator-pilot.ts"],
+      "currentAdapter": "better-sqlite3 (data/engagements/pilot-intakes.sqlite)",
+      "persistenceType": "LOCAL_FILE_SQLITE",
+      "serverlessSafe": false,
+      "multiInstanceSafe": false,
+      "transactional": "single-connection only",
+      "tenantIsolated": "no tenant column yet",
+      "productionAuthority": "MISSING (should be Postgres/Prisma)",
+      "localTestAuthority": "yes (_setPilotDbForTest :memory:)",
+      "migrationRequired": true,
+      "disposition": "REPLACE_RUNTIME_ADAPTER",
+      "severity": "CRITICAL"
+    },
+    {
+      "capability": "Signal consent-gated continuation (consent records)",
+      "module": "lib/demo/signal-consent-transition-store.ts",
+      "runtimeCaller": ["pages/api/demo/signal-consent-continuation.ts"],
+      "currentAdapter": "better-sqlite3 (data/*)",
+      "persistenceType": "LOCAL_FILE_SQLITE",
+      "serverlessSafe": false,
+      "multiInstanceSafe": false,
+      "transactional": "single-connection only",
+      "tenantIsolated": "n/a",
+      "productionAuthority": "MISSING (consent must be durable + auditable → Postgres)",
+      "localTestAuthority": "yes",
+      "migrationRequired": true,
+      "disposition": "REPLACE_RUNTIME_ADAPTER",
+      "severity": "CRITICAL"
+    },
+    {
+      "capability": "Corridor recommendation context (Signal→Corridor continuity)",
+      "module": "lib/intelligence/corridor/recommendation-context-store.ts",
+      "runtimeCaller": ["pages/api/corridor/recommendation-context.ts"],
+      "currentAdapter": "better-sqlite3 (data/*)",
+      "persistenceType": "LOCAL_FILE_SQLITE",
+      "serverlessSafe": false,
+      "multiInstanceSafe": false,
+      "transactional": "single-connection only",
+      "tenantIsolated": "check",
+      "productionAuthority": "MISSING",
+      "localTestAuthority": "yes",
+      "migrationRequired": true,
+      "disposition": "REPLACE_RUNTIME_ADAPTER",
+      "severity": "HIGH"
+    },
+    {
+      "capability": "Flagship funnel telemetry",
+      "module": "lib/demo/funnel-event-store.ts",
+      "runtimeCaller": ["pages/api/demo/funnel-event.ts", "pages/api/engagements/operator-pilot.ts"],
+      "currentAdapter": "better-sqlite3 (data/funnel/funnel-events.sqlite)",
+      "persistenceType": "LOCAL_FILE_SQLITE",
+      "serverlessSafe": false,
+      "multiInstanceSafe": false,
+      "transactional": "single-connection only",
+      "tenantIsolated": "structured, no PII",
+      "productionAuthority": "MISSING (telemetry sink should be Postgres or an analytics pipe)",
+      "localTestAuthority": "yes (_setFunnelDbForTest :memory:)",
+      "migrationRequired": true,
+      "disposition": "REPLACE_RUNTIME_ADAPTER",
+      "severity": "HIGH"
+    },
+    {
+      "capability": "Interaction spine durable store (compounding twin) — env-gated",
+      "module": "lib/intelligence/interaction-spine/runtime-spine-provider.ts (→ sqlite-interaction-store / sqlite-outbox-store)",
+      "runtimeCaller": ["pages/api/playbooks/[slug]/run.ts", "pages/api/decision-instruments/results/index.ts"],
+      "currentAdapter": "better-sqlite3 ONLY when INTERACTION_STORE_PATH is set; else resolver returns null (binding no-ops, product flow unaffected)",
+      "persistenceType": "ENV_GATED_SQLITE",
+      "serverlessSafe": "safe-by-default (no-ops without the env; never silently writes ephemeral state in prod)",
+      "multiInstanceSafe": false,
+      "transactional": "single-connection only",
+      "tenantIsolated": "yes (tenant/case binding)",
+      "productionAuthority": "would bind to Postgres adapter in a full deploy (documented in persistence-authority-adr)",
+      "localTestAuthority": "yes",
+      "migrationRequired": false,
+      "disposition": "LOCAL_TEST_SQLITE_ONLY",
+      "severity": "OK"
+    },
+    {
+      "capability": "Decision graph / watchdog / analytics / recommendation durable stores",
+      "module": "lib/intelligence/accountability/durable-{graph,watchdog,analytics}-store.ts, lib/intelligence/corridor/durable-recommendation-store.ts",
+      "runtimeCaller": [],
+      "currentAdapter": "better-sqlite3",
+      "persistenceType": "LOCAL_FILE_SQLITE",
+      "serverlessSafe": "n/a — no runtime API caller (tests only)",
+      "multiInstanceSafe": false,
+      "transactional": "single-connection only",
+      "tenantIsolated": "graph: yes",
+      "productionAuthority": "n/a until wired",
+      "localTestAuthority": "yes",
+      "migrationRequired": false,
+      "disposition": "LOCAL_TEST_SQLITE_ONLY",
+      "severity": "OK (but must be guarded so a future API import fails the serverless gate)"
+    }
+  ],
+  "otherRuntimeFilesystemWriters": {
+    "note": "Additional lib modules call fs.write*/mkdir at runtime and need individual classification in a follow-up pass (many are PDF generation to tmp, diagnostics local-storage adapters, or dev-only). Not yet dispositioned.",
+    "candidates": [
+      "lib/server/diagnostics/storage/local.ts", "lib/server/diagnostics/store.ts", "lib/storage/object-store.ts",
+      "lib/strategic-twin/strategic-twin-state-loader.ts", "lib/strategic-twin/strategic-twin-updater.ts",
+      "lib/decision-memory/decision-memory-store.ts", "lib/living-intelligence/drift-memory-store.ts",
+      "lib/living-intelligence/living-action-feedback-store.ts", "lib/decision-debt/decision-debt-ledger.ts",
+      "lib/consulting/strategy-room.ts", "lib/pdf/generate.ts", "lib/pdf-generator.ts", "pages/api/inner-circle/lexicon.ts"
+    ]
+  },
+  "remediationOrder": [
+    "1. Fail-closed guard: sqlite runtime stores throw in NODE_ENV=production unless ALLOW_SQLITE_RUNTIME is explicitly set (kills silent local fallback).",
+    "2. Migrate pilot intake + consent to Prisma/Postgres (customer/consent state first).",
+    "3. Migrate funnel + recommendation-context to Postgres (or an analytics pipe for funnel).",
+    "4. Static serverless guard test: no NEW production API route may import a LOCAL_FILE_SQLITE store.",
+    "5. Classify remaining fs.write* modules."
+  ]
+}
