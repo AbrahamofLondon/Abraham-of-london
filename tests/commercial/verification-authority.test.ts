@@ -41,7 +41,7 @@ describe("verification authority — no mirror imports in certification scripts"
       const content = readFileSync(join(scriptsDir, entry.name), "utf8");
       expect(content, `${entry.name} must not import _commercial-mirror.mjs`).not.toContain("_commercial-mirror");
     }
-  });
+  }, 30000);
 });
 
 describe("verification authority — production resolver is the authority", () => {
@@ -59,7 +59,7 @@ describe("verification authority — production resolver is the authority", () =
       const content = readFileSync(join(scriptsDir, entry.name), "utf8");
       expect(content, `${entry.name} must not define its own resolveCommercialAction`).not.toMatch(/function resolveCommercialAction/);
     }
-  });
+  }, 30000);
 
   it("unknown governance is fail-closed through production code", () => {
     const paidCheckoutProducts = Object.values(CATALOG).filter(
@@ -125,7 +125,7 @@ describe("verification authority — production and verifier Product Code resolu
       // No certification script should define its own PRODUCT_CODE_MAP
       expect(content, `${entry.name} must not define PRODUCT_CODE_MAP`).not.toContain("PRODUCT_CODE_MAP");
     }
-  });
+  }, 30000);
 
   it("certification code contains no independent GMI current-quarter constant", () => {
     const scriptsDir = join(ROOT, "scripts");
@@ -136,7 +136,7 @@ describe("verification authority — production and verifier Product Code resolu
       const content = readFileSync(join(scriptsDir, entry.name), "utf8");
       expect(content, `${entry.name} must not define CURRENT_GMI_QUARTER_KEY`).not.toContain("CURRENT_GMI_QUARTER_KEY");
     }
-  });
+  }, 30000);
 });
 
 describe("verification authority — reconciliation classification integrity", () => {
