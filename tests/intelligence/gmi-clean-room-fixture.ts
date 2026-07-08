@@ -2,9 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { releaseSnapshotStateHash } from "@/lib/intelligence/gmi-board-pack-artifact-service.server";
 import { canonicalHash, getGmiReleaseSnapshots } from "@/lib/intelligence/gmi-data-service.server";
 
-export const GMI_FIXTURE_EDITION_ID = "GMI-Q2-2026";
-export const GMI_FIXTURE_SNAPSHOT_ID = "test-gmi-q2-clean-room-published-snapshot";
-export const GMI_FIXTURE_ARTIFACT_ID = "test-gmi-q2-clean-room-board-pack-artifact";
+export const GMI_FIXTURE_EDITION_ID = "GMI-CLEAN-ROOM-FIXTURE-2026";
+export const GMI_FIXTURE_SNAPSHOT_ID = "test-gmi-clean-room-fixture-published-snapshot";
+export const GMI_FIXTURE_ARTIFACT_ID = "test-gmi-clean-room-fixture-board-pack-artifact";
 
 const calls = Array.from({ length: 8 }, (_, index) => ({
   callId: `fixture-call-${index + 1}`,
@@ -65,7 +65,7 @@ const performance = {
 const snapshot = {
   id: GMI_FIXTURE_SNAPSHOT_ID,
   editionId: GMI_FIXTURE_EDITION_ID,
-  editionSlug: "gmi-q2-2026-clean-room-fixture",
+  editionSlug: "gmi-clean-room-fixture-2026",
   releaseStatus: "PUBLISHED",
   primaryNextAction: "Fixture-only board-pack read-mode proof",
   methodologyVersion: "fixture-methodology-v1",
@@ -181,7 +181,7 @@ export async function seedGmiCleanRoomBoardPackFixture() {
       ${GMI_FIXTURE_EDITION_ID},
       ${GMI_FIXTURE_SNAPSHOT_ID},
       ${"board_pack_pdf"},
-      ${"gmi-q2-2026-clean-room-fixture-board-pack.pdf"},
+      ${"gmi-clean-room-fixture-2026-board-pack.pdf"},
       ${null},
       ${null},
       ${fixtureContentHash},
