@@ -1,18 +1,17 @@
 /**
  * lib/intelligence/gmi-release-transaction.ts
  *
- * Atomic GMI edition release operation.
- *
- * All or nothing. If the transaction fails at any point:
- * - Q2 remains unreleased
- * - Q1 remains ACTIVE_UNTIL_SUPERSEDED
- *
- * Commerce is separate from publication — resolved through existing commercial authority.
+ * Compatibility wrapper for the old release transaction API.
+ * Production release authority now lives in Postgres via
+ * gmi-release-store.server.ts. This module no longer keeps process-local
+ * receipt Maps or release lock Sets.
  */
-import { getMarketIntelligenceRecord, type MarketIntelligenceLifecycleRecord } from "./market-intelligence-lifecycle";
-import { resolveGmiReleaseState } from "./gmi-release-state-resolver";
-import { assertValidTransition, getPredecessorEditionId, getOwnerAuthority, registerOwnerAuthority, type ReleaseReceipt, type ReleaseAuthorityRecord } from "./gmi-edition-lifecycle";
-import crypto from "node:crypto";
+import type { ReleaseReceipt, ReleaseAuthorityRecord } from "./gmi-edition-lifecycle";
+import {
+  getDurableReceipt,
+  releaseGmiEditionDurable,
+  type ReleaseTransactionResult as DurableReleaseTransactionResult,
+} from "./gmi-release-store.server";
 
 export interface ReleaseTransactionInput {
   editionId: string;
@@ -32,159 +31,57 @@ export interface ReleaseTransactionResult {
   successorState: string | null;
 }
 
-// Receipt store (authority store is shared from gmi-edition-lifecycle)
-const receiptStore = new Map<string, ReleaseReceipt>();
-
-// ── Distributed-safe advisory lock ──────────────────────────────────────────
-// In production, this uses PostgreSQL advisory lock (pg_try_advisory_xact_lock)
-// or a similar distributed authority. The test environment uses a named lock
-// map that simulates the same semantics: exactly one caller acquires the lock,
-// others are rejected. The lock is automatically released when the transaction
-// completes (or fails), preventing split-state even under concurrent callers.
-
-const releaseLocks = new Set<string>();
-
-/**
- * Acquire an exclusive release lock for the given edition.
- * Returns true if the lock was acquired, false if another release is in progress.
- *
- * Production implementation uses:
- *   SELECT pg_try_advisory_xact_lock(hashtext('gmi_release_' || edition_id))
- *
- * This provides distributed safety across multiple serverless instances.
- */
-async function acquireReleaseLock(editionId: string): Promise<boolean> {
-  // In production, this would be:
-  //   const result = await prisma.$queryRaw`SELECT pg_try_advisory_xact_lock(hashtext(CONCAT('gmi_release_', ${editionId}))) as locked`;
-  //   return result[0]?.locked === true;
-  //
-  // For the test environment, use the same-process lock as a proxy.
-  // The semantics are identical: exclusive, blocking concurrent callers.
-  if (releaseLocks.has(editionId)) return false;
-  releaseLocks.add(editionId);
-  return true;
+function toLegacyReceipt(result: DurableReleaseTransactionResult): ReleaseReceipt | null {
+  if (!result.receipt) return null;
+  return {
+    editionId: result.receipt.editionId,
+    sourceSnapshotHash: result.receipt.sourceSnapshotHash,
+    reportContentHash: result.receipt.reportContentHash,
+    methodologyVersion: result.receipt.methodologyVersion,
+    pdfHash: result.receipt.pdfHash,
+    releaseChecklistVersion: result.receipt.releaseChecklistVersion,
+    releaseAuthorityRef: result.receipt.authorityId,
+    publishedAt: result.receipt.publishedAt.toISOString(),
+  };
 }
 
-function releaseReleaseLock(editionId: string): void {
-  releaseLocks.delete(editionId);
-}
-
-export function getReleaseReceipt(editionId: string): ReleaseReceipt | null {
-  return receiptStore.get(editionId) ?? null;
-}
-
-/**
- * Atomic release operation.
- *
- * 1. Lock/read current edition state
- * 2. Verify temporal boundary
- * 3. Verify data lock
- * 4. Run all release gates
- * 5. Verify owner authority
- * 6. Verify candidate hash
- * 7. Activate successor
- * 8. Set publication metadata
- * 9. Enable only authorised public/commercial state
- * 10. Supersede predecessor
- * 11. Bind predecessor/successor relationship
- * 12. Record release receipt
- *
- * All or nothing. If any step fails, no state changes persist.
- */
 export async function releaseGmiEdition(input: ReleaseTransactionInput): Promise<ReleaseTransactionResult> {
-  const errors: string[] = [];
-  const editionId = input.editionId;
-
-  // Step 0: Acquire distributed-safe release lock
-  const locked = await acquireReleaseLock(editionId);
-  if (!locked) {
-    return { ok: false, receipt: null, errors: ["Concurrent release attempt blocked — another release is in progress for this edition"], predecessorState: null, successorState: null };
-  }
-  try {
-    return releaseGmiEditionInternal(input);
-  } finally {
-    releaseReleaseLock(editionId);
-  }
-}
-
-function releaseGmiEditionInternal(input: ReleaseTransactionInput): ReleaseTransactionResult {
-  const errors: string[] = [];
-  const editionId = input.editionId;
-  const record = getMarketIntelligenceRecord(editionId);
-
-  if (!record) {
-    return { ok: false, receipt: null, errors: [`Edition ${editionId} not found in lifecycle registry`], predecessorState: null, successorState: null };
-  }
-
-  // Step 1: Verify lifecycle state allows release
-  try {
-    assertValidTransition(record.lifecycleState as any, "ACTIVE_UNTIL_SUPERSEDED");
-  } catch (e: any) {
-    return { ok: false, receipt: null, errors: [e.message], predecessorState: record.lifecycleState, successorState: null };
-  }
-
-  // Step 2: Run release gates
-  const gateResult = resolveGmiReleaseState(editionId);
-  if (!gateResult.releaseReady) {
-    return {
-      ok: false,
-      receipt: null,
-      errors: gateResult.blockers.length > 0 ? gateResult.blockers : ["Release gates not passed"],
-      predecessorState: record.lifecycleState,
-      successorState: null,
-    };
-  }
-
-  // Step 3: Verify owner authority exists and hash matches
-  const storedAuthority = getOwnerAuthority(editionId);
-  if (!storedAuthority) {
-    return { ok: false, receipt: null, errors: ["No owner release authority registered"], predecessorState: record.lifecycleState, successorState: null };
-  }
-  if (storedAuthority.candidateHash !== input.sourceSnapshotHash) {
-    return {
-      ok: false,
-      receipt: null,
-      errors: [`Candidate hash mismatch: authority was for ${storedAuthority.candidateHash}, current is ${input.sourceSnapshotHash}. Authority must be renewed.`],
-      predecessorState: record.lifecycleState,
-      successorState: null,
-    };
-  }
-
-  // Step 4: Find predecessor (the currently active edition)
-  const predecessorId = getPredecessorEditionId(editionId);
-  const predecessor = predecessorId ? getMarketIntelligenceRecord(predecessorId) : null;
-
-  // Step 5: Build release receipt
-  const now = new Date().toISOString();
-  const receipt: ReleaseReceipt = {
-    editionId,
+  const durable = await releaseGmiEditionDurable({
+    editionId: input.editionId,
+    candidateHash: input.sourceSnapshotHash,
     sourceSnapshotHash: input.sourceSnapshotHash,
     reportContentHash: input.reportContentHash,
     methodologyVersion: input.methodologyVersion,
     pdfHash: input.pdfHash,
     releaseChecklistVersion: input.releaseChecklistVersion,
-    releaseAuthorityRef: storedAuthority.authorizedAt,
-    publishedAt: now,
-  };
-
-  // Step 6: Record receipt (in production this would be a DB transaction)
-  receiptStore.set(editionId, receipt);
+  });
 
   return {
-    ok: true,
-    receipt,
-    errors: [],
-    predecessorState: predecessor?.lifecycleState ?? null,
-    successorState: "ACTIVE_UNTIL_SUPERSEDED",
+    ok: durable.ok,
+    receipt: toLegacyReceipt(durable),
+    errors: durable.errors,
+    predecessorState: durable.predecessorState,
+    successorState: durable.successorState,
   };
 }
 
-/**
- * Verify that a release receipt matches the current state.
- * Content hash changed after authority → authority invalid.
- */
-export function verifyReleaseReceipt(editionId: string, currentContentHash: string): boolean {
-  const receipt = getReleaseReceipt(editionId);
+export async function getReleaseReceipt(editionId: string): Promise<ReleaseReceipt | null> {
+  const receipt = await getDurableReceipt(editionId);
+  if (!receipt) return null;
+  return {
+    editionId: receipt.editionId,
+    sourceSnapshotHash: receipt.sourceSnapshotHash,
+    reportContentHash: receipt.reportContentHash,
+    methodologyVersion: receipt.methodologyVersion,
+    pdfHash: receipt.pdfHash,
+    releaseChecklistVersion: receipt.releaseChecklistVersion,
+    releaseAuthorityRef: receipt.authorityId,
+    publishedAt: receipt.publishedAt.toISOString(),
+  };
+}
+
+export async function verifyReleaseReceipt(editionId: string, currentContentHash: string): Promise<boolean> {
+  const receipt = await getDurableReceipt(editionId);
   if (!receipt) return false;
   return receipt.reportContentHash === currentContentHash;
 }

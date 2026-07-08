@@ -144,18 +144,19 @@ export interface ReleaseAuthorityRecord {
   candidateHash: string;
 }
 
-const authorityStore = new Map<string, ReleaseAuthorityRecord>();
-
-export function registerOwnerAuthority(authority: ReleaseAuthorityRecord): void {
-  authorityStore.set(authority.editionId, authority);
+export function registerOwnerAuthority(_authority: ReleaseAuthorityRecord): void {
+  // Legacy sync adapter retained for old unit tests only. Production owner
+  // authority is persisted in GmiReleaseAuthority and resolved through
+  // gmi-release-store.server.ts. This fail-closed helper must not become a
+  // runtime authority source.
 }
 
-export function getOwnerAuthority(editionId: string): ReleaseAuthorityRecord | null {
-  return authorityStore.get(editionId) ?? null;
+export function getOwnerAuthority(_editionId: string): ReleaseAuthorityRecord | null {
+  return null;
 }
 
-export function clearOwnerAuthority(editionId: string): void {
-  authorityStore.delete(editionId);
+export function clearOwnerAuthority(_editionId: string): void {
+  // No-op: legacy in-memory authority was removed from production code paths.
 }
 
 // ── Release gate result ────────────────────────────────────────────────────
