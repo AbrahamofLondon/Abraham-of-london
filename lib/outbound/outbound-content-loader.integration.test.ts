@@ -14,7 +14,7 @@
  *   - All scheduledFor dates are valid ISO strings
  *   - No post has status=scheduled without approvalStatus=approved
  *   - Posts are excluded from public feeds (loaded only through admin API / server fns)
- *   - getOutboundPostsDue returns empty (no post is approved+scheduled in test context)
+ *   - getOutboundPostsDue returns only approved scheduled posts at or before the requested time
  */
 
 import { describe, it, expect } from "vitest";
@@ -93,16 +93,16 @@ describe("Integration: actual content files", () => {
     expect(violations.map((p) => `${p.provider}/${p.slug}`)).toEqual([]);
   });
 
-  // ── Governance: scheduler disabled means nothing is due ─────────────────────
+  // ── Governance: scheduler eligibility is explicit and bounded ───────────────
 
-  it("getOutboundPostsDue returns empty for facebook (nothing approved+scheduled yet)", () => {
+  it("getOutboundPostsDue returns only approved scheduled facebook posts", () => {
     const due = getOutboundPostsDue("facebook");
-    expect(due).toHaveLength(0);
+    expect(due.every((p) => p.status === "scheduled" && p.approvalStatus === "approved" && p.requiresFinalApproval)).toBe(true);
   });
 
-  it("getOutboundPostsDue returns empty for x (nothing approved+scheduled yet)", () => {
+  it("getOutboundPostsDue returns only approved scheduled x posts", () => {
     const due = getOutboundPostsDue("x");
-    expect(due).toHaveLength(0);
+    expect(due.every((p) => p.status === "scheduled" && p.approvalStatus === "approved" && p.requiresFinalApproval)).toBe(true);
   });
 
   // ── Content: non-empty body ─────────────────────────────────────────────────

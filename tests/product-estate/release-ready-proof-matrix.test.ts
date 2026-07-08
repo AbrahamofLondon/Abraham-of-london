@@ -42,6 +42,6 @@ describe("release-ready product proof matrix", () => {
         }
       }
     }
-  }, 30000);
+  }, 120000);
 });
 

@@ -62,7 +62,7 @@ export const PACK_ID_TO_CATALOG_CODE: Record<string, string> = {
 // but has no catalog entry. Price is held here as the provisional source
 // until it is added to catalog.ts with a real Stripe product ID.
 export const EXECUTIVE_INTELLIGENCE_PACK_PRICE_GBP = 995;
-export const EXECUTIVE_INTELLIGENCE_PACK_DISPLAY_PRICE = "Catalog registration required";
+export const EXECUTIVE_INTELLIGENCE_PACK_DISPLAY_PRICE = "£995";
 
 // ── Getters ───────────────────────────────────────────────────────────────────
 

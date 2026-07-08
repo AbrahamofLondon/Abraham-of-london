@@ -69,7 +69,7 @@ describe('Boardroom Brief commercial product', () => {
     // even though the catalog data is checkout-ready. Checkout-ready is not permission.
     const action = resolvePricingAction(product)
     expect(action.purchasable).toBe(false)
-    expect(action.type).toBe('blocked')
+    expect(action.type).toBe('review_gated')
   })
 
   it('does not market the paid brief as Executive Reporting, Retainer, or Oversight', () => {
