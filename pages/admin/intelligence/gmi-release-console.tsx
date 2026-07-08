@@ -139,9 +139,10 @@ export function buildGmiReleaseConsoleViewModel(): ConsoleViewModel {
   const dueInQ2 = q1Calls.filter((call) => call.expectedReviewWindow === "Q2 2026");
   const carriedToQ3 = q1Calls.filter((call) => call.expectedReviewWindow === "Q3 2026");
   const pendingQ2 = getCallsPendingReview("Q2 2026");
+  // qualityGate.scores is normalised to number[] by the release-state resolver.
   const dimensionsBelowThreshold = releaseState.qualityGate.scores
-    .filter((score) => score.score < 8)
-    .map((score) => `${score.dimension}: ${score.score}/10`);
+    .filter((score) => score < 8)
+    .map((score, i) => `Dimension ${i + 1}: ${score}/10`);
   const warnings = reviewPack.sourceCoverage.coverageScore < 90
     ? ["Source coverage below paid institutional warning threshold."]
     : [];
