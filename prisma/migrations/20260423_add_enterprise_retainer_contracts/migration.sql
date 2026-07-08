@@ -5,13 +5,13 @@ CREATE TABLE IF NOT EXISTS "RetainerContract" (
   "tier" TEXT NOT NULL,
   "status" TEXT NOT NULL,
   "decisionCapacity" INTEGER NOT NULL,
-  "startDate" DATETIME NOT NULL,
-  "endDate" DATETIME,
+  "startDate" TIMESTAMPTZ NOT NULL,
+  "endDate" TIMESTAMPTZ,
   "billingCycle" TEXT NOT NULL,
   "stripeSubscriptionId" TEXT,
   "entitlementSlug" TEXT NOT NULL,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "RetainerContract_organisationId_fkey"
     FOREIGN KEY ("organisationId") REFERENCES "Organisation"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS "RetainedDecision" (
   "decisionObjectId" TEXT NOT NULL,
   "priorityLevel" TEXT NOT NULL,
   "status" TEXT NOT NULL,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "RetainedDecision_contractId_fkey"
     FOREIGN KEY ("contractId") REFERENCES "RetainerContract"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "RetainedDecision_decisionObjectId_fkey"
@@ -47,11 +47,11 @@ CREATE INDEX IF NOT EXISTS "RetainedDecision_status_idx" ON "RetainedDecision"("
 CREATE TABLE IF NOT EXISTS "EnforcementCycle" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "retainedDecisionId" TEXT NOT NULL,
-  "cycleDate" DATETIME NOT NULL,
+  "cycleDate" TIMESTAMPTZ NOT NULL,
   "actionsTaken" JSONB NOT NULL,
   "contradictionsUpdated" JSONB NOT NULL,
   "outcomeDelta" REAL,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "EnforcementCycle_retainedDecisionId_fkey"
     FOREIGN KEY ("retainedDecisionId") REFERENCES "RetainedDecision"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );

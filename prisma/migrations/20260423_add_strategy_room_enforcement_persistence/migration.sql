@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS "strategy_room_execution_sessions" (
   "constraintMap" TEXT,
   "canonicalSnapshot" TEXT,
   "status" TEXT NOT NULL DEFAULT 'active',
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "strategy_room_execution_sessions_sessionKey_key" ON "strategy_room_execution_sessions"("sessionKey");
@@ -31,12 +31,12 @@ CREATE TABLE IF NOT EXISTS "strategy_decision_logs" (
   "decision" TEXT NOT NULL,
   "status" TEXT NOT NULL DEFAULT 'pending',
   "notes" TEXT,
-  "deadline" DATETIME,
+  "deadline" TIMESTAMPTZ,
   "avoidanceCount" INTEGER NOT NULL DEFAULT 0,
-  "executedAt" DATETIME,
-  "escalatedAt" DATETIME,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "executedAt" TIMESTAMPTZ,
+  "escalatedAt" TIMESTAMPTZ,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "strategy_decision_logs_sessionId_fkey"
     FOREIGN KEY ("sessionId") REFERENCES "strategy_room_execution_sessions"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT "strategy_decision_logs_decisionObjectId_fkey"
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS "consequence_timeline" (
   "timePenalty" INTEGER NOT NULL DEFAULT 0,
   "failurePenalty" INTEGER NOT NULL DEFAULT 0,
   "explanation" TEXT,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS "consequence_timeline_sessionId_idx" ON "consequence_timeline"("sessionId");
@@ -69,8 +69,8 @@ CREATE TABLE IF NOT EXISTS "escalation_events" (
   "triggerType" TEXT NOT NULL,
   "message" TEXT NOT NULL,
   "decisionId" TEXT,
-  "resolvedAt" DATETIME,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "resolvedAt" TIMESTAMPTZ,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS "escalation_events_sessionId_idx" ON "escalation_events"("sessionId");

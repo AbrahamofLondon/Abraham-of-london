@@ -1,91 +1,48 @@
-BEGIN TRANSACTION;
-
 -- =========================================================
 -- PR 1 — expand AccessTier to canonical 9 + add paused status
--- SQLite stores Prisma enums as TEXT in this repo snapshot.
--- Therefore the DB-side migration is a data remap, not a full
--- schema rebuild.
 --
--- Approved remaps:
---   partner   -> architect
---   executive -> architect
---   sovereign -> owner
---
--- This migration is intentionally surgical.
--- No table recreation.
--- No unrelated schema drift.
+-- This migration originated as a surgical legacy-data remap. In a clean
+-- PostgreSQL database these legacy tables may not exist yet, so every remap is
+-- guarded. Existing databases still receive the intended remap; clean-room
+-- databases can proceed from tracked migrations alone.
 -- =========================================================
 
--- InnerCircleMember.tier
-UPDATE "inner_circle_members"
-SET "tier" = 'architect'
-WHERE "tier" IN ('partner', 'executive');
+DO $$
+BEGIN
+  IF to_regclass('public.inner_circle_members') IS NOT NULL THEN
+    UPDATE "inner_circle_members" SET "tier" = 'architect' WHERE "tier" IN ('partner', 'executive');
+    UPDATE "inner_circle_members" SET "tier" = 'owner' WHERE "tier" = 'sovereign';
+  END IF;
 
-UPDATE "inner_circle_members"
-SET "tier" = 'owner'
-WHERE "tier" = 'sovereign';
+  IF to_regclass('public.content_metadata') IS NOT NULL THEN
+    UPDATE "content_metadata" SET "classification" = 'architect' WHERE "classification" IN ('partner', 'executive');
+    UPDATE "content_metadata" SET "classification" = 'owner' WHERE "classification" = 'sovereign';
+  END IF;
 
--- ContentMetadata.classification
-UPDATE "content_metadata"
-SET "classification" = 'architect'
-WHERE "classification" IN ('partner', 'executive');
+  IF to_regclass('public.frameworks') IS NOT NULL THEN
+    UPDATE "frameworks" SET "tier" = 'architect' WHERE "tier" IN ('partner', 'executive');
+    UPDATE "frameworks" SET "tier" = 'owner' WHERE "tier" = 'sovereign';
+  END IF;
 
-UPDATE "content_metadata"
-SET "classification" = 'owner'
-WHERE "classification" = 'sovereign';
+  IF to_regclass('public.strategic_frameworks') IS NOT NULL THEN
+    UPDATE "strategic_frameworks" SET "tier" = 'architect' WHERE "tier" IN ('partner', 'executive');
+    UPDATE "strategic_frameworks" SET "tier" = 'owner' WHERE "tier" = 'sovereign';
+  END IF;
 
--- frameworks.tier
-UPDATE "frameworks"
-SET "tier" = 'architect'
-WHERE "tier" IN ('partner', 'executive');
+  IF to_regclass('public.canon_entries') IS NOT NULL THEN
+    UPDATE "canon_entries" SET "tier" = 'architect' WHERE "tier" IN ('partner', 'executive');
+    UPDATE "canon_entries" SET "tier" = 'owner' WHERE "tier" = 'sovereign';
+  END IF;
 
-UPDATE "frameworks"
-SET "tier" = 'owner'
-WHERE "tier" = 'sovereign';
+  IF to_regclass('public.print_assets') IS NOT NULL THEN
+    UPDATE "print_assets" SET "tier" = 'architect' WHERE "tier" IN ('partner', 'executive');
+    UPDATE "print_assets" SET "tier" = 'owner' WHERE "tier" = 'sovereign';
+  END IF;
 
--- strategic_frameworks.tier
-UPDATE "strategic_frameworks"
-SET "tier" = 'architect'
-WHERE "tier" IN ('partner', 'executive');
-
-UPDATE "strategic_frameworks"
-SET "tier" = 'owner'
-WHERE "tier" = 'sovereign';
-
--- canon_entries.tier
-UPDATE "canon_entries"
-SET "tier" = 'architect'
-WHERE "tier" IN ('partner', 'executive');
-
-UPDATE "canon_entries"
-SET "tier" = 'owner'
-WHERE "tier" = 'sovereign';
-
--- print_assets.tier
-UPDATE "print_assets"
-SET "tier" = 'architect'
-WHERE "tier" IN ('partner', 'executive');
-
-UPDATE "print_assets"
-SET "tier" = 'owner'
-WHERE "tier" = 'sovereign';
-
--- AccessAuditLog equivalent in this repo snapshot:
--- framework_access_logs.requiredTier / currentTier
-UPDATE "framework_access_logs"
-SET "requiredTier" = 'architect'
-WHERE "requiredTier" IN ('partner', 'executive');
-
-UPDATE "framework_access_logs"
-SET "requiredTier" = 'owner'
-WHERE "requiredTier" = 'sovereign';
-
-UPDATE "framework_access_logs"
-SET "currentTier" = 'architect'
-WHERE "currentTier" IN ('partner', 'executive');
-
-UPDATE "framework_access_logs"
-SET "currentTier" = 'owner'
-WHERE "currentTier" = 'sovereign';
-
-COMMIT;
+  IF to_regclass('public.framework_access_logs') IS NOT NULL THEN
+    UPDATE "framework_access_logs" SET "requiredTier" = 'architect' WHERE "requiredTier" IN ('partner', 'executive');
+    UPDATE "framework_access_logs" SET "requiredTier" = 'owner' WHERE "requiredTier" = 'sovereign';
+    UPDATE "framework_access_logs" SET "currentTier" = 'architect' WHERE "currentTier" IN ('partner', 'executive');
+    UPDATE "framework_access_logs" SET "currentTier" = 'owner' WHERE "currentTier" = 'sovereign';
+  END IF;
+END $$;

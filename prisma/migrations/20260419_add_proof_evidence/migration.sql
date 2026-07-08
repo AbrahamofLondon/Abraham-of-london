@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS "proof_evidence" (
   "organisationType" TEXT,
   "sourceOrigin" TEXT,
   "isPaidStage" BOOLEAN NOT NULL DEFAULT false,
-  "followupAt" DATETIME,
+  "followupAt" TIMESTAMPTZ,
   "approvalStatus" TEXT NOT NULL DEFAULT 'PENDING',
   "displayStatus" TEXT NOT NULL DEFAULT 'HIDDEN',
   "sourceKind" TEXT NOT NULL DEFAULT 'SELF_REPORTED',
   "adminNotes" TEXT,
   "metadataJson" TEXT,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS "proof_evidence_sourceStage_createdAt_idx" ON "proof_evidence"("sourceStage", "createdAt");

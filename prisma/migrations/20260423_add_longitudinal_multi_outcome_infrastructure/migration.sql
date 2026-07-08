@@ -4,9 +4,9 @@ ALTER TABLE "DiagnosticJourney" ADD COLUMN "organisationKey" TEXT;
 ALTER TABLE "DiagnosticJourney" ADD COLUMN "diagnosticType" TEXT NOT NULL DEFAULT 'diagnostic_journey';
 ALTER TABLE "DiagnosticJourney" ADD COLUMN "parentJourneyId" TEXT;
 ALTER TABLE "DiagnosticJourney" ADD COLUMN "monitoringCadence" TEXT NOT NULL DEFAULT 'ad_hoc';
-ALTER TABLE "DiagnosticJourney" ADD COLUMN "startedAt" DATETIME;
+ALTER TABLE "DiagnosticJourney" ADD COLUMN "startedAt" TIMESTAMPTZ;
 UPDATE "DiagnosticJourney" SET "startedAt" = COALESCE("createdAt", CURRENT_TIMESTAMP) WHERE "startedAt" IS NULL;
-ALTER TABLE "DiagnosticJourney" ADD COLUMN "completedAt" DATETIME;
+ALTER TABLE "DiagnosticJourney" ADD COLUMN "completedAt" TIMESTAMPTZ;
 
 CREATE INDEX "DiagnosticJourney_userId_idx" ON "DiagnosticJourney"("userId");
 CREATE INDEX "DiagnosticJourney_organisationKey_idx" ON "DiagnosticJourney"("organisationKey");
@@ -38,7 +38,7 @@ CREATE TABLE "LongitudinalComparisonRecord" (
   "deltaSummary" JSONB NOT NULL,
   "recurrenceSummary" JSONB,
   "evidenceNodes" JSONB,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX "LongitudinalComparisonRecord_journeyId_idx" ON "LongitudinalComparisonRecord"("journeyId");
@@ -59,8 +59,8 @@ CREATE TABLE "MultiStakeholderResult" (
   "respondentCount" INTEGER NOT NULL,
   "payload" JSONB NOT NULL,
   "evidenceNodes" JSONB,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX "MultiStakeholderResult_campaignId_diagnosticType_key" ON "MultiStakeholderResult"("campaignId", "diagnosticType");
@@ -84,7 +84,7 @@ CREATE TABLE "OutcomeVerificationRecord" (
   "unresolvedContradictions" JSONB,
   "payload" JSONB NOT NULL,
   "evidenceNodes" JSONB,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX "OutcomeVerificationRecord_baselineJourneyId_idx" ON "OutcomeVerificationRecord"("baselineJourneyId");

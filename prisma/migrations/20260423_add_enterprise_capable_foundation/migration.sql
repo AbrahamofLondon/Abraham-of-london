@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "DecisionDependency" (
   "parentDecisionId" TEXT NOT NULL,
   "childDecisionId" TEXT NOT NULL,
   "relationshipType" TEXT NOT NULL,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "DecisionDependency_parentDecisionId_fkey"
     FOREIGN KEY ("parentDecisionId") REFERENCES "DiagnosticDecisionObject"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "DecisionDependency_childDecisionId_fkey"
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS "DecisionStakeholder" (
   "function" TEXT NOT NULL,
   "influenceLevel" TEXT NOT NULL,
   "alignmentState" TEXT NOT NULL,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "DecisionStakeholder_decisionObjectId_fkey"
     FOREIGN KEY ("decisionObjectId") REFERENCES "DiagnosticDecisionObject"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "StakeholderPosition" (
   "summary" TEXT NOT NULL,
   "confidence" REAL NOT NULL DEFAULT 0.5,
   "contradictionFlag" BOOLEAN NOT NULL DEFAULT false,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "StakeholderPosition_stakeholderId_fkey"
     FOREIGN KEY ("stakeholderId") REFERENCES "DecisionStakeholder"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS "AuditEvent" (
   "actionType" TEXT NOT NULL,
   "summary" TEXT NOT NULL,
   "metadata" JSONB,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS "AuditEvent_actorType_idx" ON "AuditEvent"("actorType");
 CREATE INDEX IF NOT EXISTS "AuditEvent_actorId_idx" ON "AuditEvent"("actorId");
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS "EnforcementPlaybook" (
   "actionSequence" JSONB NOT NULL,
   "expectedOutcome" TEXT,
   "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS "EnforcementPlaybook_triggerPattern_idx" ON "EnforcementPlaybook"("triggerPattern");
 CREATE INDEX IF NOT EXISTS "EnforcementPlaybook_status_idx" ON "EnforcementPlaybook"("status");
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS "PlaybookApplication" (
   "appliedBy" TEXT,
   "status" TEXT NOT NULL DEFAULT 'APPLIED',
   "outcomeDelta" REAL,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "PlaybookApplication_playbookId_fkey"
     FOREIGN KEY ("playbookId") REFERENCES "EnforcementPlaybook"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT "PlaybookApplication_retainedDecisionId_fkey"
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS "FoundationTelemetryEvent" (
   "eventType" TEXT NOT NULL,
   "value" REAL,
   "metadata" JSONB,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS "FoundationTelemetryEvent_organisationId_idx" ON "FoundationTelemetryEvent"("organisationId");
 CREATE INDEX IF NOT EXISTS "FoundationTelemetryEvent_contractId_idx" ON "FoundationTelemetryEvent"("contractId");

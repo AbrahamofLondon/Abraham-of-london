@@ -3,7 +3,7 @@
 -- P4: GmiBenchmarkEntry
 -- P6: GmiScenarioModel
 -- P7: GmiAlertRule
--- Note: PostgreSQL-compatible SQL (TIMESTAMPTZ, not DATETIME)
+-- Note: PostgreSQL-compatible SQL (TIMESTAMPTZ, not TIMESTAMPTZ)
 
 -- ─── P4: GMI Benchmark Entries ───────────────────────────────────────────────
 

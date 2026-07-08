@@ -2,7 +2,7 @@
 -- Adds DecisionInstrumentRun and OversightReviewCycle models.
 --
 -- PostgreSQL (Neon) — uses TIMESTAMPTZ, TEXT, BOOLEAN, INTEGER.
--- Do NOT use DATETIME, TINYINT, or SQLite-specific types.
+-- Do NOT use TIMESTAMPTZ, TINYINT, or SQLite-specific types.
 
 -- ─── DecisionInstrumentRun ────────────────────────────────────────────────────
 

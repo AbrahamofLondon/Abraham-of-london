@@ -7,13 +7,13 @@ CREATE TABLE "TeamAssessmentCampaign" (
     "title" TEXT NOT NULL,
     "mode" TEXT NOT NULL DEFAULT 'leader_estimate',
     "status" TEXT NOT NULL DEFAULT 'draft',
-    "closesAt" DATETIME,
+    "closesAt" TIMESTAMPTZ,
     "minimumResponseThreshold" INTEGER NOT NULL DEFAULT 3,
     "anonymityMode" TEXT NOT NULL DEFAULT 'anonymous',
     "domainsJson" TEXT NOT NULL,
     "leaderEstimateJson" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE "TeamAssessmentInvite" (
@@ -23,10 +23,10 @@ CREATE TABLE "TeamAssessmentInvite" (
     "email" TEXT,
     "roleLabel" TEXT,
     "status" TEXT NOT NULL DEFAULT 'issued',
-    "issuedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "openedAt" DATETIME,
-    "submittedAt" DATETIME,
-    "expiresAt" DATETIME,
+    "issuedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "openedAt" TIMESTAMPTZ,
+    "submittedAt" TIMESTAMPTZ,
+    "expiresAt" TIMESTAMPTZ,
     CONSTRAINT "TeamAssessmentInvite_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "TeamAssessmentCampaign" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE "TeamAssessmentResponse" (
     "inviteId" TEXT,
     "respondentKey" TEXT NOT NULL,
     "answersJson" TEXT NOT NULL,
-    "submittedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "submittedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "TeamAssessmentResponse_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "TeamAssessmentCampaign" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "TeamAssessmentResponse_inviteId_fkey" FOREIGN KEY ("inviteId") REFERENCES "TeamAssessmentInvite" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -50,8 +50,8 @@ CREATE TABLE "TeamAssessmentAggregate" (
     "confidence" REAL NOT NULL,
     "claimLevel" TEXT NOT NULL,
     "domainsJson" TEXT NOT NULL,
-    "generatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "generatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL,
     CONSTRAINT "TeamAssessmentAggregate_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "TeamAssessmentCampaign" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 

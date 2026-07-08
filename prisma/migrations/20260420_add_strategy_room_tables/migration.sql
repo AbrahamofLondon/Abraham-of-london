@@ -8,12 +8,12 @@ CREATE TABLE IF NOT EXISTS "StrategyRoomSession" (
   "route" TEXT,
   "readinessTier" TEXT,
   "authorityType" TEXT,
-  "lastImpressionAt" DATETIME,
-  "lastFollowupAt" DATETIME,
-  "lastConversionAt" DATETIME,
+  "lastImpressionAt" TIMESTAMPTZ,
+  "lastFollowupAt" TIMESTAMPTZ,
+  "lastConversionAt" TIMESTAMPTZ,
   "lastConversionType" TEXT,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "StrategyRoomSession_sessionKey_key"
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "StrategyRoomRecommendationImpression" (
   "sessionKey" TEXT NOT NULL,
   "recommendations" TEXT NOT NULL,
   "canonicalSnapshot" TEXT,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "StrategyRoomFollowup" (
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "StrategyRoomFollowup" (
   "convertedAfterGuidance" BOOLEAN NOT NULL,
   "metadata" TEXT,
   "canonicalSnapshot" TEXT,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "StrategyRoomConversion" (
@@ -47,5 +47,5 @@ CREATE TABLE IF NOT EXISTS "StrategyRoomConversion" (
   "conversionType" TEXT NOT NULL,
   "metadata" TEXT,
   "canonicalSnapshot" TEXT,
-  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
