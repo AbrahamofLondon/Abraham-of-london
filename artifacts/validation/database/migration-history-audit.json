@@ -1,59 +1,38 @@
 {
-  "schemaVersion": "database.migration-history-audit.v1",
-  "generatedAt": "2026-07-08T10:50:00Z",
-  "head": "956a983ff",
-  "provider": "postgresql",
-  "migrationCount": 54,
-  "method": "Static analysis of prisma/migrations: extracted every CREATE TABLE and every FK REFERENCES across all 54 migrations, then computed referenced-minus-created to find tables assumed by migration SQL but never created by any tracked migration (the P3018 class).",
-  "rootCause": "The estate adopted Prisma migrations AFTER an initial `db push` baseline. Three tables that were created by that untracked baseline are referenced by later migrations' foreign keys, but no tracked migration CREATEs them. On a FRESH database, `prisma migrate deploy` fails at the first migration that references such a table (P3018). This is a baseline-history gap, not a single-migration ordering bug.",
-  "summary": {
+  "schemaVersion": "database.migration-history-audit.v2",
+  "generatedAt": "2026-07-08T11:30:00Z",
+  "head": "7ab32a431",
+  "provider": "postgresql-15.18",
+  "reproduction": {
+    "database": "aol_migcheck1 (empty, disposable)",
+    "command": "prisma migrate deploy",
+    "firstFailingMigration": "20260422_add_diagnostic_evidence_graph",
+    "errorCode": "P3018 / 42P01",
+    "errorMessage": "relation \"DiagnosticJourney\" does not exist",
+    "confirmed": true
+  },
+  "criticalFinding": "The migration history is NOT a complete from-empty history. schema.prisma defines 221 models but the 54 tracked migrations only CREATE ~90 tables. 131 schema tables are created by NO tracked migration — they entered via an untracked `prisma db push` baseline. P3018 exposes only the 3 of those 131 that are later FK-referenced. Fixing only those 3 makes `migrate deploy` EXIT 0 but produces a fresh database MISSING ~128 tables. Therefore a narrow 3-table bridge is INCORRECT; a proper full baseline of the pre-migration state is required.",
+  "counts": {
+    "schemaModels": 221,
     "tablesCreatedByMigrations": 90,
-    "tablesReferencedByFk": 16,
-    "UNTRACKED_SCHEMA_ASSUMPTION": 3,
-    "UNRESOLVED_MIGRATION_DEPENDENCY": 3
+    "untrackedBaselineTables": 131,
+    "fkExposedBaselineTables": 3
   },
-  "untrackedBaselineTables": [
-    {
-      "table": "DiagnosticJourney",
-      "inSchemaPrisma": true,
-      "createdByMigration": null,
-      "firstReferencedByMigration": "20260422_add_diagnostic_evidence_graph",
-      "alsoReferencedBy": ["20260423_add_longitudinal_multi_outcome_infrastructure"],
-      "freshInstallSafe": false,
-      "existingDatabaseSafe": true,
-      "failureMode": "P3018 — FK REFERENCES \"DiagnosticJourney\"(\"id\") with no prior CREATE TABLE",
-      "repairAction": "Prepend a baseline migration (before 20260422) that CREATEs DiagnosticJourney (IF NOT EXISTS) matching prisma/schema.prisma; for existing DBs where it already exists, the IF NOT EXISTS makes it a no-op and the migration is marked applied."
-    },
-    {
-      "table": "Organisation",
-      "inSchemaPrisma": true,
-      "createdByMigration": null,
-      "firstReferencedByMigration": "20260423_add_enterprise_retainer_contracts",
-      "freshInstallSafe": false,
-      "existingDatabaseSafe": true,
-      "failureMode": "P3018 — FK REFERENCES \"Organisation\" with no prior CREATE TABLE",
-      "repairAction": "Include in the baseline migration (IF NOT EXISTS), matching schema.prisma."
-    },
-    {
-      "table": "research_runs",
-      "inSchemaPrisma": true,
-      "createdByMigration": null,
-      "firstReferencedByMigration": "20260529_add_finding_feedback",
-      "freshInstallSafe": false,
-      "existingDatabaseSafe": true,
-      "failureMode": "P3018 — FK REFERENCES \"research_runs\" with no prior CREATE TABLE",
-      "repairAction": "Include in the baseline migration (IF NOT EXISTS), matching schema.prisma."
-    }
+  "fkExposedBaselineTables": [
+    { "table": "DiagnosticJourney", "firstReferencedBy": "20260422_add_diagnostic_evidence_graph", "alteredLaterBy": ["20260423_add_longitudinal_multi_outcome_infrastructure adds userId, organisationKey, diagnosticType, parentJourneyId, monitoringCadence, startedAt, completedAt"], "historicalShapeNote": "baseline shape = current shape MINUS the 7 columns added by 20260423; a full-current-shape baseline would collide with that ALTER." },
+    { "table": "Organisation", "firstReferencedBy": "20260423_add_enterprise_retainer_contracts", "alteredLaterBy": [], "historicalShapeNote": "no migration alters it; baseline shape = current shape." },
+    { "table": "research_runs", "firstReferencedBy": "20260529_add_finding_feedback", "alteredLaterBy": [], "historicalShapeNote": "no migration alters it; baseline shape = current shape." }
   ],
-  "repairStrategy": {
-    "freshInstall": "Add ONE baseline migration timestamped before 20260413 (the earliest tracked migration) that creates the 3 untracked tables (and any other pre-migration baseline objects) with CREATE TABLE IF NOT EXISTS + their indexes/enums. Generate the exact DDL with `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script` and extract ONLY the objects not already created by existing migrations. Then `prisma migrate deploy` on an empty DB must reach the canonical schema.",
-    "existingDatabase": "The baseline migration is idempotent (IF NOT EXISTS) so it is a no-op on databases that already have these tables. For databases whose _prisma_migrations lacks the baseline row, run `prisma migrate resolve --applied <baseline>` after confirming the tables exist. Do NOT reset or drop.",
-    "doNot": ["rewrite applied migration history casually", "drop tables", "reset production", "use `prisma db push` as the final migration strategy", "mark migrations applied without this documented reconciliation"]
+  "untrackedBaselineTableList_ref": "artifacts/validation/database/untracked-baseline-tables.txt (131 entries)",
+  "correctReconciliation": {
+    "summary": "Baseline the entire pre-migration state, not a 3-table bridge. This is Prisma's standard 'baselining an existing database' procedure, adapted because the baseline pre-dates several migrations that ALTER baseline tables.",
+    "complications": [
+      "HISTORICAL SHAPE: baseline tables that later migrations ALTER (e.g. DiagnosticJourney) must be created in their PRE-alter shape, or the ALTER collides. A full `migrate diff --from-empty --to-schema-datamodel` uses CURRENT shape and will collide — this is why the directive forbids it.",
+      "FK ORDERING: baseline tables have FKs among themselves and to the 90 migration-created tables. A baseline placed first cannot FK to a table a later migration creates; FK creation may need to be deferred/reordered.",
+      "TWO-PATH: fresh-install (baseline + 54 migrations = full schema) and existing-DB (baseline marked applied via `migrate resolve`, no-op) must both be proven."
+    ],
+    "recommendedApproach": "Author a first baseline migration representing the schema state as of immediately before 20260413 (the earliest tracked migration), derived from the git-historical schema at that point (NOT the current schema). Then `migrate deploy` on empty must reproduce the full canonical schema. Validate with the two-path proof (fresh + upgrade sim).",
+    "status": "NOT YET AUTHORED — this is a substantial reconciliation requiring iterative testing against the disposable Postgres. Characterised precisely here; execution is the next task."
   },
-  "validationCommands": [
-    "createdb aol_freshcheck",
-    "DATABASE_URL=postgres://.../aol_freshcheck prisma migrate deploy   # must exit 0 (currently fails P3018 until baseline added)",
-    "DATABASE_URL=postgres://.../aol_freshcheck prisma migrate status    # must show all applied, no drift"
-  ],
-  "executionStatus": "AUDIT COMPLETE. Baseline migration NOT YET authored/executed — requires a clean-room Postgres + shadow DB to generate exact DDL and prove deploy. Tracked as §6 (BLOCKED pending clean-room)."
+  "requiredConditions": { "UNTRACKED_SCHEMA_ASSUMPTION": 131, "UNRESOLVED_MIGRATION_DEPENDENCY": 3, "note": "Both must reach the documented-baseline state (0 NEW) via the baseline migration; currently non-zero." }
 }

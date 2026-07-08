@@ -1,82 +1,79 @@
-# ADR — Prisma migration-history reconciliation (baseline gap)
+# ADR — Prisma migration-history reconciliation
 
-**Status:** Accepted (audit + strategy). Execution of the baseline migration is pending a clean-room Postgres run (§6).
+**Status:** Root cause proven on a real empty Postgres; **the corrected strategy is a full
+baseline, not a narrow bridge**. Baseline migration NOT yet authored (large, iterative —
+next task).
 
-## Observed problem
-On a **fresh** PostgreSQL database, `prisma migrate deploy` fails with **P3018** at
-`20260422_add_diagnostic_evidence_graph`, which declares a foreign key
-`REFERENCES "DiagnosticJourney"("id")` — but **no tracked migration creates
-`DiagnosticJourney`**.
+## Observed problem (reproduced)
+On a genuinely **empty** PostgreSQL 15.18 database (`aol_migcheck1`), `prisma migrate deploy`
+fails at `20260422_add_diagnostic_evidence_graph` with **P3018 / 42P01
+`relation "DiagnosticJourney" does not exist`**.
 
-## Historical cause
-The estate adopted Prisma **migrations** after an initial **`prisma db push`** baseline.
-Three tables created by that untracked baseline are referenced by later migrations' FKs
-but are **never created by any tracked migration**. Static analysis of all 54 migrations
-(every `CREATE TABLE` vs every FK `REFERENCES`) found exactly three such tables:
+## Root cause — bigger than P3018
+The migration history is **not a complete from-empty history**. `schema.prisma` defines
+**221 models**, but the 54 tracked migrations only `CREATE` **~90 tables**. **131 schema
+tables are created by no tracked migration** — they entered via an untracked
+`prisma db push` baseline. P3018 exposes only the **3 of those 131 that a later migration
+FK-references** (`DiagnosticJourney`, `Organisation`, `research_runs`). There is also **1
+ordering defect** (`RetainedDecision` — created by a migration but FK-referenced by an
+earlier one).
 
-| Table | In `schema.prisma` | Created by a migration? | First referenced by |
-|---|---|---|---|
-| `DiagnosticJourney` | yes | **no** | `20260422_add_diagnostic_evidence_graph` |
-| `Organisation` | yes | **no** | `20260423_add_enterprise_retainer_contracts` |
-| `research_runs` | yes | **no** | `20260529_add_finding_feedback` |
+**Consequence:** fixing only the 3 FK-exposed tables makes `migrate deploy` exit 0 but
+produces a fresh database **missing ~128 tables**. A "narrow 3-table bridge" is therefore
+**incorrect**. Evidence: `artifacts/validation/database/migration-history-audit.json`,
+`untracked-baseline-tables.txt` (131), and the static validator
+`tests/database/migration-history.test.ts`.
 
-`UNTRACKED_SCHEMA_ASSUMPTION = 3`, `UNRESOLVED_MIGRATION_DEPENDENCY = 3`. Full evidence:
-`artifacts/validation/database/migration-history-audit.json`.
+## Correct fresh-install strategy — full baseline
+Author ONE baseline migration, timestamped **before** the earliest tracked migration
+(`20260413…`), that creates the **entire pre-migration state** (the 131 untracked tables),
+then let the 54 existing migrations evolve from there. Two hard complications must be
+handled — this is why it is iterative, not a one-shot diff:
 
-An **existing** database (which was `db push`-ed) already has these tables, so it does not
-hit P3018 — which is why the failure is fresh-install-only and was easy to miss.
+1. **Historical shape, not current shape.** Baseline tables that later migrations `ALTER`
+   must be created in their PRE-alter shape. Example: `DiagnosticJourney` — `20260423`
+   adds `userId, organisationKey, diagnosticType, parentJourneyId, monitoringCadence,
+   startedAt, completedAt`; the baseline must create it WITHOUT those 7 columns or the
+   `ALTER … ADD COLUMN` collides. A blanket `migrate diff --from-empty
+   --to-schema-datamodel` uses CURRENT shape and WILL collide — hence forbidden.
+   The correct source is the **git-historical `schema.prisma` as of just before
+   `20260413`**.
+2. **FK ordering.** Baseline tables have FKs among themselves and to the 90
+   migration-created tables. A baseline placed first cannot FK to a table a later
+   migration creates; FK creation must be deferred (create all tables, then add FKs that
+   are satisfiable, deferring the rest to where their targets exist).
+3. **Ordering defect.** `RetainedDecision` must be created before the migration that
+   references it (fix by a corrective migration or by including it correctly in the
+   baseline).
 
-## Fresh-install strategy
-Add **one baseline migration** timestamped **before** the earliest tracked migration
-(`20260413…`), e.g. `20260412000000_baseline_untracked_tables`, that creates the three
-tables (plus their enums/indexes) using **`CREATE TABLE IF NOT EXISTS`**. Generate the
-exact DDL from the schema, not by hand:
-
+## Existing-database reconciliation (local-tested only)
+Existing/production DBs already have all 131 tables (from `db push`) + the 54 migrations
+applied. The baseline migration must therefore be a **no-op** there:
 ```
-prisma migrate diff \
-  --from-empty \
-  --to-schema-datamodel prisma/schema.prisma \
-  --script > /tmp/full.sql
-# extract ONLY DiagnosticJourney, Organisation, research_runs (+ their enums/indexes) —
-# every other object is already created by an existing migration — into the baseline SQL,
-# converting CREATE TABLE → CREATE TABLE IF NOT EXISTS.
+prisma migrate resolve --applied <baseline>   # mark baseline applied, do not run its SQL
+prisma migrate deploy                          # remaining tracked migrations
 ```
+Test only against local representative DBs. **No production DB mutation is authorised.**
 
-After this, `prisma migrate deploy` on an empty DB must reach the canonical schema and
-exit 0.
+## Production boundary
+No production reconciliation executed. Fresh-install and existing-DB paths must BOTH be
+proven (§6/§7) before any production action, which remains owner-authorised.
 
-## Existing-database strategy
-The baseline migration is **idempotent** (`IF NOT EXISTS`), so on databases that already
-have the three tables it is a no-op. For an existing DB whose `_prisma_migrations` lacks
-the baseline row, after confirming the tables exist:
-
-```
-prisma migrate resolve --applied 20260412000000_baseline_untracked_tables
-prisma migrate deploy   # applies the remaining tracked migrations
-```
-
-A fresh DB **does not** prove upgrade safety and vice-versa — both paths must be proven
-(§6 Path A + Path B).
-
-## Baseline policy
-- The baseline migration represents pre-migration `db push` state only. It must never be
-  edited after it is applied anywhere.
-- No further reliance on `db push` for schema evolution.
-
-## Migration policy going forward
-- Every schema change ships as a tracked migration generated by `prisma migrate dev`.
-- CI runs `prisma migrate deploy` against a **fresh** shadow DB to catch new baseline gaps.
-- **Do not**: rewrite applied history, drop tables, reset production, use `db push` as the
-  final strategy, or `migrate resolve --applied` without this documented reconciliation.
+## Going-forward rule
+No schema object may become a tracked-migration dependency without an earlier tracked
+creation migration or an explicit accepted baseline. Enforced by
+`tests/database/migration-history.test.ts` (fails on any NEW referenced-before-created
+table beyond the documented known set).
 
 ## Validation commands
 ```
 createdb aol_freshcheck
 DATABASE_URL=postgres://…/aol_freshcheck prisma migrate deploy   # must exit 0 after baseline
 DATABASE_URL=postgres://…/aol_freshcheck prisma migrate status   # all applied, no drift
+# then: fixtures/seeds → tsc → full tests → production build
 ```
 
-## Execution status
-Audit + strategy complete. The baseline migration is **not yet authored/executed** — it
-requires a clean-room Postgres + shadow DB to generate exact DDL and prove both deploy
-paths. Tracked as §6 (BLOCKED pending clean-room).
+## Status
+Root cause proven; strategy corrected to a full baseline with documented complications.
+Authoring + proving the baseline (fresh + upgrade sim) is the next task — it requires
+iterative testing against the disposable Postgres and the git-historical schema.
