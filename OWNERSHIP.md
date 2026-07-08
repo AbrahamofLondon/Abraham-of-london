@@ -1,10 +1,10 @@
 # Multi-agent ownership — demo-to-evidence final closure
 
-**Current authority state:** ACTIVE WRITER: CLAUDE (re-assigned 2026-07-08 — Codex usage exhausted).
+**Current authority state:** ACTIVE WRITER: CODEX (re-assigned 2026-07-08 — Claude usage exhausted; Deepseek read-only until clean handoff).
 
-- **CLAUDE:** ACTIVE / SOLE WRITER in `C:/Dev/aol-estate-construction` for the serverless-hardening programme until completion or clean handoff. Exact-path staging only.
-- **CODEX:** INACTIVE / USAGE EXHAUSTED. Handed off at clean HEAD `878874a2f`.
-- **DEEPSEEK:** NOT AUTHORISED TO WRITE in this worktree until a clean handoff is produced or a separate worktree/branch is explicitly created.
+- **CLAUDE:** INACTIVE — USAGE EXHAUSTED.
+- **CODEX:** ACTIVE / SOLE WRITER in `C:/Dev/aol-estate-construction` for the serverless-hardening programme until completion or clean handoff. Exact-path staging only.
+- **DEEPSEEK:** READ-ONLY / NOT AUTHORISED TO WRITE in this worktree until a clean handoff is produced or a separate worktree/branch is explicitly created.
 
 ## Canonical trunk
 - **`construction/estate-restoration`** is the single canonical branch (per
