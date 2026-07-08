@@ -15,6 +15,8 @@
  *   • the decision statement text influences the evidence-gap + correction framing.
  */
 
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
+
 export type Band4 = "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
 export type UrgencyBand = "LOW" | "MODERATE" | "HIGH" | "IMMEDIATE";
 export type Consequence = "REVERSIBLE" | "COSTLY" | "STRUCTURAL" | "IRREVERSIBLE";
@@ -187,9 +189,9 @@ export function computeSignal(input: SignalInput): SignalResult {
   type MoveMeta = Omit<NextMove, "recommendationId" | "recommendationVersion" | "carriesForward">;
   const nextMoveByBand: Record<Band4, MoveMeta> = {
     LOW: { move: "Monitor. No paid instrument is warranted by this signal alone.", targetRoute: "/decision-instruments/signal", targetLabel: "Re-check when conditions change", whyAdmissible: "The evidence does not yet justify a paid intervention — recommending one would be selling ahead of the signal.", price: null, durationMinutes: null, accessMode: "none", willReceive: "Nothing to purchase yet — return when the conditions change." },
-    MODERATE: { move: "Run the Decision Exposure Instrument to price the full consequence before it compounds.", targetRoute: "/decision-instruments/decision-exposure-instrument", targetLabel: "Decision Exposure Instrument", whyAdmissible: "Moderate, measurable pressure with an unpriced downside is exactly what the exposure instrument is scoped to quantify.", price: "£29", durationMinutes: 15, accessMode: "self_serve", willReceive: "A priced exposure reading across the decision's downside scenarios." },
-    HIGH: { move: "Run the Escalation Readiness Scorecard — this decision may need executive-level attention.", targetRoute: "/decision-instruments/escalation-readiness-scorecard", targetLabel: "Escalation Readiness Scorecard", whyAdmissible: "High pressure with structural consequence is the threshold at which escalation readiness, not further analysis, is the binding constraint.", price: "£19", durationMinutes: 5, accessMode: "self_serve", willReceive: "A scored readiness read on whether this needs to escalate, and to whom." },
-    CRITICAL: { move: "Executive Reporting is warranted — the delay cost is likely compounding.", targetRoute: "/diagnostics/executive-reporting", targetLabel: "Executive Reporting", whyAdmissible: "Critical, compounding pressure on an irreversible decision justifies a governed executive reading with a checkpoint.", price: "£295", durationMinutes: 30, accessMode: "controlled", willReceive: "A governed executive reading with a checkpoint and a decision record." },
+    MODERATE: { move: "Run the Decision Exposure Instrument to price the full consequence before it compounds.", targetRoute: "/decision-instruments/decision-exposure-instrument", targetLabel: "Decision Exposure Instrument", whyAdmissible: "Moderate, measurable pressure with an unpriced downside is exactly what the exposure instrument is scoped to quantify.", price: getProductDisplayPrice("decision_exposure_instrument"), durationMinutes: 15, accessMode: "self_serve", willReceive: "A priced exposure reading across the decision's downside scenarios." },
+    HIGH: { move: "Run the Escalation Readiness Scorecard — this decision may need executive-level attention.", targetRoute: "/decision-instruments/escalation-readiness-scorecard", targetLabel: "Escalation Readiness Scorecard", whyAdmissible: "High pressure with structural consequence is the threshold at which escalation readiness, not further analysis, is the binding constraint.", price: getProductDisplayPrice("escalation_readiness_scorecard"), durationMinutes: 5, accessMode: "self_serve", willReceive: "A scored readiness read on whether this needs to escalate, and to whom." },
+    CRITICAL: { move: "Executive Reporting is warranted — the delay cost is likely compounding.", targetRoute: "/diagnostics/executive-reporting", targetLabel: "Executive Reporting", whyAdmissible: "Critical, compounding pressure on an irreversible decision justifies a governed executive reading with a checkpoint.", price: getProductDisplayPrice("executive_reporting"), durationMinutes: 30, accessMode: "controlled", willReceive: "A governed executive reading with a checkpoint and a decision record." },
   };
 
   const firstContradiction = contradictions[0] ?? null;

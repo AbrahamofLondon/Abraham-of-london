@@ -56,7 +56,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         eventType: record.reviewStatus === "MORE_INFORMATION_REQUIRED" ? "PILOT_MORE_INFO_REQUIRED" : "PILOT_SUBMITTED",
         sessionId: typeof req.body?.sessionId === "string" ? req.body.sessionId.slice(0, 64) : `api_${record.reference}`,
         sourceRoute: "/engagements/operator-pilot",
-        productCode: "operator_pilot",
       });
     } catch { /* analytics cannot block intake */ }
     return res.status(201).json({

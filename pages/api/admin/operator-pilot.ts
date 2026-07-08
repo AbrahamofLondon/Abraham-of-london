@@ -26,10 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       if (!record) return res.status(404).json({ error: "not found" });
       if (nextState === "ACCEPTED" || nextState === "DECLINED") {
-        try { recordFunnelEvent({ eventType: nextState === "ACCEPTED" ? "PILOT_ACCEPTED" : "PILOT_DECLINED", sessionId: `operator_${reference}`, sourceRoute: "/admin/operator-pilot", productCode: "operator_pilot" }); } catch {}
+        try { recordFunnelEvent({ eventType: nextState === "ACCEPTED" ? "PILOT_ACCEPTED" : "PILOT_DECLINED", sessionId: `operator_${reference}`, sourceRoute: "/admin/operator-pilot" }); } catch {}
       }
       if (nextState === "COMMERCIAL_CONTINUATION") {
-        try { recordFunnelEvent({ eventType: "COMMERCIAL_CONTINUATION_COMPLETED", sessionId: `operator_${reference}`, sourceRoute: "/admin/operator-pilot", productCode: "operator_pilot" }); } catch {}
+        try { recordFunnelEvent({ eventType: "COMMERCIAL_CONTINUATION_COMPLETED", sessionId: `operator_${reference}`, sourceRoute: "/admin/operator-pilot" }); } catch {}
       }
       return res.status(200).json({ item: record });
     } catch (err) {
