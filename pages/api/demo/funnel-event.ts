@@ -7,7 +7,7 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { recordFunnelEvent, isFunnelEvent } from "@/lib/demo/funnel-event-store";
+import { recordFunnelEvent, isFunnelEvent } from "@/lib/demo/funnel-event-store.composed";
 import { checkRateLimit, clientIpFrom } from "@/lib/runtime/simple-rate-limit";
 
 export const config = { api: { bodyParser: { sizeLimit: "4kb" } } }; // bound payload size
@@ -16,7 +16,7 @@ const MAX_STR = 200;
 const clean = (v: unknown, max = MAX_STR): string | null =>
   typeof v === "string" && v.length > 0 ? v.slice(0, max) : null;
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") { res.setHeader("Allow", "POST"); return res.status(405).json({ error: "Method not allowed" }); }
 
   // content-type must be JSON (rejects naive cross-site form posts)
@@ -35,7 +35,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!rl.ok) { res.setHeader("Retry-After", Math.ceil(rl.resetInMs / 1000).toString()); return res.status(429).json({ error: "rate limited" }); }
 
   try {
-    const rec = recordFunnelEvent({
+    const rec = await recordFunnelEvent({
       eventType: b.eventType,
       sessionId,
       sourceRoute: clean(b.sourceRoute) ?? "unknown",

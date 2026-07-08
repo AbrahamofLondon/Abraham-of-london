@@ -1,31 +1,27 @@
 {
-  "schemaVersion": "runtime-hardening.route-store-edges.v1",
-  "generatedAt": "2026-07-08T11:05:00Z",
-  "head": "956a983ff",
-  "purpose": "§2 — explain the 5-routes-vs-4-stores count explicitly. One store can serve multiple routes; one route can touch multiple stores.",
+  "schemaVersion": "runtime-hardening.route-store-edges.v2",
+  "generatedAt": "2026-07-08T12:52:41+01:00",
+  "head": "68c475794",
+  "purpose": "Current production route to store authority map after migrating the remaining known runtime stores to composed Postgres/Prisma adapters.",
   "edges": [
-    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "savePilotIntake / getPilotIntakeByRef / toCustomerStatus", "storeInterface": "PilotIntakeStore", "adapter": "sqlite (pilot-intakes.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
-    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "recordFunnelEvent (PILOT_SUBMITTED / PILOT_MORE_INFO_REQUIRED)", "storeInterface": "FunnelEventStore", "adapter": "sqlite (funnel-events.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
-    { "route": "pages/api/admin/operator-pilot.ts", "runtimeService": "listPilotQueue / transitionPilotState", "storeInterface": "PilotIntakeStore", "adapter": "sqlite (pilot-intakes.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
-    { "route": "pages/api/demo/funnel-event.ts", "runtimeService": "recordFunnelEvent", "storeInterface": "FunnelEventStore", "adapter": "sqlite (funnel-events.sqlite)", "authority": "LOCAL_FILE_SQLITE" },
-    { "route": "pages/api/demo/signal-consent-continuation.ts", "runtimeService": "signal-consent-transition-store", "storeInterface": "SignalConsentTransitionStore", "adapter": "sqlite", "authority": "LOCAL_FILE_SQLITE" },
-    { "route": "pages/api/corridor/recommendation-context.ts", "runtimeService": "recommendation-context-store", "storeInterface": "RecommendationContextStore", "adapter": "sqlite", "authority": "LOCAL_FILE_SQLITE" }
+    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "savePilotIntake / getPilotIntakeByRef / toCustomerStatus", "storeInterface": "PilotIntakeStore", "adapter": "production Prisma/Postgres via pilot-intake-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "recordFunnelEvent (PILOT_SUBMITTED / PILOT_MORE_INFO_REQUIRED)", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/admin/operator-pilot.ts", "runtimeService": "listPilotQueue / transitionPilotState", "storeInterface": "PilotIntakeStore", "adapter": "production Prisma/Postgres via pilot-intake-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/admin/operator-pilot.ts", "runtimeService": "recordFunnelEvent (PILOT_ACCEPTED / PILOT_DECLINED / COMMERCIAL_CONTINUATION_COMPLETED)", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/demo/funnel-event.ts", "runtimeService": "recordFunnelEvent", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/admin/demo-conversion.tsx", "runtimeService": "summarizeFunnel", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/demo/signal-consent-continuation.ts", "runtimeService": "Signal consent transition store", "storeInterface": "SignalConsentTransitionStore", "adapter": "production Prisma/Postgres via signal-consent-transition-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/corridor/recommendation-context.ts", "runtimeService": "save/get recommendation context", "storeInterface": "RecommendationContextStore", "adapter": "production Prisma/Postgres via recommendation-context-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/corridor/index.tsx", "runtimeService": "get recommendation context", "storeInterface": "RecommendationContextStore", "adapter": "production Prisma/Postgres via recommendation-context-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" }
   ],
   "reconciliation": {
-    "distinctProductionRoutesUsingSqlite": 5,
-    "routesList": [
-      "pages/api/engagements/operator-pilot.ts",
-      "pages/api/admin/operator-pilot.ts",
-      "pages/api/demo/funnel-event.ts",
-      "pages/api/demo/signal-consent-continuation.ts",
-      "pages/api/corridor/recommendation-context.ts"
-    ],
-    "distinctSqliteStoreAuthorities": 4,
+    "distinctProductionRoutesUsingSqlite": 0,
+    "productionRouteStoreEdgesUsingSqlite": 0,
+    "distinctPostgresStoreAuthorities": 4,
     "storesList": ["PilotIntakeStore", "FunnelEventStore", "SignalConsentTransitionStore", "RecommendationContextStore"],
-    "explanationOf5vs4": "PilotIntakeStore is used by 2 routes (engagements + admin). FunnelEventStore is used by 2 routes (demo/funnel-event + engagements/operator-pilot, which also writes the pilot store). So 6 route→store EDGES across 5 distinct routes and 4 distinct stores.",
-    "PRODUCTION_ROUTES_USING_SQLITE": 5,
-    "SQLITE_STORE_AUTHORITIES": 4,
-    "UNMAPPED_ROUTE_STORE_EDGE": 0
+    "UNMAPPED_ROUTE_STORE_EDGE": 0,
+    "PRODUCTION_ROUTES_USING_SQLITE": 0,
+    "PRODUCTION_SQLITE_CUSTOMER_STATE": 0
   },
-  "guardCoverage": "All 4 stores now call assertSqliteRuntimeAllowed() in getDb() → fail closed in NODE_ENV=production with no escape hatch (§3)."
+  "guardCoverage": "tests/runtime-hardening/serverless-route-store-boundaries.test.ts fails if production entrypoints import the direct local SQLite store modules instead of composed authorities. tests/demo-journey/sqlite-runtime-guard.test.ts proves direct SQLite adapters still fail closed in NODE_ENV=production."
 }

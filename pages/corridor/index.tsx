@@ -2,7 +2,7 @@ import * as React from "react";
 import type { GetServerSideProps } from "next";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { getRecommendationContext, isRecommendationContextStale, type RecommendationContextRecord } from "@/lib/intelligence/corridor/recommendation-context-store";
+import { getRecommendationContext, isRecommendationContextStale, type RecommendationContextRecord } from "@/lib/intelligence/corridor/recommendation-context-store.composed";
 import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
 import { COLORS, FONTS, caption, display, bodyText, bodyTextSm, card, primaryButton, ghostButton, hexA } from "@/lib/demo/journey-design";
 
@@ -14,7 +14,7 @@ interface CorridorProps {
 
 export const getServerSideProps: GetServerSideProps<CorridorProps> = async (ctx) => {
   const rec = typeof ctx.query.rec === "string" ? ctx.query.rec : "";
-  const context = rec ? getRecommendationContext(rec) : null;
+  const context = rec ? await getRecommendationContext(rec) : null;
   return {
     props: {
       context: context ? JSON.parse(JSON.stringify(context)) : null,

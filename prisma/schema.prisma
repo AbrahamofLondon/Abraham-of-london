@@ -5768,3 +5768,75 @@ model OperatorPilotTransition {
   @@index([intakeRef])
   @@map("operator_pilot_transitions")
 }
+
+// ── Demo-to-evidence production persistence (§3) ─────────────────────────────
+model SignalConsentContinuation {
+  token             String   @id
+  recommendationId  String
+  sessionId         String
+  mode              String
+  state             String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  expiresAt         DateTime
+  tenantId          String?
+  subjectId         String?
+  consentCapturedAt DateTime?
+  caseId            String?
+  interactionId     String?
+  twinVersion       Int?
+  stateHash         String
+
+  @@index([recommendationId])
+  @@index([sessionId])
+  @@index([tenantId, subjectId])
+  @@index([expiresAt])
+  @@map("signal_consent_continuations")
+}
+
+model CorridorRecommendationContext {
+  recommendationId    String   @id
+  contextId           String
+  sessionId           String
+  sessionVersion      Int      @default(1)
+  pressureBand        String
+  targetProductCode   String
+  targetLabel         String
+  targetRoute         String
+  accessMode          String
+  whyAdmissible       String
+  evidenceBasisJson   Json
+  establishedJson     Json
+  unresolvedJson      Json
+  notYetAppropriate   String?
+  carryForwardJson    Json
+  stateHash           String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([contextId])
+  @@index([sessionId])
+  @@index([targetProductCode])
+  @@index([updatedAt])
+  @@map("corridor_recommendation_contexts")
+}
+
+model FunnelJourneyEvent {
+  eventId        String   @id
+  occurredAt     DateTime @default(now())
+  eventType      String
+  journeyVersion String
+  sessionId      String
+  sourceRoute    String
+  tenantId       String?
+  caseId         String?
+  productCode    String?
+  recommendationId String?
+
+  @@index([eventType])
+  @@index([journeyVersion])
+  @@index([sessionId])
+  @@index([occurredAt])
+  @@index([tenantId, caseId])
+  @@map("funnel_journey_events")
+}

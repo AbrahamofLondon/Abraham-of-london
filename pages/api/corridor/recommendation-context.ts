@@ -1,16 +1,16 @@
 /** POST /api/corridor/recommendation-context — persist Signal's non-sensitive corridor context. */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { saveRecommendationContext, getRecommendationContext, type CorridorAccessMode } from "@/lib/intelligence/corridor/recommendation-context-store";
+import { saveRecommendationContext, getRecommendationContext, type CorridorAccessMode } from "@/lib/intelligence/corridor/recommendation-context-store.composed";
 
 const ACCESS: CorridorAccessMode[] = ["free", "self_serve", "controlled", "manual_billing", "unavailable", "none"];
 const clean = (v: unknown, max = 280) => typeof v === "string" ? v.slice(0, max) : "";
 const cleanList = (v: unknown) => Array.isArray(v) ? v.map((x) => clean(x)).filter(Boolean).slice(0, 8) : [];
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     const id = typeof req.query.recommendationId === "string" ? req.query.recommendationId : "";
     if (!id) return res.status(400).json({ error: "recommendationId required" });
-    const record = getRecommendationContext(id);
+    const record = await getRecommendationContext(id);
     if (!record) return res.status(404).json({ error: "not found" });
     return res.status(200).json(record);
   }
@@ -20,7 +20,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (typeof b.sessionId !== "string") return res.status(400).json({ error: "sessionId required" });
   const accessMode = ACCESS.includes(b.accessMode) ? b.accessMode : "unavailable";
   try {
-    const record = saveRecommendationContext({
+    const record = await saveRecommendationContext({
       recommendationId: clean(b.recommendationId, 80),
       sessionId: clean(b.sessionId, 96),
       sessionVersion: Number.isFinite(Number(b.sessionVersion)) ? Number(b.sessionVersion) : 1,

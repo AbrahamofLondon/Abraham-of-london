@@ -7,7 +7,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { qualifyPilotIntake, type PilotIntake } from "@/lib/engagements/operator-pilot-qualification";
 import { savePilotIntake, getPilotIntakeByRef, toCustomerStatus } from "@/lib/engagements/pilot-intake-store.composed";
 import { track } from "@/lib/analytics/track";
-import { recordFunnelEvent } from "@/lib/demo/funnel-event-store";
+import { recordFunnelEvent } from "@/lib/demo/funnel-event-store.composed";
 
 function coerceIntake(body: any): PilotIntake {
   return {
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const record = await savePilotIntake(intake, qualification);
     track("operator_pilot_intake_submitted", { qualificationStatus: qualification.status });
     try {
-      recordFunnelEvent({
+      await recordFunnelEvent({
         eventType: record.reviewStatus === "MORE_INFORMATION_REQUIRED" ? "PILOT_MORE_INFO_REQUIRED" : "PILOT_SUBMITTED",
         sessionId: typeof req.body?.sessionId === "string" ? req.body.sessionId.slice(0, 64) : `api_${record.reference}`,
         sourceRoute: "/engagements/operator-pilot",

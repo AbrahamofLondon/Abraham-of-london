@@ -12,7 +12,7 @@ import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { requireAdminPage } from "@/lib/access/server";
 import { COLORS, FONTS, caption, card, bodyTextSm } from "@/lib/demo/journey-design";
-import type { FunnelSummary } from "@/lib/demo/funnel-event-store";
+import type { FunnelSummary } from "@/lib/demo/funnel-event-store.composed";
 
 interface PageProps {
   summary: FunnelSummary | null;
@@ -29,7 +29,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const to = typeof ctx.query.to === "string" ? ctx.query.to : "";
   const journeyVersion = typeof ctx.query.jv === "string" ? ctx.query.jv : "";
 
-  const { summarizeFunnel } = await import("@/lib/demo/funnel-event-store");
+  const { summarizeFunnel } = await import("@/lib/demo/funnel-event-store.composed");
   const summary = await Promise.resolve(
     summarizeFunnel({ from: from || undefined, to: to || undefined, journeyVersion: journeyVersion || undefined }),
   ).catch((err) => { console.error("[demo-conversion] summarize error", err); return null; });

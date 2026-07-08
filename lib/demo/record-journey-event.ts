@@ -7,7 +7,7 @@
  * A per-tab session id is generated locally (no PII). Never sends decision text.
  */
 
-import type { FunnelEventType } from "./funnel-event-store";
+import type { FunnelEventType } from "./funnel-event-store.shared";
 
 export function getJourneySessionId(): string {
   if (typeof window === "undefined") return "ssr";
