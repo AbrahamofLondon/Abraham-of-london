@@ -1,9 +1,16 @@
 {
-  "schemaVersion": "runtime-hardening.handoff.v3",
-  "generatedAt": "2026-07-08T11:35:00Z",
+  "schemaVersion": "runtime-hardening.handoff.v4",
+  "generatedAt": "2026-07-08T12:20:00Z",
   "canonicalBranch": "construction/estate-restoration",
-  "canonicalHead": "a9de33bfd",
+  "canonicalHead": "bc7617284",
   "worktreeClean": true,
+  "executedThisSession": {
+    "migrationReconciliation": "DONE + PROVEN on Postgres 15.18 — squashed 00000000000000_baseline (221 tables), 54 migrations archived to prisma/_archived-migrations-pre-baseline (reversible). Fresh migrate deploy exit 0; existing-DB resolve→deploy no-op exit 0.",
+    "fullSuite": "GREEN at 167910651: 493 files / 7448 tests / 0 failures (timeout fix confirmed).",
+    "pilotProductionPersistence": "DONE + PROVEN — OperatorPilotIntake + OperatorPilotTransition models + migration 20260708105750; Prisma adapter (history + human-authority + optimistic concurrency) proven against real Postgres; DB-free shared module (no better-sqlite3 in prod bundle); composed store (prod→Prisma, test→SQLite via dynamic import); both pilot routes rewired to async composed store.",
+    "goForwardMigrationWorkflow": "PROVEN — prisma migrate dev creates+applies new migrations on the reconciled baseline."
+  },
+  "nextExactTask": "Apply the SAME adapter pattern (shared + prisma + composed, dynamic-import) to the remaining 3 runtime SQLite stores: signal-consent-transition-store, recommendation-context-store, funnel-event-store. Add their Prisma models (+migration via migrate dev), prove each against Postgres, rewire their API routes. Postgres: postgresql://aol:aol_local@localhost:55433 (docker aol-clean-room). Then: §15 idempotency-key vs business-duplicate split, §12/§18 status secret→HttpOnly session (drop ?ref=), §13/§19 distributed rate limit, §16/§20 serverless bundling guard test, §17 Prisma connection doc, §19-23 accessibility+visual convergence, §21 clean-room full proof, §25 final build.",
   "migrationTruth": {
     "p3018Reproduced": "yes, on empty Postgres 15.18 (aol_migcheck1, dropped)",
     "criticalFinding": "221 schema models vs ~90 migration-created tables = 131 untracked db-push baseline tables. 3 FK-exposed (DiagnosticJourney/Organisation/research_runs) + 1 ordering defect (RetainedDecision). A narrow 3-table bridge is WRONG; a full baseline of the pre-migration state is required.",
