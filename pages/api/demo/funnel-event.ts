@@ -2,13 +2,13 @@
  * POST /api/demo/funnel-event — persist one flagship-journey funnel event.
  *
  * §10 hardening: same-origin content-type, strict field bounds (no arbitrary metadata,
- * no free-text decision content), and per-caller rate limiting so a competitor cannot
+ * no free-text decision content), and shared-store rate limiting so a competitor cannot
  * inflate conversion with a flood of POSTs. Only allow-listed structured fields are read.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { recordFunnelEvent, isFunnelEvent } from "@/lib/demo/funnel-event-store.composed";
-import { checkRateLimit, clientIpFrom } from "@/lib/runtime/simple-rate-limit";
+import { consumeRateLimit, buildRateLimitKey, hashIpForRateLimit } from "@/lib/server/security/rate-limit-provider";
 
 export const config = { api: { bodyParser: { sizeLimit: "4kb" } } }; // bound payload size
 
@@ -28,11 +28,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const sessionId = clean(b.sessionId, 64);
   if (!sessionId) return res.status(400).json({ error: "sessionId required" });
 
-  // rate limit per (session + ip): 60 events / minute is generous for a real journey,
-  // ruinous for a flood. Per-instance (documented) — production global limit needs a shared store.
-  const key = `${sessionId}:${clientIpFrom(req.headers)}`;
-  const rl = checkRateLimit(key, 60, 60_000);
-  if (!rl.ok) { res.setHeader("Retry-After", Math.ceil(rl.resetInMs / 1000).toString()); return res.status(429).json({ error: "rate limited" }); }
+  // Shared-store limit per (session + hashed IP): generous for a real journey, ruinous for flood traffic.
+  const forwarded = req.headers["x-forwarded-for"];
+  const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+  const identity = `${hashIpForRateLimit(ip)}:${sessionId}`;
+  const key = buildRateLimitKey("demo-funnel-event", identity);
+  const rl = await consumeRateLimit({ key, limit: 60, windowMs: 60_000, failClosed: true });
+  res.setHeader("X-RateLimit-Limit", String(rl.limit));
+  res.setHeader("X-RateLimit-Remaining", String(Math.max(0, rl.remaining)));
+  res.setHeader("X-RateLimit-Reset", String(Math.ceil(rl.resetAt / 1000)));
+  res.setHeader("X-RateLimit-Backend", rl.backend);
+  if (!rl.allowed) { res.setHeader("Retry-After", Math.ceil(rl.retryAfterMs / 1000).toString()); return res.status(429).json({ error: "rate limited" }); }
 
   try {
     const rec = await recordFunnelEvent({
