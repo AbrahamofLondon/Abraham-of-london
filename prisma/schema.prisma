@@ -1073,6 +1073,91 @@ model GmiAlertRule {
   @@map("gmi_alert_rules")
 }
 
+// ============================================================================
+// GMI PRODUCTION RELEASE PERSISTENCE — durable, transactional, distributed-safe
+// Static edition DEFINITION stays in code (market-intelligence-lifecycle.ts).
+// Mutable release TRUTH (lifecycle, hashes, data lock, authority, receipt,
+// supersession) lives here in Postgres. The release operation runs in one
+// transaction under a pg advisory xact lock. See gmi-release-store.server.ts.
+// ============================================================================
+
+/// GMI Edition Release State — the durable mutable release truth for one edition.
+/// One row per edition. Distinct responsibility from GmiEditionGovernanceState
+/// (content gating / board-pulse). This is the production release authority for
+/// lifecycle state, data-lock and hash binding — never the static registry.
+model GmiEditionReleaseState {
+  id                 String    @id @default(cuid())
+  editionId          String    @unique @map("edition_id")
+  lifecycleState     String    @map("lifecycle_state")
+  candidateHash      String?   @map("candidate_hash")
+  sourceSnapshotHash String?   @map("source_snapshot_hash")
+  reportContentHash  String?   @map("report_content_hash")
+  methodologyVersion String?   @map("methodology_version")
+  dataLockedAt       DateTime? @map("data_locked_at")
+  releaseCandidateAt DateTime? @map("release_candidate_at")
+  publishedAt        DateTime? @map("published_at")
+  supersedes         String?   @map("supersedes")
+  supersededBy       String?   @map("superseded_by")
+  publicVisible      Boolean   @default(false) @map("public_visible")
+  purchasable        Boolean   @default(false) @map("purchasable")
+  version            Int       @default(1) @map("version")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  receipt GmiReleaseReceipt?
+
+  @@index([lifecycleState])
+  @@index([supersededBy])
+  @@map("gmi_edition_release_state")
+}
+
+/// GMI Release Authority — durable owner release authorisation, candidate-hash bound.
+/// Multiple rows may exist over time (grant → revoke → re-grant). The CURRENT valid
+/// authority is the latest non-revoked row whose candidateHash matches the edition's
+/// current candidateHash. A projected timestamp without a valid row must FAIL.
+model GmiReleaseAuthority {
+  id             String    @id @default(cuid())
+  editionId      String    @map("edition_id")
+  candidateHash  String    @map("candidate_hash")
+  authorizedBy   String    @map("authorized_by")
+  authorizedAt   DateTime  @map("authorized_at")
+  authorityScope String    @map("authority_scope")
+  revokedAt      DateTime? @map("revoked_at")
+  revokedBy      String?   @map("revoked_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  receipts GmiReleaseReceipt[]
+
+  @@index([editionId])
+  @@index([editionId, candidateHash])
+  @@index([revokedAt])
+  @@map("gmi_release_authorities")
+}
+
+/// GMI Release Receipt — the single authoritative proof of a successful release.
+/// Unique per edition: at most one authoritative receipt can ever exist, so a
+/// concurrent double-release resolves to exactly one receipt.
+model GmiReleaseReceipt {
+  id                     String   @id @default(cuid())
+  editionId              String   @unique @map("edition_id")
+  candidateHash          String   @map("candidate_hash")
+  sourceSnapshotHash     String   @map("source_snapshot_hash")
+  reportContentHash      String   @map("report_content_hash")
+  methodologyVersion     String   @map("methodology_version")
+  pdfHash                String?  @map("pdf_hash")
+  releaseChecklistVersion String  @map("release_checklist_version")
+  authorityId            String   @map("authority_id")
+  publishedAt            DateTime @map("published_at")
+  createdAt              DateTime @default(now()) @map("created_at")
+
+  authority      GmiReleaseAuthority     @relation(fields: [authorityId], references: [id])
+  editionState   GmiEditionReleaseState  @relation(fields: [editionId], references: [editionId])
+
+  @@index([authorityId])
+  @@index([candidateHash])
+  @@map("gmi_release_receipts")
+}
+
 model InnerCircleEmailEventLog {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
