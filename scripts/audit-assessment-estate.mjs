@@ -90,7 +90,7 @@ function exists(rel) { return fs.existsSync(path.join(root, rel)); }
 function write(name, data) { fs.writeFileSync(path.join(outDir, name), JSON.stringify(data, null, 2) + "\n"); }
 
 const inventory = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: "SOURCE_CONTROLLED",
   canonicalBranch: "construction/estate-restoration",
   unclassified: surfaces.filter((s) => !s.currentStatus).length,
   surfaces,
