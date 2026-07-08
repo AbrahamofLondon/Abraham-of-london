@@ -46,6 +46,8 @@ const DecisionSignalPage: NextPage = () => {
   const [diff, setDiff] = React.useState<ReadingDiff | null>(null);
   const [showTrace, setShowTrace] = React.useState(false);
   const started = React.useRef(false);
+  const inputIdPrefix = React.useId();
+  const inputId = React.useCallback((name: string) => `${inputIdPrefix}-${name}`, [inputIdPrefix]);
   const prevReading = React.useRef<SignalResult | null>(null); // §3.3 session-scoped prior reading
 
   React.useEffect(() => { track("decision_signal_landing_viewed", {}); recordJourneyEvent("SIGNAL_LANDING_VIEWED"); }, []);
@@ -133,7 +135,7 @@ const DecisionSignalPage: NextPage = () => {
           {!result && (
             <div style={{ display: "flex", gap: 8, marginTop: 28 }}>
               {(["try", "example"] as const).map((m) => (
-                <button key={m} onClick={() => { setMode(m); setError(null); }}
+                <button type="button" key={m} onClick={() => { setMode(m); setError(null); }}
                   style={{ ...ghostButton(), borderColor: mode === m ? COLORS.gold : COLORS.hairStrong, color: mode === m ? COLORS.gold : COLORS.body, background: mode === m ? hexA(COLORS.gold, 0.08) : "transparent" }}>
                   {m === "try" ? "Try the instrument" : "View an example"}
                 </button>
@@ -149,7 +151,7 @@ const DecisionSignalPage: NextPage = () => {
               </div>
               <div style={{ display: "grid", gap: 10 }}>
                 {DECISION_SIGNAL_SAMPLES.map((s) => (
-                  <button key={s.id} onClick={() => loadExample(s.id)} style={{ ...card(), textAlign: "left", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", ...bodyTextSm, color: COLORS.body }}>
+                  <button type="button" key={s.id} onClick={() => loadExample(s.id)} style={{ ...card(), textAlign: "left", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", ...bodyTextSm, color: COLORS.body }}>
                     <span>{s.title}</span><ArrowRight style={{ width: 14, height: 14, color: COLORS.gold }} />
                   </button>
                 ))}
@@ -160,8 +162,8 @@ const DecisionSignalPage: NextPage = () => {
           {/* ── Input form ── */}
           {!result && mode === "try" && (
             <div style={{ marginTop: 32, display: "grid", gap: 26 }}>
-              <Field label="What decision is being delayed or avoided?">
-                <textarea value={input.decisionStatement} onFocus={markStarted}
+              <Field label="What decision is being delayed or avoided?" htmlFor={inputId("decision-statement")}>
+                <textarea id={inputId("decision-statement")} value={input.decisionStatement} onFocus={markStarted}
                   onChange={(e) => setInput((p) => ({ ...p, decisionStatement: e.target.value }))}
                   placeholder="Describe the decision in one or two sentences — the more specific, the sharper the reading."
                   rows={3} style={{ ...field(), resize: "none" }} />
@@ -170,10 +172,10 @@ const DecisionSignalPage: NextPage = () => {
                 onPick={(v) => { markStarted(); setInput((p) => ({ ...p, delayCostBand: v as SignalInput["delayCostBand"] })); }} />
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <label style={caption(COLORS.muted)}>Confidence in the current path</label>
+                  <label htmlFor={inputId("confidence-level")} style={caption(COLORS.muted)}>Confidence in the current path</label>
                   <span style={{ fontFamily: FONTS.mono, fontSize: 14, color: COLORS.gold }}>{input.confidenceLevel}/10</span>
                 </div>
-                <input type="range" min={0} max={10} value={input.confidenceLevel}
+                <input id={inputId("confidence-level")} type="range" min={0} max={10} value={input.confidenceLevel} aria-valuetext={`${input.confidenceLevel} out of 10`}
                   onChange={(e) => { markStarted(); setInput((p) => ({ ...p, confidenceLevel: parseInt(e.target.value) })); }}
                   style={{ width: "100%", marginTop: 12, accentColor: COLORS.gold }} />
               </div>
@@ -181,8 +183,8 @@ const DecisionSignalPage: NextPage = () => {
                 onPick={(v) => { markStarted(); setInput((p) => ({ ...p, consequenceIfWrong: v as SignalInput["consequenceIfWrong"] })); }} small />
               <Segmented label="Urgency" options={["LOW", "MODERATE", "HIGH", "IMMEDIATE"]} value={input.urgencyBand}
                 onPick={(v) => { markStarted(); setInput((p) => ({ ...p, urgencyBand: v as SignalInput["urgencyBand"] })); }} />
-              {error && <p style={{ fontFamily: FONTS.sans, fontSize: 13.5, lineHeight: 1.6, color: COLORS.rose }}>{error}</p>}
-              <button onClick={submit} style={{ ...primaryButton(), width: "100%" }}>Generate governed diagnosis</button>
+              {error && <p role="alert" aria-live="polite" style={{ fontFamily: FONTS.sans, fontSize: 13.5, lineHeight: 1.6, color: COLORS.rose }}>{error}</p>}
+              <button type="button" onClick={submit} style={{ ...primaryButton(), width: "100%" }}>Generate governed diagnosis</button>
             </div>
           )}
 
@@ -315,7 +317,7 @@ const DecisionSignalPage: NextPage = () => {
 
               {/* §3.2/§3.4 how this was derived — evidence trace + uncertainty (progressive) */}
               <div style={card()}>
-                <button onClick={() => setShowTrace((s) => !s)} style={{ ...ghostButton(), width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderColor: COLORS.hair }}>
+                <button type="button" onClick={() => setShowTrace((s) => !s)} style={{ ...ghostButton(), width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderColor: COLORS.hair }}>
                   <span>How this reading was derived</span>
                   <span style={{ color: COLORS.gold }}>{showTrace ? "–" : "+"}</span>
                 </button>
@@ -357,7 +359,7 @@ const DecisionSignalPage: NextPage = () => {
 
               {/* Governance footer */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${COLORS.hair}`, paddingTop: 16, flexWrap: "wrap", gap: 12 }}>
-                <button onClick={reset} style={{ ...ghostButton(), padding: "10px 16px" }}>← Run another diagnosis</button>
+                <button type="button" onClick={reset} style={{ ...ghostButton(), padding: "10px 16px" }}>← Run another diagnosis</button>
                 <span style={{ fontFamily: FONTS.mono, fontSize: 10, color: COLORS.faint, letterSpacing: "0.08em" }}>{result.evidencePosture}</span>
               </div>
             </div>
@@ -368,8 +370,8 @@ const DecisionSignalPage: NextPage = () => {
   );
 };
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (<div><label style={caption(COLORS.muted)}>{label}</label>{children}</div>);
+function Field({ label, children, htmlFor }: { label: string; children: React.ReactNode; htmlFor: string }) {
+  return (<div><label htmlFor={htmlFor} style={caption(COLORS.muted)}>{label}</label>{children}</div>);
 }
 
 function TraceList({ title, color, items }: { title: string; color: string; items: string[] }) {
@@ -385,20 +387,20 @@ function TraceList({ title, color, items }: { title: string; color: string; item
 
 function Segmented({ label, options, value, onPick, small }: { label: string; options: readonly string[]; value: string; onPick: (v: string) => void; small?: boolean }) {
   return (
-    <div>
-      <label style={caption(COLORS.muted)}>{label}</label>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 12 }}>
+    <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+      <legend style={caption(COLORS.muted)}>{label}</legend>
+      <div role="group" aria-label={label} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 12 }}>
         {options.map((o) => {
           const active = value === o;
           return (
-            <button key={o} onClick={() => onPick(o)}
+            <button type="button" key={o} aria-pressed={active} onClick={() => onPick(o)}
               style={{ padding: "11px 6px", border: `1px solid ${active ? COLORS.gold : COLORS.hair}`, background: active ? hexA(COLORS.gold, 0.1) : "transparent", color: active ? COLORS.gold : COLORS.muted, fontFamily: FONTS.mono, fontSize: small ? 9.5 : 10.5, letterSpacing: "0.08em", cursor: "pointer", borderRadius: 4 }}>
               {o}
             </button>
           );
         })}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
