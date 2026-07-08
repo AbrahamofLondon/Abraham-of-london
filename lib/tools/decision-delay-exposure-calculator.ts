@@ -156,14 +156,21 @@ const GOVERNANCE_PRESSURE_EXPLANATION: Record<GovernancePressureBand, string> = 
 
 // ─── Formatting ───────────────────────────────────────────────────────────────
 
-const GBP = new Intl.NumberFormat("en-GB", {
+export const DECISION_EXPOSURE_LOCALE = "en-GB";
+export const DECISION_EXPOSURE_CURRENCY = "GBP";
+
+const DECISION_EXPOSURE_FORMATTER = new Intl.NumberFormat(DECISION_EXPOSURE_LOCALE, {
   style: "currency",
-  currency: "GBP",
+  currency: DECISION_EXPOSURE_CURRENCY,
   maximumFractionDigits: 0,
 });
 
+export function formatDecisionDelayCurrency(amount: number): string {
+  return DECISION_EXPOSURE_FORMATTER.format(Math.max(0, Math.round(amount)));
+}
+
 export function formatGbp(amount: number): string {
-  return GBP.format(Math.max(0, Math.round(amount)));
+  return formatDecisionDelayCurrency(amount);
 }
 
 // ─── Public helpers ───────────────────────────────────────────────────────────
