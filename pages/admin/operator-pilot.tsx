@@ -63,4 +63,3 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const status = typeof ctx.query.status === "string" && STATES.includes(ctx.query.status as PilotLifecycleState) ? ctx.query.status as PilotLifecycleState : undefined;
   return { props: { items: JSON.parse(JSON.stringify(listPilotQueue({ status }))), activeStatus: status ?? "ALL" } };
 };
-
