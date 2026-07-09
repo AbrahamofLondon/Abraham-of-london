@@ -2,7 +2,7 @@
 
 ## Verdict
 
-PASS — Wave 1 package materials have been brought into alignment with the 25-chapter manuscript after insertion of Ch.20, "The Available Tools."
+PASS — Wave 1 package materials have been brought into alignment with the 27-chapter manuscript after insertion of Ch.20, "The Available Tools."
 
 Push status: not pushed.
 
@@ -12,15 +12,15 @@ Ch.20 — "The Available Tools" is acknowledged as part of the active manuscript
 
 Current active manuscript structure:
 
-- 25 chapters
-- approximately 48,700 prose-only words in the clean manuscript header
-- approximately 49,000 words in outward-facing submission language
+- 27 chapters
+- 49,981 words by full-manuscript count; approximately 50,000 words in the clean manuscript header
+- approximately 50,000 words in outward-facing submission language
 - Ch.20 — "The Available Tools"
 - Ch.21 — "The Version in His Head"
 - Ch.22 — "Damisi"
 - Ch.23 — "Love Does Not Fear"
 - Ch.24 — "Devotion"
-- Ch.25 — "Final Room"
+- Ch.25 — "I'd Kill It"; Ch.26 — "Letter to Damisi"; Ch.27 — "Final Room"
 
 ## Folder Structure
 
@@ -53,11 +53,11 @@ Verified `current-package/` contains the active package set:
 - `11-submission-wave-plan.md`
 - `12-agent-personalisation-notes.md`
 
-Current package files were checked and updated for 25-chapter / Ch.20 alignment where needed.
+Current package files were checked and updated for 27-chapter / Ch.20 alignment where needed.
 
 ## Wave 1 Update
 
-Wave 1 folder and exports were updated to reflect the 25-chapter package.
+Wave 1 folder and exports were updated to reflect the 27-chapter package.
 
 Updated areas include:
 
@@ -97,10 +97,10 @@ Checked and updated:
 
 Result:
 
-- outward-facing word count now uses approximately 49,000 words
-- active structural references now use 25 chapters
+- outward-facing word count now uses approximately 50,000 words
+- active structural references now use 27 chapters
 - Ch.20 "The Available Tools" is present where synopsis/proposal structure requires it
-- Ch.25 "Final Room" remains the ending
+- Ch.27 "Final Room" remains the ending
 
 ## Legal / Privacy Check
 

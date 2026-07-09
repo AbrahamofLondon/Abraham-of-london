@@ -4,6 +4,21 @@
 
 ---
 
+## Chapters Requiring Specialist Legal Review
+
+The internal audit has kept the manuscript in a protected register, but specialist legal review remains required before any wide submission or publication decision. Priority chapters for review:
+
+- Ch.4 — "A Hearing Date"
+- Ch.13 — "Married by December"
+- Ch.17 — "Fatherhood Began Outside"
+- Ch.18 — "What the System Sees"
+- Ch.19 — "Seven Years"
+- Ch.22 — "Damisi"
+- Ch.25 — "I'd Kill It" / KPMG-vocation chapter
+- Ch.26 — "Letter to Damisi" / sealed-envelope chapter
+
+Ch.20 and Ch.21 remain legal/privacy watch chapters because they include professional/spiritual-room generalisation, dating material, pseudonyms, and the reported phrase "dismissive avoidant." Ch.25 is added precautionarily because it now contains a glancing reference to a family court hearing being rescheduled near the interview period.
+
 ## Chapter 6 — Childhood/School Material
 
 Chapter 6 ("A Year Without Home") covers Abraham's year at St Thomas Aquinas College in Akure after Jumoke's death. Names used: Mary (cousin), Matthew (Mary's son), Mr Adeniranye (maths teacher), Justice and Mrs Ali (landlords/fellowship hosts). These are family/community figures in a childhood memoir context — standard memoir practice. No legal/court risk. Faith material is public-safe with restraint.
@@ -40,6 +55,24 @@ Damisi (the author's son) is a living child. The book's treatment of Damisi is g
 - No material about Damisi could be used adversarially by any party;
 - No private or sensitive information about Damisi's circumstances, health, education, or living arrangements is disclosed;
 - The child's right to grow up without his childhood being publicly narrated in adversarial terms is treated as non-negotiable.
+
+Outward-facing proposal language should frame this restraint as an editorial and ethical achievement: the book does not withhold because it is evasive; it withholds because the author knows what not to take from his child.
+
+
+## Chapter 25 — I'd Kill It — Legal Review Required
+
+Chapter 25 contains a brief, non-procedural reference to a family court hearing being rescheduled close to the KPMG interview period. No case detail, allegation, party, outcome, or procedural substance is included. Specialist review is still recommended as a precaution because the chapter links professional pressure with family-court timing.
+## Chapter 26 — Letter to Damisi / Sealed Envelope — Legal Review Required
+
+Chapter 26 ("Letter to Damisi") must be treated as a specialist legal-review chapter before submission, circulation, or publication. This is mandatory because the chapter is addressed to a living child connected to ongoing family proceedings and describes a sealed envelope prepared for his eighteenth birthday.
+
+Drafting constraints:
+
+- No material that reads as evidence, proof, argument, or a message staged for a court file;
+- No reference to proceedings, arrangements, adults, institutions, or disputes even obliquely;
+- No private facts about Damisi's circumstances, education, health, home life, or relationships;
+- No burden placed on Damisi to understand, forgive, vindicate, or complete the author's story;
+- The chapter may speak toward future love, protection, restraint, and ordinary presence only from the supplied sealed-envelope source facts and after legal review.
 
 ## Pseudonyms and Privacy
 
@@ -168,7 +201,7 @@ Status: SPECIALIST LEGAL REVIEW REQUIRED before publication.
 
 ### Protected-Chapter Confirmation
 
-All six high-priority chapters (Ch.17–Ch.22) avoid:
+All mandatory legal-review chapters (Ch.4, Ch.13, Ch.17, Ch.18, Ch.19, Ch.22, Ch.25, and Ch.26) are drafted to avoid:
 - Mother naming or characterisation
 - Sealed family-court material
 - Workplace identifiers
@@ -177,8 +210,8 @@ All six high-priority chapters (Ch.17–Ch.22) avoid:
 
 ### Unresolved Legal-Review Items
 
-1. **Ch.17** — Requires specialist legal review before publication or wide submission. The oblique allegation/arrest wording is in protected register but cannot be fully cleared by internal audit.
-2. **Ch.21** — Two "dismissive avoidant" references flagged for legal review. Mitigated by being Elena's own self-description and Abraham's self-reading, but should be reviewed for potential defamation risk.
+1. **Mandatory legal-review chapters:** Ch.4, Ch.13, Ch.17, Ch.18, Ch.19, Ch.22, Ch.25, and Ch.26 require specialist legal review before publication or wide submission. Internal audit has kept them in a protected register, but cannot clear them.
+2. **Ch.21 watch item:** Two "dismissive avoidant" references flagged for legal review. Mitigated by being Elena's own self-description and Abraham's self-reading, but should be reviewed for potential defamation risk.
 
 ## Legal / Procedural Chronology
 

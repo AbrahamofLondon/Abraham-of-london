@@ -82,6 +82,8 @@ const KNOWN_ROUTES = new Set<string>([
   "/retainer/intake",
   "/intelligence/gmi",
   "/intelligence/gmi/q2-2026",
+  "/intelligence/global-market-intelligence-q1-2026",
+  "/intelligence/global-market-intelligence-q2-2026",
   "/intelligence/gmi/calls",
   "/intelligence/gmi/performance",
   "/intelligence/gmi/falsification",

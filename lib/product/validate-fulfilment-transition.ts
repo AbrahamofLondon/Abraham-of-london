@@ -143,7 +143,7 @@ export function getAdminBlockingMessage(params: {
   const evidenceMessages: Record<string, string> = {
     paymentId: "Payment has not been confirmed.",
     customerId: "Customer information is missing.",
-    productCode: "Product code is not set.",
+    productIdentity: "Product code is not set.",
     entitlementId: "Customer entitlement has not been created.",
     orderId: "Order record is missing.",
     draftExists: "No draft has been created.",

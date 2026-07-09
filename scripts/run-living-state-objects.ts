@@ -165,7 +165,7 @@ function fulfilmentProofRecords(): Record<string, unknown>[] {
     {
       sourceType: "case_study",
       sourceId: "fulfilment-proof-case-study",
-      productCode: "case_study",
+      sourceCode: "case_study",
       deliveryStatus: "DRAFT",
       generationStatus: "DRAFT",
       consentStatus: "MISSING",
@@ -421,7 +421,7 @@ function boardroomProofRecords(): Record<string, unknown>[] {
   return [
     {
       orderId: "boardroom-proof-draft-case",
-      productCode: "BOARDROOM_BRIEF",
+      productCode: "boardroom_brief",
       deliveryStatus: "draft_generated",
       artifactStatus: "DRAFT",
       adminPreviewUrl: "",

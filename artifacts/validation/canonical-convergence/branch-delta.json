@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "canonical-convergence.branch-delta.v1",
+  "generatedAt": "2026-07-07T00:00:00.000Z",
+  "candidateBranches": {
+    "canonicalCandidate": "construction/estate-restoration",
+    "secondaryCandidate": "work/estate-market-restoration"
+  },
+  "heads": {
+    "construction/estate-restoration": "b71752436332db0a74f5e298e5fb3e4acef6085f",
+    "origin/construction/estate-restoration": "b71752436332db0a74f5e298e5fb3e4acef6085f",
+    "work/estate-market-restoration": "68a285b0b3e7b15d79a43de99432bacec83c2f2c",
+    "origin/work/estate-market-restoration": "68a285b0b3e7b15d79a43de99432bacec83c2f2c"
+  },
+  "canonicalDecision": {
+    "branch": "construction/estate-restoration",
+    "basis": [
+      "Contains the estate pricing remediation, mutation harness, deterministic estate reproduction, release-ready proof matrix and controlled-release proof matrix.",
+      "Contains playbook /run surfaces, Monthly Reporting, Custom Reporting and GMI quarterly fulfilment infrastructure that are absent or older on work/estate-market-restoration.",
+      "Contains the later interaction spine, runtime binding, durable persistence, claim-boundary authority and four-pillar integration sequence through b71752436.",
+      "Diff from construction to work deletes the current runtime proof modules and fulfilment implementations rather than adding unique runtime capability to construction."
+    ]
+  },
+  "summary": {
+    "runtimeImplementationOnlyOnSecondary": 0,
+    "canonicalFeatureSplitAcrossBranches": 0,
+    "duplicateActiveAuthority": 0,
+    "secondaryBranchMaterialRuntimeUnique": 0,
+    "secondaryBranchDocsOrAuditUnique": 5,
+    "secondaryBranchSupersededRuntimeUnique": 4,
+    "patchEquivalentFinalCommits": 6
+  },
+  "uniqueCommits": [
+    { "branch": "work/estate-market-restoration", "sha": "69e9d2c01c4a66d2028be179003b4a16a7c81292", "classification": "DOCUMENTATION_ONLY", "subject": "content/source-material/fathering-without-fear/drafts/ch15-david-was-missing-from-the-wedding.mdx", "rationale": "Editorial/content draft unrelated to Four-Pillar runtime canonicalisation." },
+    { "branch": "work/estate-market-restoration", "sha": "bccd93d5f65787dd3364fd06f2af14b302960dc1", "classification": "INVESTOR_AUDIT_ONLY", "subject": "docs: add moat audit and strategic position assessment", "rationale": "Strategic/audit document; not runtime authority." },
+    { "branch": "work/estate-market-restoration", "sha": "d7e545f7023e671ef2ffb9a7ac5305ee39b4f9fe", "classification": "INVESTOR_AUDIT_ONLY", "subject": "docs: four-pillar moat activation status assessment", "rationale": "Status/audit document; construction branch must re-audit from current facts." },
+    { "branch": "work/estate-market-restoration", "sha": "d82ae4aba32a554bf78faf304094d94e39e6ff1f", "classification": "SUPERSEDED", "subject": "feat: complete four-pillar moat activation", "rationale": "Early four-pillar runtime implementation superseded by construction commits 9ce64dd3 through b71752436." },
+    { "branch": "work/estate-market-restoration", "sha": "05d076d8c65ac4186c520ef27793a78939bd1bac", "classification": "SUPERSEDED", "subject": "fix: add dedicated test files for all new components", "rationale": "Early hardening superseded by later construction runtime/test sequence." },
+    { "branch": "work/estate-market-restoration", "sha": "b77454364d873ecde1f45ddc4e98546fad2ba459", "classification": "SUPERSEDED", "subject": "feat: hostile-audit hardening", "rationale": "Superseded by construction claim-boundary, governance receipt and durable persistence commits." },
+    { "branch": "work/estate-market-restoration", "sha": "e091f10d699d58e523c8726fbcf925b9aee54b89", "classification": "INVESTOR_AUDIT_ONLY", "subject": "docs: execution status audit", "rationale": "Historical status audit; not runtime source of truth." },
+    { "branch": "work/estate-market-restoration", "sha": "f7744591776b67fd589e35be84b7287a495557e1", "classification": "SUPERSEDED", "subject": "feat: complete four-pillar integration", "rationale": "Runtime semantics superseded by construction commit 913ee101 and subsequent final hardening commits." },
+    { "branch": "work/estate-market-restoration", "sha": "6f0a118b3d13694f8cfdb6c6ef848e63d4f28ba2", "classification": "DUPLICATED", "subject": "feat: complete — routes, opportunity census, full regression 1060 tests", "rationale": "Patch-equivalent to construction commit 12d9c00a per git cherry." },
+    { "branch": "work/estate-market-restoration", "sha": "74e9f39d04dd05bcfc9ec23ba6ea1f5197aebf0b", "classification": "DUPLICATED", "subject": "feat: final hardening", "rationale": "Patch-equivalent to construction commit 744beaeb per git cherry." },
+    { "branch": "work/estate-market-restoration", "sha": "f4b6e43dc4b72454b9b099cf3099c327b09f6017", "classification": "DUPLICATED", "subject": "fix: final", "rationale": "Patch-equivalent to construction commit b71752436 per git cherry." },
+    { "branch": "work/estate-market-restoration", "sha": "f0a0c8d5261b2502a9f7e00340c49b06a210a410", "classification": "INVESTOR_AUDIT_ONLY", "subject": "docs: investor due diligence audit", "rationale": "Hypothesis/audit document to be re-audited, not canonical runtime." },
+    { "branch": "work/estate-market-restoration", "sha": "68a285b0b3e7b15d79a43de99432bacec83c2f2c", "classification": "INVESTOR_AUDIT_ONLY", "subject": "docs: demo audit and upgrade proposal", "rationale": "Market/demo hypothesis document; can inform later GTM assets but is not runtime authority." },
+
+    { "branch": "construction/estate-restoration", "sha": "eb2d804851e60931a843a04cb8c18a187629353d", "classification": "REQUIRED_CANONICAL", "subject": "feat(playbooks): genuine execution engines for the 3 governed playbooks" },
+    { "branch": "construction/estate-restoration", "sha": "27c93d1958380fc70faf1cf680382176fca601f7", "classification": "REQUIRED_CANONICAL", "subject": "feat(playbooks): real /run route surface + entitlement-gated API" },
+    { "branch": "construction/estate-restoration", "sha": "c62fead0e6eb7a2863dac2cdf5ac118ebe63ee5c", "classification": "REQUIRED_CANONICAL", "subject": "feat(reporting): real recurring Monthly Reporting fulfilment cycle" },
+    { "branch": "construction/estate-restoration", "sha": "5f46de7cf15a5ce7133a85decd5b04f851fe86e8", "classification": "REQUIRED_CANONICAL", "subject": "feat(reporting): distinct Custom Reporting engagement fulfilment" },
+    { "branch": "construction/estate-restoration", "sha": "0e930ea82efeba035c6c5f9b86f00b957a3d377d", "classification": "REQUIRED_CANONICAL", "subject": "feat(gmi): reusable gmi_quarterly fulfilment infra + release guards" },
+    { "branch": "construction/estate-restoration", "sha": "abafc11a0ce8393f2bd2ec3e656599a3567709fe", "classification": "REQUIRED_CANONICAL", "subject": "fix(audit-5A): pricing audit precision repair" },
+    { "branch": "construction/estate-restoration", "sha": "96cf51b8276176b19180f072e4884ac02d5893f4", "classification": "REQUIRED_CANONICAL", "subject": "fix: close active pricing authority defects" },
+    { "branch": "construction/estate-restoration", "sha": "93579eb7b25787244fb81c9a31b30ce238133d05", "classification": "REQUIRED_CANONICAL", "subject": "test: prove estate mutation resistance" },
+    { "branch": "construction/estate-restoration", "sha": "6b62df507cb3f9e2e2f3eaf867caca177d74a4e7", "classification": "REQUIRED_CANONICAL", "subject": "fix: make estate evidence reproduction deterministic" },
+    { "branch": "construction/estate-restoration", "sha": "9e52073858808eced1eecc0b8a48211d11ee376a", "classification": "REQUIRED_CANONICAL", "subject": "test: prove release-ready product execution paths" },
+    { "branch": "construction/estate-restoration", "sha": "ece4a68ffde8560f87446acf4968e13dc86a650c", "classification": "REQUIRED_CANONICAL", "subject": "test: prove controlled release boundaries" },
+    { "branch": "construction/estate-restoration", "sha": "f03a1be9e66340b6a07c01b412e1136a7c497ac4", "classification": "REQUIRED_CANONICAL", "subject": "fix: reconcile GMI source registry truth" },
+    { "branch": "construction/estate-restoration", "sha": "7c9909745827027dca5c2cdc3e9c1396574aa7e2", "classification": "REQUIRED_CANONICAL", "subject": "fix: make commercial verification snapshot deterministic" },
+    { "branch": "construction/estate-restoration", "sha": "67a49861ee40071a1c31acee45d2962a0bb91b68", "classification": "REQUIRED_CANONICAL", "subject": "test: stabilize estate verdict reproduction harness" },
+    { "branch": "construction/estate-restoration", "sha": "a2245250e33f2e0a09be717e70df2a9f8bacba08", "classification": "REQUIRED_CANONICAL", "subject": "fix: tighten checkout governance audit" },
+    { "branch": "construction/estate-restoration", "sha": "a0c6a0376f4e322fdae1af9af4c7bf2fd6447a6a", "classification": "REQUIRED_CANONICAL", "subject": "fix: reconcile GMI signal monitor truth" },
+    { "branch": "construction/estate-restoration", "sha": "a5b1fea46b1a42331623eae2861169a9b87199e8", "classification": "REQUIRED_CANONICAL", "subject": "feat(estate): Section 1 — canonical product-universe reconciliation" },
+    { "branch": "construction/estate-restoration", "sha": "940d562115ed00b9103f5c314831f4ba901c06ac", "classification": "REQUIRED_CANONICAL", "subject": "feat(estate): controlled-release final matrix" },
+    { "branch": "construction/estate-restoration", "sha": "4e14b1e581343c706a59507093599dbce4e80f9d", "classification": "REQUIRED_CANONICAL", "subject": "chore(estate): worktree cleanup — commit readiness-checker override + regenerated matrices" },
+    { "branch": "construction/estate-restoration", "sha": "e1a9fc39926c8462c0f57e99d1174da29a550198", "classification": "DOCUMENTATION_ONLY", "subject": "docs(programme): compounding decision intelligence master brief" },
+    { "branch": "construction/estate-restoration", "sha": "9ce64dd3b44495b354b984e1f00842d0e8ca93a0", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): compounding foundation" },
+    { "branch": "construction/estate-restoration", "sha": "2f812e87ee3098df5d019f377abc5ebac7cc1790", "classification": "DOCUMENTATION_ONLY", "subject": "docs(programme): execution log — foundation built" },
+    { "branch": "construction/estate-restoration", "sha": "15e76ab554ebc8545f46ca82964d6d5469cccc52", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): compounding loops" },
+    { "branch": "construction/estate-restoration", "sha": "83136ad1d7c94951c5a1f202190cdd67a85d383a", "classification": "REQUIRED_CANONICAL", "subject": "test(intelligence): census→ledger coverage guard" },
+    { "branch": "construction/estate-restoration", "sha": "0d582d575aad13fef0ecc2d8aad0be10dbc01a24", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): durable interaction propagation outbox" },
+    { "branch": "construction/estate-restoration", "sha": "3dadf902c77fa9a7d256d326eedc013f62413b5f", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): product→interaction mapper registry" },
+    { "branch": "construction/estate-restoration", "sha": "f8c7bab319ad1dc5885d2bb2fd95f915444db9ee", "classification": "REQUIRED_CANONICAL", "subject": "test(intelligence): architecture guards" },
+    { "branch": "construction/estate-restoration", "sha": "b18cdc8c2a20b4e7ef78d65913572a2676318414", "classification": "DOCUMENTATION_ONLY", "subject": "docs(programme): execution log — compounding core built" },
+    { "branch": "construction/estate-restoration", "sha": "bfbb136c90fd11ce5ab50bd946cad6cd73beda08", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): Decision Centre read model + enterprise portfolio + export" },
+    { "branch": "construction/estate-restoration", "sha": "49f4e8671a3bc4c601feb6f588b9f93bad058b8e", "classification": "DOCUMENTATION_ONLY", "subject": "docs(programme): authoritative closure" },
+    { "branch": "construction/estate-restoration", "sha": "7344f0c8f5300731bd11ff1794e0114bf395f1fe", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): durable persistence round-trip on real DB + ledger reconciliation" },
+    { "branch": "construction/estate-restoration", "sha": "45875ad28b6d13a642b7931577395d794315fb12", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): Decision Centre twin panel + local jsdom render proof" },
+    { "branch": "construction/estate-restoration", "sha": "cea58ba3a8e7091319484bb513b871431da414a5", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): runtime on-switch — bind live playbook + instrument paths" },
+    { "branch": "construction/estate-restoration", "sha": "5927c034830fef8a262fea160c0a111588aee488", "classification": "REQUIRED_CANONICAL", "subject": "feat(intelligence): read-before-run context" },
+    { "branch": "construction/estate-restoration", "sha": "8cb171358457eaa89d8b9874e87e92d9a09dd10b", "classification": "REQUIRED_CANONICAL", "subject": "feat(governance): claim-boundary authority + build gate + mutation tests" },
+    { "branch": "construction/estate-restoration", "sha": "913ee1018b40ce52f45db102a7c88b16cd2087e6", "classification": "REQUIRED_CANONICAL", "subject": "feat: complete four-pillar integration" },
+    { "branch": "construction/estate-restoration", "sha": "12d9c00a0bf1d16a35df039ae40c75be35b0d5bd", "classification": "DUPLICATED", "subject": "feat: complete — routes, opportunity census, full regression 1060 tests", "rationale": "Patch-equivalent to work commit 6f0a118b3; retained on canonical branch." },
+    { "branch": "construction/estate-restoration", "sha": "744beaebfa7abd8b92de84432ff61c0f431c631c", "classification": "DUPLICATED", "subject": "feat: final hardening", "rationale": "Patch-equivalent to work commit 74e9f39d; retained on canonical branch." },
+    { "branch": "construction/estate-restoration", "sha": "b71752436332db0a74f5e298e5fb3e4acef6085f", "classification": "DUPLICATED", "subject": "fix: final", "rationale": "Patch-equivalent to work commit f4b6e43d; retained as canonical HEAD." }
+  ]
+}

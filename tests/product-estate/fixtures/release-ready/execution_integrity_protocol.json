@@ -1,0 +1,9 @@
+{
+  "productCode": "execution_integrity_protocol",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

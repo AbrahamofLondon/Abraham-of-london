@@ -1,0 +1,73 @@
+import { existsSync, readFileSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { beforeAll, describe, expect, it } from "vitest";
+import { CATALOG } from "@/lib/commercial/catalog";
+
+const reportPath = "reports/gtm/estate-market-restoration-final.json";
+const reportMdPath = "reports/gtm/estate-market-restoration-final.md";
+
+function runGenerator() {
+  rmSync(reportPath, { force: true });
+  rmSync(reportMdPath, { force: true });
+
+  const result = spawnSync("pnpm", ["exec", "tsx", "scripts/gtm/generate-estate-market-restoration.ts"], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    shell: process.platform === "win32",
+  });
+
+  expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(0);
+  expect(existsSync(reportPath)).toBe(true);
+  return JSON.parse(readFileSync(reportPath, "utf8"));
+}
+
+describe("estate market restoration final disposition", () => {
+  let report: any;
+
+  beforeAll(() => {
+    report = runGenerator();
+  }, 60_000);
+
+  it("generates the final report from tracked source in a clean worktree", () => {
+    const expectedTotal = Object.keys(CATALOG).length;
+
+    expect(report.schemaVersion).toBe("estate-market-restoration-final.v2");
+    expect(report.totalProducts).toBe(expectedTotal);
+    expect(report.products).toHaveLength(expectedTotal);
+    expect(report.unresolved).toBe(0);
+    expect(report.releaseReadyNow + report.controlledReleaseReady + report.publicReferenceReady + report.internalOnlyJustified + report.mergedOrRetired).toBe(expectedTotal);
+    expect(report.exactTruthStatement).toContain(`${expectedTotal}/${expectedTotal} PRODUCTS DISPOSITIONED`);
+  });
+
+  it("writes product evidence packages with source fingerprints and no report-as-evidence dependency", () => {
+
+    for (const product of report.products) {
+      expect(existsSync(product.evidencePackage), `${product.code}: missing evidence package`).toBe(true);
+      const evidence = JSON.parse(readFileSync(product.evidencePackage, "utf8"));
+      expect(evidence.productCode).toBe(product.code);
+      expect(evidence.observedDisposition).toBe(product.finalState);
+      expect(evidence.sourceFingerprints.length, `${product.code}: source fingerprints`).toBeGreaterThan(0);
+      expect(evidence.validationErrors).toEqual([]);
+      expect(JSON.stringify(evidence.evidencePaths)).not.toContain("estate-market-restoration-final");
+    }
+  });
+
+  it("preserves the GMI Q2 released-current and Q1 superseded-reference boundary", () => {
+
+    expect(report.gmiBoundary.q2State).toBe("current_released");
+    expect(report.gmiBoundary.q2CheckoutAllowed).toBe(true);
+    expect(report.gmiBoundary.q2StripeProductId).toBe("prod_UNnSL8r6DMedEH");
+    expect(report.gmiBoundary.q2StripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+    expect(report.gmiBoundary.q1Superseded).toBe(true);
+
+    const q2 = report.products.find((p: any) => p.code === "gmi_q2_2026");
+    expect(q2.finalState).toBe("RELEASE_READY_NOW");
+    expect(q2.authorityBoundary).toContain("public, purchasable and edition-bound");
+
+    const q1 = report.products.find((p: any) => p.code === "gmi_q1_2026");
+    expect(q1.finalState).toBe("PUBLIC_REFERENCE_READY");
+    expect(q1.authorityBoundary.toLowerCase()).toContain("superseded");
+  });
+});
+
+

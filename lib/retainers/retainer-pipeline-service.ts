@@ -440,7 +440,7 @@ export async function createCaseStudyDraftFromCycle(input: {
       verificationStatus: "UNVERIFIED",
       consentStatus: "PENDING",
       narrative: {
-        productCode: "retainer-oversight",
+        surfaceCode: "retainer_oversight",
         evidenceStatus: "EVIDENCE_LINKED",
         outcomeStatus: "PENDING_REVIEW",
         adminNotes: `Created from oversight cycle ${input.cycleId}`,

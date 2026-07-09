@@ -57,17 +57,19 @@ describe('Boardroom Brief commercial product', () => {
     expect(product.primaryCta).toBe('Get full Boardroom Brief')
   })
 
-  it('resolves to the existing checkout action flow', () => {
+  it('is checkout-ready at the catalog level but governance-blocked from checkout', () => {
     const product = CATALOG.boardroom_brief!
+    // Catalog-level checkout-readiness (Stripe/pricing infrastructure present).
     expect(checkCheckoutEligibility(product.code)).toMatchObject({
       eligible: true,
       product,
     })
-    expect(resolvePricingAction(product)).toMatchObject({
-      type: 'checkout',
-      label: 'Get full Boardroom Brief',
-      href: '/boardroom-brief',
-    })
+    // Governance is the authority: boardroom_brief is in the blocked lane
+    // (blocked_claim_unsafe_product), so the resolver must NOT return checkout,
+    // even though the catalog data is checkout-ready. Checkout-ready is not permission.
+    const action = resolvePricingAction(product)
+    expect(action.purchasable).toBe(false)
+    expect(action.type).toBe('review_gated')
   })
 
   it('does not market the paid brief as Executive Reporting, Retainer, or Oversight', () => {

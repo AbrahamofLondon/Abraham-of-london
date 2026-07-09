@@ -132,12 +132,8 @@ export function resolveCommercialAction(
     return { state: "review_gated", label: cta ?? "Request access", href: successPath, purchasable: false, reason: "commercial_not_safe" };
   }
 
-  // (4) Explicit governance checkout denial (governance matrix). (Rule 2/12)
-  if (g.known && g.checkoutAllowed === false && g.releaseMode !== "manual_fulfilment_only") {
-    return { state: "review_gated", label: cta ?? "Request review", href: successPath, purchasable: false, reason: "checkout_not_allowed" };
-  }
-
   // (5) Contracted / enterprise — enquiry only. (Rule 7)
+
   if (product.commercialStatus === "contracted" || product.requiresContract === true) {
     return { state: "contact_sales", label: cta ?? "Discuss access", href: successPath || "/contact", purchasable: false, reason: "contracted" };
   }
@@ -157,9 +153,24 @@ export function resolveCommercialAction(
     return { state: "manual_fulfilment", label: cta ?? "Request access", href: "/contact", purchasable: false, reason: "manual_billing" };
   }
 
-  // (9) Paid + checkout-intended: enforce Stripe metadata before allowing checkout.
+  // (4) Explicit governance checkout denial for products not already handled by
+  // intentional catalog states above. Checkout denial is still non-purchasable,
+  // but it must not erase free/contract/manual-billing semantics.
+  if (g.known && g.checkoutAllowed === false && g.releaseMode !== "manual_fulfilment_only") {
+    return { state: "review_gated", label: cta ?? "Request review", href: successPath, purchasable: false, reason: "checkout_not_allowed" };
+  }
+  // (9) Paid + checkout-intended: enforce governance FIRST, then Stripe metadata.
   const checkoutIntended = product.commercialStatus === "paid" && product.requiresCheckout === true;
   if (checkoutIntended) {
+    // (9a) FAIL-CLOSED: absence of governance is NOT permission to sell. A paid,
+    // self-serve product with no explicit governance record must not resolve to
+    // checkout, even when Stripe metadata is complete. (Governance-known products
+    // that are blocked / unsafe / internal_only / manual are already handled in
+    // rules (1)–(8) above; reaching here with g.known === true means governance
+    // has cleared the product for checkout.)
+    if (!g.known) {
+      return { state: "blocked", label: "Not currently available", href: successPath, purchasable: false, reason: "governance_unknown_fail_closed" };
+    }
     // (10) Missing Stripe metadata for a checkout-safe paid product → unavailable.
     if (!hasValidStripe(product)) {
       return { state: "unavailable", label: "Currently unavailable", href: successPath, purchasable: false, reason: "missing_stripe_metadata" };
@@ -168,7 +179,7 @@ export function resolveCommercialAction(
     if (options.routeAvailable === false) {
       return { state: "unavailable", label: "Currently unavailable", href: successPath, purchasable: false, reason: "missing_route" };
     }
-    // Cleared by governance (blocked/unsafe handled above) and checkout-ready. (Rule 9)
+    // Cleared by governance and checkout-ready. (Rule 9)
     return { state: "checkout", label: cta ?? "Purchase / unlock", href: checkoutHref, purchasable: true };
   }
 

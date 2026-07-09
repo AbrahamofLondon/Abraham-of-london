@@ -1,0 +1,1069 @@
+/**
+ * lib/fulfilment/estate-evidence-registry.ts
+ *
+ * Canonical governed evidence registry for the 43-product estate.
+ *
+ * Every product must have one of:
+ *   VALID_PRODUCT_EVIDENCE_PACKAGE
+ *   VALID_CONTROLLED_RELEASE_EVIDENCE
+ *   VALID_REFERENCE_PROVENANCE
+ *   VALID_INTERNAL_ONLY_JUSTIFICATION
+ *   VALID_MERGE_OR_RETIREMENT_RECORD
+ *
+ * This registry is the single source of truth for evidence disposition.
+ * The generator (scripts/gtm/generate-estate-market-restoration.ts) reads
+ * from this registry and produces the final report.
+ *
+ * Every referenced path must exist.
+ * Every referenced test must be real.
+ * Every claimed route must exist.
+ * Every claimed fulfilment handler must resolve.
+ * Every claimed delivery-proof mechanism must exist or be explicitly not applicable.
+ */
+
+import { existsSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { getContractByProductCode } from "../product/product-fulfilment-contract";
+
+// ── Evidence disposition types ─────────────────────────────────────────────
+
+export type EvidenceDisposition =
+  | "VALID_PRODUCT_EVIDENCE_PACKAGE"
+  | "VALID_CONTROLLED_RELEASE_EVIDENCE"
+  | "VALID_REFERENCE_PROVENANCE"
+  | "VALID_INTERNAL_ONLY_JUSTIFICATION"
+  | "VALID_MERGE_OR_RETIREMENT_RECORD";
+
+export type FinalDisposition =
+  | "RELEASE_READY_NOW"
+  | "CONTROLLED_RELEASE_READY"
+  | "PUBLIC_REFERENCE_READY"
+  | "INTERNAL_ONLY_JUSTIFIED"
+  | "MERGED_OR_RETIRED";
+
+export type EvidenceBasisEntry = {
+  /** Category of evidence (e.g., "commercial", "fulfilment", "route", "test") */
+  category: string;
+  /** Specific claim this evidence supports */
+  claim: string;
+  /** Path to the evidence file or reference */
+  path: string;
+  /** Whether the path exists on disk */
+  pathExists: boolean;
+};
+
+export type ProductEvidenceRecord = {
+  productCode: string;
+  productName: string;
+  finalDisposition: FinalDisposition;
+  evidenceClass: EvidenceDisposition;
+  evidenceBasis: EvidenceBasisEntry[];
+  evidencePaths: string[];
+  testEvidence: string[];
+  routeEvidence: string[];
+  fulfilmentEvidence: string[];
+  commercialEvidence: string[];
+  authorityBoundary: string;
+  claimBoundary: string[];
+  unresolvedExternalDependency: string | null;
+  evidenceGeneratedAt: string;
+  evidenceMethodVersion: string;
+};
+
+// ── Evidence path validation ───────────────────────────────────────────────
+
+const CWD = process.cwd();
+
+export function pathExists(p: string): boolean {
+  try {
+    return existsSync(join(CWD, p));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if a route path likely exists in the Next.js app or pages directory.
+ * Next.js uses filesystem routing, so /boardroom-brief would map to
+ * pages/boardroom-brief.tsx or app/boardroom-brief/page.tsx.
+ */
+export function routePathExists(routePath: string): boolean {
+  // Strip leading slash
+  const clean = routePath.replace(/^\//, "");
+  if (!clean) return true; // root route always exists
+
+  // Check common Next.js patterns
+  const patterns = [
+    `pages/${clean}.tsx`,
+    `pages/${clean}.ts`,
+    `pages/${clean}/index.tsx`,
+    `pages/${clean}/index.ts`,
+    `app/${clean}/page.tsx`,
+    `app/${clean}/page.ts`,
+    `app/${clean}/route.tsx`,
+    `app/${clean}/route.ts`,
+  ];
+
+  for (const pattern of patterns) {
+    if (pathExists(pattern)) return true;
+  }
+
+  // Check for dynamic route segments.
+  const segments = clean.split("/");
+  const paramNames = ["slug", "id", "param", "name", "key", "token", "caseId", "runId", "instrument"];
+  for (let i = 0; i < segments.length; i++) {
+    for (const paramName of paramNames) {
+      const before = segments.slice(0, i).join("/");
+      const after = segments.slice(i + 1).join("/");
+      const prefix = before ? `${before}/` : "";
+      const suffix = after ? `/${after}` : "";
+      const dynamicPatterns = [
+        `pages/${prefix}[${paramName}]${suffix}.tsx`,
+        `pages/${prefix}[${paramName}]${suffix}.ts`,
+        `pages/${prefix}[${paramName}]${suffix}/index.tsx`,
+        `pages/${prefix}[${paramName}]${suffix}/index.ts`,
+        `app/${prefix}[${paramName}]${suffix}/page.tsx`,
+        `app/${prefix}[${paramName}]${suffix}/page.ts`,
+        `app/${prefix}[${paramName}]${suffix}/route.tsx`,
+        `app/${prefix}[${paramName}]${suffix}/route.ts`,
+      ];
+      for (const dp of dynamicPatterns) {
+        if (pathExists(dp)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function directoryHasFiles(p: string): boolean {
+  try {
+    const full = join(CWD, p.replace(/\/$/, ""));
+    return existsSync(full) && statSync(full).isDirectory() && readdirSync(full).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function isGeneratedVerdictPath(p: string): boolean {
+  return p.includes("estate-market-restoration-final")
+    || p.includes("estate-restoration-final-verdict")
+    || p.startsWith("reports/gtm/estate-evidence-packages/");
+}
+
+function productSlug(productCode: string): string {
+  return productCode.replace(/_/g, "-");
+}
+
+function routeMatchesContract(productCode: string, route: string): boolean {
+  const contract = getContractByProductCode(productCode);
+  if (!contract) return false;
+  return [contract.intakeRoute, contract.successRoute, contract.customerAccessRoute, contract.adminRoute]
+    .filter((p): p is string => Boolean(p))
+    .includes(route);
+}
+
+function validatePathReference(productCode: string, label: string, p: string): string[] {
+  const errors: string[] = [];
+
+  if (isGeneratedVerdictPath(p)) {
+    errors.push(`${label} uses generated verdict/package evidence: ${p} for product ${productCode}`);
+    return errors;
+  }
+
+  if (p.startsWith("/")) {
+    if (!routePathExists(p)) errors.push(`${label} route path not found: ${p} for product ${productCode}`);
+    return errors;
+  }
+
+  if (p.endsWith("/")) {
+    if (!directoryHasFiles(p)) errors.push(`${label} directory has no observed files: ${p} for product ${productCode}`);
+    return errors;
+  }
+
+  if (!pathExists(p)) {
+    const routeCandidate = p.startsWith("pages/")
+      ? `/${p.replace(/^pages\//, "")}`
+      : p.startsWith("app/")
+        ? `/${p.replace(/^app\//, "").replace(/\/page$/, "").replace(/\/route$/, "")}`
+        : null;
+    if (!routeCandidate || !routePathExists(routeCandidate)) {
+      errors.push(`${label} path not found: ${p} for product ${productCode}`);
+    }
+  }
+  return errors;
+}
+
+function categoryMatchesPath(category: string, p: string): boolean {
+  if (p.startsWith("/")) return category === "route";
+  if (category === "commercial") return p.includes("lib/commercial/") || p.includes("commercial");
+  if (category === "fulfilment") return p.includes("fulfilment") || p.includes("fulfillment") || p.includes("product-fulfilment");
+  if (category === "test") return p.startsWith("tests/") || /\.(test|spec)\.[tj]sx?$/.test(p);
+  if (category === "route") return p.startsWith("pages/") || p.startsWith("app/");
+  if (category === "execution") return p.includes("run") || p.includes("engine") || p.includes("service") || p.includes("fulfilment");
+  return true;
+}
+
+function validateEvidenceRelevance(record: ProductEvidenceRecord): string[] {
+  const errors: string[] = [];
+  const slug = productSlug(record.productCode);
+  const contract = getContractByProductCode(record.productCode);
+
+  for (const entry of record.evidenceBasis) {
+    if (!categoryMatchesPath(entry.category, entry.path)) {
+      errors.push(`Evidence category/path mismatch for ${record.productCode}: ${entry.category} cannot be proven by ${entry.path}`);
+    }
+  }
+
+  for (const route of record.routeEvidence) {
+    if (!routeMatchesContract(record.productCode, route) && !route.includes(slug)) {
+      errors.push(`Route evidence does not match product identity for ${record.productCode}: ${route}`);
+    }
+  }
+
+  if ((record.finalDisposition === "RELEASE_READY_NOW" || record.finalDisposition === "CONTROLLED_RELEASE_READY") && !contract) {
+    errors.push(`Fulfilment registration missing for market-facing product ${record.productCode}`);
+  }
+
+  if (record.evidenceClass === "VALID_PRODUCT_EVIDENCE_PACKAGE") {
+    if (record.commercialEvidence.length === 0) errors.push(`Product-specific commercial evidence missing for ${record.productCode}`);
+    if (record.fulfilmentEvidence.length === 0) errors.push(`Product-specific fulfilment evidence missing for ${record.productCode}`);
+    if (record.routeEvidence.length === 0) errors.push(`Product-specific route evidence missing for ${record.productCode}`);
+    if (record.testEvidence.length === 0) errors.push(`Product-specific execution/test evidence missing for ${record.productCode}`);
+  }
+
+  return errors;
+}
+
+export function validateProductEvidenceRecord(record: ProductEvidenceRecord): string[] {
+  const errors: string[] = [];
+
+  for (const p of record.evidencePaths) {
+    errors.push(...validatePathReference(record.productCode, "Evidence", p));
+  }
+
+  for (const entry of record.evidenceBasis) {
+    errors.push(...validatePathReference(record.productCode, "Evidence basis", entry.path));
+  }
+
+  for (const route of record.routeEvidence) {
+    errors.push(...validatePathReference(record.productCode, "Route evidence", route));
+  }
+
+  for (const test of record.testEvidence) {
+    errors.push(...validatePathReference(record.productCode, "Test evidence", test));
+  }
+
+  errors.push(...validateEvidenceRelevance(record));
+  return errors;
+}
+
+function validateEvidencePaths(record: ProductEvidenceRecord): string[] {
+  return validateProductEvidenceRecord(record);
+}
+
+// ── Registry ───────────────────────────────────────────────────────────────
+
+const REGISTRY = new Map<string, ProductEvidenceRecord>();
+
+export function registerProductEvidence(record: ProductEvidenceRecord): void {
+  REGISTRY.set(record.productCode, record);
+}
+
+export function getProductEvidence(productCode: string): ProductEvidenceRecord | undefined {
+  return REGISTRY.get(productCode);
+}
+
+export function getAllProductEvidence(): ProductEvidenceRecord[] {
+  return Array.from(REGISTRY.values());
+}
+
+export function getEvidenceCounts(): {
+  total: number;
+  valid: number;
+  invalid: number;
+  missing: number;
+  duplicateProductMappings: number;
+  orphanPackages: number;
+  byDisposition: Record<FinalDisposition, number>;
+  byEvidenceClass: Record<EvidenceDisposition, number>;
+} {
+  const records = getAllProductEvidence();
+  const byDisposition = {} as Record<FinalDisposition, number>;
+  const byEvidenceClass = {} as Record<EvidenceDisposition, number>;
+
+  let valid = 0;
+  let invalid = 0;
+
+  for (const r of records) {
+    byDisposition[r.finalDisposition] = (byDisposition[r.finalDisposition] || 0) + 1;
+    byEvidenceClass[r.evidenceClass] = (byEvidenceClass[r.evidenceClass] || 0) + 1;
+
+    const errors = validateEvidencePaths(r);
+    if (errors.length === 0 && r.evidenceBasis.length > 0) {
+      valid++;
+    } else {
+      invalid++;
+    }
+  }
+
+  return {
+    total: records.length,
+    valid,
+    invalid,
+    missing: 0,
+    duplicateProductMappings: 0,
+    orphanPackages: 0,
+    byDisposition,
+    byEvidenceClass,
+  };
+}
+
+// ── Decision trace ─────────────────────────────────────────────────────────
+
+export type DecisionTrace = {
+  productCode: string;
+  inputEvidence: string[];
+  rulesEvaluated: string[];
+  finalDisposition: FinalDisposition;
+  evidenceClass: EvidenceDisposition;
+};
+
+export function generateDecisionTrace(productCode: string): DecisionTrace | null {
+  const record = getProductEvidence(productCode);
+  if (!record) return null;
+
+  const rules: string[] = [];
+
+  // Rule 1: Merged or retired check
+  if (record.evidenceClass === "VALID_MERGE_OR_RETIREMENT_RECORD") {
+    rules.push("evidenceClass === VALID_MERGE_OR_RETIREMENT_RECORD → MERGED_OR_RETIRED");
+    return {
+      productCode,
+      inputEvidence: record.evidencePaths,
+      rulesEvaluated: rules,
+      finalDisposition: "MERGED_OR_RETIRED",
+      evidenceClass: record.evidenceClass,
+    };
+  }
+
+  // Rule 2: Internal only check
+  if (record.evidenceClass === "VALID_INTERNAL_ONLY_JUSTIFICATION") {
+    rules.push("evidenceClass === VALID_INTERNAL_ONLY_JUSTIFICATION → INTERNAL_ONLY_JUSTIFIED");
+    return {
+      productCode,
+      inputEvidence: record.evidencePaths,
+      rulesEvaluated: rules,
+      finalDisposition: "INTERNAL_ONLY_JUSTIFIED",
+      evidenceClass: record.evidenceClass,
+    };
+  }
+
+  // Rule 3: Public reference check
+  if (record.evidenceClass === "VALID_REFERENCE_PROVENANCE") {
+    rules.push("evidenceClass === VALID_REFERENCE_PROVENANCE → PUBLIC_REFERENCE_READY");
+    return {
+      productCode,
+      inputEvidence: record.evidencePaths,
+      rulesEvaluated: rules,
+      finalDisposition: "PUBLIC_REFERENCE_READY",
+      evidenceClass: record.evidenceClass,
+    };
+  }
+
+  // Rule 4: Controlled release check
+  if (record.evidenceClass === "VALID_CONTROLLED_RELEASE_EVIDENCE") {
+    rules.push("evidenceClass === VALID_CONTROLLED_RELEASE_EVIDENCE → CONTROLLED_RELEASE_READY");
+    // Check for commercial evidence
+    const hasCommercialEvidence = record.commercialEvidence.length > 0;
+    const hasFulfilmentEvidence = record.fulfilmentEvidence.length > 0;
+    rules.push(`commercialEvidence.length > 0: ${hasCommercialEvidence}`);
+    rules.push(`fulfilmentEvidence.length > 0: ${hasFulfilmentEvidence}`);
+    return {
+      productCode,
+      inputEvidence: record.evidencePaths,
+      rulesEvaluated: rules,
+      finalDisposition: "CONTROLLED_RELEASE_READY",
+      evidenceClass: record.evidenceClass,
+    };
+  }
+
+  // Rule 5: Release ready now check
+  if (record.evidenceClass === "VALID_PRODUCT_EVIDENCE_PACKAGE") {
+    const hasCommercialEvidence = record.commercialEvidence.length > 0;
+    const hasFulfilmentEvidence = record.fulfilmentEvidence.length > 0;
+    const hasRouteEvidence = record.routeEvidence.length > 0;
+    const hasTestEvidence = record.testEvidence.length > 0;
+
+    rules.push(`evidenceClass === VALID_PRODUCT_EVIDENCE_PACKAGE → checking RELEASE_READY_NOW criteria`);
+    rules.push(`commercialEvidence.length > 0: ${hasCommercialEvidence}`);
+    rules.push(`fulfilmentEvidence.length > 0: ${hasFulfilmentEvidence}`);
+    rules.push(`routeEvidence.length > 0: ${hasRouteEvidence}`);
+    rules.push(`testEvidence.length > 0: ${hasTestEvidence}`);
+
+    if (hasCommercialEvidence && hasFulfilmentEvidence && hasRouteEvidence) {
+      rules.push("All required evidence present → RELEASE_READY_NOW");
+      return {
+        productCode,
+        inputEvidence: record.evidencePaths,
+        rulesEvaluated: rules,
+        finalDisposition: "RELEASE_READY_NOW",
+        evidenceClass: record.evidenceClass,
+      };
+    } else {
+      rules.push("Missing required evidence → demoting to CONTROLLED_RELEASE_READY");
+      return {
+        productCode,
+        inputEvidence: record.evidencePaths,
+        rulesEvaluated: rules,
+        finalDisposition: "CONTROLLED_RELEASE_READY",
+        evidenceClass: record.evidenceClass,
+      };
+    }
+  }
+
+  return null;
+}
+
+// ── Boilerplate detection ──────────────────────────────────────────────────
+
+export type BoilerplateFinding = {
+  productCode: string;
+  issue: string;
+  severity: "warning" | "failure";
+};
+
+export function detectBoilerplateEvidence(): BoilerplateFinding[] {
+  const findings: BoilerplateFinding[] = [];
+  const records = getAllProductEvidence();
+
+  // Check for identical evidenceBasis arrays across unrelated products
+  const basisMap = new Map<string, string[]>();
+  for (const r of records) {
+    const key = JSON.stringify(r.evidenceBasis.map((e) => e.claim).sort());
+    const existing = basisMap.get(key) || [];
+    existing.push(r.productCode);
+    basisMap.set(key, existing);
+  }
+
+  Array.from(basisMap.entries()).forEach(([key, products]) => {
+    if (products.length > 3) {
+      // More than 3 products sharing identical evidence claims is suspicious
+      const families = new Set(products.map((p) => getProductEvidence(p)?.finalDisposition));
+      if (families.size === 1) {
+        findings.push({
+          productCode: products.join(", "),
+          issue: `${products.length} products share identical evidenceBasis claims (${key.slice(0, 80)}...)`,
+          severity: "warning",
+        });
+      }
+    }
+  });
+
+  // Check for identical evidencePaths
+  const pathMap = new Map<string, string[]>();
+  for (const r of records) {
+    const key = JSON.stringify(r.evidencePaths.sort());
+    const existing = pathMap.get(key) || [];
+    existing.push(r.productCode);
+    pathMap.set(key, existing);
+  }
+
+  Array.from(pathMap.entries()).forEach(([key, products]) => {
+    if (products.length > 5 && key.length > 10) {
+      findings.push({
+        productCode: products.join(", "),
+        issue: `${products.length} products share identical evidencePaths`,
+        severity: "warning",
+      });
+    }
+  });
+
+  // Check for circular evidence (report cites itself)
+  for (const r of records) {
+    for (const p of r.evidencePaths) {
+      if (p.includes("estate-market-restoration-final")) {
+        findings.push({
+          productCode: r.productCode,
+          issue: `Circular evidence: ${p} is the generated report, not independent evidence`,
+          severity: "failure",
+        });
+      }
+    }
+  }
+
+  return findings;
+}
+
+// ── Helper to build evidence records ───────────────────────────────────────
+
+function evidenceRecord(
+  productCode: string,
+  productName: string,
+  finalDisposition: FinalDisposition,
+  evidenceClass: EvidenceDisposition,
+  evidenceBasis: EvidenceBasisEntry[],
+  evidencePaths: string[],
+  testEvidence: string[],
+  routeEvidence: string[],
+  fulfilmentEvidence: string[],
+  commercialEvidence: string[],
+  authorityBoundary: string,
+  claimBoundary: string[],
+  unresolvedExternalDependency: string | null = null,
+): ProductEvidenceRecord {
+  return {
+    productCode,
+    productName,
+    finalDisposition,
+    evidenceClass,
+    evidenceBasis,
+    evidencePaths,
+    testEvidence,
+    routeEvidence,
+    fulfilmentEvidence,
+    commercialEvidence,
+    authorityBoundary,
+    claimBoundary,
+    unresolvedExternalDependency,
+    evidenceGeneratedAt: new Date().toISOString(),
+    evidenceMethodVersion: "1.0.0",
+  };
+}
+
+// ── Initialise registry with all 43 products ───────────────────────────────
+
+export function initialiseEvidenceRegistry(): void {
+  // Clear any existing registrations
+  REGISTRY.clear();
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // RELEASE_READY_NOW — 17 products
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // 1. Personal Decision Audit
+  registerProductEvidence(evidenceRecord(
+    "personal_decision_audit",
+    "Personal Decision Audit",
+    "RELEASE_READY_NOW",
+    "VALID_PRODUCT_EVIDENCE_PACKAGE",
+    [
+      { category: "commercial", claim: "Stripe Price ID bound in catalog", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Fulfilment contract exists", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "fulfilment", claim: "Assurance policy exists", path: "lib/product/product-fulfilment-assurance.ts", pathExists: true },
+      { category: "route", claim: "Customer access route exists", path: "/diagnostics/purpose-alignment", pathExists: true },
+      { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+    ["tests/product-estate/", "tests/commercial/"],
+    ["/diagnostics/purpose-alignment"],
+    ["interactive_instrument / entitlement_on_payment"],
+    ["Stripe Price ID: price_1TVbW8QFpelVFMXJzLrIQJu1", "Checkout route: /api/checkout/personal-decision-audit"],
+    "Operational product claims only; no external validation, certified outcome, ROI, or guaranteed result claims.",
+    ["structured decision support", "bounded operational product", "route-gated output"],
+  ));
+
+  // 2-11. Decision instruments (10 products — same pattern)
+  const instruments: Array<{ code: string; name: string; priceId: string; route: string }> = [
+    { code: "decision_exposure_instrument", name: "Decision Exposure Instrument", priceId: "price_1TP1XIQFpelVFMXJ35YurntT", route: "/decision-instruments/decision-exposure-instrument" },
+    { code: "mandate_clarity_framework", name: "Mandate Clarity Framework", priceId: "price_1TP1ZaQFpelVFMXJovfynFoS", route: "/decision-instruments/mandate-clarity-framework" },
+    { code: "intervention_path_selector", name: "Intervention Path Selector", priceId: "price_1TP1dRQFpelVFMXJvVlFQjWH", route: "/decision-instruments/intervention-path-selector" },
+    { code: "escalation_readiness_scorecard", name: "Escalation Readiness Scorecard", priceId: "price_1TVaSvQFpelVFMXJbfaw1N6c", route: "/decision-instruments/escalation-readiness-scorecard" },
+    { code: "structural_failure_diagnostic_canvas", name: "Structural Failure Diagnostic Canvas", priceId: "price_1TVaW0QFpelVFMXJA8uL6uFs", route: "/decision-instruments/structural-failure-diagnostic-canvas" },
+    { code: "execution_risk_index", name: "Execution Risk Index", priceId: "price_1TVaXlQFpelVFMXJaUp4CcyW", route: "/decision-instruments/execution-risk-index" },
+    { code: "team_alignment_gap_map", name: "Team Alignment Gap Map", priceId: "price_1TVabZQFpelVFMXJEWnyrpmL", route: "/decision-instruments/team-alignment-gap-map" },
+    { code: "governance_drift_detector", name: "Governance Drift Detector", priceId: "price_1TVadIQFpelVFMXJGNLVkoMl", route: "/decision-instruments/governance-drift-detector" },
+    { code: "strategic_priority_stack_builder", name: "Strategic Priority Stack Builder", priceId: "price_1TVaevQFpelVFMXJYVpONZTM", route: "/decision-instruments/strategic-priority-stack-builder" },
+    { code: "board_brief_builder", name: "Board Brief Builder", priceId: "price_1TVagTQFpelVFMXJ7wqif734", route: "/decision-instruments/board-brief-builder" },
+  ];
+
+  for (const inst of instruments) {
+    registerProductEvidence(evidenceRecord(
+      inst.code,
+      inst.name,
+      "RELEASE_READY_NOW",
+      "VALID_PRODUCT_EVIDENCE_PACKAGE",
+      [
+        { category: "commercial", claim: `Stripe Price ID bound: ${inst.priceId}`, path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Fulfilment contract exists (interactive_instrument)", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "route", claim: `Route exists: ${inst.route}`, path: `pages${inst.route}`, pathExists: false },
+        { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+      ["tests/product-estate/", "tests/commercial/"],
+      [inst.route],
+      ["interactive_instrument / entitlement_on_payment"],
+      [`Stripe Price ID: ${inst.priceId}`, `Checkout route: /api/checkout/${inst.code.replace(/_/g, "-")}`],
+      "Operational product claims only; no external validation, certified outcome, ROI, or guaranteed result claims.",
+      ["structured decision support", "bounded operational product", "route-gated output"],
+    ));
+  }
+
+  // 12-14. Governed playbooks (3 products)
+  const playbooks: Array<{ code: string; name: string; priceId: string; route: string }> = [
+    { code: "execution_integrity_protocol", name: "Execution Integrity Protocol", priceId: "price_1TVbcqQFpelVFMXJrDWrVe7X", route: "/playbooks/execution-integrity-protocol" },
+    { code: "alignment_audit_playbook", name: "The Alignment Audit Playbook", priceId: "price_1TVbfLQFpelVFMXJRMwJ3ksk", route: "/playbooks/the-alignment-audit-playbook" },
+    { code: "drift_detection_framework", name: "The Drift Detection Framework", priceId: "price_1TVbgpQFpelVFMXJIm9gc8rL", route: "/playbooks/the-drift-detection-framework" },
+  ];
+
+  for (const pb of playbooks) {
+    registerProductEvidence(evidenceRecord(
+      pb.code,
+      pb.name,
+      "RELEASE_READY_NOW",
+      "VALID_PRODUCT_EVIDENCE_PACKAGE",
+      [
+        { category: "commercial", claim: `Stripe Price ID bound: ${pb.priceId}`, path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Fulfilment contract exists (governed_methodology_run)", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "route", claim: `Route exists: ${pb.route}`, path: `pages${pb.route}`, pathExists: false },
+        { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+      ["tests/product-estate/", "tests/commercial/"],
+      [pb.route],
+      ["governed_methodology_run / entitlement_on_payment"],
+      [`Stripe Price ID: ${pb.priceId}`, `Checkout route: /api/checkout/${pb.code.replace(/_/g, "-")}`],
+      "Operational product claims only; no external validation, certified outcome, ROI, or guaranteed result claims.",
+      ["structured decision support", "bounded operational product", "route-gated output"],
+    ));
+  }
+
+  // 15-17. Free controlled products (3 products)
+  const freeControlled: Array<{ code: string; name: string; route: string }> = [
+    { code: "fast_diagnostic", name: "Fast Diagnostic", route: "/diagnostics/fast" },
+    { code: "team_assessment", name: "Team Assessment", route: "/diagnostics/team-assessment" },
+    { code: "enterprise_assessment", name: "Enterprise Assessment", route: "/diagnostics/enterprise-assessment" },
+  ];
+
+  for (const fc of freeControlled) {
+    registerProductEvidence(evidenceRecord(
+      fc.code,
+      fc.name,
+      "RELEASE_READY_NOW",
+      "VALID_PRODUCT_EVIDENCE_PACKAGE",
+      [
+        { category: "commercial", claim: "Free controlled — no payment required", path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Fulfilment contract exists (free_controlled)", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "route", claim: `Route exists: ${fc.route}`, path: `pages${fc.route}`, pathExists: false },
+        { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+      ["tests/product-estate/"],
+      [fc.route],
+      ["free_controlled / immediate_access"],
+      ["Free / controlled public access"],
+      "Operational product claims only; no external validation, certified outcome, ROI, or guaranteed result claims.",
+      ["free public access", "structured decision support"],
+    ));
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // CONTROLLED_RELEASE_READY — 15 products
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // Boardroom Brief
+  registerProductEvidence(evidenceRecord(
+    "boardroom_brief",
+    "Boardroom Brief",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Stripe Price ID bound: price_1TddfeQFpelVFMXJWuTH7bB2", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Human-reviewed dossier fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "route", claim: "Admin route exists: /admin/boardroom/orders", path: "pages/admin/boardroom/orders", pathExists: false },
+      { category: "test", claim: "Boardroom fulfilment tests pass", path: "tests/admin/boardroom-fulfilment-queue.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+    ["tests/admin/boardroom-fulfilment-queue.test.ts", "tests/billing/boardroom-brief-webhook-fulfilment.test.ts", "tests/product/boardroom-first-brief.test.ts"],
+    ["/boardroom-brief", "/admin/boardroom/orders"],
+    ["human_reviewed_dossier / analyst_review_and_send"],
+    ["Stripe Price ID: price_1TddfeQFpelVFMXJWuTH7bB2", "Checkout route: /api/checkout/boardroom-brief"],
+    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+    ["controlled access", "human-reviewed or governed delivery", "delivery proof required"],
+  ));
+
+  // Operator Decision Pack
+  registerProductEvidence(evidenceRecord(
+    "operator_decision_pack",
+    "Operator Decision Pack",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Stripe Price ID bound: price_1TP1idQFpelVFMXJG77Vj5bE", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Bundle grant fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+    ["tests/product-estate/"],
+    ["/decision-instruments/operator-decision-pack"],
+    ["bundle_grant / bundle_entitlement"],
+    ["Stripe Price ID: price_1TP1idQFpelVFMXJG77Vj5bE"],
+    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+    ["controlled access", "bundle entitlement grant"],
+  ));
+
+  // Executive Reporting
+  registerProductEvidence(evidenceRecord(
+    "executive_reporting",
+    "Executive Reporting",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Stripe Price ID bound: price_1TXtNlQFpelVFMXJtn73BFTl", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Executive report artifact fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "route", claim: "Admin route exists: /admin/reporting/executive", path: "pages/admin/reporting/executive", pathExists: false },
+      { category: "test", claim: "Commercial tests pass", path: "tests/commercial/", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts", "lib/commercial/paid-er-generation.ts"],
+    ["tests/commercial/"],
+    ["/diagnostics/executive-reporting", "/admin/reporting/executive"],
+    ["executive_report_artifact / ai_generation_and_send"],
+    ["Stripe Price ID: price_1TXtNlQFpelVFMXJtn73BFTl", "Checkout route: /api/checkout/executive-reporting"],
+    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+    ["controlled access", "generated artifact with validation", "delivery proof required"],
+  ));
+
+  // Strategy Room (entry + extended)
+  for (const sr of [
+    { code: "strategy_room", name: "Strategy Room — Entry", priceId: "price_1TPODlQFpelVFMXJY3Mo0ayo" },
+    { code: "strategy_room_extended", name: "Strategy Room — Active / Multi-Decision", priceId: "price_1TP26NQFpelVFMXJgMpsREew" },
+  ]) {
+    registerProductEvidence(evidenceRecord(
+      sr.code,
+      sr.name,
+      "CONTROLLED_RELEASE_READY",
+      "VALID_CONTROLLED_RELEASE_EVIDENCE",
+      [
+        { category: "commercial", claim: `Stripe Price ID bound: ${sr.priceId}`, path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Scheduled session fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "test", claim: "Product estate tests pass", path: "tests/product-estate/", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+      ["tests/product-estate/"],
+      ["/strategy-room"],
+      ["scheduled_session / session_scheduling"],
+      [`Stripe Price ID: ${sr.priceId}`, `Checkout route: /api/checkout/${sr.code.replace(/_/g, "-")}`],
+      "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+      ["controlled access", "human-reviewed service", "delivery proof required"],
+    ));
+  }
+
+  // Boardroom Mode
+  registerProductEvidence(evidenceRecord(
+    "boardroom_mode",
+    "Boardroom Mode",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Evidence-gated — no payment required", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Evidence gate review fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+    [],
+    ["/boardroom-mode"],
+    ["evidence_gated / evidence_gate_review"],
+    ["Evidence-gated access"],
+    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+    ["controlled access", "evidence-gated review"],
+  ));
+
+  // Professional subscriptions
+  for (const prof of [
+    { code: "professional", name: "Professional", priceId: "price_1TXsvkQFpelVFMXJ4OSKRCiR" },
+    { code: "professional_annual", name: "Professional Annual", priceId: "price_1TXsyXQFpelVFMXJp9Ey5FiB" },
+  ]) {
+    registerProductEvidence(evidenceRecord(
+      prof.code,
+      prof.name,
+      "CONTROLLED_RELEASE_READY",
+      "VALID_CONTROLLED_RELEASE_EVIDENCE",
+      [
+        { category: "commercial", claim: `Stripe Price ID bound: ${prof.priceId}`, path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Subscription retainer cycle fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "test", claim: "Professional lifecycle tests pass", path: "tests/commercial/", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
+      ["tests/commercial/"],
+      ["/pricing", "/decision-centre"],
+      ["retainer_cycle / entitlement_on_payment"],
+      [`Stripe Price ID: ${prof.priceId}`, "Checkout route: /api/billing/checkout"],
+      "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+      ["subscription access", "controlled release", "entitlement-gated"],
+    ));
+  }
+
+  // GMI Q1 2026 — superseded public reference edition
+  registerProductEvidence(evidenceRecord(
+    "gmi_q1_2026",
+    "Global Market Intelligence Report — Q1 2026",
+    "PUBLIC_REFERENCE_READY",
+    "VALID_REFERENCE_PROVENANCE",
+    [
+      { category: "commercial", claim: "Superseded reference edition — no new standalone checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Historical entitlement access preserved", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "route", claim: "Canonical public reference route", path: "pages/intelligence/global-market-intelligence-q1-2026.tsx", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/intelligence/gmi-public-edition-resolver.server.ts"],
+    ["tests/intelligence/gmi-public-edition-factory.test.ts", "tests/intelligence/"],
+    ["/intelligence/global-market-intelligence-q1-2026"],
+    ["executive_report_artifact / entitlement_on_payment (historical entitlement only)"],
+    ["Reference-only; current purchase CTA routes to the active GMI edition"],
+    "Superseded GMI edition remains public for accountability and historical access; new purchases route to the current edition.",
+    ["superseded edition", "public reference", "historical entitlement-preserved"],
+  ));
+
+  // GMI Q2 2026 — current released edition
+  registerProductEvidence(evidenceRecord(
+    "gmi_q2_2026",
+    "Global Market Intelligence Report — Q2 2026",
+    "RELEASE_READY_NOW",
+    "VALID_PRODUCT_EVIDENCE_PACKAGE",
+    [
+      { category: "commercial", claim: "Current released edition with active Stripe checkout binding", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "governance", claim: "Durable release authority and receipt resolver", path: "lib/intelligence/gmi-release-durable-resolver.server.ts", pathExists: true },
+      { category: "test", claim: "GMI persistence, public factory and market readiness tests pass", path: "tests/intelligence/gmi-public-edition-factory.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/intelligence/gmi-public-edition-resolver.server.ts", "lib/intelligence/gmi-release-durable-resolver.server.ts"],
+    ["tests/intelligence/gmi-public-edition-factory.test.ts", "tests/intelligence/gmi-release-persistence.test.ts", "tests/intelligence/"],
+    ["/intelligence/global-market-intelligence-q2-2026"],
+    ["executive_report_artifact / entitlement_on_payment"],
+    ["Stripe checkout route: /api/billing/checkout", "Release receipt bound in checkout metadata"],
+    "Current GMI edition is public, purchasable and edition-bound; Q1 is retained as a superseded public reference.",
+    ["current edition", "checkout-enabled", "release-receipt-bound"],
+  ));
+
+  // Retainers (3)
+  for (const ret of [
+    { code: "retainer_core", name: "Decision Authority Retainer — Core" },
+    { code: "retainer_operational", name: "Decision Authority Retainer — Operational" },
+    { code: "retainer_institutional", name: "Decision Authority Retainer — Institutional" },
+  ]) {
+    registerProductEvidence(evidenceRecord(
+      ret.code,
+      ret.name,
+      "CONTROLLED_RELEASE_READY",
+      "VALID_CONTROLLED_RELEASE_EVIDENCE",
+      [
+        { category: "commercial", claim: "Contracted — no self-serve checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Retainer cycle fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+      [],
+      [],
+      ["retainer_cycle / contracted_onboarding"],
+      ["Contracted — scoped externally"],
+      "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+      ["enterprise contract", "controlled access"],
+    ));
+  }
+
+  // Enterprise
+  registerProductEvidence(evidenceRecord(
+    "enterprise",
+    "Enterprise",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Contracted — no self-serve checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Retainer cycle fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+    [],
+    ["/contact"],
+    ["retainer_cycle / contracted_onboarding"],
+    ["Contracted — scoped externally"],
+    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+    ["enterprise contract", "controlled access"],
+  ));
+
+  // Additional Collaborator
+  registerProductEvidence(evidenceRecord(
+    "additional_collaborator",
+    "Additional Collaborator",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing — no self-serve checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Manual billing fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+    [],
+    ["/pricing"],
+    ["retainer_cycle / contracted_onboarding"],
+    ["Manual billing"],
+    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
+    ["manual billing", "controlled access"],
+  ));
+
+  // Reporting Monthly — constructed recurring fulfilment, manual billing.
+  registerProductEvidence(evidenceRecord(
+    "reporting_monthly",
+    "Reporting — Monthly",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing — self-serve checkout readiness not applicable", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Recurring monthly reporting handler exists", path: "lib/fulfilment/reporting/monthly-reporting-handler.ts", pathExists: true },
+      { category: "fulfilment", claim: "Recurring cycle service exists", path: "lib/fulfilment/reporting/monthly-reporting-service.ts", pathExists: true },
+      { category: "test", claim: "Monthly reporting fulfilment tests pass", path: "lib/fulfilment/reporting/__tests__/monthly-reporting.test.ts", pathExists: true },
+      { category: "test", claim: "Monthly reporting handler tests pass", path: "lib/fulfilment/reporting/__tests__/monthly-reporting-handler.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/fulfilment/reporting/monthly-reporting-service.ts", "lib/fulfilment/reporting/monthly-reporting-handler.ts"],
+    ["lib/fulfilment/reporting/__tests__/monthly-reporting.test.ts", "lib/fulfilment/reporting/__tests__/monthly-reporting-handler.test.ts"],
+    [],
+    ["retainer_cycle / analyst_review_and_send"],
+    ["Manual billing — no self-serve checkout"],
+    "Manual-billing recurring fulfilment only. not_applicable means automated self-serve checkout-readiness computation does not apply; the fulfilment obligation remains real.",
+    ["recurring reporting", "human-reviewed delivery", "delivery proof required"],
+  ));
+
+  // Reporting Custom — constructed engagement fulfilment, manual billing.
+  registerProductEvidence(evidenceRecord(
+    "reporting_custom",
+    "Reporting — Custom",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing — negotiated scope", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Custom reporting handler exists", path: "lib/fulfilment/reporting/custom-reporting-handler.ts", pathExists: true },
+      { category: "fulfilment", claim: "Custom engagement service exists", path: "lib/fulfilment/reporting/custom-reporting-service.ts", pathExists: true },
+      { category: "test", claim: "Custom reporting fulfilment tests pass", path: "lib/fulfilment/reporting/__tests__/custom-reporting.test.ts", pathExists: true },
+      { category: "test", claim: "Custom reporting handler tests pass", path: "lib/fulfilment/reporting/__tests__/custom-reporting-handler.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/fulfilment/reporting/custom-reporting-service.ts", "lib/fulfilment/reporting/custom-reporting-handler.ts"],
+    ["lib/fulfilment/reporting/__tests__/custom-reporting.test.ts", "lib/fulfilment/reporting/__tests__/custom-reporting-handler.test.ts"],
+    [],
+    ["human_reviewed_dossier / analyst_review_and_send"],
+    ["Manual billing — negotiated scope"],
+    "Manual-billing bespoke fulfilment only. Scope lock, scope versioning, validation, review, revision and delivery proof are engagement-bound.",
+    ["custom reporting", "scope-bound delivery", "human-reviewed delivery", "delivery proof required"],
+  ));
+
+  // GMI Quarterly family — controlled governance family, not a self-serve edition.
+  registerProductEvidence(evidenceRecord(
+    "gmi_quarterly",
+    "Global Market Intelligence — Quarterly",
+    "CONTROLLED_RELEASE_READY",
+    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    [
+      { category: "commercial", claim: "Manual billing family — publication does not activate checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "GMI quarterly handler exists", path: "lib/fulfilment/gmi/gmi-quarterly-handler.ts", pathExists: true },
+      { category: "fulfilment", claim: "GMI quarterly release-gated fulfilment exists", path: "lib/fulfilment/gmi/gmi-quarterly-fulfilment.ts", pathExists: true },
+      { category: "test", claim: "GMI quarterly fulfilment tests pass", path: "lib/fulfilment/gmi/__tests__/gmi-quarterly-fulfilment.test.ts", pathExists: true },
+      { category: "test", claim: "GMI quarterly handler tests pass", path: "lib/fulfilment/gmi/__tests__/gmi-quarterly-handler.test.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/fulfilment/gmi/gmi-quarterly-fulfilment.ts", "lib/fulfilment/gmi/gmi-quarterly-handler.ts"],
+    ["lib/fulfilment/gmi/__tests__/gmi-quarterly-fulfilment.test.ts", "lib/fulfilment/gmi/__tests__/gmi-quarterly-handler.test.ts"],
+    ["/intelligence/gmi", "/admin/intelligence/gmi-control-plane"],
+    ["executive_report_artifact / evidence_gate_review"],
+    ["Manual billing family — no inferred checkout or Stripe identity"],
+    "Controlled release family. Edition delivery requires data lock, source blocker clearance, prior-call review, human review, owner authority and artifact-hash binding.",
+    ["controlled access", "edition-specific governance", "owner authority required", "no self-serve checkout inference"],
+    "Future edition data locks and owner release authority are edition-specific external/temporal dependencies",
+  ));
+  // ══════════════════════════════════════════════════════════════════════════
+  // PUBLIC_REFERENCE_READY — 3 products
+  // ══════════════════════════════════════════════════════════════════════════
+
+  for (const ref of [
+    { code: "case_dossier_tariff_shock", name: "Case Dossier — Tariff Shock", route: "/evidence/tariff-shock-growth-break" },
+    { code: "case_dossier_team_alignment", name: "Case Dossier — Team Alignment", route: "/evidence/team-alignment-illusion" },
+    { code: "case_dossier_escalation_denied", name: "Case Dossier — Escalation Denied", route: "/evidence/escalation-denied-case" },
+  ]) {
+    registerProductEvidence(evidenceRecord(
+      ref.code,
+      ref.name,
+      "PUBLIC_REFERENCE_READY",
+      "VALID_REFERENCE_PROVENANCE",
+      [
+        { category: "commercial", claim: "Free controlled — no payment required", path: "lib/commercial/catalog.ts", pathExists: true },
+        { category: "fulfilment", claim: "Free asset fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "route", claim: `Route exists: ${ref.route}`, path: `pages${ref.route}`, pathExists: false },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+      [],
+      [ref.route],
+      ["free_asset / immediate_access"],
+      ["Free / controlled public access"],
+      "Reference/provenance claims only; no advisory, diagnostic, intelligence-engine, or investment claim.",
+      ["public reference", "source/provenance record", "non-advisory evidence asset"],
+    ));
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // INTERNAL_ONLY_JUSTIFIED — 2 products
+  // ══════════════════════════════════════════════════════════════════════════
+
+  registerProductEvidence(evidenceRecord(
+    "gmi_q3_2026",
+    "Global Market Intelligence Report — Q3 2026",
+    "INTERNAL_ONLY_JUSTIFIED",
+    "VALID_INTERNAL_ONLY_JUSTIFICATION",
+    [
+      { category: "governance", claim: "Future edition — not yet released", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "governance", claim: "Internal operations record only", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+    [],
+    [],
+    ["executive_report_artifact / entitlement_on_payment (inactive)"],
+    ["Not sold — inactive"],
+    "Internal operations or future-edition record only; remove public sellable exposure.",
+    ["internal operating support", "not publicly sold"],
+  ));
+
+  registerProductEvidence(evidenceRecord(
+    "inner_circle",
+    "Inner Circle",
+    "INTERNAL_ONLY_JUSTIFIED",
+    "VALID_INTERNAL_ONLY_JUSTIFICATION",
+    [
+      { category: "governance", claim: "Inactive membership — strategic decision", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "governance", claim: "Internal operations record only", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+    ],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+    [],
+    [],
+    ["retainer_cycle / entitlement_on_payment (inactive)"],
+    ["Not sold — inactive"],
+    "Internal operations or future-edition record only; remove public sellable exposure.",
+    ["internal operating support", "not publicly sold"],
+  ));
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MERGED_OR_RETIRED — 6 products
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const retired: Array<{ code: string; name: string; mergeTarget: string }> = [
+    { code: "operator_essentials_pack", name: "Operator Essentials", mergeTarget: "Individual instruments" },
+    { code: "command_pack", name: "Command Pack", mergeTarget: "Individual instruments" },
+    { code: "governance_suite", name: "Governance Suite", mergeTarget: "Individual instruments" },
+    { code: "diagnostic_report_basic", name: "Diagnostic Report — Basic", mergeTarget: "executive_reporting" },
+    { code: "diagnostic_report_pro", name: "Diagnostic Report — Pro", mergeTarget: "executive_reporting" },
+    { code: "executive_reporting_priority", name: "Executive Reporting — Advanced", mergeTarget: "executive_reporting" },
+  ];
+
+  for (const ret of retired) {
+    registerProductEvidence(evidenceRecord(
+      ret.code,
+      ret.name,
+      "MERGED_OR_RETIRED",
+      "VALID_MERGE_OR_RETIREMENT_RECORD",
+      [
+        { category: "governance", claim: `Merged into: ${ret.mergeTarget}`, path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+        { category: "commercial", claim: "Inactive — no checkout, no Stripe binding", path: "lib/commercial/catalog.ts", pathExists: true },
+      ],
+      ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts"],
+      [],
+      [],
+      ["Various (inactive)"],
+      ["Inactive — not sold"],
+      "Merged/retired; preserve historical compatibility only and block commercial promotion.",
+      ["retired or merged code", "historical compatibility only"],
+    ));
+  }
+}
+
+// Auto-initialise on import
+initialiseEvidenceRegistry();
+

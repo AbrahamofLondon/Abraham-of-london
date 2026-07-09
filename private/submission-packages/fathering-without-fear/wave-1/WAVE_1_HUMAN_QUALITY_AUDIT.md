@@ -8,7 +8,7 @@ The Wave 1 package is substantially submission-ready after selective correction.
 
 Owner decisions remain before live submission:
 
-- Complete specialist legal review for Ch.17 before any wide submission.
+- Complete specialist legal review for Chapters 4, 13, 17, 18, 19, 22, 25, and 26 before any wide submission.
 - Run same-day live checks for each agent's open/closed status and submission route.
 - Confirm whether the current reusable query template should remain as a template with placeholders or be replaced by only agent-specific query files.
 
@@ -76,12 +76,12 @@ Wave 1 agent folders and exports:
 
 | Agent | Agency | Submission route | Required materials | Actual materials | Query/email | Synopsis/proposal | Bio | Sample | Special instructions | Outstanding defects | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Nicola Chang | David Higham Associates | Email to DHA submissions address | Cover/query letter + first 50 pages, Word docs | Cover DOCX + calibrated first-50 DOCX | Present, revised, DOCX regenerated | Not required | In query package | 50 rendered pages | Word only; no PDF | Same-day open-status check; Ch.17 legal review before send | PASS WITH OWNER DECISION |
+| Nicola Chang | David Higham Associates | Email to DHA submissions address | Cover/query letter + first 50 pages, Word docs | Cover DOCX + calibrated first-50 DOCX | Present, revised, DOCX regenerated | Not required | In query package | 50 rendered pages | Word only; no PDF | Same-day open-status check; legal review before send for Chapters 4, 13, 17, 18, 19, 22, 25, and 26 | PASS WITH OWNER DECISION |
 | Kate Evans | Peters Fraser & Dunlop | Email | Query/cover letter + chapter outline + three sample chapters | Cover DOCX + outline DOCX + Chs.1-3 sample DOCX | Present, revised, DOCX regenerated | Chapter outline present | In package | Chs.1-3, chapter-targeted | Do not query another PFD agent simultaneously | Same-day route check | PASS |
-| Elise Dillsworth | Elise Dillsworth Agency | Email | Cover letter/proposal/chapter outline/30pp sample | Proposal DOCX regenerated + outline + calibrated 30pp sample | Present, revised | Proposal present and corrected to 25 chapters | In proposal | 30 rendered pages | Three-month no-response rule | Same-day open-status check; legal review before wide submission | PASS WITH OWNER DECISION |
+| Elise Dillsworth | Elise Dillsworth Agency | Email | Cover letter/proposal/chapter outline/30pp sample | Proposal DOCX regenerated + outline + calibrated 30pp sample | Present, revised | Proposal present and corrected to 27 chapters | In proposal | 30 rendered pages | Three-month no-response rule | Same-day open-status check; legal review before wide submission | PASS WITH OWNER DECISION |
 | Michael Bourret | Dystel, Goderich & Bourret | QueryManager | Query + proposal summary + sample chapter | Paste-ready query/bio/synopsis/sample guidance | Present, revised | Condensed synopsis present | Present | Ch.1 sample guidance | QueryManager only; do not email | Same-day QueryManager route check | PASS |
 | Reiko Davis | DeFiore & Company | Email body | Query + bio + first 20 pages pasted inline | Paste-ready query, bio, first-20 text | Present | Not required | Present | 20 rendered pages equivalent | No attachments | Same-day open-status check; remove internal notes before actual paste if assembling manually | PASS |
-| Sarah Levitt | Aevitas Creative Management | Aevitas form | Query + bio + 50 pages | Form-ready query/bio + calibrated paste block | Present, revised | Not required | Corrected to 25 chapters | 50 rendered pages equivalent | One Aevitas agent at a time | Same-day form availability check | PASS |
+| Sarah Levitt | Aevitas Creative Management | Aevitas form | Query + bio + 50 pages | Form-ready query/bio + calibrated paste block | Present, revised | Not required | Corrected to 27 chapters | 50 rendered pages equivalent | One Aevitas agent at a time | Same-day form availability check | PASS |
 
 ## AI-Scent Risk Scores
 
@@ -92,7 +92,7 @@ Wave 1 agent folders and exports:
 | Elise query/proposal | MEDIUM | LOW | Reduced institutional praise and clarified that legal material stays in the background. |
 | Michael query/bio | MEDIUM | LOW | Removed "ideal first American agent" overclaim; tightened bio. |
 | Reiko query/paste block | LOW-MEDIUM | LOW | Removed internal calibration note from outward paste block. |
-| Sarah query/bio/paste block | MEDIUM | LOW | Replaced "right home" and corrected 24-chapter bio to 25 chapters. |
+| Sarah query/bio/paste block | MEDIUM | LOW | Replaced "right home" and corrected 24-chapter bio to 27 chapters. |
 | Core synopsis files | LOW | LOW | Specific, restrained, includes Ch.20 naturally. |
 | Legal/privacy note | LOW | LOW | Internal/legal-facing, reduces risk without inviting adjudication. |
 | Current reusable query template | MEDIUM | MEDIUM | Retained as template; not outward-facing without agent-specific replacement. |
@@ -140,25 +140,25 @@ Draft email bodies are short and professional. Nicola, Elise, and form/email gui
 
 PASS.
 
-The one-page and long synopses include Ch.20 naturally, preserve the 25-chapter structure, and keep the legal material understandable without turning the synopsis into a case chronology.
+The one-page and long synopses include Ch.20 naturally, preserve the 27-chapter structure, and keep the legal material understandable without turning the synopsis into a case chronology.
 
 ## Author Bio Result
 
 PASS.
 
-The bio is restrained and credible. One stale Sarah-specific 24-chapter bio reference was corrected to 25 chapters.
+The bio is restrained and credible. One stale Sarah-specific 24-chapter bio reference was corrected to 27 chapters.
 
 ## Legal / Privacy Note Result
 
 PASS WITH OWNER DECISION.
 
-The legal/privacy note is appropriately cautious and internal-facing. It protects the child, avoids sealed detail, and flags Ch.17 and two Ch.21 attachment-language references for specialist review. Owner decision remains: do not send widely before specialist legal review if the package will include legally sensitive chapters or full manuscript material.
+The legal/privacy note is appropriately cautious and internal-facing. It protects the child, avoids sealed detail, and flags Chapters 4, 13, 17, 18, 19, 22, 25, 26, and two Ch.21 attachment-language references for specialist review. Owner decision remains: do not send widely before specialist legal review if the package will include legally sensitive chapters or full manuscript material.
 
 ## Proposal / Positioning Result
 
 PASS.
 
-The nonfiction proposal source and Elise proposal export were corrected to the 25-chapter / six-movement structure and no longer contain the old first-50 page estimate. Positioning remains literary and commercial without startup-deck certainty.
+The nonfiction proposal source and Elise proposal export were corrected to the 27-chapter / six-movement structure and no longer contain the old first-50 page estimate. Positioning remains literary and commercial without startup-deck certainty.
 
 ## Full-Scope Completeness Result
 

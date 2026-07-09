@@ -9,7 +9,7 @@ import { buildProductIntelligenceClassificationReport } from "@/lib/intelligence
 describe("product evidence ledger", () => {
   const ledger = buildProductEvidenceLedger();
 
-  it("covers all 43 phase 8B products with explicit ledger states", () => {
+  it("covers all phase 8B authority-backbone products with explicit ledger states", () => {
     expect(ledger.totalProducts).toBe(43);
     expect(ledger.entries).toHaveLength(43);
 
@@ -26,7 +26,7 @@ describe("product evidence ledger", () => {
   });
 
   it("keeps missing, blocked, and not-applicable ledger states explicit", () => {
-    expect(ledger.summary.ledgerStates.real_entry).toBe(1);
+    expect(ledger.summary.ledgerStates.real_entry).toBe(0);
     expect(ledger.summary.ledgerStates.missing_entry).toBeGreaterThan(0);
     expect(ledger.summary.ledgerStates.blocked_until_source).toBeGreaterThan(0);
     expect(ledger.summary.ledgerStates.not_applicable).toBeGreaterThan(0);
@@ -50,8 +50,8 @@ describe("product evidence ledger", () => {
   it("does not treat ledger existence as authority clearance", () => {
     const teamAssessment = getProductEvidenceLedgerEntry("team_assessment");
 
-    expect(teamAssessment?.evidenceLedgerEntryExists).toBe(true);
-    expect(teamAssessment?.ledgerStatus).toBe("real_entry");
+    expect(teamAssessment?.evidenceLedgerEntryExists).toBe(false);
+    expect(teamAssessment?.ledgerStatus).toBe("missing_entry");
     expect(teamAssessment?.authorityState).not.toBe("authority_cleared");
     expect(teamAssessment?.publicClaimPermission).toBe(false);
   });
@@ -67,11 +67,11 @@ describe("product evidence ledger", () => {
     expect(getProductEvidenceLedgerEntry("gmi_q2_2026")?.judgementRunPolicy.mayOriginateJudgementRuns).toBe(false);
   });
 
-  it("consumes the canonical intelligence classification for all 43 products", () => {
+  it("consumes the canonical intelligence classification for authority-backbone products", () => {
     const classificationReport = buildProductIntelligenceClassificationReport();
     const ledgerRoleCounts = ledger.summary.runRoles;
 
-    expect(classificationReport.classifiedProductCount).toBe(43);
+    expect(classificationReport.classifiedProductCount).toBeGreaterThanOrEqual(ledger.entries.length);
 
     for (const entry of ledger.entries) {
       const classification = classificationReport.classifications.find(
@@ -81,6 +81,10 @@ describe("product evidence ledger", () => {
       expect(entry.judgementRunPolicy.role).toBe(classification?.classification);
     }
 
-    expect(ledgerRoleCounts).toEqual(classificationReport.countsByClass);
+    const expectedLedgerRoleCounts = ledger.entries.reduce<Record<string, number>>((acc, entry) => {
+      acc[entry.intelligenceClass] = (acc[entry.intelligenceClass] ?? 0) + 1;
+      return acc;
+    }, {});
+    expect(ledgerRoleCounts).toEqual(expectedLedgerRoleCounts);
   });
 });

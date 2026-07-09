@@ -63,7 +63,7 @@ I'm writing to you because your eclectic nonfiction range — memoir, history, p
 
 ## Peter Straus — RCW Literary Agency (UK)
 
-I am writing to you because RCW's reputation for discovering and nurturing new literary voices is precisely the context in which this debut memoir belongs. *Fathering Without Fear* is a compressed, formally serious literary memoir — 25 chapters, each a closed pressure chamber — about a Black Nigerian-British man's reckoning with inheritance, fatherhood, faith, and the cost of refusing to disappear. The agency's long record of representing literary work that takes formal risks and moral seriousness seriously made it essential to approach.
+I am writing to you because RCW's reputation for discovering and nurturing new literary voices is precisely the context in which this debut memoir belongs. *Fathering Without Fear* is a compressed, formally serious literary memoir — 27 chapters, each a closed pressure chamber — about a Black Nigerian-British man's reckoning with inheritance, fatherhood, faith, and the cost of refusing to disappear. The agency's long record of representing literary work that takes formal risks and moral seriousness seriously made it essential to approach.
 
 ---
 

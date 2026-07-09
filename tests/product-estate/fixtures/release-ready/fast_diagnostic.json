@@ -1,0 +1,9 @@
+{
+  "productCode": "fast_diagnostic",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

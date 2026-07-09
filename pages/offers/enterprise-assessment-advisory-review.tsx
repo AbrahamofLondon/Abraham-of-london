@@ -41,14 +41,14 @@ const DEFAULT_OFFER: EvidenceLimitedOffer = {
     "It cannot claim restored authority, external proof, or outcome assurance.",
     "It cannot replace formal due diligence, legal advice, audit, or regulated professional review.",
   ],
-  price: "GBP 450 to GBP 950 depending on scope",
+  price: "Manual scope confirmation",
   timeline: "Initial review within 2 business days after intake. Written advisory note normally delivered within 5 business days after boundary acceptance and payment confirmation.",
   manualFulfilmentNote:
     "This offer uses assisted billing. An operator confirms scope, sends the intake pack, records boundary acceptance, issues a manual invoice or payment link, and completes delivery through the fulfilment checklist.",
   ctas: [
     {
-      label: "Buy now",
-      href: "mailto:info@abrahamoflondon.org?subject=Buy%20Enterprise%20Assessment%20Advisory%20Review&body=I%20want%20to%20purchase%20Enterprise%20Assessment%20Advisory%20Review.%20Please%20confirm%20scope%20and%20send%20manual%20payment%20instructions.",
+      label: "Request scope",
+      href: "mailto:info@abrahamoflondon.org?subject=Enterprise%20Assessment%20Advisory%20Review%20Scope&body=Please%20confirm%20scope%2C%20boundary%2C%20and%20manual%20fulfilment%20steps%20for%20Enterprise%20Assessment%20Advisory%20Review.",
       kind: "primary",
       icon: "mail",
     },
@@ -77,9 +77,9 @@ const DEFAULT_OFFER: EvidenceLimitedOffer = {
         "Prepare the decision context, stakeholder map, deadline, available evidence, constraints, prior attempts, options, and known consequence of delay.",
     },
     {
-      question: "Why is the price a range?",
+      question: "How is scope confirmed?",
       answer:
-        "The price depends on the amount of material submitted, whether human review is required, and whether the output is a short advisory note or a broader review memo.",
+        "Scope is confirmed by an operator before any billing or delivery commitment is made.",
     },
     {
       question: "Can this lead to deeper work?",
@@ -116,7 +116,7 @@ export default function EnterpriseAssessmentAdvisoryReviewOffer() {
       cannotClaim: governance.forbiddenClaims,
       ctas: DEFAULT_OFFER.ctas.filter((cta) => {
         // Filter out "Buy now" CTA if checkout is not allowed
-        if (cta.label === "Buy now" && !checkout.allowed) {
+        if (cta.label === "Request scope" && !manualFulfilment.allowed) {
           return false;
         }
         return true;

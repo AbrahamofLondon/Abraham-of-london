@@ -1,0 +1,9 @@
+{
+  "productCode": "governance_drift_detector",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

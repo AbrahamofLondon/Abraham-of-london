@@ -7,7 +7,7 @@ Phase 3.5 has converted this from a pending worksheet into a deterministic decis
 ## Summary
 
 - Unresolved groups: 0
-- Resolved decisions: 83
+- Resolved decisions: 84
 - Archive target for retired binaries: `/public/_archive/pdfs/`
 - Protected folders pending route-level audit: `/vault`, `/resources`, `/prints`, `/lexicon`
 
@@ -48,6 +48,7 @@ No unresolved canonical decisions remain.
 - frontier-resilience-when-growth-hides-breakdown: canonical -> /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-growth-hides-breakdown.pdf.)
 - frontier-resilience-when-recovery-needs-governance: canonical -> /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-recovery-needs-governance.pdf.)
 - frontier-resilience-when-urgency-corrupts-sequencing: canonical -> /assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/frontier-resilience-when-urgency-corrupts-sequencing.pdf.)
+- global-market-intelligence-report-q2-2026: canonical -> /assets/downloads/global-market-intelligence-report-q2-2026.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/global-market-intelligence-report-q2-2026.pdf.)
 - governance-diagnostic-toolkit: canonical -> /assets/downloads/governance-diagnostic-toolkit.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/governance-diagnostic-toolkit.pdf.)
 - institutional-alpha-false-confidence-from-aggregated-metrics: canonical -> /assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-false-confidence-from-aggregated-metrics.pdf.)
 - institutional-alpha-intelligence-after-the-founder-myth: canonical -> /assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf (Only one file exists for this slug. Canonical endpoint already exists at /assets/downloads/institutional-alpha-intelligence-after-the-founder-myth.pdf.)

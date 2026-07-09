@@ -9,7 +9,8 @@ import type { EvidencePackageContract } from './evidence-package-contract';
 
 export interface RegistryEntry {
   packageId: string;
-  productCode: string;
+  productCode?: string;
+  evidencePackageCode?: string;
   releaseInstanceCode?: string;
   packagePath: string;
   methodologyBoundaryPath?: string;
@@ -45,7 +46,7 @@ export const EVIDENCE_PACKAGE_REGISTRY: Record<string, RegistryEntry> = {
 
   reporting_output_layer: {
     packageId: 'reporting_output_layer',
-    productCode: 'reporting_output_layer',
+    evidencePackageCode: 'reporting_output_layer',
     packagePath: 'artifacts/validation/reporting_output_layer/evidence-package.json',
     methodologyBoundaryPath: 'artifacts/validation/reporting_output_layer/methodology-boundary.md',
     allowedClaimsPath: 'artifacts/validation/reporting_output_layer/allowed-claims.txt',
@@ -59,7 +60,7 @@ export const EVIDENCE_PACKAGE_REGISTRY: Record<string, RegistryEntry> = {
   // Reserved slots for future packages (Workstream 1B-1E)
   diagnostic_extended: {
     packageId: 'diagnostic_extended',
-    productCode: 'diagnostic_extended',
+    evidencePackageCode: 'diagnostic_extended',
     packagePath: 'artifacts/validation/diagnostic_extended/evidence-package.json',
     methodologyBoundaryPath: 'artifacts/validation/diagnostic_extended/methodology-boundary.md',
     authorityRole: 'evidence_limited_diagnostic',
@@ -70,7 +71,7 @@ export const EVIDENCE_PACKAGE_REGISTRY: Record<string, RegistryEntry> = {
 
   assessment_standard: {
     packageId: 'assessment_standard',
-    productCode: 'assessment_standard',
+    evidencePackageCode: 'assessment_standard',
     packagePath: 'artifacts/validation/assessment_standard/evidence-package.json',
     methodologyBoundaryPath: 'artifacts/validation/assessment_standard/methodology-boundary.md',
     authorityRole: 'evidence_limited_assessment',
@@ -81,7 +82,7 @@ export const EVIDENCE_PACKAGE_REGISTRY: Record<string, RegistryEntry> = {
 
   competitor_tracker: {
     packageId: 'competitor_tracker',
-    productCode: 'competitor_tracker',
+    evidencePackageCode: 'competitor_tracker',
     packagePath: 'artifacts/validation/competitor_tracker/evidence-package.json',
     methodologyBoundaryPath: 'artifacts/validation/competitor_tracker/methodology-boundary.md',
     authorityRole: 'evidence_limited_intelligence',
@@ -92,7 +93,7 @@ export const EVIDENCE_PACKAGE_REGISTRY: Record<string, RegistryEntry> = {
 
   trend_monitor: {
     packageId: 'trend_monitor',
-    productCode: 'trend_monitor',
+    evidencePackageCode: 'trend_monitor',
     packagePath: 'artifacts/validation/trend_monitor/evidence-package.json',
     methodologyBoundaryPath: 'artifacts/validation/trend_monitor/methodology-boundary.md',
     authorityRole: 'evidence_limited_intelligence',
@@ -103,7 +104,7 @@ export const EVIDENCE_PACKAGE_REGISTRY: Record<string, RegistryEntry> = {
 
   signal_watch: {
     packageId: 'signal_watch',
-    productCode: 'signal_watch',
+    evidencePackageCode: 'signal_watch',
     packagePath: 'artifacts/validation/signal_watch/evidence-package.json',
     methodologyBoundaryPath: 'artifacts/validation/signal_watch/methodology-boundary.md',
     authorityRole: 'evidence_limited_intelligence',

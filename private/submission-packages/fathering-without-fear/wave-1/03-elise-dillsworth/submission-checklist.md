@@ -8,7 +8,7 @@
 
 ## Hard Prerequisites (All Must Be Met Before Sending)
 
-- [ ] Ch.17 specialist legal review complete and cleared
+- [ ] Specialist legal review complete and cleared for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 - [ ] Author bio (`06-author-bio.md`) finalised — Dillsworth requires a proposal with author context
 - [ ] Elise Dillsworth confirmed open at elisedillsworthagency.com immediately before sending
 - [ ] No other Elise Dillsworth Agency submission is pending (she runs an independent agency; one submission at a time is standard practice)

@@ -4,7 +4,7 @@
 
 Agents who represent literary memoir and literary nonfiction, with openness to:
 
-- **Formally compressed nonfiction.** The book is approximately 49,000 words across 25 short chapters. The agent must be comfortable positioning a short memoir without requiring it to be padded to a conventional word count.
+- **Formally compressed nonfiction.** The book is 49,981 words across 27 short chapters, rounded outward-facing to approximately 50,000 words. The agent must be comfortable positioning a short memoir without requiring it to be padded to a conventional word count.
 
 - **Faith-inflected work without devotional genre.** The book treats Christianity as a family inheritance and a lived reality, not as a genre. The agent should be comfortable with faith as subject matter without categorising the book as religious or inspirational nonfiction.
 

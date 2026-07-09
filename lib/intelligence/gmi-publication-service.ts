@@ -14,6 +14,7 @@ import {
   type GmiReleaseActor,
 } from "./gmi-release-events";
 import { resolveGmiReleaseState } from "./gmi-release-state-resolver";
+import type { CriticalFailureCode } from "./market-intelligence-quality-gate";
 import {
   getCallsForReport,
   type MarketCallOutcomeStatus,
@@ -63,7 +64,8 @@ export async function runGmiQualityGateAndRecord(
     qualityGate: {
       overallScore: state.qualityGate.overallScore,
       releaseReady: state.qualityGate.releaseReady && !controlPlaneBlocked,
-      criticalFailures: state.qualityGate.criticalFailures,
+      // resolver normalises to string[]; values are canonical critical-failure codes.
+      criticalFailures: state.qualityGate.criticalFailures as CriticalFailureCode[],
       blockers,
     },
   });

@@ -8,9 +8,9 @@
 
 ## Hard Prerequisites (All Must Be Met Before Sending)
 
-- [ ] Ch.17 specialist legal review complete and cleared
+- [ ] Specialist legal review complete and cleared for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 - [ ] `03-query-letter.md` reviewed and confirmed current
-- [ ] `04-one-page-synopsis.md` verified against 25-chapter structure
+- [ ] `04-one-page-synopsis.md` verified against 27-chapter structure
 - [ ] Author bio (`06-author-bio.md`) finalised and accurate
 - [ ] Nicola Chang confirmed open on davidhigham.co.uk immediately before sending
 - [ ] No other DHA agent has been queried or is pending (DHA one-agent rule: do not query Chang if Baxter, Gordon, Woollard, Forrester, or any other DHA agent is active)
@@ -57,11 +57,11 @@ The file has been verified as 50 manuscript pages in standard submission format.
 
 - [ ] Read personalised query aloud — does it flow? Does each paragraph earn its place?
 - [ ] Query letter is addressed "Dear Nicola Chang," (not "Dear Ms Chang")
-- [ ] Word count in query matches current count (approximately 49,000 words)
-- [ ] Book described as 25 chapters (not 22 or 23)
+- [ ] Word count in query matches current count (approximately 50,000 words)
+- [ ] Book described as 27 chapters (not 22 or 23)
 - [ ] No legal specifics or court proceedings referenced in query
 - [ ] No reference to any allegation in query
-- [ ] Ch.17 legal review status confirmed safe
+- [ ] Legal review status confirmed safe for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 
 ---
 

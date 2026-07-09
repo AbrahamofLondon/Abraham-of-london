@@ -1,0 +1,9 @@
+{
+  "productCode": "mandate_clarity_framework",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

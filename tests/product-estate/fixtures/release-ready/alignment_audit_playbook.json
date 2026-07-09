@@ -1,0 +1,9 @@
+{
+  "productCode": "alignment_audit_playbook",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

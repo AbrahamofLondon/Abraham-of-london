@@ -1073,6 +1073,91 @@ model GmiAlertRule {
   @@map("gmi_alert_rules")
 }
 
+// ============================================================================
+// GMI PRODUCTION RELEASE PERSISTENCE — durable, transactional, distributed-safe
+// Static edition DEFINITION stays in code (market-intelligence-lifecycle.ts).
+// Mutable release TRUTH (lifecycle, hashes, data lock, authority, receipt,
+// supersession) lives here in Postgres. The release operation runs in one
+// transaction under a pg advisory xact lock. See gmi-release-store.server.ts.
+// ============================================================================
+
+/// GMI Edition Release State — the durable mutable release truth for one edition.
+/// One row per edition. Distinct responsibility from GmiEditionGovernanceState
+/// (content gating / board-pulse). This is the production release authority for
+/// lifecycle state, data-lock and hash binding — never the static registry.
+model GmiEditionReleaseState {
+  id                 String    @id @default(cuid())
+  editionId          String    @unique @map("edition_id")
+  lifecycleState     String    @map("lifecycle_state")
+  candidateHash      String?   @map("candidate_hash")
+  sourceSnapshotHash String?   @map("source_snapshot_hash")
+  reportContentHash  String?   @map("report_content_hash")
+  methodologyVersion String?   @map("methodology_version")
+  dataLockedAt       DateTime? @map("data_locked_at")
+  releaseCandidateAt DateTime? @map("release_candidate_at")
+  publishedAt        DateTime? @map("published_at")
+  supersedes         String?   @map("supersedes")
+  supersededBy       String?   @map("superseded_by")
+  publicVisible      Boolean   @default(false) @map("public_visible")
+  purchasable        Boolean   @default(false) @map("purchasable")
+  version            Int       @default(1) @map("version")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  receipt GmiReleaseReceipt?
+
+  @@index([lifecycleState])
+  @@index([supersededBy])
+  @@map("gmi_edition_release_state")
+}
+
+/// GMI Release Authority — durable owner release authorisation, candidate-hash bound.
+/// Multiple rows may exist over time (grant → revoke → re-grant). The CURRENT valid
+/// authority is the latest non-revoked row whose candidateHash matches the edition's
+/// current candidateHash. A projected timestamp without a valid row must FAIL.
+model GmiReleaseAuthority {
+  id             String    @id @default(cuid())
+  editionId      String    @map("edition_id")
+  candidateHash  String    @map("candidate_hash")
+  authorizedBy   String    @map("authorized_by")
+  authorizedAt   DateTime  @map("authorized_at")
+  authorityScope String    @map("authority_scope")
+  revokedAt      DateTime? @map("revoked_at")
+  revokedBy      String?   @map("revoked_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  receipts GmiReleaseReceipt[]
+
+  @@index([editionId])
+  @@index([editionId, candidateHash])
+  @@index([revokedAt])
+  @@map("gmi_release_authorities")
+}
+
+/// GMI Release Receipt — the single authoritative proof of a successful release.
+/// Unique per edition: at most one authoritative receipt can ever exist, so a
+/// concurrent double-release resolves to exactly one receipt.
+model GmiReleaseReceipt {
+  id                     String   @id @default(cuid())
+  editionId              String   @unique @map("edition_id")
+  candidateHash          String   @map("candidate_hash")
+  sourceSnapshotHash     String   @map("source_snapshot_hash")
+  reportContentHash      String   @map("report_content_hash")
+  methodologyVersion     String   @map("methodology_version")
+  pdfHash                String?  @map("pdf_hash")
+  releaseChecklistVersion String  @map("release_checklist_version")
+  authorityId            String   @map("authority_id")
+  publishedAt            DateTime @map("published_at")
+  createdAt              DateTime @default(now()) @map("created_at")
+
+  authority      GmiReleaseAuthority     @relation(fields: [authorityId], references: [id])
+  editionState   GmiEditionReleaseState  @relation(fields: [editionId], references: [editionId])
+
+  @@index([authorityId])
+  @@index([candidateHash])
+  @@map("gmi_release_receipts")
+}
+
 model InnerCircleEmailEventLog {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
@@ -5728,4 +5813,151 @@ model PublicDecisionRegistryEntry {
   @@index([aggregationBucket])
   @@index([publishable])
   @@map("public_decision_registry_entries")
+}
+
+// ── Operator Pilot production persistence (§11/§14) ──────────────────────────
+// Durable, history-preserving Postgres authority for the Operator Pilot lifecycle,
+// backing the PilotIntakeStore interface (SQLite adapter remains for local/test).
+model OperatorPilotIntake {
+  reference             String   @id
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  intakeJson            Json
+  qualificationJson     Json
+  qualificationStatus   String
+  reviewStatus          String
+  owner                 String?
+  operatorNote          String?
+  requestedInformation  String?
+  finalDecision         String?
+  intakeFingerprint     String
+  statusSecretHash      String?  @unique
+  statusSecretExpiresAt DateTime?
+  statusSecretRevokedAt DateTime?
+  transitions           OperatorPilotTransition[]
+  statusAccessAudits    OperatorPilotStatusAccessAudit[]
+  submissionIdempotency OperatorPilotSubmissionIdempotency[]
+
+  @@index([reviewStatus])
+  @@index([intakeFingerprint])
+  @@map("operator_pilot_intakes")
+}
+
+// Append-only lifecycle history — how the decision moved, who moved it, under what authority.
+
+
+model OperatorPilotSubmissionIdempotency {
+  id               String   @id @default(cuid())
+  idempotencyHash  String   @unique
+  requestFingerprint String
+  intakeRef        String
+  createdAt        DateTime @default(now())
+  expiresAt        DateTime
+
+  intake OperatorPilotIntake @relation(fields: [intakeRef], references: [reference], onDelete: Cascade)
+
+  @@index([intakeRef])
+  @@index([expiresAt])
+  @@map("operator_pilot_submission_idempotency")
+}
+model OperatorPilotStatusAccessAudit {
+  id            String   @id @default(cuid())
+  intakeRef     String?
+  attemptedHash String
+  result        String
+  ipHash        String?
+  createdAt     DateTime @default(now())
+
+  intake OperatorPilotIntake? @relation(fields: [intakeRef], references: [reference], onDelete: SetNull)
+
+  @@index([intakeRef])
+  @@index([attemptedHash])
+  @@index([createdAt])
+  @@map("operator_pilot_status_access_audits")
+}
+model OperatorPilotTransition {
+  id             String   @id @default(cuid())
+  intakeRef      String
+  intake         OperatorPilotIntake @relation(fields: [intakeRef], references: [reference], onDelete: Cascade)
+  fromState      String
+  toState        String
+  actorEmail     String?
+  humanAuthority Boolean  @default(false)
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  @@index([intakeRef])
+  @@map("operator_pilot_transitions")
+}
+
+// ── Demo-to-evidence production persistence (§3) ─────────────────────────────
+model SignalConsentContinuation {
+  token             String   @id
+  recommendationId  String
+  sessionId         String
+  mode              String
+  state             String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  expiresAt         DateTime
+  tenantId          String?
+  subjectId         String?
+  consentCapturedAt DateTime?
+  caseId            String?
+  interactionId     String?
+  twinVersion       Int?
+  stateHash         String
+
+  @@index([recommendationId])
+  @@index([sessionId])
+  @@index([tenantId, subjectId])
+  @@index([expiresAt])
+  @@map("signal_consent_continuations")
+}
+
+model CorridorRecommendationContext {
+  recommendationId    String   @id
+  contextId           String
+  sessionId           String
+  sessionVersion      Int      @default(1)
+  pressureBand        String
+  targetProductCode   String
+  targetLabel         String
+  targetRoute         String
+  accessMode          String
+  whyAdmissible       String
+  evidenceBasisJson   Json
+  establishedJson     Json
+  unresolvedJson      Json
+  notYetAppropriate   String?
+  carryForwardJson    Json
+  stateHash           String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([contextId])
+  @@index([sessionId])
+  @@index([targetProductCode])
+  @@index([updatedAt])
+  @@map("corridor_recommendation_contexts")
+}
+
+model FunnelJourneyEvent {
+  eventId        String   @id
+  occurredAt     DateTime @default(now())
+  eventType      String
+  journeyVersion String
+  sessionId      String
+  sourceRoute    String
+  tenantId       String?
+  caseId         String?
+  productCode    String?
+  recommendationId String?
+
+  @@index([eventType])
+  @@index([journeyVersion])
+  @@index([sessionId])
+  @@index([occurredAt])
+  @@index([tenantId, caseId])
+  @@map("funnel_journey_events")
 }

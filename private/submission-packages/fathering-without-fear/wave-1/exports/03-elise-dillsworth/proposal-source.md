@@ -1,7 +1,7 @@
 # Nonfiction Proposal Core — Fathering Without Fear
 
 **Author:** Abraham of London (Abraham Adaramola)
-**Word Count:** Approximately 49,000 words
+**Word Count:** Approximately 50,000 words
 **Chapters:** 25
 **Category:** Compressed literary memoir / short memoir-in-fragments
 
@@ -19,7 +19,7 @@ Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, ea
 
 When his son was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
-The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
+The book is structured as twenty-seven short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
 This is not a legal memoir, a parenting guide, or a grievance text. It is a book about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
 
@@ -102,7 +102,7 @@ Then Chapter 22 renders the boy entirely as a child — through football, swimmi
 
 The book closes in an ordinary room, at a table, with a laptop, papers, and the physical act of making room. It refuses false closure.
 
-*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 49,000 words across twenty-five chapters.
+*Fathering Without Fear* is a compressed literary memoir about inheritance, faith, grief, and the cost of remaining present. It is approximately 50,000 words across twenty-seven chapters.
 
 ---
 

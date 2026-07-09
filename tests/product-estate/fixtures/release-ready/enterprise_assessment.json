@@ -1,0 +1,9 @@
+{
+  "productCode": "enterprise_assessment",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

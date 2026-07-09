@@ -28,7 +28,7 @@ Paste the author bio from `personalised-query.md` (the section headed "Author Bi
 Enter: **Memoir / Narrative Nonfiction**
 
 ### Field: Word Count
-Enter: **49,000**
+Enter: **50,000**
 
 ### Field: First 50 Pages (upload or paste)
 Use the verified first-50-pages extract. It has been checked as 50 manuscript pages in standard submission format.

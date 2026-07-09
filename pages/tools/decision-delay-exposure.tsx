@@ -10,6 +10,8 @@ import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import {
   buildDecisionDelaySendToSelfPayload,
   computeDecisionDelayExposure,
+  DECISION_EXPOSURE_CURRENCY,
+  formatDecisionDelayCurrency,
   type DecisionState,
   type ExposureType,
   type EstimateConfidence,
@@ -43,9 +45,9 @@ function GoldDivider() {
   );
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
+function FieldLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor: string }) {
   return (
-    <p
+    <label htmlFor={htmlFor}
       style={{
         ...mono,
         fontSize: "7px",
@@ -56,7 +58,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-    </p>
+    </label>
   );
 }
 
@@ -236,6 +238,8 @@ function persistCalculatorResult(
 }
 
 export default function DecisionDelayExposurePage() {
+  const inputIdPrefix = React.useId();
+  const inputId = React.useCallback((name: string) => `${inputIdPrefix}-${name}`, [inputIdPrefix]);
   const [form, setForm] = React.useState<FormState>(DEFAULT_FORM);
   const [result, setResult] = React.useState<DecisionDelayExposureResult | null>(null);
   const [submitted, setSubmitted] = React.useState(false);
@@ -410,8 +414,9 @@ export default function DecisionDelayExposurePage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
 
                 <div>
-                  <FieldLabel>Decision being delayed (optional)</FieldLabel>
+                  <FieldLabel htmlFor={inputId("decision-label")}>Decision being delayed (optional)</FieldLabel>
                   <input
+                    id={inputId("decision-label")}
                     name="decisionLabel"
                     type="text"
                     value={form.decisionLabel}
@@ -434,8 +439,9 @@ export default function DecisionDelayExposurePage() {
                 </div>
 
                 <div>
-                  <FieldLabel>What best describes the decision?</FieldLabel>
+                  <FieldLabel htmlFor={inputId("decision-state")}>What best describes the decision?</FieldLabel>
                   <select
+                    id={inputId("decision-state")}
                     name="decisionState"
                     value={form.decisionState}
                     onChange={handleChange}
@@ -451,8 +457,9 @@ export default function DecisionDelayExposurePage() {
                 </div>
 
                 <div>
-                  <FieldLabel>Weekly cost of delay (£)</FieldLabel>
+                  <FieldLabel htmlFor={inputId("weekly-cost")}>Weekly cost of delay ({DECISION_EXPOSURE_CURRENCY})</FieldLabel>
                   <input
+                    id={inputId("weekly-cost")}
                     name="weeklyCostRaw"
                     type="number"
                     min="0"
@@ -477,8 +484,9 @@ export default function DecisionDelayExposurePage() {
                 </div>
 
                 <div>
-                  <FieldLabel>Weeks already delayed (optional)</FieldLabel>
+                  <FieldLabel htmlFor={inputId("delay-weeks")}>Weeks already delayed (optional)</FieldLabel>
                   <input
+                    id={inputId("delay-weeks")}
                     name="delayWeeksRaw"
                     type="number"
                     min="0"
@@ -491,8 +499,9 @@ export default function DecisionDelayExposurePage() {
                 </div>
 
                 <div>
-                  <FieldLabel>Exposure type</FieldLabel>
+                  <FieldLabel htmlFor={inputId("exposure-type")}>Exposure type</FieldLabel>
                   <select
+                    id={inputId("exposure-type")}
                     name="exposureType"
                     value={form.exposureType}
                     onChange={handleChange}
@@ -508,8 +517,9 @@ export default function DecisionDelayExposurePage() {
                 </div>
 
                 <div>
-                  <FieldLabel>Estimate confidence</FieldLabel>
+                  <FieldLabel htmlFor={inputId("estimate-confidence")}>Estimate confidence</FieldLabel>
                   <select
+                    id={inputId("estimate-confidence")}
                     name="estimateConfidence"
                     value={form.estimateConfidence}
                     onChange={handleChange}
@@ -674,7 +684,7 @@ export default function DecisionDelayExposurePage() {
                 if (!hasUserCost) return null;
                 const costToDate =
                   delayWeeks > 0
-                    ? `£${(weeklyCost * delayWeeks).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`
+                    ? formatDecisionDelayCurrency(weeklyCost * delayWeeks)
                     : null;
                 const exposure: CommercialExposure = {
                   costToDate,
@@ -1021,14 +1031,15 @@ function SendToSelfCalculator({
 
   return (
     <section style={{ marginTop: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "14px 18px" }}>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+      <label htmlFor="decision-delay-send-to-self-email" style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px", display: "block" }}>
         Send to self
-      </p>
+      </label>
       <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginBottom: "10px" }}>
         We will send this result to the email you provide. This does not create a governed case unless you create an account.
       </p>
       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         <input
+          id="decision-delay-send-to-self-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -1069,7 +1080,7 @@ function SendToSelfCalculator({
         </button>
       </div>
       {status === "error" && (
-        <p style={{ marginTop: "8px", fontSize: "12px", color: "rgba(252,165,165,0.55)" }}>
+        <p role="alert" aria-live="polite" style={{ marginTop: "8px", fontSize: "12px", color: "rgba(252,165,165,0.55)" }}>
           Could not send. Try again later.
         </p>
       )}

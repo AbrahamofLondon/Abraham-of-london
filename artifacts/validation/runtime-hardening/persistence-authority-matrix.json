@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "runtime-hardening.persistence-authority-matrix.v2",
+  "generatedAt": "2026-07-08T12:52:41+01:00",
+  "canonicalHead": "68c475794",
+  "method": "Continuation from clean handoff: verify migration reconciliation once, then migrate the remaining known runtime SQLite customer/telemetry stores to composed production Postgres adapters while preserving local/test SQLite adapters.",
+  "requiredConditions": {
+    "UNKNOWN_RUNTIME_PERSISTENCE": 0,
+    "PRODUCTION_FILESYSTEM_STATE": 0,
+    "SILENT_LOCAL_FALLBACK_IN_PRODUCTION": 0,
+    "PRODUCTION_SQLITE_CUSTOMER_STATE": 0,
+    "UNMAPPED_RUNTIME_STORE": 0
+  },
+  "proof": {
+    "migrationFreshPath": "pnpm exec prisma migrate deploy + prisma migrate status passed against local Postgres aol_dev",
+    "representativeLegacyPath": "legacy-style existing DB with preserved operatorPilotIntake row reconciled by marking baseline and pilot migration applied; migrate deploy/status clean; row preserved",
+    "focusedTests": "pnpm exec vitest run tests/runtime-hardening/demo-runtime-prisma-stores.test.ts tests/runtime-hardening/serverless-route-store-boundaries.test.ts tests/demo-journey/signal-consent-transition.test.ts tests/demo-journey/corridor-recommendation-context.test.ts tests/demo-journey/funnel-event-store.test.ts tests/demo-journey/sqlite-runtime-guard.test.ts --reporter=dot => 6 files / 23 tests passed",
+    "typecheck": "pnpm typecheck => exit 0"
+  },
+  "stores": [
+    {
+      "capability": "Operator Pilot intake + lifecycle (customer state)",
+      "module": "lib/engagements/pilot-intake-store.composed.ts",
+      "runtimeCaller": ["pages/api/engagements/operator-pilot.ts", "pages/api/admin/operator-pilot.ts"],
+      "currentAdapter": "Composed store: production Prisma/Postgres; local/test better-sqlite3",
+      "persistenceType": "POSTGRES_IN_PRODUCTION_SQLITE_LOCAL_TEST",
+      "serverlessSafe": true,
+      "multiInstanceSafe": true,
+      "transactional": "Prisma/Postgres; transition history and optimistic concurrency already implemented in prior handoff",
+      "tenantIsolated": "customer reference plus stored contact/intake context; operator route admin-gated",
+      "productionAuthority": "Prisma models OperatorPilotIntake and OperatorPilotTransition",
+      "localTestAuthority": "better-sqlite3 adapter retained for deterministic local tests",
+      "migrationRequired": false,
+      "disposition": "PRODUCTION_POSTGRES",
+      "severity": "OK"
+    },
+    {
+      "capability": "Signal consent-gated continuation (consent records)",
+      "module": "lib/demo/signal-consent-transition-store.composed.ts",
+      "runtimeCaller": ["pages/api/demo/signal-consent-continuation.ts"],
+      "currentAdapter": "Composed store: production Prisma/Postgres; local/test better-sqlite3",
+      "persistenceType": "POSTGRES_IN_PRODUCTION_SQLITE_LOCAL_TEST",
+      "serverlessSafe": true,
+      "multiInstanceSafe": true,
+      "transactional": "Prisma/Postgres row transitions; token identity/tenant checks enforced by adapter",
+      "tenantIsolated": "tenantId and subjectId enforced on all post-identity transitions",
+      "productionAuthority": "Prisma model SignalConsentContinuation",
+      "localTestAuthority": "better-sqlite3 adapter retained for deterministic tests",
+      "migrationRequired": false,
+      "disposition": "PRODUCTION_POSTGRES",
+      "severity": "OK"
+    },
+    {
+      "capability": "Corridor recommendation context (Signal to Corridor continuity)",
+      "module": "lib/intelligence/corridor/recommendation-context-store.composed.ts",
+      "runtimeCaller": ["pages/api/corridor/recommendation-context.ts", "pages/corridor/index.tsx"],
+      "currentAdapter": "Composed store: production Prisma/Postgres; local/test better-sqlite3",
+      "persistenceType": "POSTGRES_IN_PRODUCTION_SQLITE_LOCAL_TEST",
+      "serverlessSafe": true,
+      "multiInstanceSafe": true,
+      "transactional": "Prisma/Postgres upsert by stable recommendationId",
+      "tenantIsolated": "session/recommendation scoped; no confidential decision text stored",
+      "productionAuthority": "Prisma model CorridorRecommendationContext",
+      "localTestAuthority": "better-sqlite3 adapter retained for deterministic tests",
+      "migrationRequired": false,
+      "disposition": "PRODUCTION_POSTGRES",
+      "severity": "OK"
+    },
+    {
+      "capability": "Flagship funnel telemetry",
+      "module": "lib/demo/funnel-event-store.composed.ts",
+      "runtimeCaller": ["pages/api/demo/funnel-event.ts", "pages/api/engagements/operator-pilot.ts", "pages/api/admin/operator-pilot.ts", "pages/admin/demo-conversion.tsx"],
+      "currentAdapter": "Composed store: production Prisma/Postgres; local/test better-sqlite3",
+      "persistenceType": "POSTGRES_IN_PRODUCTION_SQLITE_LOCAL_TEST",
+      "serverlessSafe": true,
+      "multiInstanceSafe": true,
+      "transactional": "Prisma/Postgres append-only event rows and groupBy summary",
+      "tenantIsolated": "structured metadata only; no arbitrary payload/decision text column",
+      "productionAuthority": "Prisma model FunnelJourneyEvent",
+      "localTestAuthority": "better-sqlite3 adapter retained for deterministic tests",
+      "migrationRequired": false,
+      "disposition": "PRODUCTION_POSTGRES",
+      "severity": "OK"
+    },
+    {
+      "capability": "Interaction spine durable store (compounding twin) — env-gated",
+      "module": "lib/intelligence/interaction-spine/runtime-spine-provider.ts",
+      "runtimeCaller": ["pages/api/playbooks/[slug]/run.ts", "pages/api/decision-instruments/results/index.ts"],
+      "currentAdapter": "better-sqlite3 only when explicit non-production store path is configured; otherwise no-op binding",
+      "persistenceType": "ENV_GATED_SQLITE_LOCAL_TEST",
+      "serverlessSafe": "safe-by-default: no silent production filesystem write",
+      "multiInstanceSafe": false,
+      "transactional": "single-connection local proof only",
+      "tenantIsolated": "yes for local proof records",
+      "productionAuthority": "not activated by this runtime path unless a production Postgres adapter is configured in a future dedicated lane",
+      "localTestAuthority": "yes",
+      "migrationRequired": false,
+      "disposition": "LOCAL_TEST_SQLITE_ONLY",
+      "severity": "OK"
+    },
+    {
+      "capability": "Decision graph / watchdog / analytics / recommendation durable stores",
+      "module": "lib/intelligence/accountability/durable-{graph,watchdog,analytics}-store.ts, lib/intelligence/corridor/durable-recommendation-store.ts",
+      "runtimeCaller": [],
+      "currentAdapter": "better-sqlite3 test/local proof stores",
+      "persistenceType": "LOCAL_FILE_SQLITE_NOT_RUNTIME",
+      "serverlessSafe": "n/a: no production API/page caller in current route-store map",
+      "multiInstanceSafe": false,
+      "transactional": "single-connection local proof only",
+      "tenantIsolated": "graph: yes",
+      "productionAuthority": "n/a until wired",
+      "localTestAuthority": "yes",
+      "migrationRequired": false,
+      "disposition": "LOCAL_TEST_SQLITE_ONLY",
+      "severity": "OK"
+    }
+  ],
+  "remainingAdjacentRisks": [
+    "Funnel endpoint still uses per-process simple-rate-limit; replace with distributed Postgres/Redis limiter before final production PASS.",
+    "Pilot customer status still supports ref query lookup; secure POST-secret to HttpOnly session flow remains open.",
+    "Assessment accessibility/responsive convergence remains open in later programme sections.",
+    "Price presentation hardcoded-currency audit remains open in later programme sections."
+  ]
+}

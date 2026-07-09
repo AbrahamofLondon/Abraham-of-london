@@ -744,12 +744,12 @@ export const GMI_Q1_2026_CONTRACT = contract({
   productCode: "gmi_q1_2026",
   displayName: "Global Market Intelligence Report — Q1 2026",
   entitlementSlug: "global-market-intelligence-report-q1-2026",
-  stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
-  commercialStatus: "paid",
-  checkoutRoute: "/api/billing/checkout",
-  intakeRoute: "/artifacts/global-market-intelligence-report-q1-2026",
-  successRoute: "/artifacts/global-market-intelligence-report-q1-2026",
-  customerAccessRoute: "/artifacts/global-market-intelligence-report-q1-2026",
+  stripePriceId: null,
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: "/intelligence/global-market-intelligence-q1-2026",
+  successRoute: "/intelligence/global-market-intelligence-q1-2026",
+  customerAccessRoute: "/intelligence/global-market-intelligence-q1-2026",
   adminRoute: "/admin/intelligence/gmi-control-plane",
   fulfilmentType: "executive_report_artifact",
   artifactModel: "ProductArtifact",
@@ -758,42 +758,42 @@ export const GMI_Q1_2026_CONTRACT = contract({
   caseStudyEligible: false,
   feedbackSurface: null,
   estateSpineSourceType: "product_artifact",
-  readinessStatus: "proof_ready",
+  readinessStatus: "not_applicable",
   proofRunCompleted: false,
   hardFailures: [],
   warnings: [
-    "Archived edition — superseded by Q2. Checkout still possible for historical reference.",
-    "No automated post-purchase delivery email for GMI access confirmation",
+    "Superseded public reference edition; no new standalone checkout.",
+    "Existing Q1 entitlement and historical access remain valid.",
   ],
-  notes: "Archived Q1 2026 edition. Has active Stripe price. Report delivered as entitlement-gated artifact route.",
+  notes: "Superseded Q1 2026 edition. Public reference remains available; new purchases route to the current GMI edition while historical entitlements remain valid.",
 });
 
 export const GMI_Q2_2026_CONTRACT = contract({
   productCode: "gmi_q2_2026",
   displayName: "Global Market Intelligence Report — Q2 2026",
   entitlementSlug: "global-market-intelligence-report-q2-2026",
-  stripePriceId: null,
-  commercialStatus: "manual_billing",
-  checkoutRoute: null,
-  intakeRoute: "/artifacts/global-market-intelligence-report-q2-2026",
-  successRoute: "/artifacts/global-market-intelligence-report-q2-2026",
-  customerAccessRoute: "/artifacts/global-market-intelligence-report-q2-2026",
+  stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
+  commercialStatus: "paid",
+  checkoutRoute: "/api/billing/checkout",
+  intakeRoute: "/intelligence/global-market-intelligence-q2-2026",
+  successRoute: "/intelligence/global-market-intelligence-q2-2026",
+  customerAccessRoute: "/intelligence/global-market-intelligence-q2-2026",
   adminRoute: "/admin/intelligence/gmi-control-plane",
   fulfilmentType: "executive_report_artifact",
   artifactModel: "ProductArtifact",
-  deliveryModel: "immediate_access",
+  deliveryModel: "entitlement_on_payment",
   dashboardVisibility: false,
   caseStudyEligible: false,
   feedbackSurface: null,
   estateSpineSourceType: "product_artifact",
-  readinessStatus: "not_applicable",
-  proofRunCompleted: false,
+  readinessStatus: "sellable",
+  proofRunCompleted: true,
   hardFailures: [],
   warnings: [
-    "Current edition — no self-serve checkout yet (manual_billing). Add Stripe IDs to enable paid checkout.",
-    "Access is currently open or manual — no entitlement gate on the artifact route",
+    "Current released GMI edition with durable release receipt and active checkout binding.",
+    "Checkout metadata binds edition ID and release receipt before fulfilment.",
   ],
-  notes: "Current published Q2 2026 edition. Status: manual_billing. No self-serve checkout until Stripe IDs added to registry.",
+  notes: "Current Q2 2026 edition. Public, purchasable, and fulfilled as an edition-bound entitlement after durable release authority.",
 });
 
 export const GMI_Q3_2026_CONTRACT = contract({
@@ -1060,6 +1060,107 @@ export const EXECUTIVE_REPORTING_PRIORITY_CONTRACT = contract({
  * Add a new entry here before enabling checkout for any new product.
  * The build gate (scripts/check-product-fulfilment-readiness.mjs) reads this list.
  */
+export const REPORTING_MONTHLY_CONTRACT = contract({
+  productCode: "reporting_monthly",
+  displayName: "Reporting — Monthly",
+  entitlementSlug: "reporting-monthly",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/reporting",
+  successRoute: "/reporting",
+  customerAccessRoute: "/reporting",
+  adminRoute: "/admin/reporting/monthly",
+  fulfilmentType: "retainer_cycle",
+  artifactModel: null,
+  deliveryModel: "analyst_review_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes:
+    "Recurring monthly reporting. Manual billing — no self-serve checkout. " +
+    "readinessStatus=not_applicable here means ONLY that the self-serve checkout-readiness " +
+    "computation does not apply (this is manual billing, so the paid checkout/route structural " +
+    "gate is not evaluated). It does NOT mean there is no fulfilment obligation: the obligation " +
+    "is real and is discharged by the governed recurring cycle " +
+    "(lib/fulfilment/reporting/monthly-reporting-service.ts) plugged into the PR F execution " +
+    "authority via createMonthlyReportingHandler. Cadence: monthly; delivery gated on output " +
+    "validation + human review; durable DeliveryProof per cycle; missed cycles operator-visible.",
+});
+
+export const REPORTING_CUSTOM_CONTRACT = contract({
+  productCode: "reporting_custom",
+  displayName: "Reporting — Custom",
+  entitlementSlug: "reporting-custom",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/reporting/custom",
+  successRoute: "/reporting/custom",
+  customerAccessRoute: "/reporting/custom",
+  adminRoute: "/admin/reporting/custom",
+  fulfilmentType: "human_reviewed_dossier",
+  artifactModel: null,
+  deliveryModel: "analyst_review_and_send",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: null,
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [],
+  notes:
+    "Bespoke custom reporting. Manual billing — no self-serve checkout. readinessStatus=not_applicable " +
+    "means only that the self-serve checkout-readiness computation does not apply; the fulfilment obligation " +
+    "is real and is discharged by the governed ENGAGEMENT service " +
+    "(lib/fulfilment/reporting/custom-reporting-service.ts) via createCustomReportingHandler on the PR F " +
+    "authority. Operationally DISTINCT from reporting_monthly: trigger = inquiry-driven (not cadence); " +
+    "scope = negotiated brief + explicit scope lock (not standard); inputs = engagement-specific required " +
+    "sources; output = one bespoke deliverable per agreed scope; review = internal + client review loop; " +
+    "revisions = included in-scope revisions plus out-of-scope change control with versioned scope amendments; " +
+    "completion = final approval of the agreed deliverable (not a period boundary).",
+});
+
+export const GMI_QUARTERLY_FAMILY_CONTRACT = contract({
+  productCode: "gmi_quarterly",
+  displayName: "Global Market Intelligence — Quarterly",
+  entitlementSlug: "gmi-quarterly",
+  stripePriceId: null,
+  commercialStatus: "manual_billing",
+  checkoutRoute: null,
+  intakeRoute: "/intelligence/gmi",
+  successRoute: "/intelligence/gmi",
+  customerAccessRoute: "/intelligence/gmi",
+  adminRoute: "/admin/intelligence/gmi-control-plane",
+  fulfilmentType: "executive_report_artifact",
+  artifactModel: "ProductArtifact",
+  deliveryModel: "evidence_gate_review",
+  dashboardVisibility: false,
+  caseStudyEligible: false,
+  feedbackSurface: null,
+  estateSpineSourceType: "product_artifact",
+  readinessStatus: "not_applicable",
+  proofRunCompleted: false,
+  hardFailures: [],
+  warnings: [
+    "CONTROLLED_RELEASE_READY by permanent design — each edition is temporally gated by mandatory data lock, mandatory editorial human review, and owner publication authority; self-serve checkout is not authorised. This is an intentional governance boundary, not an implementation deficit.",
+  ],
+  notes:
+    "Reusable GMI quarterly product FAMILY. Fulfilment infrastructure " +
+    "(lib/fulfilment/gmi/gmi-quarterly-fulfilment.ts) COMPOSES the existing GMI release controls " +
+    "(lifecycle authority, release-candidate checklist / source blockers, prior-call review, " +
+    "DII / quality gate, owner release authority) into a release gate + edition-bound delivery " +
+    "proof, plugged into the PR F execution authority via createGmiQuarterlyHandler. Publication " +
+    "authority NEVER infers checkout activation or Stripe identity. Per-edition governance lives on " +
+    "the edition contracts (gmi_q2_2026 current; gmi_q1_2026 superseded reference; future editions gated until data lock + owner authority).",
+});
+
 export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   // Human-reviewed
   BOARDROOM_BRIEF_CONTRACT,
@@ -1087,6 +1188,8 @@ export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
 
   // Reporting + execution
   EXECUTIVE_REPORTING_CONTRACT,
+  REPORTING_MONTHLY_CONTRACT,
+  REPORTING_CUSTOM_CONTRACT,
   STRATEGY_ROOM_CONTRACT,
   STRATEGY_ROOM_EXTENDED_CONTRACT,
 
@@ -1104,6 +1207,7 @@ export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [
   PROFESSIONAL_ANNUAL_CONTRACT,
 
   // GMI intelligence reports
+  GMI_QUARTERLY_FAMILY_CONTRACT,
   GMI_Q1_2026_CONTRACT,
   GMI_Q2_2026_CONTRACT,
   GMI_Q3_2026_CONTRACT,

@@ -81,25 +81,30 @@ describe("catalog integrity", () => {
     it("keeps Additional Collaborator on assisted billing until seat billing is automated", () => {
       expect(CATALOG.additional_collaborator!.commercialStatus).toBe("manual_billing");
       expect(CATALOG.additional_collaborator!.requiresCheckout).toBe(false);
-      expect(CATALOG.additional_collaborator!.stripePriceId).toBeNull();
+      // D006 approved: stripePriceId bound to live Price; product remains manual_billing
+      expect(CATALOG.additional_collaborator!.stripePriceId).toBe("price_1TXt28QFpelVFMXJCqiXwnxp");
     });
 
-    it("reconciles GMI editions to lifecycle authority: Q1 current published, Q2 draft/release-candidate", () => {
-      // Q1 2026 — current published issue per lifecycle (ACTIVE_UNTIL_SUPERSEDED).
-      // Retains Stripe IDs, visible on pricing, purchasable. NOT hidden.
-      expect(CATALOG.gmi_q1_2026!.active).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid");
-      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false); // current published, not hidden
-      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Coverage period: Q1 2026");
+    it("reconciles GMI editions to lifecycle authority: Q2 current published, Q1 archived", () => {
+      // Q1 2026 was superseded by GMI-Q2-2026 on 2026-07-08 through the atomic
+      // release transaction: archived, inactive, hidden from pricing, retained
+      // for historical access.
+      expect(CATALOG.gmi_q1_2026!.active).toBe(false);
+      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("inactive");
+      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(true);
+      expect(CATALOG.gmi_q1_2026!.hiddenReason).toBe("superseded_by_gmi_q2_2026");
+      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Superseded by GMI-Q2-2026");
 
-      // Q2 2026 — release candidate (lifecycle DRAFT). Hidden from pricing.
-      // No Stripe metadata. Not active. Admin in-focus only.
-      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(true);  // draft, hidden
-      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("internal_only"); // draft → internal_only
-      expect(CATALOG.gmi_q2_2026!.active).toBe(false);            // draft → not active
-      expect(CATALOG.gmi_q2_2026!.stripePriceId).toBeNull();
-      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Coverage period: Q2 2026");
+      // Q2 2026 is the current published edition — released 2026-07-08 with
+      // evidence lock and hash-bound owner authority. Self-serve checkout at the
+      // £59 identity using the existing GMI Stripe product/price binding.
+      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(false);
+      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("paid");
+      expect(CATALOG.gmi_q2_2026!.active).toBe(true);
+      expect(CATALOG.gmi_q2_2026!.requiresCheckout).toBe(true);
+      expect(CATALOG.gmi_q2_2026!.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+      expect(CATALOG.gmi_q2_2026!.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Current published edition");
     });
 
     it("resolves gmi_quarterly to the dedicated GMI family page, not an issue artifact", () => {
@@ -184,7 +189,9 @@ describe("catalog integrity", () => {
     });
 
     it("returns precise ineligibility reasons for non-checkout commercial states", () => {
-      expect(checkCheckoutEligibility("gmi_q1_2026").eligible).toBe(true);
+      // Q1 archived after supersession → inactive; Q2 released as manual billing.
+      expect(checkCheckoutEligibility("gmi_q1_2026")).toEqual({ eligible: false, reason: "PRODUCT_INACTIVE" });
+      expect(checkCheckoutEligibility("gmi_q2_2026").eligible).toBe(true);
       expect(checkCheckoutEligibility("enterprise")).toEqual({ eligible: false, reason: "PRODUCT_CONTRACTED" });
       expect(checkCheckoutEligibility("additional_collaborator")).toEqual({ eligible: false, reason: "MANUAL_BILLING_REQUIRED" });
       expect(checkCheckoutEligibility("fast_diagnostic")).toEqual({ eligible: false, reason: "CHECKOUT_NOT_AVAILABLE" });

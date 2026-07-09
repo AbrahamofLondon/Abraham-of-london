@@ -82,7 +82,7 @@ The Elise proposal opens plainly with:
 ```text
 Nonfiction Proposal Core — Fathering Without Fear
 Author: Abraham of London (Abraham Adaramola)
-Word Count: Approximately 49,000 words
+Word Count: Approximately 50,000 words
 Chapters: 25
 Category: Compressed literary memoir / short memoir-in-fragments
 ```

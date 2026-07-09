@@ -75,6 +75,10 @@ const DERIVATIVE_PRODUCT_CODES = new Set<string>([
   "boardroom_mode",
 ]);
 
+const FULFILMENT_PRODUCT_CODES = new Set<string>([
+  "reporting_custom",
+]);
+
 function listEstateRows(): EstateProductRow[] {
   return PRODUCT_FULFILMENT_CONTRACTS.map((contract) => ({
     productCode: contract.productCode,
@@ -130,11 +134,13 @@ function getMatchedClasses(row: EstateProductRow): ProductIntelligenceClass[] {
     matches.push("proof_surface");
   }
 
-  if (FULFILMENT_CLASS_TYPES.has(row.contract.fulfilmentType)) {
+  const isFulfilmentLedProduct = FULFILMENT_CLASS_TYPES.has(row.contract.fulfilmentType) || FULFILMENT_PRODUCT_CODES.has(code);
+
+  if (isFulfilmentLedProduct) {
     matches.push("fulfilment");
   }
 
-  if (DERIVATIVE_CATEGORIES.has(category) || DERIVATIVE_PRODUCT_CODES.has(code)) {
+  if (!isFulfilmentLedProduct && (DERIVATIVE_CATEGORIES.has(category) || DERIVATIVE_PRODUCT_CODES.has(code))) {
     matches.push("derivative");
   }
 
@@ -313,7 +319,7 @@ export function getProductIntelligenceClassification(
 
   if (!report.canonicalProductCodes.includes(productCode)) {
     throw new Error(
-      `Unknown or out-of-scope product "${productCode}". Product intelligence classification fails closed outside the canonical 43-product estate.`,
+      `Unknown or out-of-scope product "${productCode}". Product intelligence classification fails closed outside the canonical product estate.`,
     );
   }
 

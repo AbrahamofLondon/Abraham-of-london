@@ -1,0 +1,177 @@
+{
+  "generatedAt": "2026-07-07T13:45:00.000Z",
+  "method": "Grepped pages/api, pages, and lib for recordProductInteraction, runDecisionIntelligence (decision-intelligence-orchestrator), governed-strategic-twin, governed-product-memory, cross-moat, and continuity read models. Wiring classified from actual runtime callers, not from catalog intent flags.",
+  "keyFinding": "Only the diagnostics API path (pages/api/diagnostics/submit.ts + enterprise.ts + team-alignment.ts) invokes the orchestrator (runDecisionIntelligence, persistJourney:true) for surfaces team_assessment / enterprise_assessment / executive_reporting. No surface calls a canonical recordProductInteraction spine or updates a governed strategic twin; crossMoatBrief is referenced only in the master brief and is unbuilt. Instruments, playbooks, strategy room persist structured results (DiagnosticJourney / DecisionInstrumentRun / StrategyIntake) plus signal-verification-records, then stop — dormant signals. Decision Centre is a read-only continuity presenter over journey-derived governed memory.",
+  "surfaces": [
+    {
+      "surface": "diagnostics",
+      "currentWiring": "orchestrated",
+      "writesMemory": true,
+      "updatesTwin": false,
+      "callsOrchestrator": true,
+      "showsContinuity": true,
+      "evidence": "pages/api/diagnostics/submit.ts runDecisionIntelligence(surface:'team_assessment'|'enterprise_assessment'|'executive_reporting'), persistJourney:true; enterprise.ts and team-alignment.ts also orchestrate.",
+      "topOpportunity": "Promote the diagnostics journey persistence into an explicit governed strategic-twin update so the orchestrator's output compounds a versioned twin, not just a DiagnosticJourney row."
+    },
+    {
+      "surface": "playbooks",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": false,
+      "evidence": "pages/api/playbooks/[slug]/run.ts persists to DiagnosticJourney(playbook_run) only; catalog markets 'Writes to Decision Centre memory' but no governed memory/twin/orchestrator call exists.",
+      "topOpportunity": "Route every completed playbook run through recordProductInteraction so the advertised 'Writes to Decision Centre memory' becomes a governed memory + twin update — the single highest-leverage vertical slice (3 playbooks) named in the phase plan."
+    },
+    {
+      "surface": "instruments",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": false,
+      "evidence": "pages/api/decision-instruments/results/index.ts persists DecisionInstrumentRun + DiagnosticJourney(instrument_result) + signal-verification-record; 11 instruments carry writesToDecisionMemory:true in catalog but no memory/twin/orchestrator write occurs.",
+      "topOpportunity": "Wire the shared instrument-run completion (completeInstrumentRun) to recordProductInteraction + twin update so all 11 memory-flagged instruments compound at once through one connective adapter."
+    },
+    {
+      "surface": "boardroom brief",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": false,
+      "evidence": "human_reviewed_dossier via BoardroomBriefOrder + /admin/boardroom fulfilment; writesToDecisionMemory:false; no orchestrator/twin call.",
+      "topOpportunity": "On dossier delivery, emit a governed interaction capturing the decision statement/contradiction/next-move so the brief seeds the twin and becomes cross-moat-eligible instead of terminating at PDF."
+    },
+    {
+      "surface": "executive reporting",
+      "currentWiring": "orchestrated",
+      "writesMemory": true,
+      "updatesTwin": false,
+      "callsOrchestrator": true,
+      "showsContinuity": true,
+      "evidence": "ExecutiveReportingRun; diagnostics submit routes surface:'executive_reporting' through runDecisionIntelligence with persistJourney:true; admin at /admin/reporting/executive.",
+      "topOpportunity": "Bind the ExecutiveReportingRun artifact to a versioned twin update + provenance chain so each report is a longitudinal, replayable twin checkpoint rather than a one-off journey."
+    },
+    {
+      "surface": "monthly reporting",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "lib/fulfilment/reporting/monthly-reporting-service.ts is a recurring cycle orchestrator with per-cycle DeliveryProof (in-memory reference store); no twin/orchestrator/governed-memory call.",
+      "topOpportunity": "Feed each monthly cycle output into the twin as a longitudinal datapoint so month-over-month drift/contradiction is computed and shown — the archetypal compounding surface."
+    },
+    {
+      "surface": "custom reporting",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "lib/fulfilment/reporting/custom-reporting-service.ts is an engagement service with versioned scope amendments; no twin/orchestrator/governed-memory call.",
+      "topOpportunity": "Persist engagement scope/version and deliverable into scoped case memory so re-engagements resume from prior scope state (scope/version memory) rather than a cold brief."
+    },
+    {
+      "surface": "strategy room",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": false,
+      "evidence": "pages/api/strategy-room/submit.ts persists StrategyIntake + createMaterialOutputVerificationRecord + createGovernedReviewObligation; analyze/enrol/intake exist but none call the orchestrator or twin.",
+      "topOpportunity": "Route the strategy-room intake/analysis through recordProductInteraction so session state updates the twin and produces a governed next admissible move — the highest-value paid session state is currently discarded from the loop."
+    },
+    {
+      "surface": "retainers",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "retainer_cycle contracts (Core/Operational/Institutional); lib/product retainer-cycle memory + decision-centre-retainer-memory preview exist and are surfaced read-only in Decision Centre; pages/api/retainer/intake.ts has no orchestrator/twin call.",
+      "topOpportunity": "Connect the existing retainer-cycle memory to a twin update per oversight cycle so retainers demonstrate cycle-over-cycle intervention calibration and accountability — the strongest defensibility surface."
+    },
+    {
+      "surface": "GMI",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "pages/intelligence/market.tsx reads market-intelligence-call-ledger (scored calls, pending review); GMI editions have full lifecycle/DII/falsification governance; but no customer twin join (crossMoatBrief unbuilt).",
+      "topOpportunity": "Build crossMoatBrief(caseId, editionId) joining the customer twin to the current GMI edition as a governed EXPOSURE event (never inferring agreement) — the moat-fusion step that makes GMI compounding for individual customers."
+    },
+    {
+      "surface": "decision centre",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "pages/api/decision-centre/cases.ts builds a governed-memory PRESENTER from DiagnosticJourney (journey-governed-memory-adapter), retainer-cycle memory preview, journey continuity, and client-continuity summary — read side only; nothing writes canonical memory or a twin.",
+      "topOpportunity": "Expose a real twin snapshot (once instruments/playbooks write memory) in Decision Centre so continuity is twin-derived and customer-visible, not just journey-reconstructed."
+    },
+    {
+      "surface": "living layer",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "lib/product/purpose-alignment-living-adapter.ts maps a result + optional DecisionIntelligenceResult into a LivingLayerViewModel (living-layer-view-model); pages/intelligence/memory.tsx renders decision-memory continuity. Presentation adapter, not a writer.",
+      "topOpportunity": "Have the living-layer view model read the governed twin version + provenance so 'oversight memory' stages reflect real compounding state instead of single-diagnostic stage inference (stagesCompleted hardcoded to 2)."
+    },
+    {
+      "surface": "enterprise assessment",
+      "currentWiring": "orchestrated",
+      "writesMemory": true,
+      "updatesTwin": false,
+      "callsOrchestrator": true,
+      "showsContinuity": true,
+      "evidence": "pages/api/diagnostics/submit.ts runDecisionIntelligence(surface:'enterprise_assessment') with domain scores + scenario responses, persistJourney:true.",
+      "topOpportunity": "Persist the enterprise dependency/authority/exposure reading into an organisation-scoped twin so enterprise accounts get portfolio-level continuity across seats and cases."
+    },
+    {
+      "surface": "fast diagnostic",
+      "currentWiring": "partial",
+      "writesMemory": true,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "Free entry diagnostic at /diagnostics/fast producing fracture + required move + 48h checkpoint; persists a journey but is not the orchestrated team/enterprise/executive path in submit.ts.",
+      "topOpportunity": "Route the fast diagnostic result through the orchestrator so the very first customer interaction seeds the twin and the 48h checkpoint becomes a governed outcome/accountability point."
+    },
+    {
+      "surface": "purpose-alignment/personal-decision-audit",
+      "currentWiring": "partial",
+      "writesMemory": true,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "app/api/purpose-alignment/assessments/route.ts + lib/product/purpose-alignment-living-adapter.ts (accepts DecisionIntelligenceResult); writesToDecisionMemory:true; converted to governed memory via lib/alignment/evidence-memory for Decision Centre display, but no twin update / orchestrator call at write time.",
+      "topOpportunity": "Invoke the orchestrator on audit completion and update the twin, so the mandate/obligation/drift signals it already produces compound instead of only rendering in a living-layer view."
+    },
+    {
+      "surface": "admin fulfilment",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "estate fulfilment spine + /admin/boardroom, /admin/reporting/*, /admin/intelligence/gmi-control-plane; boardroom order routes (approve/deliver/generate-dossier) reference governed memory helpers but operate on delivery state, not the compounding twin.",
+      "topOpportunity": "Emit a governed interaction + outcome checkpoint at delivery confirmation so fulfilment completion closes the calibration/accountability loop (delivered → outcome captured) for every dossier/report."
+    },
+    {
+      "surface": "customer status",
+      "currentWiring": "partial",
+      "writesMemory": false,
+      "updatesTwin": false,
+      "callsOrchestrator": false,
+      "showsContinuity": true,
+      "evidence": "Customer-facing continuity is reconstructed from DiagnosticJourney + client-continuity-summary (loadClientContinuitySummaryForCase) and retainer memory preview in Decision Centre; shows 'feedback continuity' but not twin state.",
+      "topOpportunity": "Surface a provenance-backed twin status ('why is this shown?') tracing interaction → product → run → memory → twin version, turning status into the customer-visible proof of compounding."
+    }
+  ]
+}

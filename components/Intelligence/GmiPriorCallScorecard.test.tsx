@@ -43,12 +43,12 @@ describe("GmiPriorCallScorecard data — Q2 2026 preparation view", () => {
     expect(data.total).toBe(8);
   });
 
-  it("reports 7 calls due in Q2", () => {
-    expect(data.dueInCurrentQuarter).toBe(7);
+  it("reports 6 calls due in Q2", () => {
+    expect(data.dueInCurrentQuarter).toBe(6);
   });
 
-  it("reports 1 call carried forward to Q3", () => {
-    expect(data.carriedForward).toBe(1);
+  it("reports 2 calls carried forward beyond Q2", () => {
+    expect(data.carriedForward).toBe(2);
   });
 
   it("reviewed + pending = dueInCurrentQuarter (review progress is tracked)", () => {
@@ -56,8 +56,8 @@ describe("GmiPriorCallScorecard data — Q2 2026 preparation view", () => {
     expect(data.reviewed + data.pending).toBe(data.dueInCurrentQuarter);
   });
 
-  it("at least 1 call remains pending or TOO_EARLY_TO_ASSESS", () => {
-    expect(data.pending).toBeGreaterThanOrEqual(1);
+  it("has no pending Q2 calls after release review", () => {
+    expect(data.pending).toBe(0);
   });
 
   it("does not overstate reviewed count — reviewed + pending = dueInCurrentQuarter", () => {

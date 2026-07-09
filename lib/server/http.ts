@@ -255,12 +255,16 @@ export function checkRateLimit(
 }
 
 if (typeof setInterval !== "undefined") {
-  setInterval(() => {
+  const _rateLimitCleanup = setInterval(() => {
     const now = Date.now();
     for (const [key, entry] of rateLimitStore.entries()) {
       if (now > entry.resetTime + 60000) rateLimitStore.delete(key);
     }
   }, 60000);
+  // Best-effort in-memory cleanup timer. It must NOT keep the Node event loop alive, or
+  // `next build` (which imports this module during static generation) never exits
+  // naturally. unref() lets the process terminate with the timer still pending.
+  if (typeof _rateLimitCleanup.unref === "function") _rateLimitCleanup.unref();
 }
 
 // CORS helper for API routes

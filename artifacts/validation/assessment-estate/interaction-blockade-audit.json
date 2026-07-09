@@ -1,0 +1,177 @@
+{
+  "generatedAt": "SOURCE_CONTROLLED",
+  "counts": {
+    "CONTROLLED_ACCESS_ROUTE": 11,
+    "AUTHENTICATION_DEPENDENT": 4,
+    "ENTITLEMENT_DEPENDENT": 3
+  },
+  "staleReadinessBlock": 0,
+  "missingHandler": 0,
+  "missingRoute": 0,
+  "deadCta": 0,
+  "falseDisable": 0,
+  "interactions": [
+    {
+      "route": "/diagnostics/enterprise",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/diagnostics/enterprise-assessment",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/enterprise-decision-scan",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/assessment/[token]",
+      "control": "present_or_gated",
+      "reason": "AUTHENTICATION_DEPENDENT",
+      "authoritySource": "route/auth contract",
+      "evidence": "Account or signed token required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/diagnostics/executive-reporting",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/playbooks/execution-integrity-protocol/run",
+      "control": "present_or_gated",
+      "reason": "ENTITLEMENT_DEPENDENT",
+      "authoritySource": "playbook run authority",
+      "evidence": "Paid/playbook entitlement required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/playbooks/alignment-audit-playbook/run",
+      "control": "present_or_gated",
+      "reason": "ENTITLEMENT_DEPENDENT",
+      "authoritySource": "playbook run authority",
+      "evidence": "Paid/playbook entitlement required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/playbooks/drift-detection-framework/run",
+      "control": "present_or_gated",
+      "reason": "ENTITLEMENT_DEPENDENT",
+      "authoritySource": "playbook run authority",
+      "evidence": "Paid/playbook entitlement required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/foundry/decision-test",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/foundry/release-risk-test",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/foundry/market-signal-test",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/engagements/operator-pilot",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/strategy-room",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/engagements/operator-pilot-status",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/admin/operator-pilot",
+      "control": "present_or_gated",
+      "reason": "AUTHENTICATION_DEPENDENT",
+      "authoritySource": "route/auth contract",
+      "evidence": "Account or signed token required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/corridor",
+      "control": "present_or_gated",
+      "reason": "CONTROLLED_ACCESS_ROUTE",
+      "authoritySource": "commercial resolver/governance",
+      "evidence": "Human qualification or manual billing required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/decision-centre",
+      "control": "not_applicable",
+      "reason": "AUTHENTICATION_DEPENDENT",
+      "authoritySource": "route/auth contract",
+      "evidence": "Account or signed token required",
+      "disposition": "keep",
+      "fixCommit": null
+    },
+    {
+      "route": "/decision-centre/case/[caseId]",
+      "control": "present_or_gated",
+      "reason": "AUTHENTICATION_DEPENDENT",
+      "authoritySource": "route/auth contract",
+      "evidence": "Account or signed token required",
+      "disposition": "keep",
+      "fixCommit": null
+    }
+  ]
+}

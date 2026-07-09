@@ -1,0 +1,9 @@
+{
+  "productCode": "team_assessment",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

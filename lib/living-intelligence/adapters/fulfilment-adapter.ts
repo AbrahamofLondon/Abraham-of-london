@@ -569,7 +569,7 @@ function fulfilmentProofRecords(): Record<string, unknown>[] {
     {
       sourceType: "case_study",
       sourceId: "fulfilment-proof-case-study",
-      productCode: "case_study",
+      sourceCode: "case_study",
       deliveryStatus: "DRAFT",
       generationStatus: "DRAFT",
       consentStatus: "MISSING",

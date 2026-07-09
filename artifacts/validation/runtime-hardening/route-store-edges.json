@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "runtime-hardening.route-store-edges.v2",
+  "generatedAt": "2026-07-08T12:52:41+01:00",
+  "head": "68c475794",
+  "purpose": "Current production route to store authority map after migrating the remaining known runtime stores to composed Postgres/Prisma adapters.",
+  "edges": [
+    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "savePilotIntake / getPilotIntakeByRef / toCustomerStatus", "storeInterface": "PilotIntakeStore", "adapter": "production Prisma/Postgres via pilot-intake-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/engagements/operator-pilot.ts", "runtimeService": "recordFunnelEvent (PILOT_SUBMITTED / PILOT_MORE_INFO_REQUIRED)", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/admin/operator-pilot.ts", "runtimeService": "listPilotQueue / transitionPilotState", "storeInterface": "PilotIntakeStore", "adapter": "production Prisma/Postgres via pilot-intake-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/admin/operator-pilot.ts", "runtimeService": "recordFunnelEvent (PILOT_ACCEPTED / PILOT_DECLINED / COMMERCIAL_CONTINUATION_COMPLETED)", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/demo/funnel-event.ts", "runtimeService": "recordFunnelEvent", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/admin/demo-conversion.tsx", "runtimeService": "summarizeFunnel", "storeInterface": "FunnelEventStore", "adapter": "production Prisma/Postgres via funnel-event-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/demo/signal-consent-continuation.ts", "runtimeService": "Signal consent transition store", "storeInterface": "SignalConsentTransitionStore", "adapter": "production Prisma/Postgres via signal-consent-transition-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/api/corridor/recommendation-context.ts", "runtimeService": "save/get recommendation context", "storeInterface": "RecommendationContextStore", "adapter": "production Prisma/Postgres via recommendation-context-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" },
+    { "route": "pages/corridor/index.tsx", "runtimeService": "get recommendation context", "storeInterface": "RecommendationContextStore", "adapter": "production Prisma/Postgres via recommendation-context-store.composed; local/test SQLite", "authority": "PRODUCTION_POSTGRES" }
+  ],
+  "reconciliation": {
+    "distinctProductionRoutesUsingSqlite": 0,
+    "productionRouteStoreEdgesUsingSqlite": 0,
+    "distinctPostgresStoreAuthorities": 4,
+    "storesList": ["PilotIntakeStore", "FunnelEventStore", "SignalConsentTransitionStore", "RecommendationContextStore"],
+    "UNMAPPED_ROUTE_STORE_EDGE": 0,
+    "PRODUCTION_ROUTES_USING_SQLITE": 0,
+    "PRODUCTION_SQLITE_CUSTOMER_STATE": 0
+  },
+  "guardCoverage": "tests/runtime-hardening/serverless-route-store-boundaries.test.ts fails if production entrypoints import the direct local SQLite store modules instead of composed authorities. tests/demo-journey/sqlite-runtime-guard.test.ts proves direct SQLite adapters still fail closed in NODE_ENV=production."
+}

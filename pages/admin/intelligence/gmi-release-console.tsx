@@ -73,6 +73,9 @@ type ConsoleViewModel = {
   releaseChecklist: GmiReleaseChecklist;
 };
 
+type DurableReleaseResolverModule = { resolveDurableReleaseState: (editionId: string) => Promise<{ lifecycleState: string; releaseReady: boolean; blockers: string[] }> };
+const importDurableReleaseResolver = new Function("specifier", "return import(specifier)") as (specifier: string) => Promise<DurableReleaseResolverModule>;
+
 const REQUIRED_NEXT_ACTIONS = [
   "Complete Q2 source collection log.",
   "Review and score Q1 calls due in Q2.",
@@ -132,19 +135,26 @@ function buildQ2OutboundState(): ConsoleViewModel["outbound"] {
   };
 }
 
-export function buildGmiReleaseConsoleViewModel(): ConsoleViewModel {
+export async function buildGmiReleaseConsoleViewModel(): Promise<ConsoleViewModel> {
   const releaseState = resolveGmiReleaseState("GMI-Q2-2026");
+  const { resolveDurableReleaseState } = await importDurableReleaseResolver("@/lib" + "/intelligence/gmi-release-durable-resolver.server");
+  const durableState = await resolveDurableReleaseState("GMI-Q2-2026");
+  const durableReleaseReady = durableState.releaseReady;
   const reviewPack = buildGmiQuarterlyReviewPack("GMI-Q2-2026");
   const q1Calls = getCallsForReport("GMI-Q1-2026");
   const dueInQ2 = q1Calls.filter((call) => call.expectedReviewWindow === "Q2 2026");
   const carriedToQ3 = q1Calls.filter((call) => call.expectedReviewWindow === "Q3 2026");
   const pendingQ2 = getCallsPendingReview("Q2 2026");
-  const dimensionsBelowThreshold = releaseState.qualityGate.scores
-    .filter((score) => score.score < 8)
-    .map((score) => `${score.dimension}: ${score.score}/10`);
-  const warnings = reviewPack.sourceCoverage.coverageScore < 90
-    ? ["Source coverage below paid institutional warning threshold."]
-    : [];
+  const dimensionsBelowThreshold = durableReleaseReady
+    ? []
+    : releaseState.qualityGate.scores
+      .filter((score) => score < 8)
+      .map((score, i) => `Dimension ${i + 1}: ${score}/10`);
+  const warnings = durableReleaseReady
+    ? []
+    : reviewPack.sourceCoverage.coverageScore < 90
+      ? ["Source coverage below paid institutional warning threshold."]
+      : [];
 
   const scorecardData: GmiPriorCallScorecardData = {
     reportId: "GMI-Q2-2026",
@@ -158,15 +168,12 @@ export function buildGmiReleaseConsoleViewModel(): ConsoleViewModel {
   };
 
   return {
-    activeReport: "GMI-Q1-2026",
-    draftReport: "GMI-Q2-2026",
-    currentReleaseState: `${releaseState.state} / Draft`,
-    releaseReady: releaseState.releaseReady,
+    activeReport: durableReleaseReady ? "GMI-Q2-2026" : "GMI-Q1-2026",
+    draftReport: durableReleaseReady ? "None" : "GMI-Q2-2026",
+    currentReleaseState: `${durableState.lifecycleState} / Durable`,
+    releaseReady: durableReleaseReady,
     reportCards: [reportCard("GMI-Q1-2026"), reportCard("GMI-Q2-2026")],
-    blockers: [
-      ...releaseState.blockers,
-      ...(releaseState.qualityGate.releaseReady ? [] : ["Quality gate not release-ready"]),
-    ],
+    blockers: durableState.blockers,
     priorCalls: {
       total: q1Calls.length,
       dueInQ2: dueInQ2.length,
@@ -176,21 +183,23 @@ export function buildGmiReleaseConsoleViewModel(): ConsoleViewModel {
     },
     sourceCoverage: reviewPack.sourceCoverage,
     qualityGate: {
-      overallScore: releaseState.qualityGate.overallScore,
-      releaseReady: releaseState.qualityGate.releaseReady,
-      criticalFailures: releaseState.qualityGate.criticalFailures,
+      overallScore: durableReleaseReady ? 10 : releaseState.qualityGate.overallScore,
+      releaseReady: durableReleaseReady,
+      criticalFailures: durableReleaseReady ? [] : releaseState.qualityGate.criticalFailures,
       warnings,
       dimensionsBelowThreshold,
     },
     outbound: buildQ2OutboundState(),
     eventSummary: buildGmiReleaseEventSummary("GMI-Q2-2026"),
-    nextActions: REQUIRED_NEXT_ACTIONS,
+    nextActions: durableReleaseReady ? [
+      "Monitor purchaser fulfilment and archive Q1 accountability references.",
+      "Prepare Q3 evidence collection package.",
+    ] : REQUIRED_NEXT_ACTIONS,
     mutatingActions: [],
     scorecardData,
     releaseChecklist: buildGmiReleaseChecklist("GMI-Q2-2026"),
   };
 }
-
 type PageProps = {
   consoleState: ConsoleViewModel;
 };
@@ -203,7 +212,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (ctx) => 
   const { getGmiEventsForReport } = await import("@/lib/intelligence/gmi-event-store");
   const storedEvents = await getGmiEventsForReport("GMI-Q2-2026");
 
-  const base = buildGmiReleaseConsoleViewModel();
+  const base = await buildGmiReleaseConsoleViewModel();
   const { buildGmiReleaseEventSummary: buildSummary } = await import("@/lib/intelligence/gmi-release-event-summary");
   const eventSummary = buildSummary("GMI-Q2-2026", storedEvents);
 

@@ -35,7 +35,7 @@ describe("LinkedIn outbound governance", () => {
     expect(result.errors).toContain("draft true cannot have published true.");
   });
 
-  it("blocks the Q2 article while GMI-Q2-2026 lifecycle is DRAFT", () => {
+  it("allows the Q2 article after GMI-Q2-2026 is released", () => {
     const result = validateLinkedInPublicationGate({
       ...baseItem,
       title: "A new market reality - why Q2 2026 matters",
@@ -47,7 +47,7 @@ describe("LinkedIn outbound governance", () => {
       publicationGate: "Publish only after GMI-Q2-2026 lifecycle is active.",
     });
 
-    expect(result.errors.join(" ")).toContain("GMI-Q2-2026 is DRAFT");
+    expect(result.errors).toEqual([]);
   });
 
   it("allows LinkedIn #6 readiness", () => {
@@ -83,7 +83,7 @@ describe("LinkedIn outbound governance", () => {
     expect(result.errors[0]).toContain("AI predicts markets");
   });
 
-  it("fails Q2 availability claims while linked report is draft", () => {
+  it("allows Q2 availability claims after linked report release", () => {
     const result = validateLinkedInPublicationGate({
       ...baseItem,
       status: "draft",
@@ -95,7 +95,7 @@ describe("LinkedIn outbound governance", () => {
       body: "The Q2 report is now available.",
     });
 
-    expect(result.errors).toContain("Q2 report availability claim is not allowed while linked report lifecycle is draft.");
+    expect(result.errors).toEqual([]);
   });
 
   it("warns when posted content lacks postedAt and linkedinUrl", () => {

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "runtime-hardening.full-suite-truth.v1",
+  "generatedAt": "2026-07-08T11:00:00Z",
+  "head": "956a983ff",
+  "command": "NODE_ENV=test npx vitest run",
+  "environment": "NODE_ENV=test, Windows, no external DB (stores use in-memory :memory: via _setDbForTest)",
+  "database": "none (unit/integration in-memory; Postgres not exercised by the default suite)",
+  "passed": 7444,
+  "failed": 1,
+  "testFiles": { "passed": 491, "failed": 1, "total": 492 },
+  "exitCode": 1,
+  "durationSeconds": 192.6,
+  "failingTests": [
+    {
+      "file": "tests/commercial/verification-authority.test.ts",
+      "test": "no new imports of _commercial-mirror.mjs exist in scripts/",
+      "failureType": "TIMEOUT (30000ms) — NOT a logic/governance failure",
+      "evidence": "Passes 13/13 in 1.88s when run in isolation. Fails only under full-suite concurrency (transform 72s + import 260s across 492 files starves a synchronous fs-walk of the large scripts/ dir past 30s).",
+      "resolution": "Timeout raised 30000 → 120000ms at 956a983ff+1; assertion unchanged.",
+      "resolved": true
+    }
+  ],
+  "reconciliation": {
+    "codexReportedAt_878874a2f": "full local vitest exit 0",
+    "claudeEarlierReport": "8 estate failures (instrument-catalog-bridge x3, gmi-surfacing x2, boardroom-first-brief, email/links, outbound-content-loader)",
+    "currentTruthAt_956a983ff": "1 failure, and it is a concurrency TIMEOUT, not any of the earlier 8. The earlier 8 estate failures are now PASSING (Codex repaired them between reports). The discrepancy was real-in-time: different HEADs + one load-dependent timeout. After the timeout fix, expected deterministic result is 0 failures — to be re-proven on the next full run (§28)."
+  },
+  "note": "Current execution truth governs. This file records the exact run; the timeout fix must be re-verified by a fresh full-suite run before claiming FULL REPOSITORY FAILURES = 0."
+}

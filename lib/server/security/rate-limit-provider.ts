@@ -1,5 +1,8 @@
 /* lib/server/security/rate-limit-provider.ts — Canonical rate-limit backend */
-/* Backend priority: 1. Upstash REST API 2. ioredis/Redis 3. PostgreSQL 4. In-memory fallback */
+/* Authority (docs/architecture/infrastructure-authority.md): Neon PostgreSQL is the DEFAULT
+ * durable authority; Upstash/Redis are optional acceleration used ONLY via explicit
+ * RATE_LIMIT_BACKEND=upstash|redis; in-memory is local/dev/test only. Order: [explicit
+ * accel if requested] -> Postgres(Neon) -> memory. */
 
 import { getRedis, isRedisAvailable } from "@/lib/redis";
 import type { PersistentRateLimitResult } from "./persistent-rate-limit";
@@ -130,30 +133,42 @@ export async function getRateLimitBackendStatus(): Promise<RateLimitBackendStatu
 }
 
 /**
- * Consume a rate-limit slot using the best available backend.
+ * Explicit acceleration opt-in (infrastructure-authority.md). Upstash/Redis are used ONLY
+ * when RATE_LIMIT_BACKEND=upstash|redis; credential presence must not auto-promote them.
+ */
+function acceleratedBackend(): "upstash" | "redis" | null {
+  const pref = (process.env.RATE_LIMIT_BACKEND || "").trim().toLowerCase();
+  return pref === "upstash" ? "upstash" : pref === "redis" ? "redis" : null;
+}
+
+/**
+ * Consume a rate-limit slot honouring the infrastructure authority rule
+ * (docs/architecture/infrastructure-authority.md):
+ *   0. explicit acceleration ONLY if RATE_LIMIT_BACKEND=upstash|redis (opt-in)
+ *   1. PostgreSQL (Neon) — DEFAULT durable authority
+ *   2. in-memory — local/dev/test fallback (warns + respects failClosed in production)
  *
- * Backend priority:
- * 1. Upstash REST API (UPSTASH_REDIS_REST_URL)
- * 2. ioredis/Redis (REDIS_URL / REDIS_HOST via persistent-rate-limit.ts)
- * 3. PostgreSQL (via rate-limit-store.postgres.ts)
- * 4. In-memory (dev only, warns in production)
+ * failClosed here bounds the TELEMETRY write only; the customer decision/pilot path is
+ * fire-and-forget / try-catch isolated and must never be blocked by a limiter outage.
  */
 export async function consumeRateLimit(options: RateLimitOptions): Promise<RateLimitVerdict> {
   const { key, limit, windowMs, failClosed = true } = options;
+  const accel = acceleratedBackend();
 
-  // 1. Try Upstash REST API
-  const upstashResult = await tryUpstashRateLimit(key, limit, windowMs);
-  if (upstashResult) return upstashResult;
+  // 0. Explicit acceleration opt-in (never auto-promoted by mere credential presence).
+  if (accel === "upstash") {
+    const upstashResult = await tryUpstashRateLimit(key, limit, windowMs);
+    if (upstashResult) return upstashResult;
+  } else if (accel === "redis") {
+    const redisResult = await tryRedisRateLimit(key, limit, windowMs);
+    if (redisResult) return redisResult;
+  }
 
-  // 2. Try ioredis/Redis via persistent-rate-limit
-  const redisResult = await tryRedisRateLimit(key, limit, windowMs);
-  if (redisResult) return redisResult;
-
-  // 3. Try PostgreSQL
+  // 1. Durable authority: PostgreSQL (Neon).
   const pgResult = await tryPostgresRateLimit(key, limit, windowMs);
   if (pgResult) return pgResult;
 
-  // 4. Final fallback: in-memory
+  // 2. Final fallback: in-memory (local/dev/test).
   return consumeMemoryRateLimit(key, limit, windowMs, failClosed);
 }
 

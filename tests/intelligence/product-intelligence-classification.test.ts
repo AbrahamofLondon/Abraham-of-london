@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PRODUCT_FULFILMENT_CONTRACTS } from "@/lib/product/product-fulfilment-contract";
 import {
   PRODUCT_INTELLIGENCE_CLASSES,
   assertCompleteProductIntelligenceClassificationCoverage,
@@ -33,6 +34,7 @@ const EXPECTED_CLASSIFICATIONS: Record<string, ProductIntelligenceClass> = {
   gmi_q1_2026: "proof_surface",
   gmi_q2_2026: "proof_surface",
   gmi_q3_2026: "proof_surface",
+  gmi_quarterly: "derivative",
   governance_drift_detector: "originator",
   governance_suite: "wrapper",
   inner_circle: "infrastructure",
@@ -43,6 +45,8 @@ const EXPECTED_CLASSIFICATIONS: Record<string, ProductIntelligenceClass> = {
   personal_decision_audit: "originator",
   professional: "infrastructure",
   professional_annual: "infrastructure",
+  reporting_custom: "fulfilment",
+  reporting_monthly: "derivative",
   retainer_core: "infrastructure",
   retainer_institutional: "infrastructure",
   retainer_operational: "infrastructure",
@@ -72,12 +76,13 @@ function countExpectedByClass(): Record<ProductIntelligenceClass, number> {
 }
 
 describe("product intelligence classification", () => {
-  it("covers the canonical 43-product estate exactly once", () => {
+  it("covers the canonical product estate exactly once", () => {
     const report = buildProductIntelligenceClassificationReport();
 
-    expect(report.expectedProductCount).toBe(43);
-    expect(report.uniqueProductCount).toBe(43);
-    expect(report.classifiedProductCount).toBe(43);
+    const expectedCount = PRODUCT_FULFILMENT_CONTRACTS.length;
+    expect(report.expectedProductCount).toBe(expectedCount);
+    expect(report.uniqueProductCount).toBe(expectedCount);
+    expect(report.classifiedProductCount).toBe(expectedCount);
     expect(report.completeCoverage).toBe(true);
     expect(report.duplicateRegistryProductCodes).toEqual([]);
     expect(report.unclassifiedProducts).toEqual([]);
@@ -85,7 +90,7 @@ describe("product intelligence classification", () => {
   });
 
   it("locks the class for every classified product", () => {
-    expect(Object.keys(EXPECTED_CLASSIFICATIONS)).toHaveLength(43);
+    expect(Object.keys(EXPECTED_CLASSIFICATIONS)).toHaveLength(PRODUCT_FULFILMENT_CONTRACTS.length);
 
     for (const [productCode, expectedClassification] of Object.entries(EXPECTED_CLASSIFICATIONS)) {
       expect(getProductIntelligenceClass(productCode)).toBe(expectedClassification);
@@ -99,8 +104,8 @@ describe("product intelligence classification", () => {
     const allClassifications = listAllProductIntelligenceClassifications();
     const expectedCounts = countExpectedByClass();
 
-    expect(allClassifications).toHaveLength(43);
-    expect(new Set(allClassifications.map((entry) => entry.productCode)).size).toBe(43);
+    expect(allClassifications).toHaveLength(PRODUCT_FULFILMENT_CONTRACTS.length);
+    expect(new Set(allClassifications.map((entry) => entry.productCode)).size).toBe(PRODUCT_FULFILMENT_CONTRACTS.length);
     expect(report.classifications).toEqual(allClassifications);
     expect(report.countsByClass).toEqual(expectedCounts);
     expect(Object.keys(report.countsByClass).sort()).toEqual(
@@ -112,8 +117,6 @@ describe("product intelligence classification", () => {
     expect(() => getProductIntelligenceClass("future_authority_product")).toThrow(
       /fails closed/i,
     );
-    expect(() => getProductIntelligenceClass("reporting_monthly")).toThrow(
-      /out-of-scope product/i,
-    );
+    expect(getProductIntelligenceClass("reporting_monthly")).toBe("derivative");
   });
 });

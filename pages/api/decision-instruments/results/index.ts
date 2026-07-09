@@ -16,6 +16,8 @@ import {
   InstrumentRunPersistenceError,
   startInstrumentRun,
 } from "@/lib/decision-instruments/instrument-run-authority";
+import { recordInstrumentRunInteraction, resolveTenantCase } from "@/lib/intelligence/interaction-spine/runtime-binding";
+import { resolveRuntimeSpine } from "@/lib/intelligence/interaction-spine/runtime-spine-provider";
 
 function stringOrNull(value: unknown): string | null {
   const text = typeof value === "string" ? value.trim() : "";
@@ -89,6 +91,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         scoreJson: payload,
         nextRouteSlug,
       });
+
+      // §3 on-switch: feed the AUTHORITATIVE instrument result into the compounding
+      // system (exposure/contradiction/evidence dimensions → versioned twin). Fail-safe.
+      const tc = resolveTenantCase({ subjectId: userId, email: userEmail });
+      if (tc) {
+        await recordInstrumentRunInteraction(resolveRuntimeSpine, {
+          instrumentSlug: slug,
+          tenantId: tc.tenantId,
+          caseId: tc.caseId,
+          runId: run.id,
+          scoreJson: payload,
+        });
+      }
 
       // Non-fatal verification record — instrument completion creates a future accountability point
       try {

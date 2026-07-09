@@ -37,7 +37,7 @@ export type GmiEditionCommercialStatus =
   | "draft"          // Not yet released. Hidden from pricing. No checkout allowed.
   | "active"         // Active paid checkout edition. Requires stripeProductId + stripePriceId.
   | "manual_billing" // Active but no self-serve checkout. Routes to enquiry/intake.
-  | "archived"       // Superseded edition. Hidden from pricing. Checkout still possible for historical access.
+  | "archived"       // Superseded edition. Hidden from pricing. historical access preserved through existing entitlements; no new standalone checkout.
   | "retired";       // Decommissioned. No checkout. No route. Admin record only.
 
 export type GmiEditionRegistryEntry = {
@@ -60,9 +60,9 @@ export type GmiEditionRegistryEntry = {
   stripeProductId?: string | null;
   /** Required if status === "active" (paid_checkout). Null for manual_billing/draft. */
   stripePriceId?: string | null;
-  /** Price in pence GBP. Default 5900 (£59) if omitted. */
+  /** Price in pence GBP. Default 5900 pence if omitted. */
   amountGbp?: number;
-  /** Display price string e.g. "£59". Derived from amountGbp if omitted. */
+  /** Display price string. Derived from amountGbp if omitted. */
   displayPrice?: string;
   /** ISO date when this edition was or will be released */
   releaseDate?: string;
@@ -75,11 +75,9 @@ export type GmiEditionRegistryEntry = {
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
-  // ── Q1 2026 — CURRENT PUBLISHED issue ────────────────────────────────────────
-  // Reconciled to the authoritative lifecycle (market-intelligence-lifecycle.ts):
-  // GMI-Q1-2026 is ACTIVE_UNTIL_SUPERSEDED — the current published, purchasable,
-  // public-visible issue until Q2 actually publishes. It only becomes archived
-  // after Q2 is published. Stripe IDs confirmed: prod_UNnSL8r6DMedEH.
+  // ── Q1 2026 — superseded by GMI-Q2-2026 on 2026-07-08 ───────────────────────
+  // Reconciled to the authoritative lifecycle: Q1 was superseded through the
+  // atomic release transaction. Archived; historical access preserved.
   {
     editionId: "GMI-Q1-2026",
     productCode: "gmi_q1_2026",
@@ -87,43 +85,39 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     year: 2026,
     title: "Global Market Report — Q1 2026",
     slug: "q1-2026",
-    status: "active",
-    current: false, // admin in-focus flag only (Q2 is in preparation); NOT commercial truth
-    hiddenFromPricing: false,
-    stripeProductId: "prod_UNnSL8r6DMedEH",
-    stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
+    status: "archived",
+    current: false,
+    hiddenFromPricing: true,
+    hiddenReason: "superseded_by_gmi_q2_2026",
+    stripeProductId: null,
+    stripePriceId: null,
     amountGbp: 5900,
-    displayPrice: "£59",
     releaseDate: "2026-04-08",
-    shortDescription: "Q1 2026 market report — the current published issue. Remains active for Q2 2026 operating decisions until superseded.",
-    pricingNote: "Coverage period: Q1 2026. Current decision window: Q2 2026. Remains active until superseded by Q2 2026.",
+    shortDescription: "Q1 2026 market report — superseded by the Q2 2026 edition; retained for historical access and the public call-scoring record.",
+    pricingNote: "Coverage period: Q1 2026. Superseded by GMI-Q2-2026 on 2026-07-08; retained for historical access.",
   },
 
-  // ── Q2 2026 — release candidate (DRAFT, not yet published) ────────────────────
-  // Reconciled to the authoritative lifecycle: GMI-Q2-2026 is DRAFT — a production
-  // release candidate, publication target 2026-07-08. Not purchasable, not public,
-  // hidden from pricing. `current: true` here is the ADMIN in-preparation focus
-  // flag only — it does NOT mean "current published". Public/commercial "current"
-  // is computed from the lifecycle (getCurrentPublishedMarketIntelligenceReport).
-  // To release: complete the Q2 workflow, then set status "active"/"manual_billing".
+  // ── Q2 2026 — CURRENT PUBLISHED EDITION (released 2026-07-08) ────────────────
+  // Reconciled to the authoritative lifecycle: released through the atomic
+  // transaction with hash-bound owner authority and release receipt.
+  // Commercial mode: active paid checkout at the £59 edition identity using the
+  // existing GMI Stripe product/price binding; Q1 remains historical only.
   {
     editionId: "GMI-Q2-2026",
     productCode: "gmi_q2_2026",
     quarter: "Q2",
     year: 2026,
-    title: "Global Market Report — Q2 2026",
+    title: "Global Market Intelligence — Q2 2026",
     slug: "q2-2026",
-    status: "draft",
-    current: true, // admin in-preparation focus only; NOT commercial/publication truth
-    hiddenFromPricing: true,
-    hiddenReason: "release_candidate_publication_target_2026_07_08",
-    stripeProductId: null,
-    stripePriceId: null,
+    status: "active",
+    current: true,
+    hiddenFromPricing: false,
+    stripeProductId: "prod_UNnSL8r6DMedEH",
+    stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
     amountGbp: 5900,
-    displayPrice: "£59",
     releaseDate: "2026-07-08",
-    shortDescription: "Q2 2026 market report — release candidate, in preparation. Scheduled publication 8 July 2026.",
-    pricingNote: "Coverage period: Q2 2026. Release candidate — scheduled publication 8 July 2026. Not yet the current published issue.",
+    shortDescription: "Quarterly decision intelligence for leaders operating under structural uncertainty. Current published edition.",
+    pricingNote: "Coverage period: Q2 2026. Current published edition — released 2026-07-08 with evidence lock and owner release authority. £59 per issue via canonical self-serve checkout bound to GMI-Q2-2026.",
   },
 
   // ── Q3 2026 — draft (blocked) ───────────────────────────────────────────────
@@ -143,7 +137,6 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     stripeProductId: null,
     stripePriceId: null,
     amountGbp: 5900,
-    displayPrice: "£59",
     releaseDate: undefined,
     shortDescription: "Q3 2026 market report — not yet released.",
     pricingNote: "Draft — not yet available.",

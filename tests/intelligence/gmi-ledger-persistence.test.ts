@@ -9,7 +9,7 @@ describe("GMI persistent call ledger contract", () => {
   it("adds Prisma models and migration tables for ledger entries and status history", () => {
     const schema = fs.readFileSync(path.join(process.cwd(), "prisma/schema.prisma"), "utf8");
     const migration = fs.readFileSync(
-      path.join(process.cwd(), "prisma/migrations/20260606_add_gmi_persistent_ledger/migration.sql"),
+      path.join(process.cwd(), "prisma/_archived-migrations-pre-baseline/20260606_add_gmi_persistent_ledger/migration.sql"),
       "utf8",
     );
 

@@ -8,7 +8,7 @@
 
 ## Hard Prerequisites (All Must Be Met Before Sending)
 
-- [ ] Ch.17 specialist legal review complete and cleared
+- [ ] Specialist legal review complete and cleared for Chapters 4, 13, 17, 18, 19, 22, 25, and 26
 - [ ] Author bio (`06-author-bio.md`) finalised — required as part of email body
 - [ ] Reiko Davis confirmed open at defliterary.com immediately before sending
 - [ ] No other DeFiore agent has been queried simultaneously (standard one-agent-per-agency practice)

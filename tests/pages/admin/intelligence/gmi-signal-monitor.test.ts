@@ -80,15 +80,17 @@ describe("buildGmiSignalMonitorViewModel", () => {
     const sources = vm.growthInputRows.map((r) => r.source);
     expect(sources).toContain("IMF");
     expect(sources).toContain("GOLDMAN_SACHS");
-    expect(sources).toContain("MORGAN_STANLEY");
+    expect(sources).toContain("JPMORGAN");
+    expect(sources).not.toContain("MORGAN_STANLEY");
     expect(sources).toContain("AOL_SCENARIO");
   });
 
-  it("Goldman Sachs and Morgan Stanley rows are flagged as pending confirmation", () => {
+  it("Goldman Sachs numeric row is flagged as pending confirmation", () => {
     const gs = vm.growthInputRows.find((r) => r.source === "GOLDMAN_SACHS");
-    const ms = vm.growthInputRows.find((r) => r.source === "MORGAN_STANLEY");
+    const jp = vm.growthInputRows.find((r) => r.source === "JPMORGAN");
     expect(gs?.pendingConfirmation).toBe(true);
-    expect(ms?.pendingConfirmation).toBe(true);
+    expect(jp?.pendingConfirmation).toBe(false);
+    expect(jp?.estimate).toBe("Qualitative only");
   });
 
   it("IMF row is not flagged as pending confirmation (confirmed source)", () => {

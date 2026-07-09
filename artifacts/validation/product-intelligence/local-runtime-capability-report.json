@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-07-07T17:45:00Z",
+  "purpose": "§2 — prove, with evidence, which local runtime/database capabilities are available BEFORE calling anything environment-blocked. Corrects the earlier unproven 'needs live DB' claim.",
+  "databaseOptionsDiscovered": [
+    { "option": "better-sqlite3 (embedded)", "available": true, "evidence": "dependency in package.json; verified working: `node -e` created a table, inserted, and read back a row in :memory:; the durable interaction + outbox stores now run against it (12 tests pass, incl cross-connection disk durability)." },
+    { "option": "SQLite dev runtime (scripts)", "available": true, "evidence": "package.json scripts db:sqlite:setup (scripts/setup-sqlite.js), db:sqlite:migrate (scripts/run-migrations.ts), db:sqlite:seed, data/app.db." },
+    { "option": "Postgres via docker-compose", "available": "conditional", "evidence": "docker-compose.yml present; would require Docker running — not required, since better-sqlite3 already provides a real durable DB for the proof." },
+    { "option": "Prisma/postgres (production path)", "available": false, "evidence": "prisma/schema.prisma provider=postgresql, url=env(DATABASE_URL); this is the PRODUCTION datasource and is out of bounds (no production DB mutation). Not used." }
+  ],
+  "appRuntimeOptionsDiscovered": [
+    { "option": "next build --webpack", "available": true, "evidence": "runs to completion, exit 0, 783/783 static pages — used as the build gate." },
+    { "option": "next dev / running app instance", "available": false, "evidence": "no running app instance in this worktree; not started (would not prove a persisted render without also standing up a DB + auth). Page-render remains the only running-app dependency." },
+    { "option": "component-render harness (RTL/jsdom)", "available": "to_verify", "evidence": "not yet exercised for the Decision Centre component; flagged as the path to close the last page-render item without a full app instance." }
+  ],
+  "integrationTestOptions": [
+    { "option": "vitest against better-sqlite3", "available": true, "evidence": "used — real durable DB round-trip proven deterministically in CI-safe vitest (no external services)." }
+  ],
+  "chosenMethod": "better-sqlite3 ephemeral/file database for the canonical persistence round-trip + durable outbox. Real database, local, no production, no deploy. Satisfies the durability requirement (§4/§5/§7) without touching the production Postgres.",
+  "unavailableMethodsWithEvidence": [
+    "Production Postgres round-trip — deliberately not used (no production DB mutation permitted).",
+    "Full running Next.js app render of the Decision Centre page — no app instance started; the read-model logic + durable persistence are proven, only the rendered page + in-request auth remain."
+  ],
+  "correction": "The earlier report called the persistence round-trip 'environment-blocked'. That was WRONG: a real local durable database (better-sqlite3) was available and is now used to prove the full round-trip. The only genuinely running-app-dependent item is the rendered Decision Centre / observability PAGE."
+}

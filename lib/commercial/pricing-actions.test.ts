@@ -3,21 +3,19 @@ import { CATALOG } from "./catalog";
 import { resolvePricingAction } from "./pricing-actions";
 
 describe("pricing actions", () => {
-  it("renders governance-cleared self-serve products as checkout actions", () => {
-    // professional_annual is not in the governance matrix → catalog-driven checkout.
-    expect(resolvePricingAction(CATALOG.professional_annual!)).toMatchObject({
-      type: "checkout",
-      href: "/pricing",
-    });
+  it("FAIL-CLOSED: ungoverned paid products never resolve to checkout, even with complete Stripe metadata", () => {
+    const ungovernedPaid = { ...CATALOG.boardroom_brief!, code: "ungoverned_paid_probe" };
+    const action = resolvePricingAction(ungovernedPaid);
+    expect(action.purchasable).toBe(false);
+    expect(action.type).not.toBe("checkout");
+    expect(action.reason).toBe("governance_unknown_fail_closed");
   });
 
-  it("blocks internal_only products from public checkout AND public request-access", () => {
-    // professional is releaseMode=internal_only. Internal-only products must not
-    // auto-become public "request access" surfaces (no public-intake rule), and
-    // must never resolve to checkout — regardless of Stripe metadata.
+  it("controlled subscription products do not resolve to checkout", () => {
     const action = resolvePricingAction(CATALOG.professional!);
     expect(action.purchasable).toBe(false);
-    expect(action.type).toBe("blocked");
+    expect(action.type).toBe("review_gated");
+    expect(action.reason).toBe("checkout_not_allowed");
   });
 
   it("never resolves governance-blocked products to checkout", () => {
@@ -43,23 +41,25 @@ describe("pricing actions", () => {
     });
   });
 
-  it("renders checkout-cleared paid products (e.g. playbooks) as checkout", () => {
-    // execution_integrity_protocol is a paid, checkout-safe playbook
-    // (requiresCheckout=true, valid Stripe price) and is not governance-gated.
-    expect(resolvePricingAction(CATALOG.execution_integrity_protocol!)).toMatchObject({
+  it("renders released GMI Q2 as current-edition checkout", () => {
+    expect(resolvePricingAction(CATALOG.gmi_q2_2026!)).toMatchObject({
       type: "checkout",
       purchasable: true,
     });
   });
 
-  it("renders free products with non-checkout actions and GMI Q1 as active checkout", () => {
+  it("renders superseded GMI Q1 as archive/reference only", () => {
+    expect(resolvePricingAction(CATALOG.gmi_q1_2026!)).toMatchObject({
+      type: "archive_reference_only",
+      purchasable: false,
+      reason: "inactive_or_retired",
+    });
+  });
+
+  it("renders free products with a non-checkout free surface", () => {
     expect(resolvePricingAction(CATALOG.fast_diagnostic!)).toMatchObject({
       type: "view_free_surface",
       href: "/diagnostics/fast",
-    });
-    expect(resolvePricingAction(CATALOG.gmi_q1_2026!)).toMatchObject({
-      type: "checkout",
-      href: "/artifacts/global-market-intelligence-report-q1-2026",
     });
   });
 });

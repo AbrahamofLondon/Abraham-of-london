@@ -16,32 +16,32 @@ describe('Global Market Intelligence surfacing', () => {
     expect(getProductsByFamily('market_intelligence').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('gmi_q1_2026 is in the product estate as live and governed', () => {
-    const item = PRODUCT_ESTATE.find(p => p.id === 'gmi_q1_2026')
+  it('gmi_q2_2026 is in the product estate as live, governed and purchasable', () => {
+    const item = PRODUCT_ESTATE.find(p => p.id === 'gmi_q2_2026')
     expect(item).toBeDefined()
     expect(item!.live).toBe(true)
     expect(item!.governed).toBe(true)
     expect(item!.purchasable).toBe(true)
   })
 
-  it('gmi_q1_2026 appears on products page', () => {
-    expect(getProductsForDirectory().map(p => p.id)).toContain('gmi_q1_2026')
+  it('gmi_q2_2026 appears on products page', () => {
+    expect(getProductsForDirectory().map(p => p.id)).toContain('gmi_q2_2026')
   })
 
-  it('gmi_q1_2026 appears on pricing page', () => {
-    expect(getProductsForPricing().map(p => p.id)).toContain('gmi_q1_2026')
+  it('gmi_q2_2026 appears on pricing page', () => {
+    expect(getProductsForPricing().map(p => p.id)).toContain('gmi_q2_2026')
   })
 
-  it('gmi_q1_2026 exists in CATALOG as active paid product', () => {
-    const cat = CATALOG.gmi_q1_2026
+  it('gmi_q2_2026 exists in CATALOG as active paid product', () => {
+    const cat = CATALOG.gmi_q2_2026
     expect(cat).toBeTruthy()
     expect(cat?.active).toBe(true)
     expect(cat?.commercialStatus).toBe('paid')
     expect(cat?.requiresCheckout).toBe(true)
   })
 
-  it('gmi_q1_2026 has a Stripe price ID in CATALOG', () => {
-    expect(CATALOG.gmi_q1_2026?.stripePriceId).toBeTruthy()
+  it('gmi_q2_2026 has a Stripe price ID in CATALOG', () => {
+    expect(CATALOG.gmi_q2_2026?.stripePriceId).toBeTruthy()
   })
 
   it('GMI descriptions do not use prediction-certainty language', () => {
@@ -55,7 +55,7 @@ describe('Global Market Intelligence surfacing', () => {
   })
 
   it('GMI description references prior-call review or verification', () => {
-    const item = PRODUCT_ESTATE.find(p => p.id === 'gmi_q1_2026')
+    const item = PRODUCT_ESTATE.find(p => p.id === 'gmi_q2_2026')
     expect(item).toBeDefined()
     const text = `${item!.shortDescription} ${item!.buyerDescription}`.toLowerCase()
     expect(text.includes('prior') || text.includes('review') || text.includes('verification')).toBe(true)

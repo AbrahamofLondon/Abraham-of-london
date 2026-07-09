@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-07-07T20:00:00Z",
+  "sourceBranch": "work/estate-market-restoration",
+  "sourceCommits": ["d82ae4aba", "05d076d8c"],
+  "targetBranch": "construction/estate-restoration",
+  "targetHead": "8cb171358",
+  "components": [
+    {
+      "name": "Market Decision Integrity Index",
+      "sourcePath": "lib/intelligence/accountability/market-decision-integrity-index.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/intelligence/accountability/market-decision-integrity-index.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "Needs versioned methodology authority, proper outcome state distinction, coverage-aware publication, and integration with compounding-intelligence.ts cross-moat brief. In-memory only — needs durable methodology store.",
+      "duplicateAuthorityRisk": "LOW — no existing DII module"
+    },
+    {
+      "name": "Public Decision Learning Log",
+      "sourcePath": "lib/intelligence/accountability/public-decision-learning-log.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/intelligence/accountability/public-decision-learning-log.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "Needs proper falsification semantics (not scenarioLink as condition), explicit edition lineage fields, and durable store. Must not manufacture conditions from URLs.",
+      "duplicateAuthorityRisk": "LOW — no existing Learning Log module"
+    },
+    {
+      "name": "Cross-Edition Call Review",
+      "sourcePath": "lib/intelligence/accountability/cross-edition-call-review.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/intelligence/accountability/cross-edition-call-review.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "Needs explicit edition lineage fields (not versionHistory.note), proper lineage states, and durable store. Must not infer edition IDs from free-form notes.",
+      "duplicateAuthorityRisk": "LOW — no existing Cross-Edition module"
+    },
+    {
+      "name": "Customer Falsification Watchdog",
+      "sourcePath": "lib/intelligence/accountability/customer-falsification-watchdog.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/intelligence/accountability/customer-falsification-watchdog.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "In-memory only. Must use existing durable store infrastructure (sqlite-interaction-store pattern). Needs tenant isolation, restart survival, draft-GMI rejection.",
+      "duplicateAuthorityRisk": "LOW — no existing Watchdog module"
+    },
+    {
+      "name": "Canonical Decision Graph",
+      "sourcePath": "lib/intelligence/canonical-decision-graph.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/intelligence/canonical-decision-graph.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "In-memory only. Must use existing durable store infrastructure. Needs tenant partition, case partition, node version, edge provenance, correction, supersession, deletion propagation.",
+      "duplicateAuthorityRisk": "MEDIUM — must not duplicate strategic twin semantics. The graph stores relationships BETWEEN decisions; the twin stores per-customer state. These are complementary, not competing."
+    },
+    {
+      "name": "Governance Trust Centre",
+      "sourcePath": "lib/governance/trust-centre/governance-trust-centre.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/governance/trust-centre/governance-trust-centre.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "Must derive from three-layer estate proof (observation → evaluation → verdict), not from simple contract existence. Needs proper state taxonomy (GOVERNANCE_VERIFIED, CONTROLLED_BY_DESIGN, etc.), not green/red.",
+      "duplicateAuthorityRisk": "LOW — no existing Trust Centre module"
+    },
+    {
+      "name": "Governance Receipt",
+      "sourcePath": "lib/governance/trust-centre/governance-trust-centre.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/governance/trust-centre/governance-trust-centre.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "Must be observation-derived with evidence references, receipt hash, verification function. Must not repeat catalogue fields as proof.",
+      "duplicateAuthorityRisk": "LOW"
+    },
+    {
+      "name": "Customer Corridor Map",
+      "sourcePath": "lib/intelligence/corridor/customer-corridor-map.ts",
+      "constructionEquivalent": "lib/intelligence/compounding/compounding-intelligence.ts (deriveNextAdmissibleMove)",
+      "canonicalAuthority": "lib/intelligence/compounding/compounding-intelligence.ts",
+      "disposition": "MERGE_WITH_EXISTING",
+      "reason": "The corridor map must derive from the existing deriveNextAdmissibleMove engine and strategic twin, not from a static completedProducts list. The map is a customer-visible projection of the existing next-move engine.",
+      "duplicateAuthorityRisk": "HIGH — must not create a second next-move authority. The existing deriveNextAdmissibleMove is canonical."
+    },
+    {
+      "name": "Corridor Progression Analytics",
+      "sourcePath": "lib/intelligence/corridor/corridor-progression-analytics.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "lib/intelligence/corridor/corridor-progression-analytics.ts",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "In-memory only. Must use existing durable store infrastructure. Needs tenant isolation, duplicate event idempotency, no sensitive decision payload.",
+      "duplicateAuthorityRisk": "LOW — no existing analytics module"
+    },
+    {
+      "name": "Cross-Pillar Acceptance Test",
+      "sourcePath": "tests/product-estate/cross-pillar-moat-acceptance.test.ts",
+      "constructionEquivalent": null,
+      "canonicalAuthority": "tests/hostile-audit/",
+      "disposition": "REWRITE_AGAINST_CANONICAL_AUTHORITY",
+      "reason": "Must be one complete chained scenario with negative variants, not isolated piece tests. Belongs in tests/hostile-audit/.",
+      "duplicateAuthorityRisk": "LOW"
+    }
+  ],
+  "summary": {
+    "totalComponents": 10,
+    "adopt": 0,
+    "mergeWithExisting": 1,
+    "rewriteAgainstCanonicalAuthority": 9,
+    "rejectDuplicate": 0,
+    "retire": 0,
+    "unreconciled": 0
+  }
+}

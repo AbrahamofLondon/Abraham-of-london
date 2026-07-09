@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-07-08T06:35:00.000Z",
+  "canonicalHead": "52a5abc69a73be0387cb9677c8485a2ba274a85d",
+  "productionDeployment": {
+    "status": "LIVE_RESPONSE_CONFIRMED",
+    "url": "https://www.abrahamoflondon.org",
+    "evidence": "curl.exe -I returned HTTP/1.1 200 OK, Server: Netlify, Date: Wed, 08 Jul 2026 06:32:36 GMT",
+    "deployedCommit": "INSUFFICIENT_EVIDENCE",
+    "canonicalHeadDeployed": false,
+    "reason": "Remote construction ref is b71752436332db0a74f5e298e5fb3e4acef6085f while local canonical HEAD is 52a5abc69a73be0387cb9677c8485a2ba274a85d; no deploy was performed."
+  },
+  "commerce": {
+    "pricingAudit": "LOCAL_GATE_REQUIRED_FINAL",
+    "publicPricing": "canonical catalogue and pricing audit govern public prices",
+    "manualBilling": ["Operator Pilot", "Executive Reporting where governed", "Strategy Room / retained oversight where controlled"],
+    "deadCtas": "assessment blockade audit reports DEAD_CTA=0 after regeneration",
+    "capturedPayments": "INSUFFICIENT_EVIDENCE",
+    "paidOrders": "INSUFFICIENT_EVIDENCE",
+    "refunds": "INSUFFICIENT_EVIDENCE",
+    "deliveredPaidOrders": "INSUFFICIENT_EVIDENCE",
+    "accountingRevenue": "INSUFFICIENT_EVIDENCE",
+    "testCustomers": "INSUFFICIENT_EVIDENCE",
+    "externalPayingCustomers": "INSUFFICIENT_EVIDENCE"
+  },
+  "marketingSurfaces": {
+    "homepage": "LIVE_RESPONSE_CONFIRMED",
+    "decisionSignal": "/decision-instruments/signal",
+    "corridor": "/corridor?rec=<recommendationId>",
+    "operatorPilot": "/engagements/operator-pilot",
+    "operatorPilotStatus": "/engagements/operator-pilot-status",
+    "adminConversionDashboard": "/admin/conversion-dashboard",
+    "adminOperatorQueue": "/admin/operator-pilot"
+  },
+  "salesProcess": {
+    "leadCapture": "Operator Pilot intake and controlled request/access paths",
+    "qualification": "operator-pilot qualification engine plus admin state queue",
+    "proposal": "manual controlled continuation; artifact below defines proposal pathway",
+    "payment": "self-serve only where commercial resolver permits; controlled/manual paths do not infer checkout",
+    "fulfilment": "operator queue and existing fulfilment contracts",
+    "followUp": "customer status surface and funnel events"
+  },
+  "unsupportedClaimsPolicy": "No customer, revenue, testimonial, certification, or outcome evidence is asserted without primary operational evidence."
+}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "runtime-hardening.deployment-preflight.v2",
+  "generatedAt": "2026-07-08T13:18:00+01:00",
+  "head": "6ce96a6d5",
+  "scope": "Serverless deployment preflight for the flagship journey + adjacent runtime after migrating Pilot, Signal continuation, Corridor context and funnel telemetry to composed production Postgres adapters.",
+  "findings": [
+    {
+      "question": "What works locally only?",
+      "answer": "Known runtime customer/telemetry stores no longer work locally only: Pilot, Signal continuation, Corridor context and funnel telemetry now use Prisma/Postgres in production and SQLite only in local/test.",
+      "severity": "INFO",
+      "status": "CLOSED",
+      "detail": "Focused Prisma integration tests and route-boundary guard are green. Interaction spine remains env-gated local/test only and does not silently write production filesystem state."
+    },
+    {
+      "question": "What assumes one process / one filesystem / one writer?",
+      "answer": "Direct better-sqlite3 route persistence removed from known production route-store edges.",
+      "severity": "INFO",
+      "status": "CLOSED",
+      "detail": "Production routes import composed stores; direct SQLite adapters still fail closed in NODE_ENV=production."
+    },
+    {
+      "question": "What assumes no retry / no concurrency?",
+      "answer": "Pilot optimistic concurrency was implemented in the prior clean handoff; current increment did not reopen it.",
+      "severity": "INFO",
+      "status": "CLOSED_PREVIOUS_INCREMENT",
+      "detail": "See Pilot production persistence handoff and transition tests."
+    },
+    {
+      "question": "What assumes trusted public input?",
+      "answer": "Funnel endpoint uses strict schema/bounds plus the canonical shared rate-limit provider. Backend authority corrected to Neon PostgreSQL by default; Upstash/Redis are optional acceleration used ONLY when RATE_LIMIT_BACKEND=upstash|redis is explicitly set (mere credential presence no longer auto-promotes them). See docs/architecture/infrastructure-authority.md.",
+      "severity": "INFO",
+      "status": "CLOSED",
+      "detail": "pages/api/demo/funnel-event.ts uses consumeRateLimit with failClosed=true, hashed IP/session keying, X-RateLimit headers and no arbitrary metadata. failClosed bounds the telemetry write only; the customer Signal/Pilot path is decoupled (client sendBeacon fire-and-forget; server recordFunnelEvent try/catch), so a limiter/storage outage never blocks the customer journey. tests/pages/api/demo/funnel-event.test.ts verifies denial prevents persistence and confidential payload fields are ignored."
+    },
+    {
+      "question": "What assumes UK currency?",
+      "answer": "Assessment and journey surfaces still need price/currency authority audit.",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "detail": "Use catalogue/commercial authority for amount/currency/access mode; do not infer multi-currency policy."
+    },
+    {
+      "question": "What assumes mouse input / visual perception?",
+      "answer": "Assessment estate accessibility and responsive route proof remain open.",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "detail": "Run and fix WCAG-oriented label/radiogroup/focus/touch-target/contrast issues across priority surfaces."
+    },
+    {
+      "question": "What assumes env vars exist?",
+      "answer": "Prisma DATABASE_URL/DIRECT_URL are required for production/customer state; local .env points to Postgres on 127.0.0.1:55433.",
+      "severity": "MEDIUM",
+      "status": "PARTIAL",
+      "detail": "Clean-room documentation/gates still need final full proof on final HEAD."
+    },
+    {
+      "question": "What assumes state never changes between read and write?",
+      "answer": "Pilot transitions are versioned; recommendation context upsert remains last-write-wins by stable recommendationId.",
+      "severity": "MEDIUM",
+      "status": "PARTIAL",
+      "detail": "Recommendation context is low-risk non-sensitive continuity state, but a future version guard would improve replay diagnostics."
+    },
+    {
+      "question": "Status token in URL?",
+      "answer": "Pilot customer status no longer accepts status secrets or references in query strings.",
+      "severity": "INFO",
+      "status": "CLOSED",
+      "detail": "Submission returns a one-time private status secret and clean /engagements/operator-pilot-status route. /api/engagements/operator-pilot-status-session accepts the secret by POST body, validates the HMAC hash, audits attempts, and sets a short-lived HttpOnly cookie. /api/engagements/operator-pilot-status reads only the cookie."
+    }
+  ],
+  "unresolvedCritical": 0,
+  "unresolvedHigh": 1,
+  "verdict": "BLOCKED — runtime store production persistence, funnel distributed rate limiting, and secure Pilot status return flow are closed for known customer-state routes, but final production hardening still requires assessment accessibility/responsive proof, final full suite, final build and clean-room proof."
+}

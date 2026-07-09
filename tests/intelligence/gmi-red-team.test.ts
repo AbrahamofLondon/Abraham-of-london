@@ -10,7 +10,7 @@ describe("GMI Red Team persistence contract", () => {
   it("adds the Red Team submission model and migration table", () => {
     const schema = fs.readFileSync(path.join(process.cwd(), "prisma/schema.prisma"), "utf8");
     const migration = fs.readFileSync(
-      path.join(process.cwd(), "prisma/migrations/20260606_add_gmi_persistent_ledger/migration.sql"),
+      path.join(process.cwd(), "prisma/_archived-migrations-pre-baseline/20260606_add_gmi_persistent_ledger/migration.sql"),
       "utf8",
     );
 

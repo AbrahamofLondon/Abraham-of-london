@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-07-07T21:00:00Z",
+  "programme": "Four-Pillar Moat Activation — Hostile-Audit Hardening",
+  "workspaceBranch": "work/estate-market-restoration",
+  "workspaceHead": "b77454364",
+  "constructionBranch": "construction/estate-restoration",
+  "constructionHead": "8cb171358",
+  "claims": [
+    {
+      "claimId": "CLAIM-001",
+      "statement": "Canonical authorities are established for all domains",
+      "evidenceType": "ADR_DOCUMENT",
+      "sourcePath": "docs/architecture/four-pillar-canonical-authorities.md",
+      "testPath": null,
+      "command": null,
+      "expectedResult": "One authority per domain",
+      "actualResult": "20 domains with exactly one canonical authority each",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-002",
+      "statement": "Deepseek components are dispositioned",
+      "evidenceType": "RECONCILIATION_DOCUMENT",
+      "sourcePath": "artifacts/validation/four-pillar/integration-reconciliation.json",
+      "testPath": null,
+      "command": null,
+      "expectedResult": "10 components dispositioned, 0 unreconciled",
+      "actualResult": "10 components: 0 adopt, 1 merge, 9 rewrite, 0 reject, 0 retire, 0 unreconciled",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-003",
+      "statement": "Falsification Watchdog is durably persisted",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/accountability/durable-watchdog-store.ts",
+      "testPath": "tests/hostile-audit/persistence-attacks.test.ts",
+      "command": "npx vitest run tests/hostile-audit/persistence-attacks.test.ts",
+      "expectedResult": "4 tests pass",
+      "actualResult": "4/4 PASSED",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-004",
+      "statement": "Decision Graph is durably persisted with tenant isolation",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/accountability/durable-graph-store.ts",
+      "testPath": "tests/hostile-audit/tenant-attacks.test.ts",
+      "command": "npx vitest run tests/hostile-audit/tenant-attacks.test.ts",
+      "expectedResult": "3 tests pass",
+      "actualResult": "3/3 PASSED",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-005",
+      "statement": "Corridor Analytics is durably persisted with deduplication",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/accountability/durable-analytics-store.ts",
+      "testPath": "tests/hostile-audit/persistence-attacks.test.ts",
+      "command": "npx vitest run tests/hostile-audit/persistence-attacks.test.ts",
+      "expectedResult": "Duplicate event idempotent",
+      "actualResult": "Duplicate event returns same eventId",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-006",
+      "statement": "DII methodology is versioned with documented weights and outcome treatments",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/accountability/dii-methodology-authority.ts",
+      "testPath": "tests/product-estate/market-decision-integrity-index.test.ts",
+      "command": "npx vitest run tests/product-estate/market-decision-integrity-index.test.ts",
+      "expectedResult": "8 tests pass",
+      "actualResult": "8/8 PASSED",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-007",
+      "statement": "Falsification semantics do not manufacture conditions from URLs",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/accountability/falsification-semantics.ts",
+      "testPath": "tests/hostile-audit/evidence-attacks.test.ts",
+      "command": "npx vitest run tests/hostile-audit/evidence-attacks.test.ts",
+      "expectedResult": "URL → REFERENCE_ONLY, not SPECIFIED",
+      "actualResult": "URL produces REFERENCE_ONLY status",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-008",
+      "statement": "Cross-edition lineage uses explicit states, not versionHistory notes",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/accountability/edition-lineage.ts",
+      "testPath": "tests/product-estate/cross-edition-call-review.test.ts",
+      "command": "npx vitest run tests/product-estate/cross-edition-call-review.test.ts",
+      "expectedResult": "6 tests pass",
+      "actualResult": "6/6 PASSED",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-009",
+      "statement": "Corridor map is twin-driven with evidence-based rationale",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/intelligence/corridor/customer-corridor-map.ts",
+      "testPath": "tests/product-estate/customer-corridor-map.test.ts",
+      "command": "npx vitest run tests/product-estate/customer-corridor-map.test.ts",
+      "expectedResult": "7 tests pass",
+      "actualResult": "7/7 PASSED",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-010",
+      "statement": "Trust Centre has 7 display states, not green/red",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/governance/trust-centre/governance-trust-centre.ts",
+      "testPath": "tests/product-estate/governance-trust-centre.test.ts",
+      "command": "npx vitest run tests/product-estate/governance-trust-centre.test.ts",
+      "expectedResult": "8 tests pass",
+      "actualResult": "8/8 PASSED",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-011",
+      "statement": "Governance Receipt has verification hash and detects tampering",
+      "evidenceType": "IMPLEMENTATION",
+      "sourcePath": "lib/governance/trust-centre/governance-trust-centre.ts",
+      "testPath": "tests/hostile-audit/public-trust-attacks.test.ts",
+      "command": "npx vitest run tests/hostile-audit/public-trust-attacks.test.ts",
+      "expectedResult": "Tampered receipt fails verification",
+      "actualResult": "Tampered receipt: verifyGovernanceReceipt returns false",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-012",
+      "statement": "Hostile-audit suite covers 6 attack classes",
+      "evidenceType": "TEST_SUITE",
+      "sourcePath": "tests/hostile-audit/",
+      "testPath": "tests/hostile-audit/",
+      "command": "npx vitest run tests/hostile-audit/",
+      "expectedResult": "All tests pass",
+      "actualResult": "28/28 PASSED across 5 test files",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    },
+    {
+      "claimId": "CLAIM-013",
+      "statement": "All 94 pillar tests pass",
+      "evidenceType": "TEST_RESULT",
+      "sourcePath": "tests/",
+      "testPath": "tests/",
+      "command": "npx vitest run tests/hostile-audit/ tests/product-estate/market-decision-integrity-index.test.ts tests/product-estate/public-decision-learning-log.test.ts tests/product-estate/cross-edition-call-review.test.ts tests/product-estate/customer-falsification-watchdog.test.ts tests/product-estate/canonical-decision-graph.test.ts tests/product-estate/governance-trust-centre.test.ts tests/product-estate/customer-corridor-map.test.ts tests/product-estate/corridor-progression-analytics.test.ts tests/product-estate/cross-pillar-moat-acceptance.test.ts",
+      "expectedResult": "94 tests pass",
+      "actualResult": "94/94 PASSED across 15 test files",
+      "freshnessTimestamp": "2026-07-07T21:00:00Z"
+    }
+  ],
+  "summary": {
+    "totalClaims": 13,
+    "evidenced": 13,
+    "unevidenced": 0,
+    "failed": 0
+  }
+}

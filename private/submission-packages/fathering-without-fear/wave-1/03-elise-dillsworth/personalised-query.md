@@ -11,17 +11,19 @@ Dear Elise Dillsworth,
 
 I'm writing to you because your work as a commissioning editor at Virago, your role in the Diversity in Publishing Network, and your stated interest in memoir and international writing all point toward the kind of book this is. *Fathering Without Fear* traces a Nigerian-British family from an ancestral tailor in Isua to a father sitting in a London room waiting for a court call. It is written in compressed prose and keeps the legal material in the background, where it belongs. The subject is fatherhood, inheritance, faith, and what it costs not to disappear.
 
-I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 49,000 words.
+I am seeking representation for *Fathering Without Fear*, a compressed literary memoir of approximately 50,000 words.
 
 The book follows one man's effort to remain a father when nearly everything around him — grief, distance, institutional process, and time — made remaining difficult.
+
+At a time when fatherhood is often flattened into absence, authority, or grievance, the book asks what remains when a father's only available proof of love is disciplined presence.
 
 Abraham Adaramola's family line runs through Isua and Lagos, shaped by faith, early responsibility, and inherited expectation. His father became a parent at fifteen. His brother David died young. His sister Funke carried the family's weight and did not set it down. Abraham left Lagos for London carrying what his family had given him — a name that meant something, a faith tested early, and a sense that fatherhood was not a role to be entered lightly.
 
 When his son was born, fatherhood did not begin inside a home. It began outside one. What followed were years of distance, waiting, supervised contact, and the quiet discipline of loving a child through arrangements that could record a visit but could not record what happened inside it.
 
-The book is structured as twenty-five short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
+The book is structured as twenty-seven short chapters, most between 800 and 3,800 words. The compression is deliberate. Each chapter carries a single weight — a name, a fire, a hearing date, a wedding without a brother, a boy who prefers goalkeeping and plays number 7 — and sets it down before moving to the next. The brevity is not incompleteness. It is the book's formal commitment to restraint: to tell what can be told, protect what must be protected, and let a child remain a child rather than becoming evidence.
 
-The book is a compressed literary memoir about fatherhood, inheritance, faith, and the cost of refusing to disappear. It is about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
+The book is about what a man inherits, what he refuses to pass on, and what it costs to stay present when presence is the hardest thing the situation demands.
 
 I have attached a full nonfiction proposal, including chapter outline and a thirty-page writing sample. The complete manuscript is available on request.
 

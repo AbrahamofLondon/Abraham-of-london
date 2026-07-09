@@ -8,6 +8,7 @@ import {
   readConstitutionalThread,
   type ConstitutionalThread,
 } from "@/lib/diagnostics/session-thread";
+import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -269,7 +270,7 @@ export default function DiagnosticsIndexPage() {
                 href="/diagnostics/purpose-alignment"
                 cta="Start Personal Decision Audit"
                 paidMeta={{
-                  price: "£49",
+                  price: getProductDisplayPrice("personal_decision_audit"),
                   time: "12 min",
                   deliveryNote: "Free reading included · Paid dossier gated",
                   writesToMemory: true,

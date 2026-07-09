@@ -1,0 +1,9 @@
+{
+  "productCode": "structural_failure_diagnostic_canvas",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

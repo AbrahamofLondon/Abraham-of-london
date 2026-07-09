@@ -108,6 +108,8 @@ export class PerformanceMonitor {
   private startFlushTimer(): void {
     if (typeof setInterval !== 'undefined') {
       this.flushTimer = setInterval(() => this.flush(), this.flushInterval);
+      // Never let a monitoring flush timer keep the process (e.g. `next build`) alive.
+      if (this.flushTimer && typeof this.flushTimer.unref === 'function') this.flushTimer.unref();
     }
   }
 

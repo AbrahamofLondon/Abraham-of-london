@@ -9,109 +9,110 @@
  *   - Deliver endpoint
  *   - State machine enforcement
  */
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock prisma
-jest.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/prisma", () => ({
   prisma: {
     boardroomBriefOrder: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
     productArtifact: {
-      findUnique: jest.fn(),
-      upsert: jest.fn(),
+      findUnique: vi.fn(),
+      upsert: vi.fn(),
     },
     boardroomDossier: {
-      findFirst: jest.fn(),
+      findFirst: vi.fn(),
     },
     boardroomDossierAccessToken: {
-      create: jest.fn(),
+      create: vi.fn(),
     },
     accessAuditLog: {
-      findMany: jest.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
 
 // Mock auth
-jest.mock("@/lib/auth/requireAdminServer", () => ({
-  requireAdminServer: jest.fn().mockResolvedValue({
+vi.mock("@/lib/auth/requireAdminServer", () => ({
+  requireAdminServer: vi.fn().mockResolvedValue({
     user: { email: "admin@test.com" },
   }),
 }));
 
 // Mock governance event bus
-jest.mock("@/lib/platform/governance-event-bus", () => ({
-  routeGovernanceEvent: jest.fn().mockResolvedValue({ ok: true }),
+vi.mock("@/lib/platform/governance-event-bus", () => ({
+  routeGovernanceEvent: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
 // Mock BoardroomDossierService
-jest.mock("@/lib/boardroom/boardroom-dossier-service", () => ({
+vi.mock("@/lib/boardroom/boardroom-dossier-service", () => ({
   BoardroomDossierService: {
-    grantAccess: jest.fn().mockResolvedValue({ status: "DELIVERED" }),
+    grantAccess: vi.fn().mockResolvedValue({ status: "DELIVERED" }),
   },
 }));
 
 // Mock case study bridge
-jest.mock("@/lib/evidence/case-study-boardroom-bridge", () => ({
-  createCaseStudyFromBoardroomOrder: jest.fn(),
+vi.mock("@/lib/evidence/case-study-boardroom-bridge", () => ({
+  createCaseStudyFromBoardroomOrder: vi.fn(),
 }));
 
 // Mock delivery email
-jest.mock("@/lib/boardroom/boardroom-delivery-email", () => ({
-  sendBoardroomDeliveryEmail: jest.fn(),
+vi.mock("@/lib/boardroom/boardroom-delivery-email", () => ({
+  sendBoardroomDeliveryEmail: vi.fn(),
 }));
 
 // Mock delivery log
-jest.mock("@/lib/boardroom/boardroom-delivery-log", () => ({
+vi.mock("@/lib/boardroom/boardroom-delivery-log", () => ({
   BoardroomDeliveryLog: {
-    record: jest.fn(),
+    record: vi.fn(),
   },
 }));
 
 // Mock artifact authority
-jest.mock("@/lib/artifacts/artifact-authority", () => ({
-  markArtifactDelivered: jest.fn(),
+vi.mock("@/lib/artifacts/artifact-authority", () => ({
+  markArtifactDelivered: vi.fn(),
 }));
 
 import { prisma } from "@/lib/prisma";
 import { requireAdminServer } from "@/lib/auth/requireAdminServer";
 import { createCaseStudyFromBoardroomOrder } from "@/lib/evidence/case-study-boardroom-bridge";
 import { BoardroomAccessTokenService } from "@/lib/boardroom/boardroom-access-token";
+import {
+  assertValidTransition,
+  checkDeliveryReadiness,
+  mapLegacyStatus,
+} from "@/lib/boardroom/boardroom-delivery-state-machine.shared";
 
 // Mock BoardroomAccessTokenService
-jest.mock("@/lib/boardroom/boardroom-access-token", () => ({
+vi.mock("@/lib/boardroom/boardroom-access-token", () => ({
   BoardroomAccessTokenService: {
-    createToken: jest.fn(),
+    createToken: vi.fn(),
   },
 }));
 
 describe("Boardroom Delivery Pipeline — State Machine Enforcement", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Transition validation", () => {
     it("rejects paid → delivered (cannot skip states)", () => {
-      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(() => assertValidTransition("paid", "delivered", "order-1")).toThrow("INVALID_TRANSITION");
     });
 
     it("accepts customer_access_ready → delivered", () => {
-      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(() => assertValidTransition("customer_access_ready", "delivered", "order-1")).not.toThrow();
     });
 
     it("rejects draft_generated → delivered (must go through review and approval)", () => {
-      const { assertValidTransition } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(() => assertValidTransition("draft_generated", "delivered", "order-1")).toThrow("INVALID_TRANSITION");
     });
   });
 
   describe("Delivery readiness checks", () => {
     it("blocks delivery when artifact is PENDING", () => {
-      const { checkDeliveryReadiness } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       const result = checkDeliveryReadiness({
         deliveryStatus: "customer_access_ready",
         artifactStatus: "PENDING",
@@ -126,7 +127,6 @@ describe("Boardroom Delivery Pipeline — State Machine Enforcement", () => {
     });
 
     it("allows delivery when all conditions are met", () => {
-      const { checkDeliveryReadiness } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       const result = checkDeliveryReadiness({
         deliveryStatus: "customer_access_ready",
         artifactStatus: "READY",
@@ -142,12 +142,10 @@ describe("Boardroom Delivery Pipeline — State Machine Enforcement", () => {
 
   describe("Legacy status mapping", () => {
     it("maps dossier_generated to draft_generated", () => {
-      const { mapLegacyStatus } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(mapLegacyStatus("dossier_generated")).toBe("draft_generated");
     });
 
     it("maps in_review to awaiting_operator_review", () => {
-      const { mapLegacyStatus } = require("@/lib/boardroom/boardroom-delivery-state-machine.shared");
       expect(mapLegacyStatus("in_review")).toBe("awaiting_operator_review");
     });
   });

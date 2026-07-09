@@ -1,0 +1,1199 @@
+{
+  "generatedAt": "2026-07-07T12:07:49.615Z",
+  "source": "lib/fulfilment/controlled-release-proof-matrix.ts (observation) + tracked fulfilment contracts/assurance",
+  "controlledProductCount": 18,
+  "temporaryImplementationDeficitCount": 0,
+  "allDeficitsNull": true,
+  "controlClassTally": {
+    "INTENTIONAL_GOVERNANCE_CONTROL": 17,
+    "EXTERNAL_EVIDENCE_DEPENDENCY": 1
+  },
+  "externalDependencies": [
+    {
+      "productCode": "gmi_q2_2026",
+      "dependency": {
+        "name": "post-8-July-2026 final data lock + separate owner release authority",
+        "authoritativeSource": "IMF July 2026 WEO + owner release authority record",
+        "earliestAvailability": "2026-07-08",
+        "currentBoundedState": "DRAFT / controlled pre-release; checkout false; Stripe null; Q1 unsuperseded"
+      }
+    }
+  ],
+  "rows": [
+    {
+      "productCode": "boardroom_brief",
+      "productName": "Boardroom Brief",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "High-risk or judgment-bearing output requires review, approval, and delivery proof before claims.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/boardroom-brief; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/boardroom-brief"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=human_reviewed_dossier; deliveryModel=analyst_review_and_send; approval via /admin/boardroom/orders"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "human_reviewed_dossier / analyst_review_and_send"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=manual_review_required; humanReview=true"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=manual_review_required; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/boardroom/orders"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /boardroom-brief"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, human_reviewed_dossier fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "operator_decision_pack",
+      "productName": "Operator Decision Pack",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/decision-instruments; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/decision-instruments/operator-decision-pack/start"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=bundle_grant; deliveryModel=bundle_entitlement; approval via /admin/billing"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "bundle_grant / bundle_entitlement"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=instant_digital_access; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=instant_digital_access; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/billing"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /decision-instruments"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, bundle_grant fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "gmi_q1_2026",
+      "productName": "Global Market Report — Q1 2026",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "High-risk or judgment-bearing output requires review, approval, and delivery proof before claims.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/artifacts/global-market-intelligence-report-q1-2026; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/artifacts/global-market-intelligence-report-q1-2026"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "gmi-quarterly-fulfilment: release/delivery bound to editionId + editionVersion + artifactHash + data-lock + ownerReleaseAuthority; changed hash => ARTIFACT_HASH_MISMATCH"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "executive_report_artifact / entitlement_on_payment"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=archived_digital_reference; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=archived_digital_reference; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/intelligence/gmi-control-plane"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /artifacts/global-market-intelligence-report-q1-2026"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, executive_report_artifact fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "gmi_q2_2026",
+      "productName": "Global Market Intelligence — Q2 2026",
+      "controlClass": "EXTERNAL_EVIDENCE_DEPENDENCY",
+      "controlReason": "Future post-8-July data lock and separate owner release authority are not yet available.",
+      "finalOperationalState": "CONTROLLED_PENDING_NAMED_EXTERNAL_EVIDENCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/artifacts/global-market-intelligence-report-q2-2026; action=archive_reference_only"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=archive_reference_only; href=/artifacts/global-market-intelligence-report-q2-2026"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=archive_reference_only; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=internal_only"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "gmi-quarterly-fulfilment: release/delivery bound to editionId + editionVersion + artifactHash + data-lock + ownerReleaseAuthority; changed hash => ARTIFACT_HASH_MISMATCH"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "executive_report_artifact / evidence_gate_review"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=inactive_not_sellable; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=inactive: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=inactive_not_sellable; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/intelligence/gmi-control-plane"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /artifacts/global-market-intelligence-report-q2-2026"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Pre-release: manual billing only after data lock and owner release authority. No checkout, no Stripe binding."
+      },
+      "externalDependency": {
+        "name": "post-8-July-2026 final data lock + separate owner release authority",
+        "authoritativeSource": "IMF July 2026 WEO + owner release authority record",
+        "earliestAvailability": "2026-07-08",
+        "currentBoundedState": "DRAFT / controlled pre-release; checkout false; Stripe null; Q1 unsuperseded"
+      },
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "boardroom_mode",
+      "productName": "Boardroom Mode",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/boardroom-mode; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/boardroom-mode"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=evidence_gated"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=evidence_gated; deliveryModel=evidence_gate_review; approval via operator queue"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "evidence_gated / evidence_gate_review"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=instant_digital_access; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=evidence_gated: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=instant_digital_access; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": false,
+        "evidence": "operatorQueue=/admin/fulfilment"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /boardroom-mode"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Evidence-gated: requires prior Executive Reporting or governed case record. No self-serve checkout."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "executive_reporting",
+      "productName": "Executive Reporting",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "High-risk or judgment-bearing output requires review, approval, and delivery proof before claims.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/diagnostics/executive-reporting/run; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/diagnostics/executive-reporting/run"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=executive_report_artifact; deliveryModel=ai_generation_and_send; approval via /admin/reporting/executive"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "executive_report_artifact / ai_generation_and_send"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=generated_digital_artifact; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=generated_digital_artifact; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/reporting/executive"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /diagnostics/executive-reporting/run"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, executive_report_artifact fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "reporting_monthly",
+      "productName": "Reporting — Monthly",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Manual billing and scope/recipient approval are intentional access boundaries.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/reporting; action=manual_fulfilment"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=manual_fulfilment; href=/contact"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=manual_fulfilment; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=null; requiresCheckout=false; commercialStatus=manual_billing"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "monthly-reporting-service: approval bound to cycleId + periodLabel + output.contentHash; delivery gated on review approval"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / analyst_review_and_send"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=manual_review_required; humanReview=true"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "manual_billing: fulfilment initiation requires operator-confirmed billing authority (no self-serve checkout); synthetic authority in tests, real authority in production"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=manual_review_required; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/reporting/monthly"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /reporting"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: manual_billing, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "reporting_custom",
+      "productName": "Reporting — Custom",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Manual billing and scope/recipient approval are intentional access boundaries.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/reporting/custom; action=manual_fulfilment"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "engagement qualification + rejection path (custom-reporting-service)"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=manual_fulfilment; href=/contact"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=manual_fulfilment; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=null; requiresCheckout=false; commercialStatus=manual_billing"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "custom-reporting-service: approval bound to engagementId + scope.version + output.contentHash; v2 amendment invalidates v1 validation/approval/delivery (see custom-reporting.test.ts)"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "human_reviewed_dossier / analyst_review_and_send"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=manual_review_required; humanReview=true"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "manual_billing: fulfilment initiation requires operator-confirmed billing authority (no self-serve checkout); synthetic authority in tests, real authority in production"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=manual_review_required; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/reporting/custom"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /reporting/custom"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: manual_billing, human_reviewed_dossier fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "gmi_quarterly",
+      "productName": "Global Market Intelligence — Quarterly",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Edition-specific source blockers, data lock, prior-call review, human editorial review, owner authority, and artifact-hash binding are permanent governance gates.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/intelligence/gmi; action=manual_fulfilment"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=manual_fulfilment; href=/contact"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=manual_fulfilment; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=null; requiresCheckout=false; commercialStatus=manual_billing"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "gmi-quarterly-fulfilment: release/delivery bound to editionId + editionVersion + artifactHash + data-lock + ownerReleaseAuthority; changed hash => ARTIFACT_HASH_MISMATCH"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "executive_report_artifact / evidence_gate_review"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=manual_review_required; humanReview=true"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "manual_billing: fulfilment initiation requires operator-confirmed billing authority (no self-serve checkout); synthetic authority in tests, real authority in production"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=manual_review_required; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/intelligence/gmi-control-plane"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /intelligence/gmi"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: manual_billing, executive_report_artifact fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "strategy_room",
+      "productName": "Strategy Room — Entry",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/strategy-room; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/strategy-room"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=scheduled_session; deliveryModel=session_scheduling; approval via /admin/operations"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "scheduled_session / session_scheduling"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=instant_digital_access; humanReview=true"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=instant_digital_access; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/operations"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /strategy-room"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, scheduled_session fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "strategy_room_extended",
+      "productName": "Strategy Room — Active / Multi-Decision",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/strategy-room; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/strategy-room"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=scheduled_session; deliveryModel=session_scheduling; approval via /admin/operations"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "scheduled_session / session_scheduling"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=instant_digital_access; humanReview=true"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=instant_digital_access; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/operations"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /strategy-room"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, scheduled_session fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "retainer_core",
+      "productName": "Decision Authority Retainer — Core",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Enterprise/retainer scope must be contracted and provisioned intentionally; no self-serve purchase authority.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": false,
+        "evidence": "entry=n/a; action=archive_reference_only"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "enterprise/retainer qualification before commercial commitment"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=archive_reference_only; href=/retainer"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=archive_reference_only; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=contracted"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=contracted_onboarding; approval via operator queue"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / contracted_onboarding"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=inactive_not_sellable; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "contracted: provisioned under signed engagement; no self-serve purchase authority"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=inactive_not_sellable; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": false,
+        "evidence": "operatorQueue=/admin/fulfilment"
+      },
+      "customerStatusProof": {
+        "proven": false,
+        "evidence": "status surface via operator queue"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: contracted, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "retainer_operational",
+      "productName": "Decision Authority Retainer — Operational",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Enterprise/retainer scope must be contracted and provisioned intentionally; no self-serve purchase authority.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": false,
+        "evidence": "entry=n/a; action=archive_reference_only"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "enterprise/retainer qualification before commercial commitment"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=archive_reference_only; href=/retainer"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=archive_reference_only; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=contracted"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=contracted_onboarding; approval via operator queue"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / contracted_onboarding"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=inactive_not_sellable; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "contracted: provisioned under signed engagement; no self-serve purchase authority"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=inactive_not_sellable; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": false,
+        "evidence": "operatorQueue=/admin/fulfilment"
+      },
+      "customerStatusProof": {
+        "proven": false,
+        "evidence": "status surface via operator queue"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: contracted, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "retainer_institutional",
+      "productName": "Decision Authority Retainer — Institutional",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Enterprise/retainer scope must be contracted and provisioned intentionally; no self-serve purchase authority.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": false,
+        "evidence": "entry=n/a; action=archive_reference_only"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "enterprise/retainer qualification before commercial commitment"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=archive_reference_only; href=/retainer"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=archive_reference_only; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=contracted"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=contracted_onboarding; approval via operator queue"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / contracted_onboarding"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=inactive_not_sellable; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "contracted: provisioned under signed engagement; no self-serve purchase authority"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=inactive_not_sellable; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": false,
+        "evidence": "operatorQueue=/admin/fulfilment"
+      },
+      "customerStatusProof": {
+        "proven": false,
+        "evidence": "status surface via operator queue"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: contracted, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "professional",
+      "productName": "Professional",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/decision-centre; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/decision-centre"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=entitlement_on_payment; approval via /admin/billing"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / entitlement_on_payment"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=subscription_retainer_cycle; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=subscription_retainer_cycle; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/billing"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /decision-centre"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "professional_annual",
+      "productName": "Professional Annual",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Controlled access prevents checkout/action bypass until governance and fulfilment proof are present.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/decision-centre; action=review_gated"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=review_gated; href=/decision-centre"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=review_gated; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=true; commercialStatus=paid"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=entitlement_on_payment; approval via /admin/billing"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / entitlement_on_payment"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=subscription_retainer_cycle; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "commercialStatus=paid: self-serve checkout disabled where required by resolver/governance"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=subscription_retainer_cycle; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/billing"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /decision-centre"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: paid, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "enterprise",
+      "productName": "Enterprise",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Enterprise/retainer scope must be contracted and provisioned intentionally; no self-serve purchase authority.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/decision-centre; action=contact_sales"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "enterprise/retainer qualification before commercial commitment"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=contact_sales; href=/contact"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=contact_sales; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=contracted"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=contracted_onboarding; approval via /admin/billing"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / contracted_onboarding"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=inactive_not_sellable; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "contracted: provisioned under signed engagement; no self-serve purchase authority"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=inactive_not_sellable; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/billing"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /decision-centre"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: contracted, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    },
+    {
+      "productCode": "additional_collaborator",
+      "productName": "Additional Collaborator",
+      "controlClass": "INTENTIONAL_GOVERNANCE_CONTROL",
+      "controlReason": "Manual billing and scope/recipient approval are intentional access boundaries.",
+      "finalOperationalState": "OPERATIONALLY_COMPLETE_UNDER_INTENTIONAL_GOVERNANCE",
+      "customerEntryProof": {
+        "proven": true,
+        "evidence": "entry=/decision-centre; action=manual_fulfilment"
+      },
+      "qualificationProof": {
+        "proven": true,
+        "evidence": "operator/governance review before fulfilment initiation"
+      },
+      "commercialActionProof": {
+        "proven": true,
+        "evidence": "state=manual_fulfilment; href=/contact"
+      },
+      "checkoutDenialProof": {
+        "proven": true,
+        "evidence": "resolver=manual_fulfilment; purchasable=false"
+      },
+      "APIBypassProof": {
+        "proven": true,
+        "evidence": "checkoutAllowed=false; requiresCheckout=false; commercialStatus=manual_billing"
+      },
+      "approvalBindingProof": {
+        "proven": true,
+        "evidence": "contract fulfilmentType=retainer_cycle; deliveryModel=contracted_onboarding; approval via /admin/billing"
+      },
+      "fulfilmentProof": {
+        "proven": true,
+        "evidence": "retainer_cycle / contracted_onboarding"
+      },
+      "validationProof": {
+        "proven": true,
+        "evidence": "outputValidator/deliveryGate: deliveryClass=inactive_not_sellable; humanReview=false"
+      },
+      "billingAuthorityProof": {
+        "proven": true,
+        "evidence": "manual_billing: fulfilment initiation requires operator-confirmed billing authority (no self-serve checkout); synthetic authority in tests, real authority in production"
+      },
+      "deliveryProof": {
+        "proven": true,
+        "evidence": "deliveryClass=inactive_not_sellable; durable proof per fulfilment handler"
+      },
+      "operatorQueueProof": {
+        "proven": true,
+        "evidence": "operatorQueue=/admin/billing"
+      },
+      "customerStatusProof": {
+        "proven": true,
+        "evidence": "status surface via /decision-centre"
+      },
+      "bypassPreventionProof": {
+        "proven": true,
+        "evidence": "commercial resolver + fulfilment contract + assurance gate"
+      },
+      "claimBoundaryProof": {
+        "proven": true,
+        "evidence": "Controlled release: manual_billing, retainer_cycle fulfilment. Evaluation passed."
+      },
+      "externalDependency": null,
+      "remainingImplementationDeficit": null
+    }
+  ]
+}

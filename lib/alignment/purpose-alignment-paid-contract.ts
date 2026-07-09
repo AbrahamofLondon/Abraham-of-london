@@ -41,6 +41,7 @@ import type {
   PurposePatternId,
   RoutingRecommendation,
 } from "./types";
+import { requireProduct } from "@/lib/commercial/catalog";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PAID RESULT TYPE — the full £49 output
@@ -609,17 +610,20 @@ export function validatePaidResult(result: PurposeAlignmentPaidResult): PaidResu
   return errors;
 }
 
+const PURPOSE_ALIGNMENT_PRODUCT_CODE = "personal_decision_audit";
+const PURPOSE_ALIGNMENT_PRODUCT = requireProduct(PURPOSE_ALIGNMENT_PRODUCT_CODE);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PAID RESULT CONTRACT METADATA
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const PAID_RESULT_CONTRACT = {
   /** The commercial product code this contract serves */
-  productCode: "personal_decision_audit",
+  productCode: PURPOSE_ALIGNMENT_PRODUCT_CODE,
   /** The price in GBP (pence) */
-  priceInPence: 4900,
+  priceInPence: PURPOSE_ALIGNMENT_PRODUCT.amount,
   /** The display price */
-  displayPrice: "£49",
+  displayPrice: PURPOSE_ALIGNMENT_PRODUCT.displayPrice,
   /** Contract version for schema migration */
   contractVersion: "1.0.0",
   /** The number of deliverables promised */

@@ -1,0 +1,9 @@
+{
+  "productCode": "escalation_readiness_scorecard",
+  "valid": {
+    "evidence": "sufficient"
+  },
+  "invalid": {
+    "evidence": ""
+  }
+}

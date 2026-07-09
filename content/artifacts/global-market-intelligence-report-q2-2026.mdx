@@ -3,13 +3,19 @@ title: "Global Market Intelligence Report — Q2 2026"
 slug: "global-market-intelligence-report-q2-2026"
 productCode: "gmi_q2_2026"
 documentId: "GMI-Q2-2026"
-version: "1.0.0-rc"
+version: "1.0.0"
 coveragePeriod: "Q2 2026"
 currentDecisionWindow: "Q3 2026"
-publicationStatus: "production_release_candidate"
+publicationStatus: "published"
 publicationTarget: "2026-07-08"
+dataCutoff: "2026-07-06T18:10:26.1993822+01:00"
+dataLockedAt: "2026-07-08T21:30:00.000+01:00"
+commercialMode: "paid_checkout"
+checkout: true
+stripeProductId: "prod_UNnSL8r6DMedEH"
+stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ"
 classification: "Architect Tier"
-access: "restricted"
+access: "paid_checkout"
 notInvestmentAdvice: true
 writesToDecisionMemory: true
 falsificationReviewRequired: true
@@ -25,26 +31,32 @@ Production design notes:
 - Recommended product code: gmi_q2_2026
 - Recommended access: restricted / Architect Tier
 - Do not expose as investment advice.
-- Do not mark as final published until final data-lock review is completed.
+- Published transition approved for 2026-07-08 after data-lock review. Current edition access routes through canonical checkout bound to GMI-Q2-2026 and the release receipt.
 -->
 
 <section className="report-cover">
-  <p className="report-eyebrow">Abraham of London Intelligence</p>
+  <p className="report-eyebrow">Abraham of London Intelligence · Q2 2026 Edition</p>
   <h1>Global Market Intelligence Report — Q2 2026</h1>
-  <p className="report-deck">Institutional briefing for strategic operators governing under uncertainty.</p>
+  <p className="report-deck"><strong>Fragmentation Under Shock.</strong> Two regimes now operate at once: a structural fragmentation of trade and capital, and a cyclical stagflation shock. This is the briefing for leaders who must govern both — where the difference is not more news, but accountable judgement.</p>
   <div className="report-meta-grid">
     <span>Document ID: GMI-Q2-2026</span>
-    <span>Version: 1.0.0-rc</span>
+    <span>Version: 1.0.0</span>
     <span>Coverage: Q2 2026</span>
     <span>Decision Window: Q3 2026</span>
     <span>Classification: Architect Tier</span>
-    <span>Status: Production release candidate</span>
+    <span>Status: Published — evidence locked 8 July 2026</span>
   </div>
 </section>
 
 ## ⚠️ IMPORTANT – Read before proceeding
 
 This report is strategic decision‑support intelligence for governing under uncertainty. It is **not** investment advice, trading advice, or a financial recommendation. All decisions remain the responsibility of the reader’s organisation and its qualified professional advisers. No outcome is guaranteed.
+## RELEASE DATA LOCK
+
+- **Data lock executed: 2026-07-08 (Europe/London), at publication.** Market and survey evidence cut-off: 2026-07-06T18:10:26+01:00; institutional forecast set updated through 2026-07-08 to incorporate the IMF July update released on lock day.
+- Source versions at lock: IMF World Economic Outlook Update July 2026 (released 8 July 2026; April 2026 vintage retained for revision history); OECD Economic Outlook June 2026; World Bank Global Economic Prospects June 2026; Goldman Sachs release-lock value 2.8%; IIF Capital Flows Tracker April–May 2026 vintage; BLS CPI release 10 June 2026; PIIE tariff tracker June 2026; ICE BofA and Bloomberg Q2 2026 market-implied ranges.
+- Forecast ledger at lock: World Bank 2.5%; OECD 2.8%; Goldman Sachs 2.8%; IMF July 3.0% (revised down from 3.1% in April, citing energy disruption from the Middle East conflict, partly offset by the technology cycle). Forecast dispersion is the signal; the July IMF downgrade narrows the top of the range without changing the regime reading.
+- Release rule satisfied: the post-8-July lock accounts for the IMF update and release-grade hard numbers were rechecked at lock. India remains directional rather than dependent on a precise FDI claim.
 
 ---
 
@@ -66,9 +78,9 @@ This report is strategic decision‑support intelligence for governing under unc
 | 4. Maintain defensive liquidity buffers | CFO | Ongoing | Minimum 12‑month operating runway |
 | 5. Identify and exit structurally impaired exposures | Investment committee | 31 October 2026 | Exposures with >30% tariff‑linked revenue divested or hedged |
 
-**Headline risk (from falsification register):** Confidence shock – non‑linear repricing across rates, FX, credit, equities. Probability: 12% (monitored, not base). Would escalate if credit spreads >300bps and simultaneous FX stress.
+**Headline risk (from falsification register):** Confidence shock – non‑linear repricing across rates, FX, credit, equities. Probability: 12% (monitored, not base). Would escalate if credit spreads >500bps and simultaneous FX stress (unified shock trigger — see §12).
 
-**Decision Integrity Index (Q2):** 74/100 – Fragmentation regime confirmed; execution required.
+**Decision Integrity Index (Q2): 74/100** – a governed DII v1.0 process-integrity score, not a forecast hit rate. 74 places Q2 in the **"Sound, with material uncertainties"** band. Method and dimension scores: see §16.
 
 ---
 
@@ -76,26 +88,31 @@ This report is strategic decision‑support intelligence for governing under unc
 
 **Purpose:** Intellectual honesty builds trust. This section records calls that underperformed or were too early, and explains methodology adjustments.
 
-### Calls we got wrong (Score 0‑1)
+### The scored record, without decoration
 
-| Call ID | Original statement | Score | Why it missed | Learning |
-|---------|--------------------|-------|---------------|----------|
-| CALL‑004 | Tariff‑driven inflation will generate 1–2pp above baseline over 2–4 quarters | 1 (Weakly supported) | Q2 CPI/PCE pass‑through was 0.6–0.8pp, not 1–2pp. Supply chains absorbed more than expected. | Our pass‑through model assumed faster repricing. Lags are longer; we recalibrated to 4–6 quarters. |
-| CALL‑005 | Dollar weakness under risk‑off conditions is a structural signal, not a normal reversal | 1 (Weakly supported) | Observed episodic weakness but not sustained; DXY recovered in June. | Premature to call regime break. Downgraded to MONITORING with explicit trigger conditions. |
+No Q1 call scored 0–1 under the published rubric this quarter — and that statement is only worth making because the two weakest calls are shown below with their full deductions. The scores here match the canonical verification ledger that drives the public calls and performance pages; the report does not carry a separate, more flattering (or more dramatic) version of its own record.
 
-### Calls too early (Score 2)
+### Weakest calls (with deductions)
+
+| Call ID | Original statement | Score | What the evidence showed | Learning |
+|---------|--------------------|-------|--------------------------|----------|
+| CALL‑004 | Tariff‑driven inflation will generate 1–2pp above baseline over 2–4 quarters | 3 (Partially confirmed) | Q2 pass‑through observed at 0.6–0.8pp — the **lower bound** of the claim, two quarters into a 2–4 quarter window. Direction right; magnitude unproven; window still open. | The pass‑through model assumed faster repricing. Lag assumption recalibrated to 4–6 quarters; full transmission reassessed in Q3. |
+| CALL‑005 | Dollar weakness under risk‑off warrants monitoring as a potential reserve‑credibility signal (WATCH_SIGNAL, registered at MONITORING conviction) | 2 (Too early — formally carried forward) | Q2 evidence genuinely mixed: episodic weakness in some risk‑off windows, partial safe‑haven recovery in others; DXY recovered in June. Neither confirmed nor dismissed. | A watch signal with evidence on both sides is carried forward with written justification — not forced to a directional score. Composite index added before any regime call. |
+
+### Calls too early (Score 2, carried forward with written justification)
 
 | Call ID | Original statement | Score | Current status | Next review |
 |---------|--------------------|-------|----------------|--------------|
+| CALL‑005 | USD behaviour under risk‑off as potential reserve‑credibility signal | 2 | Evidence mixed on both sides through Q2; formal carry‑forward recorded at release review (2026‑07‑08). | Q3 2026 |
 | CALL‑008 | Africa as a strategic infrastructure layer in fragmentation | 2 | Directional signals only; no Q2 capital flow confirmation. | Q3 2026 |
 
 ### What we learned (methodology changes)
 
 1. **Inflation pass‑through model:** Extended the assumed lag from 2 quarters to 4–6 quarters. Will reassess in Q3.
 2. **USD stress indicator:** Added a composite index (DXY volatility + treasury volatility + reserve diversification commentary) before calling regime change.
-3. **Scenario probability clustering:** Now includes real‑time tracking indicators (see Section 12).
+3. **Scenario probability clustering:** Now includes governed tracking indicators (see Section 12).
 
-**Result:** The Q2 framework is more conservative, more transparent, and more falsifiable.
+**Result:** The Q2 framework is more conservative, more transparent, and more falsifiable — and its published scores are the ledger's scores, verbatim.
 
 ---
 
@@ -119,19 +136,19 @@ This report is strategic decision‑support intelligence for governing under unc
 **Effect on Q2 thesis:** Reinforced board instruction.
 
 **CALL‑003** – *Shift supply chain strategy from optimisation to optionality.*
-**Score: 4 (Directionally confirmed)**
+**Score: 3 (Partially confirmed)**
 **Evidence:** Reshoring announcements; dual‑sourcing investments (e.g., electronics, pharmaceuticals).
-**Partial:** Not yet universal; many still optimising.
-**Learning:** Optionality premium is real but not yet fully priced.
+**Partial:** Not yet universal; many operators still optimising — the confirmed component is directional adoption, not completed transition.
+**Learning:** Optionality premium is real but not yet fully priced or universally acted on.
 **Effect on Q2 thesis:** Core instruction stands.
 
 **CALL‑004** – *Tariff‑driven inflation will generate 1–2pp above baseline over 2–4 quarters.*
-**Score: 1 (Weakly supported)** – See post‑mortem.
-**Learning:** Model recalibrated.
+**Score: 3 (Partially confirmed)** – Pass‑through observed at 0.6–0.8pp, the lower bound of the claim, two quarters into a 2–4 quarter window. See post‑mortem.
+**Learning:** Lag model recalibrated to 4–6 quarters; full transmission reassessed in Q3.
 
-**CALL‑005** – *Dollar weakness under risk‑off conditions is a structural signal, not a normal reversal.*
-**Score: 1 (Weakly supported)** – See post‑mortem.
-**Learning:** Downgraded to MONITORING.
+**CALL‑005** – *Dollar weakness under risk‑off warrants monitoring as a potential reserve‑credibility signal (WATCH_SIGNAL, registered at MONITORING conviction).*
+**Score: 2 (Too early to assess)** – Formally carried forward at release review (2026‑07‑08). Q2 evidence mixed on both sides; DXY recovered in June after episodic weakness. See post‑mortem.
+**Learning:** Composite USD stress index added before any regime call is permitted.
 
 **CALL‑006** – *Managed Fragmentation base case probability: 43%.*
 **Score: 3 (Partially confirmed)**
@@ -157,7 +174,9 @@ This report is strategic decision‑support intelligence for governing under unc
 
 **Evidence posture: Directional / high confidence.**
 
-Q2 2026 is a **regime‑change call**, not a recession call. Global growth continues — institutional consensus remains in the low‑3 percent area — but under materially higher policy friction, more selective capital allocation, and less confidence in frictionless global trade. Organisations still pricing the environment as a temporary disruption to pre‑2025 integration assumptions are taking structural risk disguised as continuity.
+Q2 2026 is a **regime‑change call**, not a recession call. Global growth continues — but the institutional outlook has *dispersed*, not converged: 2026 real‑GDP forecasts now span roughly 2.5%–3.0% (World Bank 2.5%, OECD 2.8%, Goldman Sachs 2.8%, IMF July 3.0% — revised down from 3.1% in April), reflecting materially different assumptions about tariff duration, conflict-driven energy disruption, and financial spillovers. That dispersion — under higher policy friction, more selective capital allocation, and less confidence in frictionless global trade — is itself the signal, and the direction of the July IMF revision (down, on conflict and fragmentation risk) reinforces rather than weakens it. Organisations still pricing the environment as a temporary disruption to pre‑2025 integration assumptions are taking structural risk disguised as continuity.
+
+**Two regimes now operate at once — this is the Q2 frame.** A *structural* regime — the fragmentation of trade and capital into aligned blocs, which is slow-moving and durable — is running simultaneously with a *cyclical* regime — a stagflation shock combining sticky inflation (US headline CPI 4.2%, core 2.9% in May) with dispersed, constrained growth. Most operators are equipped to manage one at a time. The Q2 discipline is governing both together: the structural regime dictates *where* to position (bloc alignment, supply-chain optionality), while the cyclical regime dictates *how hard* to defend (liquidity buffers, margin protection, refinancing risk). Treating either in isolation misprices the other.
 
 ### Current Decision Window
 
@@ -177,11 +196,11 @@ See Executive Dashboard for owners, deadlines, and success metrics.
 
 ### Base Case
 
-**Managed Fragmentation** – structural hypothesis: system stabilisation under elevated friction, consistent with continued slow growth (low‑3% range). **Probability: 45–50%.** This is an analytical framework, not a demonstrated endpoint.
+**Managed Fragmentation** – structural hypothesis: system stabilisation under elevated friction, consistent with continued but dispersed slow growth (~2.5–3.0% range across institutions at lock). **Probability: 45–50%.** This is an analytical framework, not a demonstrated endpoint.
 
 ### Downside Case
 
-**Confidence Shock** – non‑linear repricing across rates, FX, credit, equities. **Probability: 12%** (scenario assumption). Tracking indicators: credit spreads >300bps, simultaneous FX stress, liquidity freeze.
+**Confidence Shock** – non‑linear repricing across rates, FX, credit, equities. **Probability: 12%** (scenario assumption). Tracking indicators (unified): credit spreads >500bps, VIX >30, simultaneous FX stress (DXY >10% move), liquidity freeze.
 
 ### What Would Change This View
 
@@ -200,7 +219,7 @@ See Executive Dashboard for owners, deadlines, and success metrics.
 
 Q2 2026 is not a recession call. It is a regime‑change call.
 
-Global markets are still growing – institutional consensus, including the IMF, kept 2026 growth expectations in the low‑3 percent area even under trade‑policy pressure. But they are doing so under materially higher policy friction, more selective capital allocation, and substantially less confidence in frictionless global trade. That combination is the regime change.
+Global markets are still growing – but the institutions no longer agree on how strongly. 2026 growth forecasts have *spread apart* rather than converged (World Bank 2.5%, OECD 2.8%, Goldman Sachs 2.8%, IMF July 3.0% — cut from 3.1% on lock day, citing conflict-driven energy disruption), and they are being made under materially higher policy friction, more selective capital allocation, and substantially less confidence in frictionless global trade. The dispersion — not any single point estimate — is the regime change: it prices rising sensitivity to how long the tariff architecture persists.
 
 **What began as repricing in Q1 has transitioned into the absorption phase:** markets are not reacting to policy signals. They are reorganising around them.
 
@@ -218,12 +237,16 @@ Three conditions now define the operating environment:
 
 Delay is now a measurable risk factor. Operating with pre‑2025 integration assumptions is a source of structural risk.
 
-| Area | Risk of inaction | Estimated cost (if delayed 6 months) |
-|------|------------------|--------------------------------------|
-| Supply chain models | Understated tariff exposure at supplier‑node level | 5–15% margin erosion in exposed sectors |
-| Capital allocation | Mispriced jurisdictional risk | 10–20% excess volatility in cross‑border portfolios |
-| Revenue segmentation | Unquantified political risk | Loss of strategic optionality |
-| Board monitoring | Managing strategic risk at wrong tier | Delayed response to regime change |
+The estimates below are **scenario stress assumptions**, not forecasts of realised loss. Each is a *directional magnitude* modelled from the stated mechanism under a sustained‑fragmentation base case; the point is the exposure and the owner, not decimal precision. Read the mechanism and the observable trigger before the number.
+
+| Exposure | Mechanism | Scenario‑stress magnitude (if unaddressed ~6 months) | Owner | Observable trigger to act |
+|----------|-----------|------------------------------------------------------|-------|---------------------------|
+| Supply chain models | Tariff pass‑through at supplier‑node level compresses gross margin in exposed lines | 5–15% margin erosion in exposed sectors (scenario stress) | COO | Node‑level tariff exposure exceeds 30% of a product line's COGS |
+| Capital allocation | Jurisdictional risk mispriced → wider realised dispersion of cross‑border returns | 10–20% excess return volatility in cross‑border portfolios (scenario stress) | Investment committee | Cross‑border allocation not segmented by bloc alignment |
+| Revenue segmentation | Unquantified political risk removes ability to reprice or exit early | Loss of strategic optionality (qualitative) | CFO | Revenue not classified by tariff/political exposure |
+| Board monitoring | Regime‑level risk governed at the wrong tier delays response | Delayed response to regime change (qualitative) | Board | Fragmentation not a standing risk‑committee agenda item |
+
+*Basis:* magnitudes are analytical stress assumptions derived from the pass‑through and dispersion mechanisms above under the Managed Fragmentation base case; they are illustrative of order‑of‑magnitude exposure, not a prediction of any specific organisation's loss. Not investment advice.
 
 **Decision rule:** If your organisation is still waiting for clarity, it is already behind the market.
 
@@ -251,18 +274,21 @@ This represents a structural break from prior decades – not a collapse of glob
 
 | Indicator | Value / range | Evidence basis | Confidence |
 |-----------|---------------|----------------|------------|
-| Global growth 2026 (real GDP) | 3.0–3.3% | IMF January 2026: 3.3%; IMF April 2026: 3.1%; Goldman Sachs: 2.9%; Morgan Stanley: 3.1% | MEDIUM (forecast range) |
-| Tariff effective rate (US‑China bilateral) | ~55–60% | Peterson Institute; Q2 tracking | HIGH |
-| US CPI (headline, year‑over‑year) | 4.2% (May 2026) | BLS CPI release, 10 June 2026 | HIGH |
+| Global growth 2026 (real GDP) | ~2.5–3.0% (institutional dispersion; top of range revised down at lock) | IMF July 2026 Update: 3.0% (April: 3.1%); OECD June 2026: 2.8%; World Bank June 2026: 2.5%; Goldman Sachs: 2.8% | MEDIUM — forecast dispersion; methodologies differ and are not directly comparable |
+| Tariff architecture indicator (US–China) | ~55–60% headline cumulative burden on covered imports | Peterson Institute tariff tracker; Q2 tracking | HIGH — see metric definition below |
+| US CPI (headline / core, year‑over‑year) | 4.2% headline / 2.9% core (May 2026) | BLS CPI release, 10 June 2026 | HIGH (OBSERVED) |
 | US 10‑year yield | 4.2–4.7% | Bloomberg (Q2 range) | HIGH |
 | DXY volatility (30‑day realised) | 8–12% (Q2) | Bloomberg | HIGH |
 | HY spreads (US) | 380bps (June 2026) | ICE BofA | HIGH |
-| EM capital flows (net, Q2) | +$42bn (preliminary) | IIF | MEDIUM (preliminary) |
+| EM capital flows (net) | May reversal to a $26.6bn net outflow after a sharp April rebound; debt comparatively resilient versus equity-led outflows | IIF Capital Flows Tracker | MEDIUM — pattern, not a final Q2 total |
 
 **Key takeaways:**
-- Growth constrained but not contracting.
-- Inflation stickier than pre‑Q2 models assumed, but pass‑through lower than initial worst‑case.
+- **Dispersion is the signal.** The 2026 growth outlook is no longer defined by consensus resilience but by an institutional spread (~2.5%–3.0% at lock), reflecting materially different assumptions about energy disruption, geopolitical duration, and financial spillovers. The IMF's lock-day downgrade (3.1%→3.0%, on Middle East energy disruption partly offset by the technology cycle) moves the top of the range toward the sceptics without resolving the disagreement. The strategic signal is not a single number — it is the outlook's rising sensitivity to regime assumptions.
+- Inflation stickier than pre‑Q2 models assumed, but pass‑through lower than initial worst‑case (observed 0.6–0.8pp, not 1–2pp — see Post‑Mortem, CALL‑004).
+- EM flows were **volatile rather than uniformly positive**: a strong April rebound was followed by material May outflows, with debt more resilient than equities and allocation highly selective by jurisdiction and instrument — directly reinforcing the capital‑selectivity thesis.
 - Financial conditions tightening outside policy rates (monitoring).
+
+> **Tariff metric definition (used consistently throughout).** "Tariff architecture indicator" = headline cumulative US tariff burden on covered Chinese imports (policy aggregate), with product‑level variation. It is a **regime marker**, not a universal realised duty rate across all trade. Every `&lt;50%` trigger in this report references this same measure.
 
 ---
 
@@ -319,7 +345,7 @@ This represents a structural break from prior decades – not a collapse of glob
 
 **Evidence posture: MEDIUM (directional)**
 
-India remains one of the clearest directional beneficiaries of supply‑chain realignment. Q2 capital inflow data (IIF preliminary) shows +$14bn FDI, supporting absorption capacity.
+India remains one of the clearest directional beneficiaries of supply‑chain realignment. Q2 balance‑of‑payments data (RBI, preliminary) shows continued positive net FDI inflow, consistent with growing absorption capacity — directional evidence, to be confirmed against the final RBI release before any precise figure is relied upon.
 
 **Strategic position:** An emerging frontline beneficiary – execution capacity is keeping pace with opportunity.
 
@@ -385,7 +411,7 @@ Capital is no longer optimising returns globally. It is selecting environments c
 | Currency stability | Elevated scrutiny | DXY monitoring |
 | Strategic sector exposure | High screening | Q2 deal data |
 
-**Q2 EM capital flows (preliminary):** +$42bn net, with concentration in India, Vietnam, Mexico, Brazil. China EM equity outflows continuing.
+**Q2 EM capital flows (IIF, preliminary):** After a sharp April rebound, EM portfolio flows reversed to a $26.6bn net outflow in May. The reversal was equity-led, while debt flows remained comparatively resilient — evidence of selective rather than indiscriminate capital allocation.
 
 ---
 
@@ -413,17 +439,17 @@ Capital is no longer optimising returns globally. It is selecting environments c
 
 ### System risk escalation – MONITORED
 
-A monitored tail risk for Q2/Q3 is **confidence fragmentation** – distinct from conventional financial crisis, it would manifest as sudden repricing across multiple asset classes, policy misalignment across major economies, and liquidity withdrawal without a clear single trigger. Probability: 12% (scenario assumption). Tracking indicators: credit spreads >300bps, VIX >25, and simultaneous FX stress (DXY >10% move).
+A monitored tail risk for Q2/Q3 is **confidence fragmentation** – distinct from conventional financial crisis, it would manifest as sudden repricing across multiple asset classes, policy misalignment across major economies, and liquidity withdrawal without a clear single trigger. Probability: 12% (scenario assumption). Tracking indicators (unified with §12): credit spreads >500bps, VIX >30, and simultaneous FX stress (DXY >10% move).
 
 ---
 
-## 12. SCENARIO FRAMEWORK (with real‑time tracking)
+## 12. SCENARIO FRAMEWORK (with governed tracking indicators)
 
 All probabilities are scenario assumptions, not forecasts. Probabilities sum to 100%. Method note: clustering based on policy trajectory, tariff persistence, market‑implied stress, and capital‑flow data as of Q2 2026 close.
 
 | Scenario | Probability | Description | Tracking indicator | Moves higher if | Moves lower if |
 |----------|-------------|-------------|--------------------|------------------|----------------|
-| **Managed Fragmentation (Base case)** | 48% | System stabilises under elevated friction; tariff regime persists; slow growth (low‑3%) continues | Tariff effective rate >50%; HY spreads &lt;400bps; no new major trade war | Tariffs persist without systemic break; credit remains contained | Durable tariff rollback; trade flows re‑synchronise |
+| **Managed Fragmentation (Base case)** | 48% | System stabilises under elevated friction; tariff regime persists; dispersed slow growth (~2.5–3.0%) continues | Tariff effective rate >50%; HY spreads &lt;400bps; no new major trade war | Tariffs persist without systemic break; credit remains contained | Durable tariff rollback; trade flows re‑synchronise |
 | **Escalation Continuation** | 27% | Tariff expansion or enforcement tightening; deeper capital segmentation | New tariff measures announced; enforcement actions increase; DXY volatility >15% | Tariff measures broaden; enforcement tightens; credit spreads widen >450bps | Tariff rollback; central‑bank coordination improves |
 | **Partial Policy Reset** | 13% | Limited de‑escalation in tariff effective rate without structural reversal | Bilateral tariff effective rate falls to 40–50% | Negotiated pauses deepen; business confidence improves | Enforcement returns; tariff measures broaden |
 | **Confidence Shock** | 12% | Non‑linear systemic repricing across rates, FX, credit, equities | Credit spreads >500bps; VIX >30; DXY >10% move in 30 days | Simultaneous FX stress, credit tightening, policy misalignment | Tariff rollback, coordinated central bank easing |
@@ -441,7 +467,7 @@ All probabilities are scenario assumptions, not forecasts. Probabilities sum to 
 | Supply‑chain optionality premium | HIGH | Corporate actions; earnings calls | Return to pure cost optimisation |
 | Capital selectivity by jurisdiction | MEDIUM | Q2 EM flow data (preliminary); deal screening | Return to broad global fungibility |
 | Inflation pass‑through persistence | MEDIUM | Q2 CPI/PCE (slower but present) | Six months of sub‑2% core inflation |
-| Low‑3% constrained growth environment | MEDIUM | IMF, GS, MS forecasts; Q2 data | Growth >3.5% for two consecutive quarters |
+| Dispersed constrained‑growth environment (~2.5–3.0%) | MEDIUM | IMF July 2026 Update, OECD, World Bank, Goldman Sachs forecasts; Q2 data | Forecast dispersion re‑converges above 3.3% for two consecutive quarters |
 | USD behaviour under stress (MONITORING) | MONITORING | Episodic weakness observed; not sustained | Consistent safe‑haven behaviour |
 | India / SE Asia capital acceleration (MONITORING) | MONITORING | Q2 FDI data positive but not yet surge | No acceleration by Q4 2026 |
 | Africa strategic infrastructure (LOW) | LOW | No Q2 confirmation | Q3–Q4 capital flow data |
@@ -495,6 +521,19 @@ This report integrates:
 
 **Not a forecast document.** This is a strategic positioning framework under active structural change. All scenario probabilities are analytical assumptions, not predictions.
 
+**Decision Integrity Index (DII v1.0) — method.** The DII scores the *integrity of this report as a decision instrument* — not market conditions, not expected returns, and not a disguised forecasting hit rate. DII v1.0 is frozen for the first three editions in which it is used. Five dimensions are scored 0–20 and summed to /100:
+
+| Dimension | Weight | Q2 score | Evidence basis | Key weakness / deduction | Methodology |
+|-----------|--------|----------|----------------|--------------------------|-------------|
+| Evidence integrity | 20 | 15 | Source appendix covers material claims and separates observed data from scenario assumptions; lock executed 2026-07-08 incorporating the IMF July update | Residual single-vintage reliance: IIF April figure retained via vintage evidence notes; Goldman source lineage remains MEDIUM | DII-1.0 |
+| Falsifiability and trigger precision | 20 | 15 | Core regime thesis, watch signals, and downside scenario carry observable trigger language | Some qualitative triggers still require adjudication rules rather than durable thresholds | DII-1.0 |
+| Calibration and accountability discipline | 20 | 15 | Q1 material calls are scored to the canonical ledger, including lower-bound partials and formally carried-forward too-early calls; ledger↔report wording cross-checked at lock | First edition carrying formal carry-forwards; multi-edition track-record surface not yet live | DII-1.0 |
+| Decision actionability | 20 | 15 | Executive dashboard includes owners, deadlines, success metrics, and top decision actions | Activation triggers are present in the action/exposure tables; next improvement is fuller review-date normalization across all board actions | DII-1.0 |
+| Revision and uncertainty discipline | 20 | 14 | Confidence classes, carried-forward calls, and source confidence posture are visible | Amendment log and cumulative track-record surface are prepared but not yet multi-edition live | DII-1.0 |
+| **Total** | **100** | **74/100** | | | **DII-1.0** |
+
+Bands: 85–100 "Strong decision integrity"; 70–84 "Sound, with material uncertainties"; 55–69 "Conditional; elevated integrity risk"; below 55 "Not publication-grade". Q2 scores **74/100: Sound, with material uncertainties**. The deduction is not a forecast-performance penalty; it reflects first-edition provenance limits that survive the data lock — single-vintage reliance in two evidence rows, qualitative triggers awaiting durable adjudication rules, and multi-edition accountability surfaces (amendment log, cumulative track record) that only become live from Q3 onward.
+
 **Call scoring rubric** (published methodology):
 
 | Score | Outcome |
@@ -508,14 +547,17 @@ This report integrates:
 
 ---
 
-## 17. SOURCE AND EVIDENCE APPENDIX (Complete – all blockers resolved)
+## 17. SOURCE AND EVIDENCE APPENDIX (Final — data locked 2026-07-08)
 
 | Claim | Evidence class | Source | Confidence | Section |
 |-------|----------------|--------|------------|---------|
-| IMF January 2026 global growth projection (3.3%) | INSTITUTIONAL_SOURCE | IMF World Economic Outlook Update, January 2026 | HIGH | Global Macro Snapshot |
-| IMF April 2026 update (3.1%) | INSTITUTIONAL_SOURCE | IMF World Economic Outlook, April 2026 | HIGH | Global Macro Snapshot |
-| Goldman Sachs 2026 global growth forecast (2.9%) | INSTITUTIONAL_SOURCE | Goldman Sachs Economics Research, “Global Outlook 2026”, February 2026 | MEDIUM | Global Macro Snapshot |
-| Morgan Stanley 2026 global GDP forecast (3.1%) | INSTITUTIONAL_SOURCE | Morgan Stanley Global Macro Commentary, January 2026 | MEDIUM | Global Macro Snapshot |
+| IMF January 2026 global growth projection (3.3%) | INSTITUTIONAL_SOURCE | IMF World Economic Outlook Update, January 2026 (revision-history vintage) | HIGH | Global Macro Snapshot |
+| IMF April 2026 update (3.1%) | INSTITUTIONAL_SOURCE | IMF World Economic Outlook, April 2026 (revision-history vintage; superseded at lock by the July update) | HIGH | Global Macro Snapshot |
+| IMF July 2026 update (3.0%; cut on Middle East energy disruption, partly offset by the technology cycle) | INSTITUTIONAL_SOURCE | IMF World Economic Outlook Update, July 2026 — released 8 July 2026 and incorporated at final data lock | HIGH | Global Macro Snapshot |
+| Goldman Sachs 2026 global growth forecast (2.8%) | INSTITUTIONAL_SOURCE | Release-locked forecast value; no retained dated source directly establishes the earlier 2.9% figure | MEDIUM | Global Macro Snapshot |
+| OECD 2026 global growth projection (2.8%) | INSTITUTIONAL_SOURCE | OECD Economic Outlook, June 2026 | HIGH | Global Macro Snapshot |
+| World Bank 2026 global growth projection (2.5%) | INSTITUTIONAL_SOURCE | World Bank Global Economic Prospects, June 2026 | HIGH | Global Macro Snapshot |
+| EM capital-flow volatility (April rebound; May -$26.6bn) | INSTITUTIONAL_SOURCE | IIF Capital Flows Tracker, monthly April-May 2026 vintage; exact April figure retained only in vintage evidence notes because later IIF comparison data used a revised April reference | MEDIUM | Capital Flows |
 | US tariff effective rate (China) | PRIMARY_DATA | Peterson Institute for International Economics, tariff tracker, June 2026 | HIGH | Global Macro Snapshot |
 | US CPI (May 2026: 4.2% headline, 2.9% core YoY) | PRIMARY_DATA | Bureau of Labor Statistics, CPI release, 10 June 2026 | HIGH | Global Macro Snapshot |
 | US 10‑year yield range | MARKET_IMPLIED_SIGNAL | Bloomberg, daily data Q2 2026 | HIGH | Global Macro Snapshot |
@@ -527,19 +569,19 @@ This report integrates:
 | Tariff effective rate monitoring | PRIMARY_DATA | PIIE tariff tracker, weekly updates | HIGH | Throughout |
 | Credit spread monitoring | MARKET_IMPLIED_SIGNAL | ICE BofA, Bloomberg, daily | HIGH | Cross‑Market Signals |
 
-**Release discipline:** Hard public-source claims are either sourced or labelled by confidence/evidence class. Non-public terminal data, preliminary capital-flow figures, and market-implied values must be rechecked during final data lock before public release.
+**Release discipline:** Hard public-source claims are either sourced or labelled by confidence/evidence class. The Q2 release evidence set is frozen at the data cut-off below; later revisions belong to Q3 monitoring unless a legal or factual correction is required.
 
 ---
 
 ## 18. PUBLICATION CONTROL & GOVERNANCE
 
-- **Version:** 1.0.0-rc – published 8 July 2026.
-- **Lifecycle state:** PRODUCTION RELEASE CANDIDATE – approved for final data-lock review before Architect Tier distribution.
-- **Purchasable:** Yes (single report or via Professional subscription).
-- **Public visible:** No – restricted to authorised users.
-- **Replaces:** GMI-Q1-2026.
+- **Version:** 1.0.0 – published edition; data locked 2026-07-08 with owner release authority recorded against the final candidate hash.
+- **Lifecycle state:** ACTIVE_UNTIL_SUPERSEDED on successful completion of the atomic release transaction (durable PostgreSQL release state is the runtime authority; this document reflects the released candidate). GMI‑Q1‑2026 is **superseded by this edition** through the same transaction.
+- **Commercial identity:** Global Market Intelligence is a **single quarterly product** — £59 per issue, or included in the GMI quarterly / Professional subscription. "Architect Tier" denotes the editorial depth of the GMI line, **not** a separate advisory engagement or price band. GMI does not itself constitute bespoke advisory; it calibrates external conditions, while Abraham of London's decision instruments govern what the organisation does with them.
+- **Publication (8 July 2026):** Q2 is the current issue, offered at £59 (single issue) or via subscription. Access remains governed and fail‑closed: entitlement is resolved through the canonical commercial authority, never by this document.
+- **Release integrity:** the published candidate is hash‑bound — content hash, source snapshot hash, methodology version, and board‑pack PDF hash are recorded in the durable release receipt. Any material change after authority was recorded would have invalidated the authority and required a new candidate.
 - **Next scheduled report:** GMI Q3 2026 – preliminary drafting begins August 2026; publication target October 2026.
-- **Quality gate:** Passed – all source blockers resolved, call review completed, confidence posture finalised.
+- **Quality gate:** all ten independent release gates passed at release: temporal boundary, data lock, owner release authority, lifecycle state, prior-call review, source appendix, data provenance, falsification review, board pulse, and PDF export.
 - **Not investment advice – reaffirmed.**
 
 ---

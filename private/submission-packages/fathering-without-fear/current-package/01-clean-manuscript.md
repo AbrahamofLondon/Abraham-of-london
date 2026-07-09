@@ -4,7 +4,7 @@
 
 ---
 
-*25 chapters. Approximately 48,700 prose-only words.*
+*27 chapters. Approximately 50,000 prose-only words.*
 
 ---
 
@@ -76,11 +76,9 @@ The answer did not come as a speech. It came first as not hanging up. It came as
 
 Abraham stayed on the line.
 
-He would not make the child carry the argument. That was the first discipline. Damisi was a boy, not evidence. His love for his father was not a legal exhibit. His absence from the room was not the chapter's thesis. He was somewhere else, living the life a child lives, and this book would not ask him to do anything more than be what he already was.
+He would not make the child carry the argument. Damisi was a boy, not evidence. His absence from the room was not the chapter's thesis. He was somewhere else, living the life a child lives.
 
-He would not make the system carry the blame. That was the second discipline. The court was machinery. It processed what it could process. It did not speak the language of love, and it was not required to. The man who needed the system to be his enemy would lose something more important than the case.
-
-He would not reduce what had happened to him — or what he had allowed to happen to himself — into a case for the reader's verdict. The book that follows is not a brief. It is not a complaint. It is not an appeal. It is the account of a man who refused to disappear, told from far enough back to show where the refusal began, and told with enough restraint to let the child remain a child inside it.
+The book that follows is not a brief, a complaint, or an appeal. It is the account of a man who refused to disappear, told from far enough back to show where the refusal began.
 
 The call moved on.
 
@@ -114,6 +112,13 @@ He was also a merchant. Kola nuts. Cocoa. He held land. He helped people from Is
 On his demise, his son David asked for only two things: a few of his father's agbada robes, to remember Abraham Adaramola's legacy by the work of his hands, and the charcoal pressing iron — the tool of his trade. His father's sisters denied him both.
 
 The robes remained with them. The iron passed to someone else. The son who wanted to carry his father's craft forward was left with neither the cloth his father had cut nor the tool his father had pressed it with. Ten agbada robes, and David received none. One iron, and it went to hands that had not asked for it.
+The family remembered the request as a small scene because the objects were small enough to be held. A robe can be folded. An iron can be lifted by its handle. They were not abstract inheritance. They had weight, smell, surface. The robes would have carried the faint memory of camphor, sweat, storage, ceremony. The charcoal iron would have carried soot in the hinge and heat in the imagination even when cold. A son asking for those things was not asking to become rich. He was asking for the evidence of touch.
+
+That is the cruelty of denied objects. They do not only remove property. They interrupt a line between hand and hand. A father presses a seam. A son takes the iron. Later, another child sees the iron and understands that work passed through the family in a form that could be gripped. Without the object, the story has to work harder. It has to say what the hand can no longer show.
+
+A family can survive such denial and still carry the mark of it. The missing thing becomes part of the furniture of memory. Someone says robe and everyone knows which robe is absent. Someone says iron and the room understands that an inheritance once had a handle, a weight, a place on a worktable, and then did not.
+
+Years later, when Abraham would learn to father through things he could not keep — hours that ended, cards that could be left behind, rooms that did not belong to him — he would understand something of this earlier wound differently. A child does not need every object a father touches. But some objects say: this was not imagined. Someone stood here. Someone worked. Someone meant for what he made to continue.
 
 What was left? A name. A faith that had entered the lineage and would not leave. Land that remained but did not carry what should have accompanied it. And a son who now knew what it meant to be denied the things that should have confirmed you — the physical proof that a father had existed and that you were his.
 
@@ -137,6 +142,15 @@ He was a boy who spoke too early, and whose questions made adults go quiet.
 Not in the performing sense — not a child who had learned to seem older for the pleasure of the response. The seriousness preceded him. When he asked something, the adults around him adjusted: they recalibrated what they were looking at. The questions were not the kind a child of that age should yet have had language for. Adults do not always know what to do with this. They grow careful.
 
 He sat where other children moved. He waited where other children spoke. He watched the adults in a room the way adults watch each other — with attention, with patience, with something that could not be called understanding but was adjacent to it. He did not know he was doing anything unusual.
+At family gatherings he found the edge of the adult circle and stayed there. The children might be outside, running through the compound, inventing a game from dust, stones, bottle tops, the unfinished business of a Lagos afternoon. Abraham could join them. Sometimes he did. But often he drifted back toward the adults, toward the room where voices lowered and rose according to the weight of what was being discussed.
+
+He would sit on the arm of a chair or on the floor close enough to hear, not close enough to be invited. Money moved through those conversations. Land. School fees. A quarrel between relatives. A journey someone needed to make. A name mentioned with caution. The adults did not explain the parts he had missed. They assumed he was not following. He was following more than they knew and less than he thought.
+
+Once, when a discussion had tightened around a practical problem, he asked a question that made the room pause. Not an answer. A question. The kind that went to the joint of the matter before a child should have known there was a joint there. An uncle looked at him. Someone laughed, but not because it was funny. His father did not laugh. David Senior looked at him with the alertness Abraham would later recognise as recognition. Then the adults continued, but the temperature had shifted. The boy had spoken from the edge of the room, and the room had adjusted around him.
+
+Afterward he returned to the children without knowing what had happened. He was still small enough to be called back to food, still young enough to be sent on an errand, still a child whose shirt could be corrected by an older hand. But something in him had already learned the adult habit of listening for the pressure under the sentence.
+
+There were other signs. He did not like being dismissed from a room simply because the room had decided it was no longer for children. If an adult said, go and play, he might go, but the sentence followed him. He wanted to know what had required his removal. Not gossip. Structure. He wanted the hidden hinge of the matter: why the voices had changed, why one name had made someone quiet, why money could make adults speak in shorter sentences.
 
 He was, in the specific way that certain children are, already old. Not wise — children are not wise — but weighted with something he had not chosen and could not name.
 
@@ -231,19 +245,15 @@ The case remained a case.
 
 His son remained the reason.
 
-That was the separation Abraham kept feeling, even when he did not yet have language for it. The institution had categories. It could ask whether a thing had been filed. It could ask who had attended. It could ask what should happen next in the process.
+That was the separation Abraham kept feeling, even when he did not yet have language for it. The institution could ask whether a thing had been filed. It could ask who had attended. It could ask what should happen next in the process.
 
 It could not ask what it meant for a father to count ten minutes as part of a child's life.
-
-A father present. A child absent from the room but present in every breath. A screen between the man and the institution. A direction possibly changing somewhere beyond his reach. The demand to wait. The refusal to leave.
 
 After the hearing, there would be another date.
 
 There was always another date.
 
-That is how the years were built: not only from large decisions, but from mornings like this one, from links opened, from names called, from silence observed, from a man sitting where he was told to sit because love had taken the form of attendance.
-
-Abraham had not yet reached the later language for what he was doing. He was not trying to become an emblem. He was not trying to prove a theory about fatherhood. He was trying to remain close enough to his son that his son would one day know he had not been abandoned.
+That is how the years were built: from links opened, from names called, from silence observed, from a man sitting where he was told to sit because love had taken the form of attendance.
 
 So when the screen opened, he came.
 
@@ -319,7 +329,7 @@ St Thomas Aquinas College was the name of the school, but the name did not matte
 
 For a whole year he did not see his family.
 
-One year is not long in the accounting of adults. Adults say a year and mean calendar, school term, fees, arrangement, something necessary for a child to become more formed. A child receives a year differently. A year can become the size of the world. It can become the full measure of absence. It can teach the body that people may love you and still not be where you are.
+One year is not long in the accounting of adults. A child receives a year differently. It can become the full measure of absence.
 
 Akure became the place where childhood continued without home.
 
@@ -361,9 +371,7 @@ He was not collapsing.
 
 That is part of what made the refusal harder to read. If he had failed, the adults would have had a simpler category for him. Laziness. Stubbornness. A child going bad. But he did not fail in the expected way. He still passed the normal tests and examinations. The schoolwork did not expose the absence fully because the mind could still perform. He could stay away from class and still cross the mark required of him. He could be missing and still appear, on paper, present enough.
 
-That is a particular kind of silence.
-
-It does not ask for help in the language adults recognise. It lets the report show passing grades while the body spends school hours in the street. It refuses a life without yet knowing how to argue against the life. It says no with the feet because the mouth has not been given a sentence large enough.
+It did not ask for help in the language adults recognised. It let the report show passing grades while the body spent school hours in the street.
 
 His maths teacher noticed.
 
@@ -413,11 +421,7 @@ They had gone to America for a holiday and did not come back. The family whose c
 
 This was not the same as Jumoke's death.
 
-It should not be made equal to it.
-
 The school he chose did not give him back the boys from America.
-
-He had already learned to keep going after the thing he hoped to find had disappeared.
 
 And he entered it anyway.
 
@@ -614,6 +618,11 @@ Abraham watched from a distance — from wherever the adults were not sitting. T
 Her daily order was precise. She would shower early, dress carefully, sit to receive guests all day, then retire to bed. She liked fresh food and cooked by herself. Rice and what she called "fry" — well-fried stew. "Fry" was one of the few English words she used. She also liked Isua native soups and pounded yam. The household did not think of itself as serving her. It thought of itself as being in the presence of someone who required a different kind of attention.
 
 She settled arguments by pronouncing judgment. People came not only for company but for resolution. She was considered fair, trustworthy, wise. She was not old in the way that people become dependent. She was old in the way that people become certain. A visitor with a dispute would leave with a decision, and the decision would hold — not because she had power to enforce it but because the community trusted her to have seen clearly.
+Sometimes the signal was smaller than a judgment. A visitor would arrive speaking too quickly, hands moving ahead of the story, the complaint already rehearsed. Iyalode would let the words come. She did not hurry to fill the room with her own voice. She listened until the person had spent the first heat of the matter. Then she would ask for water, or adjust the wrapper across her knees, or say one sentence in Uhami that made the room settle. The authority was not in volume. It was in timing.
+
+Abraham watched how adults changed their bodies around her. Men who were loud elsewhere lowered themselves into patience. Women who had arrived carrying injury waited for her to finish. No one announced that this was power. The room simply behaved as if it knew.
+
+Even children learned the edges of that authority. They did not run through her receiving space the way they ran elsewhere. A child's noise could exist in the compound, but near her it found its measure. Her presence taught order before anyone explained order.
 
 In very old age, she loved telling stories of her young days and of her handsome Abraham — Abraham Adaramola, the tailor who had followed the missionary to Lagos. It sometimes seemed as if she forgot she had remarried after him. The stories were not about regret. They were about memory, about the persistence of a first love that had shaped her before anything else did.
 
@@ -653,6 +662,19 @@ He refused to follow.
 The weight moved because it had to go somewhere, and he was there. The people who might have carried it had gone — his mother back to Isua, his father into the ground. He was the oldest of those remaining. He was the fact.
 
 Lagos had room for a boy who refused to leave. Not comfortable room. The room a city makes for necessity — rough enough to teach you, available enough to survive in if you were willing to work. He worked. He farmed. He moved through whatever forms of labour the city made available to a boy with no father, with three siblings to keep whole, with two promises outstanding. A man called Captain Idris gave him a place on Bassey Obanga Street in Surulere — the kind of arrangement Lagos made possible between a man with authority and a boy who needed ground to stand on. Captain Idris was kind. He stayed kind. David Senior did not forget him.
+The farming was not pastoral in the way later memory can make farming pastoral. It was work before it was image. Soil under the nails. Tools that had to be kept somewhere. Seed bought or saved. A patch of ground made to answer need. The body bending because food and money do not rise from the earth merely because a boy has become responsible too early.
+
+David Senior learned the practical order of things: what could be planted, what had to be watched, what could be sold, what must be kept back. Farming made delay visible. You could not hurry a crop by wanting it more intensely. You could only do the next required act and wait for the result to become visible in its own time. That kind of waiting entered him. It suited the boy who had already been asked to keep promises whose results would take years to appear.
+
+There were mornings when the work began before the city had fully opened. Lagos was already noisy, but not yet at full volume. He would go toward the ground he was using and carry the day in parts: the younger ones somewhere behind him in the mind, school somewhere ahead, the promise to educate them not yet connected to any clear arithmetic. A boy can be hungry and still count another person's future before his own. That was the strange arithmetic of him.
+
+The farm did not make him gentle. It made him exact. Things lived if attended to and failed if neglected. A broken fence mattered. A delay mattered. The difference between enough rain and too much rain mattered. The hand had to know what the eye had seen. If something was left undone, the ground would not pretend otherwise.
+
+Abraham would later know his father as a man who could not leave a broken thing alone: a chair, a door, a wall, a plan, a child moving in the wrong direction. That habit did not begin as personality. It began where neglect had consequences. It began in work that answered only to attention.
+
+The teaching certificate belonged to that same movement. It was not a decorative qualification. It was a route by which a boy who had been forced into responsibility could become legible to a more orderly world. To teach was to stand in front of children while still carrying the child he had not been allowed to remain. It gave him a room, a board, a register, a subject, a way to turn survival into instruction.
+
+He did not become less practical because he became a teacher. The classroom only changed the form of the same instinct. A lesson had to be prepared. A child's error had to be seen. A mark had to mean something. If farming taught him that neglect showed itself in the ground, teaching taught him that neglect showed itself in a child's future.
 
 He earned his teaching certificate from Ifako Teachers Training College and taught in Ilaro, in Ogun State. Store management came later through the correspondence college known as RRC International — the step up from teaching, not the path into it. He was proud of that.
 
@@ -1440,33 +1462,25 @@ The reconciliation did not hold.
 
 What followed became too serious, too private, and too legally bound to be retold here as scene. The public shape of the matter is enough: an allegation was made. Abraham was arrested. The case did not proceed. The consequences in family life did. Restriction followed. Fatherhood became something Abraham had to practise through distance, permission, and time measured by others.
 
-This is one of the places where Abraham's later understanding must not be allowed to bully the past. Looking back, he can see warning signs he minimised. He can see places where caution would have been wisdom, not fear. He can see how sunk cost can disguise itself as faith. But self-accountability is not the same as accepting disappearance. He could admit he had missed things. He could admit he had stayed too long inside hope. He could admit that love without wisdom had cost him. He could not admit that the cost released him from fatherhood.
+Looking back, Abraham could see warning signs he had minimised. He could see places where caution would have been wisdom, not fear. He could see how sunk cost can disguise itself as faith. But self-accountability was not the same as accepting disappearance. He could admit that love without wisdom had cost him. He could not admit that the cost released him from fatherhood.
 
-The first time a father holds his child in his imagination, he does not imagine asking for access. He does not imagine proving that presence should be allowed. He imagines a small body, a name, a room, a hand around a finger, the tired holiness of being needed at inconvenient hours. He imagines fatherhood as burden and gift together.
+The first time a father holds his child in his imagination, he does not imagine asking for access. He imagines a small body, a name, a room, a hand around a finger, the tired holiness of being needed at inconvenient hours.
 
 Abraham learned another version.
 
-He learned it slowly, through accumulation, through the specific weight of days when fatherhood existed only as something he carried inside himself because nothing in the outside world confirmed it. No one came to the borrowed room and said: you are still a father. No letter arrived that began with his name and ended with permission to do what fathers do. The world outside the machinery did not know he was a father. The world inside the machinery knew, and processed him accordingly.
-
-He learned that love could be real and still be forced into narrow forms. That wanting to father did not mean being free to father. That a man could be present in intention and absent in the daily places where intention should have become ordinary work. The machinery around the child did not speak in the language of love or cruelty. It spoke in the language of process — reports, waiting, permission, time slots, review dates, conditions. And inside that machinery, a child was growing up, learning to walk, learning to speak, learning what the world looked like, without his father in the room where the learning happened.
-
 Later, there would be a video call. He would see Damisi through a screen. The call would be almost an hour, but not a whole hour, and it would end before goodbye could be properly made. Damisi would be excited. Abraham would receive the excitement with gratitude and pain at the same time, because joy is not simple when it arrives inside a limit.
 
-Later, there would be an in-person meeting. Damisi would be shy at first, then quickly comfortable. He would talk about his life, his friends, his school, ordinary things. Abraham would experience the meeting as sweet and too short. Those two facts would not cancel each other. Sweetness does not cure unfairness. Shortness does not erase sweetness.
+Later, there would be an in-person meeting. Damisi would be shy at first, then quickly comfortable. He would talk about his life, his friends, his school, ordinary things. Abraham would experience the meeting as sweet and too short. Those two facts would not cancel each other.
 
-The deepest wound was not only what happened to Abraham. It was that his son wanted more time with his father, and the structures around the child kept converting love into permission, time into allocation, presence into something that required approval before it could happen.
+Damisi was not a lesson. He was not the evidence that justified Abraham's choices. He was not the prize at the end of suffering. He was a child who knew time, absence, arrival, leaving. He knew when his father was there and when his father was not there.
 
-Damisi was not a lesson. He was not the evidence that justified Abraham's choices. He was not the prize at the end of suffering. He was a child — a child who did not know the language adults had built around him. He only knew time, absence, arrival, leaving. He knew when his father was there and when his father was not there, and the distance between those two facts was not something he had chosen or understood or agreed to.
-
-Abraham could not explain to a small boy why time together had to end when it did. He could not explain the reports, the conditions, the review dates. He could only be present when presence was permitted, and carry the absence when it was not, and hold the knowledge that somewhere a child was asking for more of him than the structures allowed.
-
-The days between visits were not empty. They were full of the child — full of wondering what Damisi had eaten, what he had said, whether he had asked about his father, whether anyone had answered. Abraham carried the fatherhood inside himself on the days when no one could see it. He prayed for the boy. He prepared for the next permitted meeting. He counted the days not because counting helped, but because the counting was the only form of closeness the distance allowed.
+Abraham could not explain to a small boy why time together had to end when it did. He could only be present when presence was permitted, and carry the absence when it was not.
 
 Abraham's fatherhood did not begin in a home.
 
 It began outside one.
 
-It began in a borrowed room, in a video call that ended too soon, in a meeting room where sweetness and shortness sat together, in the particular daily cost of refusing to disappear from a child who had not asked for any of this.
+It began in a borrowed room, in a video call that ended too soon, in a meeting room where sweetness and shortness sat together, in the daily cost of refusing to disappear from a child who had not asked for any of this.
 
 It would not become easier. It would become the centre of everything.
 
@@ -1481,191 +1495,95 @@ The room was not built for fatherhood.
 
 It was built for contact.
 
-That distinction mattered, though no one needed to say it aloud. Contact had a beginning time and an end time. Contact could be written down. Contact could be supervised. Contact could be cancelled, rearranged, recorded, reviewed, measured, and described in language clean enough to fit inside a file.
+Contact had a beginning time and an end time. Contact could be written down, supervised, cancelled, rearranged, reviewed, and described in language clean enough to fit inside a file.
 
 Fatherhood did not fit so neatly.
 
 ---
 
-One contact room had white walls and a wooden floor and not much else.
+One room had white walls, wooden floors, and a chair against the wall for the supervisor, who sat with a laptop open across her knees. A socket low on the skirting board. A door at one end. Not much else.
 
-A chair stood against one wall for the supervisor, who sat in it with a laptop open across her knees. A socket low on the skirting board. A door at one end. Those were most of what the room contained. Whatever came in beyond that came with the people who entered.
+Damisi sat on the floor with a truck he had brought himself — large, red and grey, the number three along its side. He moved it across the boards and the truck did what trucks do in the hands of a child: it became enough world for the hour.
 
-Damisi sat on the floor. He had a truck with him — large, red and grey, a mechanical profile, the number three along its side. He had brought it himself. The room had not provided it. He set it on the boards and moved it and the truck did what it did and the session record would note: child present, child engaged in play, behaviour observed and appropriate.
+Abraham got down on the floor with him.
 
-The supervisor's screen held her attention for portions of the hour.
+Not near him. With him.
 
-Abraham sat near his son. He watched the truck. He watched the boards. He watched what was moving between a boy and a toy in a room built for something other than what was happening inside it.
+The posture required no theory. A child was on the floor. A father who wanted to be present came down to the place where the child was.
 
-The room had a category for this: an activity during supervised contact.
+On paper, it could look like an activity during supervised contact.
+
+In the room, it was a father learning the height love required.
 
 ---
 
-Other times the room was different. A corner room with wooden floors and three tall windows, all fitted with white Venetian blinds; strong daylight pressing through. A leather armchair against one wall. Along another: a wicker trunk and baskets of toys, stuffed animals, small cars. Some rooms were warm — peach walls, a children's table, a poster on the wall showing shapes in primary colours. The rooms were assigned, not chosen. They changed.
+Other rooms changed: a corner room with three tall windows and white Venetian blinds; a warmer room with toys along the wall; a space with a children's table and a poster of primary-coloured shapes. The rooms were assigned, not chosen.
 
-What did not change was arriving at them.
+What did not change was arriving.
 
-He always came early. He came to the building — whatever building had been designated for that session — and stood outside while the morning continued and the entrance was not yet open. In cold weather, which in England is most of the year, this meant standing in the cold. He stood in it. He waited. He was always first.
+Abraham came early. In cold weather he stood outside the building before the entrance opened. He had learned not to let expectation arrive all at once. Some mornings had ended in nothing. So he held hope at a distance until the session was confirmed, then brought it forward quickly.
 
-There was a particular work that happened in the walk toward the building. He had learned to hold his expectation at a careful distance on the approach — not yet to allow himself to fully believe the session would take place. The distance was protection developed over time, built from mornings when the waiting had resolved into nothing, when the session had not taken place. He knew what that felt like when it happened. So on the walk in, he kept hope at a distance: far enough that if the contact fell through, the collapse would not be total; close enough that when it was confirmed he could bring it forward quickly.
+When Damisi came into the building, Abraham often heard him before he saw him: a voice in the corridor or on the stairs asking where he was.
 
-The moment the session was confirmed — the door open, the room assigned, the hour beginning — he permitted himself to expect the boy.
+Sometimes Abraham stood just outside the immediate sightline. It had become their game. Damisi entered looking for him, already alert to the possibility that his father might not be where the room first suggested.
 
-That shift was its own event in the body.
-
-He would be inside by then. In the room, waiting. And somewhere below — on a staircase, in the corridor, coming up from the floor beneath — he would hear Damisi before he saw him. A voice sending out a question into the building: where is he. Not directed at anyone in particular. Just asked into the air, rising. The question was a signal. The boy was close.
-
-Sometimes Abraham moved to stand to one side of the door, just outside the immediate sightline. This was their game. Damisi always came in looking — scanning the room from the threshold, alert, because his father might not be exactly where he expected him. The hide was part of how they met. The find was what came after. Damisi came through the door already on the lookout, already expecting the room to hold a version of this, and the look on his face when he found Abraham — when the game resolved in the usual direction — was not the look of surprise but the look of confirmation. He had known. He had known, and he had come looking anyway.
+Then he found him.
 
 He ran.
 
-Abraham knelt — came down from his height to the height of the boy's face, to the place where they could be eye to eye. Not the posture of authority. The posture of equivalence. He came down to where Damisi already was, so that what the boy arrived at was not an adult looking down at him but a face at the same level as his own, looking back at him directly.
+Abraham knelt.
 
 The hug happened from there.
 
 ---
 
-Fatherhood was the way Abraham entered the room already carrying more than the room could hold. It was the way he noticed Damisi's face before he noticed the clock. It was the way a child's story about school became more important than any adult account of what the session represented. It was the way a small game could become a form of repair without needing to be called repair. It was the way a father learned to do large things in permitted fragments.
-
----
-
-They played.
-
-Some rooms had toys along the walls — baskets and a box of cars, something for building. Some rooms had nothing and whatever came in came with whoever carried it. When it was the truck, Abraham got down on the floor with him. Not on a chair pulled nearby. On the boards themselves, at the level where the truck was, in the actual space where the play was taking place. There was nothing particularly graceful about this. The posture required only that he come down from where he was to where Damisi already was. He set his back against the wall or sat with his legs folded under him, and they played from there.
-
-Sometimes they played sports-car races, and Damisi wanted to win. That was ordinary. That was good. A child should want to win. Abraham did not hand him victory too cheaply. Love was not the same thing as letting a boy believe the world would always move aside for him. If Damisi won, he earned it. If he lost, he had to feel that too, safely, inside a relationship that did not disappear because he had lost a race.
-
-On paper, it could look like an activity.
-
-In the room, it was a father teaching a child how to compete without being destroyed by losing.
-
----
+They played sports-car races, and Damisi wanted to win. Abraham did not hand him victory too cheaply. Love was not the same thing as teaching a child that the world would always move aside for him. If Damisi won, he earned it. If he lost, he had to feel that too, safely, inside a relationship that did not disappear because he had lost a race.
 
 There was a moment with a word.
 
-Abraham tried something — tried to be easy about it, tried to speak in the register of someone who was comfortable with whatever the session brought. The word he chose was "bro." He called his son bro.
+Abraham tried to be easy about it and called him bro.
 
 Damisi looked at him.
 
-He said: I am not your bro. I am your son.
+"I am not your bro," he said. "I am your son."
 
-He was not angry. He was not wounded. He was precise. The correction was its entire content: he had identified the wrong word and supplied the right one. He knew what Abraham was to him and he knew the word for it. Not bro. Son. That was the category. He held it firmly.
-
-Abraham received it.
+He was not angry. He was precise. He had identified the wrong word and supplied the right one.
 
 The file could register that contact took place.
 
-It could not register the way a boy waited to see if his father had understood the joke.
+It could not register the way a boy knew the proper name for the relationship.
 
-He had understood it perfectly.
+Abraham received the correction.
 
----
+Son.
 
-The room required adjustments. Not of the love — the love was what it was, unchanged by any of the room's conditions. But the love had to learn the dimensions of the space it was permitted to occupy.
-
-He had learned the correct height. Not because anyone instructed him but because it was the obvious thing — the obvious thing for a person who is actually attending to the child rather than managing his own presentation. Damisi played on the floor. A father who wanted to be present with him was on the floor. The posture required nothing complicated. It required only that he descend.
-
-He learned the correct pace. He learned the correct volume. He learned to ask questions that could be answered inside the hour rather than questions that required more room than the session allowed. He learned to make the time feel complete without performing its completeness. He learned that Damisi brought his own world into the room — the games, the programmes, the names he assumed his father already knew, the specific things that mattered to him that week — and that the right response was to receive that world without asking it to explain itself in adult terms first. A child's world is not arranged for adult comprehension. It is arranged for the child.
-
-Sometimes he did not know what Damisi was talking about.
-
-He listened anyway. The listening was what the moment required.
-
----
-
-Abraham listened when Damisi talked about school and friends. He listened for the facts, but also for the spaces between the facts: what made him laugh, what made him proud, what he repeated, what he skipped over, what he wanted his father to know. A child does not always announce the centre of his life directly. Sometimes he gives it to you in fragments: a teacher he thinks is cool, a game he likes, a friend he mentions more than once, a small injustice from the playground, a joke he wants to land properly.
-
----
-
-There were moments when the room's official attention was elsewhere.
-
-This happened. A session was an hour. Attention, in any room, does not hold perfectly for sixty minutes without moving. There were portions of the session when the supervisor was not fully present to it.
-
-In those moments Damisi's voice sometimes changed register.
-
-Not in a way that announced itself. Quieter. Closer to Abraham than to the room. The particular quality of a voice that is not performing for anyone but the specific person directly in front of it. A sentence that came in at a lower level than what preceded it. A word arriving without the volume the room usually received.
-
-Abraham learned to receive those moments carefully. A response that was too full — too warm, too emphatic — would draw the moment into a different kind of visibility. A response that said nothing would leave the boy in the air unreturned. He had to match the register exactly: close enough that the child felt heard, restrained enough that the room was not given something to record that it had not been present to make.
-
-This too. This too was fatherhood. The narrow calibration of a response to a thing not quite heard by the room.
-
----
-
-The process had its own sight. It saw risk, compliance, dates, attendance, directions, delays.
-
-He did not need to turn the people inside the process into enemies.
-
-That would have been too easy, and too false.
-
-Many of them were doing the work the structure gave them to do. The problem was not always cruelty. Sometimes the problem was category. A father arrived with memory, fear, love, history, restraint, debt, exhaustion, and a child in his mind. The process asked for material it could sort. It asked for what could be placed, named, filed, timed, and managed.
-
-So Abraham kept trying to make himself legible without letting the legibility become the whole truth.
-
-He showed up.
-
-Showing up did not always feel noble. Sometimes it felt humiliating. Sometimes it felt smaller than the love behind it. Sometimes it felt like bringing a whole life to a narrow counter and watching only the smallest part of it be accepted. But the alternative was worse. If the only available form of fatherhood was a measured slot of time, then Abraham would enter that slot fully. If the room was not built for fatherhood, he would still father inside it.
-
-He taught Damisi to skate.
-
-There was no grand argument in that. A child balancing, a father close enough to help, the small negotiation between courage and falling. That was all. But it held more truth than many official words could hold. A boy learning what his feet could do. A father teaching without taking over. The possibility of falling without being abandoned. The possibility of trying again.
-
-The process saw the arrangement.
-
-It did not see the inheritance being edited in real time.
-
-Abraham had been shaped by a father who carried duty like oxygen, by a family history where children sometimes inherited adult weight before they had the strength to name it. He loved David Senior. He honoured him. But he also knew that love, if it is honest, must choose what not to pass on. So when he told Damisi that he did not have to be perfect, when he made losing safe, when he let play remain play even inside restriction, he was doing something larger than the room understood.
-
-He was refusing to make the child carry the adult battle.
-
-That was the difference between truth and exposure, between protecting a child and winning a point.
-
-The process did not reward that distinction clearly.
-
-It rewarded what it could see.
-
-He listened. He played. He taught. He reassured. He arrived when attendance was permitted. He left when the time ended.
+That was the word.
 
 ---
 
 Ten minutes before the end, Abraham told Damisi: ten minutes.
 
-This was his own practice, not the room's. He gave the warning himself because a child deserved to know where the end was before it arrived at him. The goodbye should not come as a surprise. He said it at ten minutes and again at five — a countdown not to rush the remaining time but to make its shape visible. The end was coming. It was coming in a known direction.
-
-The actual leaving was its own narrow road.
+This was his practice, not the room's. A child deserved to know where the end was before it arrived. He said it at ten minutes and again at five — not to hurry the time, but to give it a shape.
 
 Too much grief would ask Damisi to manage his father's sadness.
 
-Too little would lie about what the parting cost.
+Too little would lie about what parting cost.
 
-So Abraham learned what to say each time: that he had missed him. That he loved him. That nothing he did would move that — not in one direction, not in the other. He made sure those words arrived before the session ended, because they were his to give and a child should know that the love does not depend on a particular race going a particular way, or a joke landing exactly right, or the session being a good one by whatever measure a good session is measured.
+So Abraham learned the narrow road of leaving. He told Damisi he loved him. He told him nothing he did would move that love one way or the other. Then he received whatever goodbye the boy had learned to give that day and held himself together through the door.
 
-He received the goodbyes Damisi had learned to give.
-
-There was a session where Damisi said, at the door: Have a nice rest of the weekend. See you next month.
-
-The words were his. They were warm — genuinely warm, not performed. They had been assembled from the vocabulary available to a child who had learned to close the hour on a note that did not damage either of them, in the terms the arrangement allowed. Abraham received them. He held himself together through the door. He said what he said, and then he left.
-
-Outside, he walked. Not far — around the streets near the building, the immediate neighbourhood, wherever the feet went when they needed to go somewhere. He walked until the body had moved through enough of what the session had put into it. The room was still in the body; the walking was how he moved it through. At some point he turned toward home.
+Outside, he walked the nearby streets until the room had moved through his body enough for him to go home.
 
 ---
 
-Every departure required restraint. The end of contact came dressed as routine — a clock, a sentence, a transition. A goodbye that had to be neither too heavy nor too light, because the child was watching and the father had to be father even in leaving.
-
-There were days when the process saw a completed session.
+The process saw a completed session.
 
 Abraham saw a boy walking away.
 
-There were days when the process saw compliance.
+The process saw compliance.
 
 Abraham saw the work of remaining gentle when everything in him wanted more time.
 
-There were days when the process recorded what had taken place.
-
-Abraham carried what had not been recorded: a word corrected into the right word, a moment that arrived at a lower register, a farewell assembled with genuine care from whatever the arrangement allowed, a walk taken afterward so the body could be somewhere that was not the room.
-
----
-
-This is why disappearance would have been easier. Disappearance would have ended the repeated humiliation of trying to be understood by a structure that could only partially read him. It would have reduced the cost. It would have allowed silence to become someone else's explanation.
+Disappearance would have been easier. It would have reduced the repeated humiliation of trying to be understood by a structure that could only partially read him.
 
 But disappearance would have given Damisi the wrong inheritance.
 
@@ -1679,7 +1597,6 @@ Because his son was.
 
 
 ---
-
 # Chapter 19 — Seven Years
 
 The calendar did not look violent.
@@ -1746,9 +1663,9 @@ But something happened during those journeys that took years to learn to manage.
 
 The session, at any point before it was confirmed, was still conditional.
 
-He had understood this theoretically from the beginning. He came to understand it in the body through experience: mornings when he was already in motion — on the Northern line, at London Bridge, already in the walk from Catford station — and the session did not happen. The morning had already begun for him. He had left the house, taken the train, and was on the route. The session did not happen. He had turned around on those mornings and retraced the route in the wrong direction.
+He had understood this theoretically from the beginning. He came to understand it in the body through experience: mornings when he was already in motion and the session did not happen. The morning had already begun for him. He had left the house, taken the train, and was on the route. Then he had turned around and retraced the route in the wrong direction.
 
-In the early months he had carried his expectation at full volume on the way there. He had arrived at sessions hoping completely, and the cancellations when they came had cost him accordingly. He had had to learn something more precise: how to travel toward a session while holding one part of himself in reserve. Not pessimism — not the adoption of the worst outcome as a way of armoring against it. Something more practical: a discipline of incomplete arrival. The part of him that could not afford to come apart between the Northern line and Catford station was held carefully back until the session was confirmed real.
+In the early months he had carried his expectation at full volume on the way there. He had arrived at sessions hoping completely, and the cancellations when they came had cost him accordingly. He had had to learn something more precise: how to travel toward a session while holding one part of himself in reserve. Not pessimism — not the adoption of the worst outcome as a way of armoring against it. Something more practical: a discipline of incomplete arrival.
 
 He had learned this.
 
@@ -1760,7 +1677,7 @@ The cancellations, when they came, were delivered in ordinary language. A messag
 
 His phone was in his pocket during the journey.
 
-At certain points — at London Bridge, sometimes in the walk — he was aware of it. Not checking it constantly; that had been the earlier years. Later the awareness was quieter: a recognition, a fact. The phone was there. The possibility was there. He was travelling anyway. The awareness and the motion existed at the same time.
+At certain points he was aware of it. Not checking it constantly; that had been the earlier years. Later the awareness was quieter: a recognition, a fact. The phone was there. The possibility was there. He was travelling anyway.
 
 The moment the session was confirmed — door open, room assigned, hour beginning — he permitted himself to expect the boy.
 
@@ -1770,11 +1687,11 @@ That shift happened in the body before it happened anywhere else.
 
 The journey back used the same route.
 
-From the building to Catford station. The train out toward London Bridge. The Northern line northbound, the stations in reverse order, the familiar motion running the other way.
+The return journey used the same route in reverse.
 
 Somewhere in those forty minutes, the session replayed.
 
-He did not try to stop it. It came in fragments: something Damisi had said, something they had laughed about, a moment that had not announced itself as significant and turned out to be the thing he was still carrying at London Bridge. A question asked with the directness of a child who has not yet learned to make questions indirect. A moment in a game that had gone one way and then the other, and had produced in the losing something that needed no commentary.
+He did not try to stop it. It came in fragments: something Damisi had said, something they had laughed about, a moment that had not announced itself as significant and turned out to be the thing he was still carrying home. A question asked with the directness of a child who has not yet learned to make questions indirect. A moment in a game that had gone one way and then the other, and had produced in the losing something that needed no commentary.
 
 The session replayed on the train home because that was what it deserved.
 
@@ -1792,19 +1709,13 @@ He went home.
 
 He made the journey again the following month.
 
-The sessions were monthly in approximation — the intervals determined by the arrangement, not by any natural rhythm of fatherhood. Abraham had noted, over the years, that fatherhood does not come in monthly portions. A child grows continuously. The month between sessions contained everything the month contained: something the boy had learned to do, a change in the register of his voice, a film he had now seen and wanted to talk about, a concern that had been weighing on him that he would carry into the room and that would surface, or not surface, according to the hour's own logic. All of it arrived compressed into one hour. Abraham learned to receive compressed months.
+The intervals were determined by the arrangement, not by any natural rhythm of fatherhood. A child grows continuously. The month between sessions contained everything the month contained: something the boy had learned to do, a change in the register of his voice, a film he had now seen and wanted to talk about, a concern that would surface, or not surface, according to the hour's own logic. All of it arrived compressed into one hour. Abraham learned to receive compressed months.
 
-He made the journey in January, when the walk from Catford station was cold and the daylight was already low by mid-morning.
-
-He made it in spring, when the blossom was on the trees near Catford station and the cold had left the walk. He made it in summer. He made it in autumn, when the leaves on the streets near Catford station had begun to turn and the daylight had shortened since January.
+He made the journey in January, when the daylight was already low by mid-morning. He made it in spring. He made it in summer. He made it in autumn.
 
 He made it when he was tired. He made it when something else in his life was pressing and the session was an additional demand on a week already at capacity. He made it when he had slept poorly. He made it without announcement, without ceremony, without requiring recognition for making it.
 
-He made it because Damisi was on the other side of the Northern line.
-
-Same platform at London Bridge each time.
-
-Same seventeen minutes from Catford station.
+He made it because Damisi was on the other side of the journey.
 
 Same early arrival.
 
@@ -1831,6 +1742,94 @@ Sometimes it was fear of what disappearance would teach his son.
 Sometimes it was simply the next required act.
 
 That is one of the truths seven years taught him: endurance is not always dramatic from inside the person enduring. There were days when it did not feel like courage. It felt like opening the laptop again. Preparing again. Travelling again. Waiting again. Leaving again. Finding language again. Holding back language again. Paying what could be paid. Asking for help when help was possible. Standing alone when it was not.
+
+---
+
+There were kitchens in those years too.
+
+Not the kitchens of family memory, where someone was cooking stew and children were being called to eat. Work kitchens. Hospitality kitchens. Places where a shift could be measured by heat, wet floors, stacked plates, and the tasks that remained after other people's meals had ended.
+
+Abraham was working as a kitchen porter, moving between the demands of multiple chefs. The work had its own order. Porter duties were spread across the kitchen. If a chef needed someone dedicated only to him, that had to be requested through management. Abraham said this plainly when the matter arose.
+
+It was not a grand confrontation. It was the kind of practical clarification work requires: who is responsible for which task, who can demand whose time, what the system of the kitchen allows. Abraham was not refusing work. He was naming the arrangement under which the work was supposed to happen.
+
+The chef kicked him.
+
+There was no camera in the kitchen.
+
+That fact mattered immediately. It entered the calculation before anger could become action. If Abraham reported what had happened, the matter would come down to his word against the chef's. He understood the risk to himself. He understood how easily a man under pressure, needing work, needing income, needing to keep funding lawyers and court-related expenses while the family court process continued, could become the one treated as the problem.
+
+The absence of a camera did not make the kick less real. It made the truth harder to carry into any room where proof would be demanded. That was one of the lessons of those years: what happens to a body and what can be established afterward are not always the same thing.
+
+He was angry.
+
+The anger was not vague. It had direction. It knew what had happened and what should have happened next. What stopped him was not uncertainty about the act, but the risk around naming it.
+
+He did not report it.
+
+He carried it instead.
+
+That was the first version.
+
+Silence did not mean resignation. It meant calculation under pressure. It meant understanding the difference between being right and being able to prove what had happened in a room built to produce food, not evidence. It meant swallowing the first answer his body wanted to give because the cost of being disbelieved might fall on him more heavily than the cost of saying nothing.
+
+He finished the task he was midway through.
+
+That detail stayed with him because it showed the shape of the season. The body had been insulted, anger had risen, and still the half-done task remained in front of him. He completed it before he gave himself permission to leave the room.
+
+Then he went to the toilet.
+
+There, away from the kitchen, he cried.
+
+He washed his face.
+
+He returned to work.
+
+The shift had not ended. The legal costs had not ended. The need for income had not ended. Anger did not change the rota. Humiliation did not pay the next bill. So he went back into the kitchen with his face washed and his anger held somewhere no one in the room could use against him.
+
+Those years were full of work that did not match the education behind him or the fatherhood ahead of him: waiter, cleaner, toilet attendant, cloakroom attendant, kitchen porter — rooms where he stood because lawyers, court-related expenses, rent, travel, and the ordinary costs of remaining present still had to be funded.
+
+That was the plain purpose of the work. Not reinvention. Not humility as performance. Funding. The family court process was ongoing, and the process had costs attached to it. Lawyers had to be paid. Court-related expenses had to be met. Fatherhood, in those years, had an invoice life as well as an emotional one.
+
+The cloakroom had its own particular awkwardness. Sometimes, while working there, he encountered people he knew socially. They arrived as guests. He was there taking coats. The recognition landed in both directions, and he continued because financial necessity did not pause for embarrassment.
+
+He also changed churches more than once in that season. He did not leave because the questions had become too hard. He left because the answers were made too easy, because comfort was offered where the daily facts needed to be faced directly.
+
+The doors kept opening.
+
+That was the tension. Work came. A shift appeared. A person called. A way through the month presented itself. Provision did not fail in the simple way a man might have feared. But each opened door often required him to enter a room where something in him was reduced before the wage was earned. The help arrived with a cost attached, and the cost was not always visible to anyone counting only whether he had survived.
+
+Even where he lived, privacy did not always feel fully his. Some rooms were shelter without becoming refuge.
+
+Years later, in another kitchen, the body recognised the old shape before the mind finished comparing it.
+
+This time the workplace was St Paul's Cathedral.
+
+A different chef kicked him.
+
+The facts were not identical. The room was not the same room. The person was not the same person. The years between the two moments mattered. What returned was the pressure of the choice: absorb it and continue, or make the room answer for what had happened.
+
+This time Abraham raised an alarm.
+
+The head chef came to investigate.
+
+The chef who had kicked him said it was just being playful, a way to get his attention.
+
+The head chef sent him home.
+
+That consequence did not repair the first kitchen. It did not make the earlier silence foolish or the later voice triumphant. It simply marked the distance between two versions of Abraham under pressure. In the first kitchen he had calculated the risk and gone to the toilet to cry. In the second, he let the room hear him.
+
+The difference was not that he had become less aware of risk. He was still aware of it. He still knew how quickly a situation could turn against the person who named what happened. What had changed was the point at which silence stopped protecting him and started training him to accept what should not be accepted.
+
+Fatherhood had been teaching him, slowly and without ceremony, that silence is not always restraint. Sometimes restraint means not turning pain into spectacle. Sometimes it means protecting a child from adult material. But sometimes what a man calls restraint is only fear trained into obedience.
+
+He thought of Damisi without making Damisi responsible for the thought. A son should not have to become the reason his father finally protects himself. But fatherhood had changed the scale of what Abraham was willing to normalise. A man who keeps swallowing every injury eventually teaches his body that injury is the price of staying. Abraham did not want that lesson travelling any farther down the line.
+
+He could not teach Damisi that love was presence and also teach himself that presence required voicelessness.
+
+The correction was small enough to be missed by anyone outside the room.
+
+A kitchen. A raised alarm. A man sent home.
 
 ---
 
@@ -1864,7 +1863,7 @@ Abraham thanked him for reading it.
 
 They continued with the rest of the session.
 
-When the hour ended, the card was still on the surface where Damisi had left it. Abraham did not mention it again. He did not look at it for longer than it deserved. He said what he said at the end of sessions and Damisi said what Damisi said, and the hour closed the way hours close, and Abraham took the Northern line home.
+When the hour ended, the card was still on the surface where Damisi had left it. Abraham did not mention it again. He did not look at it for longer than it deserved. He said what he said at the end of sessions and Damisi said what Damisi said, and the hour closed the way hours close.
 
 He was seven years old.
 
@@ -1956,9 +1955,7 @@ His son was seven.
 
 By 2026, seven years had not resolved into a clean ending. The years were still in him. They were in the way he measured words before speaking. In the way he noticed dates before they arrived. In the way he distrusted easy narratives. In the way he understood that fatherhood is not only what a man feels, but what he keeps doing when feeling is not enough to change the conditions around him.
 
-The train from London Bridge toward Catford was still running.
-
-The walk from the station was still seventeen minutes.
+The route was still there.
 
 A calendar can make duration look tidy.
 
@@ -2004,6 +2001,14 @@ He did not turn this into poetry while living it. Hunger made life practical. It
 He was hungry for food.
 
 He was also hungry for a life that did not keep asking him to shrink.
+
+There was a particular kind of arithmetic to those weeks. He would stand in a shop aisle and count quietly: not the price of a good meal, but the number of days a small purchase could be stretched without making the body useless. Bananas had timing. Too green and they would not answer the day. Too ripe and they would fail before the week was done. Peanuts lasted longer, but they did not make a meal feel like a meal. Water became part of the calculation, not because it solved hunger but because it gave the stomach something to receive.
+
+He learned which shops reduced food late, which shelves held the items no one arranged beautifully, which packet could sit in a bag without spoiling, which purchase would look normal enough at the till. Poverty has a theatre of small concealments. A man can be hungry and still want the cashier not to know the whole story from the basket.
+
+At home he kept the evidence modest. No dramatic empty cupboard. No scene large enough to justify itself as crisis. Just a narrowing: fewer options, repeated items, the same surface cleared and used again, the same body asked to keep working on less than it required. The discipline that had once organised ambition now organised shortage.
+
+He became careful with movement because movement cost money. A train journey had to justify itself. A bus fare had to belong to something necessary. Even rest could become expensive if it meant missing a shift or failing to answer a message quickly enough. Survival made a map of the city smaller than the city actually was.
 
 ---
 
@@ -2765,15 +2770,6 @@ He had mistaken intensity for faith.
 
 He had mistaken the absence of hesitation for the presence of God.
 
-The first error was the easiest to see afterward. Movement has a body. It books tickets. It answers messages. It travels. It appears. It signs. It stands where the day has placed it. It keeps the next appointment. It enters the next room. From outside, movement can look like decision. From inside, it can feel like strength because at least the man is not frozen.
-
-But stillness would have required its own strength.
-
-To pause would have meant disappointing people. It would have meant risking shame. It would have meant admitting that what had begun to look inevitable might still need to be questioned. It would have meant accepting that a path can appear before a man and still not be the path he should take. It would have meant allowing love to ask for time.
-
-He did not know how to honour that kind of time.
-
-He knew how to endure. He knew how to take weight seriously. He knew how to continue when difficulty appeared. He knew how to interpret sacrifice as a sign that he was not shallow. He knew how to say, I am not afraid, and keep going.
 
 What he did not know was that love can ask a man to stop.
 
@@ -2831,11 +2827,6 @@ This is where Scripture became heavier, not lighter.
 
 Love now refuses to use Scripture to excuse desire, sanctify urgency, silence discernment, or make fearlessness look like faith.
 
-On the page, that sentence looked severe. Abraham did not want it to become a slogan. It had the shape of something a man might put on a wall and stop thinking about. But it was not a slogan to him. It was a boundary drawn through his own history. It said that a verse he loved could no longer be used as cover for what he wanted. It said that Scripture was not a servant brought in after the desire had already chosen its direction. It said that a holy sentence must not be made to do unholy work.
-
-The sentence was true.
-
-His use of it was not.
 
 The correction did not make the past simple. It did not mean every warning had been equally clear. It did not mean every person around him had seen more honestly than he had. It did not mean the path was obvious and he had merely refused it. Human beings do not live inside hindsight. They live inside pressure, hope, fatigue, grief, family expectation, private longing, and the meanings they have inherited before they know they have inherited them.
 
@@ -2855,7 +2846,6 @@ The contact room had taught him that love can be real inside a narrow form. Seve
 
 Love did not ask him to be less brave. It asked him to stop confusing bravery with speed and restraint with fear, to stop using spiritual language to outrun discernment, to stop making certainty perform the work that belonged to wisdom alone.
 
-That was the harder freedom. The old misuse had seemed to enlarge him. It let him move. It let him feel strong. It let him believe that if he was not hesitating, then perhaps God was in the absence of hesitation. The corrected reading made him smaller in the right way. It returned him to creatureliness. It allowed him to be a man who did not always know, a man who could pause without losing faith, a man who could admit that a warning was not the enemy of love.
 
 Love could wait.
 
@@ -2887,9 +2877,6 @@ He did not resolve it. He will not pretend, on this page, that the deaths arrang
 
 What it did was smaller and more durable. It refused to let the fear — something kept me and not them — become the thing that read his life back to him. He could stand at the graves with the question still open and not hand it the final word. It was not an answer. It was a refusal to be governed by the absence of one.
 
-Love was not recklessness. It was not denial. It was not pretending pain had been redeemed simply because Abraham could write about it now. Love did not make death less death. It did not turn the years with Damisi into a price anyone should have had to pay. It did not say everything worked out, and it did not need to.
-
-That was as far as Abraham could go without lying.
 
 He could not write that he understood every loss. He did not. He could not write that pain had made him grateful for pain. It had not. He could not write that the years had ended cleanly. They had not. But he could write that fear — whether it came dressed as panic or as false courage, whether it drove him to rush forward or to withdraw — was no longer allowed to govern what love required of him.
 
@@ -2948,15 +2935,7 @@ That is how David Senior told it: plainly, without needing to decorate the momen
 
 He also told him provision would come for their needs.
 
-The account does not need more explanation than that. It was not offered to Abraham as a display. It was not a story David Senior used to make himself large. It was the beginning of a charge. A father had died. A son had been tapped awake. Two promises had been placed before him. A life had been given its shape before the life had grown enough to carry it comfortably.
-
-That is where David Senior's devotion began.
-
-Not in temperament.
-
-In obligation.
-
-The difference matters. Generosity can be occasional. Kindness can arrive with mood. Devotion, as David Senior lived it, had structure. It had people attached to it. It had names, food, fees, books, school, letters, journeys, sickness, disappointment, and siblings who could not be allowed to scatter because a dead father had asked that they remain together.
+The account does not need more explanation than that. It was the beginning of a charge. A father had died. A son had been tapped awake. Two promises had been placed before him.
 
 He took the promises seriously.
 
@@ -3042,7 +3021,6 @@ It asks something of the body. It asks the person waiting to keep consent alive 
 
 David Senior remained.
 
-There is no need to make the wait larger than it was. It was already large. From about seven in the morning until about eight at night is enough. A man can become tired of being patient in less time than that. He can become insulted. He can decide the day has become foolish. He can leave with a reasonable complaint. David Senior did not leave.
 
 At the end of the day, he was told what the waiting had meant.
 
@@ -3068,13 +3046,7 @@ This is where provision must be written with restraint. The job did not make Dav
 
 A promise can sound large when it is spoken. It becomes real when it becomes fees paid, siblings kept, rites completed, walls raised, and a place built where family memory can stand. David Senior's life kept turning invisible obligation into visible structure.
 
-That was devotion.
-
-Not sentiment.
-
-Structure.
-
-It was the sibling still in school because a promise had been made. It was the family not scattered because unity had been named as duty. It was the burial ceremony eventually completed because the dead had not been forgotten. It was the house in Isua because memory needed more than a story; it needed a place. It was the long wait in the interview room because provision, when it came, still required a man to remain where he had been told to wait.
+That was devotion: not sentiment, but structure.
 
 This is the kind of father Abraham later lost.
 
@@ -3135,13 +3107,170 @@ He used the job that followed to fulfil what had been asked of him.
 He built in Isua.
 
 And long before Abraham knew how to call any of this devotion, he was already living beneath it.
+---
+
+
+---
+
+# Chapter 25 — I'd Kill It
+
+The KPMG partner had called weeks earlier.
+
+That detail matters because the opportunity was real. It was not a formality interview, not a polite meeting whose answer had already been decided elsewhere. The role was Commercial Manager. Abraham was under live consideration, and the person involved in the decision had found him, spoken with him directly, and carried the initial calls and negotiations before the process moved into the room.
+
+The semi-final interview came.
+
+Abraham did not land all of it.
+
+Afterward, before what should have been the last stage, the partner called again.
+
+Abraham was in bed when the call came.
+
+Exhaustion had got there before disappointment. For weeks, he had been preparing for the interview and for a family court hearing at the same time. The interview had been rescheduled twice. The hearing had been rescheduled once. By the time both dates settled near each other, his body had been asked to carry two forms of judgment at once: one room where he had to prove commercial value, another where his private life remained under pressure.
+
+He had high hopes for the interview.
+
+He had even bought Bang & Olufsen headphones in preparation, not as decoration but as equipment for a podcast side hustle he was planning around the life he thought might open next. The headphones belonged to that imagined version of the future: work, voice, judgment, something built beside the main thing.
+
+The call was not general encouragement. It did not make the process feel like theatre. It made the nearness of the opportunity plain. It also made the gap harder to hide from: Abraham had been seen as someone capable of doing the job, while the hiring managers still had to complete their part of the process.
+
+That is the plain version. He had real material. He had worked across roles, industries, borders, pressure, improvisation, recovery. He had evidence of creativity, resourcefulness, resilience, and speed of learning. The failure was not that he had nothing to say. The failure was that, when the room needed architecture, the material came without architecture.
+
+The partner asked him directly whether he thought he was able to do the job despite that gap.
+
+Abraham answered with the sentence he had.
+
+"I'd kill it."
+
+He meant it.
+
+The partner paused.
+
+After the pause, Abraham talked. He gave an account of the work he had done and the work he was doing. He reached for evidence of capacity and capability. The evidence was real. The capacity was real. The trouble was shape. He did not turn experience into sequence quickly enough. He did not give the room a structure it could enter. He had the raw material of judgment, but not yet the architecture of it.
+
+That was where I lost the job, gbamsolutely.
+
+The loss was painful.
+
+Deeply so.
+
+There are professional disappointments that bruise the surface and then pass. This was not that. This reached a more difficult place because the opportunity had been real, because the partner had come near enough to see both the capacity and the gap, because the answer he gave had been sincere and still had not been enough. It is possible to fail at the exact point where one's belief in oneself is strongest. That is a harder failure than uncertainty. Uncertainty can be blamed for hesitation. Confidence has fewer places to hide.
+
+He did not turn the partner into the problem.
+
+That would have been too easy, and too inaccurate. The cleaner account was also the more useful one: he had not built the case in the form the room required. He had not made the architecture visible in time.
+
+The failure changed everything.
+
+That same day, he began to write.
+
+The first draft landed that day. Not the whole future, not the completed form of everything that would follow, but a beginning with enough force to move the loss into another register. What had failed in the interview room became the first demand of the page: do not merely possess thought; build it. Do not merely carry purpose; give it form.
+
+That decision became the beginning of a book.
+
+*The Architecture of Human Purpose*.
+
+The title itself carried part of the correction. Architecture was what had been missing in the room: not thought, not desire, not confidence, not evidence, but a structure another person could enter. Purpose was not enough as a private intensity. It had to be built. It had to have a gateway, a prelude, a first form that could stand outside the mind and be tested by another reader.
+
+The book became real.
+
+Published.
+
+A Prelude MiniBook. A gateway to a larger Canon under the Abraham of London platform.
+
+That is why this chapter belongs after devotion. David Senior's devotion had become structure through fees, siblings kept together, burial rites, a house in Isua, promises made visible. Abraham's version did not begin with a house. It began with a failed answer and the refusal to let the failure remain only a wound.
+
+The interview had asked him to prove what he could build.
+
+He had said, "I'd kill it."
+
+He did.
+
+Not in that room.
+
+The headphones remained.
 
 ---
 
 
 ---
 
-# Chapter 25 — Final Room
+# Chapter 26 — Letter to Damisi
+
+Not before eighteen.
+
+That was the instruction.
+
+Not when the envelope was found. Not when someone else thought the time had come. Not because an adult wanted the matter settled, or explained, or made easier to carry. Not because absence makes people impatient with what has been sealed.
+
+Only on your eighteenth birthday.
+
+I was going into major surgery at Chelsea and Westminster Hospital, and I did not know what would remain available to me afterward. That is the plainest way to say it. I do not need to give you more of the medical story than that. Major surgery was enough. A man can be alive and still have to arrange for the possibility that his own voice may not be there when his son needs it.
+
+So I wrote to you.
+
+The question underneath the letter was simple and unbearable: if I did not survive, or if I survived but could not tell you directly, would you ever know who your father really was? Would you have to assemble me from fragments, from other people's versions, from silences, from whatever remained available after time had done what time does to memory?
+
+I could not let that be the whole inheritance.
+
+What I had said in public was not different from what I was placing here; the same father was speaking in a closed envelope, only to you.
+
+The letter was not written for a room of adults. It was not written to win anything. It was written because one day you might ask, and if you asked, I did not want you to find only absence where an answer should have been waiting.
+
+There were things inside it that belonged inside it, not here.
+
+That matters.
+
+The letter contains my account. It points toward what could be pointed toward: public records, private conversations, the materials I believed you might need one day if you wanted to understand the shape of what had happened. But those things are not for this page. This page is not the envelope. This book is not the moment of opening. You are not being asked to carry, now, what I decided should wait until you were old enough to choose how to receive it.
+
+That was the discipline.
+
+A father can want to be understood and still refuse to make a child responsible for understanding him too early. A father can want the truth preserved and still know that preservation is not the same as exposure. A father can write everything down and then seal it because love is not only the saying of a thing. Sometimes love is the timing of it.
+
+I included passwords.
+
+Social media accounts. Devices. Access to the parts of a life that can disappear when a person is gone and no one knows how to enter what he left behind. It was practical, but it was not only practical. Passwords are strange objects. They are small, private keys to a life that has become partly digital, partly scattered across screens and accounts and locked devices. To give them to you was not to give you a performance of openness. It was to make sure that if the door had to open one day, the handle would be where you could reach it.
+
+I did not know whether you would need any of it.
+
+I only knew that I did not want you locked outside your father's life because I had failed to prepare the key.
+
+The envelope was marked private.
+
+Confidential.
+
+Legally privileged.
+
+Those words were not decoration. They were boundaries. They told the world that the contents were not available for curiosity, convenience, argument, or adult management. They told anyone who came across it that the letter had an addressee, and that the addressee was you.
+
+Not before eighteen.
+
+Only now do I understand the envelope as fatherhood taking a form that could wait for you, even if I could not.
+
+That is the one sentence I will allow myself to understand after the fact. The rest belongs to the envelope itself: the account, the passwords, the timing, the seal. The restraint was not emptiness. It was a room kept closed until you had the right to decide whether to enter it.
+
+You were not to be handed an adult story before you were ready.
+
+You were not to be made the custodian of my pain.
+
+You were not to become the answer to someone else's need for the matter to be opened.
+
+So I wrote.
+
+And then I did the harder thing.
+
+I sealed it.
+
+Private. Confidential. Legally privileged.
+
+Not before eighteen.
+
+---
+
+
+---
+
+# Chapter 27 — Final Room
 
 The dining table had become a workstation.
 The laptop was open on it. Phones lay nearby. A cup sat to the left of the laptop — tea, by then probably cold, the kind that gets made at the start of a working hour and forgotten until the hour has moved past it. The bay window held the light behind the blinds, bright enough to enter the room without taking it over. A clock on the wall marked the afternoon in increments he no longer needed to watch. The radiator ticked as it heated. Chairs remained around the table because the table had not stopped being a table. A printer stood within reach. Papers were nearby — some organised, some not, the natural drift of work that has nowhere else to go. Shelves carried the ordinary objects work gathers around itself: folders, a notebook, things that had not been opened in days. A mirror was on the wall, reflecting the same light the window let in.
@@ -3157,7 +3286,10 @@ The laptop remained open. The phones remained on the table. The blinds held the 
 There would be no final account of every grief. No neat repair of every rupture. No sentence that made pain useful enough to be welcomed. No child asked to stand at the end of the book and carry what belonged to adults. No heroic version of himself placed at the table in place of the actual man.
 The actual man was enough because the actual man had remained. Not as performance. Not as a declaration. Remaining, in the room, was quieter than that. It meant opening the laptop again. It meant accepting that work and memory could share a dining table. It meant refusing to vanish into injury and refusing to turn survival into a crown.
 The future did not appear as a grand road from that table. It appeared as the next faithfulness. A sentence to write. A boundary to keep. A call to make or not make. A door to test. A son to love without making him responsible for the meaning of love. A past to carry without asking it to become clean.
-He reached forward and moved one paper aside. Not because it needed to be moved. Because the gesture was something to do with his hands while he thought about what came next. The paper had been sitting there for days. He moved it to the corner of the table, making room for something he could not yet name.
+He reached forward and moved one paper aside. Not because it needed to be moved. Because the gesture was something to do with his hands while he thought about what came next. The paper had been sitting there for days. He moved it to the corner of the table.
+
+The space left behind was small: no wider than a plate, or a book, or a child's hands set down beside his father's on the wood. It was not an answer. It was only room.
+
 Then he saved the document open on the laptop, closed the screen — the lid meeting the base with a soft click — and left the chair where it was.
 ---
 

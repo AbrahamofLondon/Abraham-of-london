@@ -2,8 +2,9 @@ import type { MarketEvidenceClass } from "./market-intelligence-evidence-standar
 
 export type GrowthForecastSource =
   | "IMF"
+  | "OECD"
+  | "WORLD_BANK"
   | "GOLDMAN_SACHS"
-  | "MORGAN_STANLEY"
   | "JPMORGAN"
   | "AOL_SCENARIO";
 
@@ -49,32 +50,42 @@ export const GMI_2026_GROWTH_INPUTS: readonly GrowthScenarioInput[] = [
   {
     source: "IMF",
     year: 2026,
-    globalGrowthEstimate: 3.3,
-    label: "IMF World Economic Outlook — January 2026",
-    sourceDate: "2026-01",
+    globalGrowthEstimate: 3.1,
+    label: "IMF World Economic Outlook — April 2026",
+    sourceDate: "2026-04",
     evidenceClass: "INSTITUTIONAL_SOURCE",
     notes:
-      "IMF January 2026 WEO Update forecast. 3.3% global growth for 2026. Trade policy shifts described as offset by other growth forces. July 2026 WEO revision pending — required before Q2 release.",
+      "IMF April 2026 WEO forecast: 3.1% global growth for 2026 — a downgrade from the January WEO Update (3.3%). The Jan-to-April downgrade is itself part of the dispersion signal. Release evidence is locked to the April WEO vintage; do not wait for the July WEO.",
+  },
+  {
+    source: "OECD",
+    year: 2026,
+    globalGrowthEstimate: 2.8,
+    label: "OECD Economic Outlook — June 2026",
+    sourceDate: "2026-06",
+    evidenceClass: "INSTITUTIONAL_SOURCE",
+    notes:
+      "OECD June 2026 Economic Outlook: ~2.8% global growth for 2026, below the IMF figure — sits in the lower-middle of the dispersion band. Methodology differs from IMF and is not directly comparable.",
+  },
+  {
+    source: "WORLD_BANK",
+    year: 2026,
+    globalGrowthEstimate: 2.5,
+    label: "World Bank Global Economic Prospects — June 2026",
+    sourceDate: "2026-06",
+    evidenceClass: "INSTITUTIONAL_SOURCE",
+    notes:
+      "World Bank June 2026 Global Economic Prospects: ~2.5% global growth for 2026 — the lower bound of the institutional dispersion band. Weights trade friction and EM financing conditions more heavily than the IMF.",
   },
   {
     source: "GOLDMAN_SACHS",
     year: 2026,
     globalGrowthEstimate: 2.8,
-    label: "Goldman Sachs Global Investment Research — 2026 Global GDP",
-    sourceDate: "2026-Q1",
+    label: "Goldman Sachs Global Investment Research — 2026 Global GDP release-lock value",
+    sourceDate: "2026-07-06 data lock",
     evidenceClass: "INSTITUTIONAL_SOURCE",
     notes:
-      "Goldman Sachs ~2.8% global GDP growth estimate for 2026. Source confirmation required — do not cite without confirmed publication reference and date.",
-  },
-  {
-    source: "MORGAN_STANLEY",
-    year: 2026,
-    globalGrowthEstimate: 3.2,
-    label: "Morgan Stanley Global Economics — 2026 Global GDP",
-    sourceDate: "2026-Q1",
-    evidenceClass: "INSTITUTIONAL_SOURCE",
-    notes:
-      "Morgan Stanley ~3.2% global GDP estimate. Source confirmation required — use as bracket alongside IMF figure once confirmed.",
+      "Goldman Sachs 2.8% is the release-lock value. No dated retained evidence source directly establishes the earlier 2.9% figure, so 2.9% is not used in the release forecast ledger.",
   },
   {
     source: "JPMORGAN",
@@ -99,7 +110,7 @@ export const GMI_2026_GROWTH_INPUTS: readonly GrowthScenarioInput[] = [
     label: "AoL GMI Q2 — Constrained growth scenario assumption",
     evidenceClass: "SCENARIO_ASSUMPTION",
     notes:
-      "AoL downside-of-consensus scenario: constrained ~2.7% growth under elevated trade friction, tariff persistence, and selective capital allocation. Must be labelled SCENARIO_ASSUMPTION — it sits below the institutional consensus range and must not be presented as settled until supported by confirmed Q2 evidence.",
+      "AoL constrained-growth scenario: ~2.7% under elevated trade friction, tariff persistence, and selective capital allocation. Must be labelled SCENARIO_ASSUMPTION. It now sits within the lower half of the institutional dispersion band (between the World Bank 2.5% floor and OECD 2.8%), no longer below the entire range — the widening of that band toward AoL's assumption is itself corroborating context, not proof.",
   },
 ];
 
@@ -157,7 +168,7 @@ export function buildGrowthScenarioComparison(
     aiProductivityOffset: "LOW",
     tradeHeadwindSeverity: "HIGH",
     interpretation:
-      "Institutional forecasts support a constrained low-3% global growth environment rather than a confirmed sub-3% base case. The AoL downside case may sit below consensus, but must be labelled as scenario assumption unless supported by later Q2 evidence.",
+      "Institutional forecasts have dispersed rather than converged: 2026 estimates now span roughly 2.5–3.1% (World Bank 2.5%, OECD 2.8%, Goldman Sachs 2.8%, IMF April 3.1%). The strategic signal is the widening spread — divergent assumptions on tariff duration and financial spillovers — not any single point estimate or a settled 'consensus'. The AoL constrained-growth case (~2.7%) sits inside the lower half of this band and remains a scenario assumption.",
   };
 
   return {
@@ -167,7 +178,7 @@ export function buildGrowthScenarioComparison(
     aolScenario,
     model,
     releaseNote:
-      "IMF July 2026 WEO revision is required before the Q2 report is published. Goldman Sachs and Morgan Stanley estimates require confirmed source references. JPMorgan framing may only be used qualitatively.",
+      "Dispersion band spans World Bank 2.5% to IMF April 3.1% (April–June 2026 vintage). Goldman Sachs is locked at 2.8% because no retained dated source directly establishes 2.9%; Morgan Stanley is excluded from the release range. JPMorgan framing may only be used qualitatively.",
   };
 }
 

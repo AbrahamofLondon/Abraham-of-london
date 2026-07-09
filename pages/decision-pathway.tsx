@@ -20,6 +20,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Eye, Users, Building2, FileText, Crown, RefreshCw } from 'lucide-react'
 import Layout from '@/components/Layout'
+import { getProductDisplayPrice } from '@/lib/commercial/catalog'
 
 const GOLD = '#C9A96E'
 const EMERALD = '#6EE7B7'
@@ -87,7 +88,7 @@ const LADDER_NODES: LadderNode[] = [
     detects: 'Mandate clarity, obligation conflicts, decision behaviour patterns, resonance vs certainty alignment',
     produces: 'A personal mandate reading with obligation conflict map and decision behaviour pattern. Free summary + paid dossier.',
     unlocks: 'Constitutional Diagnostic, Executive Reporting',
-    price: '£49',
+    price: getProductDisplayPrice('personal_decision_audit'),
     href: '/diagnostics/purpose-alignment',
     state: 'OPEN',
     icon: <FileText className="h-4 w-4" />,
@@ -142,7 +143,7 @@ const LADDER_NODES: LadderNode[] = [
     detects: 'Financial exposure, boardroom qualification, consequence estimates, escalation readiness',
     produces: 'An executive-grade dossier with consequence estimate, financial exposure analysis, and boardroom qualification',
     unlocks: 'Boardroom Mode, Strategy Room',
-    price: '£295',
+    price: getProductDisplayPrice('executive_reporting'),
     href: '/diagnostics/executive-reporting',
     state: 'LOCKED',
     lockReason: 'Requires enterprise or team-level evidence to produce a responsible executive synthesis.',
@@ -170,7 +171,7 @@ const LADDER_NODES: LadderNode[] = [
     detects: 'Execution readiness, intervention paths, checkpoint requirements, decision velocity',
     produces: 'A governed intervention session with pre-read, decision framing, intervention logic, and post-session action structure',
     unlocks: 'Retainer Oversight, Return Brief',
-    price: '£750 / £1,250',
+    price: getProductDisplayPrice('strategy_room') + ' / ' + getProductDisplayPrice('strategy_room_extended'),
     href: '/strategy-room',
     state: 'LOCKED',
     lockReason: 'Requires evidence of execution readiness and escalation qualification. Not available without prior diagnostic evidence.',

@@ -6,6 +6,9 @@ import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/components/Layout";
+import GmiEditionLandingPage from "@/components/gmi/public/GmiEditionLandingPage";
+import type { GmiEditionPublicContract } from "@/lib/intelligence/gmi-public-edition-contract";
+import { gmiEditionIdFromPublicSlug, resolvePublicGmiEdition } from "@/lib/intelligence/gmi-public-edition-resolver.server";
 import { StaticMDXRenderer, renderDocBodyToStaticHtml } from "@/lib/mdx/static-mdx-runtime";
 import { normalizeRequiredTier, requiredTierFromDoc } from "@/lib/access/tier-policy";
 
@@ -20,8 +23,9 @@ type PublicIntelligenceDoc = {
 };
 
 type Props = {
-  doc: PublicIntelligenceDoc;
+  doc: PublicIntelligenceDoc | null;
   bareSlug: string;
+  gmiEdition: GmiEditionPublicContract | null;
 };
 
 function safeString(value: unknown): string {
@@ -97,8 +101,31 @@ function toPublicIntelligenceDoc(doc: any): PublicIntelligenceDoc {
   };
 }
 
-const PublicIntelligencePage: NextPage<Props> = ({ doc, bareSlug }) => {
+const PublicIntelligencePage: NextPage<Props> = ({ doc, bareSlug, gmiEdition }) => {
   const canonicalUrl = `/intelligence/${bareSlug}`;
+
+  if (gmiEdition) {
+    return (
+      <Layout
+        title={`${gmiEdition.title} | Abraham of London`}
+        description={gmiEdition.executiveSummary}
+        canonicalUrl={canonicalUrl}
+        fullWidth
+        headerTransparent
+      >
+        <Head>
+          <link rel="canonical" href={canonicalUrl} />
+          <meta name="robots" content="index,follow" />
+          <meta property="og:type" content="product" />
+          <meta property="og:title" content={gmiEdition.title} />
+          <meta property="og:description" content={gmiEdition.executiveSummary} />
+        </Head>
+        <GmiEditionLandingPage edition={gmiEdition} />
+      </Layout>
+    );
+  }
+
+  if (!doc) return null;
   const formattedDate = doc.date
     ? new Date(doc.date).toLocaleDateString("en-GB", {
         day: "2-digit",
@@ -181,10 +208,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const { getAllIntelligence } = await import("@/lib/content/server");
   const docs = (getAllIntelligence() || []).filter(isRenderablePublicIntelligence);
 
-  const paths = docs
-    .map((doc: any) => publicIntelligenceSlugForDoc(doc))
-    .filter(Boolean)
-    .map((slug) => ({ params: { slug } }));
+  const gmi = await import("@/lib/commercial/gmi/gmi-edition-registry");
+  const gmiLifecycle = await import("@/lib/intelligence/market-intelligence-lifecycle");
+  const publicGmi = new Set(gmiLifecycle.getPublicMarketIntelligenceReports().map((record) => record.id));
+  const gmiPaths = gmi.GMI_EDITION_REGISTRY
+    .filter((entry) => publicGmi.has(entry.editionId))
+    .map((entry) => ({ params: { slug: `global-market-intelligence-${entry.slug}` } }));
+
+  const paths = [
+    ...docs
+      .map((doc: any) => publicIntelligenceSlugForDoc(doc))
+      .filter(Boolean)
+      .map((slug) => ({ params: { slug } })),
+    ...gmiPaths,
+  ];
 
   return { paths, fallback: "blocking" };
 };
@@ -194,6 +231,15 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (!bareSlug) return { notFound: true, revalidate: 60 };
 
   const { getAllIntelligence, sanitizeData } = await import("@/lib/content/server");
+  const gmiEditionId = gmiEditionIdFromPublicSlug(bareSlug);
+  if (gmiEditionId) {
+    try {
+      const gmiEdition = await resolvePublicGmiEdition(gmiEditionId);
+      return { props: sanitizeData({ doc: null, bareSlug, gmiEdition }), revalidate: 300 };
+    } catch {
+      return { notFound: true, revalidate: 60 };
+    }
+  }
   const rawDoc =
     (getAllIntelligence() || []).find(
       (doc: any) =>
@@ -209,6 +255,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: sanitizeData({
       doc: toPublicIntelligenceDoc(rawDoc),
       bareSlug,
+      gmiEdition: null,
     }),
     revalidate: 1800,
   };

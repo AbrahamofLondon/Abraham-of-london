@@ -1,22 +1,62 @@
-// Temporary: emit the commercial resolver truth table for owner review.
-import {
-  parseCatalogProduct, getGovernanceState, resolveCommercialAction,
-} from "./_commercial-mirror.mjs";
+#!/usr/bin/env node
+/**
+ * scripts/_truth-table.mjs
+ *
+ * Emit the commercial resolver truth table for owner review.
+ * Uses production modules directly via tsx import.
+ */
+
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "..");
+
+// ── Production module imports via tsx ──────────────────────────────────────
+let resolverModule, catalogModule;
+try {
+  resolverModule = await import("../lib/commercial/commercial-action-resolver.ts");
+  catalogModule = await import("../lib/commercial/catalog.ts");
+} catch (e) {
+  console.error("FATAL: Cannot import production modules. Ensure tsx is available.");
+  console.error(e.message);
+  process.exit(2);
+}
+
+const { resolveCommercialAction } = resolverModule;
+const { CATALOG, getProduct } = catalogModule;
+
+// ── Governance state loader ────────────────────────────────────────────────
+const readinessPath = join(ROOT, "reports", "product-release-readiness-matrix.json");
+const governancePath = join(ROOT, "reports", "product-release-governance-matrix.json");
+
+function loadGovernanceState(code) {
+  let readiness = {}, governance = {};
+  try { readiness = JSON.parse(readFileSync(readinessPath, "utf8")); } catch {}
+  try { governance = JSON.parse(readFileSync(governancePath, "utf8")); } catch {}
+  const r = readiness[code] || null;
+  const g = governance[code] || null;
+  const b = (v) => (typeof v === "boolean" ? v : null);
+  return {
+    productCode: code,
+    known: Boolean(r || g),
+    readinessStatus: r?.readinessStatus ?? null,
+    releaseReadyNow: r?.releaseReadyNow === true,
+    checkoutSafe: b(r?.checkoutSafe),
+    commercialSafe: b(r?.commercialSafe),
+    releaseLane: r?.releaseLane ?? g?.releaseLane ?? null,
+    releaseMode: r?.releaseMode ?? g?.releaseMode ?? null,
+    checkoutAllowed: b(g?.checkoutAllowed),
+    manualFulfilmentAllowed: b(g?.manualFulfilmentAllowed),
+    commercialClaimAllowed: b(g?.commercialClaimAllowed),
+  };
+}
 
 const PRODUCTS = [
   "boardroom_brief", "executive_reporting", "strategy_room", "professional", "inner_circle",
   "gmi_quarterly", "gmi_q2_2026", "reporting_monthly", "reporting_custom", "fast_diagnostic", "enterprise_assessment",
 ];
-
-// gmi_q2_2026 is built dynamically by the GMI factory (manual_billing, no Stripe).
-const DYNAMIC = {
-  gmi_q2_2026: {
-    code: "gmi_q2_2026", commercialStatus: "manual_billing", requiresCheckout: false,
-    amount: 5900, stripeProductId: null, stripePriceId: null, active: true,
-    successPath: "/intelligence/global-market-intelligence-report-q2-2026", cancelPath: "/intelligence",
-    primaryCta: "Enquire", hiddenFromPricing: false,
-  },
-};
 
 function ctaFor(action) {
   switch (action.state) {
@@ -36,12 +76,11 @@ function ctaFor(action) {
 
 const rows = [];
 for (const code of PRODUCTS) {
-  const product = parseCatalogProduct(code) || DYNAMIC[code];
-  const g = getGovernanceState(code);
+  const product = getProduct(code);
+  const g = loadGovernanceState(code);
   if (!product) { rows.push({ code, missing: true }); continue; }
   const action = resolveCommercialAction(product, g);
   const stripe = Boolean(product.stripeProductId && product.stripePriceId);
-  const publicVisible = action.state !== "blocked" || true; // blocked still renders as "not available" where listed
   rows.push({
     code,
     readinessStatus: g.readinessStatus ?? "—",

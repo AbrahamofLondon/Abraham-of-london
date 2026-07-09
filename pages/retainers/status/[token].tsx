@@ -169,7 +169,6 @@ export default function RetainerStatusPage(props: PageProps) {
             surface="retainer_review_cycle"
             subjectType="retainer_contract"
             subjectId={status.contractId}
-            productCode="retainer_oversight"
             compact
           />
 

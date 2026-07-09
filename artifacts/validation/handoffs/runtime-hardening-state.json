@@ -1,0 +1,149 @@
+{
+  "canonicalBranch": "construction/estate-restoration",
+  "canonicalHead": "07e7a6ceaa386d6eb0008c425e13b43a17e8a2ef",
+  "worktreeCleanBeforeHandoff": true,
+  "completedSections": [
+    "ownership_transfer_committed",
+    "migration_reconciliation_bounded_reverified",
+    "signal_consent_prisma_production_adapter",
+    "corridor_recommendation_prisma_production_adapter",
+    "funnel_telemetry_prisma_production_adapter",
+    "production_route_store_boundary_guard",
+    "distributed_funnel_rate_limit_provider",
+    "secure_pilot_status_secret_session_flow",
+    "pilot_request_idempotency_key_contract",
+    "pilot_material_resubmission_fingerprint_fix",
+    "shared_typed_pilot_status_contract_boundary",
+    "operator_pilot_intake_accessibility",
+    "decision_delay_assessment_accessibility_and_price_formatter",
+    "decision_signal_accessibility_semantics",
+    "pilot_status_form_accessibility",
+    "decision_centre_and_foundry_assessment_form_accessibility",
+    "local_full_repository_suite_final_head",
+    "local_pricing_checkout_gmi_product_estate_mdx_contentlayer_typecheck_build_final_head",
+    "clean_room_install_postgres_migrate_contentlayer_typecheck_full_tests_final_head"
+  ],
+  "openSections": [
+    "clean_room_production_build_command_exit_zero",
+    "real_app_responsive_screenshot_qa",
+    "gtm_commercial_truth_and_investor_audit_verification"
+  ],
+  "currentExactTask": "handoff_after_clean_room_build_timeout",
+  "nextExactTask": "diagnose why clean-room pnpm build reaches static export success but leaves Next build worker processes open until timeout; obtain pnpm build exit 0 from C:\\tmp\\aol-cleanroom-0708-1425 or fix the open-handle cause on canonical branch",
+  "filesTouched": [
+    "pages/engagements/operator-pilot.tsx",
+    "pages/engagements/operator-pilot-status.tsx",
+    "pages/decision-instruments/signal/index.tsx",
+    "pages/tools/decision-delay-exposure.tsx",
+    "pages/foundry/decision-test.tsx",
+    "pages/decision-centre.tsx",
+    "lib/tools/decision-delay-exposure-calculator.ts",
+    "artifacts/validation/handoffs/runtime-hardening-state.json"
+  ],
+  "knownFailures": [
+    {
+      "gate": "clean_room_production_build",
+      "command": "pnpm build",
+      "workdir": "C:\\tmp\\aol-cleanroom-0708-1425",
+      "exitCode": 124,
+      "timeoutMs": 1500000,
+      "evidence": {
+        "exportDetail": {
+          "path": "C:\\tmp\\aol-cleanroom-0708-1425\\.next\\export-detail.json",
+          "success": true
+        },
+        "diagnostics": {
+          "path": "C:\\tmp\\aol-cleanroom-0708-1425\\.next\\diagnostics\\build-diagnostics.json",
+          "buildStage": "static-generation",
+          "useBuildWorker": "false"
+        },
+        "orphanedProcessesStopped": [
+          "pnpm build",
+          "next build --webpack",
+          "next jest-worker processChild.js"
+        ]
+      }
+    }
+  ],
+  "lastCommands": [
+    "git branch --show-current; git rev-parse HEAD; git status --short; Get-Date -Format o",
+    "pnpm audit:assessment-estate",
+    "pnpm exec vitest run tests\\runtime-hardening\\demo-runtime-prisma-stores.test.ts tests\\runtime-hardening\\serverless-route-store-boundaries.test.ts tests\\pages\\api\\demo\\funnel-event.test.ts tests\\demo-journey\\pilot-intake-store.test.ts tests\\demo-journey\\pilot-status-security.test.ts tests\\pages\\api\\engagements\\operator-pilot-status.test.ts tests\\demo-journey\\sqlite-runtime-guard.test.ts --reporter=dot",
+    "pnpm exec vitest run --reporter=dot",
+    "pnpm audit:pricing",
+    "pnpm audit:checkout",
+    "pnpm test:gmi",
+    "pnpm test:product-estate",
+    "pnpm mdx:gate",
+    "pnpm mdx:integrity",
+    "pnpm contentlayer2:build",
+    "pnpm exec tsc --noEmit --pretty false --skipLibCheck",
+    "pnpm build",
+    "pnpm exec prisma validate",
+    "pnpm db:status",
+    "pnpm db:deploy",
+    "git clone --no-hardlinks C:\\Dev\\aol-estate-construction C:\\tmp\\aol-cleanroom-0708-1425",
+    "pnpm install --frozen-lockfile",
+    "pnpm db:deploy",
+    "pnpm db:status",
+    "pnpm contentlayer2:build",
+    "pnpm exec tsc --noEmit --pretty false --skipLibCheck",
+    "pnpm exec vitest run --reporter=json --outputFile vitest-cleanroom-results.json",
+    "pnpm build"
+  ],
+  "lastExitCodes": {
+    "canonicalStatus": 0,
+    "assessmentAudit": 0,
+    "focusedRuntimeHardeningVitest": 0,
+    "canonicalFullVitest": 0,
+    "pricingAudit": 0,
+    "checkoutAudit": 0,
+    "gmiSuite": 0,
+    "productEstateSuite": 0,
+    "mdxGate": 0,
+    "mdxIntegrity": 0,
+    "contentlayer": 0,
+    "typecheck": 0,
+    "canonicalBuild": 0,
+    "prismaValidate": 0,
+    "canonicalDbStatus": 0,
+    "canonicalDbDeploy": 0,
+    "cleanRoomClone": 0,
+    "cleanRoomInstall": 0,
+    "cleanRoomDbDeploy": 0,
+    "cleanRoomDbStatus": 0,
+    "cleanRoomContentlayer": 0,
+    "cleanRoomTypecheck": 0,
+    "cleanRoomFullVitest": 0,
+    "cleanRoomBuild": 124
+  },
+  "cleanRoomState": {
+    "path": "C:\\tmp\\aol-cleanroom-0708-1425",
+    "head": "07e7a6ceaa386d6eb0008c425e13b43a17e8a2ef",
+    "database": "aol_cleanroom_0708_1425",
+    "install": "passed",
+    "migrateDeploy": "passed",
+    "migrateStatus": "passed",
+    "contentlayer": "passed",
+    "typecheck": "passed",
+    "fullTests": {
+      "passed": true,
+      "testSuites": 2254,
+      "tests": 7469
+    },
+    "build": "timeout_after_static_export_success"
+  },
+  "postgresState": "local docker postgres on 127.0.0.1:55433 used; canonical and clean-room migrations applied through 20260708142500_add_operator_pilot_idempotency",
+  "buildState": "canonical build passed on final HEAD; clean-room build timed out after static export success and must be diagnosed before final PASS",
+  "requiredExternalFacts": [],
+  "prohibitedActions": [
+    "no_push",
+    "no_pull",
+    "no_merge",
+    "no_rebase",
+    "no_deploy",
+    "no_stripe_mutation",
+    "no_gmi_q2_publication",
+    "no_q1_supersession"
+  ]
+}

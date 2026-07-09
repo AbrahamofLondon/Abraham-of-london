@@ -1,38 +1,40 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { ADMIN_NAVIGATION } from "@/lib/admin/admin-navigation";
 import { buildGmiReleaseConsoleViewModel } from "@/pages/admin/intelligence/gmi-release-console";
 
 describe("GMI release console view model", () => {
-  const model = buildGmiReleaseConsoleViewModel();
+  let model!: Awaited<ReturnType<typeof buildGmiReleaseConsoleViewModel>>;
 
-  it("renders Q1 active state", () => {
+  beforeAll(async () => {
+    model = await buildGmiReleaseConsoleViewModel();
+  });
+
+  it("renders Q1 superseded reference state", () => {
     const q1 = model.reportCards.find((report) => report.id === "GMI-Q1-2026");
-    expect(q1?.lifecycle).toBe("ACTIVE_UNTIL_SUPERSEDED");
-    expect(q1?.purchasable).toBe(true);
+    expect(q1?.lifecycle).toBe("SUPERSEDED");
+    expect(q1?.purchasable).toBe(false);
     expect(q1?.publicVisible).toBe(true);
   });
 
-  it("renders Q2 draft state and not release-ready", () => {
+  it("renders Q2 active state and release-ready", () => {
     const q2 = model.reportCards.find((report) => report.id === "GMI-Q2-2026");
-    expect(q2?.lifecycle).toBe("DRAFT");
-    expect(q2?.purchasable).toBe(false);
-    expect(q2?.publicVisible).toBe(false);
-    expect(model.releaseReady).toBe(false);
+    expect(q2?.lifecycle).toBe("ACTIVE_UNTIL_SUPERSEDED");
+    expect(q2?.purchasable).toBe(true);
+    expect(q2?.publicVisible).toBe(true);
+    expect(model.releaseReady).toBe(true);
   });
 
-  it("shows prior-call and source coverage blockers", () => {
-    expect(model.blockers).toContain("Prior-quarter calls not reviewed");
-    // Source appendix blockers editorially cleared — "Source appendix incomplete" no longer expected
-    expect(model.blockers).toContain("Quality gate not release-ready");
+  it("shows no release blockers after Q2 release", () => {
+    expect(model.blockers).toEqual([]);
   });
 
   it("summarises prior-call review without overconfident labels", () => {
     expect(model.priorCalls.total).toBe(8);
-    expect(model.priorCalls.dueInQ2).toBe(7);
-    expect(model.priorCalls.carriedToQ3).toBe(1);
+    expect(model.priorCalls.dueInQ2).toBe(6);
+    expect(model.priorCalls.carriedToQ3).toBe(2);
     expect(model.priorCalls.reviewed).toBeGreaterThanOrEqual(0);
-    expect(model.priorCalls.pending).toBeGreaterThanOrEqual(1);
+    expect(model.priorCalls.pending).toBe(0);
   });
 
   it("shows source coverage state", () => {
