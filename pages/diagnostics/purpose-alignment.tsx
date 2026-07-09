@@ -143,7 +143,7 @@ export default function PurposeAlignmentPage() {
               <div style={{
                 marginTop: "1.5rem", display: "flex", flexWrap: "wrap", gap: "1.5rem",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.28)",
               }}>
                 <span>No account required</span>
@@ -193,7 +193,7 @@ export default function PurposeAlignmentPage() {
               <div>
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                   color: `${GOLD}AA`,
                 }}>
                   Personal Decision Audit · £49
@@ -240,7 +240,7 @@ export default function PurposeAlignmentPage() {
               <div>
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                   color: `${EMERALD}CC`,
                 }}>
                   Personal Decision Audit — unlocked

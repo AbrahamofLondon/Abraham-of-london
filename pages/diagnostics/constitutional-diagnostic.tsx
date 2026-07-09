@@ -355,7 +355,7 @@ export default function ConstitutionalDiagnosticPage() {
                         border: `1px solid ${item.active ? `${GOLD}22` : "transparent"}`,
                         backgroundColor: item.active ? `${GOLD}08` : "transparent",
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase",
                         color: item.active ? `${GOLD}CC` : "rgba(255,255,255,0.18)",
                       }}>
                         {item.label}
@@ -375,7 +375,7 @@ export default function ConstitutionalDiagnosticPage() {
                       <div key={item.route} style={{ marginBottom: "0.65rem" }}>
                         <span style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase",
+                          fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase",
                           color: item.route === "REJECT" ? "rgba(248,113,113,0.55)" : item.route === "STRATEGY" ? "rgba(110,231,183,0.55)" : "rgba(251,191,36,0.55)",
                         }}>
                           {item.route}
@@ -503,14 +503,14 @@ export default function ConstitutionalDiagnosticPage() {
               </div>
               <div className="flex items-center gap-4">
                 <Link href="/diagnostics" className="transition-opacity hover:opacity-70"
-                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                   Diagnostic ladder
                 </Link>
                 {!assessmentResult && (
                   <Link
                     href="/diagnostics/team-assessment"
                     className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
-                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
                     Team Assessment — next earned action <ChevronRight style={{ width: "10px", height: "10px" }} />
                   </Link>
                 )}

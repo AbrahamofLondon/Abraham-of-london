@@ -295,7 +295,7 @@ export default function ExecutiveReportingEntryPage() {
             </p>
             <div style={{ display: "grid", gap: "10px" }}>
               <div style={{ display: "flex", gap: "14px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                   Case ID
                 </span>
                 <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -303,7 +303,7 @@ export default function ExecutiveReportingEntryPage() {
                 </span>
               </div>
               <div style={{ display: "flex", gap: "14px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                   Originating assessments
                 </span>
                 <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -311,7 +311,7 @@ export default function ExecutiveReportingEntryPage() {
                 </span>
               </div>
               <div style={{ display: "flex", gap: "14px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                   Provenance hash
                 </span>
                 <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -319,7 +319,7 @@ export default function ExecutiveReportingEntryPage() {
                 </span>
               </div>
               <div style={{ display: "flex", gap: "14px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                   Governance implication
                 </span>
                 <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -327,7 +327,7 @@ export default function ExecutiveReportingEntryPage() {
                 </span>
               </div>
               <div style={{ display: "flex", gap: "14px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                   Decision Centre
                 </span>
                 <Link href="/decision-centre" style={{ fontSize: "12px", lineHeight: 1.55, color: `${GOLD}AA`, textDecoration: "none", borderBottom: `1px solid ${GOLD}30` }}>

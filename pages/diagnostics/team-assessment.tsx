@@ -464,7 +464,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
     return (
       <div className="flex items-center justify-between gap-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{label}</span>
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.60)" }}>{value}</span>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.60)" }}>{value}</span>
       </div>
     );
   }
@@ -666,7 +666,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             ) : submitResult.ok ? (
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(110,231,183,0.65)", marginBottom: "0.4rem" }}>Record saved</div>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: "rgba(255,255,255,0.30)" }}>Ref: {submitResult.diagnosticRef}</p>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.30)" }}>Ref: {submitResult.diagnosticRef}</p>
               </div>
             ) : (
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(252,165,165,0.70)" }}>{submitResult.error}</p>
@@ -1239,7 +1239,7 @@ export default function TeamAssessmentPage() {
                   return (
                     <React.Fragment key={p}>
                       {i > 0 && <div style={{ width: "20px", height: "1px", backgroundColor: "rgba(255,255,255,0.08)" }} />}
-                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: isCurrent ? `${GOLD}CC` : isDone ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: isCurrent ? `${GOLD}CC` : isDone ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)" }}>
                         {p === "leader" ? "Leader perception" : p === "reality" ? "Leader's team estimate" : "Gap analysis"}
                       </span>
                     </React.Fragment>
@@ -1521,7 +1521,7 @@ export default function TeamAssessmentPage() {
                   {/* Adaptive free-text questions — auto-surfaced when detected */}
                   {adaptiveQuestions.length > 0 && (
                     <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgb(10,14,20)", padding: "1.5rem", marginTop: "1.5rem" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
                         We&rsquo;ve detected structural gaps. Add evidence (optional)
                       </span>
                       <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
@@ -1688,11 +1688,11 @@ export default function TeamAssessmentPage() {
                   <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Layer 02 of 04</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>
+                  <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>
                   <Link
                     href="/diagnostics/enterprise-assessment"
                     className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
-                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}
+                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}
                   >
                     Enterprise Assessment <ChevronRight style={{ width: "10px", height: "10px" }} />
                   </Link>

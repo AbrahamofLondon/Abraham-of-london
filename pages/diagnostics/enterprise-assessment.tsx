@@ -610,7 +610,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
     return (
       <div className="flex items-center justify-between gap-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
         <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{label}</span>
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.58)" }}>{value}</span>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.58)" }}>{value}</span>
       </div>
     );
   }
@@ -921,7 +921,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             ) : submitResult.ok ? (
               <div>
                 <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(110,231,183,0.65)", marginBottom: "0.4rem" }}>Record saved</div>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: "rgba(255,255,255,0.30)" }}>Ref: {submitResult.diagnosticRef}</p>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.30)" }}>Ref: {submitResult.diagnosticRef}</p>
               </div>
             ) : (
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", color: "rgba(252,165,165,0.70)" }}>{submitResult.error}</p>
@@ -954,7 +954,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
                   <div key={s.id}>
                     <div className="flex items-center justify-between mb-1">
                       <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>{s.title}</span>
-                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: c }}>{s.pct}%</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: c }}>{s.pct}%</span>
                     </div>
                     <div style={{ height: "2px", backgroundColor: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
                       <motion.div style={{ height: "100%", backgroundColor: c }} animate={{ width: `${Math.max(2, s.pct)}%` }} transition={{ duration: 0.6 }} />
@@ -1463,14 +1463,14 @@ export default function EnterpriseAssessmentPage() {
           <div style={{ backgroundColor: "rgba(0,0,0,0.50)", borderBottom: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 50 }}>
             <div className="mx-auto max-w-7xl px-6 lg:px-12">
               <div className="flex items-center justify-between py-3">
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                   Enterprise instrument
                 </span>
                 <div className="flex items-center gap-3">
                   <div style={{ height: "2px", width: "120px", backgroundColor: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${Math.round((answeredCount / allPrompts.length) * 100)}%`, backgroundColor: `${GOLD}80`, transition: "width 400ms ease" }} />
                   </div>
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)" }}>
                     {answeredCount}/{allPrompts.length}
                   </span>
                 </div>
@@ -1667,7 +1667,7 @@ export default function EnterpriseAssessmentPage() {
                       {/* Adaptive free-text questions from spine */}
                       {showAdaptive && adaptiveQuestions.length > 0 && (
                         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: "rgb(10,14,20)", padding: "1.5rem", marginTop: "1.5rem" }}>
-                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
                             Structural evidence — from your specific decision
                           </span>
                           <p style={{ marginTop: "0.5rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
@@ -1696,7 +1696,7 @@ export default function EnterpriseAssessmentPage() {
                       {instrumentPage === 1 && complete && (
                         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.5rem", marginTop: "1.5rem" }}>
                           <div className="flex items-center gap-2 mb-1">
-                            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}80` }}>
                               Enterprise stress inputs (optional)
                             </span>
                           </div>
@@ -1736,7 +1736,7 @@ export default function EnterpriseAssessmentPage() {
                                 const isActive = enterpriseStressInputs.scenarioDelayOption === opt.value;
                                 return (
                                   <button key={opt.label} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, scenarioDelayOption: opt.value }))}
-                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
                                     {opt.label}
                                   </button>
                                 );
@@ -1767,7 +1767,7 @@ export default function EnterpriseAssessmentPage() {
                                 const isActive = enterpriseStressInputs.scenarioOwnerOption === opt.value;
                                 return (
                                   <button key={opt.label} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, scenarioOwnerOption: opt.value }))}
-                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
                                     {opt.label}
                                   </button>
                                 );
@@ -1798,7 +1798,7 @@ export default function EnterpriseAssessmentPage() {
                                 const isActive = enterpriseStressInputs.scenarioChallengeOption === opt.value;
                                 return (
                                   <button key={opt.label} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, scenarioChallengeOption: opt.value }))}
-                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    style={{ padding: "6px 12px", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", cursor: "pointer", transition: "all 200ms ease" }}>
                                     {opt.label}
                                   </button>
                                 );
@@ -2037,11 +2037,11 @@ export default function EnterpriseAssessmentPage() {
                   <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Layer 03 of 04</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>
+                  <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>
                   <Link
                     href="/diagnostics/executive-reporting"
                     className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
-                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}
+                    style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}
                   >
                     Executive Reporting <ChevronRight style={{ width: "10px", height: "10px" }} />
                   </Link>
