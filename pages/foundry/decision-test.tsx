@@ -13,10 +13,6 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { FreeSignalResult } from "@/components/kernel/FreeSignalResult";
 import { useKernelSignal } from "@/lib/kernel/use-kernel-signal";
-import { ProductAuthorityBadge } from "@/components/product/ProductAuthorityBadge";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
 
 const GOLD = "#C9A96E";
 
@@ -35,11 +31,6 @@ const SAMPLE =
 export default function DecisionTestPage() {
   const [text, setText] = React.useState("");
   const { signal, loading, error, submit, reset } = useKernelSignal();
-
-  // Resolve authority for fast_diagnostic
-  const configs = getDefaultProductConfigurations();
-  const fastDiagConfig = configs.find(c => c.productCode === "fast_diagnostic");
-  const contract = fastDiagConfig ? resolveProductAuthority(fastDiagConfig) : null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,24 +79,14 @@ export default function DecisionTestPage() {
             Test a decision.
           </h1>
 
-          {contract && (
-            <div style={{ marginTop: "16px", marginBottom: "24px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <ProductAuthorityBadge
-                  productCode={contract.productCode}
-                  currentAuthorityState={contract.currentAuthorityState}
-                  size="medium"
-                />
-                <p style={{ color: "#6b7280", fontSize: "14px", margin: 0 }}>
-                  {contract.publicClaimLanguage}
-                </p>
-              </div>
-              <ProductAuthorityPanel contract={contract} />
-              <div style={{ marginTop: "12px" }}>
-                <ProductAuthorityNotice contract={contract} />
-              </div>
-            </div>
-          )}
+          <div className="mt-6 border-l-2 border-white/[0.12] bg-white/[0.025] px-5 py-4">
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}B0`, marginBottom: "0.5rem" }}>
+              Public decision signal
+            </p>
+            <p className="max-w-[62ch] text-[14px] leading-[1.75] text-white/55">
+              Provides a structured perception check from user-supplied context. It does not certify outcomes or independently verify the underlying facts.
+            </p>
+          </div>
 
           {/* AI Contrast Section */}
           <div style={{ marginTop: "20px", marginBottom: "20px", padding: "16px", border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}08`, borderRadius: "4px" }}>

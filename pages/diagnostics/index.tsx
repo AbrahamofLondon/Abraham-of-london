@@ -19,7 +19,7 @@ const serif: React.CSSProperties = {
   fontWeight: 300,
 };
 
-type SurfaceState = "OPEN" | "AVAILABLE" | "COMPLETED" | "LOCKED";
+type SurfaceState = "OPEN" | "AVAILABLE" | "COMPLETED" | "CONTROLLED";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -45,7 +45,7 @@ function statusColor(state: SurfaceState) {
 }
 
 function StatusBadge({ state }: { state: SurfaceState }) {
-  const Icon = state === "COMPLETED" ? CheckCircle2 : state === "LOCKED" ? Lock : ShieldCheck;
+  const Icon = state === "COMPLETED" ? CheckCircle2 : state === "CONTROLLED" ? Lock : ShieldCheck;
   return (
     <span
       className="inline-flex items-center gap-2"
@@ -64,7 +64,7 @@ function StatusBadge({ state }: { state: SurfaceState }) {
           ? "Available"
           : state === "COMPLETED"
             ? "Completed"
-            : "Not yet earned"}
+            : "Controlled access"}
     </span>
   );
 }
@@ -141,16 +141,16 @@ function SurfaceCard({
             href={href}
             className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
             style={{
-              borderColor: state === "LOCKED" ? "rgba(255,255,255,0.10)" : `${GOLD}40`,
-              backgroundColor: state === "LOCKED" ? "rgba(255,255,255,0.03)" : `${GOLD}10`,
-              color: state === "LOCKED" ? "rgba(255,255,255,0.42)" : "#F5F5F5",
+              borderColor: state === "CONTROLLED" ? "rgba(255,255,255,0.14)" : `${GOLD}40`,
+              backgroundColor: state === "CONTROLLED" ? "rgba(255,255,255,0.03)" : `${GOLD}10`,
+              color: state === "CONTROLLED" ? "rgba(255,255,255,0.64)" : "#F5F5F5",
               ...mono,
               fontSize: "10px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              pointerEvents: state === "LOCKED" ? "none" : "auto",
+              pointerEvents: "auto",
             }}
-            aria-disabled={state === "LOCKED"}
+            aria-disabled={undefined}
           >
             {cta}
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -219,8 +219,7 @@ export default function DiagnosticsIndexPage() {
             </h1>
             <p className="mt-6 max-w-[54ch] text-[16px] leading-[1.85] text-white/58">
               This is not a catalogue of diagnostics. Start with a real decision,
-              receive a finding, and earn the next surface only if the record
-              justifies it.
+receive a finding, and use the next surface when the condition warrants it. Public instruments are available; controlled products still require governance.
             </p>
           </div>
         </section>
@@ -251,7 +250,7 @@ export default function DiagnosticsIndexPage() {
           <div className="mx-auto max-w-[1100px]">
             <Eyebrow>Start here</Eyebrow>
             <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.85] text-white/50">
-              Start with one decision under pressure. The system will decide whether anything further is warranted.
+Start with the decision condition you actually face. Each instrument returns a bounded reading, an evidence posture, and the next admissible move.
             </p>
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <SurfaceCard
@@ -311,27 +310,23 @@ export default function DiagnosticsIndexPage() {
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <SurfaceCard
                 title="Team Assessment"
-                state={teamDone || Boolean(thread?.teamFindings) ? "COMPLETED" : hasConstitutionalEvidence ? "AVAILABLE" : "LOCKED"}
+                state={teamDone || Boolean(thread?.teamFindings) ? "COMPLETED" : "AVAILABLE"}
                 detail="Measures leadership-team divergence after a decision condition has already been named."
                 why={
-                  hasConstitutionalEvidence
-                    ? "Prior diagnostic context is present, so this surface can sharpen the record."
-                    : "Without prior diagnostic context, this instrument should not be run in isolation. Start with Fast or Constitutional first."
+"Recommended after Constitutional Diagnostic when you want to test whether leadership intent and team reality describe the same organisation."
                 }
-                href={hasConstitutionalEvidence ? "/diagnostics/team-assessment" : "/diagnostics/constitutional-diagnostic"}
-                cta={hasConstitutionalEvidence ? "Open Team Assessment" : "Start with Constitutional"}
+                href="/diagnostics/team-assessment"
+                cta="Open Team Assessment"
               />
               <SurfaceCard
                 title="Enterprise Assessment"
-                state={enterpriseDone || Boolean(thread?.enterpriseFindings) ? "COMPLETED" : hasConstitutionalEvidence || teamDone ? "AVAILABLE" : "LOCKED"}
+                state={enterpriseDone || Boolean(thread?.enterpriseFindings) ? "COMPLETED" : "AVAILABLE"}
                 detail="Designed for institutional evidence when the condition is bigger than one team or one perception gap."
                 why={
-                  hasConstitutionalEvidence || teamDone
-                    ? "This surface is now qualified because earlier evidence exists."
-                    : "This is strongest after prior diagnostic context or an active organisational case. It is not for casual exploration."
+"Recommended after prior diagnostic or team evidence when the condition may be systemic rather than local."
                 }
-                href={hasConstitutionalEvidence || teamDone ? "/diagnostics/enterprise-assessment" : "/diagnostics/fast"}
-                cta={hasConstitutionalEvidence || teamDone ? "Open Enterprise Assessment" : "Start with Fast Diagnostic"}
+                href="/diagnostics/enterprise-assessment"
+                cta="Open Enterprise Assessment"
               />
             </div>
           </div>
@@ -354,18 +349,15 @@ export default function DiagnosticsIndexPage() {
                   >
                     Executive Reporting
                   </div>
-                  <StatusBadge state={executiveReady ? "AVAILABLE" : "LOCKED"} />
+                  <StatusBadge state="CONTROLLED" />
                 </div>
                 <p className="mt-4 text-[14px] leading-[1.8] text-white/60">
                   Executive Reporting is not a starting point. It becomes available when the evidence shows decision stakes, consequence, and sufficient seriousness.
                 </p>
                 <p className="mt-3 text-[13px] leading-[1.75] text-white/42">
-                  {executiveReady
-                    ? "Eligible for Executive Reporting. Earlier evidence is present, so this gate can be reviewed responsibly."
-                    : "Not yet earned. Submit evidence first through Fast Diagnostic or the Constitutional Diagnostic."}
+Controlled access. Earlier evidence improves eligibility, but access is governed by review rather than session state alone.
                 </p>
-                {executiveReady ? (
-                  <div className="mt-5">
+                <div className="mt-5">
                     <Link
                       href="/diagnostics/executive-reporting"
                       className="group inline-flex min-h-[44px] items-center gap-2 border px-5 py-3 transition-all duration-200 hover:-translate-y-0.5"
@@ -383,7 +375,6 @@ export default function DiagnosticsIndexPage() {
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </div>
-                ) : null}
               </div>
 
               <div className="border border-white/[0.06] bg-white/[0.01] p-5">
@@ -399,7 +390,7 @@ export default function DiagnosticsIndexPage() {
                   >
                     Enterprise Decision Authority
                   </div>
-                  <StatusBadge state="LOCKED" />
+                  <StatusBadge state="CONTROLLED" />
                 </div>
                 <p className="mt-4 text-[14px] leading-[1.8] text-white/50">
                   The organisational-grade pipeline. Turns campaign-based response patterns into governed decision evidence — protected by anonymisation, cohort safety, lineage, and escalation controls.

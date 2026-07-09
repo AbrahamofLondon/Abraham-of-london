@@ -1,36 +1,39 @@
 import { useEffect, useState } from "react";
 import type { ProductReleaseGovernance } from "@/lib/product/product-release-governance";
+import { ProductReleaseGovernanceSchema } from "@/lib/product/product-release-governance-schema";
 
 /**
- * Hook to load ProductReleaseGovernance for a product
- * Fetches from the governance matrix or returns null if not found
+ * Hook to load ProductReleaseGovernance for a product.
+ * The API adapts estate disposition records into the canonical runtime DTO;
+ * the client parses the same schema so bad governance JSON fails closed.
  */
 export function useProductReleaseGovernance(
   productCode: string
 ): ProductReleaseGovernance | null {
   const [governance, setGovernance] = useState<ProductReleaseGovernance | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadGovernance() {
       try {
-        // Try to load from generated governance matrix
         const response = await fetch("/api/product-release-governance/" + encodeURIComponent(productCode));
-        if (response.ok) {
-          const data = await response.json();
-          setGovernance(data);
-        } else {
-          setGovernance(null);
+        if (!response.ok) {
+          if (!cancelled) setGovernance(null);
+          return;
         }
+        const data = await response.json();
+        const parsed = ProductReleaseGovernanceSchema.parse(data);
+        if (!cancelled) setGovernance(parsed);
       } catch {
-        // If governance cannot be loaded, treat as unavailable
-        setGovernance(null);
-      } finally {
-        setLoading(false);
+        if (!cancelled) setGovernance(null);
       }
     }
 
-    loadGovernance();
+    void loadGovernance();
+    return () => {
+      cancelled = true;
+    };
   }, [productCode]);
 
   return governance;

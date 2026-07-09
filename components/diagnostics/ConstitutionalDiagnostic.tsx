@@ -34,6 +34,12 @@ import {
   clearAllConstitutionalHandoffs,
 } from "@/lib/diagnostics/constitutional-handoff";
 import type { ConstitutionalBridgeBundle } from "@/lib/diagnostics/constitutional-bridge";
+import {
+  ConstitutionalPublicFailureSchema,
+  ConstitutionalPublicResponseSchema,
+  type ConstitutionalPublicResponse,
+  type ConstitutionalPublicFailure,
+} from "@/lib/diagnostics/constitutional-public-contract";
 import DecisionChallengeCard from "@/components/diagnostics/DecisionChallengeCard";
 import ResultEmailCapture from "@/components/diagnostics/ResultEmailCapture";
 import GovernanceDisclosure from "@/components/trust/GovernanceDisclosure";
@@ -48,58 +54,9 @@ import {
 import { detectDualAxisIntegrityChallenge } from "@/lib/client/assessment-integrity";
 import type { ChallengeResult } from "@/lib/server/decision/challenge-engine.server";
 
-type ApiSuccess = {
-  ok: true;
-  reportId: string;
-  stateToken: string;
-  bundle: {
-    report: {
-      authorityScore: number;
-      coherenceScore: number;
-      pressureScore: number;
-      frictionScore: number;
-      trustScore: number;
-      seriousnessScore: number;
-      governanceDiscipline: number;
-      interventionReadiness: number;
-      narrativeCoherence: number;
-      failureModeCount: number;
-      failureModeSeverity: number;
-      authorityType: string;
-      posture: string;
-      readinessTier: string;
-      mandateFit: boolean;
-      summary: string;
-      keyFindings: string[];
-      answeredCount: number;
-      totalQuestions: number;
-      completionPercent: number;
-    };
-    decision: {
-      route: "REJECT" | "DIAGNOSTIC" | "STRATEGY";
-      confidence: number;
-      disqualifiersTriggered: string[];
-      recommendedInterventions: string[];
-      rationale: string[];
-      escalationAllowed: boolean;
-    };
-    routeSummary: {
-      route: string;
-      title: string;
-      description: string;
-      href: string;
-      cta: string;
-      tone: "neutral" | "amber" | "emerald";
-    };
-  };
-  bridge: ConstitutionalBridgeBundle;
-};
+type ApiSuccess = ConstitutionalPublicResponse;
 
-type ApiFailure = {
-  ok: false;
-  error: string;
-};
-
+type ApiFailure = ConstitutionalPublicFailure;
 type SubmitState = "idle" | "submitting" | "success" | "error";
 type EvaluationPhase = "idle" | "reading" | "parsing" | "weighing" | "complete";
 type DraftSnapshot = {
@@ -472,10 +429,13 @@ export default function ConstitutionalDiagnostic({ onComplete }: ConstitutionalD
         }),
       });
 
-      const json = (await res.json()) as ApiSuccess | ApiFailure;
+      const rawJson = await res.json();
+      const json = res.ok
+        ? ConstitutionalPublicResponseSchema.parse(rawJson)
+        : ConstitutionalPublicFailureSchema.parse(rawJson);
 
-      if (!res.ok || !json.ok) {
-        throw new Error(json.ok ? "Assessment failed." : json.error);
+      if (!json.ok) {
+        throw new Error(json.error);
       }
 
       writeConstitutionalHandoff("team-assessment", {

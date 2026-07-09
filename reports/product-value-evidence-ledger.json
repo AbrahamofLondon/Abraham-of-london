@@ -1,463 +1,95 @@
 {
-  "generatedAt": "2026-06-13T13:11:54.328Z",
+  "generatedAt": "2026-07-09T15:14:25.791Z",
   "doctrine": "No evidence ledger entry, no gold.",
-  "entries": [
+  "entries": [],
+  "blockedProductsWithRouteEvidence": [
     {
       "productCode": "fast_diagnostic",
-      "liveRoute": "/diagnostics/fast -> /foundry/decision-test via /api/public/kernel-signal",
-      "scenarioUsed": "pricing decision under ownership ambiguity",
-      "renderedOutputExcerpt": "The economics of the enterprise pricing change — ownership ambiguity between sales and finance are being contested without a priced hypothesis: value capture, willingness-to-pay, and margin floor are all asserted, none tested, while ownership ambiguity between sales and finance compresses the room to manoeuvre. A secondary ownership_ambiguity signal is present and may become primary if the case evolves.\nThe tension is margin versus momentum: protecting price risks losing deals now; matching pressure surrenders margin permanently — and the case currently lacks the evidence to price that trade. This reading rests on 6 signals in your answers, not on a generic playbook.\nEvery month without a priced hypothesis converts willingness-to-pay you could have captured into margin permanently surrendered. In this case the stated exposure is Q3 enterprise renewal revenue.\nWrite a falsifiable pricing ",
-      "judgementEngineEvidence": "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks.",
-      "antiToyScore": 0,
-      "redTeamResult": "survives",
-      "marketComparisonResult": "outperforms_generic_ai",
-      "finalGoldDecision": "externally_proven_gold"
+      "liveRoute": "/diagnostics/fast -> /foundry/decision-test",
+      "scenarioUsed": "pricing-ownership",
+      "renderedOutputExcerpt": "Authority over the enterprise pricing change, where it is unclear who owns the call because pricing sits between sales and finance and there is no single owner — unclear authority: nobody accountable will sign a price floor while both functions claim a veto is diffused: no single accountable owner holds the right to decide, so unclear authority: nobody accountable will sign a price floor while both functions claim a veto persists as a vacuum every function can defer into. A secondary pricing_pressure signal is present and may become primary if the case evolves.\nAn unowned decision is made by d",
+      "judgementEngineEvidence": "Captured output is produced from the case-derived judgement engine.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     },
     {
       "productCode": "team_assessment",
       "liveRoute": "/diagnostics/team-assessment",
-      "scenarioUsed": "post-merger operations team with conflicting priorities",
-      "renderedOutputExcerpt": "The principals around Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority hold materially different positions — the divergence shows in execution while the meetings perform agreement, and three of five team leads gave materially conflicting answers about this quarter's top priority keeps the conflict profitable to leave unspoken.\nDivergent execution continues, team velocity declines, post-merger integration stalls\nSurface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive. For Team organisational friction: three of five team leads gave materially conflicting answers about this quarter's top priority, that responsibility sits with Operations Director as the accountable owner, to be vis",
-      "judgementEngineEvidence": "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks.",
-      "antiToyScore": 0,
-      "redTeamResult": "survives",
-      "marketComparisonResult": "outperforms_generic_ai",
-      "finalGoldDecision": "externally_proven_gold"
+      "scenarioUsed": "team-misalignment",
+      "renderedOutputExcerpt": "The principals around Team organisational friction: the leads agree in meetings and then execute different priorities hold materially different positions — the divergence shows in execution while the meetings perform agreement, and the leads agree in meetings and then execute different priorities keeps the conflict profitable to leave unspoken.\nthe quarter locks with teams committed to incompatible plans\nSurface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive",
+      "judgementEngineEvidence": "Captured output is produced from the case-derived judgement engine.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     },
     {
       "productCode": "enterprise_assessment",
       "liveRoute": "/diagnostics/enterprise-assessment",
-      "scenarioUsed": "post-acquisition board disagreement on integration priorities",
-      "renderedOutputExcerpt": "Enterprise governance friction: board members disagree on integration pacing — one insists on speed, two push for caution, one abstains. Pattern classification incomplete from provided evidence (No decision pattern signature reached the minimum evidence threshold in the supplied input.), but the friction itself is clear.\nBoard disagreement blocks execution, integration timeline slips by quarters, deal value capture erodes, executive team fractures\nThe CEO (accountable owner) convenes the disagreeing board members or executives for a single decision meeting within 48-hour window. Outcome by end of meeting: write the decision in one sentence. Named owner signs the decision memo. All parties sign commitment to execute by next business day.\nTest the hypothesis: \"Once we clarify the decision, all parties will act on it consistently.\" Falsified if: after the decision is written and signed, imp",
-      "judgementEngineEvidence": "Live route capture uses the case-derived judgement engine and passed anti-toy diversity checks.",
-      "antiToyScore": 0,
-      "redTeamResult": "survives",
-      "marketComparisonResult": "outperforms_generic_ai",
-      "finalGoldDecision": "externally_proven_gold"
-    }
-  ],
-  "blockedProductsWithRouteEvidence": [
+      "scenarioUsed": "board-disagreement",
+      "renderedOutputExcerpt": "Enterprise governance friction: the board has intervened twice to pause commitments the CEO believed were within mandate is contested between authorities: the question is not what to decide but whose decision it is, and until that mandate is settled, the board has intervened twice to pause commitments the CEO believed were within mandate guarantees every resolution is provisional.\nthe acquisition target in the region is courting another buyer\nResolve the mandate, not the issue: get the conflicting parties to agree in writing whose decision this class of question is, then let that person decide",
+      "judgementEngineEvidence": "Captured output is produced from the case-derived judgement engine.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
+    },
     {
       "productCode": "case_dossier_tariff_shock",
       "liveRoute": "/evidence/tariff-shock-growth-break",
       "scenarioUsed": "tariff-route-proof",
       "renderedOutputExcerpt": "Tariff repricing moved faster than consensus allocation models.\nLate movers absorbed avoidable drawdown and reallocated under worse liquidity.\nRun a regime-break stress test against all growth-dependent allocations and set a 72-hour tariff-event decision protocol.\nReclassify the regime before consensus catches up; waiting for confirmation is itself the exposure.\nReusable as a board-level test for structural-break decision latency.\nTariff repricing magnitude\nConsensus positioning data\nInstitutional repositioning lag\nExposure compounding estimate\nPublic dossier proof does not expose private sour",
-      "judgementEngineEvidence": "Route evidence captured, but market outperformance or judgement-engine proof is not sufficient for gold.",
-      "antiToyScore": 23,
-      "redTeamResult": "blocked",
-      "marketComparisonResult": "not_proven",
-      "finalGoldDecision": "blocked_for_low_value"
+      "judgementEngineEvidence": "Captured output is structured route evidence, but not judgement-engine output.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     },
     {
       "productCode": "case_dossier_team_alignment",
       "liveRoute": "/evidence/team-alignment-illusion",
       "scenarioUsed": "team-alignment-route-proof",
       "renderedOutputExcerpt": "Leadership alignment confidence diverged materially from team respondent evidence.\nProceeding would have amplified divergence and increased dissonance within 90 days.\nHalt restructuring pending execution-layer alignment measurement for affected units.\nDo not restructure on leadership self-assessment; measure execution-layer alignment first.\nReusable as a governance check before restructuring, consolidation, or team investment decisions.\nLeadership self-assessment\nTeam respondent scores\nOKR/reporting gap analysis\nRestructuring impact projection\nPublic dossier proof does not identify private res",
-      "judgementEngineEvidence": "Route evidence captured, but market outperformance or judgement-engine proof is not sufficient for gold.",
-      "antiToyScore": 23,
-      "redTeamResult": "blocked",
-      "marketComparisonResult": "not_proven",
-      "finalGoldDecision": "blocked_for_low_value"
+      "judgementEngineEvidence": "Captured output is structured route evidence, but not judgement-engine output.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     },
     {
       "productCode": "case_dossier_escalation_denied",
       "liveRoute": "/evidence/escalation-denied-case",
       "scenarioUsed": "escalation-route-proof",
       "renderedOutputExcerpt": "Escalation pressure was high while evidence readiness was low.\nPremature board escalation would have targeted symptoms and burned escalation credibility.\nComplete evidence gathering across all active failure domains before board engagement.\nSeparate urgency from evidence sufficiency; premature escalation can multiply the failure.\nReusable as an escalation-readiness threshold before high-stakes governance intervention.\nFailure mode identification\nEscalation readiness score\nEvidence sufficiency assessment\nBoard response projection\nPublic dossier proof does not expose source-level records or conf",
-      "judgementEngineEvidence": "Route evidence captured, but market outperformance or judgement-engine proof is not sufficient for gold.",
-      "antiToyScore": 15,
-      "redTeamResult": "blocked",
-      "marketComparisonResult": "not_proven",
-      "finalGoldDecision": "blocked_for_low_value"
-    }
-  ],
-  "marketRows": [
-    {
-      "productCode": "fast_diagnostic",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure plus case-derived judgement, honest limits, escalation triggers, and a reusable decision record.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "A strong human consultant still out-judges the instrument on novel, ambiguous cases.",
-      "whatWouldMakeUsClearlySuperior": "Compounding case memory and cross-case pattern intelligence the alternative cannot accumulate.",
-      "wouldCustomerReturnAfterOneUse": "yes"
-    },
-    {
-      "productCode": "boardroom_brief",
-      "alternative": "strategy_workshop",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Live facilitation, group alignment, real-time challenge from an experienced operator.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "judgementEngineEvidence": "Captured output is structured route evidence, but not judgement-engine output.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     },
     {
       "productCode": "personal_decision_audit",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "decision_exposure_instrument",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "mandate_clarity_framework",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "intervention_path_selector",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "escalation_readiness_scorecard",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "structural_failure_diagnostic_canvas",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "execution_risk_index",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "team_alignment_gap_map",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "governance_drift_detector",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "strategic_priority_stack_builder",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "board_brief_builder",
-      "alternative": "strategy_workshop",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Live facilitation, group alignment, real-time challenge from an experienced operator.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "execution_integrity_protocol",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "alignment_audit_playbook",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "drift_detection_framework",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "operator_decision_pack",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "operator_essentials_pack",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "command_pack",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "governance_suite",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "case_dossier_tariff_shock",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "uncertain"
-    },
-    {
-      "productCode": "case_dossier_team_alignment",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "uncertain"
-    },
-    {
-      "productCode": "case_dossier_escalation_denied",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "Measured output shows template-dominant judgement: for materially different inputs the analysis barely changes, which a generic AI prompt matches at zero cost.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "uncertain"
-    },
-    {
-      "productCode": "gmi_q1_2026",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "gmi_q2_2026",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "gmi_q3_2026",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "team_assessment",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure plus case-derived judgement, honest limits, escalation triggers, and a reusable decision record.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "A strong human consultant still out-judges the instrument on novel, ambiguous cases.",
-      "whatWouldMakeUsClearlySuperior": "Compounding case memory and cross-case pattern intelligence the alternative cannot accumulate.",
-      "wouldCustomerReturnAfterOneUse": "yes"
-    },
-    {
-      "productCode": "enterprise_assessment",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure plus case-derived judgement, honest limits, escalation triggers, and a reusable decision record.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "A strong human consultant still out-judges the instrument on novel, ambiguous cases.",
-      "whatWouldMakeUsClearlySuperior": "Compounding case memory and cross-case pattern intelligence the alternative cannot accumulate.",
-      "wouldCustomerReturnAfterOneUse": "yes"
-    },
-    {
-      "productCode": "boardroom_mode",
-      "alternative": "strategy_workshop",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Live facilitation, group alignment, real-time challenge from an experienced operator.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "executive_reporting",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "diagnostic_report_basic",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "diagnostic_report_pro",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "executive_reporting_priority",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "liveRoute": "/test-your-decision",
+      "scenarioUsed": "budget-cut",
+      "renderedOutputExcerpt": "allocating the 20% budget reduction, where leadership can't decide between the three cut options and has been deliberating for six weeks with another review scheduled is frozen, not pending: the option set has been stable while deciding keeps restarting, and every deferral has been justified by asking for another review that produced no new information means the daily default — the status quo — is itself the most expensive option on the table. The instrument records 2 evidence items and 1 irreversible element(s): the group imposes a uniform cut that everyone agrees is the worst outcome.\nParaly",
+      "judgementEngineEvidence": "Captured output is produced from the case-derived judgement engine.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     },
     {
       "productCode": "strategy_room",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "strategy_room_extended",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "inner_circle",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "retainer_core",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "retainer_operational",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "retainer_institutional",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "professional",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "professional_annual",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "enterprise",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
-    },
-    {
-      "productCode": "additional_collaborator",
-      "alternative": "consultant_mini_audit",
-      "whatWeDoBetter": "Governed structure: named sections, honest limits, escalation triggers, and a record format the alternative does not enforce.",
-      "whatTheAlternativeDoesBetter": "Real human judgement, case-specific challenge, accountability, and tailored recommendations.",
-      "whereWeAreWeaker": "No rendered output has been captured from the actual customer surface, so superiority over this alternative is unproven.",
-      "whatWouldMakeUsClearlySuperior": "Case-derived judgement branches (classification, calibrated severity, pattern comparison across cases) wired into the live customer surface.",
-      "wouldCustomerReturnAfterOneUse": "no"
+      "liveRoute": "/strategy-room",
+      "scenarioUsed": "board-disagreement",
+      "renderedOutputExcerpt": "the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions is contested between authorities: the question is not what to decide but whose decision it is, and until that mandate is settled, the board has intervened twice to pause commitments the CEO believed were within mandate guarantees every resolution is provisional.\nWhile two authorities contest the decision, the organisation executes neither view — and learns that decisions are provisional, which slows every future commitment. In this case the stated exposure ",
+      "judgementEngineEvidence": "Captured output is produced from the case-derived judgement engine.",
+      "antiToyScore": null,
+      "redTeamResult": null,
+      "marketComparisonResult": null,
+      "finalGoldDecision": "blocked_pending_external_benchmark"
     }
   ]
 }

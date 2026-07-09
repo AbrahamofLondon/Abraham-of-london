@@ -2,6 +2,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
 import type { ProductReleaseGovernance } from "@/lib/product/product-release-governance";
+import {
+  ProductReleaseGovernanceSchema,
+  adaptEstateDispositionToReleaseGovernance,
+} from "@/lib/product/product-release-governance-schema";
 
 export default function handler(
   req: NextApiRequest,
@@ -18,7 +22,6 @@ export default function handler(
   }
 
   try {
-    // Load governance matrix
     const matrixPath = path.join(process.cwd(), "reports", "product-release-governance-matrix.json");
 
     if (!fs.existsSync(matrixPath)) {
@@ -26,13 +29,16 @@ export default function handler(
     }
 
     const matrixContent = fs.readFileSync(matrixPath, "utf-8");
-    const matrix = JSON.parse(matrixContent);
+    const matrix = JSON.parse(matrixContent) as Record<string, unknown>;
+    const sourceRecord = matrix[productCode];
 
-    const governance: ProductReleaseGovernance | undefined = matrix[productCode];
-
-    if (!governance) {
+    if (!sourceRecord) {
       return res.status(404).json({ error: `No governance found for product ${productCode}` });
     }
+
+    const governance = ProductReleaseGovernanceSchema.parse(
+      adaptEstateDispositionToReleaseGovernance(sourceRecord),
+    );
 
     res.setHeader("Cache-Control", "public, max-age=3600");
     return res.status(200).json(governance);

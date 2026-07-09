@@ -16,21 +16,16 @@ import { runConstitutionalOrchestration } from "@/lib/engine/orchestrator";
 import type { UpstreamEvidenceContext } from "@/lib/diagnostics/constitutional-evidence-bridge";
 import { assessReplicationRisk } from "@/lib/security/replication-detection";
 import { createEncryptedStateToken } from "@/lib/security/secure-client-state";
-import { toPublicResult, type PublicConstitutionalResult } from "@/lib/diagnostics/public-constitutional-result";
 import { consumePersistentRateLimit } from "@/lib/server/security/persistent-rate-limit";
+import {
+  ConstitutionalPublicResponseSchema,
+  type ConstitutionalPublicResponse,
+  type ConstitutionalPublicFailure,
+} from "@/lib/diagnostics/constitutional-public-contract";
 
-type ApiSuccess = {
-  ok: true;
-  reportId: string;
-  stateToken: string;
-  result: PublicConstitutionalResult;
-};
+type ApiSuccess = ConstitutionalPublicResponse;
 
-type ApiFailure = {
-  ok: false;
-  error: string;
-  details?: unknown;
-};
+type ApiFailure = ConstitutionalPublicFailure;
 
 const requestSchema = z
   .object({
@@ -328,12 +323,19 @@ export default async function handler(
       version: 1,
     });
 
-    return res.status(200).json({
+    const response = ConstitutionalPublicResponseSchema.parse({
       ok: true,
       reportId: created.id,
       stateToken,
-      result: toPublicResult(result.bundle.report),
+      bundle: {
+        report: result.bundle.report,
+        decision: result.bundle.decision,
+        routeSummary: result.bundle.routeSummary,
+      },
+      bridge: result.bridge,
     });
+
+    return res.status(200).json(response);
   } catch (error) {
     console.error("[CONSTITUTIONAL_INTAKE_REPORT_API_ERROR]", error);
 

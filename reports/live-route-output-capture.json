@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T03:34:27.820Z",
+  "generatedAt": "2026-07-09T15:14:25.791Z",
   "gate": "PASSED",
   "doctrine": "Live route output must be captured before any product can be externally proven gold.",
   "routesDiscovered": [
@@ -106,7 +106,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "api_response",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "team_assessment",
@@ -135,7 +135,7 @@
           "restructure the teams"
         ]
       },
-      "renderedOutputText": "The principals around resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation hold materially different positions — the divergence shows in execution while the meetings perform agreement, and the leads agree in meetings and then execute different priorities keeps the conflict profitable to leave unspoken.\nMisaligned leads spend the organisation's execution capacity against each other; the customer experiences the disagreement as inconsistency. In this case the stated exposure is the quarter locks with teams committed to incompatible plans.\nCollect each principal's written answer to the same three questions about resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation — priority, ownership, and success measure. Surface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive. For resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation, that responsibility sits with the operations director as the accountable owner, to be visibly underway within 48 hours.\nWould the leads' written answers to 'what is this quarter's top priority' actually differ? If they match, the misalignment is somewhere else — likely in incentives, not understanding. Test it against resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation before acting on this judgement.\nEscalate when written answers diverge on priority or ownership a second time after explicit reconciliation, or when a lead executes against the agreed position.\nCollect each principal's written answer to the same three questions about resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation: resolving the operations leadership split where the five team leads give conflicting answers about this quarter's priority and are pulling in different directions since the reorganisation — priority, ownership, and success measure.\nLay the conflicting answers side by side and name the divergences without softening them.\nResolve each divergence one at a time with the operations director deciding where positions cannot be reconciled.\nRe-collect the written answers by the quarterly commitments lock in three weeks; persisting divergence is the escalation signal.\nThis judgement classifies the case as stakeholder_misalignment from 5 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — holding an alignment workshop that produces a shared slide and no shared commitments. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
+      "renderedOutputText": "The principals around Team organisational friction: the leads agree in meetings and then execute different priorities hold materially different positions — the divergence shows in execution while the meetings perform agreement, and the leads agree in meetings and then execute different priorities keeps the conflict profitable to leave unspoken.\nthe quarter locks with teams committed to incompatible plans\nSurface the divergence explicitly: collect each lead's written answer to the same three questions, put the conflicts side by side, and resolve them one at a time with the accountable executive. For Team organisational friction: the leads agree in meetings and then execute different priorities, that responsibility sits with the operations director as the accountable owner, to be visibly underway within 48 hours.\nThis team friction is caused by a stakeholder_misalignment pattern.\nEscalate when written answers diverge on priority or ownership a second time after explicit reconciliation, or when a lead executes against the agreed position.\nCollect each principal's written answer to the same three questions about Team organisational friction: the leads agree in meetings and then execute different priorities — priority, ownership, and success measure.\nLay the conflicting answers side by side and name the divergences without softening them.\nResolve each divergence one at a time with the operations director deciding where positions cannot be reconciled.\nRe-collect the written answers by the quarterly commitments lock in three weeks; persisting divergence is the escalation signal.\nThis judgement classifies the case as stakeholder_misalignment from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — holding an alignment workshop that produces a shared slide and no shared commitments. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
       "renderedSections": [
         "diagnosis",
         "consequence",
@@ -155,7 +155,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "enterprise_assessment",
@@ -185,7 +185,7 @@
           "renegotiate the mandate"
         ]
       },
-      "renderedOutputText": "the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions is contested between authorities: the question is not what to decide but whose decision it is, and until that mandate is settled, the board has intervened twice to pause commitments the CEO believed were within mandate guarantees every resolution is provisional.\nWhile two authorities contest the decision, the organisation executes neither view — and learns that decisions are provisional, which slows every future commitment. In this case the stated exposure is the acquisition target in the region is courting another buyer.\nSeparate the mandate question — whose decision is the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions — from the substantive question, in writing. Resolve the mandate, not the issue: get the conflicting parties to agree in writing whose decision this class of question is, then let that person decide this instance. For the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions, that responsibility sits with the chair as the accountable owner, to be visibly underway within 48 hours.\nIs there a written mandate that already answers whose decision this is? If yes, the conflict is defiance, not ambiguity — and needs a different response. Test it against the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions before acting on this judgement.\nEscalate to the governing body when the mandate question itself is contested, or when either party acts unilaterally while the mandate is unresolved.\nSeparate the mandate question — whose decision is the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions: the European expansion approval, where the board disagrees with the executive team and the chair and CEO have publicly different positions — from the substantive question, in writing.\nObtain agreement between the conflicting parties on the mandate alone, witnessed by the governing body if needed.\nLet the mandated owner decide the substantive question without re-negotiation.\nRecord both the mandate and the decision by the next board meeting in three weeks so the next instance of this class does not restart the conflict.\nThis judgement classifies the case as authority_conflict from 5 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — splitting the difference between the conflicting authorities, producing a compromise neither would defend under pressure. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
+      "renderedOutputText": "Enterprise governance friction: the board has intervened twice to pause commitments the CEO believed were within mandate is contested between authorities: the question is not what to decide but whose decision it is, and until that mandate is settled, the board has intervened twice to pause commitments the CEO believed were within mandate guarantees every resolution is provisional.\nthe acquisition target in the region is courting another buyer\nResolve the mandate, not the issue: get the conflicting parties to agree in writing whose decision this class of question is, then let that person decide this instance. For Enterprise governance friction: the board has intervened twice to pause commitments the CEO believed were within mandate, that responsibility sits with the chair as the accountable owner, to be visibly underway within 48 hours.\nThis enterprise friction is caused by a authority_conflict pattern.\nEscalate to the governing body when the mandate question itself is contested, or when either party acts unilaterally while the mandate is unresolved.\nSeparate the mandate question — whose decision is Enterprise governance friction: the board has intervened twice to pause commitments the CEO believed were within mandate — from the substantive question, in writing.\nObtain agreement between the conflicting parties on the mandate alone, witnessed by the governing body if needed.\nLet the mandated owner decide the substantive question without re-negotiation.\nRecord both the mandate and the decision by the next board meeting in three weeks so the next instance of this class does not restart the conflict.\nThis judgement classifies the case as authority_conflict from 2 matched input signals; signals absent from the input could not be weighed. The common false move for this pattern — splitting the difference between the conflicting authorities, producing a compromise neither would defend under pressure. — was assumed avoidable; if it is already underway, the sequence above needs re-sequencing.",
       "renderedSections": [
         "diagnosis",
         "consequence",
@@ -205,7 +205,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "case_dossier_tariff_shock",
@@ -247,7 +247,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "case_dossier_team_alignment",
@@ -289,7 +289,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "case_dossier_escalation_denied",
@@ -331,7 +331,7 @@
       },
       "usesJudgementEngine": false,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "personal_decision_audit",
@@ -380,7 +380,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     },
     {
       "productCode": "strategy_room",
@@ -430,7 +430,7 @@
       },
       "usesJudgementEngine": true,
       "captureMethod": "component_render",
-      "capturedAt": "2026-06-13T03:34:27.820Z"
+      "capturedAt": "2026-07-09T15:14:25.791Z"
     }
   ],
   "counts": {

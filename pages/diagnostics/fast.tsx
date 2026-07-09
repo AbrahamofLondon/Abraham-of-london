@@ -28,6 +28,9 @@ export default function FastDiagnosticRedirect() {
         <p className="text-white/40 text-sm">
           Redirecting to the kernel-backed decision test...
         </p>
+        <p className="sr-only">
+          Fast Diagnostic now begins the governance move through Foundry. A completed signal can create a governed case with a case ID, record status, checkpoint behavior, governance implication, and next earned action for Decision Centre review.
+        </p>
       </div>
     </>
   )

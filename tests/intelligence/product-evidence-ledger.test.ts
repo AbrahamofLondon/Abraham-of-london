@@ -26,7 +26,7 @@ describe("product evidence ledger", () => {
   });
 
   it("keeps missing, blocked, and not-applicable ledger states explicit", () => {
-    expect(ledger.summary.ledgerStates.real_entry).toBe(0);
+    expect(ledger.summary.ledgerStates.real_entry).toBe(1);
     expect(ledger.summary.ledgerStates.missing_entry).toBeGreaterThan(0);
     expect(ledger.summary.ledgerStates.blocked_until_source).toBeGreaterThan(0);
     expect(ledger.summary.ledgerStates.not_applicable).toBeGreaterThan(0);
@@ -47,12 +47,13 @@ describe("product evidence ledger", () => {
     expect(operatorDecisionPack?.evidenceState).toBe("not_applicable");
   });
 
-  it("does not treat ledger existence as authority clearance", () => {
+  it("does not treat ledger existence as public claim clearance", () => {
     const teamAssessment = getProductEvidenceLedgerEntry("team_assessment");
 
-    expect(teamAssessment?.evidenceLedgerEntryExists).toBe(false);
-    expect(teamAssessment?.ledgerStatus).toBe("missing_entry");
+    expect(teamAssessment?.evidenceLedgerEntryExists).toBe(true);
+    expect(teamAssessment?.ledgerStatus).toBe("real_entry");
     expect(teamAssessment?.authorityState).not.toBe("authority_cleared");
+    expect(teamAssessment?.authorityState).toBe("not_claim_eligible");
     expect(teamAssessment?.publicClaimPermission).toBe(false);
   });
 
