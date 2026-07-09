@@ -209,6 +209,7 @@ export async function resolvePublicGmiEdition(
     quarterInOneSentence: content.quarterInOneSentence,
     quarterDelta: content.quarterDelta,
     regimeFingerprint: content.regimeFingerprint,
+    regionalLayers: content.regionalLayers,
     marketRegime: content.marketRegime,
     headlineSignals: content.headlineSignals,
     boardConsequences: content.boardConsequences,

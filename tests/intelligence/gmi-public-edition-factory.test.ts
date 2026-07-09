@@ -32,7 +32,12 @@ describe("GMI public edition landing-page factory", () => {
     expect(q2.commerce.priceLabel).toBe(CATALOG.gmi_q2_2026!.displayPrice);
     expect(q2.commerce.priceAuthorityRef).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
     expect(q2.readerAccessState).toBe("ACQUISITION_VISITOR");
-    expect(q2.regimeFingerprint).toHaveLength(5);
+    expect(q2.regimeFingerprint.length).toBe(5);
+    expect(q2.regimeFingerprint.some((a) => a.axis === "Growth dispersion")).toBe(true);
+    expect(q2.regionalLayers.length).toBeGreaterThanOrEqual(3);
+    expect(q2.regionalLayers.some((l) => l.region === "AFRICA")).toBe(true);
+    expect(q2.regionalLayers.some((l) => l.region === "LATIN_AMERICA")).toBe(true);
+    expect(q2.regionalLayers.some((l) => l.region === "MIDDLE_EAST")).toBe(true);
     expect(q2.consequenceMatrix.map((row) => row.decisionDomain)).toContain("CAPITAL ALLOCATION");
     expect(q2.crossEditionDeltas.some((delta) => delta.movement === "STRENGTHENED")).toBe(true);
     expect(q2.supportingBriefs[0]?.ref).toMatch(/^BRIEF-GMI-/);

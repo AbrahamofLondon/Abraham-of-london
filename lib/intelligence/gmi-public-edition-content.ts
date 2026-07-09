@@ -8,6 +8,7 @@ import type {
   GmiMethodologySummary,
   GmiQuarterDelta,
   GmiRegimeFingerprintAxis,
+  GmiRegionalLayer,
   GmiThesisCard,
 } from "./gmi-public-edition-contract";
 
@@ -18,6 +19,7 @@ export type GmiPublicEditionContentRecord = {
   quarterInOneSentence: string;
   quarterDelta: GmiQuarterDelta;
   regimeFingerprint: GmiRegimeFingerprintAxis[];
+  regionalLayers: GmiRegionalLayer[];
   marketRegime: { label: string; summary: string };
   headlineSignals: GmiHeadlineSignal[];
   boardConsequences: GmiBoardConsequence[];
@@ -46,6 +48,84 @@ const q2Fingerprint: GmiRegimeFingerprintAxis[] = [
   { axis: "Trade friction", value: 82, previousValue: 62, direction: "RISING", confidence: "HIGH", definition: "Durability of tariff and supply-chain constraints in strategic decisions." },
   { axis: "Capital selectivity", value: 76, previousValue: 66, direction: "RISING", confidence: "HIGH", definition: "Evidence that capital rewards resilience and optionality over broad exposure." },
   { axis: "Policy divergence", value: 70, previousValue: 60, direction: "RISING", confidence: "MEDIUM", definition: "Board-relevant divergence in policy credibility and market operating conditions." },
+];
+
+const q2RegionalLayers: GmiRegionalLayer[] = [
+  {
+    region: "AFRICA",
+    label: "Africa",
+    evidenceState: "DEVELOPING",
+    direction: null,
+    confidence: null,
+    publicSummary: "Africa-specific intelligence is under active development for this edition. Demographic tailwinds, resource-driven capital flows and intra-African trade corridor development are structurally significant but require dedicated evidence collection beyond the current release-lock scope. The GMI methodology will incorporate African central bank, supranational and corridor-specific sources from Q3 2026.",
+    operatingImplication: null,
+    triggerToMonitor: null,
+    subregions: [],
+    strategicCorridors: [],
+  },
+  {
+    region: "LATIN_AMERICA",
+    label: "Latin America",
+    evidenceState: "DEVELOPING",
+    direction: null,
+    confidence: null,
+    publicSummary: "Latin American coverage is under development. Regional differentiation between resource-driven economies (Brazil, Chile, Peru) and policy-constrained markets (Argentina) is observable but not yet at the evidence threshold required for GMI publication. Source coverage and corridor analysis will expand from Q3 2026.",
+    operatingImplication: null,
+    triggerToMonitor: null,
+    subregions: [],
+    strategicCorridors: [],
+  },
+  {
+    region: "MIDDLE_EAST",
+    label: "Middle East",
+    evidenceState: "DEVELOPING",
+    direction: null,
+    confidence: null,
+    publicSummary: "Middle East coverage is under development. Gulf sovereign wealth fund deployment, non-oil economic diversification and regional corridor dynamics are structurally relevant but not yet at the evidence threshold for GMI publication. Source coverage will expand from Q3 2026.",
+    operatingImplication: null,
+    triggerToMonitor: null,
+    subregions: [],
+    strategicCorridors: [],
+  },
+];
+
+const q1RegionalLayers: GmiRegionalLayer[] = [
+  {
+    region: "AFRICA",
+    label: "Africa",
+    evidenceState: "UNAVAILABLE",
+    direction: null,
+    confidence: null,
+    publicSummary: "Africa was not within the GMI evidence scope for Q1 2026. Regional coverage begins with the Q2 2026 edition.",
+    operatingImplication: null,
+    triggerToMonitor: null,
+    subregions: [],
+    strategicCorridors: [],
+  },
+  {
+    region: "LATIN_AMERICA",
+    label: "Latin America",
+    evidenceState: "UNAVAILABLE",
+    direction: null,
+    confidence: null,
+    publicSummary: "Latin America was not within the GMI evidence scope for Q1 2026. Regional coverage begins with the Q2 2026 edition.",
+    operatingImplication: null,
+    triggerToMonitor: null,
+    subregions: [],
+    strategicCorridors: [],
+  },
+  {
+    region: "MIDDLE_EAST",
+    label: "Middle East",
+    evidenceState: "UNAVAILABLE",
+    direction: null,
+    confidence: null,
+    publicSummary: "The Middle East was not within the GMI evidence scope for Q1 2026. Regional coverage begins with the Q2 2026 edition.",
+    operatingImplication: null,
+    triggerToMonitor: null,
+    subregions: [],
+    strategicCorridors: [],
+  },
 ];
 
 const q2Briefs: GmiBriefCitation[] = [
@@ -78,6 +158,7 @@ export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[
       whatNowMatters: "How Q2 judged which Q1 calls held, weakened or required qualification.",
     },
     regimeFingerprint: q1Fingerprint,
+    regionalLayers: q1RegionalLayers,
     marketRegime: { label: "Transition into structural pressure", summary: "Capital selectivity, policy credibility and resilience moved toward the centre of market judgement." },
     headlineSignals: [
       { signal: "Resilience premium emerging", observedEvidence: "Q1 public brief identified repricing around resilience and policy credibility.", interpretation: "Markets were beginning to discriminate between durable positioning and narrative dependence.", businessConsequence: "Boards needed to test whether growth assumptions depended on a benign policy environment.", confidence: "MEDIUM", falsificationTrigger: "Broad re-synchronisation of policy, trade and capital flows without resilience premium." },
@@ -112,6 +193,7 @@ export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[
     quarterInOneSentence: "Q2 argues that dispersion itself is now the signal: structural fragmentation and cyclical shock must be governed as separate but simultaneous realities.",
     quarterDelta: { whatChanged: "Q1's structural-pressure thesis strengthened into a managed-fragmentation base case.", whatHeld: "Resilience, policy credibility and capital selectivity remained the operating spine.", whatSurprisedUs: "Forecast dispersion stayed useful rather than resolving into a single recovery narrative.", whatNowMatters: "Boards need explicit triggers for when fragmentation is invalidated rather than vague confidence language." },
     regimeFingerprint: q2Fingerprint,
+    regionalLayers: q2RegionalLayers,
     marketRegime: { label: "Managed fragmentation under cyclical shock", summary: "A durable structural regime is running alongside a cyclical inflation/growth shock. The edition separates where to position from how defensively to operate." },
     headlineSignals: [
       { signal: "Forecast dispersion is the signal", observedEvidence: "World Bank 2.5%, OECD 2.8%, Goldman Sachs 2.8%, IMF July 3.0% at lock.", interpretation: "The outlook is sensitive to regime assumptions rather than converging around a single recovery path.", businessConsequence: "Board cases should test fragmentation persistence instead of assuming temporary disruption.", confidence: "MEDIUM", falsificationTrigger: "Durable convergence in institutional forecasts under tariff rollback and normalised capital flows." },

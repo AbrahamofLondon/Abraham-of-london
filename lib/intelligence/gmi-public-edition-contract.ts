@@ -97,6 +97,56 @@ export type GmiEditionLink = {
   status: "current" | "superseded" | "draft";
 };
 
+/**
+ * A geographic or thematic regional layer in the Regime Map.
+ * Designed for extension: future editions can add subregions and strategic corridors
+ * without changing the component.
+ */
+export type GmiRegionalLayer = {
+  /** Canonical region identifier, e.g. "AFRICA", "LATIN_AMERICA", "MIDDLE_EAST" */
+  region: string;
+  /** Public-facing display label */
+  label: string;
+  /** Evidence-development state. "ACTIVE" where sufficient Q2 evidence exists. */
+  evidenceState: "ACTIVE" | "DEVELOPING" | "UNAVAILABLE";
+  /** Directional assessment where evidence supports it */
+  direction: "RISING" | "FALLING" | "STABLE" | null;
+  /** Confidence where evidence supports it */
+  confidence: "LOW" | "MEDIUM" | "HIGH" | null;
+  /** Public-facing summary of the regional assessment */
+  publicSummary: string;
+  /** Operating implication for boards and operators, where evidence supports it */
+  operatingImplication: string | null;
+  /** Trigger to monitor, where evidence supports it */
+  triggerToMonitor: string | null;
+  /** Subregions for future extension — empty until populated by later editions */
+  subregions: GmiRegionalSubregion[];
+  /** Strategic corridors for future extension — empty until populated by later editions */
+  strategicCorridors: GmiStrategicCorridor[];
+};
+
+/**
+ * A subregion within a regional layer.
+ * Future editions can populate these without component changes.
+ */
+export type GmiRegionalSubregion = {
+  label: string;
+  direction: "RISING" | "FALLING" | "STABLE" | null;
+  confidence: "LOW" | "MEDIUM" | "HIGH" | null;
+  summary: string;
+};
+
+/**
+ * A strategic corridor connecting regions.
+ * Future editions can populate these without component changes.
+ */
+export type GmiStrategicCorridor = {
+  label: string;
+  direction: "RISING" | "FALLING" | "STABLE" | null;
+  confidence: "LOW" | "MEDIUM" | "HIGH" | null;
+  summary: string;
+};
+
 export type GmiEditionPublicContract = {
   editionId: string;
   familyId: "gmi-quarterly";
@@ -126,6 +176,7 @@ export type GmiEditionPublicContract = {
   quarterInOneSentence: string;
   quarterDelta: GmiQuarterDelta;
   regimeFingerprint: GmiRegimeFingerprintAxis[];
+  regionalLayers: GmiRegionalLayer[];
   marketRegime: {
     label: string;
     summary: string;
