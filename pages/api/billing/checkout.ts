@@ -12,8 +12,10 @@ import {
 import { resolveProductIdentity } from "@/lib/commercial/product-identity";
 import { getGovernanceState } from "@/lib/commercial/commercial-governance";
 import { resolveCommercialAction } from "@/lib/commercial/commercial-action-resolver";
+import { resolveCommercialAccessPolicy } from "@/lib/commercial/commercial-access-policy";
+import { evaluateCommercialPrerequisite } from "@/lib/commercial/prerequisite-evaluators";
+import { mapPrerequisiteFailureToCheckoutCode, buildCheckoutFailureResponse } from "@/lib/commercial/checkout-failure-code";
 import { hubspotSync } from "@/lib/hubspot/sync";
-import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
 import { evaluateERAdmission } from "@/lib/diagnostics/executive-reporting/admission";
 import { trackServerLaunch } from "@/lib/analytics/server-launch-event";
 import { prisma } from "@/lib/prisma.server";
@@ -49,7 +51,15 @@ function stripeErrorDetails(error: unknown): Record<string, unknown> {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
-  if (!stripe) return res.status(500).json({ ok: false, reason: "STRIPE_NOT_CONFIGURED" });
+  if (!stripe) {
+    const failure = buildCheckoutFailureResponse("STRIPE_NOT_CONFIGURED");
+    return res.status(500).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      supportEmail: failure.helpEmail,
+    });
+  }
 
   const { email, priceCode, productCode, entitlementSlug, contentId, originPath, contractId, organisationId, caseRef, handoffId, proofToken } = req.body || {};
 
@@ -63,7 +73,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const proofTokenProvided = typeof proofToken === "string" && proofToken.length > 0;
 
   if (proofTokenProvided && (!proofTokenSecret || proofToken !== proofTokenSecret)) {
-    return res.status(403).json({ ok: false, reason: "PROOF_TOKEN_INVALID" });
+    const failure = buildCheckoutFailureResponse("INVALID_PROOF_TOKEN");
+    return res.status(403).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      supportEmail: failure.helpEmail,
+    });
   }
   if (proofTokenProvided && proofTokenSecret && proofToken === proofTokenSecret && !proofPromoId) {
     return res.status(503).json({ ok: false, reason: "PROOF_PROMOTION_CODE_NOT_CONFIGURED" });
@@ -74,20 +90,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Resolve canonical product code — accepts catalog key OR content ID OR entitlement slug
   const identity = resolveProductIdentity(rawCode);
   if (!identity) {
-    return res.status(400).json({ ok: false, error: "Invalid product identifier" });
+    const failure = buildCheckoutFailureResponse("INVALID_PRODUCT_IDENTIFIER");
+    return res.status(400).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      recoveryPath: failure.recoveryPath,
+    });
   }
 
   const code = identity.productCode;
 
   // ── Resolve product from catalog SSOT with guardrails ──
   if (!email) {
-    return res.status(400).json({ ok: false, reason: "EMAIL_REQUIRED" });
+    const failure = buildCheckoutFailureResponse("EMAIL_REQUIRED", code);
+    return res.status(400).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      supportEmail: failure.helpEmail,
+    });
   }
 
-  // ── Do-Not-Sell gate: block if diagnostic prerequisites not met ──
-  const gate = await checkDoNotSellGate(String(email).trim().toLowerCase(), code);
-  if (!gate.allowed) {
-    return res.status(403).json({ ok: false, reason: gate.reason, message: gate.message });
+  // ── Policy-routed prerequisite evaluation ──
+  // Each product has an explicit commercial access policy that determines
+  // what (if any) prerequisite must pass before checkout. No universal gate.
+  const emailStr = String(email).trim().toLowerCase();
+  const commercialPolicy = resolveCommercialAccessPolicy(code);
+  if (!commercialPolicy) {
+    const failure = buildCheckoutFailureResponse("PRODUCT_NOT_CONFIGURED", code);
+    return res.status(404).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      supportEmail: failure.helpEmail,
+    });
+  }
+
+  const prerequisiteResult = await evaluateCommercialPrerequisite(
+    commercialPolicy.prerequisitePolicy,
+    {
+      email: emailStr,
+      productCode: code,
+    }
+  );
+
+  if (!prerequisiteResult.allowed) {
+    const failureCode = mapPrerequisiteFailureToCheckoutCode(
+      commercialPolicy.prerequisitePolicy,
+      prerequisiteResult.reason
+    );
+    const failureResponse = buildCheckoutFailureResponse(failureCode, code);
+    return res.status(403).json({
+      ok: false,
+      code: failureCode,
+      message: failureResponse.publicMessage,
+      recoveryPath: failureResponse.recoveryPath,
+      supportEmail: failureResponse.helpEmail,
+    });
   }
 
   // ── Server-side admission enforcement for Executive Reporting ──
@@ -95,7 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Payment must not override evidence requirements.
   if (code === "executive_reporting") {
     const erAdmission = await evaluateERAdmission({
-      email: String(email).trim().toLowerCase(),
+      email: emailStr,
       intakeMode: (req.body.intakeMode as string) || "ladder",
       sponsoredDirect: Boolean(req.body.sponsoredDirect),
       sponsorNameOrSeat: req.body.sponsorNameOrSeat || null,
@@ -204,7 +264,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     productCode: product.entitlementSlug,
     priceCode: code,
     tier: product.tier,
-    email: String(email).trim().toLowerCase(),
+    email: emailStr,
     originPath: origin,
     ...boardroomBridgeMetadata,
     ...(gmiEdition ? {
@@ -240,7 +300,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     session = await stripe.checkout.sessions.create({
       mode,
-      customer_email: String(email).trim().toLowerCase(),
+      customer_email: emailStr,
       line_items: [
         product.stripePriceId
           ? { price: product.stripePriceId, quantity: 1 }
