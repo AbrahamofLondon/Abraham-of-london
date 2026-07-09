@@ -3,6 +3,7 @@ import { GMI_EDITION_REGISTRY } from "@/lib/commercial/gmi/gmi-edition-registry"
 import { resolvePricingAction } from "@/lib/commercial/pricing-actions";
 import { getGmiPublicEditionContent } from "./gmi-public-edition-content";
 import type { GmiChronologyEntry, GmiEditionLink, GmiEditionPublicContract, GmiFamilyChronology } from "./gmi-public-edition-contract";
+import { MARKET_INTELLIGENCE_LIFECYCLE } from "./market-intelligence-lifecycle";
 import {
   getMarketIntelligenceRecord,
   getPublicMarketIntelligenceReports,
@@ -191,7 +192,7 @@ function buildFamilyChronology(
   entry: { slug: string; editionId: string } | null,
   currentEdition: GmiEditionLink,
 ): GmiFamilyChronology {
-  const allRecords = getPublicMarketIntelligenceReports();
+  const allRecords = [...MARKET_INTELLIGENCE_LIFECYCLE];
   const sorted = [...allRecords].sort(
     (a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime()
   );
@@ -222,7 +223,7 @@ function buildFamilyChronology(
 
   const viewedEntry = toEntry(record, viewedIdx === currentIdx ? "CURRENT" : "REFERENCE", true)!;
   const currentEntry = toEntry(sorted[currentIdx] ?? null, "CURRENT", currentIdx === viewedIdx)!;
-  const previousPublished = sorted.find((r) => r.id !== editionId && r.id !== currentEdition.editionId && r.publicVisible) ?? null;
+  const previousPublished = sorted.find((r) => r.id !== currentEdition.editionId && r.publicVisible && r.lifecycleState !== "DRAFT" && r.lifecycleState !== "PLANNED") ?? null;
   const upcoming = sorted.find((r) => r.lifecycleState === "DRAFT" || r.lifecycleState === "SCHEDULED") ?? null;
 
   return {

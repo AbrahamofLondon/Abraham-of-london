@@ -44,6 +44,7 @@ describe("GMI public edition landing-page factory", () => {
     const state = await getDurableReleaseState("GMI-Q2-2026");
     expect(q2.releaseProof.receiptRef).toBeTruthy();
     expect(q2.releaseProof.candidateHash).toBe(state?.candidateHash);
+    
   });
 
   it("resolves Q1 as a superseded public reference with no standalone checkout", async () => {
@@ -58,6 +59,7 @@ describe("GMI public edition landing-page factory", () => {
     expect(q1.consequenceMatrix[0]?.accessLevel).toBe("PUBLIC");
     expect(q1.familyChronology.currentEdition.editionId).toBe("GMI-Q2-2026");
     expect(q1.familyChronology.currentEdition.href).toBe("/intelligence/global-market-intelligence-q2-2026");
+    
   });
 
   it("excludes draft/future editions from public resolution", async () => {

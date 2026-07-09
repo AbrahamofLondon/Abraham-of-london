@@ -476,30 +476,50 @@ export default function GmiEditionLandingPage({ edition }: Props) {
           <div className="mt-8 border border-[#11161C]/12 bg-white/40 p-6 lg:p-8">
             <p className="text-sm leading-7 text-[#5E6468]">Historical editions remain visible so judgement, revision and call review stay inspectable.</p>
             <div className="mt-6 space-y-4">
+              {/* Viewed edition — shown when different from current */}
+              {edition.familyChronology.viewedEdition.editionId !== edition.familyChronology.currentEdition.editionId ? (
+                <div className="border-l-2 border-[#11161C]/30 pl-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">You are viewing</span>
+                    <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.viewedEdition.editionId}</span>
+                  </div>
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#5E6468" }}>{edition.familyChronology.viewedEdition.title}</p>
+                  <p className="font-mono text-[11px] text-[#7A6A4C]">Published {formatDate(edition.familyChronology.viewedEdition.publishedAt)}</p>
+                  <p className="font-sans text-[10px] font-medium uppercase tracking-[0.14em] text-[#7A6A4C]">Reference edition</p>
+                </div>
+              ) : null}
+
+              {/* Current edition */}
               <div className="border-l-2 border-[#B59258] pl-4">
                 <div className="flex items-center gap-3">
                   <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#B59258]">Current</span>
                   <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.currentEdition.editionId}</span>
                 </div>
                 <p className="mt-1 font-serif text-lg" style={{ color: "#11161C" }}>{edition.familyChronology.currentEdition.title}</p>
-                <p className="font-mono text-[11px] text-[#7A6A4C]">Published {formatDate(edition.publishedAt)}</p>
+                <p className="font-mono text-[11px] text-[#7A6A4C]">Published {formatDate(edition.familyChronology.currentEdition.publishedAt)}</p>
               </div>
-              {edition.familyChronology.previousPublishedEdition ? (
+
+              {/* Reference edition — published editions other than viewed and current */}
+              {edition.familyChronology.previousPublishedEdition &&
+               edition.familyChronology.previousPublishedEdition.editionId !== edition.familyChronology.viewedEdition.editionId ? (
                 <div className="border-l-2 border-[#11161C]/20 pl-4">
                   <div className="flex items-center gap-3">
                     <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">Reference</span>
-                    <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.previousPublishedEdition?.editionId}</span>
+                    <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.previousPublishedEdition.editionId}</span>
                   </div>
-                  <p className="mt-1 font-serif text-lg" style={{ color: "#5E6468" }}>{edition.familyChronology.previousPublishedEdition?.title}</p>
-                  {edition.familyChronology.previousPublishedEdition?.href ? <Link href={edition.familyChronology.previousPublishedEdition.href} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[#B59258] transition hover:text-[#D7BC84]">
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#5E6468" }}>{edition.familyChronology.previousPublishedEdition.title}</p>
+                  {edition.familyChronology.previousPublishedEdition.href ? <Link href={edition.familyChronology.previousPublishedEdition.href} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[#B59258] transition hover:text-[#D7BC84]">
                     View reference edition <ArrowRight className="h-3 w-3" aria-hidden />
                   </Link> : null}
                 </div>
               ) : null}
+
+              {/* Upcoming edition */}
               {edition.familyChronology.upcomingEdition ? (
                 <div className="border-l-2 border-dashed border-[#11161C]/15 pl-4">
                   <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">Next</span>
-                  <p className="mt-1 font-serif text-lg" style={{ color: "#7A6A4C" }}>{edition.familyChronology.upcomingEdition?.title}</p>
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#7A6A4C" }}>{edition.familyChronology.upcomingEdition.title}</p>
+                  <p className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.upcomingEdition.publishedAt ? 'Published ' + formatDate(edition.familyChronology.upcomingEdition.publishedAt) : 'In preparation'}</p>
                 </div>
               ) : null}
             </div>
