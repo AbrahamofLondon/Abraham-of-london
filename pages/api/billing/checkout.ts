@@ -17,6 +17,7 @@ import { checkDoNotSellGate } from "@/lib/commercial/do-not-sell-gate";
 import { evaluateERAdmission } from "@/lib/diagnostics/executive-reporting/admission";
 import { trackServerLaunch } from "@/lib/analytics/server-launch-event";
 import { prisma } from "@/lib/prisma.server";
+import { GMI_EDITION_REGISTRY } from "@/lib/commercial/gmi/gmi-edition-registry";
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeKey
@@ -144,6 +145,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const product = eligibility.product;
+  const gmiEdition = GMI_EDITION_REGISTRY.find((entry) => entry.productCode === code) ?? null;
+  const gmiReceipt = gmiEdition
+    ? await import("@/lib/intelligence/gmi-release-store.server")
+        .then((mod) => mod.getDurableReceipt(gmiEdition.editionId))
+        .catch(() => null)
+    : null;
+  if (gmiEdition && !gmiReceipt) {
+    return res.status(409).json({ ok: false, reason: "GMI_RELEASE_RECEIPT_MISSING", editionId: gmiEdition.editionId });
+  }
 
   // ── Paths ──
   const origin = typeof originPath === "string" && originPath.startsWith("/") ? originPath : "";
@@ -197,6 +207,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     email: String(email).trim().toLowerCase(),
     originPath: origin,
     ...boardroomBridgeMetadata,
+    ...(gmiEdition ? {
+      productFamily: "gmi-quarterly",
+      editionId: gmiEdition.editionId,
+      releaseReceiptRef: gmiReceipt?.id ?? "",
+      reportContentHash: gmiReceipt?.reportContentHash ?? "",
+      pdfHash: gmiReceipt?.pdfHash ?? "",
+    } : {}),
     ...(typeof contractId === "string" && contractId.trim() ? { contractId: contractId.trim() } : {}),
     ...(typeof organisationId === "string" && organisationId.trim() ? { organisationId: organisationId.trim() } : {}),
     ...(typeof caseRef === "string" && caseRef.trim() ? { caseRef: caseRef.trim().slice(0, 120) } : {}),

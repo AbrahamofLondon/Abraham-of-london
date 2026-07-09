@@ -170,19 +170,22 @@ export const GMI_Q1_2026_CALLS: readonly MarketCallRecord[] = [
     statement:
       "Dollar weakness under risk-off conditions is anomalous and warrants monitoring as a potential signal of reserve currency credibility stress rather than normal safe-haven behaviour reversal.",
     originalConfidence: "MONITORING",
-    expectedReviewWindow: "Q2 2026",
+    expectedReviewWindow: "Q3 2026",
     outcomeStatus: "TOO_EARLY_TO_ASSESS",
     score: 2,
     evidenceSources: ["GMI-Q2-SRC-006"],
-    lastReviewedAt: "2026-06-05",
+    lastReviewedAt: "2026-07-08",
     nextReviewDue: "2026-09-30",
     outcomeSummary:
       "Dollar behaviour through Q2 has been mixed — some risk-off episodes showed continued weakness, others showed partial safe-haven recovery. The signal remains ambiguous. Requires Q3 evidence to determine whether this is a structural shift or a temporary anomaly.",
     learning: "The dollar signal requires a full cycle of risk-off episodes to assess. Q2 provided partial data but not enough for a confident reading.",
     futureWeightingChange: "Maintain MONITORING. Upgrade to structured risk if Q3 shows consistent dollar weakness under risk-off.",
+    carryForwardJustification:
+      "Q2 2026 release review (2026-07-08, at data lock): the DXY/risk-off correlation evidence (GMI-Q2-SRC-006) shows episodes on both sides of the thesis within the completed Q2 window — genuinely inconclusive, not unexamined. As a WATCH_SIGNAL this call is formally carried forward to the Q3 2026 review window rather than forced to a directional score the evidence does not support. Score remains 2.",
     versionHistory: [
       { version: "1.0.0", changedAt: "2026-04-08", note: "Initial call registered in the GMI verification ledger." },
       { version: "2.0.0", changedAt: "2026-06-05", note: "Scored 2 — Too early to assess. Mixed dollar signals in Q2 require Q3 evidence. Carry-forward with Q3 review date." },
+      { version: "2.1.0", changedAt: "2026-07-08", note: "Q2 2026 release review completed at data lock: formal carry-forward recorded, review window moved to Q3 2026. Evidence inconclusive on both sides; score unchanged at 2." },
     ],
   },
   {

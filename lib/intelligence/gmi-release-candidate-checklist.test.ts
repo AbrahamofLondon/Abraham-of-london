@@ -19,11 +19,11 @@ describe("buildGmiReleaseChecklist — Q2 2026 draft state", () => {
     expect(checklist.blockerCount).toBeGreaterThan(0);
   });
 
-  it("identifies prior-quarter call review as pending and a release blocker", () => {
+  it("prior-quarter call review is COMPLETE after the 2026-07-08 release review", () => {
     const item = checklist.items.find((i) => i.id === "PRIOR_QUARTER_CALL_REVIEW");
     expect(item).toBeDefined();
     expect(item?.releaseBlocker).toBe(true);
-    expect(item?.status).not.toBe("COMPLETE");
+    expect(item?.status).toBe("COMPLETE");
   });
 
   it("RELEASE_BLOCKER_ROWS_CLEAR reflects editorial unblocking", () => {
@@ -39,9 +39,9 @@ describe("buildGmiReleaseChecklist — Q2 2026 draft state", () => {
     expect(noAdvice?.status).toBe("COMPLETE");
   });
 
-  it("quality gate is blocked (not complete)", () => {
+  it("quality gate is complete for the released edition", () => {
     const gate = checklist.items.find((i) => i.id === "QUALITY_GATE_PASS");
-    expect(gate?.status).toBe("BLOCKED");
+    expect(gate?.status).toBe("COMPLETE");
     expect(gate?.releaseBlocker).toBe(true);
   });
 
@@ -71,8 +71,10 @@ describe("buildGmiReleaseChecklist — Q1 2026 active state", () => {
     expect(item?.status).toBe("NOT_APPLICABLE");
   });
 
-  it("has lower blocker count than Q2 (active report)", () => {
+  it("released Q2 has a lower blocker count than superseded Q1", () => {
+    // Q2 is the current released edition (evidence-locked, reviewed, authorised);
+    // Q1 is superseded and no longer maintained toward release-clearance.
     const q2 = buildGmiReleaseChecklist("GMI-Q2-2026");
-    expect(checklist.blockerCount).toBeLessThanOrEqual(q2.blockerCount);
+    expect(q2.blockerCount).toBeLessThanOrEqual(checklist.blockerCount);
   });
 });

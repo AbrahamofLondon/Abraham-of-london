@@ -792,45 +792,44 @@ export function initialiseEvidenceRegistry(): void {
     ));
   }
 
-  // GMI Q1 2026
+  // GMI Q1 2026 — superseded public reference edition
   registerProductEvidence(evidenceRecord(
     "gmi_q1_2026",
     "Global Market Intelligence Report — Q1 2026",
-    "CONTROLLED_RELEASE_READY",
-    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    "PUBLIC_REFERENCE_READY",
+    "VALID_REFERENCE_PROVENANCE",
     [
-      { category: "commercial", claim: "Stripe Price ID bound: price_1TP1rRQFpelVFMXJWaFMOpJQ", path: "lib/commercial/catalog.ts", pathExists: true },
-      { category: "fulfilment", claim: "Executive report artifact fulfilment path", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
-      { category: "route", claim: "Admin route: /admin/intelligence/gmi-control-plane", path: "pages/admin/intelligence/gmi-control-plane", pathExists: false },
+      { category: "commercial", claim: "Superseded reference edition — no new standalone checkout", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "fulfilment", claim: "Historical entitlement access preserved", path: "lib/product/product-fulfilment-contract.ts", pathExists: true },
+      { category: "route", claim: "Canonical public reference route", path: "pages/intelligence/global-market-intelligence-q1-2026.tsx", pathExists: true },
     ],
-    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/product/product-fulfilment-assurance.ts"],
-    ["tests/intelligence/"],
-    ["/artifacts/global-market-intelligence-report-q1-2026", "/admin/intelligence/gmi-control-plane"],
-    ["executive_report_artifact / entitlement_on_payment"],
-    ["Stripe Price ID: price_1TP1rRQFpelVFMXJWaFMOpJQ", "Checkout route: /api/billing/checkout"],
-    "Controlled or human-reviewed claims only; sell/fulfil through the bounded path and retain proof before claiming delivery.",
-    ["archived edition", "controlled access", "entitlement-gated"],
+    ["lib/commercial/catalog.ts", "lib/product/product-fulfilment-contract.ts", "lib/intelligence/gmi-public-edition-resolver.server.ts"],
+    ["tests/intelligence/gmi-public-edition-factory.test.ts", "tests/intelligence/"],
+    ["/intelligence/global-market-intelligence-q1-2026"],
+    ["executive_report_artifact / entitlement_on_payment (historical entitlement only)"],
+    ["Reference-only; current purchase CTA routes to the active GMI edition"],
+    "Superseded GMI edition remains public for accountability and historical access; new purchases route to the current edition.",
+    ["superseded edition", "public reference", "historical entitlement-preserved"],
   ));
 
-  // GMI Q2 2026 — special pre-release state
+  // GMI Q2 2026 — current released edition
   registerProductEvidence(evidenceRecord(
     "gmi_q2_2026",
     "Global Market Intelligence Report — Q2 2026",
-    "CONTROLLED_RELEASE_READY",
-    "VALID_CONTROLLED_RELEASE_EVIDENCE",
+    "RELEASE_READY_NOW",
+    "VALID_PRODUCT_EVIDENCE_PACKAGE",
     [
-      { category: "commercial", claim: "Pre-release — no Stripe binding, no checkout", path: "lib/commercial/catalog.ts", pathExists: true },
-      { category: "governance", claim: "Governance standard documented", path: "docs/intelligence/gmi-editorial-governance-standard.md", pathExists: true },
-      { category: "test", claim: "GMI market readiness tests pass", path: "tests/intelligence/gmi-market-readiness.test.ts", pathExists: true },
+      { category: "commercial", claim: "Current released edition with active Stripe checkout binding", path: "lib/commercial/catalog.ts", pathExists: true },
+      { category: "governance", claim: "Durable release authority and receipt resolver", path: "lib/intelligence/gmi-release-durable-resolver.server.ts", pathExists: true },
+      { category: "test", claim: "GMI persistence, public factory and market readiness tests pass", path: "tests/intelligence/gmi-public-edition-factory.test.ts", pathExists: true },
     ],
-    ["lib/commercial/catalog.ts", "docs/intelligence/gmi-editorial-governance-standard.md", "lib/intelligence/gmi-market-readiness.ts"],
-    ["tests/intelligence/gmi-market-readiness.test.ts", "tests/intelligence/"],
-    ["/artifacts/global-market-intelligence-report-q2-2026"],
-    ["executive_report_artifact / immediate_access (manual billing)"],
-    ["Pre-release — no Stripe binding"],
-    "Pre-release market readiness complete only; final release clearance pending post-8-July data lock and owner authority. No publication, Q1 supersession, checkout, manual fulfilment, or Stripe mutation.",
-    ["pre-release", "manual billing only", "no self-serve checkout"],
-    "Final post-8-July data lock and owner release authority",
+    ["lib/commercial/catalog.ts", "lib/intelligence/gmi-public-edition-resolver.server.ts", "lib/intelligence/gmi-release-durable-resolver.server.ts"],
+    ["tests/intelligence/gmi-public-edition-factory.test.ts", "tests/intelligence/gmi-release-persistence.test.ts", "tests/intelligence/"],
+    ["/intelligence/global-market-intelligence-q2-2026"],
+    ["executive_report_artifact / entitlement_on_payment"],
+    ["Stripe checkout route: /api/billing/checkout", "Release receipt bound in checkout metadata"],
+    "Current GMI edition is public, purchasable and edition-bound; Q1 is retained as a superseded public reference.",
+    ["current edition", "checkout-enabled", "release-receipt-bound"],
   ));
 
   // Retainers (3)

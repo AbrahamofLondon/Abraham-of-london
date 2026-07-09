@@ -744,12 +744,12 @@ export const GMI_Q1_2026_CONTRACT = contract({
   productCode: "gmi_q1_2026",
   displayName: "Global Market Intelligence Report — Q1 2026",
   entitlementSlug: "global-market-intelligence-report-q1-2026",
-  stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
-  commercialStatus: "paid",
-  checkoutRoute: "/api/billing/checkout",
-  intakeRoute: "/artifacts/global-market-intelligence-report-q1-2026",
-  successRoute: "/artifacts/global-market-intelligence-report-q1-2026",
-  customerAccessRoute: "/artifacts/global-market-intelligence-report-q1-2026",
+  stripePriceId: null,
+  commercialStatus: "inactive",
+  checkoutRoute: null,
+  intakeRoute: "/intelligence/global-market-intelligence-q1-2026",
+  successRoute: "/intelligence/global-market-intelligence-q1-2026",
+  customerAccessRoute: "/intelligence/global-market-intelligence-q1-2026",
   adminRoute: "/admin/intelligence/gmi-control-plane",
   fulfilmentType: "executive_report_artifact",
   artifactModel: "ProductArtifact",
@@ -758,42 +758,42 @@ export const GMI_Q1_2026_CONTRACT = contract({
   caseStudyEligible: false,
   feedbackSurface: null,
   estateSpineSourceType: "product_artifact",
-  readinessStatus: "proof_ready",
+  readinessStatus: "not_applicable",
   proofRunCompleted: false,
   hardFailures: [],
   warnings: [
-    "Current published edition until Q2 completes final data lock and owner release authority.",
-    "No automated post-purchase delivery email for GMI access confirmation",
+    "Superseded public reference edition; no new standalone checkout.",
+    "Existing Q1 entitlement and historical access remain valid.",
   ],
-  notes: "Current published Q1 2026 edition. Has active Stripe price. Report delivered as entitlement-gated artifact route until Q2 supersession is authorised.",
+  notes: "Superseded Q1 2026 edition. Public reference remains available; new purchases route to the current GMI edition while historical entitlements remain valid.",
 });
 
 export const GMI_Q2_2026_CONTRACT = contract({
   productCode: "gmi_q2_2026",
   displayName: "Global Market Intelligence Report — Q2 2026",
   entitlementSlug: "global-market-intelligence-report-q2-2026",
-  stripePriceId: null,
-  commercialStatus: "inactive",
-  checkoutRoute: null,
-  intakeRoute: "/artifacts/global-market-intelligence-report-q2-2026",
-  successRoute: "/artifacts/global-market-intelligence-report-q2-2026",
-  customerAccessRoute: "/artifacts/global-market-intelligence-report-q2-2026",
+  stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
+  commercialStatus: "paid",
+  checkoutRoute: "/api/billing/checkout",
+  intakeRoute: "/intelligence/global-market-intelligence-q2-2026",
+  successRoute: "/intelligence/global-market-intelligence-q2-2026",
+  customerAccessRoute: "/intelligence/global-market-intelligence-q2-2026",
   adminRoute: "/admin/intelligence/gmi-control-plane",
   fulfilmentType: "executive_report_artifact",
   artifactModel: "ProductArtifact",
-  deliveryModel: "evidence_gate_review",
+  deliveryModel: "entitlement_on_payment",
   dashboardVisibility: false,
   caseStudyEligible: false,
   feedbackSurface: null,
   estateSpineSourceType: "product_artifact",
-  readinessStatus: "not_applicable",
-  proofRunCompleted: false,
+  readinessStatus: "sellable",
+  proofRunCompleted: true,
   hardFailures: [],
   warnings: [
-    "Market-ready release candidate — final post-8-July data lock and owner release authority pending.",
-    "No self-serve checkout, manual billing, or Stripe binding is active before release authority.",
+    "Current released GMI edition with durable release receipt and active checkout binding.",
+    "Checkout metadata binds edition ID and release receipt before fulfilment.",
   ],
-  notes: "Q2 2026 release candidate. Structurally market-ready; not commercially active. Stripe Product ID and Price ID remain null.",
+  notes: "Current Q2 2026 edition. Public, purchasable, and fulfilled as an edition-bound entitlement after durable release authority.",
 });
 
 export const GMI_Q3_2026_CONTRACT = contract({
@@ -1158,8 +1158,7 @@ export const GMI_QUARTERLY_FAMILY_CONTRACT = contract({
     "DII / quality gate, owner release authority) into a release gate + edition-bound delivery " +
     "proof, plugged into the PR F execution authority via createGmiQuarterlyHandler. Publication " +
     "authority NEVER infers checkout activation or Stripe identity. Per-edition governance lives on " +
-    "the edition contracts (gmi_q1_2026 current; gmi_q2_2026 pre-release/controlled until post-8-July " +
-    "data lock + owner authority). The family infrastructure is complete while editions stay gated.",
+    "the edition contracts (gmi_q2_2026 current; gmi_q1_2026 superseded reference; future editions gated until data lock + owner authority).",
 });
 
 export const PRODUCT_FULFILMENT_CONTRACTS: ProductFulfilmentContract[] = [

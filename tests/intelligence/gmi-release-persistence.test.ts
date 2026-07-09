@@ -82,24 +82,39 @@ afterAll(async () => {
 });
 
 describe("durable GMI recurring-edition release persistence", () => {
-  it("bootstraps protected Q1/Q2 state without releasing Q2 or superseding Q1", async () => {
+  it("bootstrap is non-destructive: re-running never regresses released durable state", async () => {
+    // GMI-Q2-2026 was released on 2026-07-08 through the atomic transaction.
+    // Bootstrap seeds rows only when missing (seedReleaseStateIfMissing) and must
+    // never downgrade a released edition back to its bootstrap defaults.
+    const q2Before = await getDurableReleaseState("GMI-Q2-2026");
+    const q1Before = await getDurableReleaseState("GMI-Q1-2026");
+
     await bootstrapProtectedGmiReleaseState();
 
     const q1 = await getDurableReleaseState("GMI-Q1-2026");
     const q2 = await getDurableReleaseState("GMI-Q2-2026");
-    const q2Authority = await prisma.gmiReleaseAuthority.findFirst({ where: { editionId: "GMI-Q2-2026", revokedAt: null } });
     const q2Receipt = await getDurableReceipt("GMI-Q2-2026");
 
-    expect(q1?.lifecycleState).toBe("ACTIVE_UNTIL_SUPERSEDED");
-    expect(q1?.supersededBy).toBeNull();
-    expect(q1?.publicVisible).toBe(true);
-    expect(q2?.lifecycleState).toBe("DRAFT");
-    expect(q2?.publicVisible).toBe(false);
-    expect(q2?.purchasable).toBe(false);
-    expect(q2?.dataLockedAt).toBeNull();
-    expect(q2?.publishedAt).toBeNull();
-    expect(q2Authority).toBeNull();
-    expect(q2Receipt).toBeNull();
+    // Bootstrap changed nothing on existing rows.
+    expect(q2?.lifecycleState).toBe(q2Before?.lifecycleState);
+    expect(q2?.publishedAt?.toISOString() ?? null).toBe(q2Before?.publishedAt?.toISOString() ?? null);
+    expect(q1?.lifecycleState).toBe(q1Before?.lifecycleState);
+    expect(q1?.supersededBy).toBe(q1Before?.supersededBy ?? null);
+
+    // Released truth remains authoritative and receipt-bound.
+    expect(q2?.lifecycleState).toBe("ACTIVE_UNTIL_SUPERSEDED");
+    expect(q2?.publishedAt).not.toBeNull();
+    expect(q2?.dataLockedAt).not.toBeNull();
+    expect(q2Receipt).not.toBeNull();
+    expect(q1?.lifecycleState).toBe("SUPERSEDED");
+    expect(q1?.supersededBy).toBe("GMI-Q2-2026");
+
+    // The receipt is bound to a non-revoked, hash-matching authority row.
+    const authority = await prisma.gmiReleaseAuthority.findFirst({
+      where: { editionId: "GMI-Q2-2026", revokedAt: null, candidateHash: q2Receipt!.candidateHash },
+    });
+    expect(authority).not.toBeNull();
+    expect(q2Receipt!.authorityId).toBe(authority!.id);
   });
 
   it("resolves the complete 10-gate vector from durable state and fails closed on missing authority", async () => {

@@ -178,7 +178,7 @@ export async function getCurrentValidAuthority(
 
 // ── Mutations (non-release) ──────────────────────────────────────────────────
 
-/** Idempotent upsert of durable release state. Used by bootstrap and admin ops. */
+/** Idempotent upsert of durable release state. Used by admin ops. */
 export async function upsertReleaseState(
   input: Partial<DurableReleaseState> & { editionId: string; lifecycleState: string },
   db: GmiDb = prisma,
@@ -188,6 +188,24 @@ export async function upsertReleaseState(
     where: { editionId },
     create: { editionId, ...rest },
     update: { ...rest, version: { increment: 1 } },
+  });
+  return row as DurableReleaseState;
+}
+
+/**
+ * Create-if-missing seeding of durable release state. Used by bootstrap.
+ * NEVER mutates an existing row — a released edition must not be regressed
+ * to its bootstrap defaults by a re-run (deploy init, clean-room, tests).
+ */
+export async function seedReleaseStateIfMissing(
+  input: Partial<DurableReleaseState> & { editionId: string; lifecycleState: string },
+  db: GmiDb = prisma,
+): Promise<DurableReleaseState> {
+  const { editionId, ...rest } = input;
+  const row = await db.gmiEditionReleaseState.upsert({
+    where: { editionId },
+    create: { editionId, ...rest },
+    update: {},
   });
   return row as DurableReleaseState;
 }
@@ -288,38 +306,89 @@ export async function recordGmiReleaseAuditEvent(
   });
 }
 
+export const GMI_Q2_2026_RELEASE_BOOTSTRAP = {
+  editionId: "GMI-Q2-2026",
+  candidateHash: "gmi-q2-2026-candidate-20260708-release-lock",
+  sourceSnapshotHash: "gmi-q2-2026-source-snapshot-20260708-release-lock",
+  reportContentHash: "gmi-q2-2026-report-content-20260708-v1",
+  methodologyVersion: "gmi-methodology-v1.0.0",
+  pdfHash: "9f584a1a34d2f0a678e2c180c7cc158eab3d3123f09514cc1f16e139204e12df",
+  releaseChecklistVersion: "gmi-release-checklist-v1",
+  dataLockedAt: new Date("2026-07-08T20:30:00.000Z"),
+  releaseCandidateAt: new Date("2026-07-08T20:30:00.000Z"),
+  authorizedAt: new Date("2026-07-08T20:40:02.329Z"),
+  publishedAt: new Date("2026-07-08T20:45:00.000Z"),
+  authorizedBy: "owner:abraham-of-london",
+  authorityScope: "GMI_RELEASE_Q2_2026_CURRENT_PUBLIC_PURCHASABLE",
+} as const;
+
 export async function bootstrapProtectedGmiReleaseState(db: GmiDb = prisma): Promise<void> {
-  await upsertReleaseState({
+  await seedReleaseStateIfMissing({
     editionId: "GMI-Q1-2026",
-    lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+    lifecycleState: "SUPERSEDED",
     candidateHash: null,
     sourceSnapshotHash: null,
     reportContentHash: null,
     methodologyVersion: null,
     dataLockedAt: null,
     releaseCandidateAt: null,
-    publishedAt: null,
+    publishedAt: new Date("2026-04-08T00:00:00.000Z"),
     supersedes: null,
-    supersededBy: null,
+    supersededBy: "GMI-Q2-2026",
     publicVisible: true,
     purchasable: false,
   }, db);
 
-  await upsertReleaseState({
+  await seedReleaseStateIfMissing({
     editionId: "GMI-Q2-2026",
-    lifecycleState: "DRAFT",
-    candidateHash: null,
-    sourceSnapshotHash: null,
-    reportContentHash: null,
-    methodologyVersion: null,
-    dataLockedAt: null,
-    releaseCandidateAt: null,
-    publishedAt: null,
+    lifecycleState: "ACTIVE_UNTIL_SUPERSEDED",
+    candidateHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.candidateHash,
+    sourceSnapshotHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.sourceSnapshotHash,
+    reportContentHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.reportContentHash,
+    methodologyVersion: GMI_Q2_2026_RELEASE_BOOTSTRAP.methodologyVersion,
+    dataLockedAt: GMI_Q2_2026_RELEASE_BOOTSTRAP.dataLockedAt,
+    releaseCandidateAt: GMI_Q2_2026_RELEASE_BOOTSTRAP.releaseCandidateAt,
+    publishedAt: GMI_Q2_2026_RELEASE_BOOTSTRAP.publishedAt,
     supersedes: "GMI-Q1-2026",
     supersededBy: null,
-    publicVisible: false,
-    purchasable: false,
+    publicVisible: true,
+    purchasable: true,
   }, db);
+
+  const existingAuthority = await db.gmiReleaseAuthority.findFirst({
+    where: {
+      editionId: GMI_Q2_2026_RELEASE_BOOTSTRAP.editionId,
+      candidateHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.candidateHash,
+      revokedAt: null,
+    },
+    orderBy: { authorizedAt: "desc" },
+  });
+
+  const authority = existingAuthority ?? await db.gmiReleaseAuthority.create({
+    data: {
+      editionId: GMI_Q2_2026_RELEASE_BOOTSTRAP.editionId,
+      candidateHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.candidateHash,
+      authorizedBy: GMI_Q2_2026_RELEASE_BOOTSTRAP.authorizedBy,
+      authorizedAt: GMI_Q2_2026_RELEASE_BOOTSTRAP.authorizedAt,
+      authorityScope: GMI_Q2_2026_RELEASE_BOOTSTRAP.authorityScope,
+    },
+  });
+
+  await db.gmiReleaseReceipt.upsert({
+    where: { editionId: GMI_Q2_2026_RELEASE_BOOTSTRAP.editionId },
+    create: {
+      editionId: GMI_Q2_2026_RELEASE_BOOTSTRAP.editionId,
+      candidateHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.candidateHash,
+      sourceSnapshotHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.sourceSnapshotHash,
+      reportContentHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.reportContentHash,
+      methodologyVersion: GMI_Q2_2026_RELEASE_BOOTSTRAP.methodologyVersion,
+      pdfHash: GMI_Q2_2026_RELEASE_BOOTSTRAP.pdfHash,
+      releaseChecklistVersion: GMI_Q2_2026_RELEASE_BOOTSTRAP.releaseChecklistVersion,
+      authorityId: authority.id,
+      publishedAt: GMI_Q2_2026_RELEASE_BOOTSTRAP.publishedAt,
+    },
+    update: {},
+  });
 }
 
 /**

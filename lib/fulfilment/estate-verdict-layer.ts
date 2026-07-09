@@ -55,6 +55,7 @@ const INTERNAL_ONLY_CODES = new Set([
 ]);
 
 const PUBLIC_REFERENCE_CODES = new Set([
+  "gmi_q1_2026",
   "case_dossier_tariff_shock",
   "case_dossier_team_alignment",
   "case_dossier_escalation_denied",
@@ -110,11 +111,12 @@ function determineDisposition(productCode: string, evaluation: ProductEvaluation
 
   if (isContracted || isManualBilling || isEvidenceGated || isInactive || isSubscription ||
       needsHumanReview || isScheduledSession || isReportArtifact || isBundle || isRetainerCycle) {
-    // Special case: GMI Q2 is pre-release
-    if (productCode === "gmi_q2_2026") {
+    // Released recurring GMI editions remain report artifacts, but current editions can be sold directly
+    // once the catalogue, Stripe binding and product evidence are all green.
+    if (productCode === "gmi_q2_2026" && commercialStatus === "paid" && isActive && hasStripe && evaluation.allPassed) {
       return {
-        disposition: "CONTROLLED_RELEASE_READY",
-        reason: "Pre-release: manual billing only after data lock and owner release authority. No checkout, no Stripe binding.",
+        disposition: "RELEASE_READY_NOW",
+        reason: "Released current GMI edition: durable release authority, active checkout binding and all estate evaluations passed.",
       };
     }
 

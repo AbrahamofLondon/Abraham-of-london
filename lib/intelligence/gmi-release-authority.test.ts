@@ -231,13 +231,17 @@ describe("GMI Release State Resolver — Q2 2026 Complete Gate Vector", () => {
     expect(state.blockers.length).toBeGreaterThan(0);
   });
 
-  it("Q2 DATA_LOCK, OWNER_RELEASE_AUTHORITY, LIFECYCLE_STATE, CALL_REVIEW all fail", () => {
+  it("released Q2: DATA_LOCK and CALL_REVIEW pass; LIFECYCLE_STATE blocks double release", () => {
+    // Q2 was released 2026-07-08: data is locked and every prior-window call
+    // was scored or formally carried forward. The lifecycle gate now fails
+    // closed for a *re*-release because ACTIVE_UNTIL_SUPERSEDED is not a
+    // releasable state — that is the double-release protection.
     const state = resolveGmiReleaseState("GMI-Q2-2026");
     const gates = new Map(state.gates.map(g => [g.gate, g]));
-    expect(gates.get("DATA_LOCK")?.status).toBe("FAIL");
-    expect(gates.get("OWNER_RELEASE_AUTHORITY")?.status).toBe("FAIL");
+    expect(gates.get("DATA_LOCK")?.status).toBe("PASS");
+    expect(gates.get("CALL_REVIEW")?.status).toBe("PASS");
     expect(gates.get("LIFECYCLE_STATE")?.status).toBe("FAIL");
-    expect(gates.get("CALL_REVIEW")?.status).toBe("FAIL");
+    expect(state.releaseReady).toBe(false);
   });
 });
 
@@ -280,20 +284,23 @@ describe("GMI Release Transaction", () => {
     expect(ownerGate!.evidenceRef).toContain("authorityRecord: absent");
   });
 
-  it("transaction rollback — failure leaves predecessor unchanged", async () => {
+  it("transaction rollback — failed re-release leaves predecessor state unchanged", async () => {
+    // Q1 is legitimately SUPERSEDED (Q2 released 2026-07-08). A failed
+    // re-release attempt must not mutate that binding in either direction.
     const q1Before = getMarketIntelligenceRecord("GMI-Q1-2026")!;
-    expect(q1Before.lifecycleState).toBe("ACTIVE_UNTIL_SUPERSEDED");
-    expect(q1Before.supersededBy).toBeNull();
+    expect(q1Before.lifecycleState).toBe("SUPERSEDED");
+    expect(q1Before.supersededBy).toBe("GMI-Q2-2026");
 
-    await releaseGmiEdition({
+    const attempt = await releaseGmiEdition({
       editionId: "GMI-Q2-2026",
       ownerAuthority: { editionId: "GMI-Q2-2026", authorizedBy: "owner", authorizedAt: new Date().toISOString(), authorityScope: "release", candidateHash: "original-hash" },
       sourceSnapshotHash: "original-hash", reportContentHash: "content-hash", methodologyVersion: "1.0.0", pdfHash: null, releaseChecklistVersion: "1.0.0",
     });
+    expect(attempt.ok).toBe(false);
 
     const q1After = getMarketIntelligenceRecord("GMI-Q1-2026")!;
-    expect(q1After.lifecycleState).toBe("ACTIVE_UNTIL_SUPERSEDED");
-    expect(q1After.supersededBy).toBeNull();
+    expect(q1After.lifecycleState).toBe("SUPERSEDED");
+    expect(q1After.supersededBy).toBe("GMI-Q2-2026");
   });
 
   it("concurrent release — distributed lock prevents split state", async () => {
@@ -318,9 +325,11 @@ describe("GMI Release Transaction", () => {
     expect(result1.ok === false || result2.ok === false).toBe(true);
   });
 
-  it("predecessor protection — Q1 not superseded unless Q2 successfully releases", () => {
+  it("predecessor binding — Q1 superseded exactly by the successfully released Q2", () => {
+    // Supersession happened only through the successful atomic release
+    // transaction on 2026-07-08, and the binding is exact and singular.
     const q1 = getMarketIntelligenceRecord("GMI-Q1-2026")!;
-    expect(q1.lifecycleState).not.toBe("SUPERSEDED");
-    expect(q1.supersededBy).toBeNull();
+    expect(q1.lifecycleState).toBe("SUPERSEDED");
+    expect(q1.supersededBy).toBe("GMI-Q2-2026");
   });
 });

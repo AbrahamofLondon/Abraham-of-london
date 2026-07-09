@@ -246,33 +246,31 @@ describe("P7.10 — auditProductAccessLinks() finds no FAIL-severity issues", ()
 // ─── P7.11: gmi_q2_2026 is consistent (no checkout contradiction) ────────────
 
 describe("P7.11 — GMI Q2 2026 commercial consistency", () => {
-  it("gmi_q2_2026 does not have requiresCheckout=true with manual_billing", () => {
+  it("gmi_q2_2026 is current paid checkout with canonical Stripe binding", () => {
     const q2 = CATALOG["gmi_q2_2026"];
     if (!q2) return;
-    if (q2.commercialStatus === "manual_billing") {
-      expect(
-        q2.requiresCheckout,
-        "gmi_q2_2026: manual_billing but requiresCheckout=true — contradiction",
-      ).toBeFalsy();
-    }
+    expect(q2.commercialStatus).toBe("paid");
+    expect(q2.requiresCheckout).toBe(true);
+    expect(q2.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+    expect(q2.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
   });
 });
 
 // ─── P7.12: GMI Q1 2026 Stripe product ID is configured ──────────────────────
 
-describe("P7.12 — GMI Q1 2026 Stripe product ID configured", () => {
-  it("gmi_q1_2026 has stripeProductId (prod_UNnSL8r6DMedEH)", () => {
+describe("P7.12 — GMI Q1 2026 is reference-only after supersession", () => {
+  it("gmi_q1_2026 has no new-purchase Stripe product after supersession", () => {
     const q1 = CATALOG["gmi_q1_2026"];
     if (!q1) return;
-    expect(q1.stripeProductId, "gmi_q1_2026: stripeProductId is null — add prod_UNnSL8r6DMedEH").toBeTruthy();
-    expect(q1.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+    expect(q1.commercialStatus).toBe("inactive");
+    expect(q1.stripeProductId).toBeNull();
   });
 
-  it("gmi_q1_2026 has both stripeProductId and stripePriceId", () => {
+  it("gmi_q1_2026 has no standalone current-edition price after supersession", () => {
     const q1 = CATALOG["gmi_q1_2026"];
     if (!q1) return;
-    expect(q1.stripeProductId, "gmi_q1_2026: missing stripeProductId").toBeTruthy();
-    expect(q1.stripePriceId, "gmi_q1_2026: missing stripePriceId").toBeTruthy();
+    expect(q1.stripeProductId).toBeNull();
+    expect(q1.stripePriceId).toBeNull();
   });
 });
 

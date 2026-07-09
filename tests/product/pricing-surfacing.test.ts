@@ -16,8 +16,8 @@ describe('pricing page surfacing', () => {
     expect(pricingItems.map(p => p.id)).toContain('boardroom_brief')
   })
 
-  it('gmi_q1_2026 appears on pricing page', () => {
-    expect(pricingItems.map(p => p.id)).toContain('gmi_q1_2026')
+  it('gmi_q2_2026 appears on pricing page', () => {
+    expect(pricingItems.map(p => p.id)).toContain('gmi_q2_2026')
   })
 
   it('executive_reporting appears on pricing page', () => {

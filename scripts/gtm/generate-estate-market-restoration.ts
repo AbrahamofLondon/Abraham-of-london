@@ -132,11 +132,11 @@ export function generateEstateMarketRestorationReport() {
     products,
     reportAsEvidencePolicy: "Generated report is an output only. Evidence packages cite tracked source files, routes, tests and contracts; final reports are rejected as evidence inputs by validateProductEvidenceRecord.",
     gmiBoundary: {
-      q2State: "controlled_pre_release",
-      q2CheckoutAllowed: false,
-      q2StripeProductId: null,
-      q2StripePriceId: null,
-      q1Superseded: false,
+      q2State: "current_released",
+      q2CheckoutAllowed: true,
+      q2StripeProductId: "prod_UNnSL8r6DMedEH",
+      q2StripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
+      q1Superseded: true,
     },
     exactTruthStatement: unresolved.length === 0
       ? `ESTATE RESTORATION REPRODUCIBLE — ${products.length}/${products.length} PRODUCTS DISPOSITIONED FROM TRACKED SOURCE OBSERVATION`

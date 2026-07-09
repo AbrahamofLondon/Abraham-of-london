@@ -26,6 +26,7 @@ import {
   getFalsificationEvidence,
   getPdfExportEvidence,
 } from "./gmi-release-evidence";
+import { getServerPdfExportEvidence } from "./gmi-release-evidence.server";
 import {
   getCurrentValidAuthority,
   getDurableReceipt,
@@ -121,15 +122,17 @@ export async function resolveDurableReleaseGateVector(
   );
 
   const lifecycleState = state?.lifecycleState ?? "UNKNOWN";
-  const releasable = lifecycleState === "RELEASE_CANDIDATE" || lifecycleState === "RELEASE_AUTHORIZED";
+  const receipt = await getDurableReceipt(editionId, db);
+  const preReleaseReleasable = lifecycleState === "RELEASE_CANDIDATE" || lifecycleState === "RELEASE_AUTHORIZED";
+  const postReleaseProven = (lifecycleState === "ACTIVE" || lifecycleState === "ACTIVE_UNTIL_SUPERSEDED") && Boolean(receipt);
   evidenceGate(
     gates,
     blockers,
     "LIFECYCLE_STATE",
-    releasable,
-    `state: ${lifecycleState}`,
-    "Edition is in a releasable lifecycle state",
-    `Edition is in ${lifecycleState} state, not RELEASE_CANDIDATE`,
+    preReleaseReleasable || postReleaseProven,
+    `state: ${lifecycleState}, receipt: ${receipt ? "present" : "absent"}`,
+    postReleaseProven ? "Edition is active with durable release receipt" : "Edition is in a releasable lifecycle state",
+    `Edition is in ${lifecycleState} state without a valid releasable state or release receipt`,
   );
 
   const reviewWindow = record ? getPriorReviewWindow(record as any) : null;
@@ -202,19 +205,21 @@ export async function resolveDurableReleaseGateVector(
     "Board pulse incomplete",
   );
 
-  const pdf = getPdfExportEvidence(editionId);
+  const pdf = getServerPdfExportEvidence(editionId);
   const pdfPassed = pdf.exists
     && pdf.hash !== null
     && pdf.generatedAt !== null
     && pdf.reportContentHash !== null
     && pdf.sourceSnapshotHash !== null
-    && pdf.matchesCurrentCandidate;
+    && pdf.matchesCurrentCandidate
+    && Boolean(state?.candidateHash && pdf.candidateHash === state.candidateHash)
+    && Boolean(receipt?.pdfHash && receipt.pdfHash === pdf.hash);
   evidenceGate(
     gates,
     blockers,
     "PDF_EXPORT",
     pdfPassed,
-    `exists: ${pdf.exists}, hash: ${pdf.hash ?? "none"}, generatedAt: ${pdf.generatedAt ?? "none"}, contentHash: ${pdf.reportContentHash ?? "none"}, sourceHash: ${pdf.sourceSnapshotHash ?? "none"}, matchesCandidate: ${pdf.matchesCurrentCandidate}`,
+    `exists: ${pdf.exists}, hash: ${pdf.hash ?? receipt?.pdfHash ?? "none"}, generatedAt: ${pdf.generatedAt ?? receipt?.publishedAt?.toISOString() ?? "none"}, contentHash: ${pdf.reportContentHash ?? receipt?.reportContentHash ?? "none"}, sourceHash: ${pdf.sourceSnapshotHash ?? receipt?.sourceSnapshotHash ?? "none"}, matchesCandidate: ${pdf.matchesCurrentCandidate && Boolean(state?.candidateHash && pdf.candidateHash === state.candidateHash) && Boolean(receipt?.pdfHash && receipt.pdfHash === pdf.hash)}`,
     "PDF export exists and matches the current candidate",
     "PDF export not available or does not match current candidate",
   );
@@ -268,7 +273,7 @@ export async function resolveDurableReleaseState(
     editionId,
     found: true,
     lifecycleState: state.lifecycleState,
-    releaseReady: vector.passed && receipt === null,
+    releaseReady: vector.passed,
     gates: vector.gates,
     blockers: vector.blockers,
     hasAuthority: authorityGate?.status === "PASS",

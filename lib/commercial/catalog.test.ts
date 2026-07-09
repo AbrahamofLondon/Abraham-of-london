@@ -85,25 +85,26 @@ describe("catalog integrity", () => {
       expect(CATALOG.additional_collaborator!.stripePriceId).toBe("price_1TXt28QFpelVFMXJCqiXwnxp");
     });
 
-    it("reconciles GMI editions to lifecycle authority: Q1 current, Q2 release-candidate draft", () => {
-      // Q1 2026 remains the current published commercial edition until Q2 gets
-      // final data lock and owner release authority.
-      expect(CATALOG.gmi_q1_2026!.active).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("paid");
-      expect(CATALOG.gmi_q1_2026!.requiresCheckout).toBe(true);
-      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(false);
-      expect(CATALOG.gmi_q1_2026!.hiddenReason).toBeUndefined();
-      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Current published edition");
+    it("reconciles GMI editions to lifecycle authority: Q2 current published, Q1 archived", () => {
+      // Q1 2026 was superseded by GMI-Q2-2026 on 2026-07-08 through the atomic
+      // release transaction: archived, inactive, hidden from pricing, retained
+      // for historical access.
+      expect(CATALOG.gmi_q1_2026!.active).toBe(false);
+      expect(CATALOG.gmi_q1_2026!.commercialStatus).toBe("inactive");
+      expect(CATALOG.gmi_q1_2026!.hiddenFromPricing).toBe(true);
+      expect(CATALOG.gmi_q1_2026!.hiddenReason).toBe("superseded_by_gmi_q2_2026");
+      expect(CATALOG.gmi_q1_2026!.pricingNote).toContain("Superseded by GMI-Q2-2026");
 
-      // Q2 2026 is structurally market-ready but remains draft/inactive until
-      // the future data-lock event and owner release authority.
-      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(true);
-      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("internal_only");
-      expect(CATALOG.gmi_q2_2026!.active).toBe(false);
-      expect(CATALOG.gmi_q2_2026!.requiresCheckout).toBe(false);
-      expect(CATALOG.gmi_q2_2026!.stripeProductId).toBeNull();
-      expect(CATALOG.gmi_q2_2026!.stripePriceId).toBeNull();
-      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Structurally market-ready release candidate");
+      // Q2 2026 is the current published edition — released 2026-07-08 with
+      // evidence lock and hash-bound owner authority. Self-serve checkout at the
+      // £59 identity using the existing GMI Stripe product/price binding.
+      expect(CATALOG.gmi_q2_2026!.hiddenFromPricing).toBe(false);
+      expect(CATALOG.gmi_q2_2026!.commercialStatus).toBe("paid");
+      expect(CATALOG.gmi_q2_2026!.active).toBe(true);
+      expect(CATALOG.gmi_q2_2026!.requiresCheckout).toBe(true);
+      expect(CATALOG.gmi_q2_2026!.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+      expect(CATALOG.gmi_q2_2026!.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+      expect(CATALOG.gmi_q2_2026!.pricingNote).toContain("Current published edition");
     });
 
     it("resolves gmi_quarterly to the dedicated GMI family page, not an issue artifact", () => {
@@ -188,8 +189,9 @@ describe("catalog integrity", () => {
     });
 
     it("returns precise ineligibility reasons for non-checkout commercial states", () => {
-      expect(checkCheckoutEligibility("gmi_q1_2026").eligible).toBe(true);
-      expect(checkCheckoutEligibility("gmi_q2_2026")).toEqual({ eligible: false, reason: "PRODUCT_INACTIVE" });
+      // Q1 archived after supersession → inactive; Q2 released as manual billing.
+      expect(checkCheckoutEligibility("gmi_q1_2026")).toEqual({ eligible: false, reason: "PRODUCT_INACTIVE" });
+      expect(checkCheckoutEligibility("gmi_q2_2026").eligible).toBe(true);
       expect(checkCheckoutEligibility("enterprise")).toEqual({ eligible: false, reason: "PRODUCT_CONTRACTED" });
       expect(checkCheckoutEligibility("additional_collaborator")).toEqual({ eligible: false, reason: "MANUAL_BILLING_REQUIRED" });
       expect(checkCheckoutEligibility("fast_diagnostic")).toEqual({ eligible: false, reason: "CHECKOUT_NOT_AVAILABLE" });

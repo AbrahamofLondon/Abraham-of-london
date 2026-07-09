@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 import { getSourceRowsForReport, getReleaseBlockerRows, hasPendingReleaseBlockerRows } from "@/lib/intelligence/gmi-source-appendix-registry";
 
 describe("GMI source appendix workbench", () => {
-  it("Q2 has 13 total source rows", () => {
+  it("Q2 has 14 total source rows", () => {
     const rows = getSourceRowsForReport("GMI-Q2-2026");
-    expect(rows).toHaveLength(13);
+    expect(rows).toHaveLength(14);
   });
 
   it("Q2 has no release-blocking rows after editorial unblocking", () => {

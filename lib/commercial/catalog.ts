@@ -1061,7 +1061,7 @@ export const CATALOG: Record<string, CatalogProduct> = {
     cookieName: null,
     includes: [],
     shortDescription: "The quarterly Global Market Intelligence product line. Fulfilment grants entitlement to the current issue and the verified archive, governed by access rules.",
-    pricingNote: "Reusable product family. Resolves to the dedicated GMI page; current published issue remains gmi_q1_2026 until gmi_q2_2026 completes final data lock and owner release authority.",
+    pricingNote: "Reusable product family. Resolves to the dedicated GMI page; current published issue is gmi_q2_2026 (released 2026-07-08 with evidence lock and owner release authority).",
     primaryCta: "Open Global Market Intelligence",
   },
 

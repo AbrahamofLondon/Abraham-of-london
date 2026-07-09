@@ -43,6 +43,7 @@ export type ProductIdentityChain = {
 const CONTENT_ID_TO_PRODUCT_CODE: Record<string, string> = {
   // GMI: content slug uses hyphens, product code uses underscores
   "global-market-intelligence-report-q1-2026": "gmi_q1_2026",
+  "global-market-intelligence-report-q2-2026": "gmi_q2_2026",
   // Instruments: content slugs match entitlement slugs
   "decision-exposure-instrument": "decision_exposure_instrument",
   "mandate-clarity-framework": "mandate_clarity_framework",

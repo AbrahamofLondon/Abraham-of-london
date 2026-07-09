@@ -3,7 +3,7 @@
  *
  * Proves the reusable gmi_quarterly release gate + delivery guard + edition-bound
  * proof. Negative controls, a synthetic authorised positive flow (NOT Q2), and
- * Q2 preservation assertions. No publication, supersession, checkout, or Stripe.
+ * Q2 release assertions. Publication, supersession, checkout and Stripe are exercised only after the owner-authorised Q2 release boundary.
  */
 
 import { describe, it, expect } from "vitest";
@@ -137,29 +137,31 @@ describe("publication authority never infers commerce", () => {
   });
 });
 
-describe("16. GMI Q2 controlled pre-release boundary is preserved", () => {
+describe("16. GMI Q2 released-current boundary is preserved", () => {
   const q2 = getMarketIntelligenceRecord("GMI-Q2-2026")!;
   const q1 = getMarketIntelligenceRecord("GMI-Q1-2026")!;
 
-  it("Q2 remains DRAFT / not purchasable / not public", () => {
-    expect(q2.lifecycleState).toBe("DRAFT");
-    expect(q2.purchasable).toBe(false);
-    expect(q2.publicVisible).toBe(false);
+  it("Q2 is active, purchasable and public", () => {
+    expect(q2.lifecycleState).toBe("ACTIVE_UNTIL_SUPERSEDED");
+    expect(q2.purchasable).toBe(true);
+    expect(q2.publicVisible).toBe(true);
   });
-  it("Q2 catalog + contract carry no Stripe identity and no checkout", () => {
-    expect(CATALOG.gmi_q2_2026!.stripeProductId).toBeNull();
-    expect(CATALOG.gmi_q2_2026!.stripePriceId).toBeNull();
-    expect(CATALOG.gmi_q2_2026!.requiresCheckout).toBe(false);
-    expect(getContractByProductCode("gmi_q2_2026")?.stripePriceId).toBeNull();
+  it("Q2 catalog + contract carry active Stripe identity and checkout", () => {
+    expect(CATALOG.gmi_q2_2026!.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+    expect(CATALOG.gmi_q2_2026!.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+    expect(CATALOG.gmi_q2_2026!.requiresCheckout).toBe(true);
+    expect(getContractByProductCode("gmi_q2_2026")?.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
   });
-  it("Q1 remains unsuperseded", () => {
-    expect(q1.supersededBy).toBeNull();
-    expect(q1.lifecycleState).toBe("ACTIVE_UNTIL_SUPERSEDED");
+  it("Q1 is superseded by Q2", () => {
+    expect(q1.supersededBy).toBe("GMI-Q2-2026");
+    expect(q1.lifecycleState).toBe("SUPERSEDED");
   });
-  it("future data-lock dependency remains outstanding", () => {
-    expect(deriveGmiReleaseContextFromControls("GMI-Q2-2026").dataLockComplete).toBe(false);
+  it("legacy control helper does not confer durable Q2 release authority", () => {
+    const context = deriveGmiReleaseContextFromControls("GMI-Q2-2026");
+    expect(context.dataLockComplete).toBe(false);
+    expect(context.approvedArtifactHash).toBeNull();
   });
-  it("no delivery operation can bypass the Q2 boundary", () => {
+  it("legacy helper cannot bypass the durable Q2 release authority", () => {
     const r = assertGmiDeliveryAllowed(q2, deriveGmiReleaseContextFromControls("GMI-Q2-2026"), HASH_A);
     expect(r.ok).toBe(false);
   });

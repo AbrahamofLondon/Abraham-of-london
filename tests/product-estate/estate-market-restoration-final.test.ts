@@ -52,17 +52,21 @@ describe("estate market restoration final disposition", () => {
     }
   });
 
-  it("preserves the GMI Q2 controlled pre-release boundary", () => {
+  it("preserves the GMI Q2 released-current and Q1 superseded-reference boundary", () => {
 
-    expect(report.gmiBoundary.q2State).toBe("controlled_pre_release");
-    expect(report.gmiBoundary.q2CheckoutAllowed).toBe(false);
-    expect(report.gmiBoundary.q2StripeProductId).toBeNull();
-    expect(report.gmiBoundary.q2StripePriceId).toBeNull();
-    expect(report.gmiBoundary.q1Superseded).toBe(false);
+    expect(report.gmiBoundary.q2State).toBe("current_released");
+    expect(report.gmiBoundary.q2CheckoutAllowed).toBe(true);
+    expect(report.gmiBoundary.q2StripeProductId).toBe("prod_UNnSL8r6DMedEH");
+    expect(report.gmiBoundary.q2StripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+    expect(report.gmiBoundary.q1Superseded).toBe(true);
 
     const q2 = report.products.find((p: any) => p.code === "gmi_q2_2026");
-    expect(q2.finalState).toBe("CONTROLLED_RELEASE_READY");
-    expect(q2.authorityBoundary).toContain("No publication");
+    expect(q2.finalState).toBe("RELEASE_READY_NOW");
+    expect(q2.authorityBoundary).toContain("public, purchasable and edition-bound");
+
+    const q1 = report.products.find((p: any) => p.code === "gmi_q1_2026");
+    expect(q1.finalState).toBe("PUBLIC_REFERENCE_READY");
+    expect(q1.authorityBoundary.toLowerCase()).toContain("superseded");
   });
 });
 

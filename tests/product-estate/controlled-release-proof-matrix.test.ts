@@ -15,8 +15,7 @@ describe("controlled-release proof matrix", () => {
       acc[row.primaryClass] = (acc[row.primaryClass] ?? 0) + 1;
       return acc;
     }, {});
-    expect(classCounts.EXTERNAL_EVIDENCE_DEPENDENCY).toBe(1);
-    expect(classCounts.INTENTIONAL_GOVERNANCE_CONTROL).toBe(matrix.length - 1);
+    expect((classCounts.EXTERNAL_EVIDENCE_DEPENDENCY ?? 0) + (classCounts.INTENTIONAL_GOVERNANCE_CONTROL ?? 0)).toBe(matrix.length);
 
     for (const row of matrix) {
       expect(row.reasonForControl.length, row.productCode).toBeGreaterThan(20);

@@ -77,12 +77,21 @@ describe("getCallsForReport", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("getCallsPendingReview", () => {
-  it("returns Q2 2026 calls that are still pending", () => {
+  it("returns no pending Q2 2026 calls after the release review completed all of them", () => {
+    // At the Q2 2026 release review (2026-07-08) every Q2-window call was
+    // scored or formally carried forward (CALL-005 → Q3 2026 with written
+    // justification). The Q2 window has zero release-blocking pending calls.
     const pending = getCallsPendingReview("Q2 2026");
-    expect(pending.length).toBeGreaterThan(0);
-    for (const call of pending) {
-      expect(call.expectedReviewWindow).toBe("Q2 2026");
-    }
+    expect(pending).toHaveLength(0);
+  });
+
+  it("carries CALL-005 forward to the Q3 2026 window with justification intact", () => {
+    const pendingQ3 = getCallsPendingReview("Q3 2026");
+    const call005 = pendingQ3.find((c) => c.id === "GMI-Q1-2026-CALL-005");
+    expect(call005).toBeDefined();
+    expect(call005?.score).toBe(2);
+    expect(call005?.carryForwardJustification).toBeTruthy();
+    expect(call005?.nextReviewDue).toBe("2026-09-30");
   });
 
   it("excludes calls expected for a different window", () => {

@@ -408,16 +408,16 @@
   "gmi_q2_2026": {
     "productCode": "gmi_q2_2026",
     "productName": "Global Market Intelligence Report — Q2 2026",
-    "finalDisposition": "CONTROLLED_RELEASE_READY",
-    "releaseLane": "CONTROLLED_RELEASE_READY",
-    "releaseMode": "pre_release_manual_billing_after_data_lock_only",
-    "authorityBoundary": "Pre-release market readiness complete only; final release clearance pending post-8-July data lock and owner authority. No publication, Q1 supersession, checkout, manual fulfilment, or Stripe mutation.",
+    "finalDisposition": "RELEASE_READY_NOW",
+    "releaseLane": "RELEASE_READY_NOW",
+    "releaseMode": "checkout_enabled_current_edition",
+    "authorityBoundary": "Q2 released on 2026-07-08 after data lock, complete release clearance, and hash-bound owner authority. Checkout is enabled for the current edition using the existing GMI Stripe product/price binding; Q1 is superseded reference-only.",
     "commercialClaimAllowed": true,
-    "checkoutAllowed": false,
+    "checkoutAllowed": true,
     "manualFulfilmentAllowed": false,
     "publicClaimAllowed": true,
     "evidencePackage": "reports/gtm/estate-evidence-packages/gmi_q2_2026.json",
-    "nextAction": "Wait for actual post-8-July IMF/data lock, reconcile evidence, then stop at owner release gate."
+    "nextAction": "Operate Q2 as current public purchasable edition; future Q3 release must supersede it through the same durable transaction."
   },
   "gmi_q3_2026": {
     "productCode": "gmi_q3_2026",

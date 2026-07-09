@@ -41,19 +41,18 @@ describe("pricing actions", () => {
     });
   });
 
-  it("renders draft GMI Q2 as archive/reference only until release authority", () => {
+  it("renders released GMI Q2 as current-edition checkout", () => {
     expect(resolvePricingAction(CATALOG.gmi_q2_2026!)).toMatchObject({
-      type: "archive_reference_only",
-      purchasable: false,
-      reason: "inactive_or_retired",
+      type: "checkout",
+      purchasable: true,
     });
   });
 
-  it("renders controlled GMI Q1 as non-checkout review-gated access", () => {
+  it("renders superseded GMI Q1 as archive/reference only", () => {
     expect(resolvePricingAction(CATALOG.gmi_q1_2026!)).toMatchObject({
-      type: "review_gated",
+      type: "archive_reference_only",
       purchasable: false,
-      reason: "checkout_not_allowed",
+      reason: "inactive_or_retired",
     });
   });
 

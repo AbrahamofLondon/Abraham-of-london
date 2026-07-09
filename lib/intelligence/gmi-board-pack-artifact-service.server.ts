@@ -375,7 +375,8 @@ export async function createGmiBoardPackArtifact(input: {
       "generated_at",
       "generated_by",
       "status",
-      "error_message"
+      "error_message",
+      "updated_at"
     )
     VALUES (
       ${artifact.id},
@@ -390,7 +391,8 @@ export async function createGmiBoardPackArtifact(input: {
       ${artifact.generatedAt},
       ${artifact.generatedBy},
       ${artifact.status},
-      ${artifact.errorMessage}
+      ${artifact.errorMessage},
+      ${artifact.generatedAt}
     )
   `;
 

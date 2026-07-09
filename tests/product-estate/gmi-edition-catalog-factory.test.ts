@@ -48,13 +48,13 @@ describe("GMI-1 — Q1 and Q2 products are generated from registry", () => {
 
 // ─── 2. Q1 uses prod_UNnSL8r6DMedEH ─────────────────────────────────────────
 
-describe("GMI-2 — Q1 2026 Stripe product ID is prod_UNnSL8r6DMedEH", () => {
-  it("gmi_q1_2026 stripeProductId is prod_UNnSL8r6DMedEH", () => {
-    expect(CATALOG["gmi_q1_2026"]?.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+describe("GMI-2 — Current Q2 owns the reusable GMI Stripe binding", () => {
+  it("gmi_q1_2026 has no new-purchase Stripe product after supersession", () => {
+    expect(CATALOG["gmi_q1_2026"]?.stripeProductId).toBeNull();
   });
 
-  it("gmi_q1_2026 stripePriceId is price_1TP1rRQFpelVFMXJWaFMOpJQ", () => {
-    expect(CATALOG["gmi_q1_2026"]?.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+  it("gmi_q2_2026 owns the reusable GMI Stripe price", () => {
+    expect(CATALOG["gmi_q2_2026"]?.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
   });
 });
 
@@ -62,9 +62,9 @@ describe("GMI-2 — Q1 2026 Stripe product ID is prod_UNnSL8r6DMedEH", () => {
 // Per lifecycle reconciliation: GMI-Q1-2026 remains active until Q2 receives final data lock and owner release authority.
 // It is not the admin in-focus edition, but it remains the current published commercial edition.
 
-describe("GMI-3 — Q1 2026 remains current until Q2 release authority", () => {
-  it("gmi_q1_2026 remains visible on pricing", () => {
-    expect(CATALOG["gmi_q1_2026"]?.hiddenFromPricing).toBe(false);
+describe("GMI-3 — Q1 2026 is archived after Q2 supersession (released 2026-07-08)", () => {
+  it("gmi_q1_2026 is hidden from pricing after supersession", () => {
+    expect(CATALOG["gmi_q1_2026"]?.hiddenFromPricing).toBe(true);
   });
 
   it("gmi_q1_2026 is not the admin in-focus edition", () => {
@@ -72,20 +72,22 @@ describe("GMI-3 — Q1 2026 remains current until Q2 release authority", () => {
     expect(q1Entry?.current).toBe(false);
   });
 
-  it("gmi_q1_2026 remains active as a commercial product", () => {
-    expect(CATALOG["gmi_q1_2026"]?.active).toBe(true);
+  it("gmi_q1_2026 is archived (inactive) as a commercial product", () => {
+    expect(CATALOG["gmi_q1_2026"]?.active).toBe(false);
+    expect(CATALOG["gmi_q1_2026"]?.commercialStatus).toBe("inactive");
   });
 
-  it("gmi_q1_2026 has no Q2 supersession hidden reason before release", () => {
-    expect(CATALOG["gmi_q1_2026"]?.hiddenReason).toBeUndefined();
+  it("gmi_q1_2026 carries the Q2 supersession hidden reason", () => {
+    expect(CATALOG["gmi_q1_2026"]?.hiddenReason).toBe("superseded_by_gmi_q2_2026");
   });
 });
 
-// ─── 4. Q2 is the market-ready draft awaiting release authority ──
-// Per lifecycle reconciliation: GMI-Q2-2026 remains DRAFT until final data lock and owner release authority.
-// It preserves the £59 identity but is not public-visible, purchasable, or checkout-enabled yet.
+// ─── 4. Q2 is the current published edition (released 2026-07-08) ──
+// Per lifecycle reconciliation: GMI-Q2-2026 was released through the atomic
+// transaction with hash-bound owner authority. Commercial mode: paid checkout
+// at the £59 identity using the reusable GMI Stripe binding.
 
-describe("GMI-4 — Q2 2026 is the market-ready draft awaiting release authority", () => {
+describe("GMI-4 — Q2 2026 is the current published checkout edition", () => {
   it("gmi_q2_2026 is the current edition in the registry", () => {
     const q2Entry = GMI_EDITION_REGISTRY.find((e) => e.productCode === "gmi_q2_2026");
     expect(q2Entry?.current).toBe(true);
@@ -100,16 +102,16 @@ describe("GMI-4 — Q2 2026 is the market-ready draft awaiting release authority
     expect(product?.code).toBe("gmi_q2_2026");
   });
 
-  it("gmi_q2_2026 is hidden from pricing before release authority", () => {
-    expect(CATALOG["gmi_q2_2026"]?.hiddenFromPricing).toBe(true);
+  it("gmi_q2_2026 is visible on pricing after release", () => {
+    expect(CATALOG["gmi_q2_2026"]?.hiddenFromPricing).toBe(false);
   });
 
-  it("gmi_q2_2026 is commercially inactive with Stripe IDs null", () => {
-    expect(CATALOG["gmi_q2_2026"]?.active).toBe(false);
-    expect(CATALOG["gmi_q2_2026"]?.commercialStatus).toBe("internal_only");
-    expect(CATALOG["gmi_q2_2026"]?.requiresCheckout).toBe(false);
-    expect(CATALOG["gmi_q2_2026"]?.stripeProductId).toBeNull();
-    expect(CATALOG["gmi_q2_2026"]?.stripePriceId).toBeNull();
+  it("gmi_q2_2026 is active via paid checkout with reusable GMI Stripe IDs", () => {
+    expect(CATALOG["gmi_q2_2026"]?.active).toBe(true);
+    expect(CATALOG["gmi_q2_2026"]?.commercialStatus).toBe("paid");
+    expect(CATALOG["gmi_q2_2026"]?.requiresCheckout).toBe(true);
+    expect(CATALOG["gmi_q2_2026"]?.stripeProductId).toBe("prod_UNnSL8r6DMedEH");
+    expect(CATALOG["gmi_q2_2026"]?.stripePriceId).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
   });
 });
 
@@ -297,34 +299,32 @@ describe("GMI-10 — product lookup by code", () => {
 // ─── 11. Product lookup by Stripe product ID still works ─────────────────────
 
 describe("GMI-11 — product lookup by stripeProductId", () => {
-  it("getProductByStripeProductId(prod_UNnSL8r6DMedEH) returns gmi_q1_2026", () => {
+  it("getProductByStripeProductId(prod_UNnSL8r6DMedEH) returns current gmi_q2_2026", () => {
     const product = getProductByStripeProductId("prod_UNnSL8r6DMedEH");
-    expect(product?.code).toBe("gmi_q1_2026");
+    expect(product?.code).toBe("gmi_q2_2026");
   });
 });
 
 // ─── 12. Product lookup by Stripe price ID still works ───────────────────────
 
 describe("GMI-12 — product lookup by stripePriceId", () => {
-  it("getProductByStripePriceId(price_1TP1rRQFpelVFMXJWaFMOpJQ) returns gmi_q1_2026", () => {
+  it("getProductByStripePriceId(price_1TP1rRQFpelVFMXJWaFMOpJQ) returns current gmi_q2_2026", () => {
     const product = getProductByStripePriceId("price_1TP1rRQFpelVFMXJWaFMOpJQ");
-    expect(product?.code).toBe("gmi_q1_2026");
+    expect(product?.code).toBe("gmi_q2_2026");
   });
 });
 
 // ─── 13. Access resolver returns correct GMI route ────────────────────────────
 
 describe("GMI-13 — access resolver returns correct routes", () => {
-  it("gmi_q1_2026 resolver remains paid_checkout before supersession", () => {
+  it("gmi_q1_2026 resolver is dormant after supersession (archived, no current checkout)", () => {
     const link = resolveProductAccessLink("gmi_q1_2026");
-    expect(link.accessMode).toBe("paid_checkout");
+    expect(link.accessMode).toBe("dormant");
   });
 
-  it("gmi_q2_2026 resolver remains dormant before release authority", () => {
+  it("gmi_q2_2026 resolver is paid_checkout after release", () => {
     const link = resolveProductAccessLink("gmi_q2_2026");
-    expect(link.accessMode).toBe("dormant");
-    expect(link.label).toBe("Currently unavailable");
-    expect(link.href).toBe("/products");
+    expect(link.accessMode).toBe("paid_checkout");
   });
 
   it("gmi_q3_2026 resolver does not return paid_checkout", () => {

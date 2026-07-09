@@ -40,13 +40,12 @@ export type CatalogResolution = {
 
 /**
  * Current PUBLISHED quarterly GMI issue artifact.
- * Q1 2026 is the current published issue. Q2 2026 is a production release
- * candidate (publication target 2026-07-08) and is NOT current until published.
- * Advance this only when the next issue actually publishes.
+ * Q2 2026 is the current published issue after the 2026-07-08 release transaction.
+ * Q1 2026 remains a superseded public reference edition.
  */
-export const CURRENT_GMI_QUARTER_KEY = "gmi_q1_2026";
+export const CURRENT_GMI_QUARTER_KEY = "gmi_q2_2026";
 /** Forthcoming (not-yet-published) GMI issue and its publication target. */
-export const FORTHCOMING_GMI_QUARTER_KEY = "gmi_q2_2026";
+export const FORTHCOMING_GMI_QUARTER_KEY = "gmi_q3_2026";
 export const FORTHCOMING_GMI_PUBLICATION_TARGET = "2026-07-08";
 
 /** Dedicated GMI product-family page — the storefront-facing GMI surface. */
@@ -72,8 +71,8 @@ export const PRODUCT_CODE_MAP: Record<string, CatalogResolution> = {
     catalogKey: "gmi_quarterly",
     dedicatedRoute: GMI_FAMILY_ROUTE,
     entitlementIssueKeys: ["gmi_q1_2026", "gmi_q2_2026"],
-    currentIssueKey: CURRENT_GMI_QUARTER_KEY, // gmi_q1_2026 (Q2 is a forthcoming RC)
-    archivedIssueKeys: [],
+    currentIssueKey: CURRENT_GMI_QUARTER_KEY, // gmi_q2_2026 after Q2 release
+    archivedIssueKeys: ["gmi_q1_2026"],
     aliasKeys: [],
     notes:
       "Canonical GMI product family. Resolves to the dedicated GMI page (/intelligence/gmi), " +

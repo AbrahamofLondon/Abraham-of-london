@@ -37,7 +37,7 @@ export type GmiEditionCommercialStatus =
   | "draft"          // Not yet released. Hidden from pricing. No checkout allowed.
   | "active"         // Active paid checkout edition. Requires stripeProductId + stripePriceId.
   | "manual_billing" // Active but no self-serve checkout. Routes to enquiry/intake.
-  | "archived"       // Superseded edition. Hidden from pricing. Checkout still possible for historical access.
+  | "archived"       // Superseded edition. Hidden from pricing. historical access preserved through existing entitlements; no new standalone checkout.
   | "retired";       // Decommissioned. No checkout. No route. Admin record only.
 
 export type GmiEditionRegistryEntry = {
@@ -75,9 +75,9 @@ export type GmiEditionRegistryEntry = {
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
-  // ── Q1 2026 — current published issue until Q2 release authority ─────────────
-  // Reconciled to the authoritative lifecycle: Q1 remains the current published
-  // issue until GMI-Q2-2026 completes its final data lock and owner release.
+  // ── Q1 2026 — superseded by GMI-Q2-2026 on 2026-07-08 ───────────────────────
+  // Reconciled to the authoritative lifecycle: Q1 was superseded through the
+  // atomic release transaction. Archived; historical access preserved.
   {
     editionId: "GMI-Q1-2026",
     productCode: "gmi_q1_2026",
@@ -85,21 +85,23 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     year: 2026,
     title: "Global Market Report — Q1 2026",
     slug: "q1-2026",
-    status: "active",
+    status: "archived",
     current: false,
-    hiddenFromPricing: false,
-    stripeProductId: "prod_UNnSL8r6DMedEH",
-    stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
+    hiddenFromPricing: true,
+    hiddenReason: "superseded_by_gmi_q2_2026",
+    stripeProductId: null,
+    stripePriceId: null,
     amountGbp: 5900,
     releaseDate: "2026-04-08",
-    shortDescription: "Q1 2026 market report — current published edition until Q2 receives owner release authority.",
-    pricingNote: "Coverage period: Q1 2026. Current published edition until GMI-Q2-2026 completes final data lock and owner release authority.",
+    shortDescription: "Q1 2026 market report — superseded by the Q2 2026 edition; retained for historical access and the public call-scoring record.",
+    pricingNote: "Coverage period: Q1 2026. Superseded by GMI-Q2-2026 on 2026-07-08; retained for historical access.",
   },
 
-  // ── Q2 2026 — MARKET-READY release candidate (commercial activation blocked) ──
-  // Reconciled to the authoritative lifecycle: GMI-Q2-2026 remains DRAFT until final data lock and owner release authority.
-  // It preserves the edition amount identity but is not public-visible or purchasable yet.
-  // No Stripe product/price IDs are bound; self-serve checkout remains disabled.
+  // ── Q2 2026 — CURRENT PUBLISHED EDITION (released 2026-07-08) ────────────────
+  // Reconciled to the authoritative lifecycle: released through the atomic
+  // transaction with hash-bound owner authority and release receipt.
+  // Commercial mode: active paid checkout at the £59 edition identity using the
+  // existing GMI Stripe product/price binding; Q1 remains historical only.
   {
     editionId: "GMI-Q2-2026",
     productCode: "gmi_q2_2026",
@@ -107,16 +109,15 @@ export const GMI_EDITION_REGISTRY: GmiEditionRegistryEntry[] = [
     year: 2026,
     title: "Global Market Intelligence — Q2 2026",
     slug: "q2-2026",
-    status: "draft",
+    status: "active",
     current: true,
-    hiddenFromPricing: true,
-    hiddenReason: "awaiting_post_8_july_data_lock_and_owner_release_authority",
-    stripeProductId: null,
-    stripePriceId: null,
+    hiddenFromPricing: false,
+    stripeProductId: "prod_UNnSL8r6DMedEH",
+    stripePriceId: "price_1TP1rRQFpelVFMXJWaFMOpJQ",
     amountGbp: 5900,
     releaseDate: "2026-07-08",
-    shortDescription: "Quarterly decision intelligence for leaders operating under structural uncertainty.",
-    pricingNote: "Coverage period: Q2 2026. Structurally market-ready release candidate; commercial activation awaits post-8-July data lock and owner release authority. No self-serve checkout.",
+    shortDescription: "Quarterly decision intelligence for leaders operating under structural uncertainty. Current published edition.",
+    pricingNote: "Coverage period: Q2 2026. Current published edition — released 2026-07-08 with evidence lock and owner release authority. £59 per issue via canonical self-serve checkout bound to GMI-Q2-2026.",
   },
 
   // ── Q3 2026 — draft (blocked) ───────────────────────────────────────────────

@@ -171,7 +171,7 @@ function deriveEntitlementSlug(slug: string): string {
 }
 
 function deriveArtifactRoute(slug: string): string {
-  return `/artifacts/global-market-intelligence-report-${slug}`;
+  return `/intelligence/global-market-intelligence-${slug}`;
 }
 
 function deriveCommercialStatus(status: GmiEditionRegistryEntry["status"]): CommercialStatus {
