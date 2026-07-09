@@ -1,3 +1,18 @@
+/**
+ * GMI Public Edition Content Records
+ *
+ * Each edition record must include ALL fields defined in GmiPublicEditionContentRecord.
+ * Future editions (Q3 2026, Q4 2026, 2027+) must populate:
+ *
+ * - headlineSignals: each entry requires evidencePosture and reviewHorizon
+ * - crossEditionDeltas: each entry requires decisionImplication
+ * - consequenceMatrix: each entry requires publicDecisionToReconsider
+ * - regionalLayers: each entry requires evidencePosture (set to null if no governed data)
+ *
+ * Evidence postures: OBSERVED | DIRECTIONAL | CONFIRMED | MONITORING | SCENARIO_ASSUMPTION
+ * Do not infer evidencePosture from confidence. They are separate concepts.
+ * Do not leave new fields undefined — use null where no governed data exists.
+ */
 import type {
   GmiBoardConsequence,
   GmiBriefCitation,
