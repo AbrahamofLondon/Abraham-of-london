@@ -73,8 +73,12 @@ type ConsoleViewModel = {
   releaseChecklist: GmiReleaseChecklist;
 };
 
-type DurableReleaseResolverModule = { resolveDurableReleaseState: (editionId: string) => Promise<{ lifecycleState: string; releaseReady: boolean; blockers: string[] }> };
-const importDurableReleaseResolver = new Function("specifier", "return import(specifier)") as (specifier: string) => Promise<DurableReleaseResolverModule>;
+// Server-only module, loaded lazily inside getServerSideProps' call path so the
+// client bundle never pulls in the Prisma-backed resolver. A plain dynamic
+// import resolves correctly under webpack (server chunk), vitest, and Node.
+async function importDurableReleaseResolver() {
+  return import("@/lib/intelligence/gmi-release-durable-resolver.server");
+}
 
 const REQUIRED_NEXT_ACTIONS = [
   "Complete Q2 source collection log.",
@@ -137,9 +141,14 @@ function buildQ2OutboundState(): ConsoleViewModel["outbound"] {
 
 export async function buildGmiReleaseConsoleViewModel(): Promise<ConsoleViewModel> {
   const releaseState = resolveGmiReleaseState("GMI-Q2-2026");
-  const { resolveDurableReleaseState } = await importDurableReleaseResolver("@/lib" + "/intelligence/gmi-release-durable-resolver.server");
+  const { resolveDurableReleaseState } = await importDurableReleaseResolver();
   const durableState = await resolveDurableReleaseState("GMI-Q2-2026");
-  const durableReleaseReady = durableState.releaseReady;
+  // A released edition (authoritative receipt + active lifecycle) is complete:
+  // the resolver's releaseReady is intentionally false post-release to block
+  // double release, but the console must show the released state as clear.
+  const durableReleaseReady =
+    durableState.releaseReady ||
+    (durableState.hasReceipt && durableState.lifecycleState === "ACTIVE_UNTIL_SUPERSEDED");
   const reviewPack = buildGmiQuarterlyReviewPack("GMI-Q2-2026");
   const q1Calls = getCallsForReport("GMI-Q1-2026");
   const dueInQ2 = q1Calls.filter((call) => call.expectedReviewWindow === "Q2 2026");

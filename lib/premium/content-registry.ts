@@ -221,7 +221,7 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       coveragePeriod: "Q1 2026",
       currentDecisionWindow: "Q2 2026",
       statusLabel: "Superseded — reference edition",
-      nextScheduledReport: "Q2 2026 report in preparation",
+      nextScheduledReport: "Q3 2026 — in preparation",
       freshnessNote:
         "This report reviews Q1 2026 conditions. It was superseded by GMI Q2 2026 on 8 July 2026 and is retained for historical access and the public call-scoring record; it is no longer the current edition.",
       surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
@@ -313,8 +313,8 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
     metadata: {
       author: "Abraham of London Intelligence",
       createdAt: "2026-06-01",
-      updatedAt: "2026-06-14",
-      version: "1.0.0-rc",
+      updatedAt: "2026-07-08",
+      version: "1.0.0",
       docId: "GMI-Q2-2026",
       classification: "RESTRICTED",
       watermarkRequired: true,
@@ -324,10 +324,10 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       editionType: "institutional-briefing",
       coveragePeriod: "Q2 2026",
       currentDecisionWindow: "Q3 2026",
-      statusLabel: "Production release candidate — pending final data-lock review",
-      nextScheduledReport: "Q3 2026 report in preparation",
+      statusLabel: "Current authorised edition",
+      nextScheduledReport: "Q3 2026 — in preparation",
       freshnessNote:
-        "This report covers Q2 2026 conditions and the Q3 2026 decision window. It remains current until superseded by the Q3 2026 Market Intelligence Report.",
+        "This report covers Q2 2026 conditions and the Q3 2026 decision window. Released 8 July 2026 with evidence lock and owner release authority; current until superseded by the authorised Q3 2026 release.",
       surfaceHref: "/artifacts/global-market-intelligence-report-q2-2026",
       directDownloadHref: "/api/premium/content/download/global-market-intelligence-report-q2-2026",
       coverImage:

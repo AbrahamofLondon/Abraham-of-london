@@ -70,6 +70,18 @@ module.exports = {
         "4xs": ["0.5rem",   { lineHeight: "0.7rem",  letterSpacing: "0.12em" }],
         "3xs": ["0.625rem", { lineHeight: "0.85rem", letterSpacing: "0.20em" }],
         "2xs": ["0.75rem",  { lineHeight: "1rem",    letterSpacing: "0.05em" }],
+
+        // ── SEMANTIC TYPE TOKENS (legibility standard) ───────────────────────
+        // Use these instead of arbitrary text-[Npx] classes or inline fontSize.
+        // Floor for meaningful public text is type-evidence-xs (11px). Dense
+        // internal/admin metadata may use type-admin-meta (10px) deliberately —
+        // nothing important should be smaller.
+        "type-admin-meta":  ["10px", { lineHeight: "14px", letterSpacing: "0.08em" }],
+        "type-evidence-xs": ["11px", { lineHeight: "16px", letterSpacing: "0.06em" }],
+        "type-meta-sm":     ["12px", { lineHeight: "18px", letterSpacing: "0.04em" }],
+        "type-support":     ["14px", { lineHeight: "22px" }],
+        "type-body":        ["16px", { lineHeight: "26px" }],
+        "type-body-lg":     ["18px", { lineHeight: "29px" }],
       },
 
       // ── LETTER SPACING ──────────────────────────────────────────────────────

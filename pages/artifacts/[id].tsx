@@ -28,12 +28,18 @@ import {
   getRelatedPremiumContent,
   type PremiumContentItem,
 } from "@/lib/premium/content-registry";
+import GmiInstitutionalArtifactRecord, {
+  type GmiArtifactProjection,
+} from "@/components/artifacts/GmiInstitutionalArtifactRecord";
+import { buildGmiArtifactProjection, isGmiFamilyArtifact } from "@/lib/premium/gmi-artifact-projection";
 
 type Props = {
   item: PremiumContentItem | null;
   related: PremiumContentItem[];
   hasAccess: boolean;
   accessState: "PUBLIC" | "NO_ACCESS" | "HAS_ACCESS";
+  /** Present only for GMI-family artifacts — selects the dedicated renderer. */
+  gmiRecord: GmiArtifactProjection | null;
 };
 
 function safeStr(value: unknown): string {
@@ -127,12 +133,20 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     ? { granted: true }
     : await resolveCanonicalEntitlement({ userId, email, slug: item.id });
 
+  const hasAccess = isPublic || entitlement.granted;
+
+  // GMI family assets never render through the generic artifact page.
+  // Membership is resolved from canonical product/edition identity (docId +
+  // catalog product chain), not title-string matching.
+  const gmiRecord = isGmiFamilyArtifact(item) ? buildGmiArtifactProjection(item, hasAccess) : null;
+
   return {
     props: {
       item,
       related,
-      hasAccess: isPublic || entitlement.granted,
+      hasAccess,
       accessState: isPublic ? "PUBLIC" : entitlement.granted ? "HAS_ACCESS" : "NO_ACCESS",
+      gmiRecord,
     },
   };
 
@@ -260,7 +274,17 @@ export default function ArtifactDetailPage({
   related,
   hasAccess,
   accessState,
+  gmiRecord,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  // GMI family: dedicated institutional asset record (Ledger visual family).
+  if (gmiRecord) {
+    return (
+      <Layout>
+        <GmiInstitutionalArtifactRecord record={gmiRecord} />
+      </Layout>
+    );
+  }
+
   if (!item) {
     return (
       <Layout>
@@ -453,6 +477,13 @@ export default function ArtifactDetailPage({
                       >
                         <Presentation className="mr-2 h-4 w-4 text-[#C9A96A]" />
                         Board deck
+                      </Link>
+
+                      <Link
+                        href="/intelligence/gmi/q2-2026"
+                        className="inline-flex items-center rounded-2xl border border-[#C9A96A]/40 bg-[#C9A96A]/10 px-5 py-3 text-sm font-semibold text-[#E6C98C] transition hover:bg-[#C9A96A]/20"
+                      >
+                        Open current Q2 2026 edition
                       </Link>
                     </div>
                   </div>
@@ -653,7 +684,14 @@ export default function ArtifactDetailPage({
                   version={relatedItem.metadata?.version}
                   fileSize={relatedItem.fileSize}
                   pageCount={relatedItem.asset.pageCount}
-                  href={`/artifacts/${relatedItem.id}`}
+                  href={
+                    // Canonical route resolution: public-surface editions route
+                    // to their governed public surface; asset editions route to
+                    // their institutional asset record.
+                    relatedItem.metadata?.editionType === "public-surface" && relatedItem.metadata?.surfaceHref
+                      ? relatedItem.metadata.surfaceHref
+                      : `/artifacts/${relatedItem.id}`
+                  }
                   coverImage={
                     safeStr(relatedItem.metadata?.coverImage) ||
                     "/assets/images/artifacts/global-market-intelligence-q1-2026-cover.jpg"

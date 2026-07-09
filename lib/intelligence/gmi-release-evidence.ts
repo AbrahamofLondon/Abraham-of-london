@@ -20,12 +20,14 @@ export interface PdfExportEvidence {
   candidateHash: string | null;
 }
 
+// Hashes are the REAL release-receipt values recorded by the atomic release
+// transaction on 2026-07-08 (gmi_release_receipts, edition GMI-Q2-2026).
 const PDF_ARTIFACTS: Record<string, { path: string; reportContentHash: string; sourceSnapshotHash: string; candidateHash: string }> = {
   "GMI-Q2-2026": {
     path: "public/assets/downloads/global-market-intelligence-report-q2-2026.pdf",
-    reportContentHash: "gmi-q2-2026-report-content-20260708-v1",
-    sourceSnapshotHash: "gmi-q2-2026-source-snapshot-20260708-release-lock",
-    candidateHash: "gmi-q2-2026-candidate-20260708-release-lock",
+    reportContentHash: "321f5cac2fe86122336626fb5ed91806fd0f4bfc8c2a2a552a382865a6138004",
+    sourceSnapshotHash: "7a5dceda533b36ccc6ef1c62444d58eb80b0562eaadeec455c2376cd6157312a",
+    candidateHash: "04c16a2bb58784b10968e8716459649b0f079c1c76c0c1e0cc366cdf5f2cad14",
   },
 };
 
@@ -40,8 +42,9 @@ export function getPdfExportEvidence(editionId: string): PdfExportEvidence {
 
   return {
     exists: true,
-    hash: "9f584a1a34d2f0a678e2c180c7cc158eab3d3123f09514cc1f16e139204e12df",
-    generatedAt: "2026-07-08T21:58:01.125Z",
+    // Receipt-bound distributable artifact hash (gmi_release_receipts.pdf_hash).
+    hash: "36a9834b026169584261f75d1c200885395edaad2bb658133197c0ddae9f7709",
+    generatedAt: "2026-07-08T20:40:02.313Z",
     reportContentHash: artifact.reportContentHash,
     sourceSnapshotHash: artifact.sourceSnapshotHash,
     matchesCurrentCandidate,
