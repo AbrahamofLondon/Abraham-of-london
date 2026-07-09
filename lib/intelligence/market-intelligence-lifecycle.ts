@@ -114,6 +114,26 @@ export const MARKET_INTELLIGENCE_LIFECYCLE: readonly MarketIntelligenceLifecycle
     freshnessNote:
       "Current published GMI edition. Released 2026-07-08 through the atomic release transaction: data locked, all ten release gates passed, owner authority hash-bound, and the release receipt binds content, source snapshot, methodology, and board-pack PDF hashes.",
   },
+  {
+    id: "GMI-Q3-2026",
+    title: "Global Market Intelligence Q3 2026",
+    canonicalLine: "GLOBAL_MARKET_INTELLIGENCE",
+    quarter: "Q3",
+    year: 2026,
+    coveragePeriod: "Q3 2026",
+    decisionWindow: "Q4 2026",
+    periodStart: "2026-07-01",
+    periodEnd: "2026-09-30",
+    version: "1.0.0",
+    lifecycleState: "DRAFT",
+    supersededBy: null,
+    replaces: null,
+    nextExpected: null,
+    purchasable: false,
+    publicVisible: false,
+    archiveVisible: false,
+    freshnessNote: "Q3 2026 is in preparation. No release date, data lock, or release authority has been established.",
+  },
 ] as const;
 
 export function getMarketIntelligenceRecord(id: string): MarketIntelligenceLifecycleRecord | null {

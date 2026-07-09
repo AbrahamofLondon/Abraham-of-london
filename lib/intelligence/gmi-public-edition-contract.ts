@@ -147,6 +147,27 @@ export type GmiStrategicCorridor = {
   summary: string;
 };
 
+
+export type GmiChronologyEntry = {
+  editionId: string;
+  title: string;
+  shortTitle: string;
+  lifecycleState: MarketIntelligenceLifecycleState;
+  relationship: "VIEWED" | "REFERENCE" | "CURRENT" | "UPCOMING";
+  publishedAt: string | null;
+  publicationTarget: string | null;
+  href: string | null;
+  publicVisible: boolean;
+  purchasable: boolean;
+};
+
+export type GmiFamilyChronology = {
+  viewedEdition: GmiChronologyEntry;
+  currentEdition: GmiChronologyEntry;
+  previousPublishedEdition: GmiChronologyEntry | null;
+  upcomingEdition: GmiChronologyEntry | null;
+};
+
 export type GmiEditionPublicContract = {
   editionId: string;
   familyId: "gmi-quarterly";
@@ -157,14 +178,17 @@ export type GmiEditionPublicContract = {
   periodEnd: string;
   publicationTarget: string;
   publishedAt: string | null;
+  dataLockedAt: string | null;
   lifecycleState: MarketIntelligenceLifecycleState;
   isCurrent: boolean;
   isPublic: boolean;
   isPurchasable: boolean;
   predecessorEditionId: string | null;
   successorEditionId: string | null;
-  version: string;
+  editionVersion: string;
   methodologyVersion: string;
+  releaseMethodologyRef: string | null;
+  reviewMethodologyVersion: string | null;
   readerAccessState: GmiReaderAccessState;
   hero: {
     eyebrow: string;
@@ -213,9 +237,5 @@ export type GmiEditionPublicContract = {
     available: boolean;
     downloadPath: string | null;
   };
-  archiveContext: {
-    previousEdition: GmiEditionLink | null;
-    nextEdition: GmiEditionLink | null;
-    currentEdition: GmiEditionLink;
-  };
+  familyChronology: GmiFamilyChronology;
 };

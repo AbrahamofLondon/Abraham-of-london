@@ -118,9 +118,9 @@ function CheckoutForm({ edition }: Props) {
       <div className="border border-white/14 bg-white/[0.035] p-5">
         <ClassificationStamp dark>Reference record</ClassificationStamp>
         <p className="mt-4 text-sm leading-7 text-white/64">This edition remains public as part of the accountability archive. New acquisition routes to the current authorised edition.</p>
-        <Link href={edition.archiveContext.currentEdition.href} className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#B59258] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#D7BC84]">
+        {edition.familyChronology.currentEdition.href ? <Link href={edition.familyChronology.currentEdition.href} className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#B59258] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#D7BC84]">
           Go to current edition <ArrowRight className="h-4 w-4" aria-hidden />
-        </Link>
+        </Link> : null}
       </div>
     );
   }
@@ -470,33 +470,33 @@ export default function GmiEditionLandingPage({ edition }: Props) {
               <div className="border-l-2 border-[#B59258] pl-4">
                 <div className="flex items-center gap-3">
                   <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#B59258]">Current</span>
-                  <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.archiveContext.currentEdition.editionId}</span>
+                  <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.currentEdition.editionId}</span>
                 </div>
-                <p className="mt-1 font-serif text-lg" style={{ color: "#11161C" }}>{edition.archiveContext.currentEdition.title}</p>
+                <p className="mt-1 font-serif text-lg" style={{ color: "#11161C" }}>{edition.familyChronology.currentEdition.title}</p>
                 <p className="font-mono text-[11px] text-[#7A6A4C]">Published {formatDate(edition.publishedAt)}</p>
               </div>
-              {edition.archiveContext.previousEdition ? (
+              {edition.familyChronology.previousPublishedEdition ? (
                 <div className="border-l-2 border-[#11161C]/20 pl-4">
                   <div className="flex items-center gap-3">
                     <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">Reference</span>
-                    <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.archiveContext.previousEdition.editionId}</span>
+                    <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.familyChronology.previousPublishedEdition?.editionId}</span>
                   </div>
-                  <p className="mt-1 font-serif text-lg" style={{ color: "#5E6468" }}>{edition.archiveContext.previousEdition.title}</p>
-                  <Link href={edition.archiveContext.previousEdition.href} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[#B59258] transition hover:text-[#D7BC84]">
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#5E6468" }}>{edition.familyChronology.previousPublishedEdition?.title}</p>
+                  {edition.familyChronology.previousPublishedEdition?.href ? <Link href={edition.familyChronology.previousPublishedEdition.href} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[#B59258] transition hover:text-[#D7BC84]">
                     View reference edition <ArrowRight className="h-3 w-3" aria-hidden />
-                  </Link>
+                  </Link> : null}
                 </div>
               ) : null}
-              {edition.archiveContext.nextEdition ? (
+              {edition.familyChronology.upcomingEdition ? (
                 <div className="border-l-2 border-dashed border-[#11161C]/15 pl-4">
                   <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">Next</span>
-                  <p className="mt-1 font-serif text-lg" style={{ color: "#7A6A4C" }}>{edition.archiveContext.nextEdition.title}</p>
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#7A6A4C" }}>{edition.familyChronology.upcomingEdition?.title}</p>
                 </div>
               ) : null}
             </div>
             <div className="mt-6 flex flex-wrap gap-3 pt-4 border-t border-[#11161C]/8">
-              {edition.archiveContext.previousEdition ? <Link href={edition.archiveContext.previousEdition.href} className="inline-flex min-h-10 items-center gap-2 border border-[#11161C]/18 px-4 py-2 text-sm font-medium" style={{ color: "#5E6468" }}>Previous edition <ArrowRight className="h-3 w-3" aria-hidden /></Link> : null}
-              {!edition.isCurrent ? <Link href={edition.archiveContext.currentEdition.href} className="inline-flex min-h-10 items-center gap-2 border border-[#B59258]/45 px-4 py-2 text-sm font-medium" style={{ color: "#B59258" }}>Current edition <ArrowRight className="h-3 w-3" aria-hidden /></Link> : null}
+              {edition.familyChronology.previousPublishedEdition?.href ? <Link href={edition.familyChronology.previousPublishedEdition.href} className="inline-flex min-h-10 items-center gap-2 border border-[#11161C]/18 px-4 py-2 text-sm font-medium" style={{ color: "#5E6468" }}>Previous edition <ArrowRight className="h-3 w-3" aria-hidden /></Link> : null}
+              {!edition.isCurrent && edition.familyChronology.currentEdition.href ? <Link href={edition.familyChronology.currentEdition.href} className="inline-flex min-h-10 items-center gap-2 border border-[#B59258]/45 px-4 py-2 text-sm font-medium" style={{ color: "#B59258" }}>Current edition <ArrowRight className="h-3 w-3" aria-hidden /></Link> : null}
               {edition.pdf.available && edition.pdf.downloadPath ? <Link href={edition.pdf.downloadPath} className="inline-flex min-h-10 items-center gap-2 border border-[#11161C]/18 px-4 py-2 text-sm font-medium" style={{ color: "#5E6468" }}>PDF access</Link> : null}
             </div>
           </div>

@@ -56,8 +56,8 @@ describe("GMI public edition landing-page factory", () => {
     expect(q1.commerce.checkoutEligible).toBe(false);
     expect(q1.readerAccessState).toBe("PUBLIC_SUMMARY");
     expect(q1.consequenceMatrix[0]?.accessLevel).toBe("PUBLIC");
-    expect(q1.archiveContext.currentEdition.editionId).toBe("GMI-Q2-2026");
-    expect(q1.archiveContext.currentEdition.href).toBe("/intelligence/global-market-intelligence-q2-2026");
+    expect(q1.familyChronology.currentEdition.editionId).toBe("GMI-Q2-2026");
+    expect(q1.familyChronology.currentEdition.href).toBe("/intelligence/global-market-intelligence-q2-2026");
   });
 
   it("excludes draft/future editions from public resolution", async () => {

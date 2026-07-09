@@ -2,7 +2,7 @@ import { CATALOG } from "@/lib/commercial/catalog";
 import { GMI_EDITION_REGISTRY } from "@/lib/commercial/gmi/gmi-edition-registry";
 import { resolvePricingAction } from "@/lib/commercial/pricing-actions";
 import { getGmiPublicEditionContent } from "./gmi-public-edition-content";
-import type { GmiEditionLink, GmiEditionPublicContract } from "./gmi-public-edition-contract";
+import type { GmiChronologyEntry, GmiEditionLink, GmiEditionPublicContract, GmiFamilyChronology } from "./gmi-public-edition-contract";
 import {
   getMarketIntelligenceRecord,
   getPublicMarketIntelligenceReports,
@@ -185,6 +185,52 @@ export async function resolvePublicGmiEdition(
   const predecessor = record.replaces ? getMarketIntelligenceRecord(record.replaces) : null;
   const successor = record.supersededBy ? getMarketIntelligenceRecord(record.supersededBy) : null;
 
+function buildFamilyChronology(
+  editionId: string,
+  record: MarketIntelligenceLifecycleRecord,
+  entry: { slug: string; editionId: string } | null,
+  currentEdition: GmiEditionLink,
+): GmiFamilyChronology {
+  const allRecords = getPublicMarketIntelligenceReports();
+  const sorted = [...allRecords].sort(
+    (a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime()
+  );
+  const viewedIdx = sorted.findIndex((r) => r.id === editionId);
+  const currentIdx = sorted.findIndex((r) => r.id === currentEdition.editionId);
+
+  const toEntry = (
+    r: MarketIntelligenceLifecycleRecord | null,
+    relationship: GmiChronologyEntry["relationship"]
+  ): GmiChronologyEntry | null => {
+    if (!r) return null;
+    const e = entryForEdition(r.id);
+    return {
+      editionId: r.id,
+      title: r.title,
+      shortTitle: `${r.quarter} ${r.year}`,
+      lifecycleState: r.lifecycleState,
+      relationship,
+      publishedAt: r.publishedAt ?? null,
+      publicationTarget: r.publicationTarget ?? null,
+      href: e ? gmiPublicHrefForEditionSlug(e.slug) : null,
+      publicVisible: r.publicVisible,
+      purchasable: r.purchasable,
+    };
+  };
+
+  const viewedEntry = toEntry(record, viewedIdx === currentIdx ? "CURRENT" : "REFERENCE")!;
+  const currentEntry = toEntry(sorted[currentIdx] ?? null, currentIdx === viewedIdx ? "VIEWED" : "CURRENT")!;
+  const previousPublished = sorted.find((r) => r.id !== editionId && r.id !== currentEdition.editionId && r.publicVisible) ?? null;
+  const upcoming = sorted.find((r) => r.lifecycleState === "DRAFT" || r.lifecycleState === "SCHEDULED") ?? null;
+
+  return {
+    viewedEdition: viewedEntry,
+    currentEdition: currentEntry,
+    previousPublishedEdition: toEntry(previousPublished, "REFERENCE"),
+    upcomingEdition: toEntry(upcoming, "UPCOMING"),
+  };
+}
+
   return {
     editionId,
     familyId: "gmi-quarterly",
@@ -195,13 +241,16 @@ export async function resolvePublicGmiEdition(
     periodEnd: record.periodEnd ?? "",
     publicationTarget: record.publicationTarget ?? record.publishedAt ?? entry.releaseDate ?? "",
     publishedAt,
+    dataLockedAt: record.dataLockedAt ?? null,
     lifecycleState: publicState as GmiEditionPublicContract["lifecycleState"],
     isCurrent,
     isPublic,
     isPurchasable: checkoutEligible,
     predecessorEditionId: record.replaces ?? null,
     successorEditionId: supersededBy,
-    version: record.version ?? "1.0.0",
+    editionVersion: record.version ?? "1.0.0",
+    releaseMethodologyRef: content.releaseMethodologyRef,
+    reviewMethodologyVersion: content.reviewMethodologyVersion,
     methodologyVersion: releaseProof.methodologyVersion ?? record.version ?? "1.0.0",
     readerAccessState: isCurrent ? "ACQUISITION_VISITOR" : "PUBLIC_SUMMARY",
     hero: content.hero,
@@ -246,10 +295,6 @@ export async function resolvePublicGmiEdition(
       available: Boolean(content.pdfPath || releaseProof.pdfHash),
       downloadPath: content.pdfPath,
     },
-    archiveContext: {
-      previousEdition: toEditionLink(predecessor),
-      nextEdition: toEditionLink(successor),
-      currentEdition,
-    },
+    familyChronology: buildFamilyChronology(editionId, record, entry, currentEdition),
   };
 }

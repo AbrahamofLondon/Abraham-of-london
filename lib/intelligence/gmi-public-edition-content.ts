@@ -13,6 +13,9 @@ import type {
 } from "./gmi-public-edition-contract";
 
 export type GmiPublicEditionContentRecord = {
+  editionVersion: string;
+  releaseMethodologyRef: string | null;
+  reviewMethodologyVersion: string | null;
   editionId: string;
   hero: { eyebrow: string; headline: string; deck: string; primaryBuyer: string };
   executiveSummary: string;
@@ -93,10 +96,10 @@ const q1RegionalLayers: GmiRegionalLayer[] = [
   {
     region: "AFRICA",
     label: "Africa",
-    evidenceState: "UNAVAILABLE",
+    evidenceState: "DEVELOPING",
     direction: null,
     confidence: null,
-    publicSummary: "Africa was not within the GMI evidence scope for Q1 2026. Regional coverage begins with the Q2 2026 edition.",
+    publicSummary: "Q1 registered an Africa strategic-infrastructure thesis, but the evidence base was insufficient for a publication-grade regional assessment. The call was carried forward for further evidence collection and successor review.",
     operatingImplication: null,
     triggerToMonitor: null,
     subregions: [],
@@ -108,7 +111,7 @@ const q1RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "UNAVAILABLE",
     direction: null,
     confidence: null,
-    publicSummary: "Latin America was not within the GMI evidence scope for Q1 2026. Regional coverage begins with the Q2 2026 edition.",
+    publicSummary: "No separate publication-grade regional assessment was issued in Q1. The research programme begins in the Q2–Q3 cycle.",
     operatingImplication: null,
     triggerToMonitor: null,
     subregions: [],
@@ -120,7 +123,7 @@ const q1RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "UNAVAILABLE",
     direction: null,
     confidence: null,
-    publicSummary: "The Middle East was not within the GMI evidence scope for Q1 2026. Regional coverage begins with the Q2 2026 edition.",
+    publicSummary: "No separate publication-grade regional assessment was issued in Q1. The research programme begins in the Q2–Q3 cycle.",
     operatingImplication: null,
     triggerToMonitor: null,
     subregions: [],
@@ -143,6 +146,9 @@ const q2Matrix: GmiConsequenceMatrixRow[] = [
 export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[] = [
   {
     editionId: "GMI-Q1-2026",
+    editionVersion: "2.0.0",
+    releaseMethodologyRef: null,
+    reviewMethodologyVersion: "GMI-METHOD-1.0.0",
     hero: {
       eyebrow: "Global Market Intelligence · Q1 2026",
       headline: "Structural pressure replaced cyclical comfort.",
@@ -183,6 +189,9 @@ export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[
   },
   {
     editionId: "GMI-Q2-2026",
+    editionVersion: "1.0.0",
+    releaseMethodologyRef: "GMI-METHOD-1.0.0",
+    reviewMethodologyVersion: null,
     hero: {
       eyebrow: "Global Market Intelligence · Q2 2026",
       headline: "Fragmentation under shock: the current board intelligence edition.",
