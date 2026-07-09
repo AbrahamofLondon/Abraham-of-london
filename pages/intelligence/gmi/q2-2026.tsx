@@ -65,7 +65,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     ? snapshotState.falsificationRules
     : falsification.data;
   const boardState = snapshotState?.boardPulse ?? board.data;
-  const performanceState = snapshotState?.performance ?? performance.data;
+  // Merge canonical performance.data defaults with snapshot performance values.
+  // Snapshot values take precedence where present, but the canonical record supplies
+  // methodologyVersion, rubricVersion and other fields the snapshot may not include.
+  const performanceState = { ...performance.data, ...(snapshotState?.performance ?? {}) };
   const decisions = boardState?.decisionsToMakeIn30Days ?? [];
   return {
     props: {
