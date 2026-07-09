@@ -15,6 +15,22 @@ const semanticMonitoring = "#9A7B3C";
 const semanticContradicted = "#6B3A3A";
 const semanticUnresolved = "#4A4A50";
 
+function CopyButton({ value, label }: { value: string | null; label: string }) {
+  const [copied, setCopied] = React.useState(false);
+  if (!value) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+      className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.12em] transition hover:opacity-70"
+      style={{ color: "#7A6A4C" }}
+      aria-label={"Copy " + label}
+    >
+      {copied ? "Copied" : "Copy full digest"}
+    </button>
+  );
+}
+
 function shortProofReference(value: string | null): string {
   return value ? `${value.slice(0, 12)}...${value.slice(-8)}` : "Not public";
 }
@@ -134,7 +150,7 @@ function CheckoutForm({ edition }: Props) {
     <form onSubmit={submit} className="border border-[#B59258]/40 bg-[#B59258]/10 p-5" aria-describedby="gmi-checkout-help gmi-checkout-error">
       <ClassificationStamp dark>Current acquisition</ClassificationStamp>
       <p className="mt-5 text-3xl font-semibold text-white">{edition.commerce.priceLabel}</p>
-      <p id="gmi-checkout-help" className="mt-3 text-sm leading-7 text-white/64">Checkout binds the GMI family, {edition.editionId}, price authority and release receipt. No ambiguous edition purchase.</p>
+      <p id="gmi-checkout-help" className="mt-3 text-sm leading-7 text-white/64">Checkout binds the GMI family, {edition.editionId}, price authority and release receipt. No ambiguous edition purchase.</p><p className="mt-3 text-sm leading-6" style={{ color: "rgba(255,255,255,0.4)" }}>Decision-support intelligence for boards and operators. Not investment advice and not a recommendation to buy or sell any security.</p>
       <label htmlFor="gmi-checkout-email" className="mt-5 block text-sm font-medium text-white/82">Email for access</label>
       <input id="gmi-checkout-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 min-h-12 w-full border border-white/18 bg-black/45 px-4 py-3 text-base text-white outline-none transition focus:border-[#D7BC84] focus:ring-2 focus:ring-[#D7BC84]/30" required />
       {error ? <p id="gmi-checkout-error" className="mt-3 text-sm text-red-200" role="alert">{error}</p> : <span id="gmi-checkout-error" className="sr-only" />}
@@ -145,7 +161,7 @@ function CheckoutForm({ edition }: Props) {
       {edition.commerce.checkoutEligible && edition.isCurrent ? (
         <dl className="mt-4 space-y-1 border-t border-[#B59258]/20 pt-4 font-mono text-[11px] text-white/45">
           <div className="flex justify-between"><dt>Edition</dt><dd>{edition.editionId}</dd></div>
-          <div className="flex justify-between"><dt>Evidence lock</dt><dd>{edition.evidenceSummary.sourceSnapshotHash ? formatDate(edition.publishedAt) : "Reference"}</dd></div>
+          <div className="flex justify-between"><dt>Evidence lock</dt><dd>{edition.dataLockedAt ? formatDate(edition.dataLockedAt) : "Reference"}</dd></div>
           <div className="flex justify-between"><dt>Checkout</dt><dd>{edition.commerce.commercialState.replace(/_/g, " ")}</dd></div>
         </dl>
       ) : null}
@@ -367,7 +383,7 @@ export default function GmiEditionLandingPage({ edition }: Props) {
                   </div>
                   <div className="border border-[#B59258]/25 bg-[#B59258]/10 p-4">
                     <p className="font-sans text-[12px] font-medium uppercase tracking-[0.14em] text-[#D7BC84]">Proprietary analysis / licensed reader access</p>
-                    <p className="mt-2 text-sm leading-7 text-white/58">The full action vector, trigger, risk of inaction and evidence chain are reserved for entitled readers.</p>
+                    <p className="mt-2 text-sm leading-7 text-white/58">The full action vector, trigger, risk of inaction and evidence chain are reserved for entitled readers.<a href="#acquire-gmi" className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[#D7BC84] transition hover:opacity-70">What the full edition includes <ArrowRight className="h-3 w-3" aria-hidden /></a></p>
                   </div>
                 </div>
               </article>
@@ -432,7 +448,7 @@ export default function GmiEditionLandingPage({ edition }: Props) {
                 <dl className="mt-4 space-y-3 text-sm">
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Edition</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.editionId}</dd></div>
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Published</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{formatDate(edition.publishedAt)}</dd></div>
-                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Evidence locked</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.evidenceSummary.sourceSnapshotHash ? formatDate(edition.publishedAt) : "Reference"}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Evidence locked</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.dataLockedAt ? formatDate(edition.dataLockedAt) : "Reference"}</dd></div>
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Methodology</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.methodologyVersion}</dd></div>
                   <div className="flex justify-between"><dt className="text-[#7A6A4C]">Source coverage</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.evidenceSummary.coverageState}</dd></div>
                 </dl>
@@ -443,7 +459,7 @@ export default function GmiEditionLandingPage({ edition }: Props) {
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Receipt</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.releaseProof.receiptRef ?? "Reference"}</dd></div>
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Candidate reference</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.candidateHash)}</dd></div>
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Report content reference</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.reportContentHash)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-[#7A6A4C]">PDF SHA-256</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.pdfHash)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-[#7A6A4C]">PDF SHA-256</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.pdfHash)}</dd></div>{edition.releaseProof.pdfHash ? <div className="mt-1 text-right"><CopyButton value={edition.releaseProof.pdfHash} label="PDF SHA-256 digest" /></div> : null}
                 </dl>
               </div>
               <div>
@@ -459,7 +475,7 @@ export default function GmiEditionLandingPage({ edition }: Props) {
         </div>
       </section>
 
-      <section className="px-6 py-16" style={{ backgroundColor: "#11161C" }}>
+      <section id="acquire-gmi" className="px-6 py-16" style={{ backgroundColor: "#11161C" }}>
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.72fr] lg:items-start">
           <div>
             <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#D7BC84]">Commercial corridor</p>
