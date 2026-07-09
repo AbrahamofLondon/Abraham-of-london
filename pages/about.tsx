@@ -32,7 +32,7 @@ function Eyebrow({ children, tone = "gold" }: { children: React.ReactNode; tone?
     <p
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: tone === "gold" ? `${GOLD}80` : "rgba(255,255,255,0.28)",
@@ -133,7 +133,7 @@ const AboutPage: NextPage = () => (
               href="/method"
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}BB`,
@@ -149,7 +149,7 @@ const AboutPage: NextPage = () => (
               href="/trust"
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -165,7 +165,7 @@ const AboutPage: NextPage = () => (
               href="/library"
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -201,7 +201,7 @@ const AboutPage: NextPage = () => (
               className="mt-3 inline-flex items-center gap-2"
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}AA`,
@@ -235,7 +235,7 @@ const AboutPage: NextPage = () => (
                   <span
                     style={{
                       ...mono,
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                       color: `${GOLD}AA`,
@@ -271,7 +271,7 @@ const AboutPage: NextPage = () => (
                   <span
                     style={{
                       ...mono,
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.65)",
@@ -354,7 +354,7 @@ const AboutPage: NextPage = () => (
               href="/method"
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.32)",

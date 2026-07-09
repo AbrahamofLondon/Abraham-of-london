@@ -21,7 +21,7 @@ export default function IntelligenceContradictionsPage() {
       </Head>
       <div style={{ backgroundColor: "rgb(3,3,5)", minHeight: "100vh", color: "white" }}>
         <div style={{ maxWidth: "820px", margin: "0 auto", padding: "56px 24px 96px" }}>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.72)" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(252,165,165,0.72)" }}>
             Contradictions
           </p>
           <h1 style={{ ...serif, fontSize: "clamp(2rem, 5vw, 3rem)", lineHeight: 1.04, color: "rgba(255,255,255,0.90)", fontStyle: "italic", marginTop: "10px" }}>
@@ -43,7 +43,7 @@ export default function IntelligenceContradictionsPage() {
             />
           </div>
           <div style={{ marginTop: "28px" }}>
-            <Link href="/decision-centre" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}>
+            <Link href="/decision-centre" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}>
               Return to Decision Centre
             </Link>
           </div>

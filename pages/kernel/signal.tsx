@@ -113,7 +113,7 @@ export default function KernelSignalPage() {
       <div style={{ backgroundColor: 'rgb(3,3,5)', color: 'white', minHeight: '100vh' }}>
         {/* Internal preview banner */}
         <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 text-center">
-          <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F59E0B' }}>
+          <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F59E0B' }}>
             Internal Preview — Not for public navigation. Use /foundry/decision-test for the canonical public route.
           </p>
         </div>
@@ -183,7 +183,7 @@ export default function KernelSignalPage() {
 
           {/* How it works */}
           <div className="mt-16 border-t border-white/[0.06] pt-8">
-            <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: `${GOLD}60`, marginBottom: '0.75rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: `${GOLD}60`, marginBottom: '0.75rem' }}>
               What happens
             </p>
             <div className="grid gap-3 md:grid-cols-2">
@@ -194,7 +194,7 @@ export default function KernelSignalPage() {
                 { label: 'Signal', text: 'You receive a free signal: the primary failure point, governing tension, and direction of move.' },
               ].map(({ label, text }) => (
                 <div key={label} className="border-l-2 border-white/[0.08] pl-3">
-                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}70`, marginBottom: '0.2rem' }}>{label}</p>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}70`, marginBottom: '0.2rem' }}>{label}</p>
                   <p className="text-[12px] leading-[1.6] text-white/40">{text}</p>
                 </div>
               ))}

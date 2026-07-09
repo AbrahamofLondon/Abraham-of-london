@@ -116,7 +116,7 @@ export default function ForensicAccountPanel({ account, showWarnings = true }: P
         <p
           style={{
             ...MONO,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "rgba(201,169,110,0.50)",
@@ -141,10 +141,10 @@ export default function ForensicAccountPanel({ account, showWarnings = true }: P
         </p>
         {account.strongestPredictor.presentInPositiveOutcomes > 0 && (
           <div style={{ display: "flex", gap: "16px", marginTop: "10px", flexWrap: "wrap" }}>
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.45)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.45)" }}>
               Present in {account.strongestPredictor.presentInPositiveOutcomes} positive outcomes
             </span>
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.35)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.35)" }}>
               {account.strongestPredictor.presentInNegativeOutcomes} negative
             </span>
           </div>
@@ -198,7 +198,7 @@ export default function ForensicAccountPanel({ account, showWarnings = true }: P
         <p
           style={{
             ...MONO,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "#555",
@@ -232,7 +232,7 @@ export default function ForensicAccountPanel({ account, showWarnings = true }: P
         <span
           style={{
             ...MONO,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.15)",

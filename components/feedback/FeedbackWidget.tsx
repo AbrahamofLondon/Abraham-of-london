@@ -59,7 +59,7 @@ function iconButtonStyle(active: boolean): React.CSSProperties {
 function chipStyle(active: boolean): React.CSSProperties {
   return {
     ...mono,
-    fontSize: "7px",
+    fontSize: "11px",
     letterSpacing: 0,
     textTransform: "uppercase",
     border: active ? `1px solid ${GOLD}55` : "1px solid rgba(255,255,255,0.08)",
@@ -191,21 +191,21 @@ export default function FeedbackWidget({
 
       {state === "idle" && (
         <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
             Was this a useful signal?
           </span>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button aria-label="Useful" onClick={() => chooseRating("positive")} style={iconButtonStyle(false)}>
               <CheckCircle2 style={{ width: 12, height: 12 }} />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: 0 }}>Useful</span>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: 0 }}>Useful</span>
             </button>
             <button aria-label="Not useful" onClick={() => chooseRating("negative")} style={iconButtonStyle(false)}>
               <ThumbsDown style={{ width: 12, height: 12 }} />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: 0 }}>Not useful</span>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: 0 }}>Not useful</span>
             </button>
             <button aria-label="Unsure" onClick={() => chooseRating("neutral")} style={iconButtonStyle(false)}>
               <CircleHelp style={{ width: 12, height: 12 }} />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: 0 }}>Unsure</span>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: 0 }}>Unsure</span>
             </button>
           </div>
         </div>
@@ -215,7 +215,7 @@ export default function FeedbackWidget({
         <div>
           {needsCategory && (
             <div style={{ marginBottom: "12px" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
                 What affected your judgement?
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
@@ -234,7 +234,7 @@ export default function FeedbackWidget({
           )}
 
           <div style={{ marginBottom: "12px" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
               Confidence
             </p>
             <div style={{ display: "flex", gap: "7px", flexWrap: "wrap" }}>
@@ -275,7 +275,7 @@ export default function FeedbackWidget({
               checked={followupRequested}
               onChange={(e) => setFollowupRequested(e.target.checked)}
             />
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: 0, textTransform: "uppercase" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: 0, textTransform: "uppercase" }}>
               I want someone to follow up
             </span>
           </label>
@@ -287,7 +287,7 @@ export default function FeedbackWidget({
               disabled={!canSubmit}
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.10em",
                 textTransform: "uppercase",
                 padding: "6px 12px",
@@ -304,7 +304,7 @@ export default function FeedbackWidget({
               onClick={() => setState("idle")}
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.10em",
                 textTransform: "uppercase",
                 padding: "6px 12px",
@@ -321,14 +321,14 @@ export default function FeedbackWidget({
       )}
 
       {state === "submitting" && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
           Sending...
         </p>
       )}
 
       {state === "done" && (
         <div>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)", lineHeight: 1.7 }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)", lineHeight: 1.7 }}>
             {message}
           </p>
           {nextActions.length > 0 && (
@@ -339,7 +339,7 @@ export default function FeedbackWidget({
                   href={action.href}
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     color: `${GOLD}D0`,
@@ -358,7 +358,7 @@ export default function FeedbackWidget({
       )}
 
       {state === "error" && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(220,50,50,0.65)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(220,50,50,0.65)" }}>
           Could not send feedback. Try again later.
         </p>
       )}

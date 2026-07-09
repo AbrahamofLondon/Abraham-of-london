@@ -35,7 +35,7 @@ const AuthorityCenterPage: NextPage<Props> = ({ stats, topContradictions, blocki
       <div className="space-y-6">
         {/* Header */}
         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
             Authority center
           </span>
           <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginTop: "0.25rem" }}>
@@ -69,7 +69,7 @@ const AuthorityCenterPage: NextPage<Props> = ({ stats, topContradictions, blocki
             <div key={i} style={{ marginTop: "0.35rem", paddingTop: i > 0 ? "0.3rem" : 0, borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
               <div className="flex items-center gap-2">
                 <AlertTriangle style={{ width: 10, height: 10, color: "rgba(252,165,165,0.50)" }} />
-                <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color: c.severity === "critical" ? "rgba(252,165,165,0.65)" : "rgba(253,186,116,0.60)" }}>{c.severity}</span>
+                <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color: c.severity === "critical" ? "rgba(252,165,165,0.65)" : "rgba(253,186,116,0.60)" }}>{c.severity}</span>
                 <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>{Math.round(c.confidence * 100)}% · {c.sourceStage}</span>
               </div>
               <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.40)", marginTop: "0.1rem" }}>{c.label}</p>
@@ -85,7 +85,7 @@ const AuthorityCenterPage: NextPage<Props> = ({ stats, topContradictions, blocki
             </span>
             {blockingStakeholders.map((s, i) => (
               <div key={i} style={{ marginTop: "0.3rem" }}>
-                <span style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.55)" }}>BLOCKING</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.55)" }}>BLOCKING</span>
                 <span style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.40)", marginLeft: "0.5rem" }}>{s.name} ({s.role})</span>
                 <p style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.18)", marginTop: "0.05rem" }}>Decision: {s.decisionText.slice(0, 80)}</p>
               </div>
@@ -117,7 +117,7 @@ const AuthorityCenterPage: NextPage<Props> = ({ stats, topContradictions, blocki
             { href: "/admin/enterprise-foundation", label: "Foundation" },
             { href: "/admin/proof", label: "Proof Queue" },
           ].map((l) => (
-            <Link key={l.href} href={l.href} className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", border: "1px solid rgba(255,255,255,0.06)", padding: "6px 12px" }}>
+            <Link key={l.href} href={l.href} className="inline-flex items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", border: "1px solid rgba(255,255,255,0.06)", padding: "6px 12px" }}>
               {l.label} <ArrowRight style={{ width: 9, height: 9 }} />
             </Link>
           ))}

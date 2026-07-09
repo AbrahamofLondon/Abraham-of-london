@@ -29,7 +29,7 @@ export default function ResultAction({
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: AMBER,
@@ -39,7 +39,7 @@ export default function ResultAction({
       </div>
       {steps.map((s, i) => (
         <div key={i} className="flex items-start gap-2 py-1" style={{ borderBottom: i < steps.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: `${AMBER}80`, flexShrink: 0 }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: `${AMBER}80`, flexShrink: 0 }}>
             {String(i + 1).padStart(2, "0")}
           </span>
           <div>

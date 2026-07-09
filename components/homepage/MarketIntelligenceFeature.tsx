@@ -61,7 +61,7 @@ export default function MarketIntelligenceFeature() {
             <TrendingUp style={{ width: "14px", height: "14px", color: `${GOLD}AA` }} />
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
               color: `${GOLD}BB`,
             }}>
               Global Market Intelligence
@@ -84,7 +84,7 @@ export default function MarketIntelligenceFeature() {
             backgroundColor: `${GOLD}06`,
             color: `${GOLD}B8`,
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.24em",
             textTransform: "uppercase",
             padding: "0.35rem 0.6rem",
@@ -157,7 +157,7 @@ export default function MarketIntelligenceFeature() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
                       color: ed.gold ? `${GOLD}AA` : "rgba(255,255,255,0.28)",
                       marginBottom: "0.4rem",
                     }}>
@@ -174,7 +174,7 @@ export default function MarketIntelligenceFeature() {
                     <div style={{
                       display: "flex", alignItems: "center", gap: "0.4rem",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
                       color: ed.gold ? `${GOLD}BB` : "rgba(255,255,255,0.28)",
                     }}>
                       {ed.cta}

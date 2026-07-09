@@ -69,7 +69,7 @@ const EscalationReadinessRun: NextPage = () => {
             Readiness: {result.readinessScore}/100 — {result.readinessBand.replace(/_/g, " ")}
           </div>
           <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>{result.recommendation}</p>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", color: "rgba(255,255,255,0.15)" }}>Result saved. Governed. v{result.version}</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "rgba(255,255,255,0.15)" }}>Result saved. Governed. v{result.version}</p>
         </div>
       )}
     </InstrumentShell>

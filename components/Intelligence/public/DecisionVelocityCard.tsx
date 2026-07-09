@@ -43,7 +43,7 @@ export default function DecisionVelocityCard({
         padding: "16px 18px",
       }}
     >
-      <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
         {title}
       </div>
       <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: bandColor(summary.decisionVelocityBand), marginTop: "6px" }}>
@@ -59,10 +59,10 @@ export default function DecisionVelocityCard({
         <Metric label="Completed" value={String(summary.completedCheckpointCount)} />
         <Metric label="Blocked" value={String(summary.blockedCheckpointCount)} />
       </div>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "12px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "12px" }}>
         Scope: {summary.meta.scope.scopeLabel} · Source: {summary.sourceLabel} · Recorded: {formatDate(summary.meta.capturedAt ?? summary.meta.currentCapturedAt)}
       </p>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
         Evidence posture: {summary.evidencePosture.replace(/_/g, " ").toLowerCase()} · Data quality: {summary.meta.dataQuality.toLowerCase().replace(/_/g, " ")}
       </p>
       {summary.caution && (
@@ -87,7 +87,7 @@ export default function DecisionVelocityCard({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
         {label}
       </div>
       <div style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.45, color: "rgba(255,255,255,0.72)", marginTop: "4px" }}>

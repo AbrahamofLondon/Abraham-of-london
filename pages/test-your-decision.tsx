@@ -169,7 +169,7 @@ export default function TestYourDecisionPage() {
                         <span
                           style={{
                             ...mono,
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.14em",
                             textTransform: "uppercase",
                             color: "rgba(255,255,255,0.25)",

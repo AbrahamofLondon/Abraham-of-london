@@ -42,10 +42,10 @@ export default function ContradictionMapPreview({
         padding: "16px 18px",
       }}
     >
-      <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.72)" }}>
+      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.72)" }}>
         {title}
       </div>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
         Scope: {view.meta.scope.scopeLabel} · Source: {view.meta.sourceLabel} · As of {formatDate(view.asOf)}
       </p>
       <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "8px" }}>
@@ -55,10 +55,10 @@ export default function ContradictionMapPreview({
         {view.activeContradictions.filter((item) => item.safeToDisplay).slice(0, 4).map((item) => (
           <div key={item.id} style={{ borderLeft: `2px solid ${severityColor(item.severityBand)}`, paddingLeft: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", flexWrap: "wrap" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: severityColor(item.severityBand) }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: severityColor(item.severityBand) }}>
                 {item.severityBand} · {item.trend.toLowerCase()}
               </span>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                 First seen {formatDate(item.capturedAt)} · Last seen {formatDate(item.lastSeenAt)}
               </span>
             </div>
@@ -68,7 +68,7 @@ export default function ContradictionMapPreview({
             <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)", marginTop: "5px" }}>
               Related decision signals: {item.relatedSignals.join(", ")}.
             </p>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "5px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "5px" }}>
               Source: {item.sourceLabel} · Evidence posture: {item.evidencePosture.replace(/_/g, " ").toLowerCase()} · Status: {item.currentStatus}
             </p>
             {item.suggestedNextAction && (

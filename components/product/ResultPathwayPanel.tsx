@@ -35,7 +35,7 @@ export default function ResultPathwayPanel({
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}88`,
@@ -66,7 +66,7 @@ export default function ResultPathwayPanel({
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           lineHeight: 1.7,
           color: "rgba(255,255,255,0.28)",
           marginBottom: "1rem",
@@ -126,7 +126,7 @@ function PathwayRow({ label, value }: { label: string; value: string }) {
       <span
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.24)",
@@ -135,7 +135,7 @@ function PathwayRow({ label, value }: { label: string; value: string }) {
       >
         {label}
       </span>
-      <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.46)" }}>
+      <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.46)" }}>
         {value}
       </span>
     </div>
@@ -160,7 +160,7 @@ function actionStyle(primary: boolean): React.CSSProperties {
 
 const actionLabelStyle: React.CSSProperties = {
   ...mono,
-  fontSize: "7px",
+  fontSize: "11px",
   letterSpacing: "0.18em",
   textTransform: "uppercase",
   color: "rgba(255,255,255,0.24)",
@@ -169,7 +169,7 @@ const actionLabelStyle: React.CSSProperties = {
 
 const reasonStyle: React.CSSProperties = {
   ...mono,
-  fontSize: "7.5px",
+  fontSize: "11px",
   lineHeight: 1.6,
   color: "rgba(255,255,255,0.22)",
   marginTop: "0.4rem",

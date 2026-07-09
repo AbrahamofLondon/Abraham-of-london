@@ -70,7 +70,7 @@ function CapabilityCard({ icon, label, body }: CapabilityItem) {
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: `${GOLD}BB`,
@@ -97,7 +97,7 @@ function ProtectionBadge({ children }: { children: React.ReactNode }) {
         backgroundColor: `${GOLD}06`,
         color: `${GOLD}AA`,
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.14em",
         textTransform: "uppercase",
         padding: "0.25rem 0.55rem",
@@ -168,7 +168,7 @@ export default function EnterpriseDecisionAuthorityPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.24em",
                 textTransform: "uppercase",
                 color: `${GOLD}65`,
@@ -189,7 +189,7 @@ export default function EnterpriseDecisionAuthorityPage() {
                   <span
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color:
@@ -287,7 +287,7 @@ export default function EnterpriseDecisionAuthorityPage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: `${GOLD}88`,
@@ -321,7 +321,7 @@ export default function EnterpriseDecisionAuthorityPage() {
                       <p
                         style={{
                           ...mono,
-                          fontSize: "8px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           color: `${GOLD}99`,
@@ -348,7 +348,7 @@ export default function EnterpriseDecisionAuthorityPage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: `${GOLD}88`,
@@ -382,7 +382,7 @@ export default function EnterpriseDecisionAuthorityPage() {
                       <p
                         style={{
                           ...mono,
-                          fontSize: "8px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           color: `${GOLD}99`,
@@ -428,7 +428,7 @@ export default function EnterpriseDecisionAuthorityPage() {
                   <p
                     style={{
                       ...mono,
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
                       color: `${GOLD}AA`,

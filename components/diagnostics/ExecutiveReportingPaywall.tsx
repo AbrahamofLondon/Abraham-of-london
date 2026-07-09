@@ -141,7 +141,7 @@ export default function ExecutiveReportingPaywall({
 
       {/* CONDITION SUMMARY */}
       <div className="mb-6 border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-        <div className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}>Your current condition</div>
+        <div className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase" }}>Your current condition</div>
         <ul className="space-y-2 text-sm leading-6 text-white/72">
           {currentCondition.slice(0, 3).map((item) => (
             <li key={item}>• {item}</li>
@@ -153,7 +153,7 @@ export default function ExecutiveReportingPaywall({
       <div className="mb-6 border border-white/10 bg-white/[0.02] p-5 sm:p-6">
         {hasCostText ? (
           <>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
               You said this is costing:
             </p>
             <p className="mt-2 text-[15px] leading-7 text-white/70" style={{ fontStyle: "italic" }}>
@@ -175,7 +175,7 @@ export default function ExecutiveReportingPaywall({
 
       {/* WHAT HAPPENS IN STAGE 4 */}
       <div className="mb-6 border border-white/10 bg-black/35 p-5 text-sm sm:p-6">
-        <div className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>What changes here</div>
+        <div className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" }}>What changes here</div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="border border-white/10 p-4">
             <div className="mb-1 text-white/45">Stages 1-3</div>
@@ -190,7 +190,7 @@ export default function ExecutiveReportingPaywall({
 
       {/* OUTPUT LIST — strong language */}
       <div className="mb-6">
-        <h3 className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>This produces:</h3>
+        <h3 className="mb-3 font-medium text-white" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" }}>This produces:</h3>
         <ul className="space-y-2 text-sm leading-6 text-white/72">
           <li>• Position statement — what the condition actually is</li>
           <li>• Exposure direction — financial and structural</li>
@@ -212,7 +212,7 @@ export default function ExecutiveReportingPaywall({
 
       {/* ECONOMIC ANCHOR — required input */}
       <div className="mb-6 border border-white/10 bg-white/[0.02] p-5 sm:p-6">
-        <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.5rem" }}>
+        <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.5rem" }}>
           Estimated monthly cost of this issue (£)
         </label>
         <input
@@ -262,7 +262,7 @@ export default function ExecutiveReportingPaywall({
 
       {/* CHECKOUT TRUST BLOCK */}
       <div className="mb-6 border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-3">
-        <div className="font-medium text-white" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>Before you proceed</div>
+        <div className="font-medium text-white" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" }}>Before you proceed</div>
         <ul className="space-y-2 text-sm leading-6 text-white/60">
           <li className="flex items-start gap-2">
             <span className="mt-0.5 text-amber-500/80">&#10003;</span>

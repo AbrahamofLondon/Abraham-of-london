@@ -222,7 +222,7 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
         <article className="mx-auto max-w-4xl">
 
           {/* ── Breadcrumb ───────────────────────────────────────── */}
-          <nav className="mb-10 flex flex-wrap items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+          <nav className="mb-10 flex flex-wrap items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
             <Link href="/briefs" style={{ color: "rgba(255,255,255,0.38)" }} className="transition hover:text-white/60">
               Intelligence Briefs
             </Link>
@@ -302,7 +302,7 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
           {/* ── Inner Circle bridge ──────────────────────────────── */}
           {brief.innerCircleBridge ? (
             <aside className="mt-10 border-l-2 pl-5" style={{ borderColor: `${GOLD}40` }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>
                 Inner Circle application
               </p>
               <p className="text-sm leading-7 text-white/58">{brief.innerCircleBridge}</p>
@@ -311,7 +311,7 @@ const PublicBriefPage: NextPage<Props> = ({ brief, bareSlug }) => {
 
           {/* ── Product routes ───────────────────────────────────── */}
           <section className="mt-12 border border-white/10 bg-white/[0.02] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
               Next step
             </p>
             <p className="mb-4 text-sm text-white/40">

@@ -93,7 +93,7 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
         <div className="mx-auto max-w-6xl space-y-12">
           {/* Hero — Falsification First */}
           <header className="border p-8" style={{ borderColor: "rgba(201,169,110,0.15)", backgroundColor: "rgba(201,169,110,0.03)" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Global Market Intelligence
             </p>
             <h1 className="mt-4 max-w-4xl" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.5rem)", lineHeight: 1.02 }}>
@@ -121,7 +121,7 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
 
           {/* Falsification Summary */}
           <div className="border p-6" style={{ borderColor: `${BLUE}20`, backgroundColor: `${BLUE}04` }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: BLUE }}>
               What Would Change Our View
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/55">
@@ -158,7 +158,7 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
 
           {/* Estate Integration */}
           <section className="border p-6" style={{ borderColor: `${GOLD}20`, backgroundColor: `${GOLD}04` }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               GMI Estate
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/55">
@@ -167,7 +167,7 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {GMI_ESTATE_INTEGRATION_MAP.map((item) => (
                 <Link key={item.route} href={item.route} className="border border-white/8 bg-black/20 p-4 transition hover:bg-white/[0.035]">
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{item.route}</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{item.route}</p>
                   <p className="mt-2 text-xs leading-6 text-white/45">{item.role}</p>
                 </Link>
               ))}
@@ -176,7 +176,7 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
 
           {/* Quarterly product line — current issue, archive, access model */}
           <section className="border p-6" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               The quarterly product line
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/55">
@@ -189,13 +189,13 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
               {currentIssue && (
                 currentIssue.href ? (
                   <Link href={currentIssue.href} className="border border-white/8 bg-black/20 p-4 transition hover:bg-white/[0.035]">
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>Current issue</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>Current issue</p>
                     <p className="mt-2 text-sm text-white/70">{currentIssue.title}</p>
                     <p className="mt-1 text-xs leading-6 text-white/45">The current published issue. Current decision window: {currentIssue.decisionWindow}.</p>
                   </Link>
                 ) : (
                   <div className="border border-white/8 bg-black/20 p-4">
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>Current issue</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>Current issue</p>
                     <p className="mt-2 text-sm text-white/70">{currentIssue.title}</p>
                     <p className="mt-1 text-xs leading-6 text-white/45">The current published issue. Current decision window: {currentIssue.decisionWindow}.</p>
                   </div>
@@ -203,7 +203,7 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
               )}
               {upcomingIssue && (
                 <div className="border border-white/8 bg-black/20 p-4">
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Forthcoming</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Forthcoming</p>
                   <p className="mt-2 text-sm text-white/70">{upcomingIssue.title}</p>
                   <p className="mt-1 text-xs leading-6 text-white/45">
                     Release candidate{upcomingIssue.publicationTarget ? ` — scheduled publication ${formatTargetDate(upcomingIssue.publicationTarget)}` : ""}. Not yet the current published issue.
@@ -216,12 +216,12 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
                 {archiveIssues.map((a) =>
                   a.href ? (
                     <Link key={a.id} href={a.href} className="border border-white/8 bg-black/20 p-4 transition hover:bg-white/[0.035]">
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Verified archive</p>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Verified archive</p>
                       <p className="mt-2 text-sm text-white/70">{a.title}</p>
                     </Link>
                   ) : (
                     <div key={a.id} className="border border-white/8 bg-black/20 p-4">
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Verified archive</p>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Verified archive</p>
                       <p className="mt-2 text-sm text-white/70">{a.title}</p>
                     </div>
                   ),
@@ -231,15 +231,15 @@ const GmiHomePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
 
             <div className="mt-5 grid gap-3 md:grid-cols-3">
               <div className="border border-white/[0.06] p-4">
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Access model</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Access model</p>
                 <p className="mt-2 text-xs leading-6 text-white/50">Entitlement-controlled. Access to the current issue and the archive is governed by the GMI product family, not sold issue-by-issue by default.</p>
               </div>
               <div className="border border-white/[0.06] p-4">
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Distribution</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Distribution</p>
                 <p className="mt-2 text-xs leading-6 text-white/50">Restricted distribution. Intelligence is shared under controlled access, not published as open market commentary.</p>
               </div>
               <div className="border border-white/[0.06] p-4">
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Not investment advice</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Not investment advice</p>
                 <p className="mt-2 text-xs leading-6 text-white/50">GMI is decision intelligence under a call-review methodology. It is not investment advice and does not direct the allocation of capital.</p>
               </div>
             </div>

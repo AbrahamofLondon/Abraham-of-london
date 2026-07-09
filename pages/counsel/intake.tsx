@@ -123,7 +123,7 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
       <main style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
         <div className="mx-auto max-w-3xl px-6 py-20 lg:px-12">
-          <Link href="/counsel" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", textDecoration: "none", marginBottom: "2.5rem" }}>
+          <Link href="/counsel" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", textDecoration: "none", marginBottom: "2.5rem" }}>
             <ArrowLeft style={{ width: 10, height: 10 }} /> Counsel Review
           </Link>
 
@@ -137,7 +137,7 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
           <div className="mt-10 space-y-8">
             {/* Counsel type */}
             <div>
-              <label style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90`, display: "block", marginBottom: "0.5rem" }}>
+              <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90`, display: "block", marginBottom: "0.5rem" }}>
                 Type of counsel requested
               </label>
               <select value={form.counselType} onChange={(e) => setForm((f) => ({ ...f, counselType: e.target.value }))}
@@ -222,7 +222,7 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
 
             {/* Urgency */}
             <div>
-              <label style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90`, display: "block", marginBottom: "0.5rem" }}>
+              <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90`, display: "block", marginBottom: "0.5rem" }}>
                 Urgency
               </label>
               <select value={form.urgency} onChange={(e) => setForm((f) => ({ ...f, urgency: e.target.value }))}
@@ -269,7 +269,7 @@ const CounselIntakePage: NextPage<IntakePageProps> = ({ counselState }) => {
 function Field({ label, required, children, mono, serif, GOLD }: { label: string; required?: boolean; children: React.ReactNode; mono: React.CSSProperties; serif: React.CSSProperties; GOLD: string }) {
   return (
     <div>
-      <label style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90`, display: "block", marginBottom: "0.5rem" }}>
+      <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90`, display: "block", marginBottom: "0.5rem" }}>
         {label}{required ? " *" : ""}
       </label>
       {children}

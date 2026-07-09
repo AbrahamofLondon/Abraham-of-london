@@ -90,12 +90,12 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+        <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88` }}>
           Governed decision pathway
         </p>
         <Link
           href="/decision-pathway"
-          style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', textDecoration: 'none' }}
+          style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', textDecoration: 'none' }}
         >
           View full pathway →
         </Link>
@@ -104,7 +104,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
       {/* Current position */}
       {currentNodeId && currentIndex >= 0 && (
         <div className="mb-4 p-3" style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04` }}>
-          <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '2px' }}>
+          <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '2px' }}>
             You are here
           </p>
           <p style={{ ...serif, fontSize: '0.95rem', color: 'rgba(255,255,255,0.80)', fontStyle: 'italic' }}>
@@ -112,7 +112,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
           </p>
           {evidenceGap && (
             <p className="mt-2 text-[11px] leading-[1.6]" style={{ color: `${AMBER}AA` }}>
-              <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${AMBER}88` }}>
+              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${AMBER}88` }}>
                 What is not yet proven:{' '}
               </span>
               {evidenceGap}
@@ -145,11 +145,11 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
                   }}
                 >
                   {isCurrent ? (
-                    <span style={{ ...mono, fontSize: '8px', color: `${GOLD}CC` }}>{node.rank}</span>
+                    <span style={{ ...mono, fontSize: '11px', color: `${GOLD}CC` }}>{node.rank}</span>
                   ) : node.state === 'COMPLETED' || node.state === 'EARNED' ? (
                     stateIcon(node.state)
                   ) : (
-                    <span style={{ ...mono, fontSize: '8px', color }}>{node.rank}</span>
+                    <span style={{ ...mono, fontSize: '11px', color }}>{node.rank}</span>
                   )}
                 </div>
 
@@ -160,7 +160,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
                       href={node.href}
                       style={{
                         ...mono,
-                        fontSize: '8px',
+                        fontSize: '11px',
                         letterSpacing: '0.1em',
                         textTransform: 'uppercase',
                         color,
@@ -171,7 +171,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
                       {node.title}
                     </Link>
                   ) : (
-                    <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color }}>
+                    <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color }}>
                       {node.title}
                     </span>
                   )}
@@ -180,7 +180,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
                 {/* Price / Status */}
                 <div className="flex items-center gap-2 shrink-0">
                   {node.price && node.state !== 'LOCKED' && (
-                    <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.25)' }}>
+                    <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.25)' }}>
                       {node.price}
                     </span>
                   )}
@@ -204,7 +204,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
       {/* Next admissible move */}
       {nextAdmissibleMove && (
         <div className="mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-          <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '4px' }}>
+          <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '4px' }}>
             Next admissible move
           </p>
           <p className="text-[12px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -218,7 +218,7 @@ export function LadderPathwayPanel({ nodes, currentNodeId, nextAdmissibleMove, e
         <Link
           href="/decision-pathway"
           className="inline-flex items-center gap-1.5"
-          style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77`, textDecoration: 'none' }}
+          style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77`, textDecoration: 'none' }}
         >
           Full decision pathway
           <ArrowRight className="h-2.5 w-2.5" />

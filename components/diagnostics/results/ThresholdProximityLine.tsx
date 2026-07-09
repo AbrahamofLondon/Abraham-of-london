@@ -31,7 +31,7 @@ export default function BoundaryProximityLine({
       style={{
         marginTop: "0.75rem",
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7.5px",
+        fontSize: "11px",
         letterSpacing: "0.20em",
         textTransform: "uppercase",
         color: `${GOLD}B8`,

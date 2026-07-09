@@ -149,7 +149,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
 
           {/* ── Editorial header ──────────────────────────────────── */}
           <header className="border-b border-white/10 pb-14">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.3em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               Abraham of London — Editorial
             </p>
             <h1 className="mt-5" style={{ ...serif, fontSize: "clamp(2rem,5vw,3.5rem)", color: "rgba(255,255,255,0.92)", lineHeight: 1.15 }}>
@@ -169,7 +169,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
           {/* ── Editorial thesis ──────────────────────────────────── */}
           <section className="grid gap-10 md:grid-cols-2">
             <div>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1rem" }}>
                 Why these briefs exist
               </p>
               <h2 style={{ ...serif, fontSize: "1.5rem", color: "rgba(255,255,255,0.88)" }}>
@@ -183,7 +183,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               </p>
             </div>
             <div>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1rem" }}>
                 What remains restricted
               </p>
               <h2 style={{ ...serif, fontSize: "1.5rem", color: "rgba(255,255,255,0.88)" }}>
@@ -201,7 +201,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
           {/* ── Launch collection ─────────────────────────────────── */}
           <section>
             <div className="mb-8">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "0.5rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "0.5rem" }}>
                 Launch Collection
               </p>
               <h2 style={{ ...serif, fontSize: "1.8rem", color: "rgba(255,255,255,0.9)" }}>
@@ -227,7 +227,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
                     >
                       {brief.series === "institutional-alpha" ? "Institutional Alpha" : "Sovereign Intelligence"}
                     </span>
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                       {brief.id}
                     </span>
                   </div>
@@ -235,7 +235,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
                   <p className="mt-2 text-sm leading-7 text-white/50">{brief.description}</p>
                   <span
                     className="mt-3 inline-flex items-center gap-1.5"
-                    style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}BB` }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}BB` }}
                   >
                     Read brief <span>→</span>
                   </span>
@@ -246,7 +246,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
 
           {/* ── Two series ────────────────────────────────────────── */}
           <section>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1.5rem" }}>
               The Two Series
             </p>
             <div className="space-y-5">
@@ -259,10 +259,10 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: s.accent }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: s.accent }}>
                           {s.count} briefs
                         </p>
-                        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                           {s.cluster}
                         </span>
                       </div>
@@ -278,7 +278,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
 
           {/* ── Reading path ──────────────────────────────────────── */}
           <section>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "1.5rem" }}>
               Reading path
             </p>
             <div className="space-y-3">
@@ -296,7 +296,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
                   {item.href ? (
                     <Link
                       href={item.href}
-                      style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, flexShrink: 0 }}
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, flexShrink: 0 }}
                       className="self-center transition hover:opacity-80"
                     >
                       Go →
@@ -309,7 +309,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
 
           {/* ── Canon bridge ──────────────────────────────────────── */}
           <section className="border border-white/10 bg-white/[0.02] p-7">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
               Foundational Canon
             </p>
             <h2 style={{ ...serif, fontSize: "1.5rem", color: "rgba(255,255,255,0.88)" }}>
@@ -327,14 +327,14 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               className="mt-6 inline-flex items-center gap-2 border border-white/15 px-5 py-2.5 text-white/65 transition hover:border-white/30 hover:text-white"
               style={mono}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Explore the Canon</span>
+              <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Explore the Canon</span>
               <span aria-hidden="true">→</span>
             </Link>
           </section>
 
           {/* ── Inner Circle ──────────────────────────────────────── */}
           <section className="border border-white/10 bg-white/[0.02] p-7">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "1rem" }}>
               Inner Circle
             </p>
             <h2 style={{ ...serif, fontSize: "1.5rem", color: "rgba(255,255,255,0.88)" }}>
@@ -352,7 +352,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               className="mt-6 inline-flex items-center gap-2 border px-5 py-2.5 transition hover:opacity-90"
               style={{ ...mono, borderColor: `${GOLD}40`, color: `${GOLD}DD` }}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Move from reading to diagnosis</span>
+              <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Move from reading to diagnosis</span>
               <span aria-hidden="true">→</span>
             </Link>
           </section>
@@ -366,7 +366,7 @@ const IntelligenceBriefsEditorialPage: NextPage = () => {
               { label: "Foundational Canon", href: "/vault/briefs", sub: "12 pillars · vault sequences" },
             ].map(({ label, href, sub }) => (
               <Link key={href} href={href} className="border border-white/10 p-4 transition hover:bg-white/[0.02]">
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                   {sub}
                 </p>
                 <p style={{ ...serif, fontSize: "1rem", color: "rgba(255,255,255,0.82)" }}>{label} →</p>

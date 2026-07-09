@@ -7,7 +7,7 @@ const VOID = "rgb(6 6 9)";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.5rem" }}>{children}</div>;
+  return <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.5rem" }}>{children}</div>;
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
@@ -84,8 +84,8 @@ export default function CommercialAdminPage() {
           <div style={{ display: "grid", gap: "2px" }}>
             {catalog.map((p) => (
               <div key={p.code} style={{ display: "grid", gridTemplateColumns: "1fr 4rem 5rem 5rem 8rem", gap: "0.5rem", padding: "0.4rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)", alignItems: "center" }}>
-                <span style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.60)" }}>{p.code}</span>
-                <span style={{ ...mono, fontSize: "8px", color: GOLD }}>£{p.price}</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.60)" }}>{p.code}</span>
+                <span style={{ ...mono, fontSize: "11px", color: GOLD }}>£{p.price}</span>
                 <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.30)" }}>{p.type}</span>
                 <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.30)" }}>{p.duration}</span>
                 <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.20)" }}>{p.cookie ?? "no cookie"}</span>
@@ -101,10 +101,10 @@ export default function CommercialAdminPage() {
             {failed.map((f) => (
               <div key={f.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                 <div>
-                  <div style={{ ...mono, fontSize: "7.5px", color: "rgba(252,165,165,0.70)" }}>{f.email} — {f.slug}</div>
+                  <div style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.70)" }}>{f.email} — {f.slug}</div>
                   <div style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.22)" }}>{f.error}</div>
                 </div>
-                <button onClick={() => repairGrant(f.id)} style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(110,231,183,0.70)", background: "none", border: "1px solid rgba(110,231,183,0.25)", padding: "4px 10px", cursor: "pointer" }}>
+                <button onClick={() => repairGrant(f.id)} style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(110,231,183,0.70)", background: "none", border: "1px solid rgba(110,231,183,0.25)", padding: "4px 10px", cursor: "pointer" }}>
                   Repair
                 </button>
               </div>
@@ -117,20 +117,20 @@ export default function CommercialAdminPage() {
           <Label>Entitlement Lookup by Email</Label>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <input value={lookup} onChange={(e) => setLookup(e.target.value)} onKeyDown={(e) => e.key === "Enter" && lookupEmail()}
-              placeholder="user@example.com" style={{ flex: 1, backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "6px 10px", ...mono, fontSize: "8px", color: "rgba(255,255,255,0.70)", outline: "none" }} />
-            <button onClick={lookupEmail} style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: GOLD, background: "none", border: `1px solid ${GOLD}35`, padding: "6px 12px", cursor: "pointer" }}>
+              placeholder="user@example.com" style={{ flex: 1, backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "6px 10px", ...mono, fontSize: "11px", color: "rgba(255,255,255,0.70)", outline: "none" }} />
+            <button onClick={lookupEmail} style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: GOLD, background: "none", border: `1px solid ${GOLD}35`, padding: "6px 12px", cursor: "pointer" }}>
               Lookup
             </button>
           </div>
           {lookupResult && (
             <div style={{ marginTop: "0.75rem" }}>
               {lookupResult.entitlements?.length === 0 && (
-                <div style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.60)" }}>No entitlements found for {lookupResult.email}</div>
+                <div style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.60)" }}>No entitlements found for {lookupResult.email}</div>
               )}
               {lookupResult.entitlements?.map((e: any) => (
                 <div key={e.id} style={{ display: "grid", gridTemplateColumns: "1fr 5rem 4rem 8rem", gap: "0.5rem", padding: "0.35rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                  <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.55)" }}>{e.productCode}</span>
-                  <span style={{ ...mono, fontSize: "7px", color: e.status === "active" ? "rgba(110,231,183,0.60)" : "rgba(252,165,165,0.60)" }}>{e.status}</span>
+                  <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.55)" }}>{e.productCode}</span>
+                  <span style={{ ...mono, fontSize: "11px", color: e.status === "active" ? "rgba(110,231,183,0.60)" : "rgba(252,165,165,0.60)" }}>{e.status}</span>
                   <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.25)" }}>{e.source}</span>
                   <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.20)" }}>{new Date(e.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -144,8 +144,8 @@ export default function CommercialAdminPage() {
           <Label>Recent Grants</Label>
           {recent.map((g, i) => (
             <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 4rem 4rem 6rem", gap: "0.5rem", padding: "0.3rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-              <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.45)" }}>{g.email}</span>
-              <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.45)" }}>{g.productCode}</span>
+              <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>{g.email}</span>
+              <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)" }}>{g.productCode}</span>
               <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.25)" }}>{g.source}</span>
               <span style={{ ...mono, fontSize: "6.5px", color: g.status === "active" ? "rgba(110,231,183,0.50)" : "rgba(252,165,165,0.50)" }}>{g.status}</span>
               <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>{new Date(g.createdAt).toLocaleDateString()}</span>

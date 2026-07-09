@@ -142,11 +142,11 @@ export default function BenchmarkCaseBadge({
 
       {/* Rate */}
       {tier !== "free" ? (
-        <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.08em", color: rateColor }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: rateColor }}>
           {rateLabel}
         </span>
       ) : (
-        <span style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.30)" }}>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)" }}>
           Context available
         </span>
       )}

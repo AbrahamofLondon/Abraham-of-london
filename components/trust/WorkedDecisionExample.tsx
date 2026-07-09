@@ -80,7 +80,7 @@ export default function WorkedDecisionExample({ id }: { id?: string }) {
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}80`,
@@ -116,7 +116,7 @@ export default function WorkedDecisionExample({ id }: { id?: string }) {
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.20em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.32)",
@@ -166,7 +166,7 @@ export default function WorkedDecisionExample({ id }: { id?: string }) {
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.20em",
               textTransform: "uppercase",
               color: `${GOLD}88`,
@@ -237,7 +237,7 @@ export default function WorkedDecisionExample({ id }: { id?: string }) {
             border: "1px solid rgba(255,255,255,0.10)",
             color: "rgba(255,255,255,0.42)",
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             padding: "0.65rem 1.1rem",

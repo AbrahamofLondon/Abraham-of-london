@@ -23,7 +23,7 @@ export default function RecommendedPlaybooks({
           padding: "0.85rem 1.25rem",
           borderBottom: `1px solid ${GOLD}12`,
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.34em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -63,7 +63,7 @@ export default function RecommendedPlaybooks({
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   color: `${GOLD}AA`,
                   flexShrink: 0,
                 }}
@@ -90,7 +90,7 @@ export default function RecommendedPlaybooks({
               className="inline-flex items-center gap-1.5 mt-3 transition-opacity hover:opacity-75"
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.24em",
                 textTransform: "uppercase",
                 color: `${GOLD}BB`,

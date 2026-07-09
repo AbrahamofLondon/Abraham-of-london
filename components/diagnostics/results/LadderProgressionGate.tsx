@@ -63,7 +63,7 @@ export default function LadderProgressionGate({
   return (
     <div style={{ border: `1px solid ${borderColor}`, backgroundColor: "rgba(255,255,255,0.03)", padding: "1.25rem", marginBottom: "1rem" }}>
       <div className="mb-3">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: accentColor }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: accentColor }}>
           Earned escalation
         </span>
       </div>
@@ -96,7 +96,7 @@ export default function LadderProgressionGate({
           backgroundColor: `${accentColor}10`,
           color: accentColor,
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.26em",
           textTransform: "uppercase",
         }}
@@ -115,7 +115,7 @@ export default function LadderProgressionGate({
             border: "none",
             cursor: "pointer",
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.28)",

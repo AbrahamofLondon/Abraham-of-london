@@ -53,7 +53,7 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-5xl space-y-6">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Counsel Status
             </p>
             <h1 className="mt-3 text-3xl text-white">Governed counsel lifecycle</h1>
@@ -115,20 +115,20 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
 
           {authenticated && institutionalCase ? (
             <section style={{ border: "1px solid rgba(201,169,110,0.18)", background: "rgba(201,169,110,0.03)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
                 Institutional case reference
               </p>
               <div className="mt-3 grid gap-3 md:grid-cols-3">
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Qualification</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Qualification</p>
                   <p className="mt-1 text-sm text-white/60">{institutionalCase.qualificationState.replace(/_/g, " ").toLowerCase()}</p>
                 </div>
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence posture</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence posture</p>
                   <p className="mt-1 text-sm text-white/60">{institutionalCase.evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
                 </div>
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Corridor state</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Corridor state</p>
                   <p className="mt-1 text-sm text-white/60">{institutionalCase.admitted.join(" · ") || "No surfaces admitted"}</p>
                 </div>
               </div>
@@ -137,7 +137,7 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
 
           {authenticated && stakeholderPressure && !stakeholderPressure.thinState && (
             <section style={{ border: "1px solid rgba(201,169,110,0.12)", background: "rgba(201,169,110,0.02)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
                 Stakeholder pressure summary
               </p>
               <div className="mt-3 space-y-2 text-sm text-white/60">
@@ -154,7 +154,7 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
                   <p className="text-white/45">{stakeholderPressure.unresolvedAuthorityTension}</p>
                 )}
               </div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)", marginTop: "0.75rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)", marginTop: "0.75rem" }}>
                 Source: user-provided evidence. Not independently verified.
               </p>
             </section>
@@ -164,19 +164,19 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
             <>
               <section className="grid gap-4 md:grid-cols-3">
                 <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
                     Current status
                   </p>
                   <p className="mt-3 text-xl text-white">{counselCase.status}</p>
                 </article>
                 <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
                     Created
                   </p>
                   <p className="mt-3 text-xl text-white">{new Date(counselCase.createdAt).toLocaleDateString("en-GB")}</p>
                 </article>
                 <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
                     Updated
                   </p>
                   <p className="mt-3 text-xl text-white">{new Date(counselCase.updatedAt).toLocaleDateString("en-GB")}</p>
@@ -188,13 +188,13 @@ const CounselStatusPage: NextPage<Props> = ({ authenticated, counselCase, counse
               <CounselMemorySummary counselCase={counselCase} caseCount={counselCaseCount} />
 
               <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
                   Current case summary
                 </p>
                 <p className="mt-3 text-sm leading-7 text-white/65">{counselCase.userSummary}</p>
                 {counselCase.counselResponse ? (
                   <div className="mt-5">
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
                       Counsel response
                     </p>
                     <p className="mt-2 text-sm leading-7 text-white/60">{counselCase.counselResponse}</p>

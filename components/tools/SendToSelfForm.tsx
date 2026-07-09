@@ -96,13 +96,13 @@ export default function SendToSelfForm({ source, content, isLiveRecord, label }:
           padding: "14px 18px",
         }}
       >
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
           {formLabel}
         </p>
         <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(252,165,165,0.55)", marginBottom: "8px" }}>
           {unavailableMessage ?? "Email copy is not currently available. You can still save this case to Decision Centre."}
         </p>
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)" }}>
           No marketing. No subscription.
         </p>
       </div>
@@ -119,7 +119,7 @@ export default function SendToSelfForm({ source, content, isLiveRecord, label }:
           padding: "12px 16px",
         }}
       >
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
           Sent. Check your inbox.
         </p>
         <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
@@ -140,7 +140,7 @@ export default function SendToSelfForm({ source, content, isLiveRecord, label }:
         padding: "14px 18px",
       }}
     >
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
         {formLabel}
       </p>
 
@@ -180,7 +180,7 @@ export default function SendToSelfForm({ source, content, isLiveRecord, label }:
             backgroundColor: `${GOLD}10`,
             color: `${GOLD}CC`,
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             cursor: status === "sending" ? "wait" : "pointer",
@@ -199,7 +199,7 @@ export default function SendToSelfForm({ source, content, isLiveRecord, label }:
         </p>
       )}
 
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "8px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "8px" }}>
         No marketing. No subscription. One email only.
       </p>
     </div>

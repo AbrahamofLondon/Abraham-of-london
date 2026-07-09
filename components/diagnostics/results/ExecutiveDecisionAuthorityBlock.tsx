@@ -72,7 +72,7 @@ export default function ExecutiveDecisionAuthorityBlock({
       {authorityIndex && (
         <div style={{ border: `1px solid ${getBandStyle(authorityIndex.band).border}`, backgroundColor: getBandStyle(authorityIndex.band).bg, padding: "1rem" }}>
           <div className="flex items-center justify-between">
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: getBandStyle(authorityIndex.band).text }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: getBandStyle(authorityIndex.band).text }}>
               Authority: {authorityIndex.band}
             </span>
           </div>
@@ -118,7 +118,7 @@ export default function ExecutiveDecisionAuthorityBlock({
           <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginTop: "0.3rem" }}>
             {executionFailure.whyExecutionWillStall}
           </p>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: `${GOLD}90`, marginTop: "0.5rem" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: `${GOLD}90`, marginTop: "0.5rem" }}>
             Required: {executionFailure.requiredCorrection}
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function ExecutiveDecisionAuthorityBlock({
           <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)", marginTop: "0.2rem" }}>
             {authorityIndex.nextGovernanceMove}
           </p>
-          <Link href="/diagnostics/executive-reporting" className="mt-3 inline-flex items-center gap-1.5" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+          <Link href="/diagnostics/executive-reporting" className="mt-3 inline-flex items-center gap-1.5" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
             Price this in Executive Reporting <ArrowRight style={{ width: 9, height: 9 }} />
           </Link>
         </div>

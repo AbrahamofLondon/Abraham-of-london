@@ -43,7 +43,7 @@ export default function TeamAlignmentGapMapRunner({ onComplete }: { onComplete: 
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Team Alignment</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Team Alignment</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "3rem", fontWeight: 300, lineHeight: 1, color: bandColor }}>{result.overallAlignmentScore}</div>
         </div>
         <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: bandColor }}>{result.alignmentBand}</span>
@@ -59,8 +59,8 @@ export default function TeamAlignmentGapMapRunner({ onComplete }: { onComplete: 
         return (
           <div key={d.key} style={{ border: `1px solid ${gapColor}`, padding: "0.75rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
             <div className="flex items-baseline justify-between mb-2">
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>{d.label}</span>
-              {gap && gap.gap >= 2 && <span style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.50)" }}>gap: {gap.gap}</span>}
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>{d.label}</span>
+              {gap && gap.gap >= 2 && <span style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.50)" }}>gap: {gap.gap}</span>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

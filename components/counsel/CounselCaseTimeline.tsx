@@ -112,7 +112,7 @@ export function CounselCaseTimeline({ counselCase }: { counselCase: CounselCase 
 
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
         Counsel Status
       </p>
       <div className="mt-5 space-y-4">
@@ -127,7 +127,7 @@ export function CounselCaseTimeline({ counselCase }: { counselCase: CounselCase 
               opacity: item.active ? 1 : 0.45,
             }}
           >
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: item.status === normalized ? "rgba(201,169,110,0.92)" : "rgba(255,255,255,0.46)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: item.status === normalized ? "rgba(201,169,110,0.92)" : "rgba(255,255,255,0.46)" }}>
               {item.status}
             </p>
             <p className="mt-2 text-sm text-white/70">{item.happened}</p>

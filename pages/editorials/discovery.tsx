@@ -104,14 +104,14 @@ const DiscoveryPage: NextPage = () => {
               <Link
                 href="/editorials"
                 className="font-mono uppercase tracking-[0.3em] transition-colors duration-200 hover:text-white"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Editorials
               </Link>
-              <span style={{ color: "var(--ds-border)", fontSize: "7px" }}>›</span>
+              <span style={{ color: "var(--ds-border)", fontSize: "11px" }}>›</span>
               <span
                 className="font-mono uppercase tracking-[0.3em]"
-                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Discovery
               </span>
@@ -122,7 +122,7 @@ const DiscoveryPage: NextPage = () => {
               <span style={{ width: 1, height: 16, backgroundColor: "var(--ds-accent-soft)", display: "inline-block" }} />
               <span
                 className="font-mono uppercase tracking-[0.38em]"
-                style={{ fontSize: "7.5px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Operating World
               </span>
@@ -167,7 +167,7 @@ const DiscoveryPage: NextPage = () => {
                   {/* Zone index */}
                   <div
                     className="font-mono uppercase tracking-[0.22em] pt-0.5 hidden md:block"
-                    style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                    style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </div>
@@ -176,7 +176,7 @@ const DiscoveryPage: NextPage = () => {
                   <div className="min-w-0">
                     <div
                       className="font-mono uppercase tracking-[0.3em] mb-2"
-                      style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                      style={{ fontSize: "11px", color: "var(--ds-accent)" }}
                     >
                       {zone.label}
                     </div>
@@ -205,7 +205,7 @@ const DiscoveryPage: NextPage = () => {
                   <div className="flex-shrink-0 pt-7 md:pt-0.5">
                     <span
                       className="font-mono uppercase tracking-[0.24em] transition-colors duration-200 group-hover:text-[#C9963A] whitespace-nowrap"
-                      style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                      style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
                     >
                       {zone.entry} →
                     </span>

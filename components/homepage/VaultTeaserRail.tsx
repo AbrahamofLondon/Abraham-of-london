@@ -165,7 +165,7 @@ export default function VaultTeaserRail(): React.ReactElement {
                     borderTop: "1px solid rgba(255,255,255,0.05)",
                     display: "flex", alignItems: "center", gap: "0.4rem",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                    fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
                     color: "rgba(255,255,255,0.18)",
                   }}>
                     <span className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]">
@@ -195,7 +195,7 @@ export default function VaultTeaserRail(): React.ReactElement {
       >
         <span style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
+          fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
           color: "rgba(255,255,255,0.22)",
         }}>
           Templates · Playbooks · Frameworks · Governance tools
@@ -205,7 +205,7 @@ export default function VaultTeaserRail(): React.ReactElement {
           className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
             color: `${GOLD}90`,
           }}
         >

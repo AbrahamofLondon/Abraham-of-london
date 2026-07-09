@@ -96,7 +96,7 @@ export default function FreeTierUpgradeModal({
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: `${GOLD}99`,
@@ -143,7 +143,7 @@ export default function FreeTierUpgradeModal({
           <p
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: `${GOLD}88`,
@@ -211,7 +211,7 @@ export default function FreeTierUpgradeModal({
             <span
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: "rgba(110,231,183,0.80)",
@@ -229,7 +229,7 @@ export default function FreeTierUpgradeModal({
               disabled={trialState === "starting"}
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: trialState === "starting" ? "rgba(255,255,255,0.30)" : "#0A0A0A",
@@ -249,7 +249,7 @@ export default function FreeTierUpgradeModal({
             onClick={() => trackCommercialEvent("pricing_viewed_from_prompt", "free_tier_upgrade_modal", { actionType: "free_case_limit" })}
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,
@@ -272,7 +272,7 @@ export default function FreeTierUpgradeModal({
             }}
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.40)",

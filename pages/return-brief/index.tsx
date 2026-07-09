@@ -56,13 +56,13 @@ const ReturnBriefPage: NextPage = () => {
         <div className="mx-auto max-w-4xl space-y-8">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
             <div style={{ display: "flex", gap: "12px", alignItems: "baseline", flexWrap: "wrap", marginBottom: "4px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                 Return Brief
               </p>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                 Public explainer
               </span>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                 Generated Return Briefs are case-specific
               </span>
             </div>
@@ -90,7 +90,7 @@ const ReturnBriefPage: NextPage = () => {
           />
 
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               What a live generated brief can show
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/62">
@@ -101,7 +101,7 @@ const ReturnBriefPage: NextPage = () => {
           <section className="grid gap-4 md:grid-cols-2">
             {RETURN_BRIEF_FIELDS.map((field) => (
               <article key={field.label} style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99` }}>
                   {field.label}
                 </p>
                 <p className="mt-3 text-sm leading-7 text-white/62">{field.value}</p>
@@ -110,7 +110,7 @@ const ReturnBriefPage: NextPage = () => {
           </section>
 
           <section style={{ border: "1px solid rgba(201,169,110,0.18)", background: "rgba(201,169,110,0.04)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               What a Return Brief is not
             </p>
             <p className="mt-3 text-sm leading-7 text-white/60">
@@ -119,7 +119,7 @@ const ReturnBriefPage: NextPage = () => {
           </section>
 
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
               Where governed cases live
             </p>
             <p className="mt-3 text-sm leading-7" style={{ color: "rgba(255,255,255,0.40)", maxWidth: "52ch" }}>
@@ -129,7 +129,7 @@ const ReturnBriefPage: NextPage = () => {
               <Link
                 href="/diagnostics/fast"
                 className="inline-flex items-center gap-2 border px-4 py-3"
-                style={{ borderColor: `${GOLD}45`, backgroundColor: `${GOLD}10`, color: "#F5F5F5", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ borderColor: `${GOLD}45`, backgroundColor: `${GOLD}10`, color: "#F5F5F5", ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
               >
                 Create a governed case
                 <ArrowRight className="h-3 w-3" />
@@ -137,14 +137,14 @@ const ReturnBriefPage: NextPage = () => {
               <Link
                 href="/decision-centre"
                 className="inline-flex items-center gap-2 border px-4 py-3"
-                style={{ borderColor: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ borderColor: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
               >
                 Open Decision Centre
               </Link>
               <Link
                 href="/provenance/sample-export"
                 className="inline-flex items-center gap-2 border px-4 py-3"
-                style={{ borderColor: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                style={{ borderColor: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
               >
                 View Provenance Sample
               </Link>

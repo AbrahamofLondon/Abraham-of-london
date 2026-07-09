@@ -103,7 +103,7 @@ const ChangelogPage: NextPage = () => {
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-2xl">
           <div className="mb-6">
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Changelog
             </span>
           </div>
@@ -123,7 +123,7 @@ const ChangelogPage: NextPage = () => {
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "6px" }}>
                   <time
                     dateTime={entry.date}
-                    style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: i === 0 ? `${GOLD}90` : "rgba(255,255,255,0.30)" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: i === 0 ? `${GOLD}90` : "rgba(255,255,255,0.30)" }}
                   >
                     {entry.date}
                   </time>
@@ -163,7 +163,7 @@ const ChangelogPage: NextPage = () => {
               { label: "Verification", href: "/verification" },
               { label: "Privacy policy", href: "/privacy" },
             ].map((link) => (
-              <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", padding: "5px 10px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.28)" }}>
+              <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", padding: "5px 10px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.28)" }}>
                 {link.label}
               </Link>
             ))}

@@ -40,12 +40,12 @@ export default function ExecutiveSnapshotBlock({ data }: { data: ExecutiveSnapsh
     <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
           Executive snapshot
         </span>
         <div className="flex items-center gap-2">
           <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: trajectory.color }} />
-          <span style={{ ...mono, fontSize: "7px", color: trajectory.color, fontWeight: 700 }}>
+          <span style={{ ...mono, fontSize: "11px", color: trajectory.color, fontWeight: 700 }}>
             {trajectory.label}
           </span>
         </div>
@@ -72,7 +72,7 @@ export default function ExecutiveSnapshotBlock({ data }: { data: ExecutiveSnapsh
           {data.criticalContradictions.map((c, i) => (
             <div key={i} style={{ marginTop: "0.35rem", paddingTop: i > 0 ? "0.3rem" : 0, borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
               <div className="flex items-center gap-2">
-                <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color: severityColor(c.severity) }}>
+                <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color: severityColor(c.severity) }}>
                   {c.severity}
                 </span>
                 <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>
@@ -100,7 +100,7 @@ export default function ExecutiveSnapshotBlock({ data }: { data: ExecutiveSnapsh
           </span>
           {data.topDecisionDependencies.map((d, i) => (
             <div key={i} style={{ marginTop: "0.3rem" }}>
-              <span style={{ ...mono, fontSize: "7px", color: d.relationshipType === "BLOCKS" ? "rgba(252,165,165,0.55)" : `${GOLD}80` }}>
+              <span style={{ ...mono, fontSize: "11px", color: d.relationshipType === "BLOCKS" ? "rgba(252,165,165,0.55)" : `${GOLD}80` }}>
                 {d.relationshipType}
               </span>
               <p style={{ ...serif, fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", marginTop: "0.05rem" }}>
@@ -120,7 +120,7 @@ export default function ExecutiveSnapshotBlock({ data }: { data: ExecutiveSnapsh
           {data.topStakeholderDivergences.map((s, i) => (
             <div key={i} style={{ marginTop: "0.3rem" }}>
               <div className="flex items-center gap-2">
-                <span style={{ ...mono, fontSize: "7px", color: s.alignmentState === "BLOCKING" ? "rgba(252,165,165,0.60)" : `${GOLD}AA` }}>
+                <span style={{ ...mono, fontSize: "11px", color: s.alignmentState === "BLOCKING" ? "rgba(252,165,165,0.60)" : `${GOLD}AA` }}>
                   {s.alignmentState}
                 </span>
                 <span style={{ ...serif, fontSize: "0.78rem", color: "rgba(255,255,255,0.40)" }}>

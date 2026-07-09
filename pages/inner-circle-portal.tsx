@@ -50,7 +50,7 @@ const InnerCirclePage: NextPage = () => {
                 <span className="h-px w-8" style={{ backgroundColor: `${GOLD}50` }} />
                 <span
                   className="font-mono uppercase"
-                  style={{ fontSize: "8px", letterSpacing: "0.34em", color: `${GOLD}90` }}
+                  style={{ fontSize: "11px", letterSpacing: "0.34em", color: `${GOLD}90` }}
                 >
                   Inner Circle
                 </span>
@@ -125,7 +125,7 @@ const InnerCirclePage: NextPage = () => {
           >
             <p
               className="font-mono uppercase mb-4"
-              style={{ fontSize: "8px", letterSpacing: "0.28em", color: `${GOLD}90` }}
+              style={{ fontSize: "11px", letterSpacing: "0.28em", color: `${GOLD}90` }}
             >
               How to join
             </p>
@@ -175,7 +175,7 @@ const InnerCirclePage: NextPage = () => {
           {/* Authority line */}
           <p
             className="mt-4 font-mono"
-            style={{ fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}
+            style={{ fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}
           >
             Designed for decision environments · Used when clarity matters
           </p>

@@ -114,7 +114,7 @@ export default function ProtocolInitiation() {
                     <label style={{
                       display: "block",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.30)",
                       marginBottom: "0.85rem",
                     }}>
@@ -141,7 +141,7 @@ export default function ProtocolInitiation() {
                     <label style={{
                       display: "block",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.30)",
                       marginBottom: "0.85rem",
                     }}>
@@ -171,7 +171,7 @@ export default function ProtocolInitiation() {
                   <label style={{
                     display: "block",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px", letterSpacing: "0.34em", textTransform: "uppercase",
+                    fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase",
                     color: "rgba(255,255,255,0.30)",
                     marginBottom: "0.85rem",
                   }}>
@@ -227,7 +227,7 @@ export default function ProtocolInitiation() {
                 <Send style={{ width: "11px", height: "11px", color: "rgba(255,255,255,0.18)" }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)",
                 }}>
                   Response within 24–48 hours. Not all mandates are accepted.

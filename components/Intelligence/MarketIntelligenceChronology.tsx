@@ -50,7 +50,7 @@ function ChronologyEntry({
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.34)",
@@ -67,7 +67,7 @@ function ChronologyEntry({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: isActive
@@ -88,7 +88,7 @@ function ChronologyEntry({
           <span
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: `${GOLD}80`,
@@ -106,7 +106,7 @@ function ChronologyEntry({
             style={{
               color: `${GOLD}CC`,
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
             }}
@@ -117,7 +117,7 @@ function ChronologyEntry({
           <span
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.25)",
@@ -144,7 +144,7 @@ export function MarketIntelligenceChronology({ records, className }: Props) {
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}BB`,

@@ -137,7 +137,7 @@ export default function MyInstrumentsPage() {
             {/* Header */}
             <div className="flex items-center gap-3">
               <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-              <span style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+              <span style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                 Your instruments
               </span>
             </div>
@@ -166,7 +166,7 @@ export default function MyInstrumentsPage() {
 
             {/* Loading */}
             {loading && (
-              <div className="mt-8" style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              <div className="mt-8" style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                 Resolving entitlements...
               </div>
             )}
@@ -181,7 +181,7 @@ export default function MyInstrumentsPage() {
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <Lock style={{ width: 12, height: 12, color: "rgba(255,255,255,0.35)" }} />
-                  <span style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
+                  <span style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
                     Sign in to view your instruments
                   </span>
                 </div>
@@ -199,7 +199,7 @@ export default function MyInstrumentsPage() {
                 padding: "1.25rem",
                 maxWidth: "48rem",
               }}>
-                <div style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                   No instruments acquired yet
                 </div>
                 <p style={{ ...serifStyle, marginTop: "0.5rem", fontSize: "0.9rem", lineHeight: 1.55, color: "rgba(255,255,255,0.35)" }}>
@@ -213,7 +213,7 @@ export default function MyInstrumentsPage() {
                     border: `1px solid ${AMBER}30`,
                     color: AMBER,
                     ...monoStyle,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.20em",
                     textTransform: "uppercase",
                   }}
@@ -257,7 +257,7 @@ export default function MyInstrumentsPage() {
                             {e.source === "purchase" ? " \u00b7 purchased" : ""}
                           </div>
                         </div>
-                        <div style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: AMBER, display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                        <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: AMBER, display: "flex", alignItems: "center", gap: "0.35rem" }}>
                           Open
                           <ArrowRight style={{ width: 10, height: 10 }} />
                         </div>
@@ -273,7 +273,7 @@ export default function MyInstrumentsPage() {
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 transition-all hover:underline"
-                style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}
+                style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}
               >
                 Back to home
               </Link>

@@ -151,7 +151,7 @@ const ProvenanceExplainedPage: NextPage = () => {
                 backgroundColor: `${GOLD}08`,
                 color: `${GOLD}BB`,
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.25rem 0.55rem",
@@ -196,7 +196,7 @@ const ProvenanceExplainedPage: NextPage = () => {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.14em",
                     color: `${GOLD}55`,
                     minWidth: "1.5rem",
@@ -283,7 +283,7 @@ const ProvenanceExplainedPage: NextPage = () => {
                         <span
                           style={{
                             ...mono,
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.1em",
                             color: `${GOLD}44`,
                             marginTop: "0.35rem",
@@ -367,7 +367,7 @@ const ProvenanceExplainedPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -402,7 +402,7 @@ const ProvenanceExplainedPage: NextPage = () => {
                   backgroundColor: `${GOLD}12`,
                   color: `${GOLD}DD`,
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   padding: "0.7rem 1.25rem",
@@ -423,7 +423,7 @@ const ProvenanceExplainedPage: NextPage = () => {
                   backgroundColor: "rgba(255,255,255,0.03)",
                   color: "rgba(255,255,255,0.55)",
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   padding: "0.7rem 1.25rem",
@@ -444,7 +444,7 @@ const ProvenanceExplainedPage: NextPage = () => {
                   backgroundColor: "rgba(255,255,255,0.02)",
                   color: "rgba(255,255,255,0.35)",
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   padding: "0.7rem 1.25rem",

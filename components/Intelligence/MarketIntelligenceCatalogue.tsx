@@ -38,7 +38,7 @@ function LifecycleBadge({
     <span
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.20em",
         textTransform: "uppercase",
         color: isActive
@@ -84,7 +84,7 @@ function EditionRow({
           <span
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.52)",
@@ -125,7 +125,7 @@ function EditionRow({
           style={{
             marginTop: "0.30rem",
             ...mono,
-            fontSize: "7.5px",
+            fontSize: "11px",
             color: "rgba(255,255,255,0.34)",
             lineHeight: 1.7,
           }}
@@ -140,7 +140,7 @@ function EditionRow({
           style={{
             flexShrink: 0,
             ...mono,
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: isPaid
@@ -158,7 +158,7 @@ function EditionRow({
           style={{
             flexShrink: 0,
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.20)",
@@ -211,7 +211,7 @@ export function MarketIntelligenceCatalogue({
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}BB`,
@@ -240,7 +240,7 @@ export function MarketIntelligenceCatalogue({
             className="mt-3"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               color: `${GOLD}AA`,
               textTransform: "uppercase",
@@ -272,7 +272,7 @@ export function MarketIntelligenceCatalogue({
                 style={{
                   color: "rgba(255,255,255,0.72)",
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                 }}
@@ -286,7 +286,7 @@ export function MarketIntelligenceCatalogue({
                 style={{
                   color: `${GOLD}CC`,
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                 }}
@@ -307,7 +307,7 @@ export function MarketIntelligenceCatalogue({
               <div
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.32)",

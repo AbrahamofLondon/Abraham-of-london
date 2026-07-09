@@ -102,7 +102,7 @@ export default function AdmissionNotice({
       {/* Repair actions */}
       {repairActions.length > 0 && (
         <div style={{ marginBottom: returnPath ? "12px" : "0" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
             Required to proceed
           </span>
           {repairActions.map((action, i) => (
@@ -155,7 +155,7 @@ export default function AdmissionNotice({
 function StatusField({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
         {label}
       </span>
       <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.06em", color: "rgba(255,255,255,0.45)" }}>

@@ -51,7 +51,7 @@ export function ProductAdmissionCard({
 
   return (
     <div style={{ borderLeft: `2px solid ${borderColor}`, backgroundColor: bg, padding: variant === "compact" ? "14px 18px" : "18px 22px" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: isDark ? `${GOLD}80` : "#8a6a2f", marginBottom: "6px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: isDark ? `${GOLD}80` : "#8a6a2f", marginBottom: "6px" }}>
         {state === "EARNED_ACCESS" ? "Earned next step"
           : state === "RECOMMENDED_BY_EVIDENCE" ? "Available based on your evidence"
           : state === "AVAILABLE_BUT_NOT_WARRANTED" ? "Available — not yet released"

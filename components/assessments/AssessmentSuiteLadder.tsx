@@ -86,7 +86,7 @@ export default function AssessmentSuiteLadder() {
 
                 {/* Position badge */}
                 <div style={{ marginBottom: "1rem" }}>
-                  <span style={{ display: "inline-block", padding: "3px 10px", border: `1px solid ${cfg.badgeBorder}`, backgroundColor: cfg.badgeBg, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: cfg.badgeText, transition: "border-color 300ms ease" }}>
+                  <span style={{ display: "inline-block", padding: "3px 10px", border: `1px solid ${cfg.badgeBorder}`, backgroundColor: cfg.badgeBg, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: cfg.badgeText, transition: "border-color 300ms ease" }}>
                     {item.position}
                   </span>
                 </div>
@@ -128,7 +128,7 @@ export default function AssessmentSuiteLadder() {
 
       <div className="flex items-center justify-center gap-4 mt-8">
         <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)" }} />
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
           Each layer carries context to the next without rework
         </span>
         <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent)" }} />

@@ -36,19 +36,19 @@ export default function ExecutionRiskIndexRunner({ onComplete }: { onComplete: (
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Execution Risk Index</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Execution Risk Index</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "3rem", fontWeight: 300, lineHeight: 1, color: riskColor }}>{result.riskIndex}</div>
         </div>
         <div className="text-right">
           <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: riskColor }}>{result.riskBand}</span>
-          {result.authorityGap && <p style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.50)", marginTop: "4px" }}>Authority gap detected</p>}
+          {result.authorityGap && <p style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.50)", marginTop: "4px" }}>Authority gap detected</p>}
         </div>
       </div>
 
       {FACTORS.map((f) => (
         <div key={f.key}>
           <div className="flex items-baseline justify-between mb-1">
-            <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{f.label}</label>
+            <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{f.label}</label>
             <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{scores[f.key]}/10</span>
           </div>
           <input type="range" min={0} max={10} step={1} value={scores[f.key]} onChange={(e) => handleChange(f.key, parseInt(e.target.value))} className="w-full" style={{ accentColor: GOLD }} />

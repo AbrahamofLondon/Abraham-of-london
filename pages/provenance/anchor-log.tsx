@@ -131,7 +131,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
             <div className="flex items-center gap-2 mb-4">
               <Shield className="h-5 w-5" style={{ color: GOLD }} />
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                 Provenance Anchor Log
               </p>
             </div>
@@ -141,10 +141,10 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
             <p style={{ marginTop: "1rem", ...serif, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)", maxWidth: "48ch" }}>
               These anchors disclose cryptographic roots only. They do not reveal client data, evidence, decisions, or internal review material.
             </p>
-            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)" }}>
+            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)" }}>
               External WORM/public anchoring is not yet configured.
             </p>
-            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)" }}>
+            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)" }}>
               Generated: {formatDate(generatedAt)}
             </p>
           </header>
@@ -163,12 +163,12 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
 
           {/* How to read this page */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
               How to read this page
             </p>
             <div className="grid gap-4 md:grid-cols-3">
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Internal chain anchor
                 </p>
                 <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -176,7 +176,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 </p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Public root
                 </p>
                 <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -184,7 +184,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                 </p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   External anchoring
                 </p>
                 <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -196,12 +196,12 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
 
           {/* Anchoring status */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
               Anchoring status
             </p>
             <div className="grid gap-px md:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
               <div style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Internal chain anchoring
                 </p>
                 <p
@@ -223,7 +223,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
               </div>
 
               <div style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Public anchor publication
                 </p>
                 <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: state.publicRootsCount > 0 ? "rgba(110,231,183,0.65)" : "rgba(255,255,255,0.55)" }}>
@@ -239,7 +239,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
               </div>
 
               <div style={{ backgroundColor: "rgb(3,3,5)", padding: "0.85rem 0.95rem" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   External anchoring
                 </p>
                 <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>
@@ -273,16 +273,16 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                   <div className="grid gap-3 md:grid-cols-[auto_minmax(0,1fr)]">
                     {/* Scope badge */}
                     <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
-                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}99`, border: `1px solid ${GOLD}30`, padding: "0.2rem 0.5rem" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}99`, border: `1px solid ${GOLD}30`, padding: "0.2rem 0.5rem" }}>
                         {anchor.scope}
                       </span>
-                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                         v{anchor.version}
                       </span>
                     </div>
 
                     {/* Merkle root */}
-                    <div className="md:min-w-[80px]" style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+                    <div className="md:min-w-[80px]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
                       Merkle Root
                     </div>
                     <div>
@@ -291,17 +291,17 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                         {truncateHash(anchor.merkleRoot)}
                       </div>
                       <details style={{ marginTop: "0.35rem" }}>
-                        <summary style={{ ...mono, cursor: "pointer", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                        <summary style={{ ...mono, cursor: "pointer", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
                           Show full root
                         </summary>
-                        <p style={{ marginTop: "0.35rem", ...mono, fontSize: "8px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)", wordBreak: "break-all" }}>
+                        <p style={{ marginTop: "0.35rem", ...mono, fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)", wordBreak: "break-all" }}>
                           {anchor.merkleRoot}
                         </p>
                       </details>
                     </div>
 
                     {/* Leaf count */}
-                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+                    <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
                       Leaves
                     </div>
                     <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.70)" }}>
@@ -310,7 +310,7 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
                     </div>
 
                     {/* Timestamp */}
-                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+                    <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
                       Computed
                     </div>
                     <div style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.70)" }}>
@@ -325,20 +325,20 @@ const AnchorLogPage: NextPage<PageProps> = ({ anchors, state, generatedAt }) => 
 
           {/* Boundary notice */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
               Boundary
             </p>
             <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
               These anchors disclose cryptographic roots only. They do not reveal client data, evidence, decisions, or internal review material. External WORM or public anchoring is not yet configured. Until then, these roots are stored in the platform database and are not independently anchored to an external immutable store.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/provenance/sample-export" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+              <Link href="/provenance/sample-export" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
                 View client-safe provenance sample
               </Link>
-              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
                 Create your governed case
               </Link>
-              <Link href="/trust" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
+              <Link href="/trust" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}>
                 View Trust Center
               </Link>
             </div>

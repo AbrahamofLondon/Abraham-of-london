@@ -45,7 +45,7 @@ export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps
           <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
             {data.decisionDeclaration.optionA}
           </span>
-          <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.20)" }}>vs</span>
+          <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>vs</span>
           <span style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.95rem", color: "rgba(255,255,255,0.80)", fontWeight: 500 }}>
             {data.decisionDeclaration.optionB}
           </span>
@@ -87,7 +87,7 @@ export default function DecisionGradeBlocks({ data }: { data: DecisionGradeProps
       {/* Confidence indicator */}
       <div className="flex items-center gap-2" style={{ padding: "0.5rem 0" }}>
         <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: conf.color }} />
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: conf.color }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: conf.color }}>
           {conf.label}
         </span>
       </div>

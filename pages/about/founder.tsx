@@ -57,7 +57,7 @@ const FounderPage: NextPage = () => {
             <span
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: `${GOLD}80`,
@@ -83,7 +83,7 @@ const FounderPage: NextPage = () => {
               className="mx-auto mt-6 max-w-xl"
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.34)",
@@ -170,7 +170,7 @@ const FounderPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
                   color: `${GOLD}70`,
@@ -211,7 +211,7 @@ const FounderPage: NextPage = () => {
             <span
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}70`,
@@ -266,7 +266,7 @@ const FounderPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}70`,
@@ -296,7 +296,7 @@ const FounderPage: NextPage = () => {
 
           {/* Why this matters personally */}
           <section className="mx-auto mt-14 max-w-2xl" style={{ borderLeft: `1px solid ${GOLD}25`, paddingLeft: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}55` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}55` }}>
               Why this exists
             </p>
             <p className="mt-4" style={{ ...serif, fontWeight: 300, fontSize: "1.15rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -319,7 +319,7 @@ const FounderPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}75`,
@@ -357,7 +357,7 @@ const FounderPage: NextPage = () => {
               className="mt-5 inline-flex"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}CC`,
@@ -374,7 +374,7 @@ const FounderPage: NextPage = () => {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.25)",
@@ -396,7 +396,7 @@ const FounderPage: NextPage = () => {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.25)",
@@ -419,7 +419,7 @@ const FounderPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}70`,
@@ -436,7 +436,7 @@ const FounderPage: NextPage = () => {
                 className="inline-flex items-center gap-1.5"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   padding: "7px 11px",
@@ -454,7 +454,7 @@ const FounderPage: NextPage = () => {
                 className="inline-flex items-center gap-1.5"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   padding: "7px 11px",
@@ -501,7 +501,7 @@ const FounderPage: NextPage = () => {
                   href={link.href}
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
                     padding: "7px 12px",
@@ -523,7 +523,7 @@ const FounderPage: NextPage = () => {
                 className="group inline-flex items-center gap-2"
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "rgb(3,3,5)",
@@ -535,10 +535,10 @@ const FounderPage: NextPage = () => {
                 <ArrowRight style={{ width: 11, height: 11 }} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/verification" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <Link href="/verification" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Verify credentials
                 </Link>
-                <Link href="/contact" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <Link href="/contact" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Contact
                 </Link>
               </div>

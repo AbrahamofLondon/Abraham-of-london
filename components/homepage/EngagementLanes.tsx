@@ -148,7 +148,7 @@ export default function EngagementLanes({ compact = true }: { compact?: boolean 
                 <div style={{ marginTop: "3rem" }}>
                   <div style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase",
+                    fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase",
                     color: `${GOLD}80`, marginBottom: "0.45rem",
                   }}>
                     {lane.tag}
@@ -187,7 +187,7 @@ export default function EngagementLanes({ compact = true }: { compact?: boolean 
                   borderTop: "1px solid rgba(255,255,255,0.05)",
                   display: "flex", alignItems: "center", gap: "0.35rem",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
                   color: "rgba(255,255,255,0.18)",
                 }}>
                   <span className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.65)]">Enter</span>

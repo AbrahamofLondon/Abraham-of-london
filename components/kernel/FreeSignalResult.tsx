@@ -132,7 +132,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             <ul className="mt-4 space-y-3">
               {signal.clarificationQuestions.map((q, i) => (
                 <li key={i} className="border-l-2 border-white/[0.08] pl-4">
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}88` }}>
                     {q.domain}
                   </p>
                   <p className="mt-1 text-[14px] leading-[1.7] text-white/70">{q.question}</p>
@@ -197,7 +197,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
         {/* Decision Intelligence — derived interpretation, contradiction, simulation */}
         {signal.decisionIntelligence && !signal.clarificationRequired && (
           <div className="mt-8 border-t border-white/[0.06] pt-6">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '12px' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '12px' }}>
               Decision intelligence
             </p>
 
@@ -209,7 +209,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             {/* Core contradiction */}
             {signal.decisionIntelligence.primaryContradiction && (
               <div className="mt-4 border-l-2 border-amber-500/30 pl-4">
-                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '4px' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '4px' }}>
                   Core contradiction
                 </p>
                 <p className="text-[14px] leading-[1.8] text-white/70">
@@ -221,7 +221,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             {/* Simulation paths */}
             {signal.decisionIntelligence.simulationPaths.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '4px' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '4px' }}>
                   Simulated paths
                 </p>
                 {signal.decisionIntelligence.simulationPaths.map((path, i) => (
@@ -229,10 +229,10 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
                     borderColor: path.admissible ? 'rgba(110,231,183,0.30)' : 'rgba(252,165,165,0.30)',
                   }}>
                     <div className="flex items-center gap-2">
-                      <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: path.admissible ? 'rgba(110,231,183,0.60)' : 'rgba(252,165,165,0.60)' }}>
+                      <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: path.admissible ? 'rgba(110,231,183,0.60)' : 'rgba(252,165,165,0.60)' }}>
                         {path.label}
                       </span>
-                      <span style={{ ...mono, fontSize: '7px', color: 'rgba(255,255,255,0.25)' }}>
+                      <span style={{ ...mono, fontSize: '11px', color: 'rgba(255,255,255,0.25)' }}>
                         Risk: {path.riskShift.toLowerCase()}
                       </span>
                     </div>
@@ -246,7 +246,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
 
             {/* Next admissible move */}
             <div className="mt-4 border border-amber-500/20 bg-amber-500/[0.03] p-4">
-              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '4px' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '4px' }}>
                 Next admissible move
               </p>
               <p className="text-[14px] leading-[1.8] text-white/75">
@@ -257,7 +257,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             {/* Unresolved items */}
             {signal.decisionIntelligence.unresolvedItems.length > 0 && (
               <div className="mt-4">
-                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', marginBottom: '4px' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', marginBottom: '4px' }}>
                   What remains unresolved
                 </p>
                 {signal.decisionIntelligence.unresolvedItems.map((item, i) => (
@@ -271,7 +271,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             {/* Refusal */}
             {signal.decisionIntelligence.refusalReason && (
               <div className="mt-4 border border-red-500/20 bg-red-500/[0.03] p-4">
-                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.70)', marginBottom: '4px' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.70)', marginBottom: '4px' }}>
                   System refusal
                 </p>
                 <p className="text-[13px] leading-[1.7] text-white/50">
@@ -294,7 +294,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
           <Section label="Case-Derived Judgement">
             <div className="space-y-5">
               <div>
-                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
                   Primary pattern
                 </p>
                 <Badge>{signal.caseDerivedJudgement.primaryPattern.replace(/_/g, ' ')}</Badge>
@@ -308,7 +308,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
 
               {signal.caseDerivedJudgement.executionSequence.length > 0 && (
                 <div>
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '8px' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '8px' }}>
                     Execution sequence
                   </p>
                   <ol className="space-y-2">
@@ -324,7 +324,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
 
               {signal.caseDerivedJudgement.limitations.length > 0 && (
                 <div className="border-t border-white/[0.06] pt-4">
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', marginBottom: '6px' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)', marginBottom: '6px' }}>
                     What this does not prove
                   </p>
                   {signal.caseDerivedJudgement.limitations.map((limit) => (
@@ -497,7 +497,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
                     style={{ borderColor: 'rgba(255,255,255,0.10)', resize: 'vertical' }}
                   />
                   {refineError && (
-                    <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.10em', color: 'rgba(252,165,165,0.62)' }}>
+                    <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.10em', color: 'rgba(252,165,165,0.62)' }}>
                       {refineError}
                     </p>
                   )}
@@ -507,7 +507,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
                       onClick={() => { setRefining(false); setRefineAnswer(''); setRefineError(null); }}
                       disabled={refiningLoading}
                       style={{
-                        ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
                         color: 'rgba(255,255,255,0.30)', border: '1px solid rgba(255,255,255,0.10)',
                         backgroundColor: 'transparent', padding: '6px 12px', cursor: 'pointer',
                       }}
@@ -519,7 +519,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
                       onClick={handleRefineSubmit}
                       disabled={refiningLoading || !refineAnswer.trim()}
                       style={{
-                        ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
                         color: refiningLoading ? 'rgba(255,255,255,0.20)' : `${GOLD}CC`,
                         border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`,
                         padding: '6px 12px', cursor: refiningLoading ? 'default' : 'pointer',
@@ -536,7 +536,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
                   type="button"
                   onClick={() => setRefining(true)}
                   style={{
-                    ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                    ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
                     color: `${GOLD}AA`, border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}08`,
                     padding: '6px 12px', cursor: 'pointer', marginTop: '8px',
                   }}
@@ -557,7 +557,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
               </p>
               {signal.decisionIntelligence?.progressiveEvidenceDelta && (
                 <div className="mt-3 border-t border-emerald-500/10 pt-3">
-                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(110,231,183,0.55)' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(110,231,183,0.55)' }}>
                     What changed
                   </p>
                   <p className="mt-1 text-[13px] leading-[1.7] text-white/60">
@@ -587,7 +587,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
         {/* ── Living Review ─────────────────────────────────────────────────── */}
         {!signal.clarificationRequired && (
           <div className="mt-10 border-t border-white/[0.06] pt-8">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '12px' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '12px' }}>
               Living Review
             </p>
             <p className="text-[12px] leading-[1.7] text-white/40 mb-6">
@@ -597,7 +597,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
             {/* What the system heard */}
             {signal.userLanguageEvidence && signal.userLanguageEvidence.length > 0 && (
               <div className="mb-4">
-                <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
                   What the system heard
                 </p>
                 <div className="space-y-2">
@@ -612,7 +612,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
 
             {/* Evidence strength */}
             <div className="mb-4">
-              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
                 Evidence strength
               </p>
               <p className="text-[13px] leading-[1.7] text-white/50">
@@ -622,7 +622,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
 
             {/* What cannot be inferred */}
             <div className="mb-4">
-              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '6px' }}>
                 What cannot be inferred
               </p>
               <ul className="space-y-1">
@@ -636,7 +636,7 @@ export function FreeSignalResult({ signal, onReset, originalSituation, onRefined
 
             {/* Next governed action */}
             <div className="border border-amber-500/20 bg-amber-500/[0.03] p-4">
-              <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '6px' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA`, marginBottom: '6px' }}>
                 Next governed action
               </p>
               <p className="text-[14px] leading-[1.8] text-white/70">
@@ -708,7 +708,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
       <p
         style={{
           ...mono,
-          fontSize: '8px',
+          fontSize: '11px',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: `${GOLD}70`,
@@ -725,7 +725,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 function JudgementBlock({ label, text }: { label: string; text: string }) {
   return (
     <div>
-      <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '5px' }}>
+      <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '5px' }}>
         {label}
       </p>
       <p className="text-[14px] leading-[1.8] text-white/68">{text}</p>

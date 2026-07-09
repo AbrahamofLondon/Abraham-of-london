@@ -75,7 +75,7 @@ export default function PlainEnglishDecisionLayer({
             <p
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}CC`,

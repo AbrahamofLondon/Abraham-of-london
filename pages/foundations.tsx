@@ -27,7 +27,7 @@ const FoundationsPage: NextPage = () => (
     <Head><meta name="robots" content="index,follow" /></Head>
     <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
       <div className="mx-auto max-w-2xl">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>Intellectual Foundations</span>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>Intellectual Foundations</span>
         <h1 style={{ ...serif, fontWeight: 300, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.90)", marginTop: "0.5rem" }}>
           The traditions behind the system.
         </h1>
@@ -40,7 +40,7 @@ const FoundationsPage: NextPage = () => (
           {SECTIONS.map((s) => (
             <section key={s.id} style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem" }}>
               <h2 style={{ fontSize: "1rem", fontWeight: 500, color: "rgba(255,255,255,0.70)" }}>{s.title}</h2>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: `${GOLD}70`, marginTop: "0.3rem" }}>{s.sources}</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: `${GOLD}70`, marginTop: "0.3rem" }}>{s.sources}</p>
               <p className="mt-2 text-sm" style={{ lineHeight: 1.7, color: "rgba(255,255,255,0.38)" }}>{s.description}</p>
             </section>
           ))}
@@ -48,7 +48,7 @@ const FoundationsPage: NextPage = () => (
 
         {/* Divider */}
         <div className="mt-10 pt-6" style={{ borderTop: `1px solid ${GOLD}15` }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Original Systems</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Original Systems</span>
           <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.40)", lineHeight: 1.7 }}>
             The following are original frameworks developed by Abraham of London, derived from the traditions above but applied as structured decision systems:
           </p>
@@ -74,10 +74,10 @@ const FoundationsPage: NextPage = () => (
         <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
           <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>From foundations to application</span>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/evidence" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Applied evidence</Link>
-            <Link href="/playbooks" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Public playbooks</Link>
-            <Link href="/verification" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Verify credentials</Link>
-            <Link href="/canon/glossary" style={{ ...mono, fontSize: "7px", padding: "4px 10px", border: `1px solid ${GOLD}12`, color: `${GOLD}60` }}>Canon glossary</Link>
+            <Link href="/evidence" style={{ ...mono, fontSize: "11px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Applied evidence</Link>
+            <Link href="/playbooks" style={{ ...mono, fontSize: "11px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Public playbooks</Link>
+            <Link href="/verification" style={{ ...mono, fontSize: "11px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>Verify credentials</Link>
+            <Link href="/canon/glossary" style={{ ...mono, fontSize: "11px", padding: "4px 10px", border: `1px solid ${GOLD}12`, color: `${GOLD}60` }}>Canon glossary</Link>
           </div>
         </div>
 

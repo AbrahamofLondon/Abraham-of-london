@@ -51,7 +51,7 @@ export function EfficacyCommandBlock({
           <p style={{ fontSize: "12px", lineHeight: 1.5, color: textSecondary, marginTop: "4px" }}>
             {command.checkpoint.verificationQuestion}
           </p>
-          <p style={{ ...mono, fontSize: "7px", color: textMuted, marginTop: "4px" }}>
+          <p style={{ ...mono, fontSize: "11px", color: textMuted, marginTop: "4px" }}>
             Due: {new Date(command.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         </div>

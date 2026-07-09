@@ -267,7 +267,7 @@ function ImprintStrip({
             <span
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.36em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.20)",
@@ -298,7 +298,7 @@ function ImprintStrip({
           <span
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.24em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.16)",

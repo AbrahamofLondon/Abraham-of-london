@@ -28,7 +28,7 @@ function OverrideBadge({ status }: { status: string }) {
         ? "rgba(252,165,165,0.70)"
         : "rgba(255,255,255,0.30)";
   return (
-    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color }}>
+    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color }}>
       {status}
     </span>
   );
@@ -88,7 +88,7 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
     <AdminLayout title="Suppression Audit Ledger">
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-7xl">
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
             Decision infrastructure
           </p>
           <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(2rem, 4vw, 3rem)", color: "rgba(255,255,255,0.90)" }}>
@@ -134,7 +134,7 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
 
           {/* Sponsor-safe notice */}
           <div className="mt-4" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}>
               Sponsor-safe notice: {summary.sponsorSafeNotice}
             </p>
           </div>
@@ -193,7 +193,7 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
                         onClick={() => handleOverride(ev.eventId, "APPROVED_FOR_RELEASE")}
                         style={{
                           ...mono,
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           border: "1px solid rgba(110,231,183,0.30)",
@@ -209,7 +209,7 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
                         onClick={() => handleOverride(ev.eventId, "REMAIN_SUPPRESSED")}
                         style={{
                           ...mono,
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           border: "1px solid rgba(252,165,165,0.30)",
@@ -224,10 +224,10 @@ const SuppressionLedgerPage: NextPage<PageProps> = ({ events, summary }) => {
                     </div>
                   )}
                   {resolved === "loading" && (
-                    <p className="mt-2" style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)" }}>Processing...</p>
+                    <p className="mt-2" style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)" }}>Processing...</p>
                   )}
                   {resolved === "error" && (
-                    <p className="mt-2" style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.60)" }}>Failed to update. Try again.</p>
+                    <p className="mt-2" style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.60)" }}>Failed to update. Try again.</p>
                   )}
                 </div>
               );

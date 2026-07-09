@@ -42,7 +42,7 @@ export default function EvidenceChainSurface({ result }: { result: AssessmentDec
         </span>
         <div className="flex items-center gap-2 mt-1">
           <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: strength.color }} />
-          <span style={{ ...mono, fontSize: "7px", color: strength.color }}>{strength.label}</span>
+          <span style={{ ...mono, fontSize: "11px", color: strength.color }}>{strength.label}</span>
         </div>
         <p style={{ marginTop: "0.5rem", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "1.05rem", lineHeight: 1.75, color: "rgba(255,255,255,0.85)", maxWidth: "62ch" }}>
           {result.primarySignal}

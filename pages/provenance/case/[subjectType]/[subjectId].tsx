@@ -48,13 +48,13 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-4xl space-y-6">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Client-safe provenance
             </p>
             <h1 style={{ ...serif, marginTop: "0.75rem", fontSize: "clamp(1.8rem, 3.5vw, 2.6rem)", lineHeight: 1.05, color: "rgba(255,255,255,0.92)" }}>
               Case-specific summary
             </h1>
-            <p style={{ ...mono, marginTop: "0.9rem", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+            <p style={{ ...mono, marginTop: "0.9rem", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
               {label(subjectType)} · {subjectId}
             </p>
           </header>
@@ -64,14 +64,14 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
               <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.68)" }}>
                 {unavailableReason ?? "Case-specific client-safe provenance is not available for this subject."}
               </p>
-              <p style={{ ...mono, marginTop: "0.8rem", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+              <p style={{ ...mono, marginTop: "0.8rem", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                 Public samples remain available separately from live case records.
               </p>
             </section>
           ) : (
             <>
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Accountability statement
                 </p>
                 <p style={{ ...serif, marginTop: "0.8rem", fontSize: "1.08rem", lineHeight: 1.7, color: "rgba(255,255,255,0.76)" }}>
@@ -81,7 +81,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
 
               <section className="grid gap-3 md:grid-cols-3">
                 <div style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     Delivery posture
                   </p>
                   <p style={{ ...serif, marginTop: "0.45rem", fontSize: "1rem", color: "rgba(255,255,255,0.70)" }}>
@@ -89,7 +89,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
                   </p>
                 </div>
                 <div style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     Outcome posture
                   </p>
                   <p style={{ ...serif, marginTop: "0.45rem", fontSize: "1rem", color: "rgba(255,255,255,0.70)" }}>
@@ -97,14 +97,14 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
                   </p>
                 </div>
                 <div style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     Gap posture
                   </p>
                   <p style={{ ...serif, marginTop: "0.45rem", fontSize: "1rem", color: "rgba(255,255,255,0.70)" }}>
                     {summary.gapCount} gap{summary.gapCount === 1 ? "" : "s"}
                   </p>
                   {summary.gapClasses.length > 0 && (
-                    <p style={{ ...mono, marginTop: "0.25rem", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                    <p style={{ ...mono, marginTop: "0.25rem", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                       {summary.gapClasses.map(label).join(" · ")}
                     </p>
                   )}
@@ -112,7 +112,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
               </section>
 
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Confidence bands
                 </p>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -120,7 +120,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
                     <p style={{ ...serif, color: "rgba(255,255,255,0.48)" }}>No confidence bands recorded.</p>
                   ) : summary.confidenceBands.map((band) => (
                     <div key={band.level} style={{ borderLeft: `1px solid ${GOLD}55`, paddingLeft: "0.75rem" }}>
-                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                         {label(band.level)}
                       </p>
                       <p style={{ ...serif, marginTop: "0.25rem", color: "rgba(255,255,255,0.72)" }}>
@@ -132,7 +132,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
               </section>
 
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Milestone timeline
                 </p>
                 <div className="mt-4 space-y-3">
@@ -140,7 +140,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
                     <p style={{ ...serif, color: "rgba(255,255,255,0.48)" }}>No client-safe milestones recorded.</p>
                   ) : summary.timelineSummary.map((entry) => (
                     <div key={`${entry.milestone}-${entry.occurredAt ?? "pending"}`} style={{ borderLeft: `1px solid ${GOLD}55`, paddingLeft: "0.75rem" }}>
-                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                         {entry.occurredAt ? new Date(entry.occurredAt).toLocaleString("en-GB") : "Date unavailable"}
                       </p>
                       <p style={{ ...serif, marginTop: "0.25rem", color: "rgba(255,255,255,0.72)" }}>
@@ -152,13 +152,13 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
               </section>
 
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Hash-verifiable summary
                 </p>
                 <p style={{ ...mono, marginTop: "0.7rem", fontSize: "10px", color: "rgba(255,255,255,0.68)", wordBreak: "break-all" }}>
                   {summary.provenanceHash}
                 </p>
-                <p style={{ ...mono, marginTop: "0.7rem", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                <p style={{ ...mono, marginTop: "0.7rem", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                   Composed {new Date(summary.composedAt).toLocaleString("en-GB")}
                 </p>
               </section>
@@ -180,7 +180,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
           )}
 
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
               Boundary
             </p>
             <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
@@ -189,7 +189,7 @@ const ClientSafeProvenanceCasePage: NextPage<PageProps> = ({
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
                 href={CLIENT_SAFE_PROVENANCE_SAMPLE_ROUTE}
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
               >
                 View public sample
               </Link>

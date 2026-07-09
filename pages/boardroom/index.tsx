@@ -142,7 +142,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
               <div className="mt-3 space-y-2 text-sm text-white/60">
                 <p>{institutionalCase.scenarioPressure.likelyConsequence}</p>
                 <p className="text-white/50">{institutionalCase.scenarioPressure.bestControlledPath}</p>
-                <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", marginTop: "0.75rem" }}>
+                <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "0.75rem" }}>
                   {institutionalCase.scenarioPressure.uncertaintyCaveat || "Scenario estimate based on current record. Not independently verified."}
                 </p>
               </div>
@@ -195,7 +195,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
           {authenticated && institutionalCase?.signalExposure && (
             <section style={{ border: "1px solid rgba(239,68,68,0.18)", background: "rgba(239,68,68,0.03)", padding: "1rem" }}>
               <div className="flex items-center gap-3 mb-3">
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(239,68,68,0.72)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(239,68,68,0.72)" }}>
                   Signal exposure
                 </p>
                 {institutionalCase.signalExposure.highestSeverity && (
@@ -209,7 +209,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                 {institutionalCase.signalExposure.signals.map((signal) => (
                   <div key={signal.signalName} style={{ borderLeft: "2px solid rgba(239,68,68,0.25)", paddingLeft: "0.85rem" }}>
                     <div className="flex items-center gap-2 mb-1">
-                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(239,68,68,0.55)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(239,68,68,0.55)" }}>
                         {signal.severityBand}
                       </span>
                       <span className="text-sm text-white/80">{signal.signalName}</span>
@@ -242,7 +242,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                 </div>
                 {institutionalCase.memoryConsequence && (
                   <div style={{ borderLeft: "2px solid rgba(201,169,110,0.20)", paddingLeft: "0.85rem" }}>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "0.25rem" }}>Memory consequence</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "0.25rem" }}>Memory consequence</p>
                     <p className="text-xs text-white/50 leading-relaxed">{institutionalCase.memoryConsequence}</p>
                   </div>
                 )}

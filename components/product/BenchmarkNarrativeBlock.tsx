@@ -64,7 +64,7 @@ export default function BenchmarkNarrativeBlock({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.22)",
@@ -102,10 +102,10 @@ export default function BenchmarkNarrativeBlock({
         }}
         aria-label="Benchmark context summary"
       >
-        <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.60)", flex: 1, minWidth: "180px" }}>
+        <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.60)", flex: 1, minWidth: "180px" }}>
           {narrative.headline}
         </p>
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.25)" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.25)" }}>
           n={narrative.n}
         </span>
       </div>
@@ -126,7 +126,7 @@ export default function BenchmarkNarrativeBlock({
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.20em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.28)",
@@ -184,7 +184,7 @@ export default function BenchmarkNarrativeBlock({
               <span
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: d.atOrAboveMedian
@@ -199,7 +199,7 @@ export default function BenchmarkNarrativeBlock({
               <p
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   lineHeight: 1.7,
                   color: "rgba(255,255,255,0.42)",
                 }}
@@ -229,7 +229,7 @@ export default function BenchmarkNarrativeBlock({
           <p
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               lineHeight: 1.7,
               color: "rgba(255,255,255,0.35)",
               flex: 1,
@@ -241,7 +241,7 @@ export default function BenchmarkNarrativeBlock({
             href="/professionals"
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: `${GOLD}CC`,

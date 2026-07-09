@@ -33,7 +33,7 @@ const ConfirmationPage: NextPage<Props> = ({ orderId, email, hasOrder, paymentSt
           <div style={{ border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06`, padding: "2.5rem" }}>
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle2 style={{ width: "24px", height: "24px", color: paid ? GOLD : "rgba(255,255,255,0.34)" }} />
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD }}>
                 {paid ? "Payment Received" : hasOrder ? "Payment Review" : "Payment Verification"}
               </span>
             </div>
@@ -50,7 +50,7 @@ const ConfirmationPage: NextPage<Props> = ({ orderId, email, hasOrder, paymentSt
 
             {orderId ? (
               <div style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.08)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.02)" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                   Order Reference
                 </p>
                 <p style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.60)", marginTop: "0.3rem" }}>
@@ -66,7 +66,7 @@ const ConfirmationPage: NextPage<Props> = ({ orderId, email, hasOrder, paymentSt
               </div>
             ) : sessionRef ? (
               <div style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.08)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.02)" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                   Checkout Reference
                 </p>
                 <p style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.60)", marginTop: "0.3rem" }}>
@@ -82,7 +82,7 @@ const ConfirmationPage: NextPage<Props> = ({ orderId, email, hasOrder, paymentSt
             ) : null}
 
             <div style={{ marginTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.5rem" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.75rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.75rem" }}>
                 What happens next
               </p>
               <div style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.8, color: "rgba(255,255,255,0.50)" }}>
@@ -105,13 +105,13 @@ const ConfirmationPage: NextPage<Props> = ({ orderId, email, hasOrder, paymentSt
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/inner-circle/dashboard"
-                style={{ padding: "12px 22px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
+                style={{ padding: "12px 22px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
               >
                 Return to Dashboard <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
               <Link
                 href="/contact?context=boardroom-brief-support"
-                style={{ padding: "12px 22px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
+                style={{ padding: "12px 22px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
               >
                 Contact Support <ArrowRight style={{ width: "11px", height: "11px" }} />
               </Link>
@@ -126,7 +126,7 @@ const ConfirmationPage: NextPage<Props> = ({ orderId, email, hasOrder, paymentSt
 function StatusBox({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.02)" }}>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
         {label}
       </p>
       <p style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.62)", marginTop: "0.3rem", textTransform: "uppercase" }}>

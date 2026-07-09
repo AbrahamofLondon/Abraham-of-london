@@ -53,7 +53,7 @@ export default function MandateStatement(): JSX.Element {
         <span
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.44em",
             textTransform: "uppercase",
             color: `${GOLD}99`,

@@ -165,7 +165,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.30em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -177,7 +177,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
               <span style={{ color: "rgba(255,255,255,0.12)", fontSize: "10px" }}>/</span>
               <span style={{
                 fontFamily: mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.24em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.20)",
@@ -241,7 +241,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                   flexWrap: "wrap",
                   gap: "0.5rem",
                   fontFamily: mono,
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.26em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)",
@@ -334,7 +334,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
                       style={{
                         fontFamily: mono,
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.26em",
                         textTransform: "uppercase",
                         color: `${GOLD}99`,
@@ -349,7 +349,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
                     style={{
                       fontFamily: mono,
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.26em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.22)",
@@ -363,7 +363,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
                     style={{
                       fontFamily: mono,
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.26em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.16)",
@@ -381,7 +381,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
               }}>
                 <span style={{
                   fontFamily: mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.38em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.18)",
@@ -400,7 +400,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
             {/* Section label */}
             <div style={{
               fontFamily: mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.40em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.16)",
@@ -425,7 +425,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 }}>
                   <span style={{
                     fontFamily: mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.38em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.22)",
@@ -460,7 +460,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       </span>
                       <span style={{
                         fontFamily: mono,
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.10em",
                         color: "rgba(255,255,255,0.55)",
                         textAlign: "right",
@@ -487,7 +487,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     <Quote style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
                     <span style={{
                       fontFamily: mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
                       color: `${GOLD}90`,
@@ -528,7 +528,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       <span style={{
                         marginLeft: "0.75rem",
                         fontFamily: mono,
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         color: "rgba(255,255,255,0.45)",
                         letterSpacing: "0.06em",
                       }}>
@@ -543,7 +543,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                   >
                     <span style={{
                       fontFamily: mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.28em",
                       textTransform: "uppercase",
                       color: `${GOLD}90`,
@@ -565,7 +565,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                   }}>
                     <span style={{
                       fontFamily: mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.38em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.18)",
@@ -584,7 +584,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       >
                         <div className="flex items-center gap-2">
                           <Download style={{ width: "10px", height: "10px", color: `${GOLD}80` }} />
-                          <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>PDF Edition</span>
+                          <span style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>PDF Edition</span>
                         </div>
                         <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                       </a>
@@ -597,7 +597,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       >
                         <div className="flex items-center gap-2">
                           <Eye style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
-                          <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preview Route</span>
+                          <span style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preview Route</span>
                         </div>
                         <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                       </a>
@@ -610,7 +610,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       >
                         <div className="flex items-center gap-2">
                           <BookOpen style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
-                          <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>EPUB Edition</span>
+                          <span style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>EPUB Edition</span>
                         </div>
                         <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                       </a>
@@ -622,7 +622,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     >
                       <div className="flex items-center gap-2">
                         <ExternalLink style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.30)" }} />
-                        <span style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Citation JSON</span>
+                        <span style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Citation JSON</span>
                       </div>
                       <ChevronRight style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.18)" }} />
                     </a>
@@ -642,7 +642,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                 <div>
                   <div style={{
                     fontFamily: mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.38em",
                     textTransform: "uppercase",
                     color: `${GOLD}70`,
@@ -668,7 +668,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     backgroundColor: `${GOLD}0D`,
                     color: `${GOLD}CC`,
                     fontFamily: mono,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     padding: "0.6rem 1.1rem",
@@ -699,7 +699,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     >
                       <ArrowLeft style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
                       <div>
-                        <div style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Previous</div>
+                        <div style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Previous</div>
                         <div style={{ fontFamily: serif, fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{prevItem.title}</div>
                       </div>
                     </Link>
@@ -712,7 +712,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                       style={{ padding: "1.25rem 1.5rem", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.01)" }}
                     >
                       <div>
-                        <div style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Next</div>
+                        <div style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.35rem" }}>Next</div>
                         <div style={{ fontFamily: serif, fontWeight: 300, fontSize: "1.02rem", color: "rgba(255,255,255,0.58)" }}>{nextItem.title}</div>
                       </div>
                       <ArrowRight style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
@@ -734,7 +734,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
             }}>
               <div style={{
                 fontFamily: mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.40em",
                 textTransform: "uppercase",
                 color: `${GOLD}90`,
@@ -767,7 +767,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     backgroundColor: `${GOLD}0D`,
                     color: `${GOLD}BB`,
                     fontFamily: mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}
@@ -785,7 +785,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     backgroundColor: "rgba(255,255,255,0.02)",
                     color: "rgba(255,255,255,0.38)",
                     fontFamily: mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}
@@ -802,7 +802,7 @@ const EditorialPage: NextPage<Props> = ({ item, previewHref, citationHref, relat
                     border: "1px solid rgba(255,255,255,0.06)",
                     color: "rgba(255,255,255,0.22)",
                     fontFamily: mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}

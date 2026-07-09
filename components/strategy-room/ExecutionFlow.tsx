@@ -173,7 +173,7 @@ export default function ExecutionFlow({ inheritedDecision, inheritedBlocker, inh
       {showPresence && (
         <div style={{ position: "fixed", top: "1rem", right: "1.5rem", zIndex: 50, display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: `${GOLD}60`, display: "inline-block" }} />
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
             Session active
           </span>
         </div>
@@ -182,7 +182,7 @@ export default function ExecutionFlow({ inheritedDecision, inheritedBlocker, inh
       {/* ═══ ENTRY LOCK ═══ */}
       {stage === "entry_lock" && (
         <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.35em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "2rem" }}>
+          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.35em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "2rem" }}>
             Strategy Room
           </div>
           <h1 style={{ ...serif, fontSize: "clamp(1.6rem, 4vw, 2.5rem)", lineHeight: 1.15, color: "rgba(255,255,255,0.94)", maxWidth: "20ch" }}>
@@ -238,7 +238,7 @@ export default function ExecutionFlow({ inheritedDecision, inheritedBlocker, inh
       {stage === "conflict" && (
         <div className="flex flex-col items-center justify-center min-h-screen px-6">
           <div style={{ width: "100%", maxWidth: "640px" }}>
-            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1.5rem" }}>
+            <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1.5rem" }}>
               Structural Conflict
             </div>
 
@@ -332,7 +332,7 @@ export default function ExecutionFlow({ inheritedDecision, inheritedBlocker, inh
       {stage === "record" && (
         <div className="flex flex-col items-center justify-center min-h-screen px-6">
           <div style={{ width: "100%", maxWidth: "640px" }}>
-            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.35em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "2rem" }}>
+            <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.35em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "2rem" }}>
               Decision Execution Record
             </div>
             <div style={{ ...serif, fontSize: "1.2rem", lineHeight: 1.4, color: "rgba(255,255,255,0.90)", marginBottom: "0.75rem" }}>
@@ -369,7 +369,7 @@ function EscalationScreen({ label, headline, microcopy, children }: {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6">
       <div style={{ width: "100%", maxWidth: "640px" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1.5rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1.5rem" }}>
           {label}
         </div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.3rem, 3vw, 1.8rem)", lineHeight: 1.25, color: "rgba(255,255,255,0.92)", maxWidth: "28ch" }}>
@@ -389,7 +389,7 @@ function MicroTensionLine({ text }: { text: string }) {
     <p style={{
       marginTop: "0.6rem",
       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-      fontSize: "8px",
+      fontSize: "11px",
       letterSpacing: "0.18em",
       textTransform: "uppercase",
       color: isAccepted ? "rgba(110,231,183,0.50)" : "rgba(252,165,165,0.60)",
@@ -419,7 +419,7 @@ function Evaluating() {
 function RecordLine({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "1rem 0" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.35rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.35rem" }}>
         {label}
       </div>
       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.6, color: "rgba(255,255,255,0.75)" }}>

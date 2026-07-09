@@ -117,7 +117,7 @@ const ProvenanceDemoPage: NextPage = () => {
                 backgroundColor: `${GOLD}08`,
                 color: `${GOLD}BB`,
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.25rem 0.55rem",
@@ -132,7 +132,7 @@ const ProvenanceDemoPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   color: `${GOLD}BB`,
@@ -210,7 +210,7 @@ const ProvenanceDemoPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -239,7 +239,7 @@ const ProvenanceDemoPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}66`,
@@ -272,7 +272,7 @@ const ProvenanceDemoPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}66`,
@@ -327,7 +327,7 @@ const ProvenanceDemoPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}66`,
@@ -362,7 +362,7 @@ const ProvenanceDemoPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -398,7 +398,7 @@ const ProvenanceDemoPage: NextPage = () => {
                 backgroundColor: `${GOLD}0A`,
                 color: `${GOLD}CC`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.6rem 1.1rem",
@@ -469,7 +469,7 @@ const ProvenanceDemoPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -502,7 +502,7 @@ const ProvenanceDemoPage: NextPage = () => {
                   <span
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.12em",
                       color: `${GOLD}55`,
                       marginTop: "0.2rem",
@@ -537,7 +537,7 @@ const ProvenanceDemoPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -571,7 +571,7 @@ const ProvenanceDemoPage: NextPage = () => {
                 backgroundColor: `${GOLD}12`,
                 color: `${GOLD}DD`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.7rem 1.25rem",
@@ -595,7 +595,7 @@ const ProvenanceDemoPage: NextPage = () => {
                 backgroundColor: "rgba(255,255,255,0.03)",
                 color: "rgba(255,255,255,0.55)",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.7rem 1.25rem",
@@ -612,7 +612,7 @@ const ProvenanceDemoPage: NextPage = () => {
                 href="/trust"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -625,7 +625,7 @@ const ProvenanceDemoPage: NextPage = () => {
                 href="/library"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -715,7 +715,7 @@ function VerifyResultPanel({ result }: { result: PublicDemoVerifyResult }) {
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: labelColor,

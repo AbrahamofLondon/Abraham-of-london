@@ -36,7 +36,7 @@ const PortfolioPage: NextPage<Props> = ({ authenticated, data }) => {
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Portfolio Memory
             </p>
             <h1 className="mt-3 text-3xl text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>

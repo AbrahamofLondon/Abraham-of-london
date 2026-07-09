@@ -38,7 +38,7 @@ export function ArbiterBadge({
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: variant === "compact" ? "4px 0" : "6px 0" }}>
       <ShieldCheck style={{ width: 12, height: 12, color: iconColor, flexShrink: 0 }} />
-      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: textColor }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: textColor }}>
         {status === "corrected"
           ? `${contextLabel} quality check: corrected before display`
           : status === "incomplete"

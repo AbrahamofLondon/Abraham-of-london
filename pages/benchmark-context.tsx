@@ -65,7 +65,7 @@ const BenchmarkContextPage: NextPage = () => {
 
           {/* Header */}
           <header style={{ borderLeft: `2px solid ${GOLD}55`, paddingLeft: "20px", marginBottom: "48px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "12px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "12px" }}>
               Estate-wide capability
             </p>
             <h1 style={{ ...serif, fontSize: "clamp(2rem, 4vw, 2.75rem)", lineHeight: 1.05, color: "rgba(255,255,255,0.92)", marginBottom: "16px" }}>
@@ -80,7 +80,7 @@ const BenchmarkContextPage: NextPage = () => {
 
           {/* What it is */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "24px", marginBottom: "2px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "12px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "12px" }}>
               What it is
             </p>
             <p style={{ ...mono, fontSize: "10px", lineHeight: 1.8, color: "rgba(255,255,255,0.60)" }}>
@@ -93,7 +93,7 @@ const BenchmarkContextPage: NextPage = () => {
 
           {/* Anonymized cohort architecture */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "24px", marginBottom: "2px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "12px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "12px" }}>
               Anonymized cohort architecture
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -106,7 +106,7 @@ const BenchmarkContextPage: NextPage = () => {
                 "Outcomes are self-reported at the time of contribution. The system does not independently verify.",
               ].map((item, i) => (
                 <li key={i} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                  <span style={{ ...mono, fontSize: "8px", color: `${GOLD}66`, flexShrink: 0, paddingTop: "2px" }}>—</span>
+                  <span style={{ ...mono, fontSize: "11px", color: `${GOLD}66`, flexShrink: 0, paddingTop: "2px" }}>—</span>
                   <span style={{ ...mono, fontSize: "9px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>{item}</span>
                 </li>
               ))}
@@ -117,7 +117,7 @@ const BenchmarkContextPage: NextPage = () => {
           <section style={{ border: `1px solid ${GOLD}20`, background: `${GOLD}05`, padding: "20px 24px", marginBottom: "32px" }}>
             <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "4px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "4px" }}>
                   Minimum cohort
                 </p>
                 <p style={{ ...mono, fontSize: "24px", color: `${GOLD}EE` }}>
@@ -136,22 +136,22 @@ const BenchmarkContextPage: NextPage = () => {
 
           {/* Dimensions */}
           <section style={{ marginBottom: "48px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "20px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "20px" }}>
               Comparison dimensions
             </p>
 
             {/* Free tier */}
             <div style={{ marginBottom: "2px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.free.border}`, background: TIER_COLORS.free.bg, color: TIER_COLORS.free.color }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.free.border}`, background: TIER_COLORS.free.bg, color: TIER_COLORS.free.color }}>
                   Free
                 </span>
-                <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)" }}>Available to all users</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>Available to all users</span>
               </div>
               {freeDims.map((dim) => (
                 <div key={dim.dimension} style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "14px 18px", marginBottom: "1px" }}>
                   <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.72)", marginBottom: "4px" }}>{dim.label}</p>
-                  <p style={{ ...mono, fontSize: "8px", lineHeight: 1.7, color: "rgba(255,255,255,0.42)" }}>{dim.compares}</p>
+                  <p style={{ ...mono, fontSize: "11px", lineHeight: 1.7, color: "rgba(255,255,255,0.42)" }}>{dim.compares}</p>
                 </div>
               ))}
             </div>
@@ -159,15 +159,15 @@ const BenchmarkContextPage: NextPage = () => {
             {/* Professional tier */}
             <div style={{ marginBottom: "2px", marginTop: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.professional.border}`, background: TIER_COLORS.professional.bg, color: TIER_COLORS.professional.color }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.professional.border}`, background: TIER_COLORS.professional.bg, color: TIER_COLORS.professional.color }}>
                   Professional
                 </span>
-                <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)" }}>{professionalPrice}</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>{professionalPrice}</span>
               </div>
               {profDims.map((dim) => (
                 <div key={dim.dimension} style={{ border: `1px solid ${GOLD}12`, background: `${GOLD}03`, padding: "14px 18px", marginBottom: "1px" }}>
                   <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.65)", marginBottom: "4px" }}>{dim.label}</p>
-                  <p style={{ ...mono, fontSize: "8px", lineHeight: 1.7, color: "rgba(255,255,255,0.40)" }}>{dim.compares}</p>
+                  <p style={{ ...mono, fontSize: "11px", lineHeight: 1.7, color: "rgba(255,255,255,0.40)" }}>{dim.compares}</p>
                 </div>
               ))}
             </div>
@@ -175,15 +175,15 @@ const BenchmarkContextPage: NextPage = () => {
             {/* Retainer tier */}
             <div style={{ marginBottom: "2px", marginTop: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.retainer.border}`, background: TIER_COLORS.retainer.bg, color: TIER_COLORS.retainer.color }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.retainer.border}`, background: TIER_COLORS.retainer.bg, color: TIER_COLORS.retainer.color }}>
                   Retainer
                 </span>
-                <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)" }}>By engagement</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>By engagement</span>
               </div>
               {retainerDims.map((dim) => (
                 <div key={dim.dimension} style={{ border: "1px solid rgba(147,197,253,0.08)", background: "rgba(147,197,253,0.02)", padding: "14px 18px", marginBottom: "1px" }}>
                   <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.60)", marginBottom: "4px" }}>{dim.label}</p>
-                  <p style={{ ...mono, fontSize: "8px", lineHeight: 1.7, color: "rgba(255,255,255,0.38)" }}>{dim.compares}</p>
+                  <p style={{ ...mono, fontSize: "11px", lineHeight: 1.7, color: "rgba(255,255,255,0.38)" }}>{dim.compares}</p>
                 </div>
               ))}
             </div>
@@ -191,15 +191,15 @@ const BenchmarkContextPage: NextPage = () => {
             {/* GMI tier */}
             <div style={{ marginTop: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.gmi.border}`, background: TIER_COLORS.gmi.bg, color: TIER_COLORS.gmi.color }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${TIER_COLORS.gmi.border}`, background: TIER_COLORS.gmi.bg, color: TIER_COLORS.gmi.color }}>
                   GMI Report
                 </span>
-                <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)" }}>Requires GMI access</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>Requires GMI access</span>
               </div>
               {gmiDims.map((dim) => (
                 <div key={dim.dimension} style={{ border: "1px solid rgba(216,180,254,0.08)", background: "rgba(216,180,254,0.02)", padding: "14px 18px", marginBottom: "1px" }}>
                   <p style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.60)", marginBottom: "4px" }}>{dim.label}</p>
-                  <p style={{ ...mono, fontSize: "8px", lineHeight: 1.7, color: "rgba(255,255,255,0.38)" }}>{dim.compares}</p>
+                  <p style={{ ...mono, fontSize: "11px", lineHeight: 1.7, color: "rgba(255,255,255,0.38)" }}>{dim.compares}</p>
                 </div>
               ))}
             </div>
@@ -207,7 +207,7 @@ const BenchmarkContextPage: NextPage = () => {
 
           {/* What happens when below threshold */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "24px", marginBottom: "2px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "12px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "12px" }}>
               When the cohort is building
             </p>
             <p style={{ ...mono, fontSize: "9px", lineHeight: 1.8, color: "rgba(255,255,255,0.50)" }}>
@@ -224,14 +224,14 @@ const BenchmarkContextPage: NextPage = () => {
 
           {/* Disclaimer */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "16px 20px", marginBottom: "40px" }}>
-            <p style={{ ...mono, fontSize: "7.5px", lineHeight: 1.8, color: "rgba(255,255,255,0.28)" }}>
+            <p style={{ ...mono, fontSize: "11px", lineHeight: 1.8, color: "rgba(255,255,255,0.28)" }}>
               {BENCHMARK_CAPABILITY.disclaimer}
             </p>
           </section>
 
           {/* Where benchmark context appears — product integration map */}
           <section style={{ marginBottom: "48px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "20px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "20px" }}>
               Where benchmark context appears
             </p>
             <p style={{ ...mono, fontSize: "9px", lineHeight: 1.8, color: "rgba(255,255,255,0.42)", marginBottom: "20px" }}>
@@ -305,14 +305,14 @@ const BenchmarkContextPage: NextPage = () => {
                       >
                         {item.label}
                       </Link>
-                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.22)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.22)" }}>
                         {profile.assessmentKind}
                       </span>
                     </div>
                     <span
                       style={{
                         ...mono,
-                        fontSize: "7px",
+                        fontSize: "11px",
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
                         padding: "2px 7px",
@@ -328,12 +328,12 @@ const BenchmarkContextPage: NextPage = () => {
                     {item.description}
                   </p>
                   {profile.freeMetrics.length > 0 && (
-                    <p style={{ ...mono, fontSize: "7.5px", color: "rgba(110,231,183,0.55)", marginTop: "6px" }}>
+                    <p style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.55)", marginTop: "6px" }}>
                       Free metrics: {profile.freeMetrics.join(", ")}
                     </p>
                   )}
                   {profile.professionalMetrics.length > 0 && (
-                    <p style={{ ...mono, fontSize: "7.5px", color: `${GOLD}88`, marginTop: "3px" }}>
+                    <p style={{ ...mono, fontSize: "11px", color: `${GOLD}88`, marginTop: "3px" }}>
                       Professional metrics: {profile.professionalMetrics.join(", ")}
                     </p>
                   )}
@@ -347,7 +347,7 @@ const BenchmarkContextPage: NextPage = () => {
             <Link
               href="/professionals"
               style={{
-                ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                 padding: "12px 20px", border: `1px solid ${GOLD}45`, background: `${GOLD}10`,
                 color: "rgba(255,255,255,0.85)", textDecoration: "none",
               }}
@@ -357,7 +357,7 @@ const BenchmarkContextPage: NextPage = () => {
             <Link
               href="/decision-centre"
               style={{
-                ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                 padding: "12px 20px", border: "1px solid rgba(255,255,255,0.10)",
                 color: "rgba(255,255,255,0.45)", textDecoration: "none",
               }}
@@ -367,7 +367,7 @@ const BenchmarkContextPage: NextPage = () => {
             <Link
               href="/diagnostics/fast"
               style={{
-                ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                 padding: "12px 20px", border: "1px solid rgba(255,255,255,0.08)",
                 color: "rgba(255,255,255,0.35)", textDecoration: "none",
               }}

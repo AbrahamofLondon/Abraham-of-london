@@ -31,7 +31,7 @@ const CalibrationPage: NextPage<Props> = ({ rows }) => {
 
       <div className="space-y-6">
         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
             Calibration state
           </span>
           <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.85rem", color: "rgba(255,255,255,0.40)", marginTop: "0.25rem" }}>
@@ -49,11 +49,11 @@ const CalibrationPage: NextPage<Props> = ({ rows }) => {
           <div key={`${row.modelKey}_${row.modelVersion}`} style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem" }}>
             <div className="flex items-center justify-between">
               <div>
-                <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.55)", fontWeight: 700 }}>{row.modelKey}</span>
-                <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)", marginLeft: "0.5rem" }}>v{row.modelVersion}</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.55)", fontWeight: 700 }}>{row.modelKey}</span>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginLeft: "0.5rem" }}>v{row.modelVersion}</span>
               </div>
               <span style={{
-                ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase",
+                ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                 color: row.status === "ACTIVE" ? "rgba(110,231,183,0.60)" : row.status === "SHADOW" ? `${GOLD}BB` : "rgba(255,255,255,0.25)",
               }}>
                 {row.status}
@@ -77,7 +77,7 @@ const CalibrationPage: NextPage<Props> = ({ rows }) => {
             {row.latestAdjustment && (
               <div style={{ marginTop: "0.5rem", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "0.5rem" }}>
                 <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>Latest adjustment</span>
-                <pre style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", marginTop: "0.2rem", whiteSpace: "pre-wrap" }}>
+                <pre style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "0.2rem", whiteSpace: "pre-wrap" }}>
                   {JSON.stringify(row.latestAdjustment, null, 2)}
                 </pre>
               </div>

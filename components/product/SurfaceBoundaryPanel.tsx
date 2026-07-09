@@ -65,7 +65,7 @@ export default function SurfaceBoundaryPanel({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}CC`,
@@ -79,7 +79,7 @@ export default function SurfaceBoundaryPanel({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.28)",
@@ -94,7 +94,7 @@ export default function SurfaceBoundaryPanel({
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -119,7 +119,7 @@ export default function SurfaceBoundaryPanel({
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -170,7 +170,7 @@ export default function SurfaceBoundaryPanel({
               textDecoration: "none",
               padding: "0.65rem 0.9rem",
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
             }}
@@ -189,7 +189,7 @@ export default function SurfaceBoundaryPanel({
                 textDecoration: "none",
                 padding: "0.65rem 0.9rem",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
               }}

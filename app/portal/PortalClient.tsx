@@ -97,7 +97,7 @@ function SummaryBadge({ label, count, color }: { label: string; count: number; c
   return (
     <div style={{ textAlign: "center" as const, padding: "0.75rem 1.25rem", border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
       <p style={{ ...mono, fontSize: "18px", fontWeight: 600, color, marginBottom: "0.25rem" }}>{count}</p>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)" }}>{label}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)" }}>{label}</p>
     </div>
   );
 }
@@ -108,7 +108,7 @@ function DossierCard({ dossier, token }: { dossier: Dossier; token: string }) {
     <div style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1.25rem 1.5rem" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "0.85rem" }}>
         <div>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: `${GOLD}70`, marginBottom: "0.3rem" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: `${GOLD}70`, marginBottom: "0.3rem" }}>
             {dossier.sourceType.replace(/_/g, " ")}
           </p>
           <p style={{ ...serif, fontSize: "1.1rem", color: "rgba(255,255,255,0.88)" }}>{dossier.title}</p>
@@ -116,16 +116,16 @@ function DossierCard({ dossier, token }: { dossier: Dossier; token: string }) {
         <FileText size={16} style={{ color: `${GOLD}60`, flexShrink: 0 }} />
       </div>
       <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const, marginBottom: "1rem" }}>
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)" }}>
           Delivered {formatDate(dossier.createdAt)}
         </span>
         {dossier.lastViewedAt && (
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)" }}>
             Last viewed {formatDate(dossier.lastViewedAt)}
           </span>
         )}
         {dossier.viewCount > 0 && (
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)" }}>
             Viewed {dossier.viewCount}×
           </span>
         )}
@@ -149,7 +149,7 @@ function DossierCard({ dossier, token }: { dossier: Dossier; token: string }) {
           Open Dossier →
         </a>
       ) : (
-        <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.22)" }}>
+        <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.22)" }}>
           Access link expired — contact your representative for a new link.
         </p>
       )}
@@ -195,14 +195,14 @@ function ActionRow({ action, token, onUpdate }: { action: ActionItem; token: str
           </span>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.25rem", flexWrap: "wrap" as const }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: severityColor }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: severityColor }}>
                 {action.severity}
               </span>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: statusCfg.color }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: statusCfg.color }}>
                 {statusCfg.label}
               </span>
               {action.dueDate && (
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)" }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)" }}>
                   Due {formatDate(action.dueDate)}
                 </span>
               )}
@@ -224,12 +224,12 @@ function ActionRow({ action, token, onUpdate }: { action: ActionItem; token: str
             {action.recommendedAction}
           </p>
           {action.owner && (
-            <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.30)", marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginBottom: "0.75rem" }}>
               Owner: {action.owner}
             </p>
           )}
           {action.actionedAt && (
-            <p style={{ ...mono, fontSize: "8px", color: "rgba(34,197,94,0.55)", marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", color: "rgba(34,197,94,0.55)", marginBottom: "0.75rem" }}>
               Actioned: {formatDate(action.actionedAt)}
             </p>
           )}
@@ -270,7 +270,7 @@ function ActionRow({ action, token, onUpdate }: { action: ActionItem; token: str
                 <button
                   onClick={() => updateStatus("IN_PROGRESS")}
                   disabled={updating}
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" as const, padding: "0.4rem 0.85rem", border: "1px solid rgba(59,130,246,0.35)", background: "rgba(59,130,246,0.08)", color: "rgba(59,130,246,0.75)", cursor: "pointer" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" as const, padding: "0.4rem 0.85rem", border: "1px solid rgba(59,130,246,0.35)", background: "rgba(59,130,246,0.08)", color: "rgba(59,130,246,0.75)", cursor: "pointer" }}
                 >
                   Mark in progress
                 </button>
@@ -278,7 +278,7 @@ function ActionRow({ action, token, onUpdate }: { action: ActionItem; token: str
               <button
                 onClick={() => updateStatus("ACTIONED")}
                 disabled={updating}
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" as const, padding: "0.4rem 0.85rem", border: "1px solid rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.08)", color: "rgba(34,197,94,0.75)", cursor: "pointer" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" as const, padding: "0.4rem 0.85rem", border: "1px solid rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.08)", color: "rgba(34,197,94,0.75)", cursor: "pointer" }}
               >
                 Mark actioned
               </button>
@@ -286,7 +286,7 @@ function ActionRow({ action, token, onUpdate }: { action: ActionItem; token: str
                 <button
                   onClick={() => updateStatus("DEFERRED")}
                   disabled={updating}
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" as const, padding: "0.4rem 0.85rem", border: "1px solid rgba(156,163,175,0.25)", background: "transparent", color: "rgba(156,163,175,0.55)", cursor: "pointer" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" as const, padding: "0.4rem 0.85rem", border: "1px solid rgba(156,163,175,0.25)", background: "transparent", color: "rgba(156,163,175,0.55)", cursor: "pointer" }}
                 >
                   Defer
                 </button>
@@ -378,7 +378,7 @@ function ClientPortalPageInner() {
       <div style={{ minHeight: "100vh", background: "#0b0a09", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ maxWidth: "460px", padding: "2rem", textAlign: "center" as const }}>
           <Shield size={32} style={{ color: "rgba(239,68,68,0.4)", margin: "0 auto 1rem" }} />
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(239,68,68,0.5)", marginBottom: "0.75rem" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(239,68,68,0.5)", marginBottom: "0.75rem" }}>
             Access denied
           </p>
           <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.45)", lineHeight: 1.65 }}>
@@ -403,14 +403,14 @@ function ClientPortalPageInner() {
       <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "1.5rem 2rem" }}>
         <div style={{ maxWidth: "860px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
           <div>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.25rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.25rem" }}>
               Decision Portal
             </p>
             <p style={{ ...serif, fontSize: "1.35rem", color: "rgba(255,255,255,0.88)" }}>
               Abraham of London
             </p>
           </div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
             {clientEmail}
           </p>
         </div>
@@ -422,7 +422,7 @@ function ClientPortalPageInner() {
         {/* Action summary */}
         {actionSummary.total > 0 && (
           <div style={{ marginBottom: "2.5rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "1rem" }}>
               Decision action summary
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "0.75rem" }}>
@@ -437,7 +437,7 @@ function ClientPortalPageInner() {
         {/* Boardroom dossiers */}
         {dossiers.length > 0 && (
           <section style={{ marginBottom: "2.5rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "1rem" }}>
               Boardroom dossiers ({dossiers.length})
             </p>
             <div style={{ display: "grid", gap: "0.75rem" }}>
@@ -450,7 +450,7 @@ function ClientPortalPageInner() {
 
         {dossiers.length === 0 && actionItems.length === 0 && (
           <div style={{ padding: "3rem", textAlign: "center" as const, border: "1px solid rgba(255,255,255,0.06)" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
               No deliverables yet
             </p>
             <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.35)" }}>
@@ -462,7 +462,7 @@ function ClientPortalPageInner() {
         {/* Open action items */}
         {openActions.length > 0 && (
           <section style={{ marginBottom: "2.5rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "1rem" }}>
               Action items — open ({openActions.length})
             </p>
             {openActions.map((a) => (
@@ -474,7 +474,7 @@ function ClientPortalPageInner() {
         {/* Resolved actions */}
         {resolvedActions.length > 0 && (
           <section style={{ marginBottom: "2rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "1rem" }}>
               Resolved actions ({resolvedActions.length})
             </p>
             {resolvedActions.map((a) => (
@@ -485,7 +485,7 @@ function ClientPortalPageInner() {
 
         {/* Footer */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "1.5rem", marginTop: "2rem" }}>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)", lineHeight: 1.8 }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)", lineHeight: 1.8 }}>
             Abraham of London · Decision Authority Infrastructure · Client portal is confidential.<br />
             Do not share your access link. Contact your representative if your session expires.
           </p>

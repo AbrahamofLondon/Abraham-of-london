@@ -24,7 +24,7 @@ const WhyNotAI: NextPage = () => {
 
           <div className="flex items-center gap-2 mb-6">
             <Shield className="h-4 w-4" style={{ color: `${GOLD}80` }} />
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Decision Authority vs AI Assistance
             </span>
           </div>
@@ -70,7 +70,7 @@ const WhyNotAI: NextPage = () => {
 
           {/* What we do not do */}
           <div className="mt-8" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.35)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.35)" }}>
               What this system does not do
             </span>
             <ul className="mt-2 space-y-1 text-sm" style={{ color: "rgba(255,255,255,0.30)" }}>
@@ -84,7 +84,7 @@ const WhyNotAI: NextPage = () => {
 
           {/* What we do */}
           <div className="mt-4" style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
               What this system does
             </span>
             <ul className="mt-2 space-y-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>

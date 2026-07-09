@@ -46,13 +46,13 @@ const ToolkitPage: NextPage<Props> = ({ toolkit }) => {
 
           {/* Breadcrumb */}
           <div className="mb-2">
-            <Link href="/toolkits" style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <Link href="/toolkits" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               ← Toolkits
             </Link>
           </div>
 
           {/* Header */}
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>{toolkit.domain}</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>{toolkit.domain}</span>
           <h1 style={{ ...serif, fontWeight: 300, fontSize: "clamp(1.6rem, 4vw, 2.4rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.92)", marginTop: "0.5rem" }}>
             {toolkit.title}
           </h1>
@@ -61,7 +61,7 @@ const ToolkitPage: NextPage<Props> = ({ toolkit }) => {
           </p>
 
           {toolkit.tier !== "public" && (
-            <div className="mt-3 inline-flex items-center gap-2" style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: toolkit.tier === "enterprise" ? "rgba(252,165,165,0.55)" : `${GOLD}80` }}>
+            <div className="mt-3 inline-flex items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: toolkit.tier === "enterprise" ? "rgba(252,165,165,0.55)" : `${GOLD}80` }}>
               <Lock style={{ width: 10, height: 10 }} />
               {toolkit.tier === "enterprise" ? "Enterprise access" : "Paid access"}
             </div>
@@ -69,7 +69,7 @@ const ToolkitPage: NextPage<Props> = ({ toolkit }) => {
 
           {/* Components */}
           <div className="mt-8">
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Components</span>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Components</span>
             <div className="mt-3 space-y-2">
               {toolkit.components.map((comp) => (
                 <div key={comp} style={{ padding: "8px 12px", border: "1px solid rgba(255,255,255,0.06)", fontSize: "0.88rem", color: "rgba(255,255,255,0.50)" }}>
@@ -81,7 +81,7 @@ const ToolkitPage: NextPage<Props> = ({ toolkit }) => {
 
           {/* Outputs */}
           <div className="mt-8">
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Outputs</span>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Outputs</span>
             <div className="mt-3 space-y-2">
               {toolkit.outputs.map((out) => (
                 <div key={out} style={{ padding: "8px 12px", border: `1px solid ${GOLD}12`, backgroundColor: `${GOLD}04`, fontSize: "0.88rem", color: `${GOLD}AA` }}>
@@ -94,12 +94,12 @@ const ToolkitPage: NextPage<Props> = ({ toolkit }) => {
           {/* Framework Basis */}
           {frameworks.length > 0 && (
             <div className="mt-8">
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Framework Basis</span>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Framework Basis</span>
               <div className="mt-3 space-y-3">
                 {frameworks.map((fw) => (
                   <div key={fw!.code} style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem" }}>
                     <div className="flex items-baseline gap-2">
-                      <span style={{ ...mono, fontSize: "8px", color: `${GOLD}80` }}>{fw!.code}</span>
+                      <span style={{ ...mono, fontSize: "11px", color: `${GOLD}80` }}>{fw!.code}</span>
                       <span style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.55)" }}>{fw!.name}</span>
                     </div>
                     <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.30)", marginTop: "0.25rem", lineHeight: 1.6 }}>
@@ -119,7 +119,7 @@ const ToolkitPage: NextPage<Props> = ({ toolkit }) => {
           {/* Application — linked products */}
           {toolkit.linkedProducts.length > 0 && (
             <div className="mt-8">
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Application</span>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Application</span>
               <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>This toolkit is deployed through:</p>
               <div className="mt-3 space-y-2">
                 {toolkit.linkedProducts.map((code) => {

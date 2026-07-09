@@ -81,7 +81,7 @@ export default function InstitutionalHero(): React.ReactElement {
                 border: "1px solid rgba(255,255,255,0.08)",
                 backgroundColor: "rgba(255,255,255,0.018)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.38)",
               }}>
                 {tag}

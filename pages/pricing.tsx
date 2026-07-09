@@ -124,7 +124,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "8px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.45)",
@@ -248,7 +248,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             color: "rgba(201,169,110,0.72)",
             lineHeight: 1.65,
           }}
@@ -261,7 +261,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         <p
           style={{
             ...mono,
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "rgba(253,186,116,0.70)",
@@ -275,7 +275,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         <p
           style={{
             ...mono,
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.45)",
@@ -289,7 +289,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             color: "rgba(255,255,255,0.38)",
           }}
@@ -304,7 +304,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         <span
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.32)",
@@ -318,7 +318,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
           href={actionHref}
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: "rgba(253,186,116,0.85)",
@@ -336,7 +336,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
           href={actionHref}
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: `${GOLD}CC`,
@@ -361,7 +361,7 @@ function ProductCard({ product, cta }: { product: CatalogProduct; cta?: React.Re
         <span
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.32)",
@@ -440,7 +440,7 @@ function RetainerCard({ product }: { product: CatalogProduct }) {
         href="/oversight"
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: `${GOLD}99`,
@@ -543,7 +543,7 @@ export default function PricingPage() {
                   href={href}
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
                     color: `${GOLD}BB`,
@@ -603,7 +603,7 @@ export default function PricingPage() {
                   }}
                 >
                   <div>
-                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.50)", lineHeight: 1.5, marginBottom: "3px" }}>
+                    <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)", lineHeight: 1.5, marginBottom: "3px" }}>
                       {condition}
                     </p>
                     <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.68)", lineHeight: 1.55 }}>
@@ -614,14 +614,14 @@ export default function PricingPage() {
               ))}
             </div>
             <div style={{ marginTop: "14px" }}>
-              <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", lineHeight: 1.6, marginBottom: "8px" }}>
+              <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", lineHeight: 1.6, marginBottom: "8px" }}>
                 Not sure where you fit?
               </p>
               <Link
                 href="/diagnostics/fast"
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: `${GOLD}BB`,
@@ -647,7 +647,7 @@ export default function PricingPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 color: "rgba(255,255,255,0.45)",
                 lineHeight: 1.7,
@@ -722,7 +722,7 @@ export default function PricingPage() {
                 <Link
                   href="/decision-pressure"
                   style={{
-                    ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                    ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                     color: `${GOLD}CC`, textDecoration: "none", marginTop: "4px", alignSelf: "flex-start",
                     borderBottom: `1px solid ${GOLD}40`, paddingBottom: "1px",
                   }}
@@ -752,7 +752,7 @@ export default function PricingPage() {
                 <Link
                   href={FEATURES.decision_delay_exposure.upgradeHref}
                   style={{
-                    ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                    ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                     color: `${GOLD}CC`, textDecoration: "none", marginTop: "4px", alignSelf: "flex-start",
                     borderBottom: `1px solid ${GOLD}40`, paddingBottom: "1px",
                   }}
@@ -782,7 +782,7 @@ export default function PricingPage() {
                 <Link
                   href={FEATURES.provenance_demo.upgradeHref}
                   style={{
-                    ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase",
+                    ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase",
                     color: `${GOLD}CC`, textDecoration: "none", marginTop: "4px", alignSelf: "flex-start",
                     borderBottom: `1px solid ${GOLD}40`, paddingBottom: "1px",
                   }}
@@ -812,7 +812,7 @@ export default function PricingPage() {
                   <ProductCard key={p.code} product={p} />
                 ))}
               </div>
-              <p style={{ ...mono, fontSize: "8px", color: "rgba(201,169,110,0.68)", lineHeight: 1.7, marginTop: "14px" }}>
+              <p style={{ ...mono, fontSize: "11px", color: "rgba(201,169,110,0.68)", lineHeight: 1.7, marginTop: "14px" }}>
                 Boardroom Brief is not Board Brief Builder. Boardroom Brief is an outcome-led paid brief; Board Brief Builder is a specialist self-serve instrument listed below.
               </p>
             </section>
@@ -909,7 +909,7 @@ export default function PricingPage() {
                     <p
                       style={{
                         ...mono,
-                        fontSize: "8px",
+                        fontSize: "11px",
                         color: "rgba(201,169,110,0.70)",
                         lineHeight: 1.65,
                       }}
@@ -921,7 +921,7 @@ export default function PricingPage() {
                       href="/decision-pressure"
                       style={{
                         ...mono,
-                        fontSize: "8px",
+                        fontSize: "11px",
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
                         color: `${GOLD}CC`,
@@ -1008,13 +1008,13 @@ export default function PricingPage() {
                     flexDirection: "column",
                   }}
                 >
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
                     Professional
                   </p>
                   <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.90)", marginBottom: "4px" }}>
                     {CATALOG.professional.displayPrice}
                   </p>
-                  <p style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                  <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
                     per month · cancel anytime
                   </p>
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
@@ -1027,7 +1027,7 @@ export default function PricingPage() {
                       onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
                       style={{
                         ...mono,
-                        fontSize: "8px",
+                        fontSize: "11px",
                         letterSpacing: "0.18em",
                         textTransform: "uppercase",
                         color: "#0A0A0A",
@@ -1048,7 +1048,7 @@ export default function PricingPage() {
                     <span
                       style={{
                         ...mono,
-                        fontSize: "8px",
+                        fontSize: "11px",
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.32)",
@@ -1089,13 +1089,13 @@ export default function PricingPage() {
                   >
                     Best value
                   </span>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
                     Professional Annual
                   </p>
                   <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.90)", marginBottom: "4px" }}>
                     {CATALOG.professional_annual.displayPrice}
                   </p>
-                  <p style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                  <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
                     per year · two months free
                   </p>
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
@@ -1108,7 +1108,7 @@ export default function PricingPage() {
                       onCheckoutStart={() => trackCommercialEvent("professional_upgrade_clicked", "pricing")}
                       style={{
                         ...mono,
-                        fontSize: "8px",
+                        fontSize: "11px",
                         letterSpacing: "0.18em",
                         textTransform: "uppercase",
                         color: "#0A0A0A",
@@ -1126,7 +1126,7 @@ export default function PricingPage() {
                   ) : (
                     // Fail-closed / governance-gated: not a public checkout surface.
                     <span
-                      style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", alignSelf: "flex-start" }}
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", alignSelf: "flex-start" }}
                     >
                       Not currently available
                     </span>
@@ -1145,13 +1145,13 @@ export default function PricingPage() {
                     flexDirection: "column",
                   }}
                 >
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "8px" }}>
                     Enterprise
                   </p>
                   <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.90)", marginBottom: "4px" }}>
                     {CATALOG.enterprise.displayPrice}
                   </p>
-                  <p style={{ ...mono, fontSize: "7.5px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                  <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
                     annual · custom pricing
                   </p>
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", marginBottom: "20px", flex: 1 }}>
@@ -1161,7 +1161,7 @@ export default function PricingPage() {
                     href={CATALOG.enterprise.successPath}
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
                       color: `${GOLD}CC`,
@@ -1187,7 +1187,7 @@ export default function PricingPage() {
                   gridColumn: "1 / -1",
                 }}
               >
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "4px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "4px" }}>
                   Additional collaborators
                 </p>
                 <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)" }}>
@@ -1346,7 +1346,7 @@ export default function PricingPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 color: "rgba(255,255,255,0.38)",
                 lineHeight: 1.6,
@@ -1418,7 +1418,7 @@ export default function PricingPage() {
                     <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.75)", marginBottom: "2px" }}>
                       {f.displayName}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
+                    <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
                       {f.description}
                     </p>
                   </div>
@@ -1426,7 +1426,7 @@ export default function PricingPage() {
                     href={f.upgradeHref}
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                       color: `${GOLD}BB`,
@@ -1459,14 +1459,14 @@ export default function PricingPage() {
                     <p style={{ ...serif, fontSize: "14px", color: "rgba(255,255,255,0.70)", marginBottom: "2px" }}>
                       {f.displayName}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
+                    <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>
                       {f.description}
                     </p>
                   </div>
                   <span
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       color: "rgba(255,255,255,0.38)",
                       whiteSpace: "nowrap",
@@ -1502,7 +1502,7 @@ export default function PricingPage() {
                 href={href}
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.50)",
@@ -1518,7 +1518,7 @@ export default function PricingPage() {
           <div
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.10em",
               color: "rgba(255,255,255,0.32)",
               lineHeight: 1.8,

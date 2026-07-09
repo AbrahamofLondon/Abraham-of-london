@@ -131,7 +131,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
               padding: "12px 28px",
               color: GOLD,
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.25em",
               cursor: "pointer",
               width: "100%",
@@ -148,7 +148,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
           <div style={{ marginBottom: "2rem" }}>
             <span style={{ 
               fontFamily: "'JetBrains Mono', monospace", 
-              fontSize: "7px", 
+              fontSize: "11px", 
               letterSpacing: "0.3em", 
               color: GOLD,
             }}>
@@ -167,7 +167,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
           
           <div style={{ display: "grid", gap: "1.25rem", marginBottom: "2rem" }}>
             <div>
-              <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+              <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                 Role *
               </label>
               <select
@@ -191,7 +191,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
             </div>
             
             <div>
-              <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+              <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                 Industry *
               </label>
               <select
@@ -216,7 +216,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
             
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
               <div>
-                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                   Team Size
                 </label>
                 <select
@@ -240,7 +240,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
               </div>
               
               <div>
-                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                   Years in Role
                 </label>
                 <select
@@ -274,7 +274,7 @@ export function DemographicContextCapture({ onComplete }: DemographicContextCapt
               padding: "12px 28px",
               color: canProceed ? GOLD : "rgba(255,255,255,0.2)",
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.25em",
               cursor: canProceed ? "pointer" : "not-allowed",
               width: "100%",

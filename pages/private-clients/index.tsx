@@ -38,7 +38,7 @@ const PrivateClientsPage: NextPage = () => {
           <div className="mx-auto max-w-5xl px-6 pb-16 pt-28 lg:px-12 lg:pt-36">
             <div className="inline-flex items-center gap-2" style={{ padding: "6px 14px", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06` }}>
               <Lock style={{ width: 12, height: 12, color: `${GOLD}80` }} />
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
                 Private · Confidential · Select access
               </span>
             </div>
@@ -63,7 +63,7 @@ const PrivateClientsPage: NextPage = () => {
                   {i > 0 && <div className="h-3 w-px" style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />}
                   <div className="flex items-center gap-2">
                     <item.icon style={{ width: 12, height: 12, color: `${GOLD}60` }} />
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>{item.label}</span>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>{item.label}</span>
                   </div>
                 </React.Fragment>
               ))}
@@ -75,7 +75,7 @@ const PrivateClientsPage: NextPage = () => {
         <section style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
             <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}04`, padding: "2rem" }}>
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
+              <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
                 Confidentiality commitment
               </div>
               <div className="space-y-3" style={{ ...serif, fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.75, color: "rgba(255,255,255,0.45)" }}>
@@ -91,22 +91,22 @@ const PrivateClientsPage: NextPage = () => {
           <div className="mx-auto max-w-5xl px-6 py-14 lg:px-12">
             <div className="grid gap-4 md:grid-cols-3">
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Proof</div>
+                <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Proof</div>
                 <p style={{ ...serif, fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                   Decision authority methodology observed across anonymised cases. Evidence method: anonymised, modelled, and verified where stated.
                 </p>
-                <Link href="/evidence" className="mt-3 inline-flex items-center gap-1.5" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                <Link href="/evidence" className="mt-3 inline-flex items-center gap-1.5" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                   See evidence <ArrowRight style={{ width: 9, height: 9 }} />
                 </Link>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Delivery</div>
+                <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Delivery</div>
                 <p style={{ ...serif, fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                   Private strategic counsel, decision architecture, and governance design. Diagnostic evidence + Executive Reporting + Strategy Room as warranted.
                 </p>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Boundary</div>
+                <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Boundary</div>
                 <p style={{ ...serif, fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                   Deliberately limited capacity. Not built for volume. Engagements are accepted on the basis of seriousness, not revenue. Unsuitable requests are declined.
                 </p>
@@ -120,20 +120,20 @@ const PrivateClientsPage: NextPage = () => {
           <div className="mx-auto max-w-5xl px-6 py-14 lg:px-12">
             <div className="grid gap-4 md:grid-cols-2">
               <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06`, padding: "1.75rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>Before you enquire</div>
+                <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>Before you enquire</div>
                 <p style={{ ...serif, fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)" }}>
                   Run the diagnostic first. It takes under 2 minutes and produces a specific reading. If the condition justifies private engagement, the system will indicate it.
                 </p>
-                <Link href="/diagnostics/fast" className="mt-4 inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+                <Link href="/diagnostics/fast" className="mt-4 inline-flex items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                   Run the diagnostic <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1.75rem" }}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Request confidential conversation</div>
+                <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Request confidential conversation</div>
                 <p style={{ ...serif, fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.45)" }}>
                   For principals and their representatives. Initial contact is handled discreetly with clear boundaries from the outset.
                 </p>
-                <Link href="/contact?type=private" className="mt-4 inline-flex items-center gap-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+                <Link href="/contact?type=private" className="mt-4 inline-flex items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
                   Contact <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
               </div>
@@ -151,7 +151,7 @@ const PrivateClientsPage: NextPage = () => {
                 { label: "Evidence", href: "/evidence" },
                 { label: "Foundations", href: "/foundations" },
               ].map(link => (
-                <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>
+                <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 12px", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.28)" }}>
                   {link.label}
                 </Link>
               ))}

@@ -48,7 +48,7 @@ const outcomeOptions = [
 function monoStyle(color = "rgba(255,255,255,0.56)"): React.CSSProperties {
   return {
     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontSize: "8px",
+    fontSize: "11px",
     letterSpacing: 0,
     textTransform: "uppercase",
     color,

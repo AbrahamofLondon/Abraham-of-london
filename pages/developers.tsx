@@ -37,7 +37,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "8px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.28)",
@@ -253,7 +253,7 @@ export default function DevelopersPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 color: "rgba(255,255,255,0.28)",
                 lineHeight: 1.7,
@@ -295,7 +295,7 @@ Content-Type: application/json`}</CodeBlock>
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 color: "rgba(255,255,255,0.25)",
                 lineHeight: 1.6,
                 marginTop: "8px",
@@ -331,7 +331,7 @@ Content-Type: application/json`}</CodeBlock>
               assessment session.
             </p>
 
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.28)", marginBottom: "8px" }}>
               REQUEST BODY
             </p>
             <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "16px" }}>
@@ -356,7 +356,7 @@ Content-Type: application/json`}</CodeBlock>
   "externalRef": "JIRA-4821"
 }`}</CodeBlock>
 
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.28)", marginBottom: "8px", marginTop: "16px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.28)", marginBottom: "8px", marginTop: "16px" }}>
               RESPONSE — 201 Created
             </p>
             <CodeBlock>{`{
@@ -480,7 +480,7 @@ Content-Type: application/json`}</CodeBlock>
                       key={h}
                       style={{
                         ...mono,
-                        fontSize: "7px",
+                        fontSize: "11px",
                         letterSpacing: "0.18em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.25)",
@@ -584,7 +584,7 @@ Content-Type: application/json`}</CodeBlock>
                 href={href}
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.32)",

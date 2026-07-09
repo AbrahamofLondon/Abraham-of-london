@@ -30,7 +30,7 @@ const ToolkitsIndexPage: NextPage = () => (
     <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
       <div className="mx-auto max-w-3xl">
 
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>Toolkits</span>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>Toolkits</span>
         <h1 style={{ ...serif, fontWeight: 300, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", lineHeight: 1.1, color: "rgba(255,255,255,0.92)", marginTop: "0.5rem" }}>
           Deployable execution systems.
         </h1>
@@ -57,7 +57,7 @@ const ToolkitsIndexPage: NextPage = () => (
                       <h2 style={{ fontSize: "1rem", fontWeight: 500, color: "rgba(255,255,255,0.75)", margin: 0 }}>{toolkit.title}</h2>
                       {toolkit.tier !== "public" && <Lock style={{ width: 10, height: 10, color: tierInfo.color }} />}
                     </div>
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: tierInfo.color }}>{toolkit.domain} · {tierInfo.label}</span>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: tierInfo.color }}>{toolkit.domain} · {tierInfo.label}</span>
                   </div>
                   <ArrowRight className="h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-50" style={{ color: "rgba(255,255,255,0.30)", marginTop: "4px" }} />
                 </div>

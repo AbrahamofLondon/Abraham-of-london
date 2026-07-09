@@ -40,7 +40,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "8px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.28)",
@@ -78,7 +78,7 @@ function CriterionRow({ label, description }: { label: string; description: stri
       <span
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -365,7 +365,7 @@ export default function DesignPartnersPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.10em",
                 color: "rgba(255,255,255,0.22)",
                 lineHeight: 1.75,
@@ -401,7 +401,7 @@ export default function DesignPartnersPage() {
                 href={href}
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.32)",

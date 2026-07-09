@@ -103,7 +103,7 @@ function RedactedRow({ label, index }: { label: string; index: number }) {
       <span
         style={{
           fontFamily: "JetBrains Mono, ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase" as const,
           color: `${GOLD}60`,
@@ -267,7 +267,7 @@ export default function ERUpgradePanel({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.32em",
             textTransform: "uppercase" as const,
             color: isHighSeverity ? "rgba(252,165,165,0.7)" : `${GOLD}90`,
@@ -278,7 +278,7 @@ export default function ERUpgradePanel({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase" as const,
             color: "rgba(255,255,255,0.20)",
@@ -309,14 +309,14 @@ export default function ERUpgradePanel({
               marginBottom: "1.5rem",
             }}
           >
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(252,165,165,0.50)", marginBottom: "0.35rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(252,165,165,0.50)", marginBottom: "0.35rem" }}>
               Cost of delay — 30 days
             </p>
             <p style={{ fontSize: "0.9rem", lineHeight: 1.6, color: "rgba(255,255,255,0.70)" }}>
               {costOfInaction.horizon30}
             </p>
             {costOfInaction.exposureBand && (
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)", marginTop: "0.4rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)", marginTop: "0.4rem" }}>
                 Exposure band: {costOfInaction.exposureBand}
               </p>
             )}
@@ -333,10 +333,10 @@ export default function ERUpgradePanel({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.30)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.30)" }}>
               Executive Report — {ER_SECTION_LABELS.length} sections
             </p>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: `${GOLD}50`, display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: `${GOLD}50`, display: "flex", alignItems: "center", gap: "0.3rem" }}>
               <Lock size={8} /> Access locked
             </span>
           </div>
@@ -345,7 +345,7 @@ export default function ERUpgradePanel({
             <RedactedRow key={label} label={label} index={i} />
           ))}
 
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.15)", marginTop: "0.75rem", lineHeight: 1.6 }}>
             Content unlocked on payment. All sections populated from your submitted diagnostic inputs.
           </p>
         </div>
@@ -359,13 +359,13 @@ export default function ERUpgradePanel({
               marginBottom: "1.5rem",
             }}
           >
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: `${GOLD}60`, marginBottom: "0.35rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: `${GOLD}60`, marginBottom: "0.35rem" }}>
               Required governance move (preview)
             </p>
             <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.75)" }}>
               {nextGovernanceMove}
             </p>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.4rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.4rem" }}>
               Full analysis and evidence map in the Executive Report.
             </p>
           </div>
@@ -374,7 +374,7 @@ export default function ERUpgradePanel({
         {/* Email capture (if no email yet) */}
         {!initialEmail && (
           <div style={{ marginBottom: "1rem" }}>
-            <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.4rem" }}>
+            <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "0.4rem" }}>
               Email for report delivery
             </label>
             <input
@@ -443,7 +443,7 @@ export default function ERUpgradePanel({
         {/* Trust strip */}
         <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.85rem", flexWrap: "wrap" as const }}>
           {["No sales call required", "One-time payment", "Report delivered immediately", "Governed output"].map((item) => (
-            <span key={item} style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)" }}>
+            <span key={item} style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)" }}>
               · {item}
             </span>
           ))}

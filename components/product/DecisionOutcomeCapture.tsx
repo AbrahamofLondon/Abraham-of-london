@@ -108,7 +108,7 @@ export default function DecisionOutcomeCapture({
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: "rgba(110,231,183,0.70)",
@@ -162,7 +162,7 @@ export default function DecisionOutcomeCapture({
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}88`,
@@ -202,7 +202,7 @@ export default function DecisionOutcomeCapture({
             }}
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: signal === s.value ? "#0A0A0A" : "rgba(255,255,255,0.45)",
@@ -248,7 +248,7 @@ export default function DecisionOutcomeCapture({
                   onClick={() => setBlocker(b.value)}
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color:
@@ -313,7 +313,7 @@ export default function DecisionOutcomeCapture({
           disabled={!signal || submitting}
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: !signal || submitting ? "rgba(255,255,255,0.20)" : "#0A0A0A",

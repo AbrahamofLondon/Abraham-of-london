@@ -18,7 +18,7 @@ export default function CaseActiveBanner({ caseReference, committed, assessmentT
   return (
     <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginBottom: "1.5rem" }}>
       <div className="flex items-center justify-between">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
           Your case is now active
         </span>
         <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.18)" }}>{caseReference.slice(0, 16)}</span>

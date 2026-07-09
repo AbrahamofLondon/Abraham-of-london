@@ -26,7 +26,7 @@ export default function AIInterventionSuggestions({ suggestions }: { suggestions
   return (
     <div style={{ border: "1px solid rgba(110,231,183,0.10)", backgroundColor: "rgba(110,231,183,0.02)", padding: "1.25rem", marginBottom: "1rem" }}>
       <div className="mb-1">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(110,231,183,0.50)" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(110,231,183,0.50)" }}>
           Governed intervention options
         </span>
       </div>
@@ -43,7 +43,7 @@ export default function AIInterventionSuggestions({ suggestions }: { suggestions
             marginTop: i > 0 ? "0.5rem" : 0,
           }}>
             <div className="flex items-center gap-2 mb-1">
-              <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color, fontWeight: 700 }}>
+              <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color, fontWeight: 700 }}>
                 {s.intervention.category}
               </span>
               <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>

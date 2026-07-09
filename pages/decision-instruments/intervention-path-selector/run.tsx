@@ -56,7 +56,7 @@ const InterventionPathRun: NextPage = () => {
           </div>
           {result.executionBlocked && <p style={{ fontSize: "0.92rem", color: "rgba(252,165,165,0.60)", fontWeight: 500 }}>{result.blockReason}</p>}
           {result.rationale.map((r, i) => <p key={i} style={{ fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.50)" }}>{r}</p>)}
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", color: "rgba(255,255,255,0.15)" }}>Escalation window: {result.escalationWindow} days · v{result.version}</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "rgba(255,255,255,0.15)" }}>Escalation window: {result.escalationWindow} days · v{result.version}</p>
         </div>
       )}
     </InstrumentShell>

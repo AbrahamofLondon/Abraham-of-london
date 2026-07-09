@@ -61,7 +61,7 @@ type PageProps = {
 };
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status) return <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)" }}>—</span>;
+  if (!status) return <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>—</span>;
   const colors: Record<string, string> = {
     executed: "rgba(110,231,183,0.70)",
     resolved: "rgba(110,231,183,0.70)",
@@ -74,7 +74,7 @@ function StatusBadge({ status }: { status: string | null }) {
     failed: "rgba(252,165,165,0.70)",
   };
   return (
-    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: colors[status.toLowerCase()] ?? "rgba(255,255,255,0.30)" }}>
+    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: colors[status.toLowerCase()] ?? "rgba(255,255,255,0.30)" }}>
       {status}
     </span>
   );
@@ -85,7 +85,7 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
     <AdminLayout>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-7xl">
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
             Decision authority system
           </p>
           <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(2rem, 4vw, 3rem)", color: "rgba(255,255,255,0.90)" }}>
@@ -103,7 +103,7 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
               { label: "Critical AI exposure", href: "/admin/outcome-ledger?aiRisk=CRITICAL" },
               { label: "Velocity improved", href: "/admin/outcome-ledger?velocityImproved=true" },
             ].map((filter) => (
-              <a key={filter.href} href={filter.href} style={{ ...mono, border: "1px solid rgba(255,255,255,0.08)", padding: "0.45rem 0.65rem", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(147,197,253,0.66)", textDecoration: "none" }}>
+              <a key={filter.href} href={filter.href} style={{ ...mono, border: "1px solid rgba(255,255,255,0.08)", padding: "0.45rem 0.65rem", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(147,197,253,0.66)", textDecoration: "none" }}>
                 {filter.label}
               </a>
             ))}
@@ -157,7 +157,7 @@ const OutcomeLedgerPage: NextPage<PageProps> = ({ entries, stats }) => {
                     <StatusBadge status={entry.enforcementStatus} />
                     {entry.outcomeClassification && (
                       <>
-                        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.12)" }}>→</span>
+                        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.12)" }}>→</span>
                         <StatusBadge status={entry.outcomeClassification} />
                       </>
                     )}

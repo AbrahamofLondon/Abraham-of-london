@@ -48,7 +48,7 @@ export default function VerificationSpineBlock() {
               <span
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   color: `${HOMEPAGE_GOLD}80`,
                 }}
               >

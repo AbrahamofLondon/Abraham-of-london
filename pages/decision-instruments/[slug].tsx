@@ -445,7 +445,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+      <span style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
         {children}
       </span>
     </div>
@@ -454,7 +454,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ ...monoStyle, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.75rem" }}>
+    <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.75rem" }}>
       {children}
     </div>
   );
@@ -539,7 +539,7 @@ function CheckoutPanel({ instrument }: { instrument: InstrumentData }) {
 
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.25rem", maxWidth: "65ch" }}>
-      <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+      <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
         Confirm access
       </div>
       <SystemText color="rgba(255,255,255,0.70)" size="13px">
@@ -547,7 +547,7 @@ function CheckoutPanel({ instrument }: { instrument: InstrumentData }) {
       </SystemText>
 
       <div className="mt-5" style={{ border: "1px solid rgba(255,255,255,0.09)", backgroundColor: "rgb(5 6 8)", padding: "1rem" }}>
-        <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.82)" }}>
+        <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.82)" }}>
           {instrument.title}
         </div>
         <SystemText>{instrument.outcomeLine}</SystemText>
@@ -582,7 +582,7 @@ function CheckoutPanel({ instrument }: { instrument: InstrumentData }) {
             padding: "0.72rem 1rem",
             color: AMBER,
             ...monoStyle,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             opacity: busy ? 0.55 : 1,
@@ -605,7 +605,7 @@ function DeliveryState({
 }) {
   return (
     <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}06`, padding: "1.25rem", maxWidth: "65ch" }}>
-      <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+      <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
         Access granted. Instrument ready.
       </div>
       <h2 style={{
@@ -628,7 +628,7 @@ function DeliveryState({
             color: AMBER,
             padding: "0.75rem 1rem",
             ...monoStyle,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
           }}
@@ -643,7 +643,7 @@ function DeliveryState({
             color: "rgba(255,255,255,0.68)",
             padding: "0.75rem 1rem",
             ...monoStyle,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
           }}
@@ -724,7 +724,7 @@ function _LegacyInstrumentEnvironment({
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: "1rem", ...monoStyle, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            <div style={{ marginTop: "1rem", ...monoStyle, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               Time expectation · {instrument.timeExpectation}
             </div>
             <SystemText color="rgba(255,255,255,0.58)" size="12px">
@@ -733,7 +733,7 @@ function _LegacyInstrumentEnvironment({
           </div>
 
           <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)" }}>
+            <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)" }}>
               At completion, you will have
             </div>
             <div className="mt-3 space-y-2">
@@ -744,7 +744,7 @@ function _LegacyInstrumentEnvironment({
           </div>
 
           <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgb(4 5 7)", padding: "1.25rem" }}>
-            <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               Guided checklist
             </div>
             <div className="mt-4 space-y-3">
@@ -775,7 +775,7 @@ function _LegacyInstrumentEnvironment({
                 color: completionReady ? AMBER : "rgba(255,255,255,0.32)",
                 padding: "0.7rem 1rem",
                 ...monoStyle,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
               }}
@@ -786,7 +786,7 @@ function _LegacyInstrumentEnvironment({
 
           {complete && transition.state !== "HIGH_SEVERITY" && (
             <div style={{ border: `1px solid ${GOLD}28`, backgroundColor: "rgb(2 3 5)", padding: "1.25rem" }}>
-              <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}CC` }}>
+              <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}CC` }}>
                 This decision now carries consequence
               </div>
               <div className="mt-3 space-y-1.5">
@@ -810,7 +810,7 @@ function _LegacyInstrumentEnvironment({
                   color: AMBER,
                   padding: "0.7rem 1rem",
                   ...monoStyle,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                 }}
@@ -827,7 +827,7 @@ function _LegacyInstrumentEnvironment({
                     border: "none",
                     cursor: "pointer",
                     ...monoStyle,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.22)",
@@ -841,7 +841,7 @@ function _LegacyInstrumentEnvironment({
 
           {complete && transition.state === "HIGH_SEVERITY" && (
             <div style={{ border: "1px solid rgba(252,165,165,0.22)", backgroundColor: "rgb(2 3 5)", padding: "1.25rem" }}>
-              <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
+              <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
                 Action is now required
               </div>
               <div className="mt-3 grid gap-px grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
@@ -852,7 +852,7 @@ function _LegacyInstrumentEnvironment({
                 ].map((m) => (
                   <div key={m.label} style={{ backgroundColor: "rgb(4 5 7)", padding: "0.6rem 0.75rem" }}>
                     <div style={{ ...monoStyle, fontSize: "5.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>{m.label}</div>
-                    <div style={{ ...monoStyle, fontSize: "8px", marginTop: "0.2rem", color: "rgba(252,165,165,0.70)" }}>{m.value}</div>
+                    <div style={{ ...monoStyle, fontSize: "11px", marginTop: "0.2rem", color: "rgba(252,165,165,0.70)" }}>{m.value}</div>
                   </div>
                 ))}
               </div>
@@ -868,7 +868,7 @@ function _LegacyInstrumentEnvironment({
                   color: "rgba(252,165,165,0.80)",
                   padding: "0.7rem 1rem",
                   ...monoStyle,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                 }}
@@ -963,7 +963,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
             <div className="mt-6">
               {hasAccess ? (
                 <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}06`, padding: "1rem", maxWidth: "65ch" }}>
-                  <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                  <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                     {accessState === "JUST_PURCHASED"
                       ? "Access granted. Instrument ready."
                       : firstUseComplete
@@ -1054,7 +1054,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
                 productCode="operator_decision_pack"
                 originPath={`/decision-instruments/${instrument.slug}`}
                 className="mt-2.5 inline-flex items-center gap-2"
-                style={{ ...monoStyle, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}
+                style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}
               >
                 Resolve the decision fully &middot; Operator Pack {getProductDisplayPrice("operator_decision_pack")}
                 <ArrowRight style={{ width: 9, height: 9 }} />
@@ -1067,7 +1067,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
           {hasAccess ? (
             <div className="py-8" style={{ maxWidth: "60ch" }}>
               <div style={{ border: `1px solid ${GOLD}25`, backgroundColor: `${GOLD}06`, padding: "1.25rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.75rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.75rem" }}>
                   Instrument unlocked
                 </div>
                 <Link
@@ -1080,7 +1080,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
                 </Link>
                 <div
                   className="flex items-center gap-2 mt-2"
-                  style={{ padding: "8px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}
+                  style={{ padding: "8px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.25)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase" }}
                 >
                   PDF dossier unlocks after saved run
                 </div>
@@ -1089,13 +1089,13 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
           ) : (
             <div className="py-8" style={{ maxWidth: "65ch" }}>
               <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgb(5 6 8)", padding: "1.25rem" }}>
-                <div style={{ ...monoStyle, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)" }}>
+                <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.36)" }}>
                   Controlled instrument access
                 </div>
                 <SystemText color="rgba(255,255,255,0.62)">
                   Confirm access above. The first-use environment opens immediately after payment confirmation.
                 </SystemText>
-                <div className="mt-3 flex items-center gap-2" style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                <div className="mt-3 flex items-center gap-2" style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}90` }}>
                   <Lock style={{ width: 12, height: 12 }} />
                   Tokenized access · no public PDF route
                 </div>
@@ -1113,7 +1113,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
               padding: "1.25rem 1.5rem",
               maxWidth: "48rem",
             }}>
-              <div style={{ ...monoStyle, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.65rem" }}>
+              <div style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.65rem" }}>
                 Where this fits
               </div>
               <div className="space-y-2" style={{ ...serifStyle, fontSize: "0.92rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>
@@ -1134,7 +1134,7 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
                     backgroundColor: `${GOLD}06`,
                     color: GOLD,
                     ...monoStyle,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.20em",
                     textTransform: "uppercase",
                   }}
@@ -1153,15 +1153,15 @@ export default function InstrumentProductPage({ instrument, checkoutVerified, ac
             <Link
               href="/decision-instruments"
               className="inline-flex items-center gap-2 transition-all hover:underline"
-              style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}
+              style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}
             >
               All instruments
             </Link>
-            <span style={{ ...monoStyle, fontSize: "7px", color: "rgba(255,255,255,0.12)" }}>&middot;</span>
+            <span style={{ ...monoStyle, fontSize: "11px", color: "rgba(255,255,255,0.12)" }}>&middot;</span>
             <Link
               href="/"
               className="inline-flex items-center gap-2 transition-all hover:underline"
-              style={{ ...monoStyle, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}
+              style={{ ...monoStyle, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}
             >
               Back to home
             </Link>

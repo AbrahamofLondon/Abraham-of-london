@@ -75,7 +75,7 @@ const Page: NextPage<Props> = ({
         <div className="mx-auto max-w-4xl">
           <div className="mb-2 flex items-center gap-3">
             <span className="h-px w-8" style={{ backgroundColor: `${GOLD}50` }} />
-            <span className="font-mono uppercase" style={{ fontSize: "8px", letterSpacing: "0.34em", color: `${GOLD}90` }}>
+            <span className="font-mono uppercase" style={{ fontSize: "11px", letterSpacing: "0.34em", color: `${GOLD}90` }}>
               {categoryLabel}
             </span>
           </div>
@@ -104,7 +104,7 @@ const Page: NextPage<Props> = ({
               ) : (
                 <Lock className="h-4 w-4" style={{ color: `${GOLD}CC` }} />
               )}
-              <span className="font-mono uppercase" style={{ fontSize: "8px", letterSpacing: "0.28em", color: `${GOLD}CC` }}>
+              <span className="font-mono uppercase" style={{ fontSize: "11px", letterSpacing: "0.28em", color: `${GOLD}CC` }}>
                 {accessLabel}
               </span>
             </div>
@@ -163,7 +163,7 @@ const Page: NextPage<Props> = ({
           ) : null}
 
           {!isPublic && (
-            <p className="mt-4 font-mono" style={{ fontSize: "7.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
+            <p className="mt-4 font-mono" style={{ fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
               Protected delivery is handled by the entitlement resolver. Unknown assets are not resolvable.
             </p>
           )}

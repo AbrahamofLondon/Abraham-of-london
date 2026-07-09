@@ -45,14 +45,14 @@ const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
               <Link
                 href="/editorials"
                 className="font-mono uppercase tracking-[0.3em] transition-colors duration-200"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Editorials
               </Link>
-              <span style={{ color: "var(--ds-border)", fontSize: "7px" }}>›</span>
+              <span style={{ color: "var(--ds-border)", fontSize: "11px" }}>›</span>
               <span
                 className="font-mono uppercase tracking-[0.3em]"
-                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Catalogue
               </span>
@@ -62,7 +62,7 @@ const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
               <span style={{ width: 1, height: 16, backgroundColor: "var(--ds-accent-soft)", display: "inline-block" }} />
               <span
                 className="font-mono uppercase tracking-[0.38em]"
-                style={{ fontSize: "7.5px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Publication Record
               </span>
@@ -116,7 +116,7 @@ const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
                       {pub.category && (
                         <div
                           className="font-mono uppercase tracking-[0.28em] mb-1"
-                          style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                          style={{ fontSize: "11px", color: "var(--ds-accent)" }}
                         >
                           {pub.category}
                         </div>
@@ -140,7 +140,7 @@ const EditorialCataloguePage: NextPage<Props> = ({ publications }) => {
                     <div className="self-start pt-0.5 text-right">
                       <span
                         className="font-mono uppercase tracking-[0.24em] transition-colors duration-200 group-hover:text-[#C9963A]"
-                        style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                        style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
                       >
                         {pub.tier ?? "Public"}
                       </span>

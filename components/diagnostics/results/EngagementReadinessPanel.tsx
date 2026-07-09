@@ -32,7 +32,7 @@ export default function EngagementReadinessPanel({
         <div
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.34em",
             textTransform: "uppercase",
             color: `${GOLD}90`,
@@ -74,7 +74,7 @@ export default function EngagementReadinessPanel({
           <div
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.28em",
               textTransform: "uppercase",
               color: readinessColor,

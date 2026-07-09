@@ -90,7 +90,7 @@ const GmiBoardPulsePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header className="border border-[#C9A96E]/20 bg-[#C9A96E]/[0.04] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Board pulse
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.2rem)", lineHeight: 1.04 }}>

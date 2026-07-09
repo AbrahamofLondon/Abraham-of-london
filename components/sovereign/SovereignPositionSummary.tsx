@@ -260,7 +260,7 @@ export default function SovereignPositionSummary({
               WATCH: "rgba(110,231,183,0.55)",
             };
             return (
-              <span key={sev} style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: colors[sev] }}>
+              <span key={sev} style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: colors[sev] }}>
                 {count} {sev.toLowerCase()}
               </span>
             );

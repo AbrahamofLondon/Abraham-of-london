@@ -40,7 +40,7 @@ function Eyebrow({ children, tone = "gold" }: { children: React.ReactNode; tone?
     <p
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: tone === "gold" ? `${GOLD}80` : "rgba(255,255,255,0.28)",
@@ -150,7 +150,7 @@ const FoundersPage: NextPage = () => (
                 backgroundColor: `${GOLD}0C`,
                 color: `${GOLD}CC`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 textDecoration: "none",
@@ -164,7 +164,7 @@ const FoundersPage: NextPage = () => (
               href="/method"
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -196,7 +196,7 @@ const FoundersPage: NextPage = () => (
                 <span
                   style={{
                     ...mono,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
                     color: `${GOLD}99`,
@@ -272,7 +272,7 @@ const FoundersPage: NextPage = () => (
                   <span
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color: `${GOLD}88`,
@@ -299,7 +299,7 @@ const FoundersPage: NextPage = () => (
               href="/about/founder"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: `${GOLD}B0`,
@@ -315,7 +315,7 @@ const FoundersPage: NextPage = () => (
               href="/trust"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -331,7 +331,7 @@ const FoundersPage: NextPage = () => (
               href="/verification"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -347,7 +347,7 @@ const FoundersPage: NextPage = () => (
               href="/evidence"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -363,7 +363,7 @@ const FoundersPage: NextPage = () => (
               href="/library"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -379,7 +379,7 @@ const FoundersPage: NextPage = () => (
               href="/method"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -395,7 +395,7 @@ const FoundersPage: NextPage = () => (
               href="/provenance/demo"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -437,7 +437,7 @@ const FoundersPage: NextPage = () => (
             href="/pricing"
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.32)",

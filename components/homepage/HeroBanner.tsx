@@ -102,7 +102,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                 border: "1px solid rgba(255,255,255,0.08)",
                 backgroundColor: "rgba(255,255,255,0.018)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.45)",
               }}>
                 {tag}
@@ -123,7 +123,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                 <div style={{ marginBottom: "1.5rem" }}>
                   <span style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+                    fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                     color: "rgba(255,255,255,0.30)",
                   }}>
                     Navigation
@@ -152,7 +152,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                       </div>
                       <p style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                         color: "rgba(255,255,255,0.28)",
                       }} className="transition-colors group-hover:[color:rgba(255,255,255,0.50)]">
                         {item.desc}
@@ -190,7 +190,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                 <Sparkles style={{ width: "12px", height: "12px", color: `${GOLD}BB` }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.30em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase",
                   color: `${GOLD}CC`,
                 }}>
                   Abraham of London
@@ -282,7 +282,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                       <Icon style={{ width: "13px", height: "13px", color: `${GOLD}AA` }} />
                       <span style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                         color: "rgba(255,255,255,0.38)",
                       }}>
                         {label}
@@ -338,7 +338,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                   border: "1px solid rgba(255,255,255,0.10)",
                   backgroundColor: "rgba(6,6,9,0.92)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                   color: "rgba(255,255,255,0.70)",
                 }}>
                   Selected works
@@ -355,7 +355,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                     <div>
                       <p style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                         color: `${GOLD}AA`, marginBottom: "0.5rem",
                       }}>
                         Platform
@@ -385,7 +385,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
                   }}>
                     <p style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.32)", marginBottom: "0.35rem",
                     }}>
                       {item.label}
@@ -415,7 +415,7 @@ export const HeroBanner = ({ title, subtitle }: { title: string; subtitle?: stri
               <div key={col.label}>
                 <p style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                   color: `${GOLD}BB`, marginBottom: "0.6rem",
                 }}>
                   {col.label}

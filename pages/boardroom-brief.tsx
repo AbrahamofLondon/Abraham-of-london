@@ -244,7 +244,7 @@ export default function BoardroomBriefPage() {
     return {
       display: 'block', marginBottom: '0.45rem',
       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-      fontSize: '7px', letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)',
+      fontSize: '11px', letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)',
     }
   }
 
@@ -266,14 +266,14 @@ export default function BoardroomBriefPage() {
               <p style={{ ...serif, fontSize: '1rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.58)', marginTop: '1rem', maxWidth: '52ch' }}>
                 Answer a few questions and receive an early boardroom-readiness preview. The paid Boardroom Brief expands the evidence read into objections, trade-offs, decision paths, and the next admissible move.
               </p>
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.20em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)', marginTop: '0.75rem' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.20em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)', marginTop: '0.75rem' }}>
                 This is not a full executive report. It is an early boardroom-readiness brief built from the evidence you provide.
               </p>
             </div>
 
             {/* ── Phase 3: Trust and fulfilment clarity ──────────────────── */}
             <div className="mt-10 max-w-2xl space-y-3">
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
                 What the Boardroom Brief delivers
               </p>
 
@@ -322,7 +322,7 @@ export default function BoardroomBriefPage() {
                   },
                 ].map(({ label, body }) => (
                   <div key={label} style={{ backgroundColor: 'rgb(3,3,5)', padding: '1.1rem 1.25rem' }}>
-                    <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '0.4rem' }}>
+                    <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.24em', textTransform: 'uppercase', color: `${GOLD}88`, marginBottom: '0.4rem' }}>
                       {label}
                     </p>
                     <p style={{ ...serif, fontSize: '0.875rem', lineHeight: 1.65, color: 'rgba(255,255,255,0.50)' }}>
@@ -332,7 +332,7 @@ export default function BoardroomBriefPage() {
                 ))}
               </div>
 
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.25)', marginTop: '0.5rem' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.25)', marginTop: '0.5rem' }}>
                 The delivery is manual and governed by design. The £99 price reflects governed decision scrutiny with human review — not automated report generation.
               </p>
             </div>
@@ -404,7 +404,7 @@ export default function BoardroomBriefPage() {
               </div>
 
               <details style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
-                <summary style={{ cursor: 'pointer', ...mono, fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.50)' }}>
+                <summary style={{ cursor: 'pointer', ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.50)' }}>
                   Optional: cost of delay
                 </summary>
                 <div className="mt-3">
@@ -424,7 +424,7 @@ export default function BoardroomBriefPage() {
                   onMouseLeave={e => { e.currentTarget.style.borderColor = `${GOLD}42`; e.currentTarget.style.backgroundColor = `${GOLD}10` }}>
                   Generate preview <ArrowRight style={{ width: '12px', height: '12px' }} />
                 </button>
-                <Link href="/boardroom-brief?sample=true" style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>
+                <Link href="/boardroom-brief?sample=true" style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>
                   View sample Boardroom brief
                 </Link>
               </div>
@@ -432,14 +432,14 @@ export default function BoardroomBriefPage() {
 
             {/* Upgrade routing */}
             <div className="mt-12 border-t border-white/[0.05] pt-8 max-w-2xl">
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: '0.75rem' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: '0.75rem' }}>
                 Need more than a brief?
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/quick-check" style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}99`, textDecoration: 'none', border: `1px solid ${GOLD}20`, padding: '8px 14px' }}>
+                <Link href="/quick-check" style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}99`, textDecoration: 'none', border: `1px solid ${GOLD}20`, padding: '8px 14px' }}>
                   Run Quick Decision Health Check
                 </Link>
-                <Link href="/enterprise" style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)', padding: '8px 14px' }}>
+                <Link href="/enterprise" style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.08)', padding: '8px 14px' }}>
                   View Enterprise pathway
                 </Link>
               </div>
@@ -461,7 +461,7 @@ export default function BoardroomBriefPage() {
             <div style={{ border: '1px solid rgba(252,165,165,0.20)', backgroundColor: 'rgba(252,165,165,0.04)', padding: '2rem' }}>
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle style={{ width: '14px', height: '14px', color: 'rgba(252,165,165,0.70)' }} />
-                <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.32em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.70)' }}>
+                <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.32em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.70)' }}>
                   Boardroom brief — insufficient evidence
                 </span>
               </div>
@@ -472,7 +472,7 @@ export default function BoardroomBriefPage() {
                 Please provide a clearer {missingField === 'decision' ? 'decision statement' : missingField === 'consequence' ? 'description of the consequence' : 'evidence or authority context'} and try again.
               </p>
               <button onClick={() => setPhase('intake')}
-                style={{ marginTop: '1.25rem', padding: '11px 22px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', cursor: 'pointer' }}>
+                style={{ marginTop: '1.25rem', padding: '11px 22px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '11px', letterSpacing: '0.24em', textTransform: 'uppercase', cursor: 'pointer' }}>
                 Return to intake
               </button>
             </div>
@@ -500,7 +500,7 @@ export default function BoardroomBriefPage() {
           <div style={{ border: `1px solid ${isQualified ? `${GOLD}30` : 'rgba(252,165,165,0.20)'}`, backgroundColor: isQualified ? `${GOLD}06` : 'rgba(252,165,165,0.04)', padding: '2rem' }}>
             <div className="flex items-center gap-2 mb-2">
               <Shield style={{ width: '14px', height: '14px', color: isQualified ? `${GOLD}99` : 'rgba(252,165,165,0.60)' }} />
-              <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.32em', textTransform: 'uppercase', color: isQualified ? `${GOLD}99` : 'rgba(252,165,165,0.60)' }}>
+              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.32em', textTransform: 'uppercase', color: isQualified ? `${GOLD}99` : 'rgba(252,165,165,0.60)' }}>
                 {isSampleResult ? 'Sample Boardroom Brief' : isQualified ? 'Boardroom Brief preview' : 'Boardroom brief — limited evidence'}
               </span>
             </div>
@@ -522,7 +522,7 @@ export default function BoardroomBriefPage() {
               </p>
               <div className="mt-3">
                 <Link href="/boardroom-brief"
-                  style={{ ...mono, fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}BB`, textDecoration: 'none', border: `1px solid ${GOLD}35`, padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}BB`, textDecoration: 'none', border: `1px solid ${GOLD}35`, padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                   Generate your own brief <ArrowRight style={{ width: '10px', height: '10px' }} />
                 </Link>
               </div>
@@ -545,7 +545,7 @@ export default function BoardroomBriefPage() {
             <div className="mt-6" style={{ border: `1px solid ${GOLD}28`, backgroundColor: `${GOLD}05`, padding: '1.25rem' }}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: `${GOLD}99`, marginBottom: '0.45rem' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: `${GOLD}99`, marginBottom: '0.45rem' }}>
                     Preview generated from your input
                   </p>
                   <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.55)' }}>
@@ -558,7 +558,7 @@ export default function BoardroomBriefPage() {
                     originPath="/boardroom-brief"
                     checkoutMetadata={{ handoffId }}
                     onCheckoutStart={() => trackLaunch("boardroom_to_checkout", "/boardroom-brief")}
-                    style={{ padding: '12px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    style={{ padding: '12px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     Get full Boardroom Brief — {BOARDROOM_BRIEF_PRODUCT.displayPrice}
                   </CheckoutButton>
@@ -571,7 +571,7 @@ export default function BoardroomBriefPage() {
           <div className="mt-6 space-y-4">
             {hasPreviewSections ? previewSections.map(section => (
               <div key={section.id} style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
-                <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
                   {section.label}
                 </p>
                 <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.65)', whiteSpace: 'pre-line' }}>
@@ -580,7 +580,7 @@ export default function BoardroomBriefPage() {
               </div>
             )) : (
               <div style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
-                <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
+                <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
                   Preview boundary
                 </p>
                 <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.65)' }}>
@@ -600,19 +600,19 @@ export default function BoardroomBriefPage() {
           {/* Objection handling */}
           {isSampleResult && dossier.objectionHandling.length > 0 && (
             <div className="mt-6">
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.75rem' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.75rem' }}>
                 Likely objections
               </p>
               <div className="space-y-3">
                 {dossier.objectionHandling.map((item, i) => (
                   <div key={i} style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
-                    <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.50)', marginBottom: '0.3rem' }}>
+                    <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(252,165,165,0.50)', marginBottom: '0.3rem' }}>
                       Objection
                     </p>
                     <p style={{ ...serif, fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.55)' }}>
                       {item.objection}
                     </p>
-                    <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(110,231,183,0.50)', marginTop: '0.5rem', marginBottom: '0.3rem' }}>
+                    <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(110,231,183,0.50)', marginTop: '0.5rem', marginBottom: '0.3rem' }}>
                       Response
                     </p>
                     <p style={{ ...serif, fontSize: '0.9rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.55)' }}>
@@ -627,7 +627,7 @@ export default function BoardroomBriefPage() {
           {/* Decision paths */}
           {isSampleResult && dossier.decisionPath.length > 0 && (
             <div className="mt-6">
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.75rem' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.75rem' }}>
                 Decision paths
               </p>
               <div className="space-y-3">
@@ -635,7 +635,7 @@ export default function BoardroomBriefPage() {
                   <div key={i} style={{ border: `1px solid ${path.recommended ? `${GOLD}25` : 'rgba(255,255,255,0.06)'}`, padding: '1rem', backgroundColor: path.recommended ? `${GOLD}04` : 'rgba(255,255,255,0.008)' }}>
                     <div className="flex items-center gap-2 mb-1">
                       {path.recommended && <CheckCircle2 style={{ width: '12px', height: '12px', color: `${GOLD}99` }} />}
-                      <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: path.recommended ? `${GOLD}CC` : 'rgba(255,255,255,0.35)' }}>
+                      <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: path.recommended ? `${GOLD}CC` : 'rgba(255,255,255,0.35)' }}>
                         {path.option}
                       </span>
                     </div>
@@ -650,7 +650,7 @@ export default function BoardroomBriefPage() {
 
           {!isSampleResult && (dossier.objectionHandling.length > 0 || dossier.decisionPath.length > 0) && (
             <div className="mt-6" style={{ border: '1px solid rgba(255,255,255,0.06)', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.008)' }}>
-              <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
+              <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: '0.5rem' }}>
                 Held for full brief
               </p>
               <p style={{ ...serif, fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.58)' }}>
@@ -685,34 +685,34 @@ export default function BoardroomBriefPage() {
                 productCode={BOARDROOM_BRIEF_PRODUCT.code}
                 originPath="/boardroom-brief"
                 onCheckoutStart={() => trackLaunch("boardroom_to_checkout", "/boardroom-brief")}
-                style={{ padding: '11px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ padding: '11px 20px', border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}12`, color: `${GOLD}DD`, ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 Get full Boardroom Brief
               </CheckoutButton>
             )}
             <Link href="/quick-check"
-              style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               Run Quick Decision Health Check <ArrowRight style={{ width: '11px', height: '11px' }} />
             </Link>
             <Link href="/enterprise"
-              style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               View Enterprise pathway <ArrowRight style={{ width: '11px', height: '11px' }} />
             </Link>
             {isQualified && (
               <Link href="/diagnostics/executive-reporting"
-                style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                style={{ padding: '11px 20px', border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                 Consider Executive Reporting <ArrowRight style={{ width: '11px', height: '11px' }} />
               </Link>
             )}
             {isQualified && (
               <Link href="/boardroom"
-                style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                 Check Boardroom Mode eligibility <ArrowRight style={{ width: '11px', height: '11px' }} />
               </Link>
             )}
             {isQualified && (
               <Link href="/strategy-room"
-                style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                style={{ padding: '11px 20px', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.50)', ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                 Consider Strategy Room <ArrowRight style={{ width: '11px', height: '11px' }} />
               </Link>
             )}
@@ -721,7 +721,7 @@ export default function BoardroomBriefPage() {
           {/* Start fresh */}
           <div className="mt-6">
             <button onClick={() => { setPhase('intake'); setDossier(null) }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '7.5px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+              style={{ background: 'none', border: 'none', cursor: 'pointer', ...mono, fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
               Start a new brief
             </button>
           </div>

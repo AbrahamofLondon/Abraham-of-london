@@ -55,7 +55,7 @@ export default function InstrumentShell({
       <Head><meta name="robots" content="noindex" /></Head>
       <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-xl">
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
             {title} · Decision instrument
           </span>
 
@@ -75,12 +75,12 @@ export default function InstrumentShell({
                     padding: "1.25rem 1.5rem",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.6rem" }}>
-                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: severityColor(signalAuthority.severity) }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: severityColor(signalAuthority.severity) }}>
                         {signalAuthority.severity}
                       </span>
                       <span style={{ height: "1px", flex: 1, backgroundColor: `${severityColor(signalAuthority.severity)}25` }} />
                       {signalAuthority.comparisonBand && (
-                        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                           {signalAuthority.comparisonBand}
                         </span>
                       )}
@@ -112,7 +112,7 @@ export default function InstrumentShell({
                   {/* 5 + 6: Differentiator + next admissible move */}
                   <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "1rem 1.25rem" }}>
                     <div style={{ marginBottom: "0.75rem" }}>
-                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginBottom: "0.3rem" }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginBottom: "0.3rem" }}>
                         What changes the outcome
                       </p>
                       <p style={{ fontSize: "0.84rem", lineHeight: 1.6, color: "rgba(255,255,255,0.52)" }}>
@@ -120,7 +120,7 @@ export default function InstrumentShell({
                       </p>
                     </div>
                     <div>
-                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.3rem" }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.3rem" }}>
                         Next admissible move
                       </p>
                       <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.75)" }}>
@@ -134,13 +134,13 @@ export default function InstrumentShell({
               {/* VALUE RECEIPT — what the instrument produced */}
               {valueReceipt && valueReceipt.length > 0 && (
                 <div className="mt-6" style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "16px 20px" }}>
-                  <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
                     This instrument produced
                   </div>
                   <div className="mt-3 grid gap-2">
                     {valueReceipt.map((item) => (
                       <div key={item.label} className="flex items-start gap-3">
-                        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "100px", paddingTop: "2px" }}>
+                        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "100px", paddingTop: "2px" }}>
                           {item.label}
                         </span>
                         <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>
@@ -149,7 +149,7 @@ export default function InstrumentShell({
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+                  <div className="mt-3" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
                     Result saved · Governed memory written
                   </div>
                 </div>
@@ -157,13 +157,13 @@ export default function InstrumentShell({
 
               <div className="mt-6 space-y-3">
                 {nextStepHref && nextStepLabel && (
-                  <Link href={nextStepHref} className="flex items-center justify-between w-full" style={{ padding: "14px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+                  <Link href={nextStepHref} className="flex items-center justify-between w-full" style={{ padding: "14px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" }}>
                     {nextStepLabel}
                     <ArrowRight style={{ width: 11, height: 11 }} />
                   </Link>
                 )}
                 {pdfHref && (
-                  <a href={pdfHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full" style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.30)", ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                  <a href={pdfHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full" style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.30)", ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
                     <Download style={{ width: 10, height: 10 }} />
                     Download dossier (PDF)
                   </a>

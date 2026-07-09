@@ -201,7 +201,7 @@ export default function ProvenanceSummaryPanel({
                 style={{ display: "flex", alignItems: "baseline", gap: "10px" }}
               >
                 <span
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)", minWidth: "72px" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)", minWidth: "72px" }}
                 >
                   {entry.displayDate ?? "—"}
                 </span>
@@ -221,7 +221,7 @@ export default function ProvenanceSummaryPanel({
             {model.hashDisplay}
           </span>
         </div>
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.22)", lineHeight: 1.7 }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.22)", lineHeight: 1.7 }}>
           {model.caveat}
         </p>
       </div>

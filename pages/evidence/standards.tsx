@@ -17,7 +17,7 @@ function Rule() {
 function Section({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <div className="max-w-3xl">
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.5rem" }}>{eyebrow}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.5rem" }}>{eyebrow}</p>
       <h2 style={{ ...serif, fontSize: "1.45rem", lineHeight: 1.3, color: "rgba(255,255,255,0.75)", fontStyle: "italic", marginBottom: "1rem" }}>{title}</h2>
       {children}
     </div>
@@ -197,10 +197,10 @@ export default function VerificationStandardsPage() {
 
           {/* Navigation */}
           <div className="flex flex-wrap gap-4 mt-4">
-            <Link href="/evidence" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            <Link href="/evidence" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               View evidence
             </Link>
-            <Link href="/evidence/seals" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+            <Link href="/evidence/seals" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
               Integrity seal registry
             </Link>
           </div>

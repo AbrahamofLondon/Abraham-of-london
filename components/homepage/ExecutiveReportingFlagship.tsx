@@ -163,7 +163,7 @@ export default function ExecutiveReportingFlagship({
                 <Crown style={{ width: "14px", height: "14px", color: `${GOLD}AA` }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                   color: `${GOLD}BB`,
                 }}>
                   Flagship interpretation layer
@@ -245,7 +245,7 @@ export default function ExecutiveReportingFlagship({
               }}>
                 <div style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.38em", textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)", marginBottom: "1.5rem",
                 }}>
                   Report output fields
@@ -305,7 +305,7 @@ export default function ExecutiveReportingFlagship({
               <Crown style={{ width: "14px", height: "14px", color: `${GOLD}AA` }} />
               <span style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                 color: `${GOLD}BB`,
               }}>
                 Flagship bridge product
@@ -345,7 +345,7 @@ export default function ExecutiveReportingFlagship({
               }}>
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.38em", textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)",
                 }}>
                   Report output — all 10 fields
@@ -383,7 +383,7 @@ export default function ExecutiveReportingFlagship({
             }}>
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.22)", marginBottom: "0.5rem",
               }}>
                 Position in the system
@@ -480,7 +480,7 @@ export default function ExecutiveReportingFlagship({
               {/* Buyer fit */}
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px", letterSpacing: "0.38em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.38em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.20)", marginBottom: "1.5rem",
               }}>
                 Buyer fit
@@ -523,7 +523,7 @@ export default function ExecutiveReportingFlagship({
                     <TrendingUp style={{ width: "13px", height: "13px", color: `${GOLD}90` }} />
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.22)",
                     }}>
                       Latest release · {quarterDisplay}
@@ -555,7 +555,7 @@ export default function ExecutiveReportingFlagship({
                         backgroundColor: `${GOLD}0A`,
                         color: `${GOLD}CC`,
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                       }}
                       onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}50`; el.style.backgroundColor = `${GOLD}12`; }}
                       onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}32`; el.style.backgroundColor = `${GOLD}0A`; }}
@@ -575,7 +575,7 @@ export default function ExecutiveReportingFlagship({
                           backgroundColor: "rgba(255,255,255,0.015)",
                           color: "rgba(255,255,255,0.42)",
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                          fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                         }}
                         onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.16)"; el.style.color = "rgba(255,255,255,0.68)"; }}
                         onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.08)"; el.style.color = "rgba(255,255,255,0.42)"; }}
@@ -597,7 +597,7 @@ export default function ExecutiveReportingFlagship({
                     <div>
                       <div style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                         color: `${GOLD}90`, marginBottom: "0.5rem",
                       }}>
                         Commercial position

@@ -73,7 +73,7 @@ export default function ReturnBriefInterruptionBar({ sessionKey }: { sessionKey:
         href={`/briefing/return/${sessionKey}`}
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase" as const,
           color: isCritical ? "rgba(252,165,165,0.70)" : "#C9A96EBB",

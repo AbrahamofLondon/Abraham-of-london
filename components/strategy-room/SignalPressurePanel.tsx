@@ -76,14 +76,14 @@ function SignalPressureItem({ item }: { item: SignalPressureItem }) {
       >
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px", flexWrap: "wrap" }}>
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color }}>
               {item.severityBand}
             </span>
             {isLocking && (
               <span
                 style={{
                   ...MONO,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(252,165,165,0.55)",
@@ -113,7 +113,7 @@ function SignalPressureItem({ item }: { item: SignalPressureItem }) {
           borderLeft: `1px solid ${isLocking ? "rgba(252,165,165,0.20)" : "rgba(255,255,255,0.06)"}`,
         }}
       >
-        <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "4px" }}>
+        <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "4px" }}>
           System requirement
         </p>
         <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.65)", margin: 0 }}>
@@ -125,7 +125,7 @@ function SignalPressureItem({ item }: { item: SignalPressureItem }) {
       {expanded && (
         <div style={{ marginTop: "10px", display: "grid", gap: "10px" }}>
           <div>
-            <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
+            <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
               Why this matters for this intervention
             </p>
             <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.48)" }}>
@@ -133,7 +133,7 @@ function SignalPressureItem({ item }: { item: SignalPressureItem }) {
             </p>
           </div>
           <div>
-            <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
+            <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
               What is now required
             </p>
             <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -141,7 +141,7 @@ function SignalPressureItem({ item }: { item: SignalPressureItem }) {
             </p>
           </div>
           <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
               Evidence: {item.evidencePosture.replace(/_/g, " ").toLowerCase()}
             </span>
           </div>
@@ -218,7 +218,7 @@ export default function SignalPressurePanel({ signalPressure }: Props) {
       )}
 
       {/* Governance footer */}
-      <p style={{ ...MONO, fontSize: "8px", lineHeight: 1.55, color: "rgba(255,255,255,0.16)", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+      <p style={{ ...MONO, fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.16)", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         Signal pressure is derived from the institutional pattern dataset. It represents observed tendencies, not determinate conclusions. Evidence posture and sample caveat apply to each signal.
       </p>
     </div>

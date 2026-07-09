@@ -271,7 +271,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                   <span
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.40em",
                       textTransform: "uppercase",
                       color: `${GOLD}CC`,
@@ -305,7 +305,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                 className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.30em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -318,7 +318,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)",
@@ -349,7 +349,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px",
+                        fontSize: "11px",
                         letterSpacing: "0.38em",
                         textTransform: "uppercase",
                         color: typeColor(pbPlaybookType),
@@ -370,7 +370,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                       <span
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.34em",
                           textTransform: "uppercase",
                           color: difficultyColor(pbDifficulty),
@@ -428,7 +428,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.34em",
                         textTransform: "uppercase",
                         color: `${GOLD}90`,
@@ -462,7 +462,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.28em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.28)",
@@ -534,7 +534,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                         <span
                           style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.38em",
                             textTransform: "uppercase",
                             color: "rgba(255,255,255,0.25)",
@@ -599,7 +599,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                         <span
                           style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.38em",
                             textTransform: "uppercase",
                             color: "rgba(255,255,255,0.22)",
@@ -666,7 +666,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                         <span
                           style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.38em",
                             textTransform: "uppercase",
                             color: `${GOLD}90`,
@@ -719,7 +719,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     <div
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px",
+                        fontSize: "11px",
                         letterSpacing: "0.36em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.20)",
@@ -833,7 +833,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                       <div
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.34em",
                           textTransform: "uppercase",
                           color: "rgba(255,255,255,0.20)",
@@ -872,7 +872,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                       <div
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.34em",
                           textTransform: "uppercase",
                           color: "rgba(255,255,255,0.20)",
@@ -925,7 +925,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase",
                   color: `${GOLD}90`,
@@ -960,7 +960,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     backgroundColor: `${GOLD}0D`,
                     color: `${GOLD}BB`,
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}
@@ -988,7 +988,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     backgroundColor: "rgba(255,255,255,0.02)",
                     color: "rgba(255,255,255,0.40)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}
@@ -1014,7 +1014,7 @@ const PlaybookPage: NextPage<PlaybookPageProps> = ({ playbook, renderCode, requi
                     border: "1px solid rgba(255,255,255,0.06)",
                     color: "rgba(255,255,255,0.25)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                   }}

@@ -143,7 +143,7 @@ export default function ConsequencePath({
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: `${GOLD}80`,
@@ -221,7 +221,7 @@ export default function ConsequencePath({
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.14em",
           color: "rgba(255,255,255,0.18)",
           marginTop: "1rem",

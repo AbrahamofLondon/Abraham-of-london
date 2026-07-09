@@ -14,7 +14,7 @@ const eyebrowStyle: React.CSSProperties = {
 
 const metaStyle: React.CSSProperties = {
   ...mono,
-  fontSize: "8px",
+  fontSize: "11px",
   letterSpacing: "0.14em",
   textTransform: "uppercase",
   color: "rgba(255,255,255,0.34)",

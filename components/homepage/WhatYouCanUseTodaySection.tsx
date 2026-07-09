@@ -113,7 +113,7 @@ export default function WhatYouCanUseTodaySection() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: pillar.accent,
@@ -146,7 +146,7 @@ export default function WhatYouCanUseTodaySection() {
           <p
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               color: "rgba(255,255,255,0.28)",
               lineHeight: 1.7,

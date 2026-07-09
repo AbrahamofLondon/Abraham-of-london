@@ -36,7 +36,7 @@ export default function AITerrainExposure({ data }: { data: AITerrainAssessment 
     <div style={{ border: `1px solid ${config.color}25`, backgroundColor: `${config.color}05`, padding: "1.25rem", marginBottom: "1rem" }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
           AI terrain exposure
         </span>
       </div>
@@ -46,7 +46,7 @@ export default function AITerrainExposure({ data }: { data: AITerrainAssessment 
         <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: config.color, fontWeight: 700 }}>
           {config.label}
         </span>
-        <span style={{ ...mono, fontSize: "7px", color: severityColor(data.exposureLevel.toLowerCase()), fontWeight: 600 }}>
+        <span style={{ ...mono, fontSize: "11px", color: severityColor(data.exposureLevel.toLowerCase()), fontWeight: 600 }}>
           {data.exposureLevel} EXPOSURE
         </span>
       </div>
@@ -95,7 +95,7 @@ export default function AITerrainExposure({ data }: { data: AITerrainAssessment 
               <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                 {period.label}
               </span>
-              <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color: severityColor(period.data.severity) }}>
+              <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color: severityColor(period.data.severity) }}>
                 {period.data.severity}
               </span>
             </div>

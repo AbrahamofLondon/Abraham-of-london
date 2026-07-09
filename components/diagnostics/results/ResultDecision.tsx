@@ -16,7 +16,7 @@ export default function ResultDecision({ decision }: { decision: string }) {
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: `${GOLD}80`,

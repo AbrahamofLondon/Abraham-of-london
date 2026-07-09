@@ -89,7 +89,7 @@ export default function PlaybookContinuationPanel({
         <span
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.38em",
             textTransform: "uppercase",
             color: `${GOLD}99`,
@@ -126,7 +126,7 @@ export default function PlaybookContinuationPanel({
             backgroundColor: `${GOLD}0D`,
             color: `${GOLD}BB`,
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.26em",
             textTransform: "uppercase",
           }}
@@ -154,7 +154,7 @@ export default function PlaybookContinuationPanel({
               border: "1px solid rgba(255,255,255,0.08)",
               color: "rgba(255,255,255,0.38)",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.26em",
               textTransform: "uppercase",
             }}

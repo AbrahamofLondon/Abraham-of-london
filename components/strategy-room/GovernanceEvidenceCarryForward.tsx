@@ -49,7 +49,7 @@ export default function GovernanceEvidenceCarryForward({
       <div
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
           color: "rgba(201,169,110,0.75)",

@@ -8,7 +8,7 @@ export default function RetainedMemoryLossPanel({ summary, retainedAssets }: {
 }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem 1.1rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.78)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.78)" }}>
         Active continuity if oversight stops
       </p>
       <p className="mt-3 text-sm leading-7 text-white/68">{summary}</p>

@@ -162,7 +162,7 @@ export default function PlaybookCard({
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.40em",
                     textTransform: "uppercase",
                     color: typeColor(playbookType),
@@ -177,7 +177,7 @@ export default function PlaybookCard({
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "8px",
+                        fontSize: "11px",
                         letterSpacing: "0.26em",
                         textTransform: "uppercase",
                         color: difficultyColor(difficultyLabel),
@@ -204,7 +204,7 @@ export default function PlaybookCard({
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.32em",
                     textTransform: "uppercase",
                   }}
@@ -269,7 +269,7 @@ export default function PlaybookCard({
                     border: "1px solid rgba(255,255,255,0.05)",
                     backgroundColor: "rgba(255,255,255,0.012)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.24em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.22)",
@@ -306,7 +306,7 @@ export default function PlaybookCard({
                   <span
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.28em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.22)",
@@ -319,7 +319,7 @@ export default function PlaybookCard({
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.14)",
@@ -334,7 +334,7 @@ export default function PlaybookCard({
               className="flex items-center gap-2 transition-all duration-300 group-hover:gap-3 group-focus-visible:gap-3"
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}AA`,

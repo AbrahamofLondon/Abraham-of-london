@@ -155,7 +155,7 @@ function StatusPill({ status, colorFn }: {
       border: `1px solid ${c.border}`,
       backgroundColor: c.bg,
       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-      fontSize: "7px",
+      fontSize: "11px",
       letterSpacing: "0.32em",
       textTransform: "uppercase",
       color: c.text,
@@ -250,7 +250,7 @@ function CorrectionNodeRow({
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.28em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.18)",
@@ -268,7 +268,7 @@ function CorrectionNodeRow({
                   border: "1px solid rgba(255,255,255,0.08)",
                   backgroundColor: "rgba(255,255,255,0.02)",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.26em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.38)",
@@ -345,7 +345,7 @@ function InterventionCard({
                 border: "1px solid rgba(255,255,255,0.07)",
                 backgroundColor: "rgba(255,255,255,0.015)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.30em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.30)",
@@ -379,7 +379,7 @@ function InterventionCard({
               ].filter(Boolean).map((m: any) => (
                 <div key={m.label} className="flex items-center gap-1.5">
                   <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>{m.label}</span>
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.50)" }}>{m.value}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.50)" }}>{m.value}</span>
                 </div>
               ))}
             </div>
@@ -426,7 +426,7 @@ function InterventionCard({
           }}>
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.34em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.20)",
@@ -446,7 +446,7 @@ function InterventionCard({
                     border: `1px solid ${c.border}`,
                     backgroundColor: c.bg,
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.28em",
                     textTransform: "uppercase",
                     color: c.text,
@@ -466,7 +466,7 @@ function InterventionCard({
             <div style={{ padding: "1rem 1.75rem 1.5rem" }}>
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.38em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.18)",
@@ -549,7 +549,7 @@ function FilterBar({
                   flexShrink: 0,
                   padding: "5px 14px",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.30em",
                   textTransform: "uppercase",
                   border: `1px solid ${isActive ? (sc?.border ?? `${GOLD}35`) : "rgba(255,255,255,0.07)"}`,
@@ -692,7 +692,7 @@ export default function InterventionConsole() {
                 className="inline-flex items-center gap-1.5 mb-8 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.30em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.26)",
@@ -749,7 +749,7 @@ export default function InterventionConsole() {
                       </div>
                       <div style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px",
+                        fontSize: "11px",
                         letterSpacing: "0.30em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.22)",
@@ -795,7 +795,7 @@ export default function InterventionConsole() {
                 />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.34em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)",
@@ -875,7 +875,7 @@ export default function InterventionConsole() {
                 <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}35, transparent)` }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.34em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.18)",
@@ -888,7 +888,7 @@ export default function InterventionConsole() {
                 className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
                   color: `${GOLD}90`,
@@ -923,7 +923,7 @@ export default function InterventionConsole() {
           <CheckSquare style={{ width: "13px", height: "13px", color: `${GOLD}AA` }} />
           <span style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.65)",

@@ -128,13 +128,13 @@ export default function DecisionCentreChecklist({ hasExistingCases = false }: Pr
         onClick={() => setExpanded((e) => !e)}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
             Getting started
           </span>
           <span
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               padding: "2px 7px",
               border: `1px solid ${GOLD}30`,
               color: `${GOLD}70`,

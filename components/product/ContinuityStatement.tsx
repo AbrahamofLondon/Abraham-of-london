@@ -134,12 +134,12 @@ export default function ContinuityStatement({
           {config.label}
         </span>
         {priorOccurrences != null && priorOccurrences > 0 && (
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: theme.dim }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: theme.dim }}>
             {priorOccurrences} prior occurrence{priorOccurrences !== 1 ? "s" : ""}
           </span>
         )}
         {trend && trend !== "unknown" && (
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: theme.dim }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: theme.dim }}>
             Trend: {trend}
           </span>
         )}
@@ -154,7 +154,7 @@ export default function ContinuityStatement({
 
       {/* Last observed */}
       {lastObserved && !compact && (
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: theme.dim, marginTop: "6px" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: theme.dim, marginTop: "6px" }}>
           Last observed: {lastObserved}
         </p>
       )}

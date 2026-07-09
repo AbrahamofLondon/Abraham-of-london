@@ -138,7 +138,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                 <Shield style={{ color: GOLD, width: "24px", height: "24px" }} />
                 <span style={{ 
                   fontFamily: "'JetBrains Mono', monospace", 
-                  fontSize: "8px", 
+                  fontSize: "11px", 
                   letterSpacing: "0.3em", 
                   textTransform: "uppercase",
                   color: GOLD,
@@ -191,7 +191,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     border: "1px solid rgba(255,255,255,0.15)",
                     color: "rgba(255,255,255,0.4)",
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor: "pointer",
@@ -207,7 +207,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     border: `1px solid ${GOLD}60`,
                     color: GOLD,
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor: "pointer",
@@ -229,7 +229,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
               <div style={{ marginBottom: "1.5rem" }}>
                 <span style={{ 
                   fontFamily: "'JetBrains Mono', monospace", 
-                  fontSize: "7px", 
+                  fontSize: "11px", 
                   letterSpacing: "0.3em", 
                   textTransform: "uppercase",
                   color: GOLD,
@@ -239,7 +239,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
               </div>
               
               <div style={{ marginBottom: "1.5rem" }}>
-                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
                   Your first action (from the assessment)
                 </label>
                 <div style={{ 
@@ -254,7 +254,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                   {pattern.firstAction}
                 </div>
                 
-                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
                   Rewrite it in YOUR words (be specific)
                 </label>
                 <textarea
@@ -275,7 +275,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                   }}
                 />
                 
-                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
                   Deadline (7 days recommended)
                 </label>
                 <input
@@ -292,7 +292,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                   }}
                 />
                 
-                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+                <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
                   If you fail to act, what is the real cost?
                 </label>
                 <textarea
@@ -322,7 +322,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     border: "1px solid rgba(255,255,255,0.15)",
                     color: "rgba(255,255,255,0.4)",
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor: "pointer",
@@ -339,7 +339,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     border: `1px solid ${canSign ? `${GOLD}60` : "rgba(255,255,255,0.1)"}`,
                     color: canSign ? GOLD : "rgba(255,255,255,0.3)",
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor: canSign ? "pointer" : "not-allowed",
@@ -361,7 +361,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
               <div style={{ marginBottom: "1.5rem" }}>
                 <span style={{ 
                   fontFamily: "'JetBrains Mono', monospace", 
-                  fontSize: "7px", 
+                  fontSize: "11px", 
                   letterSpacing: "0.3em", 
                   textTransform: "uppercase",
                   color: GOLD,
@@ -375,7 +375,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
               
               <div style={{ display: "grid", gap: "1rem", marginBottom: "1.5rem" }}>
                 <div>
-                  <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+                  <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                     Role *
                   </label>
                   <select
@@ -396,7 +396,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                 </div>
                 
                 <div>
-                  <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+                  <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                     Industry *
                   </label>
                   <select
@@ -418,7 +418,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
-                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                       Team Size
                     </label>
                     <select
@@ -434,7 +434,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
+                    <label style={{ display: "block", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: "0.3rem" }}>
                       Years in Role
                     </label>
                     <select
@@ -485,7 +485,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     border: "1px solid rgba(255,255,255,0.15)",
                     color: "rgba(255,255,255,0.4)",
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor: "pointer",
@@ -502,7 +502,7 @@ export function PatternBreakerContract({ pattern, resultPercent, coherenceBand, 
                     border: `1px solid ${(demographic.role && demographic.industry) ? `${GOLD}60` : "rgba(255,255,255,0.1)"}`,
                     color: (demographic.role && demographic.industry) ? GOLD : "rgba(255,255,255,0.3)",
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor: (demographic.role && demographic.industry && !isSigning) ? "pointer" : "not-allowed",

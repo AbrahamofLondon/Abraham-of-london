@@ -116,7 +116,7 @@ export default function EnterprisePreviewPage() {
         {/* Entry CTAs */}
         <section className="border-t px-6 py-8" style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.01)' }}>
           <div className="mx-auto max-w-[760px]">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '1rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '1rem' }}>
               Start here
             </p>
             <div className="flex flex-wrap gap-3">
@@ -151,7 +151,7 @@ export default function EnterprisePreviewPage() {
         {/* Capabilities grid */}
         <section className="px-6 py-16">
           <div className="mx-auto max-w-[760px]">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '1.5rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '1.5rem' }}>
               Capabilities
             </p>
             <div className="space-y-4">
@@ -173,7 +173,7 @@ export default function EnterprisePreviewPage() {
                         {cap.description}
                       </p>
                       <p className="mt-2 text-[12px] leading-[1.6]" style={{ color: `${GOLD}AA` }}>
-                        <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77` }}>
+                        <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77` }}>
                           Produces:{' '}
                         </span>
                         {cap.output}
@@ -189,7 +189,7 @@ export default function EnterprisePreviewPage() {
         {/* Progression note */}
         <section className="border-t px-6 py-12" style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.01)' }}>
           <div className="mx-auto max-w-[760px]">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '0.75rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '0.75rem' }}>
               Governed progression
             </p>
             <p className="text-[14px] leading-[1.8]" style={{ color: 'rgba(255,255,255,0.50)' }}>

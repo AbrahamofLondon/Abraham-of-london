@@ -48,7 +48,7 @@ export default function LegalIdentityBlock({
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}88`,

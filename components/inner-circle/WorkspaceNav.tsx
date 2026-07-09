@@ -46,7 +46,7 @@ export default function WorkspaceNav() {
             href={link.href}
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.28em",
               textTransform: "uppercase",
               padding: "5px 12px",

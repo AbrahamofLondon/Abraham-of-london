@@ -38,7 +38,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
       <div style={{ marginBottom: "0.75rem" }}>
         <span style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.32em",
           textTransform: "uppercase",
           color: accentColor,
@@ -77,7 +77,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
       </p>
       <p style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.12em",
         color: "rgba(255,255,255,0.22)",
         marginBottom: "0.75rem",
@@ -133,7 +133,7 @@ export default function RetainerEntryGate({ qualification }: { qualification: Re
           backgroundColor: `${accentColor}10`,
           color: accentColor,
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.26em",
           textTransform: "uppercase",
           textDecoration: "none",

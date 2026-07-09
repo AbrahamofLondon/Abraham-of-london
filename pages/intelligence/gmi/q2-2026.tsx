@@ -126,7 +126,7 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header className="border border-white/10 bg-white/[0.018] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Operator dashboard · {dashboard.editionId}
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.2rem)", lineHeight: 1.04 }}>
@@ -159,7 +159,7 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
           <section className="grid gap-4 md:grid-cols-3">
             {dashboard.watchSignals.map((signal) => (
               <article key={signal.signal} className="border border-white/10 bg-white/[0.015] p-5">
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{signal.evidencePosture}</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{signal.evidencePosture}</p>
                 <h2 className="mt-3 font-serif text-xl text-white/88">{signal.signal}</h2>
                 <p className="mt-3 text-xs leading-6 text-white/48">{signal.currentStatus}</p>
                 <p className="mt-3 text-xs leading-6 text-white/42"><span className="text-white/62">Trigger:</span> {signal.triggerThreshold}</p>
@@ -169,7 +169,7 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
           </section>
 
           <section className="border border-[#C9A96E]/20 bg-[#C9A96E]/[0.035] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Five board decisions
             </p>
             <div className="mt-4 space-y-3">
@@ -193,7 +193,7 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
 
           <section className="grid gap-6 lg:grid-cols-2">
             <article className="border border-white/10 bg-white/[0.015] p-6">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>Scenario framework</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>Scenario framework</p>
               <div className="mt-4 space-y-3">
                 {dashboard.scenarioProbabilities.map((scenario) => (
                   <div key={scenario.label} className="border border-white/8 bg-black/20 p-4">
@@ -204,7 +204,7 @@ const GmiQ2OperatorDashboardPage: NextPage<InferGetStaticPropsType<typeof getSta
               </div>
             </article>
             <article className="border border-white/10 bg-white/[0.015] p-6">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>What would change the view</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>What would change the view</p>
               <div className="mt-4 space-y-3">
                 {dashboard.falsificationThresholds.map((threshold) => (
                   <div key={threshold.threshold} className="border border-white/8 bg-black/20 p-4">

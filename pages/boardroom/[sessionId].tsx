@@ -34,7 +34,7 @@ export default function BoardroomPage(props: PageProps) {
       <div style={{ backgroundColor: "rgb(3,3,5)", minHeight: "100vh", color: "white" }}>
         <div style={{ maxWidth: "72rem", margin: "0 auto", padding: "48px 24px 96px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${brass}88` }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${brass}88` }}>
               Boardroom dossier
             </span>
             <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey, border: "1px solid rgba(255,255,255,0.10)", padding: "3px 8px" }}>
@@ -80,7 +80,7 @@ export default function BoardroomPage(props: PageProps) {
           {props.qualified && props.dossier && (
             <>
               <div style={{ border: `1px solid ${brass}24`, backgroundColor: `${brass}05`, padding: "20px 24px", marginTop: "24px" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${brass}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${brass}88` }}>
                   Boardroom readiness
                 </p>
                 <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.76)", marginTop: "8px" }}>
@@ -92,7 +92,7 @@ export default function BoardroomPage(props: PageProps) {
                 {props.organisationId && (
                   <Link
                     href={`/api/boardroom/dossier/pdf?organisationId=${encodeURIComponent(props.organisationId)}`}
-                    style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${brass}CC`, textDecoration: "none", display: "inline-block", marginTop: "12px", border: `1px solid ${brass}35`, padding: "8px 12px" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${brass}CC`, textDecoration: "none", display: "inline-block", marginTop: "12px", border: `1px solid ${brass}35`, padding: "8px 12px" }}
                   >
                     Export PDF
                   </Link>
@@ -110,7 +110,7 @@ export default function BoardroomPage(props: PageProps) {
                 </section>
 
                 <section style={{ border: `1px solid ${brass}22`, backgroundColor: `${brass}04`, padding: "18px 20px" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${brass}88` }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${brass}88` }}>
                     Board actions — accountability required
                   </p>
                   <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.40)", marginTop: "8px" }}>
@@ -120,7 +120,7 @@ export default function BoardroomPage(props: PageProps) {
                     <div style={{ marginTop: "12px", display: "grid", gap: "8px" }}>
                       {props.dossier.recommendedBoardActions.map((action) => (
                         <div key={`${action.category}-${action.relatedEntityId ?? "none"}`} style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.015)", padding: "12px 14px" }}>
-                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${brass}70`, marginBottom: "4px" }}>
+                          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${brass}70`, marginBottom: "4px" }}>
                             {action.priority.toUpperCase()} · {action.category}
                           </p>
                           <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -169,7 +169,7 @@ export default function BoardroomPage(props: PageProps) {
 
           {props.qualified && props.dossier && (
             <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "18px 20px", marginTop: "32px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                 Challenge this dossier
               </p>
               <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.38)", marginTop: "8px" }}>

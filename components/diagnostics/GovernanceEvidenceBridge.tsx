@@ -36,7 +36,7 @@ export default function GovernanceEvidenceBridge({
       <div
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.34em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -103,7 +103,7 @@ export default function GovernanceEvidenceBridge({
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.24em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.34)",

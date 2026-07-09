@@ -92,31 +92,31 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
       : null;
     return (
       <section style={{ border: "1px solid rgba(201,169,110,0.20)", background: "rgba(201,169,110,0.03)", padding: "1.1rem" }}>
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
           Outcome Verification — Recorded
         </p>
         <p className="mt-3 text-sm text-white/70">Verification written to institutional record. This evidence is now carried into Decision Centre, Return Brief, and Retained Oversight.</p>
         <div className="mt-4 space-y-2">
           {calibrationLabel && (
             <div style={{ borderLeft: "2px solid rgba(110,231,183,0.40)", paddingLeft: "0.85rem" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)", marginBottom: "0.25rem" }}>Signal calibration</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)", marginBottom: "0.25rem" }}>Signal calibration</p>
               <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>{calibrationLabel}</p>
             </div>
           )}
           {recorded.evidencePosture && (
             <div style={{ borderLeft: "2px solid rgba(201,169,110,0.25)", paddingLeft: "0.85rem" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "0.25rem" }}>Evidence posture</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "0.25rem" }}>Evidence posture</p>
               <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.45)" }}>{recorded.evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
             </div>
           )}
           <div style={{ borderLeft: "2px solid rgba(255,255,255,0.10)", paddingLeft: "0.85rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>What this contributes</p>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>What this contributes</p>
             <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>
               Your verification feeds into signal accuracy tracking, pattern calibration, and the outcome loop that governs future recommendations. Where accuracy was confirmed, this strengthens the evidence posture for similar conditions. Where accuracy was disputed, the system records a correction signal.
             </p>
           </div>
         </div>
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem" }}>
           Governed · Outcome verification written · Evidence posture updated
         </p>
       </section>
@@ -127,7 +127,7 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
     <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.1rem" }}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
             Outcome Verification
           </p>
           <h2 className="mt-2 text-lg text-white">Verify what changed.</h2>
@@ -136,14 +136,14 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
           </p>
         </div>
         {context?.checkpointTitle ? (
-          <div style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.38)", textAlign: "right" }}>
+          <div style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.38)", textAlign: "right" }}>
             <div>{context.checkpointTitle}</div>
             {context.dueAt ? <div className="mt-1">Checkpoint due {new Date(context.dueAt).toLocaleDateString("en-GB")}</div> : null}
           </div>
         ) : null}
       </div>
       <div style={{ borderLeft: "2px solid rgba(201,169,110,0.20)", paddingLeft: "0.85rem", marginTop: "1rem", marginBottom: "0.5rem" }}>
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "0.25rem" }}>What a verification contributes</p>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "0.25rem" }}>What a verification contributes</p>
         <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
           Accurate outcome data calibrates the system's signal accuracy, updates the institutional record, and strengthens the evidence posture for similar cases. Disputed findings are logged as correction signals and inform future recommendations.
         </p>
@@ -251,7 +251,7 @@ export function OutcomeVerificationPanel({ context, token, onRecorded }: Props) 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
         {label}
       </span>
       <div className="mt-2">{children}</div>

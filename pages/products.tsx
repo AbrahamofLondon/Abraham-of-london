@@ -600,7 +600,7 @@ function StatusBadge({ status }: { status: ProductStatus }) {
         color: style.color,
         borderColor: style.border,
         backgroundColor: style.background,
-        fontSize: "7.5px",
+        fontSize: "11px",
         letterSpacing: "0.14em",
         textTransform: "uppercase",
       }}
@@ -701,7 +701,7 @@ function ProductCard({ item }: { item: ProductItem }) {
           <p
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.38)",
@@ -718,7 +718,7 @@ function ProductCard({ item }: { item: ProductItem }) {
           <p
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.38)",
@@ -737,7 +737,7 @@ function ProductCard({ item }: { item: ProductItem }) {
           className="mt-4 border-t border-white/[0.06] pt-4"
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.12em",
             lineHeight: 1.65,
             color: "rgba(255,255,255,0.42)",
@@ -759,7 +759,7 @@ function ProductCard({ item }: { item: ProductItem }) {
               borderColor: `${GOLD}35`,
               backgroundColor: `${GOLD}0D`,
               color: "rgba(255,255,255,0.82)",
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
             }}
@@ -772,7 +772,7 @@ function ProductCard({ item }: { item: ProductItem }) {
             className="inline-flex min-h-[42px] items-center border border-white/[0.07] px-4 py-2.5 text-white/[0.25]"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
             }}
@@ -788,7 +788,7 @@ function ProductCard({ item }: { item: ProductItem }) {
             className="group inline-flex min-h-[42px] max-w-full items-center gap-2 whitespace-normal border border-white/[0.08] px-4 py-2.5 text-left leading-[1.45] text-white/[0.42] transition-all duration-150 hover:border-white/[0.14] hover:text-white/[0.60]"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
             }}
@@ -828,7 +828,7 @@ function StickyActionBar() {
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.50)",
@@ -847,7 +847,7 @@ function StickyActionBar() {
               borderColor: `${GOLD}45`,
               backgroundColor: `${GOLD}10`,
               color: "#F5F5F5",
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
@@ -862,7 +862,7 @@ function StickyActionBar() {
             className="inline-flex items-center gap-2 border border-white/[0.10] px-4 py-2 text-white/[0.50] transition-all hover:-translate-y-px hover:border-white/[0.18] hover:text-white/[0.72]"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
@@ -936,14 +936,14 @@ function InstrumentList({ items }: { items: InstrumentItem[] }) {
                 href={item.href}
                 onClick={() => trackProductClick(item.name)}
                 className="truncate text-white/[0.78] transition-colors hover:text-white/[0.90]"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em" }}
               >
                 {item.name}
               </Link>
             ) : (
               <span
                 className="truncate text-white/[0.38]"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em" }}
               >
                 {item.name}
               </span>
@@ -994,7 +994,7 @@ function CollapsibleBriefPreview() {
           <p
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: `${GOLD}80`,
@@ -1021,7 +1021,7 @@ function CollapsibleBriefPreview() {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: `${GOLD}70`,
@@ -1043,7 +1043,7 @@ function CollapsibleBriefPreview() {
             className="border-t border-white/[0.04] pt-3"
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.32)",
@@ -1081,7 +1081,7 @@ function CorridorStageRow({
           <span
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.08em",
               color: dimmed ? "rgba(255,255,255,0.35)" : `${GOLD}88`,
             }}
@@ -1099,7 +1099,7 @@ function CorridorStageRow({
           <span
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.40)",
@@ -1142,7 +1142,7 @@ function CorridorStageRow({
                 borderColor: `${GOLD}30`,
                 backgroundColor: `${GOLD}08`,
                 color: "rgba(255,255,255,0.72)",
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
               }}
@@ -1155,7 +1155,7 @@ function CorridorStageRow({
               className="inline-flex items-center gap-2"
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: isGated ? "rgba(255,255,255,0.34)" : "rgba(255,255,255,0.42)",
@@ -1169,7 +1169,7 @@ function CorridorStageRow({
               className="inline-flex items-center gap-2"
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.32)",
@@ -1213,7 +1213,7 @@ function SectionNav() {
             className="border border-white/[0.08] px-4 py-2 text-white/[0.55] transition-colors hover:border-white/[0.15] hover:text-white/[0.78]"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
@@ -1281,7 +1281,7 @@ function HeroSection() {
                 className="inline-flex items-center gap-1.5 px-4 text-white/[0.45] transition-colors hover:text-white/[0.80]"
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                 }}
@@ -1448,7 +1448,7 @@ function StartHereSection() {
             <p
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: `${GOLD}80`,
@@ -1689,7 +1689,7 @@ function EnterpriseSection() {
             <span
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 color: `${GOLD}77`,
               }}
               className="uppercase tracking-wider"

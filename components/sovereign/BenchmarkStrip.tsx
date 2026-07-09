@@ -43,7 +43,7 @@ export default function BenchmarkStrip({ label, score, maxScore = 100, benchmark
           <span style={{ ...MONO, fontSize: "13px", letterSpacing: "0.02em", color: "#F5F5F5" }}>
             {score}
           </span>
-          <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color }}>
             {benchmark.percentile}th pct
           </span>
         </div>
@@ -93,16 +93,16 @@ export default function BenchmarkStrip({ label, score, maxScore = 100, benchmark
 
       {/* ── Band label ─────────────────────────────────────── */}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
-        <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+        <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
           {BAND_LABEL[benchmark.band]}
         </span>
         {benchmark.dataSource === "THEORETICAL" && (
-          <span style={{ ...MONO, fontSize: "7px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
             theoretical benchmark
           </span>
         )}
         {benchmark.cohortSize > 0 && (
-          <span style={{ ...MONO, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.15)" }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.15)" }}>
             n={benchmark.cohortSize}
           </span>
         )}
@@ -136,7 +136,7 @@ export function BenchmarkReport({ benchmarks, scores, cohortKey, commonsSize }: 
         <p style={{ ...MONO, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#555", margin: 0 }}>
           Benchmark position
         </p>
-        <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+        <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
           Cohort: {cohortKey.replace(".", " · ")}
           {commonsSize > 0 ? ` · n=${commonsSize}` : " · theoretical"}
         </span>
@@ -154,7 +154,7 @@ export function BenchmarkReport({ benchmarks, scores, cohortKey, commonsSize }: 
       </div>
 
       {commonsSize === 0 && (
-        <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
+        <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
           Percentiles are theoretically grounded. They will update with empirical data as the Intelligence Commons grows.
         </p>
       )}

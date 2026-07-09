@@ -147,7 +147,7 @@ export default function ContextualUpgradePrompt({
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: `${GOLD}99`,
@@ -191,7 +191,7 @@ export default function ContextualUpgradePrompt({
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: `${GOLD}77`,
@@ -223,7 +223,7 @@ export default function ContextualUpgradePrompt({
             <span
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(110,231,183,0.80)",
@@ -241,7 +241,7 @@ export default function ContextualUpgradePrompt({
               disabled={trialState === "starting"}
               style={{
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: trialState === "starting" ? "rgba(255,255,255,0.30)" : "#0A0A0A",
@@ -260,7 +260,7 @@ export default function ContextualUpgradePrompt({
             onClick={() => trackCommercialEvent("pricing_viewed_from_prompt", "contextual_upgrade_prompt", { actionType: action })}
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,
@@ -282,7 +282,7 @@ export default function ContextualUpgradePrompt({
             }}
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.35)",

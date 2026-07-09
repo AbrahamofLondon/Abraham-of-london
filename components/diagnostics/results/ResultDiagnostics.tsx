@@ -26,7 +26,7 @@ export default function ResultDiagnostics({ domains, percent, band }: {
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.22)",
@@ -38,14 +38,14 @@ export default function ResultDiagnostics({ domains, percent, band }: {
         {domains.map((d) => (
           <div key={d.domain}>
             <div className="flex items-center justify-between mb-1">
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                 {d.label}
               </span>
               <div className="flex items-center gap-2">
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", color: "rgba(255,255,255,0.22)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.22)" }}>
                   R:{d.resonance} C:{d.certainty}
                 </span>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: d.percent < 40 ? "rgba(252,165,165,0.60)" : d.percent < 60 ? `${GOLD}80` : "rgba(110,231,183,0.60)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: d.percent < 40 ? "rgba(252,165,165,0.60)" : d.percent < 60 ? `${GOLD}80` : "rgba(110,231,183,0.60)" }}>
                   {d.percent}%
                 </span>
               </div>

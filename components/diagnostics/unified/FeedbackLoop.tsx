@@ -18,7 +18,7 @@ export type FeedbackLoopProps = {
 
 function FeedbackButton({ icon, label, color, onClick }: { icon: React.ReactNode; label: string; color: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", padding: "8px 6px", border: `1px solid ${color}0.20)`, backgroundColor: `${color}0.04)`, color: `${color}0.60)`, ...mono, fontSize: "7px", letterSpacing: "0.1em", cursor: "pointer" }}>
+    <button type="button" onClick={onClick} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem", padding: "8px 6px", border: `1px solid ${color}0.20)`, backgroundColor: `${color}0.04)`, color: `${color}0.60)`, ...mono, fontSize: "11px", letterSpacing: "0.1em", cursor: "pointer" }}>
       {icon} {label}
     </button>
   );
@@ -46,18 +46,18 @@ export default function FeedbackLoop({ assessmentType, onFeedback }: FeedbackLoo
           </div>
         </>
       ) : (
-        <div style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", letterSpacing: "0.15em" }}>
+        <div style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)", letterSpacing: "0.15em" }}>
           {given === "yes" ? (
             <>
               Then you already know this is real.
-              <Link href="/diagnostics/executive-reporting" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}CC`, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+              <Link href="/diagnostics/executive-reporting" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}CC`, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase" }}>
                 See what this is already costing <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
               </Link>
             </>
           ) : given === "partial" ? (
             <>
               Noted. The surface read is partial. The next stage tests whether the condition is structural.
-              <Link href="/diagnostics/constitutional-diagnostic" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}AA`, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              <Link href="/diagnostics/constitutional-diagnostic" className="mt-2 inline-flex items-center gap-2" style={{ display: "block", color: `${GOLD}AA`, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                 Sharpen the diagnosis <ArrowRight style={{ width: 10, height: 10, display: "inline" }} />
               </Link>
             </>
@@ -76,13 +76,13 @@ export default function FeedbackLoop({ assessmentType, onFeedback }: FeedbackLoo
                   <button type="button" onClick={() => {
                     track(`${assessmentType}_feedback_reason`, { reason: reason.slice(0, 200) });
                     onFeedback?.("no", reason);
-                  }} style={{ marginTop: "0.4rem", padding: "6px 14px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
+                  }} style={{ marginTop: "0.4rem", padding: "6px 14px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}BB`, ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}>
                     Submit correction
                   </button>
                   <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "rgba(255,255,255,0.20)" }}>
                     Correction recorded. Your next best route is to test the structure more deeply.
                   </p>
-                  <Link href="/diagnostics/constitutional-diagnostic" style={{ display: "inline-block", marginTop: "0.3rem", color: `${GOLD}AA`, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                  <Link href="/diagnostics/constitutional-diagnostic" style={{ display: "inline-block", marginTop: "0.3rem", color: `${GOLD}AA`, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                     Run Constitutional Diagnostic →
                   </Link>
                 </>

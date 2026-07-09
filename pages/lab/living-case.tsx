@@ -128,7 +128,7 @@ export default function LivingCaseLabPage() {
               <span style={{ ...mono, fontSize: '9px', letterSpacing: '0.24em', textTransform: 'uppercase', color: `${GOLD}88` }}>
                 Living Case Lab
               </span>
-              <span className="border px-2 py-0.5" style={{ ...mono, fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', borderColor: 'rgba(255,255,255,0.10)' }}>
+              <span className="border px-2 py-0.5" style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', borderColor: 'rgba(255,255,255,0.10)' }}>
                 v1.7
               </span>
             </div>
@@ -151,16 +151,16 @@ export default function LivingCaseLabPage() {
             </p>
             {state.context && (
               <div className="mt-4 flex items-center gap-4">
-                <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.30)' }}>
+                <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.30)' }}>
                   Session: {state.context.sessionId}
                 </span>
-                <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.30)' }}>
+                <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.30)' }}>
                   Turns: {turnCount}
                 </span>
                 <button
                   onClick={handleReset}
                   className="inline-flex items-center gap-1.5"
-                  style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}AA` }}
+                  style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}AA` }}
                 >
                   <RefreshCw className="h-3 w-3" />
                   Reset session
@@ -208,7 +208,7 @@ export default function LivingCaseLabPage() {
                 {state.isStreaming ? 'Processing...' : turnCount === 0 ? 'Start case' : 'Refine case'}
                 {!state.isStreaming && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />}
               </button>
-              <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.20)' }}>
+              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.20)' }}>
                 {turnCount === 0 ? 'First turn' : `Turn ${turnCount + 1}`} · {state.context ? 'Context active' : 'No context'}
               </span>
             </div>
@@ -227,7 +227,7 @@ export default function LivingCaseLabPage() {
               <div className="border p-5" style={{ borderColor: `${GOLD}20`, backgroundColor: 'rgba(255,255,255,0.015)' }}>
                 <div className="flex items-center gap-2.5 mb-4">
                   <Layers className="h-3.5 w-3.5" style={{ color: `${GOLD}AA` }} />
-                  <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                  <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                     Governed runtime trace
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export default function LivingCaseLabPage() {
 
                         {/* Current indicator */}
                         {isCurrent && (
-                          <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.1em', color: `${GOLD}66` }}>
+                          <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.1em', color: `${GOLD}66` }}>
                             Current stage
                           </span>
                         )}
@@ -303,7 +303,7 @@ export default function LivingCaseLabPage() {
                   {state.synthesis.currentRisk}
                 </span>
                 {state.synthesis.shouldRefuse && (
-                  <span className="border px-2 py-0.5" style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${ROSE}AA`, borderColor: `${ROSE}30` }}>
+                  <span className="border px-2 py-0.5" style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${ROSE}AA`, borderColor: `${ROSE}30` }}>
                     Refusal triggered
                   </span>
                 )}
@@ -344,7 +344,7 @@ export default function LivingCaseLabPage() {
                     <div className="border p-4" style={{ borderColor: `${GOLD}15`, backgroundColor: 'rgba(255,255,255,0.01)' }}>
                       <div className="flex items-center gap-2">
                         <Eye className="h-3 w-3" style={{ color: `${GOLD}77` }} />
-                        <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}77` }}>
+                        <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}77` }}>
                           What changed (synthesis)
                         </span>
                       </div>
@@ -359,7 +359,7 @@ export default function LivingCaseLabPage() {
                     <div className="border p-4" style={{ borderColor: `${GOLD}15`, backgroundColor: 'rgba(255,255,255,0.01)' }}>
                       <div className="flex items-center gap-2">
                         <GitBranch className="h-3 w-3" style={{ color: `${GOLD}77` }} />
-                        <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}77` }}>
+                        <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}77` }}>
                           Simulation paths
                         </span>
                       </div>
@@ -367,10 +367,10 @@ export default function LivingCaseLabPage() {
                         {state.simulation.paths.map((path, i) => (
                           <div key={path.assumptionId} className="border-l-2 pl-3 py-2" style={{ borderColor: path.shouldProceed ? `${EMERALD}40` : `${ROSE}30` }}>
                             <div className="flex items-center gap-2">
-                              <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: path.shouldProceed ? `${EMERALD}AA` : `${ROSE}AA` }}>
+                              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: path.shouldProceed ? `${EMERALD}AA` : `${ROSE}AA` }}>
                                 Path {i + 1}: {path.assumptionLabel}
                               </span>
-                              <span style={{ ...mono, fontSize: '7px', color: 'rgba(255,255,255,0.25)' }}>
+                              <span style={{ ...mono, fontSize: '11px', color: 'rgba(255,255,255,0.25)' }}>
                                 Risk: {path.riskShift}
                               </span>
                             </div>
@@ -395,7 +395,7 @@ export default function LivingCaseLabPage() {
                   <div className="border p-4" style={{ borderColor: `${GOLD}15`, backgroundColor: 'rgba(255,255,255,0.01)' }}>
                     <div className="flex items-center gap-2">
                       <Layers className="h-3 w-3" style={{ color: `${GOLD}77` }} />
-                      <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}77` }}>
+                      <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}77` }}>
                         Synthesis
                       </span>
                     </div>
@@ -411,7 +411,7 @@ export default function LivingCaseLabPage() {
                       </div>
                     )}
                     <div className="mt-2">
-                      <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', color: `${GOLD}88` }}>
+                      <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', color: `${GOLD}88` }}>
                         Next admissible move:
                       </span>
                       <p className="text-[12px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.50)' }}>
@@ -420,7 +420,7 @@ export default function LivingCaseLabPage() {
                     </div>
                     {state.synthesis.shouldRefuse && state.synthesis.refusalReason && (
                       <div className="mt-2 border p-3" style={{ borderColor: `${ROSE}20`, backgroundColor: `${ROSE}04` }}>
-                        <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${ROSE}AA` }}>
+                        <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${ROSE}AA` }}>
                           System refusal
                         </span>
                         <p className="mt-0.5 text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.50)' }}>
@@ -433,7 +433,7 @@ export default function LivingCaseLabPage() {
                   {/* Turn history */}
                   {state.context && state.context.turns.length > 0 && (
                     <div className="border-t pt-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                      <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                      <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
                         Turn history ({state.context.turns.length})
                       </span>
                       <div className="mt-2 space-y-1.5">
@@ -447,10 +447,10 @@ export default function LivingCaseLabPage() {
                             }}
                           >
                             <div className="flex items-center gap-2">
-                              <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: turn.role === 'user' ? `${GOLD}88` : 'rgba(255,255,255,0.30)' }}>
+                              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: turn.role === 'user' ? `${GOLD}88` : 'rgba(255,255,255,0.30)' }}>
                                 {turn.role === 'user' ? 'You' : 'System'}
                               </span>
-                              <span style={{ ...mono, fontSize: '7px', color: 'rgba(255,255,255,0.15)' }}>
+                              <span style={{ ...mono, fontSize: '11px', color: 'rgba(255,255,255,0.15)' }}>
                                 {new Date(turn.createdAt).toLocaleTimeString()}
                               </span>
                             </div>

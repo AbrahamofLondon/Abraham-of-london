@@ -76,7 +76,7 @@ export default function DoctrineShowcase({ canonEntries = [] }: DoctrineShowcase
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.44em",
                     textTransform: "uppercase",
                     color: `${GOLD}99`,
@@ -128,7 +128,7 @@ export default function DoctrineShowcase({ canonEntries = [] }: DoctrineShowcase
               <p
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -282,7 +282,7 @@ export default function DoctrineShowcase({ canonEntries = [] }: DoctrineShowcase
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -296,7 +296,7 @@ export default function DoctrineShowcase({ canonEntries = [] }: DoctrineShowcase
               className="group inline-flex items-center gap-1.5 transition-colors duration-200"
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.26)",
@@ -398,7 +398,7 @@ export default function DoctrineShowcase({ canonEntries = [] }: DoctrineShowcase
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px",
+                        fontSize: "11px",
                         letterSpacing: "0.22em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.18)",

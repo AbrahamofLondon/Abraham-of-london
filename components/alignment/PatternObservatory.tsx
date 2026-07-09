@@ -133,7 +133,7 @@ export function PatternObservatory({ organizationId, isPremium }: PatternObserva
           padding: "8px 20px",
           color: GOLD,
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.2em",
           cursor: "pointer"
         }}>
@@ -171,7 +171,7 @@ export function PatternObservatory({ organizationId, isPremium }: PatternObserva
       <div style={{ marginBottom: "2rem" }}>
         <div className="flex items-center gap-2 mb-2">
           <Crown style={{ color: GOLD, width: "14px", height: "14px" }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.3em", color: GOLD }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.3em", color: GOLD }}>
             PREMIUM INTELLIGENCE
           </span>
         </div>
@@ -187,7 +187,7 @@ export function PatternObservatory({ organizationId, isPremium }: PatternObserva
       <div style={{ marginBottom: "2rem" }}>
         <div className="flex items-center gap-2 mb-3">
           <Briefcase style={{ width: "12px", height: "12px", color: GOLD }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: "rgba(255,255,255,0.5)" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.25em", color: "rgba(255,255,255,0.5)" }}>
             BREACH RATES BY ROLE
           </span>
         </div>
@@ -219,7 +219,7 @@ export function PatternObservatory({ organizationId, isPremium }: PatternObserva
       <div style={{ marginBottom: "2rem" }}>
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle style={{ width: "12px", height: "12px", color: GOLD }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: "rgba(255,255,255,0.5)" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.25em", color: "rgba(255,255,255,0.5)" }}>
             HARDEST DOMAINS TO RESOLVE
           </span>
         </div>
@@ -252,7 +252,7 @@ export function PatternObservatory({ organizationId, isPremium }: PatternObserva
       }}>
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp style={{ width: "12px", height: "12px", color: GOLD }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.25em", color: GOLD }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.25em", color: GOLD }}>
             STRATEGIC INTELLIGENCE
           </span>
         </div>

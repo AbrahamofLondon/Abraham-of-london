@@ -60,7 +60,7 @@ export default function CredibilityStrip() {
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   color: "var(--ds-accent)",

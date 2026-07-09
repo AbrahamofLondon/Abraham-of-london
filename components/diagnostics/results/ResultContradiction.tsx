@@ -22,7 +22,7 @@ export default function ResultContradiction({ evidence }: { evidence: Contradict
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: "rgba(252,165,165,0.55)",
@@ -35,14 +35,14 @@ export default function ResultContradiction({ evidence }: { evidence: Contradict
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "baseline", flexWrap: "wrap" }}>
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
+              fontSize: "11px",
               color: "rgba(255,255,255,0.62)",
             }}>
               {e.scoreLabel}: {e.scoreValue}
             </span>
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(252,165,165,0.58)",

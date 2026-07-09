@@ -166,7 +166,7 @@ function StaleCaseCard({
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.08em",
           color: styles.textColor,
           marginTop: "0.35rem",
@@ -188,7 +188,7 @@ function StaleCaseCard({
           border: "none",
           cursor: "pointer",
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.28)",
@@ -233,7 +233,7 @@ function StaleCaseCard({
             title={action.description}
             style={{
               ...mono,
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               textDecoration: "none",
@@ -283,7 +283,7 @@ export default function StaleCaseAlert({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.25)",
@@ -294,7 +294,7 @@ export default function StaleCaseAlert({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.10em",
             color: "rgba(255,255,255,0.20)",
             border: "1px solid rgba(255,255,255,0.08)",
@@ -321,7 +321,7 @@ export default function StaleCaseAlert({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             color: "rgba(255,255,255,0.28)",
             marginTop: "0.75rem",

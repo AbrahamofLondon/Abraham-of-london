@@ -72,7 +72,7 @@ export default function ArticleCoverImage({
           className="mt-3 text-center"
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.28)",

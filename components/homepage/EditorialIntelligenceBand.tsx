@@ -34,7 +34,7 @@ function EditorialSeriesCard({
             <span
               style={{
                 ...MONO,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: isScheduled
@@ -152,7 +152,7 @@ function AppliedSeriesCard({
           className="transition-colors duration-200 group-hover:text-[#C9963A]"
           style={{
             ...MONO,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.24em",
             textTransform: "uppercase",
             color: "#484848",
@@ -212,7 +212,7 @@ export default function EditorialIntelligenceBand({
           <span
             style={{
               ...MONO,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.38em",
               textTransform: "uppercase",
               color: "#C9963A",
@@ -263,7 +263,7 @@ export default function EditorialIntelligenceBand({
             <span
               style={{
                 ...MONO,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: "rgba(201,150,58,0.55)",

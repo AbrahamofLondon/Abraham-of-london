@@ -374,7 +374,7 @@ const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }
             className="mb-10 p-6 sm:p-8"
             style={{ border: "1px solid rgba(255,255,255,0.09)", background: "rgba(255,255,255,0.018)" }}
           >
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Library
             </p>
             <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(1.75rem,3.5vw,2.75rem)", color: "rgba(255,255,255,0.92)", lineHeight: 1.25 }}>
@@ -384,7 +384,7 @@ const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }
               Essays, canon, frameworks, decision instruments, intelligence briefs, downloads,
               and restricted vault records — organised for serious decision work.
             </p>
-            <p className="mt-4" style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+            <p className="mt-4" style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
               452+ indexed works across essays, canon, frameworks, intelligence, downloads,
               proof materials, and restricted vault records.
             </p>
@@ -394,7 +394,7 @@ const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }
               className="mt-6 p-4 rounded"
               style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${GOLD}18` }}
             >
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
                 Item Classification
               </p>
               <p className="text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -478,7 +478,7 @@ const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }
           {/* ── Pathway cards — shown only on unfiltered view (Part 2) ── */}
           {!activeFilters && (
             <section className="mb-12" aria-label="Primary pathways">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}99` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}99` }}>
                 Where to begin
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -618,7 +618,7 @@ const LibraryIndexPage: NextPage<Props> = ({ initialItems, sectionMetas, stats }
           {/* ── Results (Part 3 — sections or flat list) ── */}
           {activeFilters ? (
             <section aria-label={`${filteredItems.length} filtered results`}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}99` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}99` }}>
                 {filteredItems.length} result{filteredItems.length !== 1 ? "s" : ""}
               </p>
 
@@ -714,7 +714,7 @@ function AccessChip({
       </span>
       <span
         style={{
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
           color: active ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.28)",
@@ -761,7 +761,7 @@ function PathwayCard({
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${GOLD}30`; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = active ? `${GOLD}44` : "rgba(255,255,255,0.07)"; }}
     >
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88` }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88` }}>
         Pathway {number}
       </p>
       <p className="mt-2 text-sm font-medium" style={{ color: "rgba(255,255,255,0.82)" }}>
@@ -783,7 +783,7 @@ function PathwayCard({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
       {children}
     </p>
   );

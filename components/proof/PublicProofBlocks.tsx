@@ -91,7 +91,7 @@ export function ObservedOutcomesBlock({
         <p
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.12)",

@@ -29,7 +29,7 @@ export default function AdvantagePathBlock({ data }: { data: AdvantagePath | nul
     <div style={{ border: `1px solid rgba(110,231,183,0.12)`, backgroundColor: "rgba(110,231,183,0.02)", padding: "1.25rem", marginBottom: "1rem" }}>
       {/* Header */}
       <div className="mb-3">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
           Advantage path
         </span>
       </div>
@@ -65,7 +65,7 @@ export default function AdvantagePathBlock({ data }: { data: AdvantagePath | nul
         {data.opportunityMoves.map((move, i) => (
           <div key={i} style={{ border: "1px solid rgba(255,255,255,0.05)", padding: "0.65rem", marginTop: "0.35rem" }}>
             <div className="flex items-center gap-2 mb-1">
-              <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color: LEVERAGE_COLOR[move.leverageType] ?? `${GOLD}80` }}>
+              <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color: LEVERAGE_COLOR[move.leverageType] ?? `${GOLD}80` }}>
                 {move.leverageType}
               </span>
               <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>

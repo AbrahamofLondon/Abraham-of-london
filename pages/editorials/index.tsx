@@ -54,7 +54,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="font-mono uppercase tracking-[0.34em]"
-      style={{ fontSize: "7.5px", color: "var(--ds-accent)" }}
+      style={{ fontSize: "11px", color: "var(--ds-accent)" }}
     >
       {children}
     </div>
@@ -447,7 +447,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
               {/* Status mark */}
               <div style={{
                 fontFamily: mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.42em",
                 textTransform: "uppercase",
                 color: `${GOLD}BB`,
@@ -512,7 +512,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
                 justifyContent: "center",
                 gap: "0.6rem",
                 fontFamily: mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.26em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.18)",
@@ -608,7 +608,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
               <div style={{
                 marginTop: "3.5rem",
                 fontFamily: mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.36em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.14)",
@@ -737,7 +737,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
             <div className="mb-2">
               <span
                 className="font-mono uppercase tracking-[0.28em]"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Launch Collection · 8 briefs
               </span>
@@ -910,7 +910,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
           <div className="mx-auto max-w-6xl px-6 lg:px-10 py-12 lg:py-14">
             <div
               className="mb-8 font-mono uppercase tracking-[0.34em] text-center"
-              style={{ fontSize: "7px", color: "rgba(255,255,255,0.22)" }}
+              style={{ fontSize: "11px", color: "rgba(255,255,255,0.22)" }}
             >
               Continue
             </div>
@@ -945,7 +945,7 @@ const EditorialLibrary: NextPage<Props> = ({ items, flagship }) => {
                   style={{ borderColor: `${item.accent}18`, backgroundColor: `${item.accent}05`, textDecoration: "none" }}
                 >
                   <div className="px-6 py-7">
-                    <div className="mb-3" style={{ fontFamily: mono, fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: item.accent }}>
+                    <div className="mb-3" style={{ fontFamily: mono, fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: item.accent }}>
                       {item.sublabel}
                     </div>
                     <h3

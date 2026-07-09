@@ -176,7 +176,7 @@ const CaseDetailPage: NextPage = () => {
           style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}
         >
           <div className="mx-auto max-w-2xl">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               Loading case…
             </p>
           </div>
@@ -196,7 +196,7 @@ const CaseDetailPage: NextPage = () => {
           <div className="mx-auto max-w-2xl space-y-4">
             <Link
               href="/decision-centre"
-              style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none" }}
+              style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none" }}
             >
               ← Decision Centre
             </Link>
@@ -243,7 +243,7 @@ const CaseDetailPage: NextPage = () => {
               alignItems: "center",
               gap: "0.4rem",
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -267,7 +267,7 @@ const CaseDetailPage: NextPage = () => {
               <span
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: `${GOLD}99`,
@@ -281,7 +281,7 @@ const CaseDetailPage: NextPage = () => {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.3)",
@@ -296,7 +296,7 @@ const CaseDetailPage: NextPage = () => {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.22)",
@@ -371,7 +371,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}77`,
@@ -405,7 +405,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}77`,
@@ -444,7 +444,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -472,7 +472,7 @@ const CaseDetailPage: NextPage = () => {
                     href="/diagnostics/executive-reporting"
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.16em",
                       textTransform: "uppercase",
                       color: `${GOLD}DD`,
@@ -491,7 +491,7 @@ const CaseDetailPage: NextPage = () => {
                     href="/strategy-room"
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.16em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.45)",
@@ -520,7 +520,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                   color: `${GOLD}77`,
@@ -552,7 +552,7 @@ const CaseDetailPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 border: `1px solid ${GOLD}33`,
@@ -603,7 +603,7 @@ const CaseDetailPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.20em",
                 textTransform: "uppercase",
                 color: `${GOLD}77`,
@@ -620,7 +620,7 @@ const CaseDetailPage: NextPage = () => {
                 href="/account/proof-pack"
                 style={{
                   ...mono,
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: `${GOLD}AA`,
@@ -635,7 +635,7 @@ const CaseDetailPage: NextPage = () => {
                 href="/provenance/explained"
                 style={{
                   ...mono,
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.38)",
@@ -664,7 +664,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -684,7 +684,7 @@ const CaseDetailPage: NextPage = () => {
                     href={c.returnBriefs[0]?.href ?? "/return-brief"}
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                       color: `${GOLD}AA`,
@@ -714,7 +714,7 @@ const CaseDetailPage: NextPage = () => {
                   style={{
                     ...mono,
                     marginTop: "0.75rem",
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
                     color: generatingReturnBrief ? "rgba(255,255,255,0.24)" : `${GOLD}BB`,
@@ -746,7 +746,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -791,7 +791,7 @@ const CaseDetailPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",
@@ -861,7 +861,7 @@ const CaseDetailPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.28)",
@@ -882,7 +882,7 @@ const CaseDetailPage: NextPage = () => {
                   alignItems: "center",
                   gap: "0.4rem",
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "rgba(255,120,120,0.6)",
@@ -966,7 +966,7 @@ function VerifyResultPanel({ result }: { result: CaseVerifyResult }) {
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: textColor,

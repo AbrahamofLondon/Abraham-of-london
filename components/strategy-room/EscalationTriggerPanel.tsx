@@ -10,7 +10,7 @@ export default function EscalationTriggerPanel({ triggers }: { triggers: Trigger
 
   return (
     <div style={{ border: "1px solid rgba(252,165,165,0.22)", backgroundColor: "rgba(252,165,165,0.03)", padding: "0.85rem 1rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.5rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", marginBottom: "0.5rem" }}>
         Escalation triggers
       </div>
       {triggers.map((t, i) => (

@@ -102,7 +102,7 @@ const TrustPage: NextPage = () => (
               backgroundColor: `${GOLD}08`,
               color: `${GOLD}BB`,
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               padding: "0.25rem 0.55rem",
@@ -150,7 +150,7 @@ const TrustPage: NextPage = () => (
                 backgroundColor: `${GOLD}0A`,
                 color: `${GOLD}CC`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.65rem 1.1rem",
@@ -170,7 +170,7 @@ const TrustPage: NextPage = () => (
                 backgroundColor: "rgba(255,255,255,0.02)",
                 color: "rgba(255,255,255,0.4)",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.65rem 1.1rem",
@@ -193,7 +193,7 @@ const TrustPage: NextPage = () => (
             padding: "1rem",
           }}
         >
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.65rem" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.65rem" }}>
             Security assurance readiness
           </p>
           <p className="max-w-2xl text-[15px] leading-7 text-white/60">
@@ -207,7 +207,7 @@ const TrustPage: NextPage = () => (
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}99`,
@@ -226,7 +226,7 @@ const TrustPage: NextPage = () => (
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.45)",
@@ -247,7 +247,7 @@ const TrustPage: NextPage = () => (
             padding: "1rem",
           }}
         >
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)", marginBottom: "0.65rem" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)", marginBottom: "0.65rem" }}>
             Operational Governance
           </p>
           <div className="max-w-2xl space-y-3 text-[15px] leading-7 text-white/60">
@@ -328,7 +328,7 @@ const TrustPage: NextPage = () => (
               marginBottom: "1rem",
             }}
           >
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.6rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.6rem" }}>
               Terms used here
             </p>
             <dl className="grid gap-2 sm:grid-cols-2">
@@ -339,7 +339,7 @@ const TrustPage: NextPage = () => (
                 { term: "Anchoring", def: "Publishing the hash to an external immutable log so verification does not depend solely on internal records." },
               ] as const).map(({ term, def }) => (
                 <div key={term}>
-                  <dt style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "2px" }}>
+                  <dt style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "2px" }}>
                     {term}
                   </dt>
                   <dd style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -367,7 +367,7 @@ const TrustPage: NextPage = () => (
 
           {/* ── Company / platform certifications ── */}
           <div className="mb-6">
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Company / platform certifications
             </p>
             <div className="space-y-3">
@@ -382,7 +382,7 @@ const TrustPage: NextPage = () => (
 
           {/* ── Founder / operator assurance credentials ── */}
           <div>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Founder assurance credentials
             </p>
             <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.60)", marginBottom: "0.75rem" }}>
@@ -398,7 +398,7 @@ const TrustPage: NextPage = () => (
               className="mb-4 inline-flex items-center gap-1"
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: `${GOLD}99`,
@@ -470,7 +470,7 @@ const TrustPage: NextPage = () => (
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}99`,
@@ -554,7 +554,7 @@ const TrustPage: NextPage = () => (
         >
           <div className="flex items-center gap-2 mb-3">
             <Mail className="h-4 w-4" style={{ color: `${GOLD}70` }} />
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
               Contact for security review
             </p>
           </div>
@@ -575,7 +575,7 @@ const TrustPage: NextPage = () => (
                 backgroundColor: `${GOLD}0A`,
                 color: `${GOLD}CC`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.65rem 1.1rem",
@@ -596,7 +596,7 @@ const TrustPage: NextPage = () => (
                 backgroundColor: "rgba(255,255,255,0.02)",
                 color: "rgba(255,255,255,0.4)",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.65rem 1.1rem",
@@ -628,7 +628,7 @@ const TrustPage: NextPage = () => (
                 href={href}
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.28)",

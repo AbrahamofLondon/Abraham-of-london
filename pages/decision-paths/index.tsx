@@ -112,7 +112,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.28em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.38)",
@@ -170,7 +170,7 @@ function PathCard({ path }: { path: DecisionPath }) {
         <span
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: isGold ? `${GOLD}90` : "rgba(255,255,255,0.28)",
@@ -337,7 +337,7 @@ function PathCard({ path }: { path: DecisionPath }) {
             backgroundColor: isGold ? `${GOLD}0A` : "transparent",
             color: isGold ? GOLD : AMBER,
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
           }}
@@ -363,7 +363,7 @@ function PathCard({ path }: { path: DecisionPath }) {
               backgroundColor: `${GOLD}08`,
               color: GOLD,
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
             }}
@@ -463,7 +463,7 @@ export default function DecisionPathsPage() {
                   className="inline-flex items-center gap-2 transition-all hover:underline"
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     letterSpacing: "0.16em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.32)",
@@ -508,7 +508,7 @@ export default function DecisionPathsPage() {
                       <div
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px",
+                          fontSize: "11px",
                           letterSpacing: "0.20em",
                           textTransform: "uppercase",
                           color: "rgba(255,255,255,0.58)",
@@ -545,7 +545,7 @@ export default function DecisionPathsPage() {
                 className="mt-3"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -656,7 +656,7 @@ export default function DecisionPathsPage() {
                         <span
                           style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.28em",
                             textTransform: "uppercase",
                             color: GOLD,
@@ -696,7 +696,7 @@ export default function DecisionPathsPage() {
                   <div
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.32em",
                       textTransform: "uppercase",
                       color: `${GOLD}90`,
@@ -805,7 +805,7 @@ export default function DecisionPathsPage() {
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.38)",
@@ -860,7 +860,7 @@ export default function DecisionPathsPage() {
                 <div
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.32em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.24)",
@@ -900,7 +900,7 @@ export default function DecisionPathsPage() {
                 className="inline-flex items-center gap-2 transition-all hover:underline"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.3)",

@@ -32,7 +32,7 @@ const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia,
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>{title}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>{title}</p>
       <div className="mt-3 text-sm leading-7 text-white/60">{children}</div>
     </section>
   );
@@ -54,7 +54,7 @@ const OperatorPilotPage: NextPage = () => {
 
           {/* ── 1. WHAT THIS IS ── */}
           <header style={{ border: `1px solid ${GOLD}24`, background: `${GOLD}04`, padding: "1.5rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Selective engagement · Operator pilot
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3rem)", color: "rgba(255,255,255,0.92)", fontStyle: "italic" }}>
@@ -66,7 +66,7 @@ const OperatorPilotPage: NextPage = () => {
           </header>
 
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Trust boundary
             </p>
             <p className="mt-3 text-sm leading-7 text-white/60">
@@ -121,7 +121,7 @@ const OperatorPilotPage: NextPage = () => {
 
           {/* ── 5. WHAT THE OPERATOR RECEIVES ── */}
           <section style={{ border: `1px solid ${GOLD}20`, background: `${GOLD}04`, padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               What the operator receives
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -173,7 +173,7 @@ const OperatorPilotPage: NextPage = () => {
 
           {/* ── 8. SUBMIT DECISION FOR PILOT REVIEW ── */}
           <section style={{ border: `1px solid ${GOLD}30`, background: `${GOLD}06`, padding: "1.5rem", textAlign: "center" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Ready to proceed
             </p>
             <p className="mt-3 max-w-2xl mx-auto text-sm leading-7 text-white/60">
@@ -201,7 +201,7 @@ const OperatorPilotPage: NextPage = () => {
                   padding: "14px 24px",
                   border: "1px solid rgba(255,255,255,0.15)",
                   color: "rgba(255,255,255,0.50)",
-                  ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                   textDecoration: "none",
                 }}
               >
@@ -212,7 +212,7 @@ const OperatorPilotPage: NextPage = () => {
 
           {/* ── STRUCTURED INTAKE (§6/§7) ── */}
           <section id="pilot-intake" style={{ border: `1px solid ${GOLD}24`, background: `${GOLD}03`, padding: "1.5rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Structured pilot intake</p>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Structured pilot intake</p>
             <p className="mt-2 text-sm leading-7 text-white/55">
               This is a qualification, not a checkout. Nothing is accepted automatically — a strong submission reaches a human reviewer, who decides suitability and scope. You will receive a reference to check your status.
             </p>
@@ -221,7 +221,7 @@ const OperatorPilotPage: NextPage = () => {
 
           {/* ── VALUE RECEIPT ── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Value receipt
             </p>
             <div className="mt-3 grid gap-2 text-xs text-white/40 sm:grid-cols-2">
@@ -286,11 +286,11 @@ function PilotIntakeForm() {
   if (outcome) {
     return (
       <div style={{ marginTop: "1rem", border: `1px solid ${EMERALD}30`, background: `${EMERALD}05`, padding: "1rem" }}>
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${EMERALD}` }}>Submitted · {outcome.qualificationStatus}</p>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${EMERALD}` }}>Submitted · {outcome.qualificationStatus}</p>
                 {outcome.reference && <p className="mt-2 text-sm text-white/70">Your reference: <strong style={{ color: GOLD }}>{outcome.reference}</strong>.</p>}
         {outcome.statusAccess && (
           <div className="mt-3" style={{ border: `1px solid ${GOLD}24`, background: `${GOLD}06`, padding: "0.85rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}` }}>Private status access</p>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}` }}>Private status access</p>
             <p className="mt-2 text-xs leading-6 text-white/55">Keep this status secret somewhere safe. It is not placed in the status URL and it opens a short-lived secure status session.</p>
             <code className="mt-2 block break-all text-xs text-white/75">{outcome.statusAccess.secret}</code>
             <Link href={outcome.statusAccess.statusUrl} className="mt-3 inline-flex text-xs underline" style={{ color: GOLD, textUnderlineOffset: 4 }}>Open status page</Link>

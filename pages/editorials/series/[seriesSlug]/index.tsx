@@ -51,7 +51,7 @@ function PartRow({
           <span
             className="font-mono uppercase tracking-[0.32em]"
             style={{
-              fontSize: "7px",
+              fontSize: "11px",
               color: isFirst && !isScheduled ? "var(--ds-accent)" : "var(--ds-text-subtle)",
             }}
           >
@@ -111,14 +111,14 @@ function PartRow({
       <div className="flex items-center gap-6 md:flex-col md:items-end md:gap-2 md:pt-1 flex-shrink-0">
         <span
           className="font-mono uppercase tracking-[0.26em]"
-          style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+          style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
         >
           {part.readTime}
         </span>
         {!isScheduled && (
           <span
             className="font-mono uppercase tracking-[0.26em] transition-colors duration-200 group-hover:text-[#C9963A]"
-            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+            style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
           >
             {isFirst ? "Begin reading →" : "Read →"}
           </span>
@@ -199,14 +199,14 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
               <Link
                 href="/editorials"
                 className="font-mono uppercase tracking-[0.3em] transition-colors duration-200"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Editorials
               </Link>
-              <span style={{ color: "var(--ds-border)", fontSize: "7px" }}>›</span>
+              <span style={{ color: "var(--ds-border)", fontSize: "11px" }}>›</span>
               <span
                 className="font-mono uppercase tracking-[0.3em]"
-                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Editorial Series
               </span>
@@ -217,7 +217,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
               <span style={{ width: 1, height: 16, backgroundColor: "var(--ds-accent)", display: "inline-block" }} />
               <span
                 className="font-mono uppercase tracking-[0.36em]"
-                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 {totalPartCount}-Part Editorial Series
                 {series.status === "PUBLISHED" ? " · Complete" : publishedParts.length === 0 ? " · Scheduled" : " · In Progress"}
@@ -252,7 +252,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
                 href={`/editorials/series/${series.slug}/${firstPart.slug}`}
                 className="inline-flex items-center border px-5 py-3 font-mono uppercase tracking-[0.28em] transition-colors duration-200"
                 style={{
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   borderColor: "var(--ds-accent-soft)",
                   color: "var(--ds-accent)",
                   backgroundColor: "var(--ds-accent-soft)",
@@ -271,13 +271,13 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
             <div className="mb-6 flex items-center justify-between">
               <span
                 className="font-mono uppercase tracking-[0.34em]"
-                style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Reading sequence
               </span>
               <span
                 className="font-mono uppercase tracking-[0.28em]"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 {publishedParts.length} of {totalPartCount} published
               </span>
@@ -303,7 +303,7 @@ const SeriesHubPage: NextPage<Props> = ({ series, totalMinutes }) => {
             <Link
               href="/editorials"
               className="font-mono uppercase tracking-[0.26em] transition-colors duration-200"
-              style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+              style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
             >
               ← All editorials
             </Link>

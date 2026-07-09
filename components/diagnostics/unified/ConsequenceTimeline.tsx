@@ -32,7 +32,7 @@ export default function ConsequenceTimeline({ alreadyIncurred, sevenDays, thirty
           { label: "90 days", text: ninetyDays },
         ].map((c) => (
           <div key={c.label} className="flex gap-3">
-            <span style={{ ...mono, fontSize: "7px", color: `${RED}0.30)`, minWidth: "50px" }}>{c.label}</span>
+            <span style={{ ...mono, fontSize: "11px", color: `${RED}0.30)`, minWidth: "50px" }}>{c.label}</span>
             <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.45)" }}>{c.text}</span>
           </div>
         ))}

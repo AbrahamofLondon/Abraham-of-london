@@ -28,7 +28,7 @@ export default function FreeLayerBoundary({
 }: FreeLayerBoundaryProps) {
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.03)", padding: "1.25rem", marginBottom: "0.75rem" }}>
-      <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.52)", marginBottom: "0.55rem" }}>
+      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.52)", marginBottom: "0.55rem" }}>
         Boundary of this result
       </div>
 

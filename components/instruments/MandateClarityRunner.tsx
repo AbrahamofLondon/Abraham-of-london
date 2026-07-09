@@ -44,7 +44,7 @@ export default function MandateClarityRunner({ onComplete }: { onComplete: (resu
       {/* Live score */}
       <div className="flex items-baseline justify-between mb-4">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Clarity Score</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Clarity Score</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "3rem", fontWeight: 300, lineHeight: 1, color: authColor }}>{result.clarityScore}</div>
         </div>
         <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: authColor }}>{result.authorityType}</span>
@@ -57,7 +57,7 @@ export default function MandateClarityRunner({ onComplete }: { onComplete: (resu
         return (
           <React.Fragment key={field.key}>
             {showHeader && (
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60`, marginTop: "1rem", marginBottom: "0.25rem" }}>
+              <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60`, marginTop: "1rem", marginBottom: "0.25rem" }}>
                 {BLOCK_LABELS[field.block]}
               </div>
             )}

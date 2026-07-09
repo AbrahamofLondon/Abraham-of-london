@@ -86,7 +86,7 @@ const OutcomeCheckPage: NextPage = () => {
     return (
       <Layout title="Outcome Check" description="Verifying your decision.">
         <main className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "rgb(3,3,5)" }}>
-          <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.20)" }}>
+          <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>
             Loading assessment history...
           </p>
         </main>
@@ -108,7 +108,7 @@ const OutcomeCheckPage: NextPage = () => {
             <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.92rem", color: "rgba(255,255,255,0.40)", marginTop: "0.75rem" }}>
               The outcome verification requires a completed decision check. Complete one first, and the system will return in 30 days.
             </p>
-            <a href="/diagnostics/fast" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1.5rem", padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+            <a href="/diagnostics/fast" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1.5rem", padding: "12px 24px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}08`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
               Start decision check <ArrowRight style={{ width: 10, height: 10 }} />
             </a>
           </div>
@@ -129,7 +129,7 @@ const OutcomeCheckPage: NextPage = () => {
         <Head><meta name="robots" content="noindex" /></Head>
         <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
           <div className="mx-auto max-w-xl">
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
               Outcome verification · {daysSince} days since assessment
             </span>
 
@@ -197,7 +197,7 @@ const OutcomeCheckPage: NextPage = () => {
         <Head><meta name="robots" content="noindex" /></Head>
         <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
           <div className="mx-auto max-w-xl space-y-6">
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
               Outcome capture
             </span>
 
@@ -223,7 +223,7 @@ const OutcomeCheckPage: NextPage = () => {
                       backgroundColor: status === opt.value ? `${GOLD}10` : "transparent",
                       color: status === opt.value ? `${GOLD}CC` : "rgba(255,255,255,0.40)",
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
                       cursor: "pointer",
@@ -309,10 +309,10 @@ const OutcomeCheckPage: NextPage = () => {
                 : "The system has recorded that the recommended action was not taken. This pattern will be surfaced in future assessments as recurrence evidence."}
             </p>
             <div className="flex justify-center gap-4 mt-6">
-              <a href="/diagnostics/fast" style={{ padding: "10px 20px", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06`, color: `${GOLD}AA`, ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              <a href="/diagnostics/fast" style={{ padding: "10px 20px", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}06`, color: `${GOLD}AA`, ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                 New assessment
               </a>
-              <a href="/diagnostics" style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)", ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              <a href="/diagnostics" style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)", ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                 Dashboard
               </a>
             </div>

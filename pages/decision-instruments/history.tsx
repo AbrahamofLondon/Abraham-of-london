@@ -77,7 +77,7 @@ const HistoryPage: NextPage = () => {
       <Head><meta name="robots" content="noindex" /></Head>
       <main className="min-h-screen px-6 py-16" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-2xl">
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60` }}>
             Decision Instrument History
           </span>
           <h1 className="mt-4" style={{ ...serif, fontSize: "2rem", color: "white" }}>
@@ -100,10 +100,10 @@ const HistoryPage: NextPage = () => {
                 in your decision record and informs the next admissible step.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
-                <Link href="/decision-instruments/signal" style={{ padding: "10px 16px", border: `1px solid ${GOLD}40`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/decision-instruments/signal" style={{ padding: "10px 16px", border: `1px solid ${GOLD}40`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
                   Free Decision Signal
                 </Link>
-                <Link href="/decision-instruments" style={{ padding: "10px 16px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/decision-instruments" style={{ padding: "10px 16px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
                   View instruments
                 </Link>
               </div>
@@ -124,12 +124,12 @@ const HistoryPage: NextPage = () => {
                     {entry.score !== null && (
                       <span style={{ ...serif, fontSize: "1.5rem", color: bandColor(entry.resultBand) }}>{entry.score}</span>
                     )}
-                    <span className="flex items-center gap-1 text-white/25" style={{ ...mono, fontSize: "8px" }}>
+                    <span className="flex items-center gap-1 text-white/25" style={{ ...mono, fontSize: "11px" }}>
                       <Clock style={{ width: 9, height: 9 }} />
                       {new Date(entry.updatedAt).toLocaleDateString("en-GB")}
                     </span>
                   </div>
-                  <Link href={`/decision-instruments/${entry.slug}/run`} className="mt-3 flex items-center gap-1 text-white/30 hover:text-white/50" style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                  <Link href={`/decision-instruments/${entry.slug}/run`} className="mt-3 flex items-center gap-1 text-white/30 hover:text-white/50" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                     Run again <ArrowRight style={{ width: 9, height: 9 }} />
                   </Link>
                 </div>

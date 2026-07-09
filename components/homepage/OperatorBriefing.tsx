@@ -171,7 +171,7 @@ export default function OperatorBriefing({
                 <div>
                   <div style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px", letterSpacing: "0.34em", textTransform: "uppercase",
+                    fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase",
                     color: "rgba(255,255,255,0.55)",
                   }}>
                     Governance protocol
@@ -197,7 +197,7 @@ export default function OperatorBriefing({
                 <ShieldCheck style={{ width: "11px", height: "11px", color: `${GOLD}90` }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                   color: `${GOLD}AA`,
                 }}>
                   Institutional grade
@@ -268,7 +268,7 @@ export default function OperatorBriefing({
                   backgroundColor: `${GOLD}08`,
                   color: `${GOLD}BB`,
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                   flexShrink: 0,
                 }}
                 onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}50`; el.style.backgroundColor = `${GOLD}10`; }}

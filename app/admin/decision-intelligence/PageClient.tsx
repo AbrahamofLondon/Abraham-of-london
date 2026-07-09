@@ -61,7 +61,7 @@ const VOID = "rgb(6 6 9)";
 
 const monoLabel: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "8px",
+  fontSize: "11px",
   letterSpacing: "0.28em",
   textTransform: "uppercase",
   color: "rgba(255,255,255,0.35)",
@@ -334,7 +334,7 @@ export default function DecisionIntelligencePage() {
             style={{
               ...monoLabel,
               marginTop: "0.35rem",
-              fontSize: "7px",
+              fontSize: "11px",
             }}
           >
             {new Date(data.period.from).toLocaleDateString()} &ndash;{" "}
@@ -568,7 +568,7 @@ export default function DecisionIntelligencePage() {
                   <span
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.08em",
                       color: "rgba(255,255,255,0.45)",
                       lineHeight: 1.6,

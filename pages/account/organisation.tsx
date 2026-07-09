@@ -161,7 +161,7 @@ const OrganisationPage: NextPage = () => {
                 type="button"
                 onClick={() => setShowCreate(true)}
                 style={{
-                  ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                   color: "#0A0A0A", backgroundColor: GOLD, padding: "12px 24px", border: "none", cursor: "pointer",
                 }}
               >
@@ -173,7 +173,7 @@ const OrganisationPage: NextPage = () => {
           {/* Create form */}
           {showCreate && (
             <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "20px", marginBottom: "24px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
                 Create organisation
               </p>
               <input
@@ -190,11 +190,11 @@ const OrganisationPage: NextPage = () => {
               />
               <div style={{ display: "flex", gap: "10px" }}>
                 <button type="button" onClick={handleCreateOrg} disabled={creating}
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: creating ? "rgba(255,255,255,0.20)" : "#0A0A0A", backgroundColor: creating ? "rgba(255,255,255,0.06)" : GOLD, padding: "10px 20px", border: "none", cursor: creating ? "not-allowed" : "pointer" }}>
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: creating ? "rgba(255,255,255,0.20)" : "#0A0A0A", backgroundColor: creating ? "rgba(255,255,255,0.06)" : GOLD, padding: "10px 20px", border: "none", cursor: creating ? "not-allowed" : "pointer" }}>
                   {creating ? "Creating..." : "Create"}
                 </button>
                 <button type="button" onClick={() => setShowCreate(false)}
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", padding: "10px 20px", cursor: "pointer" }}>
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "transparent", padding: "10px 20px", cursor: "pointer" }}>
                   Cancel
                 </button>
               </div>
@@ -210,7 +210,7 @@ const OrganisationPage: NextPage = () => {
                   <h2 style={{ ...serif, fontSize: "1.2rem", color: "rgba(255,255,255,0.85)", marginBottom: "4px" }}>
                     {org.organisationName}
                   </h2>
-                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: org.overageCount > 0 ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.25)" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: org.overageCount > 0 ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.25)" }}>
                     {org.seatsUsed} of {org.seatAllowance} seats used
                     {org.overageCount > 0 ? ` · ${org.overageCount} overage` : ""}
                   </p>
@@ -219,7 +219,7 @@ const OrganisationPage: NextPage = () => {
 
               {/* Member list */}
               <div style={{ marginBottom: "20px" }}>
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "8px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "8px" }}>
                   Members ({org.members.length})
                 </p>
                 {org.members.map((member) => (
@@ -228,14 +228,14 @@ const OrganisationPage: NextPage = () => {
                       <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>
                         {member.fullName || member.email}
                       </p>
-                      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                         {member.email} · {ROLE_LABELS[member.role] ?? member.role}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveMember(org.organisationId, member.membershipId)}
-                      style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "transparent", padding: "4px 10px", cursor: "pointer" }}
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)", border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "transparent", padding: "4px 10px", cursor: "pointer" }}
                     >
                       Remove
                     </button>
@@ -245,7 +245,7 @@ const OrganisationPage: NextPage = () => {
 
               {/* Invite form */}
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "16px" }}>
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "10px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}77`, marginBottom: "10px" }}>
                   Invite member
                 </p>
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
@@ -268,7 +268,7 @@ const OrganisationPage: NextPage = () => {
                     type="button"
                     onClick={() => handleInvite(org.organisationId)}
                     disabled={inviting || !inviteEmail}
-                    style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: inviting || !inviteEmail ? "rgba(255,255,255,0.20)" : "#0A0A0A", backgroundColor: inviting || !inviteEmail ? "rgba(255,255,255,0.06)" : GOLD, padding: "8px 16px", border: "none", cursor: inviting || !inviteEmail ? "not-allowed" : "pointer" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: inviting || !inviteEmail ? "rgba(255,255,255,0.20)" : "#0A0A0A", backgroundColor: inviting || !inviteEmail ? "rgba(255,255,255,0.06)" : GOLD, padding: "8px 16px", border: "none", cursor: inviting || !inviteEmail ? "not-allowed" : "pointer" }}
                   >
                     {inviting ? "Sending..." : "Invite"}
                   </button>
@@ -284,7 +284,7 @@ const OrganisationPage: NextPage = () => {
 
           {/* Seat info */}
           <div style={{ border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)", padding: "16px", marginTop: "16px" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "4px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "4px" }}>
               Seats
             </p>
             <p style={{ fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.30)" }}>

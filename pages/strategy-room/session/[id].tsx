@@ -577,7 +577,7 @@ export default function StrategyRoomSessionPage({
 
           {/* ── Session authority line ── */}
           <div style={{ padding: "1rem 0 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.04)", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.5rem" }}>
               Strategy Room execution session
             </p>
             <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)" }}>
@@ -592,7 +592,7 @@ export default function StrategyRoomSessionPage({
           </div>
 
           <div style={{ borderLeft: `2px solid rgba(201,169,110,0.35)`, backgroundColor: "rgba(201,169,110,0.04)", padding: "16px 18px", marginBottom: "12px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>Your required move</p>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>Your required move</p>
             <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
               <p style={{ ...serif, fontSize: "0.94rem", lineHeight: 1.5, color: "rgba(255,255,255,0.46)" }}>
                 Current directive: {executionState.directive ?? session.directive ?? "Continue governed execution."}
@@ -600,7 +600,7 @@ export default function StrategyRoomSessionPage({
               <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)" }}>
                 Next action: {nextAction}
               </p>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", color: executionState.checkpoint?.status === "OVERDUE" ? "rgba(252,165,165,0.60)" : "rgba(255,255,255,0.30)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: executionState.checkpoint?.status === "OVERDUE" ? "rgba(252,165,165,0.60)" : "rgba(255,255,255,0.30)" }}>
                 Checkpoint due: {executionState.checkpoint?.dueAt ? new Date(executionState.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "No due date recorded"}
               </p>
               <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(252,165,165,0.50)" }}>
@@ -612,11 +612,11 @@ export default function StrategyRoomSessionPage({
                     const input = document.querySelector<HTMLInputElement>('input[placeholder="Record action taken"]');
                     input?.focus();
                   }}
-                  style={{ ...mono, fontSize: "7px", background: "none", border: `1px solid ${GOLD}35`, color: `${GOLD}BB`, padding: "8px 12px", cursor: "pointer" }}
+                  style={{ ...mono, fontSize: "11px", background: "none", border: `1px solid ${GOLD}35`, color: `${GOLD}BB`, padding: "8px 12px", cursor: "pointer" }}
                 >
                   Record action
                 </button>
-                <Link href="/decision-centre" style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.44)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 12px" }}>
+                <Link href="/decision-centre" style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.44)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 12px" }}>
                   Respond to checkpoint
                 </Link>
               </div>
@@ -625,7 +625,7 @@ export default function StrategyRoomSessionPage({
 
           {executionState.checkpoint && (
             <div style={{ borderLeft: "2px solid rgba(255,255,255,0.18)", backgroundColor: "rgba(255,255,255,0.02)", padding: "14px 18px", marginBottom: "12px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
                 Checkpoint governance
               </p>
               <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>
@@ -634,20 +634,20 @@ export default function StrategyRoomSessionPage({
               <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)", marginTop: "6px" }}>
                 {executionState.checkpoint.verificationQuestion}
               </p>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: executionState.checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : executionState.checkpoint.status === "RESPONDED" ? "rgba(110,231,183,0.55)" : "rgba(201,169,110,0.55)", marginTop: "8px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: executionState.checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : executionState.checkpoint.status === "RESPONDED" ? "rgba(110,231,183,0.55)" : "rgba(201,169,110,0.55)", marginTop: "8px" }}>
                 {executionState.checkpoint.status === "RESPONDED"
                   ? `Responded${executionState.checkpoint.respondedAt ? ` · ${new Date(executionState.checkpoint.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`
                   : `${executionState.checkpoint.status} · ${executionState.checkpoint.dueAt ? `Due ${new Date(executionState.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "No due date"}`}
               </p>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginTop: "6px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginTop: "6px" }}>
                 Source: {executionState.checkpoint.sourceLabel} · Evidence posture: {executionState.checkpoint.evidencePosture.replace(/_/g, " ").toLowerCase()}
               </p>
               {(executionState.checkpoint.status !== "RESPONDED" || executionState.checkpoint.responseStatus === "BLOCKED") && (
                 <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "10px" }}>
-                  <Link href="/decision-centre" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
+                  <Link href="/decision-centre" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
                     Respond in Decision Centre
                   </Link>
-                  <Link href="/return-brief" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none" }}>
+                  <Link href="/return-brief" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none" }}>
                     Understand Return Brief
                   </Link>
                 </div>
@@ -657,13 +657,13 @@ export default function StrategyRoomSessionPage({
 
           {sessionIrreversibility && (
             <div style={{ borderLeft: "2px solid rgba(252,165,165,0.30)", backgroundColor: "rgba(252,165,165,0.03)", padding: "14px 18px", marginBottom: "12px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", color: "rgba(252,165,165,0.55)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", color: "rgba(252,165,165,0.55)" }}>
                 Irreversibility estimate: {sessionIrreversibility.level}
               </p>
               <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
                 {sessionIrreversibility.summary} This is an irreversibility estimate, not a verified external fact.
               </p>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
                 Source: recorded session signals · Recorded: {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} · Evidence posture: estimated
               </p>
               <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
@@ -863,10 +863,10 @@ export default function StrategyRoomSessionPage({
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
-                      <span style={{ ...mono, fontSize: "8px", color: `${GOLD}80` }}>
+                      <span style={{ ...mono, fontSize: "11px", color: `${GOLD}80` }}>
                         {String(step.order).padStart(2, "0")}
                       </span>
-                      <span style={{ ...mono, fontSize: "7px", color: urgencyColor(step.urgency) }}>
+                      <span style={{ ...mono, fontSize: "11px", color: urgencyColor(step.urgency) }}>
                         {step.urgency}
                       </span>
                       {step.dependency && (
@@ -1022,7 +1022,7 @@ export default function StrategyRoomSessionPage({
                 {pressure.postureLocked && (
                   <div style={{ borderLeft: "2px solid rgba(252,165,165,0.55)", backgroundColor: "rgba(252,165,165,0.04)", padding: "10px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
                     <Lock style={{ width: 10, height: 10, color: "rgba(252,165,165,0.70)", flexShrink: 0 }} />
-                    <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>
                       Execution conditions must be met before recording a decision
                     </span>
                   </div>
@@ -1059,7 +1059,7 @@ export default function StrategyRoomSessionPage({
                     {statusIcon(d.status)}
                     <span style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.45, color: "rgba(255,255,255,0.72)" }}>{d.decision}</span>
                   </div>
-                  <span style={{ ...mono, fontSize: "7px", color: statusColor(d.status) }}>{d.status}</span>
+                  <span style={{ ...mono, fontSize: "11px", color: statusColor(d.status) }}>{d.status}</span>
                 </div>
                 {d.notes && (
                   <p style={{ ...serif, fontSize: "0.8rem", color: "rgba(255,255,255,0.35)", marginTop: "0.25rem", fontStyle: "italic" }}>{d.notes}</p>
@@ -1124,7 +1124,7 @@ export default function StrategyRoomSessionPage({
                     disabled={submitting || !newDecision.trim()}
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       background: "none",
                       border: `1px solid ${GOLD}35`,
                       color: `${GOLD}BB`,
@@ -1140,12 +1140,12 @@ export default function StrategyRoomSessionPage({
                   </button>
                 </div>
                 {microFeedback && (
-                  <div style={{ ...mono, fontSize: "7.5px", color: "rgba(110,231,183,0.55)", marginTop: "0.35rem" }}>
+                  <div style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.55)", marginTop: "0.35rem" }}>
                     {microFeedback}
                   </div>
                 )}
                 {localError && (
-                  <div style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.70)", marginTop: "0.35rem" }}>
+                  <div style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.70)", marginTop: "0.35rem" }}>
                     {localError}
                   </div>
                 )}
@@ -1162,7 +1162,7 @@ export default function StrategyRoomSessionPage({
                   onClick={() => updateSessionStatus("completed")}
                   style={{
                     ...mono,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     background: "none",
                     border: `1px solid ${GOLD}35`,
                     color: `${GOLD}BB`,
@@ -1180,7 +1180,7 @@ export default function StrategyRoomSessionPage({
                   onClick={() => updateSessionStatus("monitoring")}
                   style={{
                     ...mono,
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     background: "none",
                     border: "1px solid rgba(255,255,255,0.12)",
                     color: "rgba(255,255,255,0.50)",
@@ -1214,7 +1214,7 @@ export default function StrategyRoomSessionPage({
                 </button>
               </div>
             ) : (
-              <div style={{ ...mono, fontSize: "8px", color: statusColor(session.status) }}>
+              <div style={{ ...mono, fontSize: "11px", color: statusColor(session.status) }}>
                 Session {session.status} &middot;{" "}
                 <Link href="/strategy-room" style={{ color: AMBER, textDecoration: "underline" }}>
                   Return to Strategy Room
@@ -1228,13 +1228,13 @@ export default function StrategyRoomSessionPage({
 
             {/* Record persistence notice */}
             <div style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "0.75rem 0.95rem" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "4px" }}>
                 Record status
               </p>
               <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>
                 This session is persisted and retrievable at this URL. Decision Centre shows this record as active for your case.
               </p>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
                 {provenanceState?.status === "AVAILABLE"
                   ? "Provenance status: live client-safe provenance is available for this Strategy Room record."
                   : provenanceState?.status === "PENDING"
@@ -1255,28 +1255,28 @@ export default function StrategyRoomSessionPage({
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
               <Link
                 href="/decision-centre"
-                style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}35`, padding: "8px 14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}35`, padding: "8px 14px", display: "inline-flex", alignItems: "center", gap: "6px" }}
               >
                 Return to Decision Centre
                 <ArrowRight style={{ width: 10, height: 10 }} />
               </Link>
               <Link
                 href="/strategy-room"
-                style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)", padding: "8px 12px" }}
+                style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)", padding: "8px 12px" }}
               >
                 Back to Strategy Room
               </Link>
               {provenanceState?.status === "AVAILABLE" && provenanceState.href ? (
                 <Link
                   href={provenanceState.href}
-                  style={{ ...mono, fontSize: "7px", color: `${GOLD}AA`, textDecoration: "none" }}
+                  style={{ ...mono, fontSize: "11px", color: `${GOLD}AA`, textDecoration: "none" }}
                 >
                   View live client-safe provenance
                 </Link>
               ) : (
                 <Link
                   href="/provenance/sample-export"
-                  style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
+                  style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
                 >
                   View client-safe provenance sample
                 </Link>

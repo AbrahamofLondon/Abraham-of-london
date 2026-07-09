@@ -116,7 +116,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.42em",
           textTransform: "uppercase",
           color: `${GOLD}BB`,
@@ -341,7 +341,7 @@ function HeroSection() {
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.42em",
                   textTransform: "uppercase",
                   color: `${GOLD}BB`,
@@ -394,7 +394,7 @@ function HeroSection() {
             style={{
               marginTop: "1rem",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.20em",
               textTransform: "uppercase",
               color: "rgba(201,169,110,0.72)",
@@ -503,7 +503,7 @@ function HeroSection() {
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.34em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -680,7 +680,7 @@ function CoreThesis() {
                 <div
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.38em",
                     textTransform: "uppercase",
                     color: `${GOLD}90`,
@@ -736,7 +736,7 @@ function CoreThesis() {
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.38em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -844,7 +844,7 @@ function CoreThesis() {
                             <span
                               style={{
                                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                                fontSize: "7px",
+                                fontSize: "11px",
                                 letterSpacing: "0.36em",
                                 textTransform: "uppercase",
                                 color: "rgba(255,255,255,0.22)",
@@ -964,7 +964,7 @@ function CoreThesis() {
                 <p
                   style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.16em",
                     color: "rgba(255,255,255,0.18)",
                     lineHeight: 1.60,
@@ -1092,7 +1092,7 @@ function EditionLadder() {
                         className="mb-3 flex items-center justify-between gap-3"
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.34em",
                           textTransform: "uppercase",
                         }}
@@ -1160,7 +1160,7 @@ function EditionLadder() {
                           alignItems: "center",
                           gap: "0.5rem",
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "8px",
+                          fontSize: "11px",
                           letterSpacing: "0.28em",
                           textTransform: "uppercase",
                           color: isGold ? `${GOLD}BB` : "rgba(255,255,255,0.28)",

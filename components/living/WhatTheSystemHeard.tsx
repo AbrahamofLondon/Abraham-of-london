@@ -72,7 +72,7 @@ export default function WhatTheSystemHeard({
       <div
         style={{
           ...mono,
-          fontSize: '8px',
+          fontSize: '11px',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: isDark ? 'rgba(201,169,110,0.75)' : 'rgba(138,106,47,0.70)',

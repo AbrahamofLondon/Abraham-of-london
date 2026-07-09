@@ -45,7 +45,7 @@ function PartRow({
       {/* Part number */}
       <div
         className="flex-shrink-0 w-8 pt-0.5 font-mono uppercase tracking-[0.22em]"
-        style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+        style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
       >
         {String(part.order).padStart(2, "0")}
       </div>
@@ -55,7 +55,7 @@ function PartRow({
         <div className="flex items-center gap-2.5 mb-2">
           <span
             className="font-mono uppercase tracking-[0.24em]"
-            style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+            style={{ fontSize: "11px", color: "var(--ds-accent)" }}
           >
             Part {formatBlogSeriesPartNumber(part.order)}
           </span>
@@ -115,14 +115,14 @@ function PartRow({
       >
         <span
           className="font-mono uppercase tracking-[0.2em] whitespace-nowrap"
-          style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+          style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
         >
           {part.readTime}
         </span>
         {!isDraft && (
           <span
             className="font-mono uppercase tracking-[0.2em] transition-colors duration-200 group-hover:text-[#C9963A] whitespace-nowrap"
-            style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+            style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
           >
             Read →
           </span>
@@ -171,14 +171,14 @@ const BlogSeriesHub: NextPage<Props> = ({ series, totalMinutes }) => {
               <Link
                 href="/blog"
                 className="font-mono uppercase tracking-[0.3em] transition-colors duration-200 hover:text-white"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Essays
               </Link>
-              <span style={{ color: "var(--ds-border)", fontSize: "7px" }}>›</span>
+              <span style={{ color: "var(--ds-border)", fontSize: "11px" }}>›</span>
               <span
                 className="font-mono uppercase tracking-[0.3em]"
-                style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Applied Essay Series
               </span>
@@ -196,7 +196,7 @@ const BlogSeriesHub: NextPage<Props> = ({ series, totalMinutes }) => {
               />
               <span
                 className="font-mono uppercase tracking-[0.38em]"
-                style={{ fontSize: "7.5px", color: "var(--ds-accent)" }}
+                style={{ fontSize: "11px", color: "var(--ds-accent)" }}
               >
                 Applied Essay Series
               </span>
@@ -227,28 +227,28 @@ const BlogSeriesHub: NextPage<Props> = ({ series, totalMinutes }) => {
             <div className="flex flex-wrap items-center gap-5">
               <span
                 className="font-mono uppercase tracking-[0.24em]"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 {series.partCount}-Part Series
               </span>
               <span style={{ width: 1, height: 10, backgroundColor: "var(--ds-border)", display: "inline-block" }} />
               <span
                 className="font-mono uppercase tracking-[0.24em]"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 {isComplete ? "Complete" : `${publishedCount} of ${series.partCount} published`}
               </span>
               <span style={{ width: 1, height: 10, backgroundColor: "var(--ds-border)", display: "inline-block" }} />
               <span
                 className="font-mono uppercase tracking-[0.24em]"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 {formatTotalTime(totalMinutes)} total
               </span>
               <span style={{ width: 1, height: 10, backgroundColor: "var(--ds-border)", display: "inline-block" }} />
               <span
                 className="font-mono uppercase tracking-[0.24em]"
-                style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
               >
                 Abraham of London
               </span>

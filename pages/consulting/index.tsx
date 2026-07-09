@@ -176,7 +176,7 @@ function TierBadge({ tier }: { tier: Engagement["tier"] }) {
       border: `1px solid ${config.border}`,
       backgroundColor: config.bg,
       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-      fontSize: "7px",
+      fontSize: "11px",
       letterSpacing: "0.30em",
       textTransform: "uppercase",
       color: config.text,
@@ -193,7 +193,7 @@ function MetricTile({ label, value }: { label: string; value: string }) {
     >
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.28em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.22)",
@@ -422,7 +422,7 @@ const ConsultingPage: NextPage<ConsultingPageProps> = (props) => {
                           <item.icon style={{ width: "12px", height: "12px", color: `${GOLD}50` }} />
                           <span style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7.5px",
+                            fontSize: "11px",
                             letterSpacing: "0.26em",
                             textTransform: "uppercase",
                             color: "rgba(255,255,255,0.24)",
@@ -452,7 +452,7 @@ const ConsultingPage: NextPage<ConsultingPageProps> = (props) => {
                     <div className="flex items-center justify-between mb-7">
                       <span style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.28em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.20)",
@@ -511,7 +511,7 @@ const ConsultingPage: NextPage<ConsultingPageProps> = (props) => {
               {hasActiveCheckpoints && (
                 <div className="mt-4 flex items-center gap-3" style={{ padding: "0.75rem 1rem", border: "1px solid rgba(252,165,165,0.15)", backgroundColor: "rgba(252,165,165,0.03)" }}>
                   <Clock style={{ width: "14px", height: "14px", color: "rgba(252,165,165,0.50)", flexShrink: 0 }} />
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
                     {checkpointCount} checkpoint{checkpointCount !== 1 ? "s" : ""} require{checkpointCount === 1 ? "s" : ""} attention — unresolved checkpoints may affect counsel readiness
                   </span>
                 </div>
@@ -519,7 +519,7 @@ const ConsultingPage: NextPage<ConsultingPageProps> = (props) => {
               {escalationLevel !== undefined && escalationLevel > 0 && (
                 <div className="mt-3 flex items-center gap-3" style={{ padding: "0.75rem 1rem", border: "1px solid rgba(201,169,110,0.15)", backgroundColor: "rgba(201,169,110,0.03)" }}>
                   <AlertTriangle style={{ width: "14px", height: "14px", color: `${GOLD}70`, flexShrink: 0 }} />
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                     Escalation level {escalationLevel} — the system recommends governed counsel review
                   </span>
                 </div>
@@ -1104,7 +1104,7 @@ const ConsultingPage: NextPage<ConsultingPageProps> = (props) => {
                       marginTop: "0.85rem",
                       textAlign: "center",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.26em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.14)",

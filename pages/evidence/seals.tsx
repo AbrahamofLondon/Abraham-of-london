@@ -180,10 +180,10 @@ export default function IntegritySealRegistryPage() {
 
           {/* Navigation */}
           <div className="flex flex-wrap gap-4 mt-4">
-            <Link href="/evidence/standards" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            <Link href="/evidence/standards" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               Verification standards
             </Link>
-            <Link href="/evidence" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+            <Link href="/evidence" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
               View evidence
             </Link>
           </div>

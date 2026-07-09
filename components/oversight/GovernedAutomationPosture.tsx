@@ -63,19 +63,19 @@ export default function GovernedAutomationPosturePanel({
 
       {posture.humanBoundaries.length > 0 && (
         <div className="mt-3">
-          <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.25)" }}>Human review required for:</p>
+          <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)" }}>Human review required for:</p>
           <p className="mt-1 text-[11px] text-white/40">{posture.humanBoundaries.join(" · ")}</p>
         </div>
       )}
 
       {posture.lastSweepAt && (
-        <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.18)", marginTop: "0.5rem" }}>
+        <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.18)", marginTop: "0.5rem" }}>
           Last sweep: {new Date(posture.lastSweepAt).toLocaleString("en-GB")}
           {posture.nextScheduledAt ? ` · Next: ${new Date(posture.nextScheduledAt).toLocaleString("en-GB")}` : ""}
         </p>
       )}
 
-      <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.15)", marginTop: "0.5rem" }}>
+      <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.15)", marginTop: "0.5rem" }}>
         {posture.publicLabel}
       </p>
     </div>

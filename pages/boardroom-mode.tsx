@@ -70,7 +70,7 @@ const BoardroomModePage: NextPage = () => {
           >
             <Lock className="mt-0.5 h-4 w-4 shrink-0" style={{ color: `${GOLD}AA` }} />
             <div>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                 Evidence-gated
               </p>
               <p className="mt-1.5 text-[13px] leading-[1.7] text-white/[0.65]">
@@ -104,14 +104,14 @@ const BoardroomModePage: NextPage = () => {
             <div className="flex flex-wrap gap-3 pt-2">
               <span
                 className="inline-flex items-center gap-1.5 border px-3 py-1.5"
-                style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: "rgba(216,180,254,0.22)", color: "rgba(216,180,254,0.90)", backgroundColor: "rgba(216,180,254,0.06)" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: "rgba(216,180,254,0.22)", color: "rgba(216,180,254,0.90)", backgroundColor: "rgba(216,180,254,0.06)" }}
               >
                 <Lock className="h-3 w-3" />
                 Evidence-gated
               </span>
               <span
                 className="inline-flex items-center border px-3 py-1.5"
-                style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
               >
                 Requires prior Executive Reporting
               </span>
@@ -123,12 +123,12 @@ const BoardroomModePage: NextPage = () => {
             className="border p-5"
             style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)" }}
           >
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
               Boardroom Mode vs Boardroom Brief
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88` }}>
                   Boardroom Brief — public entry
                 </p>
                 <p className="mt-1.5 text-[13px] leading-[1.65] text-white/[0.60]">
@@ -139,14 +139,14 @@ const BoardroomModePage: NextPage = () => {
                 <Link
                   href="/boardroom-brief"
                   className="group mt-3 inline-flex items-center gap-1.5 text-white/[0.55] transition-colors hover:text-white/[0.80]"
-                  style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   Generate Boardroom Brief
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(216,180,254,0.85)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(216,180,254,0.85)" }}>
                   Boardroom Mode — evidence-gated
                 </p>
                 <p className="mt-1.5 text-[13px] leading-[1.65] text-white/[0.60]">
@@ -160,7 +160,7 @@ const BoardroomModePage: NextPage = () => {
 
           {/* What it does */}
           <div>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
               What Boardroom Mode produces
             </p>
             <div className="mt-4 space-y-2.5">
@@ -178,7 +178,7 @@ const BoardroomModePage: NextPage = () => {
             className="border p-5"
             style={{ borderColor: "rgba(216,180,254,0.15)", backgroundColor: "rgba(216,180,254,0.03)" }}
           >
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(216,180,254,0.75)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(216,180,254,0.75)" }}>
               Prerequisites to access Boardroom Mode
             </p>
             <div className="mt-4 space-y-2.5">
@@ -193,7 +193,7 @@ const BoardroomModePage: NextPage = () => {
 
           {/* CTA routes */}
           <div className="space-y-4">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
               What to do next
             </p>
 
@@ -203,7 +203,7 @@ const BoardroomModePage: NextPage = () => {
               style={{ borderColor: `${GOLD}28`, backgroundColor: `${GOLD}06` }}
             >
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                   Recommended first step
                 </p>
                 <p className="mt-1.5 text-[14px] text-white/[0.82]">Proceed to Executive Reporting</p>
@@ -219,7 +219,7 @@ const BoardroomModePage: NextPage = () => {
               className="group flex items-center justify-between border border-white/[0.07] bg-white/[0.012] p-5 transition-colors hover:border-white/[0.12] hover:bg-white/[0.02]"
             >
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
                   Not ready for Executive Reporting?
                 </p>
                 <p className="mt-1.5 text-[14px] text-white/[0.72]">Start with a Boardroom Brief</p>
@@ -235,7 +235,7 @@ const BoardroomModePage: NextPage = () => {
               className="group flex items-center justify-between border border-white/[0.07] bg-white/[0.012] p-5 transition-colors hover:border-white/[0.12] hover:bg-white/[0.02]"
             >
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>
                   Starting from scratch?
                 </p>
                 <p className="mt-1.5 text-[14px] text-white/[0.72]">Start with the free pressure signal</p>
@@ -249,7 +249,7 @@ const BoardroomModePage: NextPage = () => {
 
           <div
             className="border-t border-white/[0.06] pt-6"
-            style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", lineHeight: 1.8, color: "rgba(255,255,255,0.30)" }}
+            style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", lineHeight: 1.8, color: "rgba(255,255,255,0.30)" }}
           >
             <p>Access: Evidence-gated — Operational Decision Intelligence Corridor, Stage 4.</p>
             <p className="mt-1">No self-serve checkout. Access opens when a qualifying governed record is confirmed.</p>

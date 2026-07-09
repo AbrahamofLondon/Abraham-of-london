@@ -74,7 +74,7 @@ export default function TrialExpiredCaseSelection({ state, onResolved }: Props) 
         marginBottom: "20px",
       }}
     >
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "8px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "8px" }}>
         Professional trial expired
       </p>
       <h2 style={{ ...serif, fontSize: "1.15rem", lineHeight: 1.3, color: "rgba(255,255,255,0.88)", marginBottom: "10px" }}>
@@ -111,7 +111,7 @@ export default function TrialExpiredCaseSelection({ state, onResolved }: Props) 
                 <span style={{ display: "block", fontSize: "13px", lineHeight: 1.5, color: "rgba(255,255,255,0.72)" }}>
                   {item.title}
                 </span>
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                   {item.status.replace(/_/g, " ").toLowerCase()} · updated {new Date(item.updatedAt).toLocaleDateString("en-GB")}
                 </span>
               </span>
@@ -127,7 +127,7 @@ export default function TrialExpiredCaseSelection({ state, onResolved }: Props) 
           disabled={saving || selected.length === 0}
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: saving || selected.length === 0 ? "rgba(255,255,255,0.25)" : "#0A0A0A",
@@ -144,7 +144,7 @@ export default function TrialExpiredCaseSelection({ state, onResolved }: Props) 
           onClick={() => trackCommercialEvent("pricing_viewed_from_prompt", "decision_centre", { actionType: "trial_expiry" })}
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: `${GOLD}AA`,
@@ -163,7 +163,7 @@ export default function TrialExpiredCaseSelection({ state, onResolved }: Props) 
           }}
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.38)",

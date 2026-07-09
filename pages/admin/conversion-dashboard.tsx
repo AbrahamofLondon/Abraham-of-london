@@ -21,14 +21,14 @@ function Metric({ row }: { row: MetricRow }) {
 
   return (
     <div style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1.25rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
         {row.label}
       </div>
       <div className="mt-2 flex items-end justify-between gap-3">
         <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "2rem", lineHeight: 1, color }}>
           {row.value}
         </div>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--ds-text-subtle)" }}>
           Target: {row.target}
         </div>
       </div>
@@ -53,7 +53,7 @@ export default function ConversionDashboard({ conversionIntelligence }: Conversi
       <Head><meta name="robots" content="noindex,nofollow" /></Head>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "var(--ds-background)" }}>
         <div className="mx-auto max-w-5xl">
-          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}90` }}>
+          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}90` }}>
             Conversion Dashboard
           </div>
           <h1 className="mt-4" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "2.5rem", lineHeight: 1, color: "var(--ds-text)" }}>
@@ -116,7 +116,7 @@ export default function ConversionDashboard({ conversionIntelligence }: Conversi
           </div>
 
           <div className="mt-10" style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1.5rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
               Decision Matrix
             </div>
             <div className="space-y-2 text-[13px] leading-[1.7]" style={{ color: "var(--ds-text-muted)" }}>
@@ -128,7 +128,7 @@ export default function ConversionDashboard({ conversionIntelligence }: Conversi
           </div>
 
           <div className="mt-10" style={{ border: "1px solid var(--ds-border)", backgroundColor: "var(--ds-panel)", padding: "1.5rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "1rem" }}>
               GA4 Event Map
             </div>
             <div className="space-y-1 font-mono text-[11px]" style={{ color: "var(--ds-text-subtle)" }}>

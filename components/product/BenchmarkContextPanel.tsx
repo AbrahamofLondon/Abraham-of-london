@@ -163,7 +163,7 @@ export default function BenchmarkContextPanel({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.22)",
@@ -201,7 +201,7 @@ export default function BenchmarkContextPanel({
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.20em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.28)",

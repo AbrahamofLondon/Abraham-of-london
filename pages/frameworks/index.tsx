@@ -38,10 +38,10 @@ function InstrumentCard({ slug }: { slug: InstrumentSlug }) {
       </div>
       <p className="mt-1.5 text-xs text-white/40">{meta.whatItTests}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Paid instrument</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)" }}>{meta.timeEstimate}</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.40)" }}>Writes to memory</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.40)" }}>Dossier eligible</span>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Paid instrument</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>{meta.timeEstimate}</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.40)" }}>Writes to memory</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.40)" }}>Dossier eligible</span>
       </div>
     </div>
   );
@@ -55,7 +55,7 @@ function PlaybookCard({ title, href, description, tier }: ContentItem) {
     <div style={{ borderLeft: `1px solid ${isFree ? "rgba(110,231,183,0.25)" : `${GOLD}32`}`, paddingLeft: "12px" }}>
       <div className="flex items-baseline justify-between gap-3">
         <Link href={href} className="text-sm text-white/80 hover:underline underline-offset-4">{title}</Link>
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: isFree ? "rgba(110,231,183,0.50)" : `${GOLD}70` }}>{label}</span>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: isFree ? "rgba(110,231,183,0.50)" : `${GOLD}70` }}>{label}</span>
       </div>
       <p className="mt-1 text-xs leading-5 text-white/45">{description}</p>
     </div>
@@ -71,9 +71,9 @@ function PackCard({ name, price, count, status }: { name: string; price: string;
         <span style={{ ...mono, fontSize: "11px", color: GOLD }}>{price}</span>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Pack</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)" }}>{count} instruments</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(253,186,116,0.40)" }}>{status}</span>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Pack</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)" }}>{count} instruments</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(253,186,116,0.40)" }}>{status}</span>
       </div>
     </div>
   );
@@ -89,10 +89,10 @@ function GovernedPlaybookCard({ title, price, time, href, description }: { title
       </div>
       <p className="mt-1.5 text-xs text-white/40">{description}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Controlled release</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)" }}>{time}</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.40)" }}>Checkpoint eligible</span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.40)" }}>Writes to memory</span>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70` }}>Controlled release</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>{time}</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.40)" }}>Checkpoint eligible</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.40)" }}>Writes to memory</span>
       </div>
     </div>
   );
@@ -151,7 +151,7 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>Governed Decision Intelligence</p>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>Governed Decision Intelligence</p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3rem)", color: "rgba(255,255,255,0.92)" }}>
               Instruments, playbooks, frameworks, and operator packs.
             </h1>
@@ -159,10 +159,10 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
               Every product tests a real decision condition, produces a source-labelled governed output, writes into institutional memory, and earns or restricts the next step.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/decision-instruments/signal" style={{ padding: "8px 16px", border: `1px solid ${GOLD}40`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
+              <Link href="/decision-instruments/signal" style={{ padding: "8px 16px", border: `1px solid ${GOLD}40`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
                 Free Decision Signal
               </Link>
-              <Link href="/decision-instruments" style={{ padding: "8px 16px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
+              <Link href="/decision-instruments" style={{ padding: "8px 16px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none" }}>
                 All instruments
               </Link>
             </div>
@@ -171,7 +171,7 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
           {/* ── DECISION INSTRUMENTS ── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
             <div className="flex items-center justify-between gap-3">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Decision instruments</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Decision instruments</p>
               <Link href="/decision-instruments" className="text-xs text-white/50 underline-offset-4 hover:underline">View all &rarr;</Link>
             </div>
             <p className="mt-2 text-xs text-white/35">Paid instruments that score, classify, or map a specific decision dimension. Each writes to decision memory and produces a dossier-ready output.</p>
@@ -182,7 +182,7 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
 
           {/* ── GOVERNED PLAYBOOKS ── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Governed playbooks</p>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Governed playbooks</p>
             <p className="mt-2 text-xs text-white/35">Interactive methodology runs with checkpoint tracking. Playbooks guide a governed process over time — they are not static PDFs.</p>
             <div className="mt-4 grid gap-3 lg:grid-cols-2">
               <GovernedPlaybookCard title="Execution Integrity Protocol" price={getProductDisplayPrice("execution_integrity_protocol")} time="15 min" href="/playbooks/execution-integrity-protocol" description="Restore execution discipline without rewriting strategy." />
@@ -194,7 +194,7 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
           <div className="grid gap-6 xl:grid-cols-2">
             {/* ── OPERATOR PACKS ── */}
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Operator packs</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Operator packs</p>
               <p className="mt-2 text-xs text-white/35">Bundled instrument access. Pack checkout is controlled — available when bundle entitlement resolution is verified.</p>
               <div className="mt-4 space-y-3">
                 <PackCard name="Operator Essentials" price={getProductDisplayPrice("operator_essentials_pack")} count={4} status="Checkout controlled" />
@@ -206,7 +206,7 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
             {/* ── STRATEGIC FRAMEWORKS ── */}
             <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
               <div className="flex items-center justify-between gap-3">
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Strategic frameworks</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Strategic frameworks</p>
                 <Link href="/resources/strategic-frameworks" className="text-xs text-white/50 underline-offset-4 hover:underline">View all &rarr;</Link>
               </div>
               <p className="mt-2 text-xs text-white/35">Public method briefs and restricted architect material. Frameworks explain methodology — instruments deploy it.</p>
@@ -221,7 +221,7 @@ const FrameworksPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
           {/* ── PUBLIC PLAYBOOKS ── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
             <div className="flex items-center justify-between gap-3">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Playbooks</p>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB` }}>Playbooks</p>
               <Link href="/playbooks" className="text-xs text-white/50 underline-offset-4 hover:underline">View all &rarr;</Link>
             </div>
             <p className="mt-2 text-xs text-white/35">Public method briefs, governed playbooks, and restricted architect material.</p>

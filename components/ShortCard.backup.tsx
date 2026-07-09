@@ -144,7 +144,7 @@ export default function ShortCard({
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase" as const,
                   color: "rgba(201,169,110,0.75)",
@@ -159,7 +159,7 @@ export default function ShortCard({
                   <span
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.26em",
                       textTransform: "uppercase" as const,
                       color: "rgba(255,255,255,0.24)",
@@ -286,7 +286,7 @@ export default function ShortCard({
             <span
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.36em",
                 textTransform: "uppercase" as const,
                 color: "rgba(255,255,255,0.15)",

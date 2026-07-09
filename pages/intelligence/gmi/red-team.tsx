@@ -40,7 +40,7 @@ const GmiRedTeamPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-5xl space-y-8">
           <header className="border border-white/10 bg-white/[0.018] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Red Team Challenge
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.2rem)", lineHeight: 1.04 }}>
@@ -92,7 +92,7 @@ const GmiRedTeamPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
           </form>
 
           <section className="border border-white/10 bg-white/[0.015] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Red Team Register
             </p>
             {acknowledged.length > 0 ? (

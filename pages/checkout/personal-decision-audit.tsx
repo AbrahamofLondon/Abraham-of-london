@@ -101,7 +101,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
               <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
               <span style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.38)",
               }}>
                 Purchase
@@ -157,7 +157,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
                     <Shield style={{ width: "12px", height: "12px", color: `${GOLD}66` }} />
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                       color: `${GOLD}88`,
                     }}>
                       What this is not
@@ -244,7 +244,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
                     <FileText style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.20)" }} />
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.25)",
                     }}>
                       PDF dossier included
@@ -254,7 +254,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
                     <Shield style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.20)" }} />
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.25)",
                     }}>
                       Decision Centre memory included

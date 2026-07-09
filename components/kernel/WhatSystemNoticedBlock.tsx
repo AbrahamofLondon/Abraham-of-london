@@ -80,7 +80,7 @@ export function WhatSystemNoticedBlock({
         <span
           style={{
             ...mono,
-            fontSize: '8px',
+            fontSize: '11px',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: `${GOLD}AA`,
@@ -106,7 +106,7 @@ export function WhatSystemNoticedBlock({
             <span
               style={{
                 ...mono,
-                fontSize: '7px',
+                fontSize: '11px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 color: 'rgba(255,255,255,0.30)',
@@ -127,7 +127,7 @@ export function WhatSystemNoticedBlock({
           <span
             style={{
               ...mono,
-              fontSize: '7px',
+              fontSize: '11px',
               letterSpacing: '0.16em',
               textTransform: 'uppercase',
               color: 'rgba(255,255,255,0.30)',
@@ -149,7 +149,7 @@ export function WhatSystemNoticedBlock({
                 <span
                   style={{
                     ...mono,
-                    fontSize: '8px',
+                    fontSize: '11px',
                     letterSpacing: '0.1em',
                     color: signal.severity === 'CRITICAL' ? `${ROSE}CC` : signal.severity === 'HIGH' ? `${AMBER}CC` : 'rgba(255,255,255,0.60)',
                   }}
@@ -170,7 +170,7 @@ export function WhatSystemNoticedBlock({
             <span
               style={{
                 ...mono,
-                fontSize: '7px',
+                fontSize: '11px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 color: `${AMBER}AA`,
@@ -195,7 +195,7 @@ export function WhatSystemNoticedBlock({
             <span
               style={{
                 ...mono,
-                fontSize: '7px',
+                fontSize: '11px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 color: `${ROSE}AA`,
@@ -218,7 +218,7 @@ export function WhatSystemNoticedBlock({
             <span
               style={{
                 ...mono,
-                fontSize: '7px',
+                fontSize: '11px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 color: 'rgba(255,255,255,0.30)',
@@ -246,7 +246,7 @@ export function WhatSystemNoticedBlock({
             <span
               style={{
                 ...mono,
-                fontSize: '7px',
+                fontSize: '11px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 color: `${GOLD}88`,

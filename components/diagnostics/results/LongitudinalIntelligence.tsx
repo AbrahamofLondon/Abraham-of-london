@@ -70,7 +70,7 @@ export default function LongitudinalIntelligence({ data }: { data: LongitudinalD
     <div style={{ border: `1px solid ${config.color}25`, backgroundColor: `${config.color}05`, padding: "1.25rem", marginBottom: "1rem" }}>
       {/* Classification */}
       <div className="flex items-center gap-3 mb-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
           Longitudinal intelligence
         </span>
         {data.baselineDate && (
@@ -99,7 +99,7 @@ export default function LongitudinalIntelligence({ data }: { data: LongitudinalD
           {contradictions.map((c, i) => (
             <div key={i} style={{ marginTop: "0.4rem", paddingTop: i > 0 ? "0.3rem" : 0, borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
               <div className="flex items-center gap-2">
-                <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color: severityColor(c.severity) }}>
+                <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color: severityColor(c.severity) }}>
                   {c.severity}
                 </span>
                 <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>
@@ -145,7 +145,7 @@ export default function LongitudinalIntelligence({ data }: { data: LongitudinalD
                 {improved.map((m) => (
                   <div key={m.metric} className="flex items-center justify-between py-0.5">
                     <span style={{ ...serif, fontSize: "0.78rem", color: "rgba(255,255,255,0.35)" }}>{m.metric}</span>
-                    <span style={{ ...mono, fontSize: "7px", color: "rgba(110,231,183,0.50)" }}>+{m.delta}</span>
+                    <span style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.50)" }}>+{m.delta}</span>
                   </div>
                 ))}
               </div>
@@ -155,7 +155,7 @@ export default function LongitudinalIntelligence({ data }: { data: LongitudinalD
                 {worsened.map((m) => (
                   <div key={m.metric} className="flex items-center justify-between py-0.5">
                     <span style={{ ...serif, fontSize: "0.78rem", color: "rgba(255,255,255,0.35)" }}>{m.metric}</span>
-                    <span style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.50)" }}>{m.delta}</span>
+                    <span style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.50)" }}>{m.delta}</span>
                   </div>
                 ))}
               </div>
@@ -167,7 +167,7 @@ export default function LongitudinalIntelligence({ data }: { data: LongitudinalD
       {/* Escalation movement */}
       {data.escalationMovement !== "unknown" && data.escalationMovement !== "flat" && (
         <div style={{ marginTop: "0.35rem" }}>
-          <span style={{ ...mono, fontSize: "7px", color: data.escalationMovement === "up" ? "rgba(252,165,165,0.50)" : "rgba(110,231,183,0.50)" }}>
+          <span style={{ ...mono, fontSize: "11px", color: data.escalationMovement === "up" ? "rgba(252,165,165,0.50)" : "rgba(110,231,183,0.50)" }}>
             Escalation level {data.escalationMovement === "up" ? "increased" : "decreased"} since baseline
           </span>
         </div>

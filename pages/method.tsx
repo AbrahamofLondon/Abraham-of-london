@@ -28,7 +28,7 @@ function Eyebrow({ children, tone = "gold" }: { children: React.ReactNode; tone?
     <p
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: tone === "gold" ? `${GOLD}80` : "rgba(255,255,255,0.28)",
@@ -256,7 +256,7 @@ const MethodPage: NextPage = () => {
                   <span
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color: item.highlight ? `${GOLD}88` : "rgba(255,255,255,0.28)",
@@ -278,7 +278,7 @@ const MethodPage: NextPage = () => {
                   <span
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       color: "rgba(255,255,255,0.16)",
                     }}
                   >
@@ -373,7 +373,7 @@ const MethodPage: NextPage = () => {
                     className="mt-2"
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                       color: panel.color,
@@ -492,7 +492,7 @@ const MethodPage: NextPage = () => {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
                     color: "rgba(252,165,165,0.7)",
@@ -504,7 +504,7 @@ const MethodPage: NextPage = () => {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.58)",
@@ -585,7 +585,7 @@ const MethodPage: NextPage = () => {
                 href="/provenance/demo"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: `${GOLD}B0`,
@@ -598,7 +598,7 @@ const MethodPage: NextPage = () => {
                 href="/trust"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.3)",
@@ -611,7 +611,7 @@ const MethodPage: NextPage = () => {
                 href="/library"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.3)",
@@ -650,7 +650,7 @@ const MethodPage: NextPage = () => {
                 href="/tools/decision-delay-exposure"
                 style={{
                   ...mono,
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.32)",
@@ -665,7 +665,7 @@ const MethodPage: NextPage = () => {
                 href="/about"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -678,7 +678,7 @@ const MethodPage: NextPage = () => {
                 href="/about/founder"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -691,7 +691,7 @@ const MethodPage: NextPage = () => {
                 href="/trust"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -704,7 +704,7 @@ const MethodPage: NextPage = () => {
                 href="/provenance/demo"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -717,7 +717,7 @@ const MethodPage: NextPage = () => {
                 href="/briefs"
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",

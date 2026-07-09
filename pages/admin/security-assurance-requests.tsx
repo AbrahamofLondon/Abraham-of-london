@@ -271,7 +271,7 @@ function RequestCard({ request, onStatusChange }: { request: RequestRow; onStatu
             <span
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: STATUS_COLOR[request.status] ?? "rgba(255,255,255,0.40)",
@@ -317,7 +317,7 @@ function RequestCard({ request, onStatusChange }: { request: RequestRow; onStatu
           <p style={{ ...serif, fontSize: "0.92rem", color: "rgba(255,255,255,0.75)", marginTop: "0.25rem" }}>
             {material?.title ?? request.requestedMaterial}
           </p>
-          <div style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.35)", marginTop: "0.15rem" }}>
+          <div style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)", marginTop: "0.15rem" }}>
             {request.email}
             {request.organisation && ` · ${request.organisation}`}
             {request.role && ` · ${request.role}`}
@@ -398,7 +398,7 @@ function RequestCard({ request, onStatusChange }: { request: RequestRow; onStatu
               disabled={saving}
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: saved ? "rgba(110,231,183,0.80)" : `${GOLD}CC`,
@@ -447,7 +447,7 @@ const SecurityAssuranceRequestsPage: NextPage<Props> = ({
       <div className="space-y-6">
         {/* Header */}
         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
             Security assurance · Request queue
           </span>
           <p style={{ ...serif, fontSize: "0.88rem", color: "rgba(255,255,255,0.35)", marginTop: "0.25rem" }}>
@@ -471,7 +471,7 @@ const SecurityAssuranceRequestsPage: NextPage<Props> = ({
 
         {/* Pending */}
         <div>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.6rem" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.6rem" }}>
             Pending review ({pending.length})
           </p>
           {pending.length === 0 ? (
@@ -488,7 +488,7 @@ const SecurityAssuranceRequestsPage: NextPage<Props> = ({
         {/* Resolved */}
         {resolved.length > 0 && (
           <div>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.6rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.6rem" }}>
               Resolved ({resolved.length})
             </p>
             <div className="space-y-3">

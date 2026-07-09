@@ -161,7 +161,7 @@ export default function RetainerCycleMemoryPanel(input: {
               key={finding.id}
               style={{ borderLeft: "2px solid rgba(201,169,110,0.28)", paddingLeft: "16px" }}
             >
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.62)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.62)" }}>
                 {finding.statusLabel} · {finding.severity}
               </p>
               <p className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.56)" }}>

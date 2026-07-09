@@ -40,7 +40,7 @@ export function PastContractInterrupt({ onAcknowledge, onProceed }: PastContract
       }}>
         <CheckCircle style={{ color: "#34d399", width: "20px", height: "20px", flexShrink: 0 }} />
         <div>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: "#34d399", marginBottom: "0.3rem" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: "#34d399", marginBottom: "0.3rem" }}>
             PREVIOUS CONTRACT COMPLETED
           </p>
           <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", marginBottom: "0.5rem" }}>
@@ -71,7 +71,7 @@ export function PastContractInterrupt({ onAcknowledge, onProceed }: PastContract
         <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
           <AlertTriangle style={{ color: "#fca5a5", width: "24px", height: "24px", flexShrink: 0 }} />
           <div>
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: "#fca5a5", marginBottom: "0.5rem" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: "#fca5a5", marginBottom: "0.5rem" }}>
               PATTERN CONTRACT — BREACHED
             </p>
             <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.8)", marginBottom: "0.5rem" }}>
@@ -99,7 +99,7 @@ export function PastContractInterrupt({ onAcknowledge, onProceed }: PastContract
                   padding: "8px 16px",
                   color: "#fca5a5",
                   fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.2em",
                   cursor: "pointer",
                 }}
@@ -115,7 +115,7 @@ export function PastContractInterrupt({ onAcknowledge, onProceed }: PastContract
                   padding: "8px 16px",
                   color: GOLD,
                   fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.2em",
                   cursor: "pointer",
                 }}
@@ -145,7 +145,7 @@ export function PastContractInterrupt({ onAcknowledge, onProceed }: PastContract
       }}>
         <Clock style={{ color: isOverdue ? "#fca5a5" : GOLD, width: "20px", height: "20px", flexShrink: 0 }} />
         <div>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.2em", color: isOverdue ? "#fca5a5" : GOLD, marginBottom: "0.3rem" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.2em", color: isOverdue ? "#fca5a5" : GOLD, marginBottom: "0.3rem" }}>
             ACTIVE CONTRACT — {isOverdue ? "OVERDUE" : `${daysRemaining} DAYS REMAINING`}
           </p>
           <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", marginBottom: "0.3rem" }}>

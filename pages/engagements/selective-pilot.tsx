@@ -28,7 +28,7 @@ const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia,
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "0.75rem" }}>{title}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "0.75rem" }}>{title}</p>
       {children}
     </section>
   );
@@ -58,7 +58,7 @@ const SelectivePilotPage: NextPage = () => {
 
           {/* ── 1. HEADER ── */}
           <header style={{ border: `1px solid ${GOLD}24`, background: `${GOLD}04`, padding: "1.5rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Selective pilot terms
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(1.8rem,4vw,2.6rem)", color: "rgba(255,255,255,0.92)", fontStyle: "italic" }}>
@@ -145,19 +145,19 @@ const SelectivePilotPage: NextPage = () => {
           <Section title="What happens after submission">
             <div className="space-y-4">
               <div style={{ borderLeft: `2px solid ${EMERALD}40`, paddingLeft: "12px" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${EMERALD}99` }}>Accepted for review</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${EMERALD}99` }}>Accepted for review</p>
                 <p className="text-sm leading-7 text-white/50 mt-1">If your submission meets the eligibility criteria, it enters the governed review pipeline. You will receive a finding, a required move, and a checkpoint.</p>
               </div>
               <div style={{ borderLeft: `2px solid ${GOLD}40`, paddingLeft: "12px" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}99` }}>Redirected to a better entry point</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}99` }}>Redirected to a better entry point</p>
                 <p className="text-sm leading-7 text-white/50 mt-1">If your decision is better served by a specific instrument (Fast Diagnostic, Decision Exposure, Purpose Alignment), you will be redirected rather than processed through the pilot.</p>
               </div>
               <div style={{ borderLeft: `2px solid "#FC8181"40`, paddingLeft: "12px" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#FC8181" }}>Declined — evidence insufficient</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#FC8181" }}>Declined — evidence insufficient</p>
                 <p className="text-sm leading-7 text-white/50 mt-1">If the submission lacks sufficient context, authority, or consequence, it will be declined with an explanation of what would be required to qualify.</p>
               </div>
               <div style={{ borderLeft: `2px solid ${AMBER}40`, paddingLeft: "12px" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${AMBER}99` }}>Escalated — consequence justifies it</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${AMBER}99` }}>Escalated — consequence justifies it</p>
                 <p className="text-sm leading-7 text-white/50 mt-1">If the evidence reveals institutional consequence, the case may be escalated directly to Executive Reporting or Strategy Room without requiring a separate purchase.</p>
               </div>
             </div>
@@ -192,7 +192,7 @@ const SelectivePilotPage: NextPage = () => {
 
           {/* ── CTA ── */}
           <section style={{ border: `1px solid ${GOLD}30`, background: `${GOLD}06`, padding: "1.5rem", textAlign: "center" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Ready to submit
             </p>
             <p className="mt-3 max-w-2xl mx-auto text-sm leading-7 text-white/55">
@@ -221,7 +221,7 @@ const SelectivePilotPage: NextPage = () => {
                   padding: "14px 24px",
                   border: "1px solid rgba(255,255,255,0.15)",
                   color: "rgba(255,255,255,0.50)",
-                  ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase",
+                  ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                   textDecoration: "none",
                 }}
               >

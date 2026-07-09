@@ -134,7 +134,7 @@ export default function WhoIWorkWith({ className = "" }: WhoIWorkWithProps): Rea
             <CheckCircle2 style={{ width: "14px", height: "14px", color: `${GOLD}AA`, flexShrink: 0 }} />
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.45)",
             }}>
               The Alliance
@@ -167,7 +167,7 @@ export default function WhoIWorkWith({ className = "" }: WhoIWorkWithProps): Rea
                   <div>
                     <div style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
                       color: `${GOLD}AA`,
                       marginBottom: "0.45rem",
                     }}>
@@ -204,7 +204,7 @@ export default function WhoIWorkWith({ className = "" }: WhoIWorkWithProps): Rea
             <XCircle style={{ width: "14px", height: "14px", color: "rgba(255,255,255,0.22)", flexShrink: 0 }} />
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
             }}>
               The Divergence

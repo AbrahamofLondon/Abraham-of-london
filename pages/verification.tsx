@@ -49,7 +49,7 @@ const VerificationPage: NextPage = () => {
             <span
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${GOLD}70`,
@@ -78,7 +78,7 @@ const VerificationPage: NextPage = () => {
 
           <div className="mt-9 space-y-6">
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Legal Presence
               </span>
 
@@ -89,7 +89,7 @@ const VerificationPage: NextPage = () => {
             </section>
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Infrastructure Boundary
               </span>
 
@@ -102,7 +102,7 @@ const VerificationPage: NextPage = () => {
             </section>
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Founder
               </span>
 
@@ -132,7 +132,7 @@ const VerificationPage: NextPage = () => {
             </section>
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Founder Assurance Credentials
               </span>
 
@@ -156,7 +156,7 @@ const VerificationPage: NextPage = () => {
             </section>
 
             <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}65` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}65` }}>
                 Operating Reality
               </span>
 
@@ -168,7 +168,7 @@ const VerificationPage: NextPage = () => {
             </section>
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Evidence Standard
               </span>
 
@@ -209,7 +209,7 @@ const VerificationPage: NextPage = () => {
             </section>
 
             <section style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "1.25rem" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>
                 Intellectual Grounding
               </span>
 
@@ -237,7 +237,7 @@ const VerificationPage: NextPage = () => {
                   href={step.href}
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.10em",
                     textTransform: "uppercase",
                     padding: "5px 10px",

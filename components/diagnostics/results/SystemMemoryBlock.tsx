@@ -77,7 +77,7 @@ export default function SystemMemoryBlock({ currentStage, thread: threadProp }: 
       <div
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.32em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.28)",
@@ -92,7 +92,7 @@ export default function SystemMemoryBlock({ currentStage, thread: threadProp }: 
         <div
           style={{
             ...mono,
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             color:
               thread.escalationLevel === "intervention_required"

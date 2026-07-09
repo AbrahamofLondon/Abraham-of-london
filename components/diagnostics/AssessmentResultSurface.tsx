@@ -52,7 +52,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "8px",
+        fontSize: "11px",
         letterSpacing: "0.20em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.28)",
@@ -87,7 +87,7 @@ function PosturePill({ posture }: { posture: AssessmentResult["evidencePosture"]
     <span
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.18em",
         textTransform: "uppercase",
         border: `1px solid ${GOLD}30`,
@@ -179,7 +179,7 @@ export default function AssessmentResultSurface({
           <span
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.20em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.25)",
@@ -208,7 +208,7 @@ export default function AssessmentResultSurface({
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             color: "rgba(255,255,255,0.25)",
             textAlign: "right",
@@ -229,7 +229,7 @@ export default function AssessmentResultSurface({
           <p
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,
@@ -349,7 +349,7 @@ export default function AssessmentResultSurface({
               <span
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: `${GOLD}80`,

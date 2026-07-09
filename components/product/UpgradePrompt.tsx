@@ -148,7 +148,7 @@ function InlineVariant({
           <p
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: `${GOLD}99`,
@@ -223,7 +223,7 @@ function FullVariant({
         <span
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}99`,
@@ -284,7 +284,7 @@ function FullVariant({
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.12em",
             color: "rgba(255,255,255,0.22)",
             lineHeight: 1.6,

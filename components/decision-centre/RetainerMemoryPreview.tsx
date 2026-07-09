@@ -211,7 +211,7 @@ export default function RetainerMemoryPreview({
                 <p style={{ ...microLabelStyle, color: "rgba(201,169,110,0.72)" }}>
                   {finding.statusLabel} · {finding.severity}
                 </p>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.30)", marginTop: "3px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.30)", marginTop: "3px" }}>
                   {finding.sourceLabel} · {finding.signalKey}
                 </p>
                 <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.54)", marginTop: "4px" }}>

@@ -18,7 +18,7 @@ export default function ResultTrajectory({
     <div style={{ padding: "1rem 0" }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: "rgba(252,165,165,0.45)",

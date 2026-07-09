@@ -34,7 +34,7 @@ export default function StructuralFailureCanvasRunner({ onComplete }: { onComple
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Structural Health</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Structural Health</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "3rem", fontWeight: 300, lineHeight: 1, color: healthColor }}>{result.healthScore}</div>
         </div>
         <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: healthColor }}>{result.failurePattern.replace(/_/g, " ")}</span>
@@ -43,7 +43,7 @@ export default function StructuralFailureCanvasRunner({ onComplete }: { onComple
       {DIMENSIONS.map((dim) => (
         <div key={dim.key}>
           <div className="flex items-baseline justify-between mb-1">
-            <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{dim.label}</label>
+            <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{dim.label}</label>
             <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{scores[dim.key]}/10</span>
           </div>
           <input type="range" min={0} max={10} step={1} value={scores[dim.key]} onChange={(e) => handleChange(dim.key, parseInt(e.target.value))} className="w-full" style={{ accentColor: GOLD }} />

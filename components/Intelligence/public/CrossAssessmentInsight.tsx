@@ -35,15 +35,15 @@ export default function CrossAssessmentInsight({
         padding: "16px 18px",
       }}
     >
-      <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
         {title}
       </div>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
         Scope: {intelligence.meta.scope.scopeLabel} · Source: {intelligence.meta.sourceLabel} · As of {formatDate(intelligence.asOf)}
       </p>
       {intelligence.conflicts.slice(0, 2).map((conflict) => (
         <div key={conflict.label} style={{ marginTop: "10px" }}>
-          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
             {conflict.surfacesInvolved.join(" · ")}
           </div>
           <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>

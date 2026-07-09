@@ -106,7 +106,7 @@ export default function CounselStatusPanel({
       {/* Reasons */}
       {reasons.length > 0 && !compact && (
         <div style={{ marginBottom: "10px" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", display: "block", marginBottom: "4px" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", display: "block", marginBottom: "4px" }}>
             Triggers
           </span>
           {reasons.map((reason, i) => (
@@ -120,7 +120,7 @@ export default function CounselStatusPanel({
       {/* Repair actions */}
       {repairActions.length > 0 && !compact && (status === "REQUIRED" || status === "PAUSED_PENDING_REVIEW") && (
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", display: "block", marginBottom: "4px" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", display: "block", marginBottom: "4px" }}>
             Required before execution resumes
           </span>
           {repairActions.map((action, i) => (

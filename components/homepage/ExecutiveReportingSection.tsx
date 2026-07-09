@@ -30,7 +30,7 @@ export default function ExecutiveReportingSection() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.20em",
                     textTransform: "uppercase",
                     color: `${HOMEPAGE_GOLD}90`,

@@ -61,7 +61,7 @@ const EnterprisePipelinePage: NextPage<PageProps> = ({ entries, stats }) => {
     <AdminLayout>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-7xl">
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
             Enterprise pipeline
           </p>
           <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(2rem, 4vw, 3rem)", color: "rgba(255,255,255,0.90)" }}>
@@ -94,7 +94,7 @@ const EnterprisePipelinePage: NextPage<PageProps> = ({ entries, stats }) => {
                 onClick={() => setFilter(f)}
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   padding: "6px 12px",
@@ -116,9 +116,9 @@ const EnterprisePipelinePage: NextPage<PageProps> = ({ entries, stats }) => {
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span style={{ ...mono, fontSize: "8px", color: routeColor(entry.route), fontWeight: 700 }}>{entry.route}</span>
-                      <span style={{ ...mono, fontSize: "7px", color: temperatureColor(entry.predictedTemperature) }}>{entry.predictedTemperature ?? "—"}</span>
-                      <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)" }}>
+                      <span style={{ ...mono, fontSize: "11px", color: routeColor(entry.route), fontWeight: 700 }}>{entry.route}</span>
+                      <span style={{ ...mono, fontSize: "11px", color: temperatureColor(entry.predictedTemperature) }}>{entry.predictedTemperature ?? "—"}</span>
+                      <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>
                         Score: {entry.score}
                       </span>
                     </div>

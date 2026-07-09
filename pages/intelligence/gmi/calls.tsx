@@ -40,7 +40,7 @@ const GmiCallsPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header className="border border-white/10 bg-white/[0.018] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Public call ledger
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.2rem)", lineHeight: 1.04 }}>
@@ -59,7 +59,7 @@ const GmiCallsPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (
               <article key={call.callId} className="border border-white/10 bg-white/[0.015] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{call.callId}</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{call.callId}</p>
                     <p className="mt-1 text-xs text-white/34">{call.editionId} · {call.category.replace(/_/g, " ")} · Review {call.reviewWindow}</p>
                   </div>
                   <span className="border border-white/10 bg-black/25 px-3 py-1 text-[9px] uppercase tracking-[0.16em] text-white/50" style={mono}>
@@ -74,7 +74,7 @@ const GmiCallsPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (
                 </div>
                 {call.evidenceSources.length > 0 ? (
                   <div className="mt-3">
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence sources</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence sources</p>
                     <ul className="mt-2 space-y-1">
                       {call.evidenceSources.map((source) => (
                         <li key={source} className="text-xs leading-5 text-white/42">{source}</li>

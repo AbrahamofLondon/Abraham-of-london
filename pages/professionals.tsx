@@ -269,7 +269,7 @@ export default function ProfessionalsLandingPage() {
             <div className="border border-white/[0.075] bg-white/[0.018] p-5 lg:p-6">
               <div className="flex items-center gap-3">
                 <BriefcaseBusiness className="h-4 w-4" style={{ color: `${GOLD}AA` }} />
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                   Controlled access for
                 </p>
               </div>
@@ -278,7 +278,7 @@ export default function ProfessionalsLandingPage() {
                   <span
                     key={audience}
                     className="border border-white/[0.08] bg-black/20 px-3 py-2"
-                    style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.58)" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.58)" }}
                   >
                     {audience}
                   </span>
@@ -303,7 +303,7 @@ export default function ProfessionalsLandingPage() {
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
               {WHAT_IT_IS.map((item, index) => (
                 <article key={item.title} className="flex min-h-[260px] flex-col border border-white/[0.075] bg-white/[0.016] p-5">
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <h3
@@ -380,10 +380,10 @@ export default function ProfessionalsLandingPage() {
               {USE_CASES.map((item, index) => (
                 <article key={item.title} className="flex min-h-[240px] flex-col border border-white/[0.075] bg-white/[0.016] p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="border border-white/[0.08] px-2.5 py-1 text-white/[0.38]" style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                    <span className="border border-white/[0.08] px-2.5 py-1 text-white/[0.38]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
                       {item.label}
                     </span>
                   </div>
@@ -434,7 +434,7 @@ export default function ProfessionalsLandingPage() {
             <div>
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4" style={{ color: `${GOLD}AA` }} />
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}90` }}>
                   Request access
                 </p>
               </div>
@@ -482,9 +482,9 @@ export default function ProfessionalsLandingPage() {
               <div className="grid gap-2 sm:grid-cols-2 lg:max-w-[620px]">
                 {/* Monthly */}
                 <div className="border p-5" style={{ borderColor: `${GOLD}28`, background: `${GOLD}06` }}>
-                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>Monthly</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>Monthly</p>
                   <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.88)", marginBottom: "4px" }}>{professional.displayPrice}</p>
-                  <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.28)", marginBottom: "16px" }}>controlled access · governed onboarding</p>
+                  <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.28)", marginBottom: "16px" }}>controlled access · governed onboarding</p>
                   {proPurchasable ? (
                     <CheckoutButton productCode="professional" originPath="/professionals">
                       Start Professional
@@ -492,14 +492,14 @@ export default function ProfessionalsLandingPage() {
                   ) : (
                     // internal_only: no public checkout and no automatic public request-access
                     <span
-                      style={{ ...mono, display: "inline-block", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}
+                      style={{ ...mono, display: "inline-block", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}
                     >
                       Not currently available
                     </span>
                   )}
                   <Link
                     href="/decision-centre"
-                    style={{ ...mono, display: "block", marginTop: "10px", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", textDecoration: "none" }}
+                    style={{ ...mono, display: "block", marginTop: "10px", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", textDecoration: "none" }}
                   >
                     Already subscribed → Decision Centre
                   </Link>
@@ -508,16 +508,16 @@ export default function ProfessionalsLandingPage() {
                 {/* Annual */}
                 {annualProduct && (
                   <div className="border border-white/[0.08] bg-white/[0.015] p-5">
-                    <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "8px" }}>Annual</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", marginBottom: "8px" }}>Annual</p>
                     <p style={{ ...mono, fontSize: "22px", color: "rgba(255,255,255,0.72)", marginBottom: "4px" }}>{annualProduct.displayPrice}</p>
-                    <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>controlled access · governed onboarding</p>
+                    <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>controlled access · governed onboarding</p>
                     {annualPurchasable ? (
                       <CheckoutButton productCode="professional_annual" originPath="/professionals">
                         Start Annual Professional
                       </CheckoutButton>
                     ) : (
                       <span
-                        style={{ ...mono, display: "inline-block", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}
+                        style={{ ...mono, display: "inline-block", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}
                       >
                         Not currently available
                       </span>

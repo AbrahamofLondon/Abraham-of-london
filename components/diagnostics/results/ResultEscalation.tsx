@@ -21,7 +21,7 @@ export default function ResultEscalation({ qualifies, nextStep, href, reason }: 
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: qualifies ? `${GOLD}70` : "rgba(255,255,255,0.22)",
@@ -48,7 +48,7 @@ export default function ResultEscalation({ qualifies, nextStep, href, reason }: 
           backgroundColor: qualifies ? `${GOLD}08` : "transparent",
           color: qualifies ? GOLD : "rgba(255,255,255,0.35)",
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
         }}

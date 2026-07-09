@@ -50,7 +50,7 @@ function FieldLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor:
     <label htmlFor={htmlFor}
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: `${GOLD}80`,
@@ -103,7 +103,7 @@ function ExposureBand({
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -132,7 +132,7 @@ function ReadingField({ label, value }: { label: string; value: string }) {
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.30)",
@@ -161,7 +161,7 @@ function ReadingParagraph({ label, children }: { label: string; children: React.
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.30)",
@@ -355,7 +355,7 @@ export default function DecisionDelayExposurePage() {
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.30em",
               textTransform: "uppercase",
               color: `${GOLD}70`,
@@ -428,7 +428,7 @@ export default function DecisionDelayExposurePage() {
                   <p
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       color: "rgba(255,255,255,0.22)",
                       marginTop: "6px",
@@ -473,7 +473,7 @@ export default function DecisionDelayExposurePage() {
                   <p
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       color: "rgba(255,255,255,0.22)",
                       marginTop: "6px",
@@ -570,7 +570,7 @@ export default function DecisionDelayExposurePage() {
                   <p
                     style={{
                       ...mono,
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.20em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.28)",
@@ -605,7 +605,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: `${GOLD}70`,
@@ -660,7 +660,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.26em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.28)",
@@ -711,7 +711,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.28)",
@@ -734,7 +734,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.30)",
@@ -785,7 +785,7 @@ export default function DecisionDelayExposurePage() {
                       color: `${GOLD}DD`,
                       textDecoration: "none",
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
                       minHeight: "44px",
@@ -802,7 +802,7 @@ export default function DecisionDelayExposurePage() {
                       color: "rgba(255,255,255,0.42)",
                       textDecoration: "none",
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
                     }}
@@ -813,7 +813,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     color: "rgba(255,255,255,0.28)",
                     marginTop: "10px",
@@ -834,7 +834,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     color: "rgba(255,255,255,0.22)",
                     lineHeight: 1.75,
@@ -855,7 +855,7 @@ export default function DecisionDelayExposurePage() {
                   padding: "10px 20px",
                   cursor: "pointer",
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   minHeight: "44px",
@@ -876,7 +876,7 @@ export default function DecisionDelayExposurePage() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.28)",
@@ -946,19 +946,19 @@ export default function DecisionDelayExposurePage() {
 
           {/* ─── Related surfaces ──────────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
               Next steps
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/diagnostics/fast"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
               >
                 Run the Fast Diagnostic
               </Link>
               <Link
                 href="/provenance/sample-export"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.4rem 0.8rem", textDecoration: "none" }}
               >
                 View sample provenance summary
               </Link>
@@ -1019,7 +1019,7 @@ function SendToSelfCalculator({
   if (status === "sent") {
     return (
       <section style={{ marginTop: "16px", borderLeft: `2px solid rgba(110,231,183,0.25)`, backgroundColor: "rgba(110,231,183,0.02)", padding: "12px 16px" }}>
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
           Sent. Check your inbox.
         </p>
         <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>
@@ -1031,7 +1031,7 @@ function SendToSelfCalculator({
 
   return (
     <section style={{ marginTop: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "14px 18px" }}>
-      <label htmlFor="decision-delay-send-to-self-email" style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px", display: "block" }}>
+      <label htmlFor="decision-delay-send-to-self-email" style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "8px", display: "block" }}>
         Send to self
       </label>
       <p style={{ ...serif, fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.40)", marginBottom: "10px" }}>
@@ -1067,7 +1067,7 @@ function SendToSelfCalculator({
             backgroundColor: `${GOLD}10`,
             color: `${GOLD}CC`,
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             cursor: status === "sending" ? "wait" : "pointer",
@@ -1084,7 +1084,7 @@ function SendToSelfCalculator({
           Could not send. Try again later.
         </p>
       )}
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "8px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "8px" }}>
         No marketing. No account created. One email only.
       </p>
     </section>

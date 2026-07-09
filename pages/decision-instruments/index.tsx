@@ -136,7 +136,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
         {children}
       </span>
     </div>
@@ -201,7 +201,7 @@ export default function DecisionInstrumentsPage() {
                     border: `1px solid ${AMBER}42`,
                     color: AMBER,
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                   }}
@@ -213,19 +213,19 @@ export default function DecisionInstrumentsPage() {
                 </a>
                 <Link
                   href="/pressure"
-                  style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
                 >
                   Start with Pressure Signal
                 </Link>
                 <Link
                   href="/boardroom-brief"
-                  style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
                 >
                   Boardroom Brief
                 </Link>
                 <Link
                   href="/decision-instruments/history"
-                  style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
                 >
                   Your instrument history
                 </Link>
@@ -244,13 +244,13 @@ export default function DecisionInstrumentsPage() {
                 { pre: "Not generic content", post: "Condition-specific output" },
               ].map((item) => (
                 <div key={item.pre} style={{ backgroundColor: VOID, padding: "0.85rem 1rem" }}>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     {item.pre}
                   </span>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     {" \u2192 "}
                   </span>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
                     {item.post}
                   </span>
                 </div>
@@ -262,7 +262,7 @@ export default function DecisionInstrumentsPage() {
         {/* ── P3: SIGNAL PRIMER — What this system names and recognises ─── */}
         <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)" }}>
           <div className="mx-auto max-w-6xl px-6 lg:px-12 py-8">
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "1rem" }}>
               What this system names and acts on
             </p>
             <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)", maxWidth: "62ch", marginBottom: "1rem" }}>
@@ -300,13 +300,13 @@ export default function DecisionInstrumentsPage() {
                 },
               ].map(({ severity, color, bg, condition, tag }) => (
                 <div key={severity} style={{ border: `1px solid ${color}20`, backgroundColor: bg, padding: "0.85rem 1rem" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color, marginBottom: "0.4rem" }}>{severity}</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color, marginBottom: "0.4rem" }}>{severity}</p>
                   <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.35, color: "rgba(255,255,255,0.78)", marginBottom: "0.4rem" }}>{condition}</p>
                   <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.40)" }}>{tag}</p>
                 </div>
               ))}
             </div>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem" }}>
               Each instrument returns a named condition, consequence path, and next admissible move — not a score alone.
             </p>
           </div>
@@ -371,7 +371,7 @@ export default function DecisionInstrumentsPage() {
                           border: `1px solid ${AMBER}30`,
                           color: AMBER,
                           ...mono,
-                          fontSize: "7.5px",
+                          fontSize: "11px",
                           letterSpacing: "0.20em",
                           textTransform: "uppercase",
                         }}
@@ -398,7 +398,7 @@ export default function DecisionInstrumentsPage() {
               <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "1.25rem" }}>
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <div>
-                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                    <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>
                       Operator Decision Pack
                     </div>
                     <div style={{ ...serif, marginTop: "0.35rem", fontSize: "0.92rem", color: "rgba(255,255,255,0.45)" }}>
@@ -424,7 +424,7 @@ export default function DecisionInstrumentsPage() {
                       backgroundColor: `${GOLD}08`,
                       color: GOLD,
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.22em",
                       textTransform: "uppercase",
                     }}
@@ -454,7 +454,7 @@ export default function DecisionInstrumentsPage() {
                 ].map((step) => (
                   <div key={step.n} className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: VOID }}>
                     <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.06em", color: `${GOLD}45` }}>{step.n}</span>
-                    <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)" }}>
                       {step.label}
                     </span>
                   </div>
@@ -482,7 +482,7 @@ export default function DecisionInstrumentsPage() {
                   backgroundColor: `${GOLD}06`,
                   color: GOLD,
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                 }}
@@ -500,7 +500,7 @@ export default function DecisionInstrumentsPage() {
         <section>
           <div className="mx-auto max-w-6xl px-6 lg:px-12">
             <div className="py-8">
-              <Link href="/" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              <Link href="/" style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                 Back to home
               </Link>
             </div>

@@ -123,7 +123,7 @@ export default function CheckoutButton({
       {error && (
         <p style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           color: "rgba(252,165,165,0.60)",
           marginBottom: "6px",
         }}>

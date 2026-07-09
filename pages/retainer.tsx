@@ -85,7 +85,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
     <Layout title="Decision Authority Retainer" description="Retained decision enforcement" fullWidth>
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-6xl">
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.3em", textTransform: "uppercase", color: `${GOLD}88` }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase", color: `${GOLD}88` }}>
             Decision Authority as a Service
           </p>
           <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.15rem)", color: "rgba(255,255,255,0.92)" }}>
@@ -94,7 +94,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
 
           {blockedReason ? (
             <section className="mt-8" style={{ border: "1px solid rgba(252,165,165,0.24)", padding: "1rem", background: "rgba(252,165,165,0.035)" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.72)" }}>
                 Access blocked
               </p>
               <p className="mt-3" style={{ ...serif, color: "rgba(255,255,255,0.68)", lineHeight: 1.65 }}>
@@ -120,7 +120,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                     ["Status", contract.status],
                   ].map(([label, value]) => (
                     <div key={label}>
-                      <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                         {label}
                       </div>
                       <div className="mt-1" style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.70)" }}>
@@ -135,7 +135,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                     <article key={decision.id} className="p-4">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="max-w-3xl">
-                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}90` }}>
                             {decision.priorityLevel} priority · {decision.status} · {decision.sourceStage}
                           </p>
                           <h2 className="mt-2" style={{ ...serif, fontSize: "1.25rem", lineHeight: 1.35, color: "rgba(255,255,255,0.86)" }}>
@@ -146,15 +146,15 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
 
                       <div className="mt-4 grid gap-3 md:grid-cols-3">
                         <div>
-                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Constraint</div>
+                          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Constraint</div>
                           <p className="mt-1" style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.58)" }}>{decision.constraintText || "Not recorded"}</p>
                         </div>
                         <div>
-                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Cost of delay</div>
+                          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Cost of delay</div>
                           <p className="mt-1" style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.58)" }}>{decision.costOfDelayText || "Not recorded"}</p>
                         </div>
                         <div>
-                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Latest outcome delta</div>
+                          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>Latest outcome delta</div>
                           <p className="mt-1" style={{ ...mono, fontSize: "12px", color: "rgba(255,255,255,0.58)" }}>
                             {decision.enforcementCycles[0]?.outcomeDelta == null
                               ? "No cycle recorded"
@@ -164,7 +164,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                           </p>
                         </div>
                         <div>
-                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>AI exposure</div>
+                          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>AI exposure</div>
                           <p className="mt-1" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.58)" }}>
                             {decision.ai.aiExposureLevel} · {decision.ai.classification} · velocity {decision.ai.decisionVelocityScore}/100
                           </p>
@@ -174,7 +174,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                       {(decision.dependencies.upstreamBlockers.length > 0 || decision.dependencies.downstreamConsequences.length > 0 || decision.stakeholders.length > 0) && (
                         <div className="mt-5 grid gap-3 md:grid-cols-2">
                           <div style={{ border: "1px solid rgba(252,165,165,0.12)", padding: "0.75rem" }}>
-                            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.56)" }}>Dependency pressure</div>
+                            <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.56)" }}>Dependency pressure</div>
                             {decision.dependencies.upstreamBlockers.length === 0 && decision.dependencies.downstreamConsequences.length === 0 ? (
                               <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.34)", marginTop: "0.35rem" }}>No dependency chain recorded.</p>
                             ) : (
@@ -186,7 +186,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                             )}
                           </div>
                           <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "0.75rem" }}>
-                            <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Stakeholder friction</div>
+                            <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Stakeholder friction</div>
                             {decision.stakeholders.length === 0 ? (
                               <p style={{ ...serif, fontSize: "0.82rem", color: "rgba(255,255,255,0.34)", marginTop: "0.35rem" }}>No stakeholder map recorded.</p>
                             ) : (
@@ -202,7 +202,7 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
 
                       {decision.playbookApplications.length > 0 && (
                         <div className="mt-5" style={{ border: "1px solid rgba(201,169,110,0.18)", padding: "0.75rem" }}>
-                          <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>Applied enforcement playbooks</div>
+                          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}90` }}>Applied enforcement playbooks</div>
                           {decision.playbookApplications.map((application) => (
                             <p key={application.id} style={{ ...serif, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.48)", marginTop: "0.35rem" }}>
                               {application.playbookName} · {application.triggerPattern}
@@ -212,14 +212,14 @@ const RetainerPage: NextPage<PageProps> = ({ contracts, blockedReason }) => {
                       )}
 
                       <div className="mt-5 space-y-2">
-                        <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                        <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                           Enforcement cycles
                         </div>
                         {decision.enforcementCycles.length === 0 ? (
                           <p style={{ ...serif, color: "rgba(255,255,255,0.38)" }}>No enforcement cycle has been recorded for this retained decision.</p>
                         ) : decision.enforcementCycles.map((cycle) => (
                           <div key={cycle.id} style={{ border: "1px solid rgba(255,255,255,0.07)", padding: "0.75rem" }}>
-                            <div style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.34)" }}>
+                            <div style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.34)" }}>
                               {new Date(cycle.cycleDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                             </div>
                             <div className="mt-2 grid gap-3 md:grid-cols-2">

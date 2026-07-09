@@ -177,7 +177,7 @@ const PremiumDownloadsAdminPage: NextPage = () => {
           {/* Eyebrow — softGold (was amber-500/70) */}
           <p style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
             color: `${GOLD}BB`,
           }}>
             Premium Security

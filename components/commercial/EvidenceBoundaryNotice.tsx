@@ -75,7 +75,7 @@ export default function EvidenceBoundaryNotice({
       <p
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}CC`,

@@ -41,7 +41,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.28)",
@@ -69,7 +69,7 @@ function BriefList({ items }: { items: string[] }) {
           <span
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               color: `${GOLD}66`,
               flexShrink: 0,
               paddingTop: "4px",
@@ -115,7 +115,7 @@ function StatusPill({ status }: { status: ReturnBriefV1["status"] }) {
     <span
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.14em",
         textTransform: "uppercase",
         color: config.color,
@@ -171,7 +171,7 @@ const ReturnBriefPage: NextPage = () => {
       <Layout title="Return Brief | Abraham of London">
         <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
           <div className="mx-auto max-w-2xl">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               Loading Return Brief…
             </p>
           </div>
@@ -187,7 +187,7 @@ const ReturnBriefPage: NextPage = () => {
           <div className="mx-auto max-w-2xl space-y-4">
             <Link
               href="/decision-centre"
-              style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
+              style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
             >
               ← Decision Centre
             </Link>
@@ -226,7 +226,7 @@ const ReturnBriefPage: NextPage = () => {
               alignItems: "center",
               gap: "0.4rem",
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -250,7 +250,7 @@ const ReturnBriefPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -276,7 +276,7 @@ const ReturnBriefPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.10em",
                   color: "rgba(255,255,255,0.35)",
                   marginTop: "0.5rem",
@@ -298,7 +298,7 @@ const ReturnBriefPage: NextPage = () => {
             >
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" style={{ color: "rgba(255,200,80,0.6)" }} />
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,200,80,0.7)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,200,80,0.7)" }}>
                   Insufficient evidence
                 </p>
               </div>
@@ -315,7 +315,7 @@ const ReturnBriefPage: NextPage = () => {
                   href="/diagnostics/fast"
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: `${GOLD}CC`,
@@ -402,7 +402,7 @@ const ReturnBriefPage: NextPage = () => {
                   href="/counsel"
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.16em",
                     textTransform: "uppercase",
                     color: "rgba(255,120,120,0.75)",
@@ -427,7 +427,7 @@ const ReturnBriefPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.28)",
@@ -445,7 +445,7 @@ const ReturnBriefPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: `${GOLD}99`,

@@ -119,7 +119,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
       <div className="mx-auto max-w-6xl space-y-12">
 
         {/* Breadcrumb */}
-        <nav style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+        <nav style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" }}>
           <Link href="/briefs" style={{ color: "rgba(255,255,255,0.38)" }} className="transition hover:text-white/60">
             Intelligence Briefs
           </Link>
@@ -129,7 +129,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
 
         {/* Hero */}
         <header className="border border-white/10 bg-white/[0.02] p-8">
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT }}>
             Series II — Intelligence Briefs
           </p>
           <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "rgba(255,255,255,0.92)" }}>
@@ -152,7 +152,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
               className="inline-flex items-center gap-2 border border-white/15 px-4 py-2 text-white/60 transition hover:border-white/30 hover:text-white"
               style={mono}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Institutional Alpha Series</span>
+              <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Institutional Alpha Series</span>
               <span aria-hidden="true">→</span>
             </Link>
             <Link
@@ -160,7 +160,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
               className="inline-flex items-center gap-2 border border-white/15 px-4 py-2 text-white/60 transition hover:border-white/30 hover:text-white"
               style={mono}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Foundational Canon</span>
+              <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Foundational Canon</span>
               <span aria-hidden="true">→</span>
             </Link>
           </div>
@@ -183,7 +183,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
                       Sovereign Intelligence
                     </span>
                     {brief.briefId ? (
-                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                         {brief.briefId}
                       </span>
                     ) : null}
@@ -200,7 +200,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
                     className="mt-4 inline-flex items-center gap-2 transition hover:opacity-80"
                     style={{ color: `${GOLD}DD` }}
                   >
-                    <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Read brief</span>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Read brief</span>
                     <span aria-hidden="true">→</span>
                   </Link>
                 </article>
@@ -219,7 +219,7 @@ const SovereignIntelligencePage: NextPage<InferGetStaticPropsType<typeof getStat
             { label: "Move to diagnosis", href: "/pressure", sub: "Application" },
           ].map(({ label, href, sub }) => (
             <Link key={href} href={href} className="border border-white/10 p-5 transition hover:bg-white/[0.02]">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>
                 {sub}
               </p>
               <p className="font-serif text-lg text-white">{label} →</p>

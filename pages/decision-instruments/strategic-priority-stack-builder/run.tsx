@@ -72,7 +72,7 @@ const PriorityStackRun: NextPage = () => {
           </p>
           <p style={{ fontSize: "0.92rem", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>{result.recommendation}</p>
           {result.deferredRiskWarning && <p style={{ fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(252,165,165,0.50)" }}>{result.deferredRiskWarning}</p>}
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", color: "rgba(255,255,255,0.15)" }}>Result saved. Governed. v{result.version}</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", color: "rgba(255,255,255,0.15)" }}>Result saved. Governed. v{result.version}</p>
         </div>
       )}
     </InstrumentShell>

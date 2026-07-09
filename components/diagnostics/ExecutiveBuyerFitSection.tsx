@@ -198,7 +198,7 @@ export default function ExecutiveBuyerFitSection() {
                     border: "1px solid rgba(255,255,255,0.08)",
                     backgroundColor: "rgba(255,255,255,0.03)",
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.45)",

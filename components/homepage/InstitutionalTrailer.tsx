@@ -38,7 +38,7 @@ export default function InstitutionalTrailer() {
         {/* Eyebrow — factual, not self-narrating */}
         <div style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px", letterSpacing: "0.46em", textTransform: "uppercase",
+          fontSize: "11px", letterSpacing: "0.46em", textTransform: "uppercase",
           color: `${GOLD}80`,
           marginBottom: "2rem",
         }}>
@@ -94,7 +94,7 @@ export default function InstitutionalTrailer() {
         {/* Signature line */}
         <div style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase",
+          fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
           color: "rgba(255,255,255,0.22)",
           margin: "3rem 0",
         }}>

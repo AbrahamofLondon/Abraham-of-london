@@ -4,7 +4,7 @@ const GOLD = "#C9A96E";
 
 const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "8px",
+  fontSize: "11px",
   letterSpacing: "0.16em",
   textTransform: "uppercase",
 };
@@ -71,7 +71,7 @@ export default function DecisionTimeline({ items }: { items: DecisionTimelineIte
                   {item.status.replace(/_/g, " ")}
                 </span>
               </div>
-              <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
+              <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.24)", marginTop: "8px" }}>
                 {formatDate(item.date)}{item.evidencePosture ? ` · ${item.evidencePosture.replace(/_/g, " ").toLowerCase()}` : ""}
               </p>
             </div>

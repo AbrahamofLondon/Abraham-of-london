@@ -23,7 +23,7 @@ export default function ResultCost({ calc }: { calc: CostCalculation | null }) {
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.32em",
         textTransform: "uppercase",
         color: `${GOLD}70`,
@@ -47,7 +47,7 @@ export default function ResultCost({ calc }: { calc: CostCalculation | null }) {
           </div>
         ))}
       </div>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.35)", marginBottom: "0.35rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.35)", marginBottom: "0.35rem" }}>
         {calc.formula}
       </div>
       <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "14px", letterSpacing: "0.04em", color: GOLD }}>

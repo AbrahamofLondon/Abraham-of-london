@@ -264,7 +264,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}55` }} />
       <span style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7.5px", letterSpacing: "0.40em", textTransform: "uppercase",
+        fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
         color: `${GOLD}BB`,
       }}>
         {children}
@@ -291,7 +291,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   marginBottom: "0.50rem",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "7px",
+  fontSize: "11px",
   letterSpacing: "0.34em",
   textTransform: "uppercase",
   color: "rgba(255,255,255,0.26)",
@@ -358,7 +358,7 @@ function FieldTextarea({ label, value, onChange, placeholder, rows = 5, helpText
         <div style={{
           marginTop: "0.35rem",
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px", letterSpacing: "0.22em",
+          fontSize: "11px", letterSpacing: "0.22em",
           color: value.length >= charTarget ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.18)",
           transition: "color 300ms ease",
         }}>
@@ -383,10 +383,10 @@ function ConsequenceRail({ label, value, onChange, note }: {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
           {label}
         </span>
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.50)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.50)" }}>
           {value}/10
         </span>
       </div>
@@ -424,7 +424,7 @@ function LiveScoreSidebar({ reading }: { reading: ConstitutionalReading }) {
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "3rem", lineHeight: 1, color: ROUTE_CONFIG[reading.route].text, marginBottom: "0.4rem" }}>
             {reading.score}
           </div>
-          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: ROUTE_CONFIG[reading.route].text, opacity: 0.85 }}>
+          <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: ROUTE_CONFIG[reading.route].text, opacity: 0.85 }}>
             {reading.route.replace("_", " ")}
           </div>
         </div>
@@ -439,7 +439,7 @@ function LiveScoreSidebar({ reading }: { reading: ConstitutionalReading }) {
               <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                 {d.label}
               </span>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: bColor }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: bColor }}>
                 {d.value}
               </span>
             </div>
@@ -486,7 +486,7 @@ function ConstitutionalResult({
             <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(3rem, 6vw, 5rem)", lineHeight: 1, letterSpacing: "-0.04em", color: rc.text }}>
               {reading.score}
             </div>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.36em", textTransform: "uppercase", color: rc.text, opacity: 0.85, marginTop: "0.4rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase", color: rc.text, opacity: 0.85, marginTop: "0.4rem" }}>
               {rc.label}
             </div>
           </div>
@@ -523,7 +523,7 @@ function ConstitutionalResult({
 
           {reading.urgentSignal && (
             <div style={{ marginTop: "1.25rem", padding: "1rem 1.25rem", border: `1px solid ${rc.border}`, backgroundColor: rc.bg }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: rc.text, marginBottom: "0.55rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase", color: rc.text, marginBottom: "0.55rem" }}>
                 Urgent signal
               </div>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.65)", fontStyle: "italic" }}>
@@ -556,7 +556,7 @@ function ConstitutionalResult({
               backgroundColor: rc.bg,
               color: rc.text,
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
             }}
           >
             {rc.ctaLabel} <ArrowRight style={{ width: "11px", height: "11px" }} />
@@ -568,7 +568,7 @@ function ConstitutionalResult({
               backgroundColor: "transparent",
               color: "rgba(255,255,255,0.28)",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
               cursor: "pointer",
             }}
             onMouseEnter={e => { const el = e.currentTarget; el.style.color = "rgba(255,255,255,0.50)"; }}
@@ -770,10 +770,10 @@ export default function StrategyRoomForm() {
       {stage < 4 && (
         <div style={{ marginBottom: "2rem" }}>
           <div className="flex items-center justify-between mb-2">
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
               Strategy Room intake
             </span>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)" }}>
               Stage {stage + 1} / 4
             </span>
           </div>
@@ -812,7 +812,7 @@ export default function StrategyRoomForm() {
                     className="inline-flex items-center gap-2 transition-all duration-200"
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                       color: stage === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.38)",
                       cursor: stage === 0 ? "not-allowed" : "pointer", background: "none", border: "none",
                     }}

@@ -276,7 +276,7 @@ export default function EnterpriseDecisionScanPage() {
                 </div>
                 {/* Authority context */}
                 <div style={{ marginTop: '12px', padding: '12px', backgroundColor: `${GOLD}08`, border: `1px solid ${GOLD}22`, borderRadius: '4px' }}>
-                  <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '6px' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '6px' }}>
                     What This Means
                   </p>
                   <p style={{ fontSize: '13px', lineHeight: '1.5', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
@@ -295,7 +295,7 @@ export default function EnterpriseDecisionScanPage() {
               <div className="space-y-6">
                 {/* Question 1 */}
                 <div>
-                  <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                  <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                     What decision is currently unresolved?
                   </label>
                   <textarea
@@ -311,7 +311,7 @@ export default function EnterpriseDecisionScanPage() {
                 {/* Questions 2-3 side by side */}
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                    <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                       Who owns it?
                     </label>
                     <input
@@ -324,7 +324,7 @@ export default function EnterpriseDecisionScanPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                    <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                       Who can block it?
                     </label>
                     <input
@@ -340,7 +340,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Question 4 */}
                 <div>
-                  <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                  <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                     What happens if it is delayed by 30 days?
                   </label>
                   <textarea
@@ -356,7 +356,7 @@ export default function EnterpriseDecisionScanPage() {
                 {/* Questions 5-6 side by side */}
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                    <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                       What evidence exists?
                     </label>
                     <textarea
@@ -369,7 +369,7 @@ export default function EnterpriseDecisionScanPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                    <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                       What evidence is missing?
                     </label>
                     <textarea
@@ -386,7 +386,7 @@ export default function EnterpriseDecisionScanPage() {
                 {/* Questions 7-8 side by side */}
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                    <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                       Where is the disagreement?
                     </label>
                     <textarea
@@ -399,7 +399,7 @@ export default function EnterpriseDecisionScanPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                    <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                       What has already been tried?
                     </label>
                     <textarea
@@ -415,7 +415,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Question 9 — Org level */}
                 <div>
-                  <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                  <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                     Is this individual, team, board, or enterprise-level?
                   </label>
                   <div className="mt-2 flex flex-wrap gap-3">
@@ -442,7 +442,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Question 10 — Exposure type */}
                 <div>
-                  <label style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                  <label style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                     What type of exposure is at stake?
                   </label>
                   <div className="mt-2 flex flex-wrap gap-3">
@@ -511,7 +511,7 @@ export default function EnterpriseDecisionScanPage() {
               <div className="mt-8 border p-6 md:p-8" style={{ borderColor: `${costColor}30`, backgroundColor: 'rgba(255,255,255,0.02)' }}>
                 {/* Cost band */}
                 <div className="flex items-center justify-between">
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
                     Cost-of-delay band
                   </p>
                   <div className="flex items-center gap-2">
@@ -524,7 +524,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Top decision risk */}
                 <div className="mt-6">
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
                     Top unresolved decision risk
                   </p>
                   <p className="mt-1 text-[15px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.75)' }}>
@@ -534,7 +534,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Primary contradiction */}
                 <div className="mt-5">
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${AMBER}AA` }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${AMBER}AA` }}>
                     Primary organisational contradiction
                   </p>
                   <p className="mt-1 text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.60)' }}>
@@ -544,7 +544,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Recommended path */}
                 <div className="mt-6 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
                     Recommended entry path
                   </p>
                   <p className="mt-1 text-[15px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.70) ...serif' }}>
@@ -554,7 +554,7 @@ export default function EnterpriseDecisionScanPage() {
 
                 {/* Board-facing summary */}
                 <div className="mt-6 border-t pt-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                  <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+                  <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
                     Board-facing summary
                   </p>
                   <div className="mt-2 border-l-2 p-4" style={{ borderColor: `${GOLD}30`, backgroundColor: 'rgba(255,255,255,0.02)' }}>

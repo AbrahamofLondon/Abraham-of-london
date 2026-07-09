@@ -139,7 +139,7 @@ export default function DirectiveCTA(props: DirectiveCTAProps) {
       {secondary.length > 0 && (
         <div className="flex flex-wrap gap-3 mt-3">
           {secondary.map((link) => (
-            <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <Link key={link.href} href={link.href} style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               {link.label} →
             </Link>
           ))}

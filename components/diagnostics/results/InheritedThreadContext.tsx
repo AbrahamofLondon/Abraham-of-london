@@ -25,7 +25,7 @@ export default function InheritedThreadContext({
       <div
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.34em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -73,7 +73,7 @@ export default function InheritedThreadContext({
                 key={line}
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   lineHeight: 1.55,
                   color: "rgba(255,255,255,0.50)",
                   letterSpacing: "0.08em",
@@ -107,7 +107,7 @@ export default function InheritedThreadContext({
                 key={i}
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   lineHeight: 1.55,
                   color: "rgba(255,255,255,0.48)",
                   letterSpacing: "0.08em",
@@ -161,7 +161,7 @@ function Metric({ label, value }: { label: string; value: string }) {
       <div
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.12em",
           color: "rgba(255,255,255,0.68)",
         }}

@@ -51,7 +51,7 @@ const GOLD = "#C9A96E";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.025)", padding: "1rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88` }}>{title}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88` }}>{title}</p>
       <div style={{ marginTop: "0.85rem" }}>{children}</div>
     </section>
   );
@@ -77,7 +77,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)" }}>
         <div className="mx-auto max-w-5xl space-y-6">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", padding: "1.25rem", background: "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>
               Governed Oversight Brief
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3rem)", color: "rgba(255,255,255,0.92)" }}>
@@ -133,7 +133,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div className="space-y-4">
                     {cycleComparison.deltas.filter((delta) => delta.direction !== "UNCHANGED").map((delta) => (
                       <div key={`${delta.dimension}-${delta.explanation}`}>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
                           {delta.dimension} · {delta.direction}
                         </p>
                         <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{delta.explanation}</p>
@@ -243,7 +243,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                       <p style={{ ...metadataLabelStyle, color: "rgba(255,255,255,0.30)" }}>What needs review before next cycle</p>
                       <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{(brief as any).cycleProjection.whatNeedsReviewBeforeNextCycle}</p>
                     </div>
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
                       {(brief as any).cycleProjection.sourceLabel}
                     </p>
                   </div>
@@ -258,7 +258,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                       <li key={i} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{pattern}</li>
                     ))}
                   </ul>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.20)", marginTop: "0.5rem" }}>
                     {(brief as any).stakeholderFriction.sourceLabel}
                   </p>
                 </Section>
@@ -307,7 +307,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div className="space-y-4">
                     {((brief as any).oversightSignals as Array<{ id: string; type: string; severity: string; title: string; explanation: string; recommendedAction: string; sourceLabel?: string; evidencePosture?: string }>).map((signal) => (
                       <div key={signal.id} style={{ borderLeft: `2px solid ${signal.severity === "HIGH" || signal.severity === "CRITICAL" ? "rgba(252,165,165,0.40)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "16px" }}>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: signal.severity === "HIGH" || signal.severity === "CRITICAL" ? "rgba(252,165,165,0.50)" : "rgba(201,169,110,0.50)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: signal.severity === "HIGH" || signal.severity === "CRITICAL" ? "rgba(252,165,165,0.50)" : "rgba(201,169,110,0.50)" }}>
                           {signal.type.replace(/_/g, " ")} &middot; {signal.severity}
                         </p>
                         <p className="mt-1" style={{ ...serif, fontWeight: 500, color: "rgba(255,255,255,0.85)", lineHeight: 1.4 }}>
@@ -320,7 +320,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                           Recommended: {signal.recommendedAction}
                         </p>
                         {signal.sourceLabel && (
-                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
+                          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "6px" }}>
                             {signal.sourceLabel}{signal.evidencePosture ? ` · Evidence posture: ${signal.evidencePosture}` : ""}
                           </p>
                         )}
@@ -341,12 +341,12 @@ const OversightBriefPage: NextPage<PageProps> = ({
                       {item}
                     </p>
                   ))}
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "12px" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "12px" }}>
                     Source: Retainer Intake &middot; Evidence posture: client-reported
                     {(brief as any).retainerIntake.capturedAt && ` · Captured: ${new Date((brief as any).retainerIntake.capturedAt).toLocaleDateString("en-GB")}`}
                   </p>
                   {(brief as any).retainerIntake.suppressionReasons?.length > 0 && (
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.35)", marginTop: "6px" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.35)", marginTop: "6px" }}>
                       Some intake fields were suppressed for safety.
                     </p>
                   )}
@@ -359,7 +359,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div className="mt-4 space-y-4">
                     {brief.organisationDivergence.items.map((item) => (
                       <div key={`${item.type}-${item.affectedDomain}`}>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                           {item.type} · {item.confidence}
                         </p>
                         <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item.sponsorSafeSummary}</p>
@@ -395,19 +395,19 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div className="space-y-4">
                     {brief.structuredActions.map((action) => (
                       <div key={action.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "0.75rem" }}>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                           {action.actionType} · {action.severity}
                         </p>
                         <p className="mt-2" style={{ ...serif, color: "rgba(255,255,255,0.78)", lineHeight: 1.65 }}>{action.action}</p>
                         {action.evidenceBasis ? (
-                          <p className="mt-2" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.62)" }}>
+                          <p className="mt-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.62)" }}>
                             {action.continuitySourceLabel
                               ? `Continuity source · ${action.continuityConfidenceLabel || "CAPTURED"}`
                               : "Continuity source"}
                           </p>
                         ) : null}
                         {action.continuitySourceLabel ? (
-                          <p className="mt-1" style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.34)" }}>
+                          <p className="mt-1" style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.34)" }}>
                             {action.continuitySourceLabel}
                           </p>
                         ) : null}
@@ -435,7 +435,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div className="mt-4 space-y-4">
                     {brief.valueProtected.missedSignals.map((signal) => (
                       <div key={signal.label}>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                           {signal.label} · {signal.severity}
                         </p>
                         <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{signal.whyItMatters}</p>
@@ -451,7 +451,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <div className="mt-4 space-y-4">
                     {brief.cancellationLoss.lostVisibility.map((item) => (
                       <div key={`${item.area}-${item.description}`}>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                           {item.area} · {item.severity}
                         </p>
                         <p className="mt-1" style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item.description}</p>
@@ -466,7 +466,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                   <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.indispensability.headline}</p>
                   <div className="mt-4 grid gap-6 md:grid-cols-2">
                     <div>
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preserved visibility</p>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Preserved visibility</p>
                       <ul className="mt-2 space-y-2">
                         {brief.indispensability.preservedVisibility.map((item) => (
                           <li key={item} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item}</li>
@@ -474,7 +474,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                       </ul>
                     </div>
                     <div>
-                      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Would be lost</p>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Would be lost</p>
                       <ul className="mt-2 space-y-2">
                         {brief.indispensability.wouldLose.map((item) => (
                           <li key={item} style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{item}</li>
@@ -489,7 +489,7 @@ const OversightBriefPage: NextPage<PageProps> = ({
                 <Section title="Signal Pattern Recurrence">
                   <p style={{ ...serif, color: "rgba(255,255,255,0.72)", lineHeight: 1.6 }}>{brief.sovereignSignalRecurrence.recurrenceSummary}</p>
                   {brief.sovereignSignalRecurrence.hasCriticalRecurrence && (
-                    <p className="mt-3" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>
+                    <p className="mt-3" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>
                       Critical pattern has recurred across oversight cycles
                     </p>
                   )}
@@ -497,25 +497,25 @@ const OversightBriefPage: NextPage<PageProps> = ({
                     {brief.sovereignSignalRecurrence.currentCycleSignals.map((signal) => (
                       <div key={signal.signalId} style={{ borderLeft: "1px solid rgba(255,255,255,0.10)", paddingLeft: "14px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: signal.severityBand === "CRITICAL" ? "rgba(252,165,165,0.80)" : signal.severityBand === "ALERT" ? "#C9A96E" : "rgba(255,255,255,0.50)" }}>
+                          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: signal.severityBand === "CRITICAL" ? "rgba(252,165,165,0.80)" : signal.severityBand === "ALERT" ? "#C9A96E" : "rgba(255,255,255,0.50)" }}>
                             {signal.severityBand}
                           </p>
                           {signal.isRecurrence && (
-                            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", border: "1px solid rgba(255,255,255,0.10)", padding: "1px 5px" }}>
+                            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", border: "1px solid rgba(255,255,255,0.10)", padding: "1px 5px" }}>
                               Recurring · {signal.cycleCount} cycle{signal.cycleCount !== 1 ? "s" : ""}
                             </p>
                           )}
-                          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: signal.movement === "INCREASING" ? "rgba(252,165,165,0.55)" : signal.movement === "REDUCING" ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.28)" }}>
+                          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: signal.movement === "INCREASING" ? "rgba(252,165,165,0.55)" : signal.movement === "REDUCING" ? "rgba(110,231,183,0.55)" : "rgba(255,255,255,0.28)" }}>
                             {signal.movement.replace(/_/g, " ").toLowerCase()}
                           </p>
                         </div>
                         <p className="mt-1" style={{ ...serif, fontSize: "0.92rem", lineHeight: 1.5, color: "rgba(255,255,255,0.74)" }}>{signal.signalName}</p>
                         <p className="mt-1" style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)" }}>{signal.retainedImplication}</p>
-                        <p className="mt-1" style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.28)" }}>Next cycle: {signal.nextReviewObligation}</p>
+                        <p className="mt-1" style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.28)" }}>Next cycle: {signal.nextReviewObligation}</p>
                       </div>
                     ))}
                   </div>
-                  <p className="mt-4" style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                  <p className="mt-4" style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                     Evidence posture: {brief.sovereignSignalRecurrence.evidencePosture.replace(/_/g, " ").toLowerCase()} · {brief.sovereignSignalRecurrence.totalDistinctSignals} distinct signal pattern{brief.sovereignSignalRecurrence.totalDistinctSignals !== 1 ? "s" : ""} observed
                   </p>
                 </Section>

@@ -109,10 +109,10 @@ function DetailPanel({ model, config }: { model: ProvenanceBadgeModel; config: S
   const row = (label: string, value: string | null, dim = false) =>
     value ? (
       <div style={{ display: "flex", gap: "10px", alignItems: "baseline" }}>
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", minWidth: "100px" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", minWidth: "100px" }}>
           {label}
         </span>
-        <span style={{ ...mono, fontSize: "8px", color: dim ? "rgba(255,255,255,0.40)" : "rgba(255,255,255,0.68)" }}>
+        <span style={{ ...mono, fontSize: "11px", color: dim ? "rgba(255,255,255,0.40)" : "rgba(255,255,255,0.68)" }}>
           {value}
         </span>
       </div>
@@ -176,10 +176,10 @@ function DetailPanel({ model, config }: { model: ProvenanceBadgeModel; config: S
                 key={band.level}
                 style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "2px 7px" }}
               >
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: `${GOLD}88` }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: `${GOLD}88` }}>
                   {band.label}
                 </span>
-                <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.35)", marginLeft: "5px" }}>
+                <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)", marginLeft: "5px" }}>
                   {band.count}
                 </span>
               </div>
@@ -230,7 +230,7 @@ export default function ProvenanceBadge({
         title={`Provenance: ${model.label}`}
       >
         {config.icon}
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: config.color }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: config.color }}>
           {model.label}
         </span>
         <ShieldAlert

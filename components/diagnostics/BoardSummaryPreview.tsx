@@ -45,7 +45,7 @@ function SeverityBadge({ band }: { band: string }) {
     <span
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.28em",
         textTransform: "uppercase",
         color,
@@ -77,7 +77,7 @@ function ProvenanceHashRow({ hash }: { hash: string }) {
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.25)",
@@ -102,7 +102,7 @@ function ProvenanceHashRow({ hash }: { hash: string }) {
           onClick={handleCopy}
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: copied ? "#6EE7B7" : "rgba(255,255,255,0.28)",
@@ -154,7 +154,7 @@ export function BoardSummaryDemonstrationPanel() {
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.30em",
           textTransform: "uppercase",
           color: `${GOLD}88`,
@@ -170,7 +170,7 @@ export function BoardSummaryDemonstrationPanel() {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}70`,
@@ -210,7 +210,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
         <span
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.32em",
             textTransform: "uppercase",
             color: `${GOLD}88`,
@@ -238,7 +238,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           color: `${GOLD}77`,
@@ -260,7 +260,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: `${GOLD}70`,
@@ -279,7 +279,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.30)",
@@ -298,7 +298,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: `${GOLD}70`,
@@ -334,7 +334,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: `${GOLD}90`,
@@ -354,7 +354,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.30)",
@@ -398,7 +398,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.25)",
@@ -418,7 +418,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.25)",
@@ -439,7 +439,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
                   paddingBottom: "4px",
                 }}
               >
-                <span style={{ ...mono, fontSize: "7px", color: `${GOLD}80` }}>✓</span>
+                <span style={{ ...mono, fontSize: "11px", color: `${GOLD}80` }}>✓</span>
                 <span style={{ ...serif, fontSize: "0.85rem", color: "rgba(255,255,255,0.60)" }}>
                   {surface}
                 </span>
@@ -461,7 +461,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             color: "rgba(255,255,255,0.20)",
           }}
@@ -471,7 +471,7 @@ export default function BoardSummaryPreview({ data }: { data: BoardSummaryData |
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             color: "rgba(255,255,255,0.18)",
             marginTop: "0.3rem",

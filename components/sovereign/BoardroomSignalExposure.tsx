@@ -145,13 +145,13 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
     >
       {/* Header */}
       <div style={{ marginBottom: "14px" }}>
-        <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color, display: "block", marginBottom: "6px" }}>
+        <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color, display: "block", marginBottom: "6px" }}>
           Observed institutional signal · {signal.severityBand.toLowerCase()}
         </span>
         <p style={{ ...SERIF, fontSize: "18px", fontWeight: 500, lineHeight: 1.25, color: "#F5F5F5", margin: 0 }}>
           {signal.signalName}
         </p>
-        <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "4px" }}>
+        <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "4px" }}>
           Evidence: {signal.evidencePosture.replace(/_/g, " ").toLowerCase()} · {signal.confidenceBand.toLowerCase()} · {signal.prevalenceLabel}
         </p>
       </div>
@@ -160,7 +160,7 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
       {board && (
         <div style={{ display: "grid", gap: "14px" }}>
           <div>
-            <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "5px" }}>
+            <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "5px" }}>
               Board relevance
             </p>
             <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.58)" }}>
@@ -169,7 +169,7 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
           </div>
 
           <div style={{ background: "rgba(255,255,255,0.025)", padding: "12px 14px", borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
-            <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "5px" }}>
+            <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "5px" }}>
               Objection anticipated
             </p>
             <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)", fontStyle: "italic" }}>
@@ -179,7 +179,7 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.40)", marginBottom: "5px" }}>
+              <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.40)", marginBottom: "5px" }}>
                 Evidence that strengthens
               </p>
               <p style={{ fontSize: "12px", lineHeight: 1.65, color: "rgba(255,255,255,0.38)" }}>
@@ -187,7 +187,7 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
               </p>
             </div>
             <div>
-              <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)", marginBottom: "5px" }}>
+              <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)", marginBottom: "5px" }}>
                 Evidence that weakens
               </p>
               <p style={{ fontSize: "12px", lineHeight: 1.65, color: "rgba(255,255,255,0.38)" }}>
@@ -197,7 +197,7 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
           </div>
 
           <div style={{ background: "rgba(201,169,110,0.03)", border: "1px solid rgba(201,169,110,0.12)", padding: "12px 14px" }}>
-            <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "5px" }}>
+            <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "5px" }}>
               Recommended board posture
             </p>
             <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
@@ -220,7 +220,7 @@ function SignalExposureCard({ signal }: { signal: SovereignSignalPublicSummary }
       )}
 
       {/* Sample caveat */}
-      <p style={{ ...MONO, fontSize: "8px", lineHeight: 1.55, color: "rgba(255,255,255,0.15)", marginTop: "14px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+      <p style={{ ...MONO, fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.15)", marginTop: "14px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
         {signal.sampleCaveat}
       </p>
     </div>
@@ -258,7 +258,7 @@ export default function BoardroomSignalExposure({ assessment }: Props) {
           </p>
         </div>
         {assessment.withheldCount > 0 && (
-          <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
             {assessment.withheldCount} pattern{assessment.withheldCount > 1 ? "s" : ""} withheld
           </span>
         )}
@@ -273,7 +273,7 @@ export default function BoardroomSignalExposure({ assessment }: Props) {
 
       {/* Withheld notice */}
       {assessment.withheldCount > 0 && (
-        <p style={{ ...MONO, fontSize: "8px", lineHeight: 1.55, color: "rgba(255,255,255,0.18)", marginTop: "14px" }}>
+        <p style={{ ...MONO, fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.18)", marginTop: "14px" }}>
           {assessment.withheldCount} additional pattern{assessment.withheldCount > 1 ? "s were" : " was"} detected but withheld due to evidence posture, role limits, or surface discipline. Withheld patterns are available in the retained oversight record.
         </p>
       )}

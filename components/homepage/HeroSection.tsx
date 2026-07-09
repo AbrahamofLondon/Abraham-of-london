@@ -54,7 +54,7 @@ function StatTile({ label, value, hint }: { label: string; value: string; hint?:
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.4rem" }}>
         <span style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase",
+          fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase",
           color: "rgba(255,255,255,0.35)",
         }}>
           {label}

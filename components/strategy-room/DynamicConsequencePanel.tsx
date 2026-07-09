@@ -23,7 +23,7 @@ export default function DynamicConsequencePanel({ currentExposure, previousExpos
 
   return (
     <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "0.85rem 1rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
         Current exposure
       </div>
       <div className="mt-1 flex items-baseline gap-3">
@@ -33,7 +33,7 @@ export default function DynamicConsequencePanel({ currentExposure, previousExpos
         {deltaFormatted && (
           <span style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px",
+            fontSize: "11px",
             color: delta! > 0 ? "rgba(252,165,165,0.65)" : "rgba(110,231,183,0.65)",
           }}>
             {deltaFormatted}

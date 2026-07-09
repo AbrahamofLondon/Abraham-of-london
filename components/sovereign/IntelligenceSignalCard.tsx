@@ -76,7 +76,7 @@ export default function IntelligenceSignalCard({
             <span
               style={{
                 ...MONO,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: palette.label,
@@ -100,7 +100,7 @@ export default function IntelligenceSignalCard({
             <span
               style={{
                 ...MONO,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.10em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.18)",
@@ -175,7 +175,7 @@ export default function IntelligenceSignalCard({
               <p
                 style={{
                   ...MONO,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",
@@ -202,7 +202,7 @@ export default function IntelligenceSignalCard({
             <p
               style={{
                 ...MONO,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.25)",
@@ -229,7 +229,7 @@ export default function IntelligenceSignalCard({
               <p
                 style={{
                   ...MONO,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(201,169,110,0.45)",
@@ -248,7 +248,7 @@ export default function IntelligenceSignalCard({
           <p
             style={{
               ...MONO,
-              fontSize: "8px",
+              fontSize: "11px",
               lineHeight: 1.55,
               color: "rgba(255,255,255,0.18)",
               marginTop: "14px",

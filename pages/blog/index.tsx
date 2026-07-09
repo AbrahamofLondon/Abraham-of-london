@@ -157,7 +157,7 @@ function SeriesShelf({ catalogue }: { catalogue: SeriesSummary[] }) {
           />
           <span
             className="font-mono uppercase tracking-[0.38em]"
-            style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+            style={{ fontSize: "11px", color: "var(--ds-accent)" }}
           >
             Applied Essay Series
           </span>
@@ -192,7 +192,7 @@ function SeriesShelf({ catalogue }: { catalogue: SeriesSummary[] }) {
                   <div className="flex items-center gap-3 mb-3">
                     <span
                       className="font-mono uppercase tracking-[0.28em]"
-                      style={{ fontSize: "7px", color: "var(--ds-accent)" }}
+                      style={{ fontSize: "11px", color: "var(--ds-accent)" }}
                     >
                       {series.partCount}-Part Series
                     </span>
@@ -207,7 +207,7 @@ function SeriesShelf({ catalogue }: { catalogue: SeriesSummary[] }) {
                     <span
                       className="font-mono uppercase tracking-[0.24em]"
                       style={{
-                        fontSize: "7px",
+                        fontSize: "11px",
                         color: isComplete ? "var(--ds-accent)" : "var(--ds-text-subtle)",
                       }}
                     >
@@ -240,7 +240,7 @@ function SeriesShelf({ catalogue }: { catalogue: SeriesSummary[] }) {
                   <div className="flex items-center gap-6">
                     <span
                       className="font-mono uppercase tracking-[0.24em] transition-colors duration-200 group-hover:text-[#C9963A] whitespace-nowrap"
-                      style={{ fontSize: "7.5px", color: "var(--ds-text-subtle)" }}
+                      style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
                     >
                       Enter the series →
                     </span>
@@ -249,7 +249,7 @@ function SeriesShelf({ catalogue }: { catalogue: SeriesSummary[] }) {
                         href={entryHref}
                         onClick={(e) => e.stopPropagation()}
                         className="font-mono uppercase tracking-[0.24em] transition-colors duration-200 hover:text-[#C9963A] whitespace-nowrap"
-                        style={{ fontSize: "7px", color: "var(--ds-text-subtle)" }}
+                        style={{ fontSize: "11px", color: "var(--ds-text-subtle)" }}
                       >
                         Begin Part One →
                       </Link>

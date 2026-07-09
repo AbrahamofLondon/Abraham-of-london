@@ -81,10 +81,10 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
       <main style={{ backgroundColor: "rgb(3,3,5)", minHeight: "100vh", color: "white", padding: "80px 24px" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}99` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}99` }}>
               Governed Return Brief
             </p>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "6px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginTop: "6px" }}>
               Case reference {brief.caseRef}
             </p>
             <h1 style={{ ...serif, fontSize: "1.45rem", lineHeight: 1.3, color: "rgba(255,255,255,0.90)", marginTop: "12px" }}>
@@ -96,7 +96,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
           </header>
 
           <section style={{ border: `1px solid ${GOLD}25`, background: `${GOLD}05`, padding: "1rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
               Status
             </p>
             <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: STATUS_COLOR[brief.status], marginTop: "8px" }}>
@@ -112,7 +112,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
           <section style={{ display: "grid", gap: "1rem", marginBottom: "1rem" }}>
             {brief.originalCondition && (
               <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Original condition
                 </p>
                 <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.62)", marginTop: "8px" }}>
@@ -122,7 +122,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
             )}
             {brief.originalCommitment && (
               <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Original commitment
                 </p>
                 <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.62)", marginTop: "8px" }}>
@@ -137,7 +137,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
           <BriefListSection title="What is now required" items={brief.nowRequired} emptyLabel="No next move is available from the current record." emphasis />
 
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
               Escalation status
             </p>
             <p style={{ ...mono, fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, marginTop: "8px" }}>
@@ -146,7 +146,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
           </section>
 
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
               Provenance status
             </p>
             <p style={{ fontSize: "12px", lineHeight: 1.6, color: "rgba(255,255,255,0.42)", marginTop: "8px" }}>
@@ -159,7 +159,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
           </section>
 
           <section style={{ border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)", padding: "1rem", marginBottom: "1.5rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Boundary
             </p>
             <p style={{ fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.28)", marginTop: "8px" }}>
@@ -167,7 +167,7 @@ const ReturnBriefPage: NextPage<Props> = (props) => {
             </p>
           </section>
 
-          <Link href={brief.decisionCentreHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}BB`, border: `1px solid ${GOLD}35`, padding: "10px 18px", textDecoration: "none" }}>
+          <Link href={brief.decisionCentreHref} style={{ display: "inline-flex", alignItems: "center", gap: "6px", ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}BB`, border: `1px solid ${GOLD}35`, padding: "10px 18px", textDecoration: "none" }}>
             Return to Decision Centre
           </Link>
         </div>
@@ -189,7 +189,7 @@ function BriefListSection({
 }) {
   return (
     <section style={{ border: emphasis ? `1px solid ${GOLD}22` : "1px solid rgba(255,255,255,0.08)", background: emphasis ? `${GOLD}04` : "rgba(255,255,255,0.015)", padding: "1rem", marginBottom: "1rem" }}>
-      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: emphasis ? `${GOLD}88` : "rgba(255,255,255,0.28)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: emphasis ? `${GOLD}88` : "rgba(255,255,255,0.28)" }}>
         {title}
       </p>
       <div style={{ display: "grid", gap: "8px", marginTop: "10px" }}>

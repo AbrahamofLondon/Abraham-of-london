@@ -196,7 +196,7 @@ const LADDER_NODES: LadderNode[] = [
 function NodeStatusBadge({ state, price }: { state: NodeState; price: string }) {
   if (state === 'COMPLETED') {
     return (
-      <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: EMERALD }}>
+      <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: EMERALD }}>
         <CheckCircle2 className="h-3 w-3" />
         Completed
       </span>
@@ -204,7 +204,7 @@ function NodeStatusBadge({ state, price }: { state: NodeState; price: string }) 
   }
   if (state === 'EARNED') {
     return (
-      <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}CC` }}>
+      <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}CC` }}>
         <ShieldCheck className="h-3 w-3" />
         Earned
       </span>
@@ -212,7 +212,7 @@ function NodeStatusBadge({ state, price }: { state: NodeState; price: string }) 
   }
   if (state === 'LOCKED') {
     return (
-      <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
+      <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)' }}>
         <Lock className="h-3 w-3" />
         Locked
       </span>
@@ -220,7 +220,7 @@ function NodeStatusBadge({ state, price }: { state: NodeState; price: string }) 
   }
   // OPEN
   return (
-    <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+    <span className="inline-flex items-center gap-1.5" style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
       <Eye className="h-3 w-3" />
       Available
     </span>
@@ -282,7 +282,7 @@ function LadderNodeCard({ node, isLast }: { node: LadderNode; isLast: boolean })
         {/* Details grid */}
         <div className="mt-5 grid gap-3 md:grid-cols-2">
           <div>
-            <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
               For
             </p>
             <p className="mt-1 text-[13px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -290,7 +290,7 @@ function LadderNodeCard({ node, isLast }: { node: LadderNode; isLast: boolean })
             </p>
           </div>
           <div>
-            <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
               Detects
             </p>
             <p className="mt-1 text-[13px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -298,7 +298,7 @@ function LadderNodeCard({ node, isLast }: { node: LadderNode; isLast: boolean })
             </p>
           </div>
           <div>
-            <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
               Produces
             </p>
             <p className="mt-1 text-[13px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -306,7 +306,7 @@ function LadderNodeCard({ node, isLast }: { node: LadderNode; isLast: boolean })
             </p>
           </div>
           <div>
-            <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
               Unlocks
             </p>
             <p className="mt-1 text-[13px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -319,7 +319,7 @@ function LadderNodeCard({ node, isLast }: { node: LadderNode; isLast: boolean })
         {node.state === 'LOCKED' && node.lockReason && (
           <div className="mt-4 border-t pt-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
             <p className="text-[12px] leading-[1.7]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77` }}>
+              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77` }}>
                 Why this is locked:{' '}
               </span>
               {node.lockReason}
@@ -409,7 +409,7 @@ export default function DecisionPathwayPage() {
         {/* Quick entry CTAs */}
         <section className="border-t px-6 py-8" style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.01)' }}>
           <div className="mx-auto max-w-[760px]">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '1rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '1rem' }}>
               Start here
             </p>
             <div className="flex flex-wrap gap-3">
@@ -455,7 +455,7 @@ export default function DecisionPathwayPage() {
         {/* Enterprise entry note */}
         <section className="border-t px-6 py-12" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           <div className="mx-auto max-w-[760px]">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '0.75rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '0.75rem' }}>
               For organisations
             </p>
             <h2
@@ -484,7 +484,7 @@ export default function DecisionPathwayPage() {
         {/* Refusal framing */}
         <section className="border-t px-6 py-12" style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.01)' }}>
           <div className="mx-auto max-w-[760px]">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '0.75rem' }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: `${GOLD}77`, marginBottom: '0.75rem' }}>
               Why surfaces are locked
             </p>
             <p className="text-[14px] leading-[1.8]" style={{ color: 'rgba(255,255,255,0.50)' }}>

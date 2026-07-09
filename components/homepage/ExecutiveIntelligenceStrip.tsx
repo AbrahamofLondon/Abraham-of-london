@@ -87,7 +87,7 @@ export default function ExecutiveIntelligenceStrip({
           className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
             color: `${GOLD}AA`,
           }}
         >
@@ -120,7 +120,7 @@ export default function ExecutiveIntelligenceStrip({
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "auto" }}>
               <span style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase",
                 color: `${GOLD}90`,
               }}>
                 {lead.readTime ?? "5 min"}
@@ -130,7 +130,7 @@ export default function ExecutiveIntelligenceStrip({
                   <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
                   <span style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                    fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                     color: "rgba(255,255,255,0.22)",
                   }}>
                     {toDateLabel(lead.date)}
@@ -173,7 +173,7 @@ export default function ExecutiveIntelligenceStrip({
                 marginTop: "2rem", paddingTop: "1.25rem",
                 borderTop: "1px solid rgba(255,255,255,0.05)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.22)",
               }}
             >
@@ -201,7 +201,7 @@ export default function ExecutiveIntelligenceStrip({
                     {date && (
                       <div style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                         color: "rgba(255,255,255,0.20)", marginBottom: "0.4rem",
                       }}>
                         {date}
@@ -238,7 +238,7 @@ export default function ExecutiveIntelligenceStrip({
           >
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px", letterSpacing: "0.30em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
             }}>
               All dispatches

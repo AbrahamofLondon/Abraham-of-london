@@ -26,7 +26,7 @@ export default function NextStepCTA({
       <div
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.34em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -52,7 +52,7 @@ export default function NextStepCTA({
         className="inline-flex items-center gap-2 transition-opacity hover:opacity-75"
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.24em",
           textTransform: "uppercase",
           color: `${GOLD}BB`,

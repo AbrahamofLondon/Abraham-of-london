@@ -49,7 +49,7 @@ export default function ProvenanceThesisSection() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.20em",
                     textTransform: "uppercase",
                     color: `${HOMEPAGE_GOLD}80`,
@@ -70,7 +70,7 @@ export default function ProvenanceThesisSection() {
           <p
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.25)",
@@ -85,7 +85,7 @@ export default function ProvenanceThesisSection() {
             <span
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: "rgba(110,231,183,0.72)",
@@ -122,7 +122,7 @@ export default function ProvenanceThesisSection() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
                     color: "rgba(255,255,255,0.22)",

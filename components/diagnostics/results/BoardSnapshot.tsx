@@ -32,7 +32,7 @@ export default function BoardSnapshot({ data }: { data: BoardSnapshotData | null
 
   return (
     <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem", marginBottom: "1.25rem" }}>
-      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
         Board snapshot
       </span>
       <div className="mt-3 space-y-2">

@@ -58,7 +58,7 @@ export default function CaseSuccessPage({ searchParams }: SuccessPageProps) {
 
         {caseId && (
           <div className="mt-6 border border-white/[0.08] bg-white/[0.02] p-4">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}70` }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}70` }}>
               Case Reference
             </p>
             <p className="mt-1 text-[14px] text-white/70" style={{ ...mono }}>
@@ -69,7 +69,7 @@ export default function CaseSuccessPage({ searchParams }: SuccessPageProps) {
 
         {tier && (
           <div className="mt-3 border border-white/[0.08] bg-white/[0.02] p-4">
-            <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}70` }}>
+            <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: `${GOLD}70` }}>
               Requested Tier
             </p>
             <p className="mt-1 text-[14px] text-white/70" style={{ ...mono, textTransform: 'uppercase' }}>

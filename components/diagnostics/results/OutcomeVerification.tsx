@@ -64,7 +64,7 @@ export default function OutcomeVerification({ data }: { data: OutcomeData | null
     <div style={{ border: `1px solid ${config.color}25`, backgroundColor: `${config.color}05`, padding: "1.25rem", marginBottom: "1rem" }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
           Outcome verification
         </span>
       </div>
@@ -90,7 +90,7 @@ export default function OutcomeVerification({ data }: { data: OutcomeData | null
             ? contradictionEvidence.map((c, i) => (
                 <div key={i} style={{ marginTop: "0.4rem", paddingTop: i > 0 ? "0.3rem" : 0, borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
                   <div className="flex items-center gap-2">
-                    <span style={{ ...mono, fontSize: "7px", textTransform: "uppercase", color: severityColor(c.severity) }}>
+                    <span style={{ ...mono, fontSize: "11px", textTransform: "uppercase", color: severityColor(c.severity) }}>
                       {c.severity}
                     </span>
                     <span style={{ ...mono, fontSize: "6px", color: "rgba(255,255,255,0.15)" }}>
@@ -166,7 +166,7 @@ export default function OutcomeVerification({ data }: { data: OutcomeData | null
       {/* Strategy Room enforcement linkage */}
       {data.strategyRoomHeld && (
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "0.5rem" }}>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase",
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
             color: data.strategyRoomHeld === "held" ? "rgba(110,231,183,0.50)"
               : data.strategyRoomHeld === "failed" ? "rgba(252,165,165,0.50)"
               : `${GOLD}60`,
@@ -174,7 +174,7 @@ export default function OutcomeVerification({ data }: { data: OutcomeData | null
             Execution {data.strategyRoomHeld === "held" ? "held" : data.strategyRoomHeld === "partially_held" ? "partially held — structural gaps remain" : data.strategyRoomHeld === "failed" ? "failed — intervention did not produce change" : "requires renewal"}
           </span>
           {(data.strategyRoomHeld === "failed" || data.strategyRoomHeld === "needs_renewal") && (
-            <Link href="/strategy-room" className="mt-2 inline-flex items-center gap-2" style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
+            <Link href="/strategy-room" className="mt-2 inline-flex items-center gap-2" style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)" }}>
               Re-enter Strategy Room <ArrowRight style={{ width: 9, height: 9 }} />
             </Link>
           )}

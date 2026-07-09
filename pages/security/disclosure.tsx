@@ -30,7 +30,7 @@ const SecurityDisclosurePage: NextPage = () => {
         <div className="mx-auto max-w-2xl">
           <div className="mb-6 flex items-center gap-2">
             <Shield className="h-4 w-4" style={{ color: `${GOLD}78` }} />
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Security - Disclosure
             </span>
           </div>
@@ -45,7 +45,7 @@ const SecurityDisclosurePage: NextPage = () => {
           </p>
 
           <section className="mt-10 space-y-4">
-            <h2 style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <h2 style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
               How to Report
             </h2>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 1.8 }}>
@@ -68,7 +68,7 @@ const SecurityDisclosurePage: NextPage = () => {
           </section>
 
           <section className="mt-10">
-            <h2 style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <h2 style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Response Commitment
             </h2>
             <div className="mt-4 space-y-3">
@@ -87,7 +87,7 @@ const SecurityDisclosurePage: NextPage = () => {
           </section>
 
           <section className="mt-10">
-            <h2 style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <h2 style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Scope
             </h2>
             <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.50)", lineHeight: 1.8 }}>
@@ -101,7 +101,7 @@ const SecurityDisclosurePage: NextPage = () => {
           </section>
 
           <section className="mt-10">
-            <h2 style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <h2 style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Ground Rules
             </h2>
             <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.42)", lineHeight: 1.75 }}>
@@ -113,7 +113,7 @@ const SecurityDisclosurePage: NextPage = () => {
           </section>
 
           <section className="mt-10">
-            <h2 style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
+            <h2 style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}70` }}>
               Our Commitment to Reporters
             </h2>
             <ul className="mt-3 space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.44)", lineHeight: 1.75 }}>
@@ -144,7 +144,7 @@ const SecurityDisclosurePage: NextPage = () => {
               <Link
                 key={link.href}
                 href={link.href}
-                style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", padding: "5px 10px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.28)" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", padding: "5px 10px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.28)" }}
               >
                 {link.label}
               </Link>

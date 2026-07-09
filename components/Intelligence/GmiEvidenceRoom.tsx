@@ -89,7 +89,7 @@ function BuyerPreviewRoom({
       <p
         style={{
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}BB`,
@@ -130,7 +130,7 @@ function BuyerPreviewRoom({
             <div
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.20em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.28)",
@@ -147,7 +147,7 @@ function BuyerPreviewRoom({
             <div
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 color: "rgba(255,255,255,0.22)",
                 marginTop: "3px",
               }}

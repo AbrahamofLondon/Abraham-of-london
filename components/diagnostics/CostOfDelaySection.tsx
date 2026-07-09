@@ -135,20 +135,20 @@ export default function CostOfDelaySection({
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
           <TrendingUp size={12} style={{ color: tierCfg.color }} />
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)" }}>
             Cost of delay — {context}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           {data.wsjfScore != null && (
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", color: "rgba(255,255,255,0.25)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", color: "rgba(255,255,255,0.25)" }}>
               WSJF {data.wsjfScore.toFixed(1)}
             </span>
           )}
           <span
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase" as const,
               color: tierCfg.color,
@@ -180,7 +180,7 @@ export default function CostOfDelaySection({
           >
             <AlertTriangle size={13} style={{ color: escCfg.color, flexShrink: 0, marginTop: "2px" }} />
             <div>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase" as const, color: escCfg.color, marginBottom: "0.25rem" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase" as const, color: escCfg.color, marginBottom: "0.25rem" }}>
                 {escCfg.label}
               </p>
               <p style={{ fontSize: "0.84rem", lineHeight: 1.6, color: "rgba(255,255,255,0.65)" }}>
@@ -200,7 +200,7 @@ export default function CostOfDelaySection({
         {/* Recommendation */}
         {data.recommendation && (
           <div style={{ borderLeft: `2px solid ${tierCfg.border}`, paddingLeft: "1rem", marginBottom: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.28)", marginBottom: "0.35rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.28)", marginBottom: "0.35rem" }}>
               Recommended action
             </p>
             <p style={{ fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
@@ -221,13 +221,13 @@ export default function CostOfDelaySection({
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.85rem" }}>
               <DollarSign size={11} style={{ color: `${GOLD}70` }} />
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.30)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.30)" }}>
                 Financial exposure estimate
               </p>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem" }}>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: "0.25rem" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: "0.25rem" }}>
                   Total cost of delay
                 </p>
                 <p style={{ ...serif, fontSize: "1.3rem", color: tier === "CRITICAL" ? "rgba(252,165,165,0.85)" : "rgba(255,255,255,0.82)" }}>
@@ -235,7 +235,7 @@ export default function CostOfDelaySection({
                 </p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: "0.25rem" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: "0.25rem" }}>
                   Weekly burn rate
                 </p>
                 <p style={{ ...serif, fontSize: "1.3rem", color: "rgba(255,255,255,0.75)" }}>
@@ -244,7 +244,7 @@ export default function CostOfDelaySection({
               </div>
               {data.weeksDelayed != null && data.weeksDelayed > 0 && (
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: "0.25rem" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.25)", marginBottom: "0.25rem" }}>
                     Delay modelled
                   </p>
                   <p style={{ ...serif, fontSize: "1.3rem", color: "rgba(255,255,255,0.60)" }}>
@@ -253,7 +253,7 @@ export default function CostOfDelaySection({
                 </div>
               )}
             </div>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", marginTop: "0.85rem", lineHeight: 1.6 }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", marginTop: "0.85rem", lineHeight: 1.6 }}>
               Scenario estimate only — not financial advice. Based on declared inputs. Actual figures may vary.
             </p>
           </div>

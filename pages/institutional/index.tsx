@@ -263,7 +263,7 @@ const InstitutionalPage: NextPage = () => {
                           <item.icon style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
                           <span style={{
                             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                            fontSize: "7.5px",
+                            fontSize: "11px",
                             letterSpacing: "0.28em",
                             textTransform: "uppercase",
                             color: "rgba(255,255,255,0.28)",
@@ -282,7 +282,7 @@ const InstitutionalPage: NextPage = () => {
                     <div className="h-px w-12" style={{ background: `linear-gradient(to right, ${GOLD}35, transparent)` }} />
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px",
+                      fontSize: "11px",
                       letterSpacing: "0.32em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.22)",
@@ -317,7 +317,7 @@ const InstitutionalPage: NextPage = () => {
                         <p style={{
                           marginTop: "0.75rem",
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px",
+                          fontSize: "11px",
                           letterSpacing: "0.26em",
                           textTransform: "uppercase",
                           color: "rgba(255,255,255,0.38)",
@@ -550,22 +550,22 @@ const InstitutionalPage: NextPage = () => {
           <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
             <div className="grid gap-4 md:grid-cols-3">
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Proof</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Proof</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                   Observed in anonymised decision cases across governance pressure, decision exposure, and board accountability environments.
                 </p>
-                <Link href="/evidence" className="mt-3 inline-flex items-center gap-1.5" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                <Link href="/evidence" className="mt-3 inline-flex items-center gap-1.5" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                   See evidence <ArrowRight style={{ width: 9, height: 9 }} />
                 </Link>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Delivery</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.85rem" }}>Delivery</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                   Diagnostic evidence, Executive Reporting, and Strategy Room. Board-grade output derived from structured inputs — not open-ended engagement.
                 </p>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Boundary</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.85rem" }}>Boundary</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                   Evidence method: anonymised and modelled. No client naming. No speculative claims. Verified outcomes where stated.
                 </p>
@@ -590,7 +590,7 @@ const InstitutionalPage: NextPage = () => {
               }}>
                 <div style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase",
                   color: `${GOLD}90`,
@@ -620,7 +620,7 @@ const InstitutionalPage: NextPage = () => {
                       backgroundColor: `${GOLD}0D`,
                       color: `${GOLD}BB`,
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.28em",
                       textTransform: "uppercase",
                     }}
@@ -636,7 +636,7 @@ const InstitutionalPage: NextPage = () => {
                       border: "1px solid rgba(255,255,255,0.07)",
                       color: "rgba(255,255,255,0.30)",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.28em",
                       textTransform: "uppercase",
                     }}

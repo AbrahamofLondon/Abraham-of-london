@@ -71,7 +71,7 @@ const SecurityReviewPage: NextPage = () => {
                 backgroundColor: `${GOLD}08`,
                 color: `${GOLD}BB`,
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.25rem 0.55rem",
@@ -123,7 +123,7 @@ const SecurityReviewPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -155,7 +155,7 @@ const SecurityReviewPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -198,7 +198,7 @@ const SecurityReviewPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -251,7 +251,7 @@ const SecurityReviewPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -289,7 +289,7 @@ const SecurityReviewPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -374,7 +374,7 @@ const SecurityReviewPage: NextPage = () => {
                           alignItems: "center",
                           gap: "0.3rem",
                           ...mono,
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           color: "rgba(110,231,183,0.75)",
@@ -397,7 +397,7 @@ const SecurityReviewPage: NextPage = () => {
                           alignItems: "center",
                           gap: "0.3rem",
                           ...mono,
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           color: `${GOLD}CC`,
@@ -420,7 +420,7 @@ const SecurityReviewPage: NextPage = () => {
                           alignItems: "center",
                           gap: "0.3rem",
                           ...mono,
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.14em",
                           textTransform: "uppercase",
                           color: "rgba(252,165,165,0.65)",
@@ -457,7 +457,7 @@ const SecurityReviewPage: NextPage = () => {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: "rgba(255,200,80,0.7)",
@@ -495,7 +495,7 @@ const SecurityReviewPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -531,7 +531,7 @@ const SecurityReviewPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -575,7 +575,7 @@ const SecurityReviewPage: NextPage = () => {
                 backgroundColor: `${GOLD}0A`,
                 color: `${GOLD}CC`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.7rem 1.25rem",
@@ -601,7 +601,7 @@ const SecurityReviewPage: NextPage = () => {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
                 color: `${GOLD}88`,
@@ -657,7 +657,7 @@ const SecurityReviewPage: NextPage = () => {
                 backgroundColor: `${GOLD}0A`,
                 color: `${GOLD}CC`,
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.65rem 1.1rem",
@@ -678,7 +678,7 @@ const SecurityReviewPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",
@@ -696,7 +696,7 @@ const SecurityReviewPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.3)",

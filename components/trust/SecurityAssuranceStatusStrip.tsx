@@ -32,7 +32,7 @@ export default function SecurityAssuranceStatusStrip() {
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: `${GOLD}88`,
@@ -47,7 +47,7 @@ export default function SecurityAssuranceStatusStrip() {
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(110,231,183,0.68)",
@@ -67,7 +67,7 @@ export default function SecurityAssuranceStatusStrip() {
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,

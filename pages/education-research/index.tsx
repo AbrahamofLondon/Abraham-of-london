@@ -245,7 +245,7 @@ const EducationResearchPage: NextPage = () => {
                         <item.icon style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
                         <span style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px",
+                          fontSize: "11px",
                           letterSpacing: "0.28em",
                           textTransform: "uppercase",
                           color: "rgba(255,255,255,0.28)",
@@ -388,12 +388,12 @@ const EducationResearchPage: NextPage = () => {
                 { label: "Editorials", desc: "Long-form analysis and applied thinking. Peer-reviewable. Citable.", href: "/editorials" },
               ].map(item => (
                 <Link key={item.label} href={item.href} className="group block" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90` }}>{item.label}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}90` }}>{item.label}</div>
                   <p className="mt-2" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.38)" }}>{item.desc}</p>
                 </Link>
               ))}
             </div>
-            <p className="mt-6" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <p className="mt-6" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Publication and research boundary: all outputs are governed, citable, and available for academic or institutional review. No proprietary lock-in on foundational thinking.
             </p>
           </div>
@@ -415,7 +415,7 @@ const EducationResearchPage: NextPage = () => {
               }}>
                 <div style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase",
                   color: `${GOLD}90`,
@@ -440,7 +440,7 @@ const EducationResearchPage: NextPage = () => {
                 <div className="flex flex-wrap gap-3">
                   <Link href="/contact?type=education"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
+                    style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
                   >
@@ -448,7 +448,7 @@ const EducationResearchPage: NextPage = () => {
                   </Link>
                   <Link href="/foundations"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
+                    style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.55)"; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.30)"; }}
                   >

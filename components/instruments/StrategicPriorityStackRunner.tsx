@@ -29,12 +29,12 @@ export default function StrategicPriorityStackRunner({ onComplete }: { onComplet
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Priority Stack</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Priority Stack</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, lineHeight: 1, color: "white" }}>{validPriorities.length} priorities</div>
         </div>
         <div className="text-right">
           <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: pressureColor }}>Resource: {result.resourcePressureBand}</span>
-          {result.conflicts.length > 0 && <p style={{ ...mono, fontSize: "7px", color: "rgba(252,165,165,0.50)", marginTop: "4px" }}>{result.conflicts.length} conflict{result.conflicts.length !== 1 ? "s" : ""}</p>}
+          {result.conflicts.length > 0 && <p style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.50)", marginTop: "4px" }}>{result.conflicts.length} conflict{result.conflicts.length !== 1 ? "s" : ""}</p>}
         </div>
       </div>
 
@@ -62,7 +62,7 @@ export default function StrategicPriorityStackRunner({ onComplete }: { onComplet
       ))}
 
       {priorities.length < 6 && (
-        <button onClick={addPriority} style={{ width: "100%", padding: "10px", border: "1px dashed rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.25)", ...mono, fontSize: "8px", cursor: "pointer", backgroundColor: "transparent" }}>+ Add priority</button>
+        <button onClick={addPriority} style={{ width: "100%", padding: "10px", border: "1px dashed rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.25)", ...mono, fontSize: "11px", cursor: "pointer", backgroundColor: "transparent" }}>+ Add priority</button>
       )}
 
       {result.stack.length >= 2 && (
@@ -74,7 +74,7 @@ export default function StrategicPriorityStackRunner({ onComplete }: { onComplet
                 <span style={{ ...mono, fontSize: "14px", color: item.rank === 1 ? `${GOLD}CC` : "rgba(255,255,255,0.30)" }}>{item.rank}</span>
                 <div>
                   <p className="text-sm text-white/65">{item.label}</p>
-                  <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)" }}>Score: {item.compositeScore} · {item.deferralRisk}</p>
+                  <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)" }}>Score: {item.compositeScore} · {item.deferralRisk}</p>
                 </div>
               </div>
             ))}

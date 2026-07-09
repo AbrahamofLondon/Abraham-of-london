@@ -90,7 +90,7 @@ export default function ValueReceipt({
       {posture && (
         <div className="flex items-center gap-1.5" style={{ marginBottom: "0.5rem" }}>
           {posture.icon}
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: posture.color }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: posture.color }}>
             {posture.label}
           </span>
         </div>
@@ -105,7 +105,7 @@ export default function ValueReceipt({
             </span>
           )}
           {estimatedTime && (
-            <span className="flex items-center gap-1" style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.25)" }}>
+            <span className="flex items-center gap-1" style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.25)" }}>
               <Clock style={{ width: 9, height: 9 }} />
               {estimatedTime}
             </span>
@@ -115,7 +115,7 @@ export default function ValueReceipt({
 
       {/* Delivery format */}
       {deliveryFormat && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.30)", marginBottom: "0.5rem" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.30)", marginBottom: "0.5rem" }}>
           {deliveryFormat}
         </p>
       )}
@@ -160,7 +160,7 @@ export default function ValueReceipt({
       {nextAdmissibleMove && (
         <div className="flex items-start gap-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "0.5rem", marginTop: "0.25rem" }}>
           <ArrowRight style={{ width: 10, height: 10, color: GOLD, marginTop: 2, flexShrink: 0 }} />
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: `${GOLD}AA` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: `${GOLD}AA` }}>
             {nextAdmissibleMove}
           </span>
         </div>
@@ -172,7 +172,7 @@ export default function ValueReceipt({
 
   return (
     <div className={className}>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.5rem" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "0.5rem" }}>
         Value receipt
       </p>
       {content}

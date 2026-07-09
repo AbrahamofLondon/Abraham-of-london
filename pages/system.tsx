@@ -135,7 +135,7 @@ export default function SystemPage() {
                 return (
                   <article key={s.n} className="flex min-h-[220px] flex-col border border-white/[0.075] bg-white/[0.016] p-5">
                     <div className="flex items-center justify-between">
-                      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", color: `${GOLD}90` }}>{s.n}</span>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", color: `${GOLD}90` }}>{s.n}</span>
                       <Icon className="h-4 w-4" style={{ color: `${GOLD}AA` }} />
                     </div>
                     <h3 className="mt-5" style={{ ...serif, color: "rgba(255,255,255,0.88)", fontSize: "1.3rem", lineHeight: 1.1, fontStyle: "italic" }}>
@@ -166,7 +166,7 @@ export default function SystemPage() {
                   href={surface.href}
                   className="group flex min-h-[200px] flex-col border border-white/[0.075] bg-white/[0.016] p-5 transition-colors hover:border-white/[0.16]"
                 >
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}80` }}>
                     {surface.stage}
                   </span>
                   <h3 className="mt-4 flex items-center gap-2" style={{ ...serif, color: "rgba(255,255,255,0.88)", fontSize: "1.18rem", lineHeight: 1.1, fontStyle: "italic" }}>
@@ -178,7 +178,7 @@ export default function SystemPage() {
                     </span>
                   )}
                   <p className="mt-3 text-[12.5px] leading-[1.7] text-white/[0.50]">{surface.body}</p>
-                  <span className="mt-auto inline-flex items-center gap-2 pt-4 text-white/[0.42] transition-colors group-hover:text-white/[0.72]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase" }}>
+                  <span className="mt-auto inline-flex items-center gap-2 pt-4 text-white/[0.42] transition-colors group-hover:text-white/[0.72]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" }}>
                     View
                     <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                   </span>

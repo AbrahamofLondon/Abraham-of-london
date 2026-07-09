@@ -63,11 +63,11 @@ export default function DecisionTracePanel({ spine, expanded = false }: Decision
       >
         <div className="flex items-center gap-2">
           <FileText className="h-3 w-3" style={{ color: "rgba(255,255,255,0.25)" }} />
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
             Decision Trace
           </span>
         </div>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.15)" }}>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.15)" }}>
           {open ? "collapse" : "expand"}
         </span>
       </button>
@@ -113,7 +113,7 @@ export default function DecisionTracePanel({ spine, expanded = false }: Decision
             <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
               Routing outcome
             </span>
-            <div style={{ ...mono, fontSize: "7px", color: "rgba(201,169,110,0.60)", marginTop: "2px" }}>
+            <div style={{ ...mono, fontSize: "11px", color: "rgba(201,169,110,0.60)", marginTop: "2px" }}>
               {routingOutcome}
             </div>
           </div>

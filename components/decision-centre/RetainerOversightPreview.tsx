@@ -87,7 +87,7 @@ export function RetainerOversightPreview({
       <div className="flex items-center gap-3 mb-4">
         <RefreshCw className="h-4 w-4" style={{ color }} />
         <div>
-          <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color }}>
+          <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color }}>
             {readinessLabel(level)}
           </p>
         </div>
@@ -106,7 +106,7 @@ export function RetainerOversightPreview({
               key={signal}
               style={{
                 ...mono,
-                fontSize: '7px',
+                fontSize: '11px',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 color: `${GOLD}77`,
@@ -123,7 +123,7 @@ export function RetainerOversightPreview({
       {/* Cadence status */}
       {cadenceStatus && (
         <p className="mt-3 text-[11px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.30)' }}>
-          <span style={{ ...mono, fontSize: '7px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+          <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
             Cadence:{' '}
           </span>
           {cadenceStatus}
@@ -138,7 +138,7 @@ export function RetainerOversightPreview({
             className="group inline-flex items-center gap-2"
             style={{
               ...mono,
-              fontSize: '8px',
+              fontSize: '11px',
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               color: `${GOLD}CC`,
@@ -154,13 +154,13 @@ export function RetainerOversightPreview({
         </div>
       ) : briefReady ? (
         <div className="mt-4">
-          <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77` }}>
+          <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}77` }}>
             Oversight brief composable — available upon request
           </p>
         </div>
       ) : level === 'HIGH' ? (
         <div className="mt-4">
-          <p style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+          <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
             Internal review pending
           </p>
         </div>
@@ -171,7 +171,7 @@ export function RetainerOversightPreview({
         <div className="mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           <Link
             href="/engagements/retained-oversight"
-            style={{ ...mono, fontSize: '7px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}
+            style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}
           >
             About retained oversight →
           </Link>

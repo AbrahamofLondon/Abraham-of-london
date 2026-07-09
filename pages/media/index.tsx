@@ -105,7 +105,7 @@ function FormatCard({
           <Icon style={{ width: "14px", height: "14px", color: `${GOLD}90` }} />
           <span style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7.5px",
+            fontSize: "11px",
             letterSpacing: "0.36em",
             textTransform: "uppercase",
             color: `${GOLD}80`,
@@ -238,7 +238,7 @@ const MediaPage: NextPage = () => {
                         <item.icon style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
                         <span style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px",
+                          fontSize: "11px",
                           letterSpacing: "0.28em",
                           textTransform: "uppercase",
                           color: "rgba(255,255,255,0.28)",
@@ -402,9 +402,9 @@ const MediaPage: NextPage = () => {
                   <p>Every public statement is governed by the same standard as the diagnostic system: specific, evidence-grounded, and retractable if wrong.</p>
                 </div>
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <Link href="/editorials" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>Review public writing</Link>
-                  <Link href="/evidence" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>See evidence</Link>
-                  <Link href="/foundations" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Foundations</Link>
+                  <Link href="/editorials" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}AA` }}>Review public writing</Link>
+                  <Link href="/evidence" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>See evidence</Link>
+                  <Link href="/foundations" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Foundations</Link>
                 </div>
               </div>
             </div>
@@ -421,7 +421,7 @@ const MediaPage: NextPage = () => {
               viewport={{ once: true, margin: "-60px" }}
             >
               <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}06`, padding: "2rem 2.5rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "1rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "1rem" }}>
                   Media engagement
                 </div>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.02rem", lineHeight: 1.72, color: "rgba(255,255,255,0.42)", fontStyle: "italic", maxWidth: "48ch", marginBottom: "1.5rem" }}>
@@ -430,7 +430,7 @@ const MediaPage: NextPage = () => {
                 <div className="flex flex-wrap gap-3">
                   <Link href="/contact?type=media"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
+                    style={{ padding: "11px 22px", border: `1px solid ${GOLD}35`, backgroundColor: `${GOLD}0D`, color: `${GOLD}BB`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}55`; el.style.backgroundColor = `${GOLD}14`; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}35`; el.style.backgroundColor = `${GOLD}0D`; }}
                   >
@@ -438,7 +438,7 @@ const MediaPage: NextPage = () => {
                   </Link>
                   <Link href="/editorials"
                     className="inline-flex items-center gap-2.5 transition-all duration-300"
-                    style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase" }}
+                    style={{ padding: "11px 22px", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase" }}
                     onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.55)"; }}
                     onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.color = "rgba(255,255,255,0.30)"; }}
                   >

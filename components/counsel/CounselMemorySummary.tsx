@@ -24,12 +24,12 @@ export default function CounselMemorySummary({ counselCase, caseCount }: {
 
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
         Counsel memory
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
             What the system already knows
           </p>
           <ul className="mt-2 space-y-2 text-sm leading-7 text-white/64">
@@ -40,7 +40,7 @@ export default function CounselMemorySummary({ counselCase, caseCount }: {
           </ul>
         </div>
         <div>
-          <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
             What happens next
           </p>
           <ul className="mt-2 space-y-2 text-sm leading-7 text-white/64">

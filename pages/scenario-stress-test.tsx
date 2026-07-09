@@ -162,11 +162,11 @@ export default function ScenarioStressTestPage() {
                   Start scenario test
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </button>
-                <p className="mt-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em" }}>
+                <p className="mt-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em" }}>
                   Free · No account required · 3 scenarios · 3 minutes
                 </p>
                 <div className="mt-6 border border-white/[0.06] bg-white/[0.012] p-4">
-                  <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                     What this tests
                   </p>
                   <p className="mt-2 text-[13px] leading-[1.65] text-white/[0.50]">
@@ -182,11 +182,11 @@ export default function ScenarioStressTestPage() {
                 <div className="mb-6 flex items-center gap-3">
                   <span
                     className="inline-flex items-center border px-2.5 py-1"
-                    style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
                   >
                     Scenario {currentScenario + 1} of {PUBLIC_SCENARIOS.length}
                   </span>
-                  <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.35)" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.35)" }}>
                     {scenario.timeConstraint} · {scenario.stakes}
                   </span>
                 </div>
@@ -197,7 +197,7 @@ export default function ScenarioStressTestPage() {
                   </p>
 
                   <div className="mt-6 space-y-3">
-                    <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                       Choose your response
                     </p>
                     {([0, 1] as const).map((idx) => (
@@ -228,7 +228,7 @@ export default function ScenarioStressTestPage() {
             {finished && results.length > 0 && (
               <div className="mt-10 space-y-8">
                 <div className="border border-white/[0.06] bg-white/[0.012] p-6 lg:p-8">
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                     Stress test results
                   </p>
                   <p className="mt-3 text-[13px] leading-[1.65] text-white/[0.50]">
@@ -241,11 +241,11 @@ export default function ScenarioStressTestPage() {
                     <div className="flex flex-wrap items-center gap-3">
                       <span
                         className="inline-flex items-center border px-2.5 py-1"
-                        style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
+                        style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
                       >
                         Scenario {i + 1}
                       </span>
-                      <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.35)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.35)" }}>
                         {r.scenario.timeConstraint}
                       </span>
                     </div>
@@ -256,7 +256,7 @@ export default function ScenarioStressTestPage() {
 
                     <div className="mt-5 grid gap-4 sm:grid-cols-2">
                       <div className="border border-white/[0.05] bg-white/[0.008] p-3.5">
-                        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
                           Pressure finding
                         </p>
                         <p className="mt-1.5 text-[12px] leading-[1.6] text-white/[0.55]">
@@ -264,7 +264,7 @@ export default function ScenarioStressTestPage() {
                         </p>
                       </div>
                       <div className="border border-white/[0.05] bg-white/[0.008] p-3.5">
-                        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
                           Likely break point
                         </p>
                         <p className="mt-1.5 text-[12px] leading-[1.6] text-white/[0.55]">
@@ -272,7 +272,7 @@ export default function ScenarioStressTestPage() {
                         </p>
                       </div>
                       <div className="border border-white/[0.05] bg-white/[0.008] p-3.5">
-                        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
                           Weakness category
                         </p>
                         <p className="mt-1.5 text-[12px] leading-[1.6] text-white/[0.55]">
@@ -280,7 +280,7 @@ export default function ScenarioStressTestPage() {
                         </p>
                       </div>
                       <div className="border border-white/[0.05] bg-white/[0.008] p-3.5">
-                        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}75` }}>
                           Strengthening recommendation
                         </p>
                         <p className="mt-1.5 text-[12px] leading-[1.6] text-white/[0.55]">
@@ -317,7 +317,7 @@ export default function ScenarioStressTestPage() {
                     type="button"
                     onClick={handleReset}
                     className="inline-flex items-center gap-2 border border-white/[0.08] px-4 py-2.5 text-white/[0.40] transition-colors hover:border-white/[0.14] hover:text-white/[0.60]"
-                    style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                   >
                     Run again
                   </button>
@@ -327,14 +327,14 @@ export default function ScenarioStressTestPage() {
 
             {/* Forward links */}
             <div className="mt-12 border-t border-white/[0.06] pt-8">
-              <p className="mb-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              <p className="mb-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
                 Need deeper governance?
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/quick-check"
                   className="group inline-flex items-center gap-2 border px-4 py-2.5 transition-all hover:-translate-y-px"
-                  style={{ ...mono, borderColor: `${GOLD}35`, backgroundColor: `${GOLD}0D`, color: "rgba(255,255,255,0.72)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, borderColor: `${GOLD}35`, backgroundColor: `${GOLD}0D`, color: "rgba(255,255,255,0.72)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   <Target className="h-3 w-3" />
                   Quick Decision Health Check
@@ -343,7 +343,7 @@ export default function ScenarioStressTestPage() {
                 <Link
                   href="/boardroom-brief"
                   className="group inline-flex items-center gap-2 border border-white/[0.08] px-4 py-2.5 transition-all hover:-translate-y-px hover:border-white/[0.14]"
-                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   <Route className="h-3 w-3" />
                   Generate Boardroom Brief
@@ -352,7 +352,7 @@ export default function ScenarioStressTestPage() {
                 <Link
                   href="/enterprise"
                   className="group inline-flex items-center gap-2 border border-white/[0.08] px-4 py-2.5 transition-all hover:-translate-y-px hover:border-white/[0.14]"
-                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   <ShieldCheck className="h-3 w-3" />
                   Enterprise pathway

@@ -35,7 +35,7 @@ export default function DecisionStateBanner({ state }: { state: string; escalati
   const config = STATE_CONFIG[state] ?? STATE_CONFIG.PENDING!;
   return (
     <div style={{ border: `1px solid ${config.border}`, backgroundColor: config.bg, padding: "0.75rem 1rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: config.text, fontWeight: 700 }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: config.text, fontWeight: 700 }}>
         {config.label}
       </div>
       <p style={{ marginTop: "0.2rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.38)" }}>

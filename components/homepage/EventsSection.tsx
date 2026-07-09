@@ -101,7 +101,7 @@ export default function EventsSection({ events, embedded = true, limit = 3 }: Ev
             backgroundColor: `${GOLD}0A`,
             color: GOLD,
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
             flexShrink: 0,
           }}
           onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}58`; el.style.backgroundColor = `${GOLD}12`; }}
@@ -135,7 +135,7 @@ export default function EventsSection({ events, embedded = true, limit = 3 }: Ev
           </p>
           <p style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
             color: "rgba(255,255,255,0.16)", marginTop: "0.75rem",
           }}>
             Check back soon or browse past sessions.
@@ -179,7 +179,7 @@ function EventCard({ event, borderRight }: { event: EventItem & { status: string
           <div>
             <div style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
               color: `${GOLD}AA`, marginBottom: "0.35rem",
             }}>
               {formatDateGB(event.date)}
@@ -188,7 +188,7 @@ function EventCard({ event, borderRight }: { event: EventItem & { status: string
               <ModeIcon style={{ width: "11px", height: "11px", color: "rgba(255,255,255,0.25)" }} />
               <span style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                 color: "rgba(255,255,255,0.28)",
               }}>
                 {event.location || event.mode}
@@ -245,7 +245,7 @@ function EventCard({ event, borderRight }: { event: EventItem & { status: string
           borderTop: "1px solid rgba(255,255,255,0.05)",
           display: "flex", alignItems: "center", gap: "0.4rem",
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+          fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
           color: "rgba(255,255,255,0.20)",
         }}>
           <span className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.75)]">View details</span>

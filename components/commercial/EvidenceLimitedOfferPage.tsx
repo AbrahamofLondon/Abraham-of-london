@@ -45,7 +45,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "8px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.42)",
@@ -222,13 +222,13 @@ export default function EvidenceLimitedOfferPage({
             <SectionLabel>Commercial terms</SectionLabel>
             <div className="grid gap-5">
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                   Price
                 </p>
                 <p className="mt-2 text-2xl text-white/86" style={serif}>{offer.price}</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>
                   Delivery timeline
                 </p>
                 <p className="mt-2 text-sm leading-7 text-white/68">{offer.timeline}</p>
@@ -239,7 +239,7 @@ export default function EvidenceLimitedOfferPage({
                   paddingTop: "16px",
                 }}
               >
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                   Manual fulfilment
                 </p>
                 <p className="mt-2 text-sm leading-7 text-white/62">{offer.manualFulfilmentNote}</p>

@@ -45,7 +45,7 @@ export default function SectionDivider({
             <div style={{ flex: 1, height: "1px", background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06))" }} />
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px", letterSpacing: "0.46em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.46em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.18)",
               whiteSpace: "nowrap",
             }}>

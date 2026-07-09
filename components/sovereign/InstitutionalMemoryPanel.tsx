@@ -56,11 +56,11 @@ export default function InstitutionalMemoryPanel({ report }: Props) {
           Institutional memory
         </p>
         <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-          <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
             {report.totalSessions} session{report.totalSessions !== 1 ? "s" : ""}
           </span>
           {report.timeSpanDays > 0 && (
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               {report.timeSpanDays} day{report.timeSpanDays !== 1 ? "s" : ""}
             </span>
           )}
@@ -127,7 +127,7 @@ function ArcTab({ arc, report }: { arc: InstitutionalMemoryReport["trajectoryArc
     <div style={{ display: "grid", gap: "16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
         <div>
-          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "4px" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "4px" }}>
             {arc.startPosture} → {arc.currentPosture}
           </p>
           <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "22px", color, margin: 0 }}>
@@ -136,7 +136,7 @@ function ArcTab({ arc, report }: { arc: InstitutionalMemoryReport["trajectoryArc
         </div>
         {arc.improvementVelocity !== 0 && (
           <div style={{ textAlign: "right" }}>
-            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "2px" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", marginBottom: "2px" }}>
               Velocity per session
             </p>
             <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "14px", color: arc.improvementVelocity > 0 ? "rgba(110,231,183,0.65)" : "rgba(252,165,165,0.65)", margin: 0 }}>
@@ -152,7 +152,7 @@ function ArcTab({ arc, report }: { arc: InstitutionalMemoryReport["trajectoryArc
 
       {report.unresolvedSignals.length > 0 && (
         <div style={{ padding: "12px 14px", borderLeft: "2px solid rgba(201,169,110,0.30)", background: "rgba(201,169,110,0.04)" }}>
-          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "6px" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", marginBottom: "6px" }}>
             Unresolved across sessions
           </p>
           <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
@@ -185,7 +185,7 @@ function PatternsTab({ patterns, unresolvedSignals }: { patterns: RecurringPatte
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 500, fontSize: "16px", color: "#F5F5F5", margin: 0, lineHeight: 1.3 }}>
                 {pattern.signalName}
               </p>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color, flexShrink: 0 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color, flexShrink: 0 }}>
                 {pattern.status}
               </span>
             </div>
@@ -193,16 +193,16 @@ function PatternsTab({ patterns, unresolvedSignals }: { patterns: RecurringPatte
               {pattern.narrative}
             </p>
             <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
                 {pattern.occurrences} occurrence{pattern.occurrences !== 1 ? "s" : ""}
               </span>
               {pattern.consecutiveSessions && (
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(201,169,110,0.40)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(201,169,110,0.40)" }}>
                   Consecutive sessions
                 </span>
               )}
               {isUnresolved && (
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)" }}>
                   Still active
                 </span>
               )}
@@ -226,7 +226,7 @@ function ContradictionsTab({ clusters }: { clusters: ContradictionCluster[] }) {
             background: "rgba(255,255,255,0.015)",
           }}
         >
-          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "8px" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "8px" }}>
             {cluster.sessionsPresent} session{cluster.sessionsPresent !== 1 ? "s" : ""} · First detected {new Date(cluster.firstDetected).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
           </p>
 
@@ -237,7 +237,7 @@ function ContradictionsTab({ clusters }: { clusters: ContradictionCluster[] }) {
                 {cluster.scoreA.label} {cluster.scoreA.trend === "UP" ? "↑" : cluster.scoreA.trend === "DOWN" ? "↓" : "→"}
               </span>
             </div>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: "rgba(255,255,255,0.20)" }}>vs</span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>vs</span>
             <div style={{ padding: "6px 10px", background: "rgba(252,165,165,0.06)", border: "1px solid rgba(252,165,165,0.15)" }}>
               <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", color: "rgba(252,165,165,0.60)" }}>
                 {cluster.scoreB.label} {cluster.scoreB.trend === "UP" ? "↑" : cluster.scoreB.trend === "DOWN" ? "↓" : "→"}

@@ -145,7 +145,7 @@ export default function EnhancedVenturesSection() {
                 backgroundColor: `${GOLD}0E`,
                 color: GOLD,
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
               }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}62`; el.style.backgroundColor = `${GOLD}16`; }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${GOLD}42`; el.style.backgroundColor = `${GOLD}0E`; }}
@@ -163,7 +163,7 @@ export default function EnhancedVenturesSection() {
                 backgroundColor: "rgba(255,255,255,0.02)",
                 color: "rgba(255,255,255,0.45)",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
               }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.18)"; el.style.color = "rgba(255,255,255,0.70)"; }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.09)"; el.style.color = "rgba(255,255,255,0.45)"; }}
@@ -224,7 +224,7 @@ export default function EnhancedVenturesSection() {
                       border: "1px solid rgba(255,255,255,0.07)",
                       backgroundColor: "rgba(255,255,255,0.018)",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.28)",
                     }}>
                       {dest.tag}
@@ -266,7 +266,7 @@ export default function EnhancedVenturesSection() {
                       className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.75)]"
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
                         color: "rgba(255,255,255,0.20)",
                       }}
                     >
@@ -296,7 +296,7 @@ export default function EnhancedVenturesSection() {
               border: "1px solid rgba(255,255,255,0.07)",
               backgroundColor: "rgba(255,255,255,0.015)",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.35)",
             }}
             onMouseEnter={e => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = "rgba(255,255,255,0.14)"; el.style.color = "rgba(255,255,255,0.62)"; }}

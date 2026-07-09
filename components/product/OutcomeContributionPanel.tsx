@@ -224,7 +224,7 @@ export default function OutcomeContributionPanel({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}88`,
@@ -275,7 +275,7 @@ export default function OutcomeContributionPanel({
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.20em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -305,7 +305,7 @@ export default function OutcomeContributionPanel({
             padding: "0.35rem 0.7rem",
             cursor: "pointer",
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             flexShrink: 0,
@@ -348,7 +348,7 @@ export default function OutcomeContributionPanel({
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -370,7 +370,7 @@ export default function OutcomeContributionPanel({
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -392,7 +392,7 @@ export default function OutcomeContributionPanel({
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -412,7 +412,7 @@ export default function OutcomeContributionPanel({
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.35)",
@@ -432,7 +432,7 @@ export default function OutcomeContributionPanel({
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 color: "rgba(255,120,120,0.75)",
                 marginBottom: "0.75rem",
               }}
@@ -447,7 +447,7 @@ export default function OutcomeContributionPanel({
             disabled={!isValid || status === "submitting"}
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               padding: "0.55rem 1.1rem",

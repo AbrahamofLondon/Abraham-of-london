@@ -283,7 +283,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                 style={{
                   marginTop: "0.9rem",
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.20em",
                   textTransform: "uppercase",
                   color: "rgba(201,169,110,0.72)",
@@ -310,7 +310,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.34em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.25)",
@@ -337,7 +337,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                     <span
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.34em",
                         textTransform: "uppercase",
                         color: "rgba(255,255,255,0.25)",
@@ -381,7 +381,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                         flexShrink: 0,
                         padding: "5px 14px",
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.32em",
                         textTransform: "uppercase",
                         border: `1px solid ${
@@ -403,7 +403,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
                   <span
                     style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px",
+                      fontSize: "11px",
                       letterSpacing: "0.30em",
                       textTransform: "uppercase",
                       color: "rgba(255,255,255,0.18)",
@@ -428,7 +428,7 @@ const PlaybooksPage: NextPage<PlaybooksPageProps> = ({ items }) => {
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.40em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.22)",

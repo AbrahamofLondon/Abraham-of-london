@@ -40,7 +40,7 @@ const GmiFalsificationPage: NextPage<InferGetStaticPropsType<typeof getStaticPro
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header className="border border-white/10 bg-white/[0.018] p-6">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Falsification register
             </p>
             <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(2rem,4vw,3.2rem)", lineHeight: 1.04 }}>
@@ -59,7 +59,7 @@ const GmiFalsificationPage: NextPage<InferGetStaticPropsType<typeof getStaticPro
               <article key={rule.id} className="border border-white/10 bg-white/[0.015] p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                       {rule.thesisId}
                     </p>
                     <h2 className="mt-2 font-serif text-xl text-white">{rule.thesisStatement}</h2>

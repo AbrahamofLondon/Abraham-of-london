@@ -128,7 +128,7 @@ function ExportButton() {
       disabled={state === "loading"}
       style={{
         ...mono,
-        fontSize: "8px",
+        fontSize: "11px",
         letterSpacing: "0.16em",
         textTransform: "uppercase",
         color: state === "done"
@@ -167,7 +167,7 @@ export default function DataRightsPanel() {
         <p
           style={{
             ...mono,
-            fontSize: "8px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}90`,
@@ -206,7 +206,7 @@ export default function DataRightsPanel() {
             href="/decision-centre"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.45)",
@@ -230,7 +230,7 @@ export default function DataRightsPanel() {
             href="/decision-centre"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.45)",
@@ -254,7 +254,7 @@ export default function DataRightsPanel() {
             href="mailto:support@abrahamoflondon.org?subject=Data%20Rights%20Request"
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.45)",
@@ -274,7 +274,7 @@ export default function DataRightsPanel() {
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.10em",
           color: "rgba(255,255,255,0.18)",
           lineHeight: 1.75,

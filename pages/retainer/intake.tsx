@@ -94,14 +94,14 @@ const RetainerIntakePage: NextPage = () => {
           It is not a sales form. It captures why oversight is required, what has
           already been tried, and what evidence would prove oversight is working.
         </p>
-        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", marginTop: 24, color: "rgba(255,255,255,0.25)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", marginTop: 24, color: "rgba(255,255,255,0.25)" }}>
           Completing this intake does not activate oversight or commit to pricing.
         </p>
 
         <div style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 32 }}>
           {RETAINER_INTAKE_QUESTIONS.map((q, idx) => (
             <div key={q.id} style={{ borderLeft: `1px solid rgba(255,255,255,0.06)`, paddingLeft: 24 }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD, opacity: 0.6 }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: GOLD, opacity: 0.6 }}>
                 {q.label}{q.required ? " *" : ""}
               </p>
               <p style={{ ...serif, fontSize: "1.15rem", lineHeight: 1.5, marginTop: 8, color: "rgba(255,255,255,0.82)" }}>
@@ -166,7 +166,7 @@ const RetainerIntakePage: NextPage = () => {
           )}
         </div>
 
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: 32, color: "rgba(255,255,255,0.15)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: 32, color: "rgba(255,255,255,0.15)" }}>
           Responses are confidential. Oversight activation is subject to governance review.
         </p>
       </div>

@@ -113,7 +113,7 @@ export default function StrategicFunnelStrip(): React.ReactElement {
                     </div>
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
                       color: `${GOLD}80`,
                     }}>
                       {route.tag}
@@ -152,7 +152,7 @@ export default function StrategicFunnelStrip(): React.ReactElement {
                       marginTop: "auto", paddingTop: "1.25rem",
                       borderTop: "1px solid rgba(255,255,255,0.05)",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.22)",
                     }}
                   >

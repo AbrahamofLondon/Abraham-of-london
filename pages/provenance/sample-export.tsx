@@ -83,7 +83,7 @@ const SampleExportPage: NextPage = () => {
                 backgroundColor: `${GOLD}08`,
                 color: `${GOLD}BB`,
                 ...mono,
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 padding: "0.25rem 0.55rem",
@@ -94,7 +94,7 @@ const SampleExportPage: NextPage = () => {
             </div>
             <div className="flex items-center gap-2 mb-4">
               <Shield className="h-5 w-5" style={{ color: GOLD }} />
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                 Client-safe provenance sample
               </p>
             </div>
@@ -107,7 +107,7 @@ const SampleExportPage: NextPage = () => {
             <p style={{ marginTop: "0.4rem", ...serif, fontSize: "0.9rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
               This page demonstrates the client-safe provenance format. It is not generated from the current visitor's account or case.
             </p>
-            <p style={{ marginTop: "0.4rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
+            <p style={{ marginTop: "0.4rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
               Sample data for demonstration purposes. Not connected to your account, case, or governed record.
             </p>
           </header>
@@ -128,7 +128,7 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── LIVE CASE VERSION ──────────────────────────────────── */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Your live case version would show
             </p>
             <div className="grid gap-3 md:grid-cols-2">
@@ -152,7 +152,7 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── ACCOUNTABILITY STATEMENT ────────────────────────────── */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
               Accountability statement
             </p>
             <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.6, color: "rgba(255,255,255,0.78)" }}>
@@ -164,7 +164,7 @@ const SampleExportPage: NextPage = () => {
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
             <div className="flex items-center gap-2 mb-3">
               <Hash className="h-4 w-4" style={{ color: `${GOLD}70` }} />
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
                 Provenance hash
               </p>
             </div>
@@ -172,38 +172,38 @@ const SampleExportPage: NextPage = () => {
               {truncateHash(SAMPLE_HASH)}
             </p>
             <details style={{ marginTop: "0.55rem" }}>
-              <summary style={{ ...mono, cursor: "pointer", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
+              <summary style={{ ...mono, cursor: "pointer", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
                 Show full hash
               </summary>
               <p style={{ marginTop: "0.45rem", ...mono, fontSize: "9px", lineHeight: 1.6, color: "rgba(255,255,255,0.55)", wordBreak: "break-all" }}>
                 {SAMPLE_HASH}
               </p>
             </details>
-            <p style={{ marginTop: "0.4rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)" }}>
+            <p style={{ marginTop: "0.4rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)" }}>
               SHA-256 of the canonical internal record. The client-safe summary carries the same hash.
             </p>
           </section>
 
           {/* ── POSTURE GRID ────────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Posture
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Delivery</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Delivery</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.80)", marginTop: "0.2rem" }}>Delivered</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Outcome</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Outcome</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.80)", marginTop: "0.2rem" }}>Recorded</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Gaps</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Gaps</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(251,191,36,0.80)", marginTop: "0.2rem" }}>1 warning</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Anchor</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Anchor</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)", marginTop: "0.2rem" }}>Hash verified</p>
               </div>
             </div>
@@ -211,13 +211,13 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── CONFIDENCE BANDS ────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Evidence confidence
             </p>
             <div className="flex flex-wrap gap-3">
               {SAMPLE_CONFIDENCE_BANDS.map((band) => (
                 <div key={band.level} style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.03)", padding: "0.5rem 0.75rem", minWidth: "140px" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88` }}>
                     {band.label}
                   </p>
                   <p style={{ ...mono, fontSize: "16px", color: "rgba(255,255,255,0.80)", marginTop: "0.2rem" }}>
@@ -226,7 +226,7 @@ const SampleExportPage: NextPage = () => {
                 </div>
               ))}
             </div>
-            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
+            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
               Confidence tiers are never upgraded. System-inferred remains system-inferred. Operator-verified means a human confirmed the finding.
             </p>
           </section>
@@ -235,7 +235,7 @@ const SampleExportPage: NextPage = () => {
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
             <div className="flex items-center gap-2 mb-4">
               <Clock className="h-4 w-4" style={{ color: `${GOLD}70` }} />
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88` }}>
                 Milestone timeline
               </p>
             </div>
@@ -249,7 +249,7 @@ const SampleExportPage: NextPage = () => {
                     )}
                   </div>
                   <div>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
                       {entry.date}
                     </p>
                     <p style={{ ...serif, fontSize: "0.9rem", color: "rgba(255,255,255,0.72)", marginTop: "0.1rem" }}>
@@ -263,7 +263,7 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── GAP CLASSES ─────────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Gap classes
             </p>
             {SAMPLE_GAP_CLASSES.length === 0 ? (
@@ -280,7 +280,7 @@ const SampleExportPage: NextPage = () => {
                     <div key={cls} style={{ border: `1px solid ${color}30`, backgroundColor: bg, padding: "0.4rem 0.7rem" }}>
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-3 w-3" style={{ color }} />
-                        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color }}>
+                        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color }}>
                           {cls}
                         </span>
                       </div>
@@ -289,31 +289,31 @@ const SampleExportPage: NextPage = () => {
                 })}
               </div>
             )}
-            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
+            <p style={{ marginTop: "0.5rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.22)" }}>
               Gap severity classes are exposed without internal stage names or remediation details.
             </p>
           </section>
 
           {/* ── ANCHOR STATUS ───────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.75rem" }}>
               Anchor status
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Hash</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Hash</p>
                 <p style={{ ...mono, fontSize: "11px", color: `${GOLD}AA`, marginTop: "0.2rem" }}>Verified</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Chain</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Chain</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)", marginTop: "0.2rem" }}>Not yet included</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>External anchor</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>External anchor</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", marginTop: "0.2rem" }}>Not configured</p>
               </div>
               <div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>WORM storage</p>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>WORM storage</p>
                 <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.45)", marginTop: "0.2rem" }}>Not configured</p>
               </div>
             </div>
@@ -321,17 +321,17 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── PROOF PATH ─────────────────────────────────────────── */}
           <section style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)", padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
               Proof path
             </p>
             <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)", maxWidth: "52ch" }}>
               This sample shows the client-safe proof surface. A governed case is where the live decision record, evidence posture, and provenance trail are created.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgb(3,3,5)", backgroundColor: GOLD, border: `1px solid ${GOLD}`, padding: "0.5rem 0.9rem", textDecoration: "none" }}>
+              <Link href="/diagnostics/fast" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgb(3,3,5)", backgroundColor: GOLD, border: `1px solid ${GOLD}`, padding: "0.5rem 0.9rem", textDecoration: "none" }}>
                 Create a governed case
               </Link>
-              <Link href="/provenance/anchor-log" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.5rem 0.9rem", textDecoration: "none" }}>
+              <Link href="/provenance/anchor-log" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "0.5rem 0.9rem", textDecoration: "none" }}>
                 View public anchor log status
               </Link>
             </div>
@@ -339,7 +339,7 @@ const SampleExportPage: NextPage = () => {
 
           {/* ── CHAIN BOUNDARY NOTE ─────────────────────────────────── */}
           <section style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}03`, padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.5rem" }}>
               Chain boundary
             </p>
             <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -350,20 +350,20 @@ const SampleExportPage: NextPage = () => {
           {/* ── FOOTER ──────────────────────────────────────────────── */}
           <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1rem" }}>
             <div style={{ marginBottom: "1rem" }}>
-              <Link href="/library" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none", borderBottom: "1px solid rgba(255,255,255,0.10)", paddingBottom: "1px" }}>
+              <Link href="/library" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none", borderBottom: "1px solid rgba(255,255,255,0.10)", paddingBottom: "1px" }}>
                 Explore Library →
               </Link>
             </div>
             <div className="flex items-center gap-2 mb-2">
               <FileText className="h-4 w-4" style={{ color: `${GOLD}60` }} />
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                 Client-safe provenance summary
               </p>
             </div>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}>
               This is a client-safe provenance summary. It does not expose internal review notes, suppression details, or raw governance events. Sample data for demonstration purposes. Not connected to your account, case, or governed record.
             </p>
-            <p style={{ marginTop: "0.3rem", ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.14)" }}>
+            <p style={{ marginTop: "0.3rem", ...mono, fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.14)" }}>
               External anchoring is not yet configured.
             </p>
           </footer>

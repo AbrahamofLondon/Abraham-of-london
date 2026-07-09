@@ -127,7 +127,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
           <div className="mx-auto max-w-5xl px-6 py-32 lg:px-12">
             <div className="flex items-center gap-3 mb-6">
               <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                 {isRestricted ? "Counsel Review · Restricted" : "Counsel Review · Escalation Chamber"}
               </span>
             </div>
@@ -141,7 +141,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
             </p>
 
             {/* Restrained language line */}
-            <p style={{ marginTop: "0.75rem", ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <p style={{ marginTop: "0.75rem", ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               {labels.restrained}
             </p>
 
@@ -185,7 +185,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
             <div className="mx-auto max-w-5xl px-6 py-16 lg:px-12">
               <div className="flex items-center gap-3 mb-8">
                 <FileText style={{ width: "16px", height: "16px", color: `${GOLD}70` }} />
-                <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>
                   Evidence package
                 </span>
               </div>
@@ -201,7 +201,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
               {state.evidencePackage && (
                 <div className="mt-8 grid gap-4 sm:grid-cols-2">
                   <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                       Completed stages
                     </span>
                     <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.95rem", color: "rgba(255,255,255,0.72)" }}>
@@ -211,7 +211,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                     </p>
                   </div>
                   <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                       Escalation level
                     </span>
                     <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.95rem", color: state.evidencePackage.escalationLevel >= 2 ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.72)" }}>
@@ -220,7 +220,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                   </div>
                   {state.evidencePackage.activeContradictions.length > 0 && (
                     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
-                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                         Active contradictions
                       </span>
                       <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.95rem", color: "rgba(255,255,255,0.72)" }}>
@@ -230,7 +230,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                   )}
                   {(state.evidencePackage.overdueCheckpointCount > 0 || state.evidencePackage.blockedCheckpointCount > 0) && (
                     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem 1.25rem" }}>
-                      <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                         Checkpoint status
                       </span>
                       <p style={{ marginTop: "0.35rem", ...serif, fontSize: "0.95rem", color: "rgba(252,165,165,0.72)" }}>
@@ -248,13 +248,13 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                 <div className="mt-6" style={{ border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.02)", padding: "1rem 1.25rem" }}>
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle style={{ width: "14px", height: "14px", color: "rgba(252,165,165,0.55)" }} />
-                    <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
+                    <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
                       Escalation triggers detected
                     </span>
                   </div>
                   <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                     {state.evidencePackage.triggers.map((trigger, i) => (
-                      <li key={i} style={{ padding: "0.35rem 0", borderBottom: i < state.evidencePackage!.triggers.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.50)" }}>
+                      <li key={i} style={{ padding: "0.35rem 0", borderBottom: i < state.evidencePackage!.triggers.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.50)" }}>
                         {trigger.replace(/_/g, " ")}
                       </li>
                     ))}
@@ -281,7 +281,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
               <p style={{ ...serif, fontSize: "1.1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.35)", maxWidth: "40ch", margin: "0 auto" }}>
                 Counsel Review exists for the cases the system should not pretend to resolve alone. When the evidence crosses the threshold for human judgement, the case enters Counsel Review.
               </p>
-              <p style={{ marginTop: "1rem", ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
+              <p style={{ marginTop: "1rem", ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
                 No evidence yet. Complete a diagnostic first.
               </p>
             </div>
@@ -301,7 +301,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                   <p style={{ marginTop: "0.5rem", ...serif, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                     Submit a structured intake with your evidence package. The system will prefill what it knows — you add what only you know.
                   </p>
-                  <Link href="/counsel/intake" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  <Link href="/counsel/intake" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                     Submit intake <ArrowRight style={{ width: 10, height: 10 }} />
                   </Link>
                 </div>
@@ -314,7 +314,7 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
                   <p style={{ marginTop: "0.5rem", ...serif, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                     The Strategy Room provides governed execution tracking. Return to automated governance if counsel is not yet required.
                   </p>
-                  <Link href="/strategy-room" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                  <Link href="/strategy-room" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                     Enter Strategy Room <ArrowRight style={{ width: 10, height: 10 }} />
                   </Link>
                 </div>
@@ -330,14 +330,14 @@ const CounselPage: NextPage<CounselPageProps> = ({ counselState, paEvidence, feE
               <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "1.5rem" }}>
                 <div className="flex items-center gap-2 mb-4">
                   <Clock style={{ width: "18px", height: "18px", color: `${GOLD}80` }} />
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}90` }}>
                     Retained oversight active
                   </span>
                 </div>
                 <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
                   Your retained oversight agreement includes counsel review. Open retained oversight command visibility to view review cadence, active cases, and next required sponsor-safe action.
                 </p>
-                <Link href="/oversight" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/oversight" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                   Open retained review <ArrowRight style={{ width: 10, height: 10 }} />
                 </Link>
               </div>

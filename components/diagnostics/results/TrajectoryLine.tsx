@@ -29,7 +29,7 @@ export default function TrajectoryLine({ trajectory }: { trajectory: Trajectory 
           <div
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.30em",
               textTransform: "uppercase",
               color,

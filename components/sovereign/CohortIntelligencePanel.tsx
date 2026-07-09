@@ -33,16 +33,16 @@ export default function CohortIntelligencePanel({ result }: Props) {
           Cohort intelligence
         </p>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: matchColor }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: matchColor }}>
             {matchStrength.toLowerCase()} match
           </span>
           {cohort.memberCount > 0 && (
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
               n={cohort.memberCount}
             </span>
           )}
           {cohort.dataSource === "THEORETICAL" && (
-            <span style={{ ...MONO, fontSize: "7px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
               theoretical
             </span>
           )}
@@ -51,7 +51,7 @@ export default function CohortIntelligencePanel({ result }: Props) {
 
       {/* ── Cohort description ─────────────────────────────── */}
       <div style={{ padding: "16px 18px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", marginBottom: "20px" }}>
-        <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "6px" }}>
+        <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "6px" }}>
           Your cohort
         </p>
         <p style={{ ...SERIF, fontWeight: 500, fontSize: "16px", lineHeight: 1.3, color: "#F5F5F5", marginBottom: "6px" }}>
@@ -129,7 +129,7 @@ export default function CohortIntelligencePanel({ result }: Props) {
           marginBottom: "16px",
         }}
       >
-        <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "6px" }}>
+        <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "6px" }}>
           Key differentiator in your cohort
         </p>
         <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
@@ -146,7 +146,7 @@ export default function CohortIntelligencePanel({ result }: Props) {
           marginBottom: "14px",
         }}
       >
-        <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)", marginBottom: "6px" }}>
+        <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.40)", marginBottom: "6px" }}>
           Primary structural risk for your cohort
         </p>
         <p style={{ fontSize: "13px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)" }}>
@@ -157,12 +157,12 @@ export default function CohortIntelligencePanel({ result }: Props) {
       {/* ── Trajectory distribution ────────────────────────── */}
       {Object.keys(cohort.trajectoryDistribution).length > 0 && (
         <div>
-          <p style={{ ...MONO, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "8px" }}>
+          <p style={{ ...MONO, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "8px" }}>
             Current trajectory distribution in cohort
           </p>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             {Object.entries(cohort.trajectoryDistribution).map(([key, pct]) => (
-              <span key={key} style={{ ...MONO, fontSize: "8px", letterSpacing: "0.08em", color: key === "IMPROVING" ? "rgba(110,231,183,0.50)" : key === "DETERIORATING" || key === "COLLAPSING" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.25)" }}>
+              <span key={key} style={{ ...MONO, fontSize: "11px", letterSpacing: "0.08em", color: key === "IMPROVING" ? "rgba(110,231,183,0.50)" : key === "DETERIORATING" || key === "COLLAPSING" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.25)" }}>
                 {key.toLowerCase()} {pct}%
               </span>
             ))}

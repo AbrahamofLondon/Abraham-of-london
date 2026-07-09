@@ -34,7 +34,7 @@ export default function DecisionExposureRunner({ costAnchor, onComplete }: { cos
       {/* Live score */}
       <div className="flex items-baseline justify-between">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Exposure Score</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Exposure Score</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "3rem", fontWeight: 300, lineHeight: 1, color: bandColor }}>{result.exposureScore}</div>
         </div>
         <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: bandColor }}>{result.exposureBand}</span>
@@ -44,7 +44,7 @@ export default function DecisionExposureRunner({ costAnchor, onComplete }: { cos
       {DIMENSIONS.map((dim) => (
         <div key={dim.key}>
           <div className="flex items-baseline justify-between mb-1">
-            <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{dim.label}</label>
+            <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{dim.label}</label>
             <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{scores[dim.key]}/10</span>
           </div>
           <input
@@ -66,7 +66,7 @@ export default function DecisionExposureRunner({ costAnchor, onComplete }: { cos
         <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}55` }}>Assessment</span>
         <p style={{ fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.60)", marginTop: "0.25rem" }}>{result.recommendation}</p>
         {result.projectedMonthlyCost !== null && (
-          <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.30)", marginTop: "0.5rem" }}>
+          <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "0.5rem" }}>
             Projected monthly exposure: £{result.projectedMonthlyCost.toLocaleString()}
           </p>
         )}

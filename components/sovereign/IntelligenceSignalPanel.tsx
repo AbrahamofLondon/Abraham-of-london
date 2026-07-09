@@ -50,16 +50,16 @@ export default function IntelligenceSignalPanel({
         </p>
         <div style={{ display: "flex", gap: "12px" }}>
           {critical > 0 && (
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>
               {critical} critical
             </span>
           )}
           {alerts > 0 && (
-            <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)" }}>
+            <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)" }}>
               {alerts} alert
             </span>
           )}
-          <span style={{ ...MONO, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+          <span style={{ ...MONO, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
             {signals.length} total
           </span>
         </div>

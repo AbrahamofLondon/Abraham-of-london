@@ -42,7 +42,7 @@ const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace,
 function Stat({ label, value, note }: { label: string; value: string | number; note: string }) {
   return (
     <article style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>{label}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>{label}</p>
       <p className="mt-3 text-3xl text-white">{value}</p>
       <p className="mt-3 text-sm leading-6 text-white/55">{note}</p>
     </article>
@@ -62,12 +62,12 @@ function SectionCard({
 }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>{eyebrow}</p>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>{eyebrow}</p>
       <p className="mt-3 text-white">{title}</p>
       <p className="mt-3 text-sm leading-7 text-white/60">{body}</p>
       <div className="mt-4 space-y-1">
         {meta.map((item) => (
-          <p key={item} style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+          <p key={item} style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
             {item}
           </p>
         ))}
@@ -87,7 +87,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
         <Head><meta name="robots" content="noindex,nofollow" /></Head>
         <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
           <div className="mx-auto max-w-3xl">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Retained oversight
             </p>
             <h1 className="mt-4 text-3xl text-white" style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontStyle: "italic" }}>
@@ -126,7 +126,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
       <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-6xl space-y-8">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Retained Oversight Command
             </p>
             <h1 className="mt-3 text-3xl text-white">Retained governance — cadence, delivery, and outcome memory.</h1>
@@ -139,7 +139,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 
             {/* Current required action — top orientation for senior operators */}
             <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(201,169,110,0.12)" }}>
-              <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,169,110,0.70)", marginBottom: "8px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(201,169,110,0.70)", marginBottom: "8px" }}>
                 Current required action
               </p>
               <p style={{ fontSize: "14px", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>
@@ -208,7 +208,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 
               <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Current command summary</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Current command summary</p>
                   <p className="mt-3 text-white">{summary.oversightStatus.label}</p>
                   <p className="mt-3 text-sm leading-7 text-white/60">{summary.oversightStatus.explanation}</p>
                   <div className="mt-5 space-y-3">
@@ -225,7 +225,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                 </section>
 
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Retained cadence posture</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Retained cadence posture</p>
                   <p className="mt-3 text-white">{summary.retainedCadencePosture.summary}</p>
                   <p className="mt-3 text-sm leading-7 text-white/58">{summary.retainedCadencePosture.state === "NOT_CONFIGURED" ? "Retained cadence is not configured for this account." : summary.retainedCadencePosture.state === "CONFIGURED" ? "Retained cadence is configured. No cycle is currently due." : summary.retainedCadencePosture.state === "MANUAL_OPERATOR_REVIEW" ? "Retained review is operator-confirmed. Automated scheduling is not active for this account." : summary.retainedCadencePosture.state === "SCHEDULED" ? `Next retained review is scheduled for ${formatDate(summary.retainedCadencePosture.scheduledFor)}.` : summary.retainedCadencePosture.state === "DUE_SOON" || summary.retainedCadencePosture.state === "REVIEW_DUE" ? "A retained review is due." : summary.retainedCadencePosture.state === "REVIEW_IN_PROGRESS" ? "A retained review is in progress." : summary.retainedCadencePosture.state === "OVERDUE" ? "A retained review is overdue. Operator attention is required." : summary.retainedCadencePosture.state === "COMPLETED" || summary.retainedCadencePosture.state === "REVIEW_COMPLETED" ? `Latest retained review completed on ${formatDate(summary.retainedCadencePosture.lastCompletedAt)}.` : summary.retainedCadencePosture.state === "SKIPPED_WITH_REASON" || summary.retainedCadencePosture.state === "REVIEW_SKIPPED" ? "Latest retained review was skipped with recorded reason." : summary.retainedCadencePosture.state === "CADENCE_BROKEN" ? "Retained cadence has been broken. Operator intervention required." : "This retained review cycle has been escalated."}</p>
 
@@ -236,32 +236,32 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                   )}
 
                   <div className="mt-4 space-y-1">
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                       Last review date · {cadencePosture ? formatDate(cadencePosture.lastReviewDate) : formatDate(summary.retainedCadencePosture.lastCompletedAt)}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                       Next due date · {cadencePosture ? formatDate(cadencePosture.nextDueDate) : formatDate(summary.retainedCadencePosture.scheduledFor)}
                     </p>
                     {cadencePosture && (
                       <>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                           Cycles completed · {cadencePosture.cyclesCompleted}
                         </p>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cadencePosture.cyclesOverdue > 0 ? "rgba(245,158,11,0.60)" : "rgba(255,255,255,0.34)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: cadencePosture.cyclesOverdue > 0 ? "rgba(245,158,11,0.60)" : "rgba(255,255,255,0.34)" }}>
                           Cycles overdue · {cadencePosture.cyclesOverdue}
                         </p>
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cadencePosture.reliability < 0.5 ? "rgba(245,158,11,0.60)" : "rgba(255,255,255,0.34)" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: cadencePosture.reliability < 0.5 ? "rgba(245,158,11,0.60)" : "rgba(255,255,255,0.34)" }}>
                           Cadence reliability · {Math.round(cadencePosture.reliability * 100)}%
                         </p>
                       </>
                     )}
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                       Cadence source · {summary.retainedCadencePosture.cadenceSource}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                       Evidence posture · {summary.retainedCadencePosture.evidencePosture}
                     </p>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                       Source label · {summary.retainedCadencePosture.sourceLabel}
                     </p>
                   </div>
@@ -270,7 +270,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 
               {/* P6 — OVERSIGHT SIGNAL AUTHORITY: signal recurrence, cadence reliability, institutional signal tracking */}
               <section style={{ border: "1px solid rgba(201,169,110,0.14)", background: "rgba(201,169,110,0.025)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
                   Retained signal authority
                 </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-3">
@@ -316,14 +316,14 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                 )}
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem", lineHeight: 1.6 }}>
                   Retained signal authority is derived from the oversight cycle record and cadence posture. Signal recurrence is a pattern estimate — not independently verified. Cadence reliability reflects the proportion of completed cycles against expected schedule.
                 </p>
               </section>
 
               {/* P7 — SIGNAL MOVEMENT + REVIEW OBLIGATION + OPERATOR REVIEW REQUIREMENT */}
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>
                   Signal movement and review obligation
                 </p>
                 <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -370,7 +370,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                     </p>
                   </div>
                 </div>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.14)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.14)", marginTop: "0.75rem", lineHeight: 1.6 }}>
                   Movement direction is derived from cadence posture and attention severity — not independently verified. Review obligation is a structural assessment, not a legal requirement.
                 </p>
               </section>
@@ -443,7 +443,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 
               <section className="grid gap-6 xl:grid-cols-3">
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Institutional memory retained</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Institutional memory retained</p>
                   <div className="mt-4 space-y-3 text-sm text-white/62">
                     <p>First captured: {summary.retainedMemory.firstCapturedAt ? new Date(summary.retainedMemory.firstCapturedAt).toLocaleDateString("en-GB") : "Not yet established"}</p>
                     <p>Most recent update: {summary.retainedMemory.lastUpdatedAt ? new Date(summary.retainedMemory.lastUpdatedAt).toLocaleDateString("en-GB") : "No retained update yet"}</p>
@@ -453,13 +453,13 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
                   </div>
                 </section>
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Suppression boundary</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Suppression boundary</p>
                   <ul className="mt-3 space-y-2 text-sm text-white/55">
                     {summary.suppression.map((item) => <li key={`${item.reason}-${item.scope}`}>{item.reason} ({item.scope})</li>)}
                   </ul>
                 </section>
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Role-safe visibility</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Role-safe visibility</p>
                   <ul className="mt-3 space-y-2 text-sm text-white/58">
                     <li>No raw respondent text.</li>
                     <li>No operator notes.</li>
@@ -471,11 +471,11 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 
               {cadenceHistory.length > 0 && (
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Cadence history</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>Cadence history</p>
                   <div className="mt-4 space-y-2">
                     {cadenceHistory.slice(0, 20).map((event) => (
                       <div key={event.eventId} className="flex items-start gap-4 border-t border-white/5 pt-2 text-sm">
-                        <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.30)", minWidth: "80px" }}>
+                        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.30)", minWidth: "80px" }}>
                           {new Date(event.timestamp).toLocaleDateString("en-GB")}
                         </p>
                         <p className="text-white/60">{event.action.replace(/_/g, " ").toLowerCase()}</p>
@@ -500,7 +500,7 @@ const OversightPage: NextPage<Props> = ({ authenticated, summary, warnings, role
 
               {warnings.length > 0 && (
                 <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Warnings</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>Warnings</p>
                   <ul className="mt-3 space-y-2 text-sm text-white/52">
                     {warnings.map((warning) => <li key={warning}>{warning}</li>)}
                   </ul>

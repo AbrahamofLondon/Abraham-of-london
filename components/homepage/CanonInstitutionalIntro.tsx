@@ -38,7 +38,7 @@ function Pillar({ title, body }: { title: string; body: string }) {
       <div
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.34em",
           textTransform: "uppercase",
           color: `${GOLD}90`,
@@ -102,7 +102,7 @@ export default function CanonInstitutionalIntro({
             <span style={{ width: "1px", height: "20px", backgroundColor: `${GOLD}55` }} />
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
               color: `${GOLD}BF`,
             }}>
               Canon gateway
@@ -155,7 +155,7 @@ export default function CanonInstitutionalIntro({
                 </h2>
                 <p style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                   color: `${GOLD}90`,
                 }}>
                   {subtitle}

@@ -72,10 +72,10 @@ const OperatorPackRun: NextPage = () => {
         ))}
       </div>
       <div className="flex justify-between mb-6">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: `${GOLD}60` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: `${GOLD}60` }}>
           {stage === "exposure" ? "Step 1 — Exposure" : stage === "mandate" ? "Step 2 — Authority" : stage === "intervention" ? "Step 3 — Intervention" : "Decision Dossier"}
         </span>
-        <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)" }}>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)" }}>
           {["exposure", "mandate", "intervention", "dossier"].indexOf(stage) + 1} / 4
         </span>
       </div>

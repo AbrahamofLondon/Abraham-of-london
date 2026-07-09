@@ -28,7 +28,7 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
     return (
       <div className="flex items-center gap-2 border border-white/[0.06] bg-white/[0.02] px-3 py-2">
         <Shield className="h-3 w-3 shrink-0" style={{ color: "rgba(110,231,183,0.50)" }} />
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
           Governed · {level} confidence
         </span>
       </div>
@@ -39,7 +39,7 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
     <div className="border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
         <Shield className="h-3.5 w-3.5" style={{ color: "rgba(110,231,183,0.50)" }} />
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.40)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.40)" }}>
           Governed Decision Proof
         </span>
       </div>
@@ -48,7 +48,7 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
         This result was reached by governed analysis. Same input produces same output. The logic path is auditable.
       </p>
 
-      <div className="mt-3 grid grid-cols-2 gap-2" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.08em" }}>
+      <div className="mt-3 grid grid-cols-2 gap-2" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.08em" }}>
         <div className="border border-white/[0.04] p-2">
           <span style={{ color: "rgba(255,255,255,0.20)", textTransform: "uppercase" }}>Signal strength</span>
           <div style={{ color: levelColor, marginTop: "2px" }}>{level}</div>
@@ -59,7 +59,7 @@ export default function DeterminismProof({ spine, compact = false }: Determinism
         </div>
       </div>
 
-      <p className="mt-3" style={{ fontSize: "7px", color: "rgba(255,255,255,0.15)", fontFamily: "'JetBrains Mono', monospace" }}>
+      <p className="mt-3" style={{ fontSize: "11px", color: "rgba(255,255,255,0.15)", fontFamily: "'JetBrains Mono', monospace" }}>
         Proprietary multi-factor evaluation. Result derived from your stated inputs only.
       </p>
     </div>

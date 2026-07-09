@@ -66,7 +66,7 @@ export default function DecisionTerrainStatus({
         flexShrink: 0,
       }} />
       <div>
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: config.color, fontWeight: 700 }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: config.color, fontWeight: 700 }}>
           Terrain: {state}
         </span>
         <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.18)", marginLeft: "0.5rem" }}>

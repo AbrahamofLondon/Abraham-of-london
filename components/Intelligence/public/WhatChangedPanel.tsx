@@ -37,7 +37,7 @@ export default function WhatChangedPanel({ summary, title = "What changed", clas
         padding: "16px 18px",
       }}
     >
-      <div style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+      <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
         {title}
       </div>
       <p style={{ ...serif, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "8px" }}>
@@ -47,7 +47,7 @@ export default function WhatChangedPanel({ summary, title = "What changed", clas
         <div style={{ display: "grid", gap: "8px", marginTop: "12px" }}>
           {summary.changes.slice(0, 6).map((change) => (
             <div key={`${change.field}:${String(change.current)}`} style={{ borderLeft: `1px solid ${directionColor(change.direction)}`, paddingLeft: "10px" }}>
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: directionColor(change.direction) }}>
+              <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: directionColor(change.direction) }}>
                 {change.direction.replace(/_/g, " ")}
               </div>
               <p style={{ fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.52)", marginTop: "3px" }}>
@@ -63,11 +63,11 @@ export default function WhatChangedPanel({ summary, title = "What changed", clas
           {summary.meta.emptyState.nextAction ? ` ${summary.meta.emptyState.nextAction}` : ""}
         </p>
       )}
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "12px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "12px" }}>
         Scope: {summary.meta.scope.scopeLabel} · Source: {summary.meta.sourceLabel}
       </p>
       {hasComparison && (
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "12px" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "12px" }}>
           Compared: {formatDate(summary.previousObservedAt)} → {formatDate(summary.currentObservedAt)} · Evidence posture: {summary.meta.evidencePosture.replace(/_/g, " ").toLowerCase()}
         </p>
       )}

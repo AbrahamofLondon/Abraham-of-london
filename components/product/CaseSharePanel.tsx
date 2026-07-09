@@ -134,7 +134,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
           padding: "1rem",
         }}
       >
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.5rem" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.5rem" }}>
           Share this case
         </p>
 
@@ -149,7 +149,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
               style={{
                 ...mono,
                 marginTop: "0.8rem",
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "#0A0A0A",
@@ -170,7 +170,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
             <div style={{ display: "grid", gap: "0.7rem" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.7rem" }}>
                 <label style={{ display: "grid", gap: "0.35rem" }}>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Role</span>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Role</span>
                   <select value={role} onChange={(event) => setRole(event.target.value as CaseShareRole)}
                     style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.70)", padding: "0.55rem" }}>
                     <option value="VIEWER">Viewer</option>
@@ -178,7 +178,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
                   </select>
                 </label>
                 <label style={{ display: "grid", gap: "0.35rem" }}>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Expiry</span>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Expiry</span>
                   <select value={expiresInDays} onChange={(event) => setExpiresInDays(Number(event.target.value))}
                     style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.70)", padding: "0.55rem" }}>
                     <option value={7}>7 days</option>
@@ -189,7 +189,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
               </div>
 
               <label style={{ display: "grid", gap: "0.35rem" }}>
-                <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                   Recipient email (optional)
                 </span>
                 <input
@@ -215,7 +215,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
                   disabled={creating}
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.16em",
                     textTransform: "uppercase",
                     color: creating ? "rgba(255,255,255,0.24)" : "#0A0A0A",
@@ -233,7 +233,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
                     onClick={copyShareLink}
                     style={{
                       ...mono,
-                      fontSize: "8px",
+                      fontSize: "11px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                       color: `${GOLD}AA`,
@@ -257,7 +257,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
 
             {shares.length > 0 && (
               <div style={{ marginTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.85rem" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.5rem" }}>
                   Existing links
                 </p>
                 <div style={{ display: "grid", gap: "0.5rem" }}>
@@ -278,7 +278,7 @@ export default function CaseSharePanel({ caseId }: { caseId: string }) {
                           onClick={() => revokeShare(share.id)}
                           style={{
                             ...mono,
-                            fontSize: "7px",
+                            fontSize: "11px",
                             letterSpacing: "0.12em",
                             textTransform: "uppercase",
                             color: "rgba(252,165,165,0.58)",

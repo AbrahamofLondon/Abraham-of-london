@@ -32,12 +32,12 @@ export default function InterventionPathRunner({ onComplete }: { onComplete: (re
     <div className="space-y-5">
       <div className="flex items-baseline justify-between mb-2">
         <div>
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Recommended Path</span>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Recommended Path</span>
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, lineHeight: 1.2, color: pathColor[result.recommendedPath] ?? GOLD }}>
             {result.recommendedPath}
           </div>
         </div>
-        <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.25)" }}>composite: {result.composite}</span>
+        <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)" }}>composite: {result.composite}</span>
       </div>
 
       {result.executionBlocked && (
@@ -49,7 +49,7 @@ export default function InterventionPathRunner({ onComplete }: { onComplete: (re
       {DIMS.map((dim) => (
         <div key={dim.key}>
           <div className="flex items-baseline justify-between mb-1">
-            <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{dim.label}</label>
+            <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{dim.label}</label>
             <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{input[dim.key]}/10</span>
           </div>
           <input type="range" min={0} max={10} step={1} value={input[dim.key]} onChange={(e) => setInput((prev) => ({ ...prev, [dim.key]: parseInt(e.target.value) }))} className="w-full" style={{ accentColor: GOLD }} />

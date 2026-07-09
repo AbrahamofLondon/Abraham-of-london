@@ -34,7 +34,7 @@ export default function PredictiveConsequence({ data }: { data: ConsequenceProje
   return (
     <div style={{ border: `1px solid ${config.color}25`, backgroundColor: `${config.color}05`, padding: "1.25rem", marginBottom: "1rem" }}>
       <div className="flex items-center gap-3 mb-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>
           Projected financial exposure (90 days)
         </span>
         <span style={{ ...mono, fontSize: "6.5px", color: "rgba(255,255,255,0.18)" }}>
@@ -71,7 +71,7 @@ export default function PredictiveConsequence({ data }: { data: ConsequenceProje
               <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                 {period.label}
               </span>
-              <span style={{ ...mono, fontSize: "8px", color: severityColor(period.data.severity) }}>
+              <span style={{ ...mono, fontSize: "11px", color: severityColor(period.data.severity) }}>
                 -{period.data.degradation}pt
               </span>
             </div>

@@ -49,7 +49,7 @@ export default function StartHereStrip() {
               <p
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "rgba(110,231,183,0.80)",
@@ -72,7 +72,7 @@ export default function StartHereStrip() {
               <span
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.45)",
@@ -98,7 +98,7 @@ export default function StartHereStrip() {
                 <p
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: `${HOMEPAGE_GOLD}CC`,
@@ -110,7 +110,7 @@ export default function StartHereStrip() {
                   className="border px-2 py-0.5"
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     color: `${HOMEPAGE_GOLD}AA`,
                     borderColor: `${HOMEPAGE_GOLD}30`,
@@ -134,7 +134,7 @@ export default function StartHereStrip() {
                 <span
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.16em",
                     textTransform: "uppercase",
                     color: `${HOMEPAGE_GOLD}BB`,
@@ -149,7 +149,7 @@ export default function StartHereStrip() {
                 onClick={e => e.stopPropagation()}
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.32)",
@@ -173,7 +173,7 @@ export default function StartHereStrip() {
               <p
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "rgba(147,197,253,0.75)",
@@ -196,7 +196,7 @@ export default function StartHereStrip() {
               <span
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.45)",

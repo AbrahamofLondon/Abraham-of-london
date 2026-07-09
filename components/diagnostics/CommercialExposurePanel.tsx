@@ -94,7 +94,7 @@ export default function CommercialExposurePanel({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: hasNoBasis ? "rgba(255,255,255,0.28)" : "rgba(255,180,80,0.75)",

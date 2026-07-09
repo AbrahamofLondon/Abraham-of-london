@@ -143,7 +143,7 @@ export default function ServiceLines(): React.ReactElement {
                       border: "1px solid rgba(255,255,255,0.07)",
                       backgroundColor: "rgba(255,255,255,0.018)",
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.32)",
                     }}>
                       {item.tag}
@@ -185,7 +185,7 @@ export default function ServiceLines(): React.ReactElement {
                       className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.75)]"
                       style={{
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px", letterSpacing: "0.26em", textTransform: "uppercase",
+                        fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
                         color: "rgba(255,255,255,0.20)",
                       }}
                     >

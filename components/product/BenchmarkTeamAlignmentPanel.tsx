@@ -148,7 +148,7 @@ export default function BenchmarkTeamAlignmentPanel({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}88`,
@@ -173,7 +173,7 @@ export default function BenchmarkTeamAlignmentPanel({
           href="/professionals"
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: `${GOLD}CC`,
@@ -203,7 +203,7 @@ export default function BenchmarkTeamAlignmentPanel({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.22)",
@@ -246,10 +246,10 @@ export default function BenchmarkTeamAlignmentPanel({
     >
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem" }}>
-        <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+        <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
           Team alignment benchmark
         </p>
-        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color, textTransform: "uppercase" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color, textTransform: "uppercase" }}>
           {bandLabel(percentile)}
         </span>
       </div>
@@ -260,7 +260,7 @@ export default function BenchmarkTeamAlignmentPanel({
           {teamDivergenceScore}
           <span style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.30)", marginLeft: "6px" }}>/ 100</span>
         </p>
-        <p style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.35)" }}>
+        <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>
           {percentile}th percentile
           {cohortMedian !== null && (
             <span style={{ color: "rgba(255,255,255,0.22)", marginLeft: "6px" }}>

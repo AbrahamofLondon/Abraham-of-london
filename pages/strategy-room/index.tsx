@@ -151,7 +151,7 @@ function StrategyRoomGate() {
   return (
     <div className="mx-auto max-w-6xl px-6 pt-8 lg:px-12">
       <div style={{ border: `1px solid ${borderColor}`, backgroundColor: bgColor, padding: "1.25rem 1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: labelColor, marginBottom: "0.65rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: labelColor, marginBottom: "0.65rem" }}>
           {label}
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.97rem", lineHeight: 1.68, color: "rgba(255,255,255,0.60)" }}>
@@ -173,15 +173,15 @@ function StrategyRoomGate() {
                 backgroundColor: `${GOLD}0D`,
                 color: `${GOLD}BB`,
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
               }}
             >
               {directive.level === "block" ? "Return to diagnostics" : "Address this first"}
               <ArrowRight style={{ width: "11px", height: "11px" }} />
             </Link>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href="/institutional" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Institutional mandate</Link>
-              <Link href="/evidence/standards" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Evidence standards</Link>
+              <Link href="/institutional" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Institutional mandate</Link>
+              <Link href="/evidence/standards" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Evidence standards</Link>
             </div>
           </div>
         )}
@@ -218,7 +218,7 @@ function EvidenceCarriedFromER() {
       }}>
         <p style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.32em",
           textTransform: "uppercase",
           color: "#C9A96E",
@@ -242,7 +242,7 @@ function EvidenceCarriedFromER() {
         </p>
         <p style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.25)",
@@ -618,7 +618,7 @@ function RouteStrip() {
           <span
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
               color: item.color,
@@ -630,7 +630,7 @@ function RouteStrip() {
             <span
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.16)",
@@ -676,7 +676,7 @@ function ExecutionEntryState({
           >
             <div style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px",
+              fontSize: "11px",
               letterSpacing: "0.28em",
               textTransform: "uppercase",
               color: `${GOLD}CC`,
@@ -686,7 +686,7 @@ function ExecutionEntryState({
             </div>
             <div style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.12em",
               color: "rgba(242,241,238,0.45)",
               lineHeight: 1.7,
@@ -714,7 +714,7 @@ function ExecutionEntryState({
             <p style={{
               marginTop: "0.85rem",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
+              fontSize: "11px",
               lineHeight: 1.7,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
@@ -738,7 +738,7 @@ function ExecutionEntryState({
             <p style={{
               marginTop: "0.35rem",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.12em",
               color: "rgba(255,255,255,0.18)",
             }}>
@@ -776,7 +776,7 @@ function ExecutionEntryState({
                 </div>
                 <div style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   lineHeight: 1.55,
                   color: metric.label === "Ignored consequence" ? "rgba(252,165,165,0.82)" : "rgba(255,255,255,0.72)",
                 }}>
@@ -801,7 +801,7 @@ function FirstActionPrompt() {
         <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.25rem" }}>
           <div style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.32em",
             textTransform: "uppercase",
             color: `${GOLD}AA`,
@@ -809,14 +809,14 @@ function FirstActionPrompt() {
           }}>
             Your required move
           </div>
-          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
             Your report named the condition. The Strategy Room tests whether you will act against it. Start with the first intervention. Do not optimise. Execute.
           </p>
         </div>
         <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.25rem" }}>
           <div style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.32em",
             textTransform: "uppercase",
             color: "rgba(252,165,165,0.72)",
@@ -824,7 +824,7 @@ function FirstActionPrompt() {
           }}>
             System constraint
           </div>
-          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
             Only act on what is defined here. Deviation introduces risk.
           </p>
         </div>
@@ -856,7 +856,7 @@ function CompactEntryField({
           onChange={onChange}
           rows={3}
           placeholder={field.placeholder}
-          style={{ ...inputStyle, resize: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px" }}
+          style={{ ...inputStyle, resize: "none", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px" }}
         />
       ) : field.type === "select" ? (
         <select
@@ -864,7 +864,7 @@ function CompactEntryField({
           name={String(field.name)}
           value={value}
           onChange={onChange}
-          style={{ ...inputStyle, appearance: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px" }}
+          style={{ ...inputStyle, appearance: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px" }}
         >
           <option value="" style={{ backgroundColor: "rgb(6 6 9)" }}>Select...</option>
           {(field.options || []).map((option) => (
@@ -881,7 +881,7 @@ function CompactEntryField({
           value={value}
           onChange={onChange}
           placeholder={field.placeholder}
-          style={{ ...inputStyle, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px" }}
+          style={{ ...inputStyle, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px" }}
         />
       )}
     </div>
@@ -928,7 +928,7 @@ function EntryBrief({
 
         <div className="grid gap-px lg:grid-cols-[1.15fr_0.85fr]" style={{ border: "1px solid rgba(255,255,255,0.11)", backgroundColor: "rgba(255,255,255,0.08)" }}>
           <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1.2rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.75rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.75rem" }}>
               Decision to be executed
             </div>
             <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "9px", lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
@@ -944,7 +944,7 @@ function EntryBrief({
                   <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.45rem" }}>
                     {label}
                   </div>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: label === "Cost of delay" ? "rgba(252,165,165,0.76)" : "rgba(255,255,255,0.58)" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.55, color: label === "Cost of delay" ? "rgba(252,165,165,0.76)" : "rgba(255,255,255,0.58)" }}>
                     {value}
                   </p>
                 </div>
@@ -953,10 +953,10 @@ function EntryBrief({
           </div>
 
           <div style={{ backgroundColor: "rgb(5 6 8)", padding: "1.2rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.74)", marginBottom: "0.75rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.74)", marginBottom: "0.75rem" }}>
               Contradiction snapshot
             </div>
-            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.72)" }}>
               {brief.contradiction}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -976,10 +976,10 @@ function EntryBrief({
           <div style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgb(5 6 8)", padding: "1.2rem" }}>
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.5rem" }}>
                   What the system still needs
                 </div>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.6, color: "rgba(255,255,255,0.46)" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.46)" }}>
                   Only missing execution inputs are requested. Captured evidence is not repeated.
                 </p>
               </div>
@@ -1000,14 +1000,14 @@ function EntryBrief({
                 ))}
               </div>
             ) : (
-              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "0.85rem 1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+              <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "0.85rem 1rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                 No further execution inputs required.
               </div>
             )}
 
             {error && (
               <div style={{ marginTop: "1rem", border: "1px solid rgba(248,113,113,0.22)", backgroundColor: "rgba(248,113,113,0.05)", padding: "0.85rem 1rem" }}>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(252,165,165,0.80)" }}>
                   {error}
                 </span>
               </div>
@@ -1017,7 +1017,7 @@ function EntryBrief({
               <button
                 type="submit"
                 className="inline-flex items-center justify-center gap-2"
-                style={{ border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}10`, color: GOLD, padding: "0.8rem 1.05rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase" }}
+                style={{ border: `1px solid ${GOLD}45`, backgroundColor: `${GOLD}10`, color: GOLD, padding: "0.8rem 1.05rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase" }}
               >
                 Begin execution session
                 <ArrowRight style={{ width: "12px", height: "12px" }} />
@@ -1025,7 +1025,7 @@ function EntryBrief({
               <button
                 type="button"
                 onClick={onClearDraft}
-                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}
               >
                 Clear entry
               </button>
@@ -1064,7 +1064,7 @@ function ExecutionDecisionFrame({
             <div key={label} style={{ backgroundColor: "rgb(5 6 8)", padding: "1.15rem 1.25rem" }}>
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: label === "Constraints (non-negotiable)" ? "rgba(252,165,165,0.68)" : `${GOLD}90`,
@@ -1072,7 +1072,7 @@ function ExecutionDecisionFrame({
               }}>
                 {label}
               </div>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.68)" }}>
                 {value}
               </p>
             </div>
@@ -1127,7 +1127,7 @@ function InterventionStack({
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
         <p style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.12em",
           color: "rgba(252,165,165,0.30)",
           marginBottom: "0.5rem",
@@ -1148,7 +1148,7 @@ function InterventionStack({
           }}>
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.34em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,
@@ -1157,7 +1157,7 @@ function InterventionStack({
             </span>
             <span style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.30)",
@@ -1184,10 +1184,10 @@ function InterventionStack({
                         Execution friction
                       </span>
                     </div>
-                    <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.76)" }}>
+                    <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.76)" }}>
                       <span style={{ color: `${GOLD}AA` }}>Intent:</span> {item}
                     </p>
-                    <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>
+                    <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.50)" }}>
                       <span style={{ color: "rgba(255,255,255,0.72)" }}>Decision link:</span> this step exists to unblock: {requiredDecision}
                     </p>
                   </div>
@@ -1202,7 +1202,7 @@ function InterventionStack({
                         <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                           {label}
                         </div>
-                        <div style={{ marginTop: "0.2rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.5, color: label === "Risk if ignored" ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.52)" }}>
+                        <div style={{ marginTop: "0.2rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.5, color: label === "Risk if ignored" ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.52)" }}>
                           {value}
                         </div>
                       </div>
@@ -1236,17 +1236,17 @@ function ConstraintMap({
         <div className="grid gap-px md:grid-cols-3" style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.08)" }}>
           {constraints.map((constraint, index) => (
             <div key={`${constraint}-${index}`} style={{ backgroundColor: "rgb(5 6 8)", padding: "1rem 1.15rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)", marginBottom: "0.75rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)", marginBottom: "0.75rem" }}>
                 Blocking constraint
               </div>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.6, color: "rgba(255,255,255,0.70)" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.70)" }}>
                 {constraint}
               </p>
               <div style={{ marginTop: "0.85rem", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "0.75rem" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.48)" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.48)" }}>
                   <span style={{ color: `${GOLD}AA` }}>Workaround required:</span> assign a temporary owner and decision boundary.
                 </p>
-                <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(252,165,165,0.68)" }}>
+                <p style={{ marginTop: "0.45rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.55, color: "rgba(252,165,165,0.68)" }}>
                   If unresolved → escalation.
                 </p>
               </div>
@@ -1290,10 +1290,10 @@ function DecisionLog({
             justifyContent: "space-between",
             gap: "1rem",
           }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.34em", textTransform: "uppercase", color: `${GOLD}AA` }}>
               Decision log
             </span>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
               Pending · Executed · Blocked
             </span>
           </div>
@@ -1306,7 +1306,7 @@ function DecisionLog({
               style={{
                 ...inputStyle,
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
+                fontSize: "11px",
                 backgroundColor: "rgba(255,255,255,0.025)",
               }}
             />
@@ -1319,7 +1319,7 @@ function DecisionLog({
                 color: GOLD,
                 padding: "0.7rem 1rem",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.24em",
                 textTransform: "uppercase",
               }}
@@ -1331,19 +1331,19 @@ function DecisionLog({
 
           <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
             {entries.length === 0 ? (
-              <div className="p-4" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
+              <div className="p-4" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.42)" }}>
                 No decision logged. The environment is not active until the first decision is recorded.
               </div>
             ) : entries.map((entry) => (
               <div key={entry.id} className="grid gap-3 p-4 lg:grid-cols-[150px_1fr_170px] lg:items-start">
                 <div className="flex items-center gap-2" style={{ color: "rgba(255,255,255,0.38)" }}>
                   <Clock3 style={{ width: "12px", height: "12px" }} />
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                     {formatTimeStamp(entry.createdAt)}
                   </span>
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", lineHeight: 1.65, color: "rgba(255,255,255,0.74)" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.65, color: "rgba(255,255,255,0.74)" }}>
                     {entry.text}
                   </p>
                   {entry.status === "blocked" && (
@@ -1355,7 +1355,7 @@ function DecisionLog({
                         ...inputStyle,
                         marginTop: "0.75rem",
                         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         borderColor: entry.blockReason.trim() ? "rgba(255,255,255,0.14)" : "rgba(252,165,165,0.45)",
                         backgroundColor: "rgba(252,165,165,0.035)",
                       }}
@@ -1368,7 +1368,7 @@ function DecisionLog({
                   style={{
                     ...inputStyle,
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7.5px",
+                    fontSize: "11px",
                     backgroundColor: "rgb(2 3 5)",
                   }}
                 >
@@ -1398,17 +1398,17 @@ function EscalationTriggers({ entries }: { entries: DecisionLogEntry[] }) {
       <div className="mx-auto max-w-7xl px-6 py-6 lg:px-12">
         <div style={{ border: "1px solid rgba(252,165,165,0.16)", backgroundColor: "rgb(5 6 8)" }}>
           <div style={{ padding: "0.85rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.76)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.76)" }}>
               Escalation triggers
             </span>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: blocked ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.28)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: blocked ? "rgba(252,165,165,0.72)" : "rgba(255,255,255,0.28)" }}>
               {blocked ? `${blocked} blocked` : "Armed"}
             </span>
           </div>
           <div className="grid gap-px md:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.07)" }}>
             {triggers.map((trigger) => (
               <div key={trigger} style={{ backgroundColor: "rgb(5 6 8)", padding: "0.9rem 1rem" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
                   {trigger}
                 </p>
               </div>
@@ -1430,13 +1430,13 @@ function ExitStates() {
   return (
     <section style={{ backgroundColor: VOID }}>
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-12">
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.65rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.65rem" }}>
           Exit classification
         </div>
         <div className="grid gap-px md:grid-cols-3" style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.08)" }}>
           {exits.map((exit) => (
             <div key={exit.label} style={{ backgroundColor: "rgb(5 6 8)", padding: "0.85rem 1rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: exit.color, fontWeight: 700, marginBottom: "0.35rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: exit.color, fontWeight: 700, marginBottom: "0.35rem" }}>
                 {exit.label}
               </div>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.45, color: "rgba(255,255,255,0.45)" }}>
@@ -1487,7 +1487,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   marginBottom: "0.55rem",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "7.5px",
+  fontSize: "11px",
   letterSpacing: "0.36em",
   textTransform: "uppercase",
   color: "rgba(255,255,255,0.28)",
@@ -1528,41 +1528,41 @@ function InstitutionalCorridorPanel({
 
   return (
     <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "14px 18px" }}>
-      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88` }}>
+      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88` }}>
         Institutional case in execution
       </p>
       <div style={{ marginTop: "10px", display: "grid", gap: "6px", gridTemplateColumns: "1fr 1fr 1fr" }}>
         <div>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>State</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>State</span>
           <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.56)", marginTop: "2px" }}>{stateLabel}</p>
         </div>
         <div>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence</span>
           <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.56)", marginTop: "2px" }}>{evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
         </div>
         <div>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Source</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Source</span>
           <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.56)", marginTop: "2px" }}>Executive Reporting</p>
         </div>
       </div>
       <div style={{ marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
         {counselEligible && (
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", border: "1px solid rgba(252,165,165,0.18)", padding: "4px 8px" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)", border: "1px solid rgba(252,165,165,0.18)", padding: "4px 8px" }}>
             Counsel review recommended
           </span>
         )}
         {boardroomEligible && (
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: `${GOLD}88`, border: `1px solid ${GOLD}22`, padding: "4px 8px" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: `${GOLD}88`, border: `1px solid ${GOLD}22`, padding: "4px 8px" }}>
             Boardroom dossier qualified
           </span>
         )}
         {oversightEligible && (
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)", border: "1px solid rgba(110,231,183,0.18)", padding: "4px 8px" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)", border: "1px solid rgba(110,231,183,0.18)", padding: "4px 8px" }}>
             Oversight {corridorState?.oversightStatus === "ACTIVE" ? "active" : "eligible"}
           </span>
         )}
         {!counselEligible && !boardroomEligible && !oversightEligible && (
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.08)", padding: "4px 8px" }}>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", border: "1px solid rgba(255,255,255,0.08)", padding: "4px 8px" }}>
             Oversight not yet warranted
           </span>
         )}
@@ -1791,13 +1791,13 @@ export default function StrategyRoomPage({
 
               {checkoutCancelled && (
                 <div className="mb-6" style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "0.85rem 1rem" }}>
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>Session cancelled. No payment taken.</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>Session cancelled. No payment taken.</span>
                 </div>
               )}
 
               {/* ── Ladder orientation ── */}
               <div style={{ marginBottom: "28px" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
                   Fast Diagnostic{" "}
                   <span style={{ color: `${GOLD}35`, margin: "0 4px" }}>→</span>
                   Executive Reporting{" "}
@@ -1836,7 +1836,7 @@ export default function StrategyRoomPage({
               <div className="mt-4 grid gap-px sm:grid-cols-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", maxWidth: "36rem" }}>
                 {["Decision sequencing", "Constraint removal", "Execution verification"].map((item) => (
                   <div key={item} style={{ backgroundColor: VOID, padding: "0.65rem 0.85rem" }}>
-                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{item}</span>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -1844,7 +1844,7 @@ export default function StrategyRoomPage({
               {/* ── Activation corridor — what qualifies, what is carried, what is produced ── */}
               <div className="mt-8 space-y-3" style={{ maxWidth: "40rem" }}>
                 <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}05`, padding: "1.15rem 1.25rem" }}>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.65rem" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}AA`, marginBottom: "0.65rem" }}>
                     What qualifies a case for entry
                   </p>
                   <div className="space-y-2">
@@ -1854,17 +1854,17 @@ export default function StrategyRoomPage({
                       "A decision owner is identified and the consequence is measurable.",
                     ].map((line, i) => (
                       <div key={i} style={{ display: "flex", gap: "0.65rem", alignItems: "flex-start" }}>
-                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: `${GOLD}60`, flexShrink: 0, marginTop: "2px" }}>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: `${GOLD}60`, flexShrink: 0, marginTop: "2px" }}>
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)" }}>{line}</p>
+                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)" }}>{line}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.15rem 1.25rem" }}>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.65rem" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.65rem" }}>
                     What this session produces
                   </p>
                   <div className="grid gap-px grid-cols-2" style={{ backgroundColor: "rgba(255,255,255,0.04)" }}>
@@ -1876,14 +1876,14 @@ export default function StrategyRoomPage({
                     ].map(([label, value]) => (
                       <div key={label} style={{ backgroundColor: VOID, padding: "0.75rem 0.85rem" }}>
                         <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.3rem" }}>{label}</p>
-                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>{value}</p>
+                        <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>{value}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.85rem 1.1rem", display: "flex", flexWrap: "wrap", gap: "1.25rem", alignItems: "center" }}>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                     After the session:
                   </p>
                   {[
@@ -1894,7 +1894,7 @@ export default function StrategyRoomPage({
                     <Link
                       key={href}
                       href={href}
-                      style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88`, textDecoration: "none" }}
+                      style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}88`, textDecoration: "none" }}
                     >
                       {label} →
                     </Link>
@@ -1968,7 +1968,7 @@ export default function StrategyRoomPage({
               {/* Decision-weight price framing */}
               <div className="mt-8 space-y-4" style={{ maxWidth: "36rem" }}>
                 <div style={{ border: "1px solid rgba(255,255,255,0.08)", padding: "1.25rem" }}>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     If this decision slips another 30 days, it becomes:
                   </p>
                   <ul className="mt-2 space-y-1 text-sm" style={{ color: "rgba(252,165,165,0.55)" }}>
@@ -2304,7 +2304,7 @@ export default function StrategyRoomPage({
           }}>
             <div style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.30em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,
@@ -2347,7 +2347,7 @@ export default function StrategyRoomPage({
               />
               <div style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.38em",
                 textTransform: "uppercase",
                 color: `${GOLD}90`,
@@ -2377,7 +2377,7 @@ export default function StrategyRoomPage({
 
             <div className="mx-auto max-w-7xl px-6 lg:px-12 pt-4 pb-2">
               <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "16px 20px" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
                   This session governs
                 </p>
                 <div style={{ display: "grid", gap: "6px" }}>
@@ -2390,7 +2390,7 @@ export default function StrategyRoomPage({
                     { label: "Counsel / boardroom trigger", value: "Escalation triggers active — qualification conditions monitored" },
                   ].map((item) => (
                     <div key={item.label} style={{ display: "flex", gap: "16px" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>
                         {item.label}
                       </span>
                       <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
@@ -2399,7 +2399,7 @@ export default function StrategyRoomPage({
                     </div>
                   ))}
                 </div>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
                   Session governed · Execution record written
                 </p>
               </div>
@@ -2416,7 +2416,7 @@ export default function StrategyRoomPage({
               );
               const sv = srSeverityColor(srAuthority.severity);
               const bg = srSeverityBg(srAuthority.severity);
-              const srMono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase" as const };
+              const srMono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" as const };
               const conseq = srAuthority.consequence;
               return (
                 <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
@@ -2472,7 +2472,7 @@ export default function StrategyRoomPage({
 
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
               <div style={{ borderLeft: `2px solid ${GOLD}55`, backgroundColor: `${GOLD}08`, padding: "16px 18px" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                   Your required move
                 </p>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.46)", marginTop: "8px" }}>
@@ -2481,7 +2481,7 @@ export default function StrategyRoomPage({
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>
                   Next action: {localSummary(canonical)?.nextAction ?? "Select and execute the first governed intervention."}
                 </p>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", color: enforcement?.checkpoint?.status === "OVERDUE" ? "rgba(252,165,165,0.60)" : "rgba(255,255,255,0.30)", marginTop: "8px" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", color: enforcement?.checkpoint?.status === "OVERDUE" ? "rgba(252,165,165,0.60)" : "rgba(255,255,255,0.30)", marginTop: "8px" }}>
                   Checkpoint due: {enforcement?.checkpoint?.dueAt ? new Date(enforcement.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "No due date recorded"}
                 </p>
                 <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(252,165,165,0.50)", marginTop: "6px" }}>
@@ -2491,11 +2491,11 @@ export default function StrategyRoomPage({
                 </p>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "10px" }}>
                   {executionSessionId ? (
-                    <Link href={`/strategy-room/session/${executionSessionId}`} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}35`, padding: "8px 12px" }}>
+                    <Link href={`/strategy-room/session/${executionSessionId}`} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}35`, padding: "8px 12px" }}>
                       Open session
                     </Link>
                   ) : null}
-                  <Link href="/decision-centre" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 12px" }}>
+                  <Link href="/decision-centre" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.12)", padding: "8px 12px" }}>
                     Respond to checkpoint
                   </Link>
                 </div>
@@ -2582,7 +2582,7 @@ export default function StrategyRoomPage({
             {enforcement?.checkpoint && (
               <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
                 <div style={{ borderLeft: "2px solid rgba(255,255,255,0.18)", backgroundColor: "rgba(255,255,255,0.02)", padding: "14px 18px" }}>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.44)" }}>
                     Checkpoint governance
                   </p>
                   <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.55, color: "rgba(255,255,255,0.78)", marginTop: "4px" }}>
@@ -2591,12 +2591,12 @@ export default function StrategyRoomPage({
                   <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.52)", marginTop: "6px" }}>
                     {enforcement.checkpoint.verificationQuestion}
                   </p>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: enforcement.checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : enforcement.checkpoint.status === "RESPONDED" ? "rgba(110,231,183,0.55)" : `${GOLD}A0`, marginTop: "8px" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: enforcement.checkpoint.status === "OVERDUE" ? "rgba(252,165,165,0.55)" : enforcement.checkpoint.status === "RESPONDED" ? "rgba(110,231,183,0.55)" : `${GOLD}A0`, marginTop: "8px" }}>
                     {enforcement.checkpoint.status === "RESPONDED"
                       ? `Responded${enforcement.checkpoint.respondedAt ? ` · ${new Date(enforcement.checkpoint.respondedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`
                       : `${enforcement.checkpoint.status}${enforcement.checkpoint.dueAt ? ` · Due ${new Date(enforcement.checkpoint.dueAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}`}
                   </p>
-                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginTop: "6px" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)", marginTop: "6px" }}>
                     Source: {enforcement.checkpoint.sourceLabel} · Evidence posture: {enforcement.checkpoint.evidencePosture.replace(/_/g, " ").toLowerCase()}
                   </p>
                 </div>
@@ -2696,7 +2696,7 @@ export default function StrategyRoomPage({
             {enforcement?.directive && (
               <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingBottom: "0.5rem" }}>
                 <div style={{ border: "1px solid rgba(252,165,165,0.25)", backgroundColor: "rgba(252,165,165,0.04)", padding: "0.75rem 1rem" }}>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>System directive</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)" }}>System directive</div>
                   <p style={{ marginTop: "0.2rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(252,165,165,0.50)" }}>{enforcement.directive}</p>
                 </div>
               </div>
@@ -2712,7 +2712,7 @@ export default function StrategyRoomPage({
                 }}>
                   <span style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "7px",
+                    fontSize: "11px",
                     letterSpacing: "0.24em",
                     textTransform: "uppercase",
                     color: "rgba(252,165,165,0.70)",
@@ -2738,7 +2738,7 @@ export default function StrategyRoomPage({
                     <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
                       Execution trajectory
                     </span>
-                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.10em", color: trajColor, fontWeight: 700 }}>
+                    <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", color: trajColor, fontWeight: 700 }}>
                       {traj}
                     </span>
                     {executed > 0 && (
@@ -2768,31 +2768,31 @@ export default function StrategyRoomPage({
             {/* ── After-session navigation — Decision Centre / Return Brief ── */}
             <div className="mx-auto max-w-7xl px-6 lg:px-12" style={{ paddingTop: "0.5rem", paddingBottom: "2rem" }}>
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.25rem", display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
                   Continue in:
                 </span>
                 <Link
                   href="/decision-centre"
                   className="inline-flex items-center gap-2"
-                  style={{ padding: "9px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`, color: "#F5F5F5", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                  style={{ padding: "9px 18px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`, color: "#F5F5F5", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
                 >
                   Decision Centre
                   <ArrowRight style={{ width: 11, height: 11 }} />
                 </Link>
                 <Link
                   href="/return-brief"
-                  style={{ padding: "9px 18px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.38)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                  style={{ padding: "9px 18px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.38)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
                 >
                   Understand Return Brief
                 </Link>
                 <Link
                   href="/provenance/sample-export"
-                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70`, textDecoration: "none" }}
+                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}70`, textDecoration: "none" }}
                 >
                   View client-safe provenance sample →
                 </Link>
               </div>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", lineHeight: 1.6 }}>
                 Live case provenance appears when a case-bound record has been composed. The sample shows the client-safe format.
               </p>
             </div>
@@ -2824,7 +2824,7 @@ export default function StrategyRoomPage({
                 className="inline-flex items-center gap-2 transition-all hover:underline"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7.5px",
+                  fontSize: "11px",
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.3)",

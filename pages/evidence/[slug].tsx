@@ -343,13 +343,13 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>{children}</span>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)" }}>{children}</span>
     </div>
   );
 }
 
 function SL({ children }: { children: React.ReactNode }) {
-  return <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.55rem" }}>{children}</div>;
+  return <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginBottom: "0.55rem" }}>{children}</div>;
 }
 
 function Rule() { return <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />; }
@@ -359,7 +359,7 @@ function MetaRow({ label, value, accent }: { label: string; value: string; accen
   return (
     <div className="flex items-start gap-3 py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
       <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.24em", textTransform: "uppercase", color: accent ? `${GOLD}70` : "rgba(255,255,255,0.22)", minWidth: "9rem", flexShrink: 0 }}>{label}</span>
-      <span style={{ ...mono, fontSize: "7.5px", lineHeight: 1.5, color: "rgba(255,255,255,0.60)" }}>{value}</span>
+      <span style={{ ...mono, fontSize: "11px", lineHeight: 1.5, color: "rgba(255,255,255,0.60)" }}>{value}</span>
     </div>
   );
 }
@@ -384,7 +384,7 @@ function ActionBand({ label, items }: { label: string; items: string[] }) {
       <div style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "0.3rem" }}>{label}</div>
       {items.map((a, i) => (
         <div key={i} className="flex items-start gap-2 py-1" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-          <span style={{ ...mono, fontSize: "7px", color: `${GOLD}50`, flexShrink: 0 }}>{String(i + 1).padStart(2, "0")}</span>
+          <span style={{ ...mono, fontSize: "11px", color: `${GOLD}50`, flexShrink: 0 }}>{String(i + 1).padStart(2, "0")}</span>
           <span style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.55)" }}>{a}</span>
         </div>
       ))}
@@ -427,7 +427,7 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
           {/* 1. CASE CLASSIFICATION */}
           <div className="py-5" style={{ maxWidth: "56rem" }}>
             <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1rem 1.25rem" }}>
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.65rem" }}>Case Classification</div>
+              <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.65rem" }}>Case Classification</div>
               <MetaRow label="Condition Type" value={asset.conditionType} accent />
               <MetaRow label="Domain" value={asset.domain} />
               <MetaRow label="Confidence" value={asset.confidence} />
@@ -436,13 +436,13 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
                 <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Evidence Basis</span>
                 <div className="mt-1 space-y-0.5">
                   {asset.evidenceBasis.map((eb) => (
-                    <div key={eb.label} className="flex items-center gap-2"><BasisTag basis={eb.basis} /><span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.50)" }}>{eb.label}</span></div>
+                    <div key={eb.label} className="flex items-center gap-2"><BasisTag basis={eb.basis} /><span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{eb.label}</span></div>
                   ))}
                 </div>
               </div>
               <div className="mt-2.5 flex items-center gap-3" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.5rem" }}>
                 <span style={{ ...mono, fontSize: "6px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}60` }}>System Link</span>
-                <Link href={asset.systemLink.href} style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: `${GOLD}90`, textDecoration: "underline", textDecorationColor: `${GOLD}30` }}>{asset.systemLink.label}</Link>
+                <Link href={asset.systemLink.href} style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", color: `${GOLD}90`, textDecoration: "underline", textDecorationColor: `${GOLD}30` }}>{asset.systemLink.label}</Link>
               </div>
             </div>
           </div>
@@ -494,7 +494,7 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
             <SL>System Classification</SL>
             <div className="flex flex-wrap items-center gap-4">
               <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: `${GOLD}CC`, fontWeight: 700 }}>{asset.systemClassification}</span>
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.35)" }}>{asset.reclassification}</span>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.35)" }}>{asset.reclassification}</span>
             </div>
           </div>
 
@@ -550,7 +550,7 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
             <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.75rem" }}>
               {asset.timeline.map((t, i) => (
                 <div key={i} className="flex items-start gap-3 py-1" style={{ borderBottom: i < asset.timeline.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-                  <span style={{ ...mono, fontSize: "7px", color: `${GOLD}70`, minWidth: "4rem", flexShrink: 0 }}>{t.marker}</span>
+                  <span style={{ ...mono, fontSize: "11px", color: `${GOLD}70`, minWidth: "4rem", flexShrink: 0 }}>{t.marker}</span>
                   <span style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.52)" }}>{t.event}</span>
                 </div>
               ))}
@@ -609,7 +609,7 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
           {/* 13. SYSTEM TRACE */}
           <div className="py-5" style={{ maxWidth: "56rem" }}>
             <div style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "0.85rem 1.1rem" }}>
-              <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.45rem" }}>System Trace</div>
+              <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.45rem" }}>System Trace</div>
               <Bullets items={asset.systemFeeds} color="rgba(255,255,255,0.45)" />
               <div className="mt-2.5" style={{ borderTop: `1px solid ${GOLD}15`, paddingTop: "0.5rem" }}>
                 <p style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.55, color: `${GOLD}90`, fontStyle: "italic" }}>{asset.principle}</p>
@@ -625,7 +625,7 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
               <SL>Full dossier</SL>
               <p style={{ ...serif, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.38)" }}>Available as a structured dossier for offline use and board-level discussion.</p>
               <a href={`/api/downloads/${asset.dossierSlug}`} className="mt-2.5 inline-flex items-center gap-2 transition-all duration-200"
-                style={{ padding: "7px 14px", border: "1px solid rgba(255,255,255,0.14)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                style={{ padding: "7px 14px", border: "1px solid rgba(255,255,255,0.14)", backgroundColor: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.50)", ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; }}
               >Download full dossier <ArrowRight style={{ width: 9, height: 9 }} /></a>
@@ -643,9 +643,9 @@ export default function EvidenceDetailPage({ asset, valuePayload }: PageProps) {
 
           {/* BACK */}
           <div className="pb-10 flex items-center gap-4">
-            <Link href="/evidence" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>All evidence</Link>
-            <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.12)" }}>&middot;</span>
-            <Link href="/" style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Back to home</Link>
+            <Link href="/evidence" style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>All evidence</Link>
+            <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.12)" }}>&middot;</span>
+            <Link href="/" style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Back to home</Link>
           </div>
         </div>
       </div>

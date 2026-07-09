@@ -44,38 +44,38 @@ export default function BoardBriefBuilderRunner({ onComplete }: { onComplete: (r
       {result && (
         <div className="flex items-baseline justify-between">
           <div>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Board Readiness</span>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Board Readiness</span>
             <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "3rem", fontWeight: 300, lineHeight: 1, color: readinessColor }}>{result.readinessScore}</div>
           </div>
           <div className="text-right">
             <span style={{ ...mono, fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: readinessColor }}>{result.briefReadiness.replace(/_/g, " ")}</span>
-            <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.30)", marginTop: "4px" }}>Posture: {result.decisionPosture.replace(/_/g, " ").toLowerCase()}</p>
+            <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.30)", marginTop: "4px" }}>Posture: {result.decisionPosture.replace(/_/g, " ").toLowerCase()}</p>
           </div>
         </div>
       )}
 
       {/* Text inputs */}
       <div>
-        <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Decision statement</label>
+        <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Decision statement</label>
         <textarea value={input.decisionStatement} onChange={(e) => setInput((p) => ({ ...p, decisionStatement: e.target.value }))} placeholder="What decision must the board address?" rows={2} className="mt-2 w-full resize-none border border-white/10 bg-white/5 p-3 text-sm text-white/70 placeholder:text-white/20 focus:border-amber-500/40 focus:outline-none" />
       </div>
       <div>
-        <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Strategic context</label>
+        <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Strategic context</label>
         <textarea value={input.strategicContext} onChange={(e) => setInput((p) => ({ ...p, strategicContext: e.target.value }))} placeholder="Why does this decision matter strategically?" rows={2} className="mt-2 w-full resize-none border border-white/10 bg-white/5 p-3 text-sm text-white/70 placeholder:text-white/20 focus:border-amber-500/40 focus:outline-none" />
       </div>
       <div>
-        <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Recommended decision</label>
+        <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Recommended decision</label>
         <textarea value={input.recommendedDecision} onChange={(e) => setInput((p) => ({ ...p, recommendedDecision: e.target.value }))} placeholder="What do you recommend the board decides?" rows={2} className="mt-2 w-full resize-none border border-white/10 bg-white/5 p-3 text-sm text-white/70 placeholder:text-white/20 focus:border-amber-500/40 focus:outline-none" />
       </div>
 
       {/* Known objections */}
       <div>
-        <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Known objections</label>
+        <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Known objections</label>
         {input.knownObjections.map((obj, i) => (
           <input key={i} type="text" value={obj} onChange={(e) => updateObjection(i, e.target.value)} placeholder={`Objection ${i + 1}...`} className="mt-2 w-full border border-white/10 bg-white/5 p-2 text-sm text-white/70 placeholder:text-white/20 focus:border-amber-500/40 focus:outline-none" />
         ))}
         {input.knownObjections.length < 5 && (
-          <button onClick={addObjection} style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem", cursor: "pointer", border: "none", background: "none" }}>+ Add objection</button>
+          <button onClick={addObjection} style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem", cursor: "pointer", border: "none", background: "none" }}>+ Add objection</button>
         )}
       </div>
 
@@ -83,7 +83,7 @@ export default function BoardBriefBuilderRunner({ onComplete }: { onComplete: (r
       {sliders.map((s) => (
         <div key={s.key}>
           <div className="flex items-baseline justify-between mb-1">
-            <label style={{ ...mono, fontSize: "7px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{s.label}</label>
+            <label style={{ ...mono, fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{s.label}</label>
             <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.50)" }}>{input[s.key]}/10</span>
           </div>
           <input type="range" min={0} max={10} step={1} value={input[s.key]} onChange={(e) => setInput((p) => ({ ...p, [s.key]: parseInt(e.target.value) }))} className="w-full" style={{ accentColor: GOLD }} />
@@ -101,7 +101,7 @@ export default function BoardBriefBuilderRunner({ onComplete }: { onComplete: (r
                 <div key={i} className="mt-3">
                   <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", fontStyle: "italic" }}>&ldquo;{oh.objection}&rdquo;</p>
                   <p style={{ fontSize: "0.82rem", lineHeight: 1.6, color: "rgba(255,255,255,0.50)", marginTop: "0.25rem" }}>{oh.response}</p>
-                  <p style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.20)", marginTop: "0.15rem" }}>{oh.evidenceBasis}</p>
+                  <p style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.20)", marginTop: "0.15rem" }}>{oh.evidenceBasis}</p>
                 </div>
               ))}
             </div>

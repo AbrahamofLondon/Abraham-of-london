@@ -73,7 +73,7 @@ export default function CredibilityQuotes(): React.ReactElement {
             <p style={{
               marginTop: "1.25rem",
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7.5px", letterSpacing: "0.32em", textTransform: "uppercase",
+              fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase",
               color: "rgba(255,255,255,0.32)",
             }}>
               — {item.a}

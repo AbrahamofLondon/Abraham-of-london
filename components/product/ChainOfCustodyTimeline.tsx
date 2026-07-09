@@ -107,7 +107,7 @@ export default function ChainOfCustodyTimeline({
           <p
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -144,7 +144,7 @@ export default function ChainOfCustodyTimeline({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: `${GOLD}88`,

@@ -48,7 +48,7 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-5xl space-y-6">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
               Proof Pack
             </p>
             <h1 className="mt-3 text-3xl text-white">Portable governed-chain record.</h1>
@@ -69,7 +69,7 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
                 { label: "Provenance status", value: (pack?.oversightCycles?.count ?? 0) > 0 ? "Chain anchor available — view provenance sample for record detail" : "Provenance status will appear when this case has a chain-anchored record." },
               ].map((row) => (
                 <div key={row.label} style={{ display: "flex", gap: "14px" }}>
-                  <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)", minWidth: "120px", flexShrink: 0, paddingTop: "1px" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.55)", minWidth: "120px", flexShrink: 0, paddingTop: "1px" }}>
                     {row.label}
                   </span>
                   <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -102,7 +102,7 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
                   pack.oversightCycles,
                 ].map((item) => (
                   <article key={item.label} style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.42)" }}>
                       {item.label}
                     </p>
                     <p className="mt-3 text-3xl text-white">{item.count}</p>
@@ -115,7 +115,7 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
               </section>
 
               <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
                   Retained Outcome History
                 </p>
                 <p className="mt-3 text-sm leading-7 text-white/65">
@@ -130,7 +130,7 @@ const ProofPackPage: NextPage<Props> = ({ authenticated, pack, outcomeContext, o
               </section>
 
               <section style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
                   Summary
                 </p>
                 <p className="mt-3 text-sm leading-7 text-white/65">{pack.summary}</p>

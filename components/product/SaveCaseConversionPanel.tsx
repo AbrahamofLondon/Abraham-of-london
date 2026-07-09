@@ -236,7 +236,7 @@ export default function SaveCaseConversionPanel({
           <p
             style={{
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(100,220,140,0.85)",
@@ -275,7 +275,7 @@ export default function SaveCaseConversionPanel({
               alignItems: "center",
               gap: "0.5rem",
               ...mono,
-              fontSize: "8px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               border: `1px solid ${GOLD}55`,
@@ -307,7 +307,7 @@ export default function SaveCaseConversionPanel({
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "7.5px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.42)",
@@ -329,7 +329,7 @@ export default function SaveCaseConversionPanel({
         onClick={() => setDismissed(true)}
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.20)",

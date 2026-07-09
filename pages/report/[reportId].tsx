@@ -49,7 +49,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: "rgba(255,255,255,0.28)",
@@ -86,7 +86,7 @@ function StatusBadge({ status }: { status: LiveReportResult["status"] }) {
     <span
       style={{
         ...mono,
-        fontSize: "7px",
+        fontSize: "11px",
         letterSpacing: "0.14em",
         textTransform: "uppercase",
         color: c.color,
@@ -123,7 +123,7 @@ function ConfidenceBar({ confidence }: { confidence: number }) {
       <span
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           color: "rgba(255,255,255,0.28)",
           flexShrink: 0,
         }}
@@ -180,7 +180,7 @@ const LiveReportPage: NextPage = () => {
       <Layout title="Executive Report | Abraham of London">
         <main className="min-h-screen px-6 py-24" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
           <div className="mx-auto max-w-2xl">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               Loading report…
             </p>
           </div>
@@ -196,7 +196,7 @@ const LiveReportPage: NextPage = () => {
           <div className="mx-auto max-w-2xl space-y-4">
             <Link
               href="/decision-centre"
-              style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
+              style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
             >
               ← Decision Centre
             </Link>
@@ -251,7 +251,7 @@ const LiveReportPage: NextPage = () => {
               alignItems: "center",
               gap: "0.4rem",
               ...mono,
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.28)",
@@ -278,7 +278,7 @@ const LiveReportPage: NextPage = () => {
               <p
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: `${GOLD}88`,
@@ -367,7 +367,7 @@ const LiveReportPage: NextPage = () => {
                   href="/diagnostics/fast"
                   style={{
                     ...mono,
-                    fontSize: "8px",
+                    fontSize: "11px",
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: `${GOLD}CC`,
@@ -537,7 +537,7 @@ const LiveReportPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: `${GOLD}DD`,
@@ -557,7 +557,7 @@ const LiveReportPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.38)",
@@ -575,7 +575,7 @@ const LiveReportPage: NextPage = () => {
                 alignItems: "center",
                 gap: "0.4rem",
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.28)",

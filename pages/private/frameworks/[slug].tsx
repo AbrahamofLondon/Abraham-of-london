@@ -76,7 +76,7 @@ function SecurityBadge({ label }: { label: string }) {
       <Shield style={{ width: "11px", height: "11px", color: `${GOLD}80` }} />
       <span style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase",
+        fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase",
         color: `${GOLD}AA`,
       }}>
         {label}
@@ -212,7 +212,7 @@ const PrivateFrameworkPreviewPage: NextPage<Props> = ({
                 <Lock style={{ width: "32px", height: "32px", color: `${GOLD}80` }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase",
                   color: "rgba(255,255,255,0.30)",
                 }}>
                   Loading
@@ -273,7 +273,7 @@ const PrivateFrameworkPreviewPage: NextPage<Props> = ({
             <div>
               <p style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7.5px", letterSpacing: "0.24em", textTransform: "uppercase",
+                fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase",
                 color: `${GOLD}90`, marginBottom: "0.4rem",
               }}>
                 Institutional Access Protocol

@@ -77,14 +77,14 @@ const SharedCasePage: NextPage<Props> = ({ token, state, share, view }) => {
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-3xl space-y-5">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Shared governed case
             </p>
             <h1 style={{ ...serif, marginTop: "0.75rem", fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "rgba(255,255,255,0.90)" }}>
               {view?.title ?? "Shared case unavailable"}
             </h1>
             {share && view && (
-              <p style={{ ...mono, marginTop: "0.75rem", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+              <p style={{ ...mono, marginTop: "0.75rem", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                 {view.caseRef} · {share.role.toLowerCase()} · expires {new Date(share.expiresAt).toLocaleDateString("en-GB")}
               </p>
             )}
@@ -99,7 +99,7 @@ const SharedCasePage: NextPage<Props> = ({ token, state, share, view }) => {
           ) : (
             <>
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Client-safe summary
                 </p>
                 <p style={{ ...serif, marginTop: "0.65rem", fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.70)" }}>
@@ -122,13 +122,13 @@ const SharedCasePage: NextPage<Props> = ({ token, state, share, view }) => {
               )}
 
               <section style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
                   Reviewer actions
                 </p>
                 <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap", marginTop: "0.8rem" }}>
                   {view.canVerify ? (
                     <button type="button" onClick={verifyIntegrity} disabled={verifying}
-                      style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: verifying ? "rgba(255,255,255,0.24)" : "#0A0A0A", backgroundColor: verifying ? "rgba(255,255,255,0.08)" : GOLD, border: "none", padding: "0.6rem 0.9rem", cursor: verifying ? "not-allowed" : "pointer" }}>
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: verifying ? "rgba(255,255,255,0.24)" : "#0A0A0A", backgroundColor: verifying ? "rgba(255,255,255,0.08)" : GOLD, border: "none", padding: "0.6rem 0.9rem", cursor: verifying ? "not-allowed" : "pointer" }}>
                       {verifying ? "Verifying…" : "Verify integrity"}
                     </button>
                   ) : (
@@ -140,7 +140,7 @@ const SharedCasePage: NextPage<Props> = ({ token, state, share, view }) => {
                   )}
                   {view.canExport && (
                     <button type="button" onClick={exportClientSafeEvidence}
-                      style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}28`, backgroundColor: "transparent", padding: "0.6rem 0.9rem", cursor: "pointer" }}>
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}28`, backgroundColor: "transparent", padding: "0.6rem 0.9rem", cursor: "pointer" }}>
                       Export client-safe evidence
                     </button>
                   )}
@@ -157,7 +157,7 @@ const SharedCasePage: NextPage<Props> = ({ token, state, share, view }) => {
           )}
 
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "1rem" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.45rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "0.45rem" }}>
               Boundary note
             </p>
             <p style={{ fontSize: "12px", lineHeight: 1.7, color: "rgba(255,255,255,0.42)" }}>
@@ -173,7 +173,7 @@ const SharedCasePage: NextPage<Props> = ({ token, state, share, view }) => {
 function SharedField({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1rem" }}>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
         {label}
       </p>
       <p style={{ ...serif, marginTop: "0.45rem", fontSize: "1rem", color: "rgba(255,255,255,0.70)" }}>
@@ -186,7 +186,7 @@ function SharedField({ label, value }: { label: string; value: string }) {
 function SharedNarrative({ label, value }: { label: string; value: string }) {
   return (
     <section style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-      <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
         {label}
       </p>
       <p style={{ ...serif, marginTop: "0.65rem", fontSize: "0.95rem", lineHeight: 1.7, color: "rgba(255,255,255,0.64)" }}>

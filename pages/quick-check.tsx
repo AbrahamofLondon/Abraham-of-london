@@ -250,7 +250,7 @@ export default function QuickCheckPage() {
                   Start health check
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </button>
-                <p className="mt-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em" }}>
+                <p className="mt-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em" }}>
                   Free · No account required · 2 minutes
                 </p>
               </div>
@@ -311,7 +311,7 @@ export default function QuickCheckPage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <span
                       className="inline-flex items-center gap-1.5 border px-3 py-1.5"
-                      style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${healthColor}30`, color: healthColor, backgroundColor: `${healthColor}10` }}
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${healthColor}30`, color: healthColor, backgroundColor: `${healthColor}10` }}
                     >
                       <AlertTriangle className="h-3 w-3" />
                       {result.healthSignal === "critical" ? "Requires attention"
@@ -320,7 +320,7 @@ export default function QuickCheckPage() {
                     </span>
                     <span
                       className="inline-flex items-center border px-3 py-1.5"
-                      style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
+                      style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", borderColor: `${GOLD}30`, color: `${GOLD}BB`, backgroundColor: `${GOLD}08` }}
                     >
                       {result.condition.label}
                     </span>
@@ -332,7 +332,7 @@ export default function QuickCheckPage() {
 
                   <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     <div className="border border-white/[0.06] bg-white/[0.015] p-4">
-                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                         Key weakness
                       </p>
                       <p className="mt-2 text-[13px] leading-[1.65] text-white/[0.55]">
@@ -340,7 +340,7 @@ export default function QuickCheckPage() {
                       </p>
                     </div>
                     <div className="border border-white/[0.06] bg-white/[0.015] p-4">
-                      <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                         Next admissible move
                       </p>
                       <p className="mt-2 text-[13px] leading-[1.65] text-white/[0.55]">
@@ -374,7 +374,7 @@ export default function QuickCheckPage() {
                     type="button"
                     onClick={handleReset}
                     className="inline-flex items-center gap-2 border border-white/[0.08] px-4 py-2.5 text-white/[0.40] transition-colors hover:border-white/[0.14] hover:text-white/[0.60]"
-                    style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                   >
                     Run again
                   </button>
@@ -384,14 +384,14 @@ export default function QuickCheckPage() {
 
             {/* Forward links */}
             <div className="mt-12 border-t border-white/[0.06] pt-8">
-              <p className="mb-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              <p className="mb-4 text-[13px] text-white/[0.40]" style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}>
                 Need more than a quick check?
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/decision-pressure"
                   className="group inline-flex items-center gap-2 border px-4 py-2.5 transition-all hover:-translate-y-px"
-                  style={{ ...mono, borderColor: `${GOLD}35`, backgroundColor: `${GOLD}0D`, color: "rgba(255,255,255,0.72)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, borderColor: `${GOLD}35`, backgroundColor: `${GOLD}0D`, color: "rgba(255,255,255,0.72)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   <Zap className="h-3 w-3" />
                   Free pressure signal
@@ -400,7 +400,7 @@ export default function QuickCheckPage() {
                 <Link
                   href="/boardroom-brief"
                   className="group inline-flex items-center gap-2 border border-white/[0.08] px-4 py-2.5 transition-all hover:-translate-y-px hover:border-white/[0.14]"
-                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   <Target className="h-3 w-3" />
                   Generate Boardroom Brief
@@ -409,7 +409,7 @@ export default function QuickCheckPage() {
                 <Link
                   href="/diagnostics/fast"
                   className="group inline-flex items-center gap-2 border border-white/[0.08] px-4 py-2.5 transition-all hover:-translate-y-px hover:border-white/[0.14]"
-                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }}
+                  style={{ ...mono, color: "rgba(255,255,255,0.45)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase" }}
                 >
                   <Route className="h-3 w-3" />
                   Run Fast Diagnostic

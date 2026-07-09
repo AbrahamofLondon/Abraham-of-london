@@ -305,7 +305,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.40em",
           textTransform: "uppercase",
           color: `${GOLD}BB`,
@@ -335,7 +335,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   marginBottom: "0.50rem",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "7px",
+  fontSize: "11px",
   letterSpacing: "0.36em",
   textTransform: "uppercase",
   color: "rgba(255,255,255,0.26)",
@@ -475,7 +475,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
   if (claims.benchmarked?.allowed) {
     blocks.push(
       <div key="benchmark" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
           Comparative position · Anonymised comparison set
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -489,7 +489,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
   if (claims.predictive?.allowed) {
     blocks.push(
       <div key="predictive" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
           Trajectory outlook · {claims.predictive.reason?.includes("Bounded") ? "Bounded scenario mode" : "Longitudinal projection"}
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -511,7 +511,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
     // Tier 3: Full team-wide sentiment — participation standard met
     blocks.push(
       <div key="sentiment" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
           Respondent-derived team sentiment{sentimentConfidence !== null ? ` · ${sentimentConfidence}% confidence` : ""}
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -523,7 +523,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
     // Tier 2: Directional team reading — respondents exist but participation remains limited
     blocks.push(
       <div key="sentiment-directional" style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "0.75rem" }}>
           Directional team signal{sentimentConfidence !== null ? ` · ${sentimentConfidence}% confidence` : ""}
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.48)" }}>
@@ -535,7 +535,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
     // Tier 1: Leader view only
     blocks.push(
       <div key="sentiment-leader" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>
           Team evidence · Leadership view
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
@@ -549,7 +549,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
   if (claims.monitoring?.allowed) {
     blocks.push(
       <div key="monitoring" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
           Monitoring posture · Longitudinal tracking active
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -563,7 +563,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
   if (claims["data-integrated"]?.allowed) {
     blocks.push(
       <div key="data" style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.025)", padding: "1.5rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.75rem" }}>
           Enterprise signal integration · Data-supported evidence
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -577,7 +577,7 @@ function ClaimGovernedCapabilities({ canonical }: { canonical: any }) {
 
   return (
     <div className="space-y-3">
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
         Capability provenance
       </div>
       {blocks}
@@ -619,7 +619,7 @@ function BasisOfBriefBlock({ canonical, thread }: { canonical: any; thread: any 
 
   return (
     <div style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.012)", padding: "1.5rem" }}>
-      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "1rem" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "1rem" }}>
         Basis of this brief
       </div>
       <div className="space-y-1.5">
@@ -722,7 +722,7 @@ function MetricRow({ label, value }: { label: string; value: string }) {
       <span
         style={{
           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-          fontSize: "7.5px",
+          fontSize: "11px",
           letterSpacing: "0.10em",
           color: "rgba(255,255,255,0.60)",
           textAlign: "right",
@@ -806,53 +806,53 @@ function InstitutionalCaseCorridorPanel({
 
   return (
     <div style={{ border: "1px solid rgba(201,169,110,0.18)", backgroundColor: "rgba(201,169,110,0.03)", padding: "20px 24px", marginBottom: "18px" }}>
-      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
         Institutional case state
       </span>
 
       <div style={{ marginTop: "12px", display: "grid", gap: "10px", gridTemplateColumns: "1fr 1fr" }}>
         <div>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Qualification</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Qualification</span>
           <p style={{ marginTop: "3px", fontSize: "13px", color: "rgba(255,255,255,0.64)" }}>{stateLabels[ic.qualificationState] ?? ic.qualificationState}</p>
         </div>
         <div>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Evidence posture</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Evidence posture</span>
           <p style={{ marginTop: "3px", fontSize: "13px", color: "rgba(255,255,255,0.64)" }}>{ic.evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
         </div>
       </div>
 
       {ic.admitted.length > 0 && (
         <div style={{ marginTop: "12px" }}>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Admitted</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>Admitted</span>
           <p style={{ marginTop: "3px", fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>{ic.admitted.join(" · ")}</p>
         </div>
       )}
 
       {ic.notYetAdmitted.length > 0 && (
         <div style={{ marginTop: "8px" }}>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Not yet admitted</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Not yet admitted</span>
           <p style={{ marginTop: "3px", fontSize: "12px", color: "rgba(255,255,255,0.28)" }}>{ic.notYetAdmitted.join(" · ")}</p>
         </div>
       )}
 
       <div style={{ marginTop: "14px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
         {ic.strategyRoomEarned && route === "STRATEGY" && (
-          <Link href="/strategy-room" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.68)", textDecoration: "none", border: "1px solid rgba(201,169,110,0.22)", padding: "6px 12px" }}>
+          <Link href="/strategy-room" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.68)", textDecoration: "none", border: "1px solid rgba(201,169,110,0.22)", padding: "6px 12px" }}>
             Enter Strategy Room
           </Link>
         )}
         {ic.counselWarranted && (
-          <Link href="/counsel" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
+          <Link href="/counsel" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
             Counsel review
           </Link>
         )}
         {ic.boardroomEarned && (
-          <a href="#boardroom-dossier" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
+          <a href="#boardroom-dossier" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
             Boardroom dossier
           </a>
         )}
         {ic.oversightStatus !== "PREMATURE" && (
-          <Link href="/oversight" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
+          <Link href="/oversight" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.38)", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", padding: "6px 12px" }}>
             Oversight {ic.oversightStatus === "ACTIVE" ? "(active)" : "(eligible)"}
           </Link>
         )}
@@ -884,7 +884,7 @@ function BoardroomDossierSection({
   if (!boardroom.qualified) {
     return (
       <div style={{ margin: "1rem 0", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "0.85rem 1rem" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.35rem" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.35rem" }}>
           Boardroom Dossier not generated
         </div>
         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.86rem", lineHeight: 1.55, color: "rgba(255,255,255,0.35)" }}>
@@ -943,7 +943,7 @@ function BoardroomDossierSection({
                 <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: dp.recommended ? "#C9A96E" : "rgba(255,255,255,0.35)" }}>
                   {dp.option}
                 </span>
-                {dp.recommended && <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A96E" }}>Recommended</span>}
+                {dp.recommended && <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A96E" }}>Recommended</span>}
               </div>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.50)" }}>
                 {dp.consequence}
@@ -984,7 +984,7 @@ function BoardroomDossierSection({
       <div style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "rgba(201,169,110,0.04)", padding: "1rem 1.25rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#C9A96E", marginBottom: "0.5rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#C9A96E", marginBottom: "0.5rem" }}>
               Boardroom Dossier available
             </div>
             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.55)", maxWidth: "50ch" }}>
@@ -994,7 +994,7 @@ function BoardroomDossierSection({
           <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
             <button
               onClick={() => setExpanded(!expanded)}
-              style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#C9A96E", border: "1px solid rgba(201,169,110,0.35)", backgroundColor: expanded ? "rgba(201,169,110,0.12)" : "rgba(201,169,110,0.06)", padding: "8px 16px", cursor: "pointer" }}
+              style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#C9A96E", border: "1px solid rgba(201,169,110,0.35)", backgroundColor: expanded ? "rgba(201,169,110,0.12)" : "rgba(201,169,110,0.06)", padding: "8px 16px", cursor: "pointer" }}
             >
               {expanded ? "Close Boardroom Mode" : "Open Boardroom Mode"}
             </button>
@@ -1002,7 +1002,7 @@ function BoardroomDossierSection({
               <button
                 onClick={handleExportPdf}
                 disabled={exporting}
-                style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", padding: "8px 16px", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.5 : 1 }}
+                style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", padding: "8px 16px", cursor: exporting ? "wait" : "pointer", opacity: exporting ? 0.5 : 1 }}
               >
                 {exporting ? "Exporting..." : "Export Boardroom PDF"}
               </button>
@@ -1010,7 +1010,7 @@ function BoardroomDossierSection({
           </div>
         </div>
         {exportResult && (
-          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.35)", marginTop: "0.5rem" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.35)", marginTop: "0.5rem" }}>
             {exportResult}
           </p>
         )}
@@ -1042,7 +1042,7 @@ function ExecutiveJudgementBlock({
 
   return (
     <section style={{ border: `1px solid ${GOLD}22`, backgroundColor: "rgba(255,255,255,0.018)", padding: "1.25rem", marginTop: "1rem" }}>
-      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88` }}>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}88` }}>
         {judgement.title}
       </span>
 
@@ -1065,7 +1065,7 @@ function ExecutiveJudgementBlock({
           <div style={{ display: "grid", gap: "8px", marginTop: "0.55rem" }}>
             {judgement.evidenceCarriedForward.slice(0, 5).map((item) => (
               <div key={item.id} style={{ borderLeft: `2px solid ${GOLD}55`, paddingLeft: "10px" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}78` }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}78` }}>
                   {item.label} · {item.source.replace(/_/g, " ")}
                 </p>
                 <p style={{ marginTop: "0.2rem", fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
@@ -1080,7 +1080,7 @@ function ExecutiveJudgementBlock({
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         {judgement.decisionOptions.map((option) => (
           <div key={option.label} style={{ border: option.recommended ? `1px solid ${GOLD}30` : "1px solid rgba(255,255,255,0.07)", backgroundColor: option.recommended ? `${GOLD}05` : "rgba(255,255,255,0.014)", padding: "0.85rem" }}>
-            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: option.recommended ? `${GOLD}A0` : "rgba(255,255,255,0.28)" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: option.recommended ? `${GOLD}A0` : "rgba(255,255,255,0.28)" }}>
               {option.recommended ? "Recommended · " : ""}{option.label}
             </p>
             <p style={{ marginTop: "0.35rem", fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.54)" }}>{option.judgement}</p>
@@ -1189,7 +1189,7 @@ function ResultSurface({
           {/* ── Governed case linkage ── */}
           <div style={{ display: "grid", gap: "8px", marginBottom: "18px", paddingBottom: "16px", borderBottom: `1px solid ${GOLD}15` }}>
             <div style={{ display: "flex", gap: "14px" }}>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                 Case ID
               </span>
               <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -1197,7 +1197,7 @@ function ResultSurface({
               </span>
             </div>
             <div style={{ display: "flex", gap: "14px" }}>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                 Provenance hash
               </span>
               <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)" }}>
@@ -1205,7 +1205,7 @@ function ResultSurface({
               </span>
             </div>
             <div style={{ display: "flex", gap: "14px" }}>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}55`, minWidth: "120px", flexShrink: 0 }}>
                 Decision Centre
               </span>
               <Link href="/decision-centre" style={{ fontSize: "12px", lineHeight: 1.55, color: `${GOLD}AA`, textDecoration: "none", borderBottom: `1px solid ${GOLD}30` }}>
@@ -1216,7 +1216,7 @@ function ResultSurface({
 
           <div style={{ display: "grid", gap: "14px" }}>
             <section>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Dominant finding</span>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Dominant finding</span>
               <p style={{ marginTop: "6px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.1rem", lineHeight: 1.45, color: "rgba(255,255,255,0.84)" }}>
                 {summary?.headline ?? "Condition identified"}
               </p>
@@ -1227,7 +1227,7 @@ function ResultSurface({
 
             {boardActions.length > 0 && (
               <section>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Governed priority stack</span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Governed priority stack</span>
                 {boardActions.slice(0, 3).map((action: unknown, index: number) => (
                   <p key={`${String(action)}-${index}`} style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
                     {String(index + 1).padStart(2, "0")} {String(action)}
@@ -1238,7 +1238,7 @@ function ResultSurface({
 
             {decisionText && (
               <section>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Required decision</span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Required decision</span>
                 <p style={{ marginTop: "4px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>
                   {decisionText}
                 </p>
@@ -1247,7 +1247,7 @@ function ResultSurface({
 
             {(exposureFormatted || projectedCost90 || executiveIrreversibility) && (
               <section>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>Financial exposure / cost of delay</span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(252,165,165,0.70)" }}>Financial exposure / cost of delay</span>
                 {exposureFormatted && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Current priced exposure: {exposureFormatted}</p>}
                 {projectedCost90 && <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>Projected 90-day cost of delay: {projectedCost90}</p>}
                 {executiveIrreversibility && (
@@ -1255,7 +1255,7 @@ function ResultSurface({
                     <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
                       Irreversibility estimate: {executiveIrreversibility} This is an irreversibility estimate, not a verified external fact.
                     </p>
-                    <p style={{ marginTop: "4px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
+                    <p style={{ marginTop: "4px", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)" }}>
                       {financialExposure?.irreversibilityProvenanceLine ?? report.meta.provenanceLine}
                     </p>
                   </>
@@ -1264,7 +1264,7 @@ function ResultSurface({
             )}
 
             <section>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Boardroom readiness</span>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Boardroom readiness</span>
               <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
                 {summary.boardroomReadinessLabel}
               </p>
@@ -1272,7 +1272,7 @@ function ResultSurface({
 
             {governanceEvidenceCarryForward && (
               <section>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Evidence carried forward</span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Evidence carried forward</span>
                 <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
                   This report is carrying forward prior governance evidence. The recommendation has not been generated in isolation.
                 </p>
@@ -1280,7 +1280,7 @@ function ResultSurface({
             )}
 
             <section>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Next admitted step</span>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88` }}>Next admitted step</span>
               <p style={{ marginTop: "4px", fontSize: "13px", lineHeight: 1.55, color: "rgba(255,255,255,0.46)" }}>
                 {summary.nextAdmittedStep}
               </p>
@@ -1299,7 +1299,7 @@ function ResultSurface({
           if (!erAuthority) return null;
           const sv = instrSeverityColor(erAuthority.severity);
           const bg = instrSeverityBg(erAuthority.severity);
-          const mono7: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase" as const };
+          const mono7: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" as const };
           const conseq = erAuthority.consequence;
           return (
             <div style={{ border: `1px solid ${sv}22`, backgroundColor: `${bg}`, padding: "20px 24px", marginBottom: "18px" }}>
@@ -1386,7 +1386,7 @@ function ResultSurface({
           <div style={{ textAlign: "right", marginTop: "0.35rem" }}>
             <a
               href="#boardroom-dossier"
-              style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", textDecoration: "none" }}
+              style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,169,110,0.50)", textDecoration: "none" }}
             >
               Open Boardroom Dossier &darr;
             </a>
@@ -1416,16 +1416,16 @@ function ResultSurface({
               : summary?.headline ?? "The consequence is now priced."}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               {[header?.organisationName, route, safeString(constitution?.readinessTier)].filter(Boolean).join(" \u00b7 ")}
             </span>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", color: rc.text }}>{route}</span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", color: rc.text }}>{route}</span>
           </div>
         </div>
 
         {projectedCost90 && (
           <div style={{ border: "1px solid rgba(252,165,165,0.32)", backgroundColor: "rgba(252,165,165,0.055)", padding: "1rem 1.25rem", marginTop: "1rem", marginBottom: "1rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.65)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.65)" }}>
               Projected Cost of Inaction (90 days)
             </span>
             <div style={{ marginTop: "0.35rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "clamp(1.35rem, 3vw, 2rem)", color: "rgba(252,165,165,0.88)", fontWeight: 700 }}>
@@ -1436,7 +1436,7 @@ function ResultSurface({
 
         {aiAdjustedConsequence && (
           <div style={{ border: "1px solid rgba(147,197,253,0.24)", backgroundColor: "rgba(147,197,253,0.045)", padding: "1rem 1.25rem", marginBottom: "1rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(147,197,253,0.72)" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(147,197,253,0.72)" }}>
               AI-adjusted consequence projection
             </span>
             <div className="mt-3 grid gap-3 sm:grid-cols-4">
@@ -1472,7 +1472,7 @@ function ResultSurface({
         {/* ── BLOCK 4: CONSEQUENCE MODEL (visible math) ── */}
         {financialExposure && (
           <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "1.25rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>Consequence model</span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}70` }}>Consequence model</span>
             <div className="mt-3 flex flex-wrap gap-3">
               {[
                 { label: "Execution loss", value: financialExposure.executionLossFormatted ?? financialExposure.executionLossFormatted },
@@ -1518,7 +1518,7 @@ function ResultSurface({
         {/* ── BLOCK 5: DECISION OBJECT (visually dominant) ── */}
         {decisionText && (
           <div style={{ border: `1px solid ${GOLD}28`, backgroundColor: `${GOLD}06`, padding: "1.25rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>Decision required</span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}80` }}>Decision required</span>
             <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>
               {decisionText}
             </p>
@@ -1534,10 +1534,10 @@ function ResultSurface({
         {/* ── BLOCK 6: PRIORITY STACK ── */}
         {boardActions.length > 0 && (
           <div style={{ border: `1px solid ${AMBER}25`, backgroundColor: `${AMBER}05`, padding: "1.25rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: AMBER }}>Required actions</span>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: AMBER }}>Required actions</span>
             {boardActions.slice(0, 5).map((action: unknown, i: number) => (
               <div key={i} className="flex items-start gap-2 py-1.5" style={{ borderBottom: i < Math.min(boardActions.length, 5) - 1 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: `${AMBER}70`, flexShrink: 0 }}>{String(i + 1).padStart(2, "0")}</span>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: `${AMBER}70`, flexShrink: 0 }}>{String(i + 1).padStart(2, "0")}</span>
                 <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.5, color: "rgba(255,255,255,0.55)" }}>{String(action)}</span>
               </div>
             ))}
@@ -1546,7 +1546,7 @@ function ResultSurface({
 
         {/* ── BLOCK 7: IF IGNORED ── */}
         <div style={{ padding: "0.75rem 0", marginBottom: "0.75rem" }}>
-          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>If ignored</span>
+          <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(252,165,165,0.45)" }}>If ignored</span>
           <p style={{ marginTop: "0.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.55, color: "rgba(252,165,165,0.45)" }}>
             {summary?.mandate ?? "The condition persists. Exposure compounds. The window for effective action narrows."}
           </p>
@@ -1582,7 +1582,7 @@ function ResultSurface({
                   Challenge with evidence
                 </button>
               </div>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "10px" }}>
                 Checkpoint: 7-day priority decision &middot; {report.meta.provenanceLine}
               </p>
             </div>
@@ -1620,18 +1620,18 @@ function ResultSurface({
 
         {(route === "STRATEGY" || engagementReadiness.readinessPercent >= 70) && (
           <div style={{ border: "1px solid rgba(201,169,110,0.18)", backgroundColor: "rgba(201,169,110,0.04)", padding: "1rem 1.1rem", marginTop: "1rem" }}>
-            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "#C9A96E" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "#C9A96E" }}>
               Selective continuation pathways
             </span>
             <p style={{ marginTop: "0.35rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.62)" }}>
               Your existing case record may support a selective engagement review. These pathways remain evidence-led and are not a starting point.
             </p>
             <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginTop: "10px" }}>
-              <Link href="/engagements/selective-pilot" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#C9A96E", textDecoration: "none" }}>
+              <Link href="/engagements/selective-pilot" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#C9A96E", textDecoration: "none" }}>
                 View selective pilot terms
               </Link>
               {route === "STRATEGY" ? (
-                <Link href="/engagements/retained-oversight" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.52)", textDecoration: "none" }}>
+                <Link href="/engagements/retained-oversight" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.52)", textDecoration: "none" }}>
                   Review retained oversight pathway
                 </Link>
               ) : null}
@@ -1640,7 +1640,7 @@ function ResultSurface({
         )}
 
         <details style={{ marginTop: "1.5rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1rem 1.1rem" }}>
-          <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+          <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
             Evidence, governance, and method
           </summary>
           <div style={{ marginTop: "1rem" }}>
@@ -1846,14 +1846,14 @@ function ExecutiveReportingIntake({
             Your answers are translated into a constitutional position, financial exposure,
             governed priority stack, and escalation logic where evidence warrants it.
           </p>
-          <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)" }}>
+          <p style={{ marginTop: "0.5rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.18)" }}>
             Every decision is evaluated against cost, speed, and competitive position.
           </p>
           <div
             className="mt-5 grid gap-3 sm:grid-cols-3"
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "11px",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.34)",
@@ -1889,7 +1889,7 @@ function ExecutiveReportingIntake({
             <div
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: `${GOLD}AA`,
@@ -2165,7 +2165,7 @@ function ExecutiveReportingIntake({
                 marginTop: "0.85rem",
                 textAlign: "center",
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "7px",
+                fontSize: "11px",
                 letterSpacing: "0.24em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.14)",
@@ -2344,7 +2344,7 @@ export default function ExecutiveReportingRunPage({
                 className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70"
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.25)",
@@ -2357,7 +2357,7 @@ export default function ExecutiveReportingRunPage({
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.20)",
@@ -2444,7 +2444,7 @@ export default function ExecutiveReportingRunPage({
                       <div
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7px",
+                          fontSize: "11px",
                           letterSpacing: "0.24em",
                           textTransform: "uppercase",
                           color: `${GOLD}A0`,
@@ -2516,7 +2516,7 @@ export default function ExecutiveReportingRunPage({
               <div
                 style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px",
+                  fontSize: "11px",
                   letterSpacing: "0.38em",
                   textTransform: "uppercase",
                   color: `${GOLD}90`,
@@ -2557,7 +2557,7 @@ export default function ExecutiveReportingRunPage({
                   <Eyebrow>Executive Report · Generated</Eyebrow>
                 </div>
                 <div style={{ borderTop: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "16px 0 20px" }}>
-                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
                     This report produced
                   </p>
                   <div style={{ display: "grid", gap: "6px" }}>
@@ -2570,7 +2570,7 @@ export default function ExecutiveReportingRunPage({
                       { label: "Next admissible move", value: (() => { const nextAdmissibleMove = result.result.summary.nextAdmittedStep; return nextAdmissibleMove || "Review priority stack and schedule checkpoint"; })() },
                     ].map((item) => (
                       <div key={item.label} style={{ display: "flex", gap: "16px" }}>
-                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}60`, minWidth: "160px", paddingTop: "1px", flexShrink: 0 }}>
                           {item.label}
                         </span>
                         <span style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.50)" }}>
@@ -2579,7 +2579,7 @@ export default function ExecutiveReportingRunPage({
                       </div>
                     ))}
                   </div>
-                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
+                  <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "12px" }}>
                     Report saved · Governed record written · Self-reported inputs only
                   </p>
                 </div>

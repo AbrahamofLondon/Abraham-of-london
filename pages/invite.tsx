@@ -66,7 +66,7 @@ const InvitePage: NextPage = () => {
 
           {state === "loading" && (
             <>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
                 Accepting invitation...
               </p>
               <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.40)" }}>Please wait.</p>
@@ -75,14 +75,14 @@ const InvitePage: NextPage = () => {
 
           {state === "accepted" && (
             <>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.70)", marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(110,231,183,0.70)", marginBottom: "12px" }}>
                 Invitation accepted
               </p>
               <p style={{ ...serif, fontSize: "1.2rem", color: "rgba(255,255,255,0.85)", marginBottom: "20px" }}>
                 You have joined the organisation.
               </p>
               <Link href="/account/organisation"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#0A0A0A", backgroundColor: GOLD, padding: "12px 24px", textDecoration: "none", display: "inline-block" }}>
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#0A0A0A", backgroundColor: GOLD, padding: "12px 24px", textDecoration: "none", display: "inline-block" }}>
                 View organisation
               </Link>
             </>
@@ -90,14 +90,14 @@ const InvitePage: NextPage = () => {
 
           {state === "auth_required" && (
             <>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "12px" }}>
                 Sign in required
               </p>
               <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginBottom: "20px" }}>
                 You need to sign in before accepting this invitation.
               </p>
               <Link href={`/auth/signin?callbackUrl=${encodeURIComponent(window.location.href)}`}
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#0A0A0A", backgroundColor: GOLD, padding: "12px 24px", textDecoration: "none", display: "inline-block" }}>
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#0A0A0A", backgroundColor: GOLD, padding: "12px 24px", textDecoration: "none", display: "inline-block" }}>
                 Sign in
               </Link>
             </>
@@ -105,14 +105,14 @@ const InvitePage: NextPage = () => {
 
           {state === "error" && (
             <>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)", marginBottom: "12px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)", marginBottom: "12px" }}>
                 Invitation failed
               </p>
               <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginBottom: "20px" }}>
                 {errorMsg || "Could not accept this invitation. It may have expired or already been used."}
               </p>
               <Link href="/decision-centre"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "12px 24px", textDecoration: "none", display: "inline-block" }}>
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA`, border: `1px solid ${GOLD}25`, padding: "12px 24px", textDecoration: "none", display: "inline-block" }}>
                 Go to Decision Centre
               </Link>
             </>

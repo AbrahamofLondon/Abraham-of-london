@@ -93,7 +93,7 @@ export default function ContentShowcase({
           className="group inline-flex items-center gap-2 transition-opacity hover:opacity-75"
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
             color: `${GOLD}AA`,
           }}
         >
@@ -138,7 +138,7 @@ export default function ContentShowcase({
                   <div className="mb-5 flex items-center gap-3">
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase",
                       color: `${GOLD}90`,
                     }}>
                       {kind}
@@ -148,7 +148,7 @@ export default function ContentShowcase({
                         <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
                         <span style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px", letterSpacing: "0.22em", textTransform: "uppercase",
+                          fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                           color: "rgba(255,255,255,0.24)",
                         }}>
                           {item.theme}
@@ -160,7 +160,7 @@ export default function ContentShowcase({
                         <span style={{ color: "rgba(255,255,255,0.10)" }}>·</span>
                         <span style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "7.5px", letterSpacing: "0.18em", textTransform: "uppercase",
+                          fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase",
                           color: "rgba(255,255,255,0.20)",
                         }}>
                           {dateLabel}
@@ -206,7 +206,7 @@ export default function ContentShowcase({
                         className="transition-colors duration-300 group-hover:[color:rgba(201,169,110,0.80)]"
                         style={{
                           fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                          fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+                          fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
                           color: "rgba(255,255,255,0.22)",
                         }}
                       >

@@ -159,13 +159,13 @@ function SeriesCard({
 }) {
   return (
     <Link href={href} className="block border border-white/10 bg-white/[0.015] p-6 transition hover:bg-white/[0.03]">
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: accent }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: accent }}>
         Intelligence Series
       </p>
       <h2 className="mt-3 font-serif text-2xl text-white">{label}</h2>
       <p className="mt-2 text-sm leading-7 text-white/52">{description}</p>
       <div className="mt-4 flex items-center justify-between">
-        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
           {count} briefs
         </span>
         <span style={{ color: `${GOLD}CC`, fontSize: "14px" }}>→</span>
@@ -201,7 +201,7 @@ function BriefCard({ brief }: { brief: BriefListItem }) {
           </span>
         ) : null}
         {brief.briefId ? (
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
             {brief.briefId}
           </span>
         ) : null}
@@ -220,7 +220,7 @@ function BriefCard({ brief }: { brief: BriefListItem }) {
         className="mt-4 inline-flex items-center gap-2 transition hover:opacity-80"
         style={{ color: `${GOLD}DD` }}
       >
-        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
           Read brief
         </span>
         <span aria-hidden="true">→</span>
@@ -265,7 +265,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
 
           {/* ── Hero ─────────────────────────────────────────────── */}
           <header className="border border-white/10 bg-white/[0.02] p-8">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}BB` }}>
               Evidence Base
             </p>
             <h1 className="mt-4" style={{ ...serif, fontSize: "clamp(2rem,4vw,3rem)", color: "rgba(255,255,255,0.92)" }}>
@@ -286,7 +286,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                 className="inline-flex items-center gap-2 border border-white/15 px-4 py-2 text-white/70 transition hover:border-white/30 hover:text-white"
                 style={mono}
               >
-                <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Explore the Canon</span>
+                <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Explore the Canon</span>
                 <span aria-hidden="true">→</span>
               </Link>
               <Link
@@ -294,7 +294,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                 className="inline-flex items-center gap-2 border px-4 py-2 transition hover:opacity-90"
                 style={{ ...mono, borderColor: `${GOLD}40`, color: `${GOLD}DD` }}
               >
-                <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Begin with the Pressure Signal</span>
+                <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Begin with the Pressure Signal</span>
                 <span aria-hidden="true">→</span>
               </Link>
             </div>
@@ -302,7 +302,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
 
           {/* ── Series overview ───────────────────────────────────── */}
           <section>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "1.25rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "1.25rem" }}>
               Series
             </p>
             <div className="grid gap-5 md:grid-cols-2">
@@ -328,14 +328,14 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             <section>
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#7CB8E8" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#7CB8E8" }}>
                     Series I
                   </p>
                   <h2 className="mt-1 font-serif text-2xl text-white">Institutional Alpha</h2>
                 </div>
                 <Link
                   href="/briefs/institutional-alpha"
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}BB` }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}BB` }}
                   className="transition hover:opacity-80"
                 >
                   View all {institutionalAlpha.length} →
@@ -353,7 +353,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                     className="inline-flex items-center gap-2 border border-white/15 px-6 py-3 text-white/60 transition hover:border-white/30 hover:text-white"
                     style={mono}
                   >
-                    <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                       View all {institutionalAlpha.length} Institutional Alpha briefs
                     </span>
                     <span aria-hidden="true">→</span>
@@ -368,14 +368,14 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
             <section>
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#9B8EC4" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#9B8EC4" }}>
                     Series II
                   </p>
                   <h2 className="mt-1 font-serif text-2xl text-white">Sovereign Intelligence</h2>
                 </div>
                 <Link
                   href="/briefs/sovereign-intelligence"
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}BB` }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: `${GOLD}BB` }}
                   className="transition hover:opacity-80"
                 >
                   View all {sovereignIntelligence.length} →
@@ -393,7 +393,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
                     className="inline-flex items-center gap-2 border border-white/15 px-6 py-3 text-white/60 transition hover:border-white/30 hover:text-white"
                     style={mono}
                   >
-                    <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                       View all {sovereignIntelligence.length} Sovereign Intelligence briefs
                     </span>
                     <span aria-hidden="true">→</span>
@@ -405,7 +405,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
 
           {/* ── Inner Circle boundary ─────────────────────────────── */}
           <section className="border border-white/10 bg-white/[0.02] p-8">
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "1rem" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}BB`, marginBottom: "1rem" }}>
               Inner Circle
             </p>
             <h2 style={{ ...serif, fontSize: "1.6rem", color: "rgba(255,255,255,0.88)" }}>
@@ -421,7 +421,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               className="mt-6 inline-flex items-center gap-2 border px-5 py-2.5 transition hover:opacity-90"
               style={{ ...mono, borderColor: `${GOLD}40`, color: `${GOLD}DD` }}
             >
-              <span style={{ fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Move from reading to diagnosis</span>
+              <span style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>Move from reading to diagnosis</span>
               <span aria-hidden="true">→</span>
             </Link>
           </section>
@@ -434,7 +434,7 @@ const IntelligenceBriefsPage: NextPage<InferGetStaticPropsType<typeof getStaticP
               { label: "Editorial", sub: "Intelligence front door", href: "/editorial/intelligence-briefs" },
             ].map(({ label, sub, href }) => (
               <Link key={href} href={href} className="border border-white/10 p-5 transition hover:bg-white/[0.02]">
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}99`, marginBottom: "0.5rem" }}>
                   {sub}
                 </p>
                 <p className="font-serif text-lg text-white">{label} →</p>

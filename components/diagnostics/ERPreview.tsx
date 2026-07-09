@@ -72,7 +72,7 @@ export default function ERPreview({
           <p style={{ fontFamily: "'Courier New',monospace", fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, margin: 0 }}>
             Executive Report Preview
           </p>
-          <p style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.30)", margin: "4px 0 0" }}>
+          <p style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.30)", margin: "4px 0 0" }}>
             Redacted — full report available after purchase
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function ERPreview({
 
       {/* Top decision risks */}
       <div style={{ marginBottom: "24px" }}>
-        <p style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "12px" }}>
+        <p style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "12px" }}>
           Top Decision Risks
         </p>
         {topRisks.slice(0, 3).map((risk, i) => (
@@ -123,13 +123,13 @@ export default function ERPreview({
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
             <TrendingUp size={13} color="rgba(249,115,22,0.70)" />
-            <p style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(249,115,22,0.70)", margin: 0 }}>
+            <p style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(249,115,22,0.70)", margin: 0 }}>
               Cost of Delay
             </p>
           </div>
           <p style={{ fontFamily: "Georgia,serif", fontSize: "14px", lineHeight: 1.5, color: "rgba(255,255,255,0.55)", margin: 0 }}>
             {costOfDelayTeaser}
-            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", color: "rgba(255,255,255,0.20)", marginLeft: "6px" }}>
+            <span style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", color: "rgba(255,255,255,0.20)", marginLeft: "6px" }}>
               — scenario projection
             </span>
           </p>
@@ -138,7 +138,7 @@ export default function ERPreview({
 
       {/* Report sections (redacted) */}
       <div style={{ marginBottom: "24px" }}>
-        <p style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "12px" }}>
+        <p style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "12px" }}>
           Report Sections
         </p>
         {ER_SECTIONS.map((section, i) => (
@@ -159,7 +159,7 @@ export default function ERPreview({
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
           <Lock size={12} color="rgba(255,255,255,0.25)" />
-          <p style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", margin: 0 }}>
+          <p style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", margin: 0 }}>
             Recommendation (redacted)
           </p>
         </div>
@@ -188,7 +188,7 @@ export default function ERPreview({
       >
         Unlock Full Executive Report — £295
       </button>
-      <p style={{ fontFamily: "'Courier New',monospace", fontSize: "8px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.20)", textAlign: "center", margin: "10px 0 0" }}>
+      <p style={{ fontFamily: "'Courier New',monospace", fontSize: "11px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.20)", textAlign: "center", margin: "10px 0 0" }}>
         One-time payment · No subscription · Immediate delivery
       </p>
     </div>

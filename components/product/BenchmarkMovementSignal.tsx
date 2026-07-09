@@ -105,7 +105,7 @@ export default function BenchmarkMovementSignal({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: `${GOLD}88`,
@@ -130,7 +130,7 @@ export default function BenchmarkMovementSignal({
           href="/professionals"
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: `${GOLD}CC`,
@@ -160,7 +160,7 @@ export default function BenchmarkMovementSignal({
         <p
           style={{
             ...mono,
-            fontSize: "7px",
+            fontSize: "11px",
             letterSpacing: "0.20em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.25)",
@@ -200,7 +200,7 @@ export default function BenchmarkMovementSignal({
       <p
         style={{
           ...mono,
-          fontSize: "7px",
+          fontSize: "11px",
           letterSpacing: "0.20em",
           textTransform: "uppercase",
           color: "rgba(255,255,255,0.28)",
@@ -221,7 +221,7 @@ export default function BenchmarkMovementSignal({
           {delta >= 0 ? `+${delta}` : delta}
           <span style={{ ...mono, fontSize: "9px", color: "rgba(255,255,255,0.28)", marginLeft: "4px" }}>pp</span>
         </p>
-        <p style={{ ...mono, fontSize: "8px", color, lineHeight: 1.5 }}>
+        <p style={{ ...mono, fontSize: "11px", color, lineHeight: 1.5 }}>
           {label}
         </p>
       </div>
@@ -241,7 +241,7 @@ export default function BenchmarkMovementSignal({
           </p>
           <p style={{ ...serif, fontSize: "1rem", color: "rgba(255,255,255,0.55)" }}>
             {originalImprovementRate}%
-            <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.22)", marginLeft: "4px" }}>n={originalN}</span>
+            <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.22)", marginLeft: "4px" }}>n={originalN}</span>
           </p>
         </div>
         <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.55rem 0.7rem" }}>
@@ -250,7 +250,7 @@ export default function BenchmarkMovementSignal({
           </p>
           <p style={{ ...serif, fontSize: "1rem", color: "rgba(255,255,255,0.72)" }}>
             {currentImprovementRate}%
-            <span style={{ ...mono, fontSize: "7px", color: "rgba(255,255,255,0.22)", marginLeft: "4px" }}>n={currentN}</span>
+            <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.22)", marginLeft: "4px" }}>n={currentN}</span>
           </p>
         </div>
       </div>

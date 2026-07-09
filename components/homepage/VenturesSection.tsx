@@ -205,7 +205,7 @@ export default function VenturesSection(): React.ReactElement {
                   <div style={{ marginBottom: "auto" }}>
                     <div style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7.5px", letterSpacing: "0.36em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.36em", textTransform: "uppercase",
                       color: `${GOLD}80`, marginBottom: "0.45rem",
                     }}>
                       {venture.tag}
@@ -241,7 +241,7 @@ export default function VenturesSection(): React.ReactElement {
                   }}>
                     <span style={{
                       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                      fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase",
+                      fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase",
                       color: "rgba(255,255,255,0.20)",
                     }}>
                       {venture.focus}
@@ -283,7 +283,7 @@ export default function VenturesSection(): React.ReactElement {
           className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase",
+            fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase",
             color: "rgba(255,255,255,0.28)",
           }}
         >

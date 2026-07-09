@@ -150,7 +150,7 @@ export function GovernedRefusalBlock({
               {explanation || meta.explanation}
             </p>
             <p className="mt-2 text-[12px] leading-[1.6]" style={{ color: `${GOLD}AA` }}>
-              <span style={{ ...mono, fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+              <span style={{ ...mono, fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: `${GOLD}88` }}>
                 Next admissible move:{' '}
               </span>
               {nextMove || meta.nextMove}
@@ -187,7 +187,7 @@ export function GovernedRefusalBlock({
 
       {/* Reason */}
       <div className="mt-5">
-        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+        <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88` }}>
           Reason
         </p>
         <p className="mt-1 text-[15px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.75)' }}>
@@ -198,7 +198,7 @@ export function GovernedRefusalBlock({
 
       {/* Why it matters */}
       <div className="mt-4">
-        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88` }}>
+        <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}88` }}>
           Why this matters
         </p>
         <p className="mt-1 text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -208,7 +208,7 @@ export function GovernedRefusalBlock({
 
       {/* Next admissible move */}
       <div className="mt-5 border-t pt-5" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-        <p style={{ ...mono, fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
+        <p style={{ ...mono, fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', color: `${GOLD}AA` }}>
           Next admissible move
         </p>
         <p className="mt-1 text-[14px] leading-[1.75]" style={{ color: 'rgba(255,255,255,0.70)' }}>
