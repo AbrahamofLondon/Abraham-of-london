@@ -58,7 +58,7 @@ import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPane
 import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
 import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
 
-const GOLD = "#C9A96E";
+import { brass as GOLD, evidenceGrey, RelationshipNavigator } from "@/components/institutional";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
 
@@ -150,10 +150,10 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
               {rec.recommendedAction}
             </p>
             <div style={{ display: "flex", gap: "8px", marginTop: "4px", flexWrap: "wrap" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
+              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(110,231,183,0.55)" }}>
                 OUTCOME REPORTED
               </span>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
+              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
                 Outcome submitted
               </span>
             </div>
@@ -171,20 +171,20 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
             {rec.recommendedAction}
           </p>
           <div style={{ display: "flex", gap: "8px", marginTop: "4px", flexWrap: "wrap" }}>
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: rec.status === "OUTCOME_REPORTED" ? "rgba(110,231,183,0.55)" : rec.status === "ACTED_ON" ? "rgba(110,231,183,0.55)" : rec.status === "ACCEPTED" ? `${GOLD}88` : rec.status === "REJECTED" ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.30)" }}>
+            <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", textTransform: "uppercase", color: rec.status === "OUTCOME_REPORTED" ? "rgba(110,231,183,0.55)" : rec.status === "ACTED_ON" ? "rgba(110,231,183,0.55)" : rec.status === "ACCEPTED" ? `${GOLD}88` : rec.status === "REJECTED" ? "rgba(252,165,165,0.55)" : "rgba(255,255,255,0.30)" }}>
               {rec.status.replace(/_/g, " ")}
             </span>
             {rec.outcomeSummary && (
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.30)" }}>
+              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.30)" }}>
                 {rec.outcomeSummary.slice(0, 80)}{rec.outcomeSummary.length > 80 ? "..." : ""}
               </span>
             )}
             {rec.verified && (
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(110,231,183,0.55)" }}>
+              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: "rgba(110,231,183,0.55)" }}>
                 Verified
               </span>
             )}
-            <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
+            <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
               {formatDisplayDate(rec.lastUpdated)}
             </span>
           </div>
@@ -195,7 +195,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
             onClick={() => setReporting(true)}
             style={{
               ...mono,
-              fontSize: "7px",
+              fontSize: "10px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: `${GOLD}AA`,
@@ -214,14 +214,14 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
       {reporting && (
         <form onSubmit={handleSubmit} style={{ marginTop: "8px", borderTop: `1px solid ${GOLD}18`, paddingTop: "8px" }}>
           {error && (
-            <p role="alert" aria-live="polite" style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(252,165,165,0.62)", marginBottom: "6px" }}>
+            <p role="alert" aria-live="polite" style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(252,165,165,0.62)", marginBottom: "6px" }}>
               {error}
             </p>
           )}
 
           <div style={{ display: "grid", gap: "6px" }}>
             <div>
-              <label htmlFor={formId("signal")} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
+              <label htmlFor={formId("signal")} style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
                 Outcome
               </label>
               <select
@@ -230,7 +230,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
                 required
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   color: "rgba(255,255,255,0.65)",
                   backgroundColor: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.10)",
@@ -249,7 +249,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
             </div>
 
             <div>
-              <label htmlFor={formId("what-changed")} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
+              <label htmlFor={formId("what-changed")} style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
                 What changed
               </label>
               <textarea
@@ -258,7 +258,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
                 rows={2}
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   color: "rgba(255,255,255,0.65)",
                   backgroundColor: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.10)",
@@ -270,7 +270,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
             </div>
 
             <div>
-              <label htmlFor={formId("blocker")} style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
+              <label htmlFor={formId("blocker")} style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "block", marginBottom: "4px" }}>
                 Blocker (optional)
               </label>
               <select
@@ -278,7 +278,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
                 name="blocker"
                 style={{
                   ...mono,
-                  fontSize: "8px",
+                  fontSize: "11px",
                   color: "rgba(255,255,255,0.65)",
                   backgroundColor: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.10)",
@@ -305,7 +305,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
                 disabled={submitting}
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "10px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.30)",
@@ -322,7 +322,7 @@ function RecommendationRow({ rec, caseId }: { rec: ClientSafeRecommendation; cas
                 disabled={submitting}
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "10px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: submitting ? "rgba(255,255,255,0.20)" : `${GOLD}CC`,
@@ -359,7 +359,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "16px" }}>
         <div>
           {isMostUrgent && (
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA`, display: "block", marginBottom: "8px" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA`, display: "block", marginBottom: "8px" }}>
               Most urgent case
             </span>
           )}
@@ -367,30 +367,30 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
             {c.title}
           </h2>
           <div style={{ display: "flex", gap: "12px", marginTop: "6px", flexWrap: "wrap" }}>
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: cognitive.color }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: cognitive.color }}>
               {cognitive.label}
             </span>
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Evidence: {c.evidenceTier.replace("_", " ")}
             </span>
             {sourceLabel && (
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}77` }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}77` }}>
                 {sourceLabel}
               </span>
             )}
             {c.unresolvedContradictions > 0 && (
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
                 {c.unresolvedContradictions} contradiction{c.unresolvedContradictions !== 1 ? "s" : ""}
               </span>
             )}
             {lastActivity && (
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.18)" }}>
+              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.18)" }}>
                 Last activity: {lastActivity}
               </span>
             )}
           </div>
         </div>
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.15)", flexShrink: 0 }}>
+        <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.15)", flexShrink: 0 }}>
           {c.caseId.slice(0, 16)}
         </span>
       </div>
@@ -407,7 +407,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Primary finding */}
       {c.primaryFinding && (
         <div style={{ borderLeft: `2px solid ${GOLD}40`, paddingLeft: "14px", marginBottom: "12px" }}>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
+          <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
             Primary finding
           </p>
           <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
@@ -419,7 +419,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Governance implication */}
       {c.governanceImplication && (
         <div style={{ border: "1px solid rgba(255,200,100,0.10)", backgroundColor: "rgba(255,200,100,0.03)", padding: "10px 14px", marginBottom: "16px" }}>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
+          <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "4px" }}>
             Governance implication
           </p>
           <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>
@@ -435,16 +435,16 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
           backgroundColor: c.completionRisk.band === "SEVERE" ? "rgba(252,165,165,0.04)" : c.completionRisk.band === "HIGH" ? "rgba(251,191,36,0.03)" : "rgba(255,255,255,0.01)",
           padding: "10px 14px", marginBottom: "16px"
         }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.completionRisk.band === "SEVERE" ? "rgba(252,165,165,0.62)" : c.completionRisk.band === "HIGH" ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.30)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.completionRisk.band === "SEVERE" ? "rgba(252,165,165,0.62)" : c.completionRisk.band === "HIGH" ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.30)" }}>
             Completion risk: {c.completionRisk.band}
           </span>
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.38)", marginTop: "4px" }}>
             {c.completionRisk.reason}
           </p>
-          <p style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}77`, marginTop: "6px" }}>
+          <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}77`, marginTop: "6px" }}>
             Suggested: {c.completionRisk.suggestedIntervention.replace(/_/g, " ")}
           </p>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+          <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
             Basis: {c.completionRisk.evidenceBasis.replace(/_/g, " ").toLowerCase()}
           </p>
         </div>
@@ -452,7 +452,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
 
       {c.urgencyReasons && c.urgencyReasons.length > 0 && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.12)", backgroundColor: "rgba(252,165,165,0.03)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.62)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.62)" }}>
             Why this case is first
           </span>
           {c.urgencyReasons.map((reason) => (
@@ -483,7 +483,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       </div>
 
       <div style={{ marginBottom: "16px", border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}04`, padding: "12px 14px" }}>
-        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, display: "block", marginBottom: "6px" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}88`, display: "block", marginBottom: "6px" }}>
           Next governed pathway
         </span>
         <div style={{ display: "grid", gap: "8px" }}>
@@ -511,7 +511,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Repair actions — shown when any surface is restricted */}
       {(c.admission.executiveReporting?.status === "RESTRICTED" || c.admission.strategyRoom?.status === "RESTRICTED") && (
         <div style={{ border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "12px 16px", marginBottom: "16px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", display: "block", marginBottom: "6px" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", display: "block", marginBottom: "6px" }}>
             Required to proceed
           </span>
           {[
@@ -533,7 +533,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Cost-of-Inaction Clock */}
       {c.costOfInaction && c.costOfInaction.accumulatedCost > 0 && (
         <div style={{ marginBottom: "16px", border: `1px solid rgba(252,165,165,0.12)`, backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(252,165,165,0.55)" }}>
             Cost of inaction
           </span>
           <p style={{ ...serif, fontSize: "1.1rem", color: `${GOLD}CC`, marginTop: "4px" }}>
@@ -556,20 +556,20 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
 
       {c.irreversibility && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(252,165,165,0.10)", backgroundColor: "rgba(252,165,165,0.02)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.irreversibility.score >= 45 ? "rgba(252,165,165,0.58)" : `${GOLD}88` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.irreversibility.score >= 45 ? "rgba(252,165,165,0.58)" : `${GOLD}88` }}>
             Irreversibility: {c.irreversibility.level}
           </span>
           <p style={{ ...serif, fontSize: "0.95rem", lineHeight: 1.5, color: "rgba(255,255,255,0.70)", marginTop: "4px" }}>
             {c.irreversibility.summary}
           </p>
-          <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+          <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
             Source: {c.irreversibility.sourceLabel} · Recorded: {formatDisplayDate(c.irreversibility.computedAt) ?? "Date unavailable"} · Evidence posture: {c.irreversibility.evidencePosture.replace(/_/g, " ").toLowerCase()}
           </p>
           <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
             {c.irreversibility.evidenceBasis}
           </p>
           {c.irreversibility.windowRemaining && (
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.24)", marginTop: "6px" }}>
               Window remaining: {c.irreversibility.windowRemaining}
             </p>
           )}
@@ -602,7 +602,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
 
       {memoryGroups.length > 0 && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(201,169,110,0.10)", backgroundColor: "rgba(201,169,110,0.03)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
             Case memory
           </span>
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
@@ -611,7 +611,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
           <div style={{ display: "grid", gap: "12px", marginTop: "10px" }}>
             {memoryGroups.map((group) => (
               <div key={group.key}>
-                <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.78)", marginBottom: "6px" }}>
+                <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.78)", marginBottom: "6px" }}>
                   {group.title}
                 </div>
                 <div style={{ display: "grid", gap: "8px" }}>
@@ -620,12 +620,12 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
                     const capturedDate = formatDisplayDate(item.capturedAt);
                     return (
                       <div key={item.id} style={{ borderLeft: "1px solid rgba(201,169,110,0.42)", paddingLeft: "10px" }}>
-                        <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
+                        <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.34)" }}>
                           {formatMemorySourceLabel(item)}
                           {capturedDate ? ` · ${capturedDate}` : ""}
                           {` · ${statusLabel(item.status)}`}
                         </div>
-                        <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.10em", textTransform: "uppercase", color: `${GOLD}88`, marginTop: "4px" }}>
+                        <div style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", textTransform: "uppercase", color: `${GOLD}88`, marginTop: "4px" }}>
                           {item.label}
                         </div>
                         <div style={{ ...serif, fontSize: "0.88rem", lineHeight: 1.5, color: "rgba(255,255,255,0.68)", marginTop: "2px" }}>
@@ -644,7 +644,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Recommendations */}
       {c.recommendations && c.recommendations.length > 0 && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(201,169,110,0.10)", backgroundColor: "rgba(201,169,110,0.03)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}99` }}>
             Recommendations
           </span>
           <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
@@ -657,7 +657,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
 
       {/* Return Briefs */}
       <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
-        <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
+        <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
           Return Briefs
         </span>
         {c.returnBriefs.length > 0 ? (
@@ -669,14 +669,14 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: "4px", textDecoration: "none" }}
               >
                 <div>
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, display: "block" }}>
+                  <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}BB`, display: "block" }}>
                     View Return Brief
                   </span>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.25)", marginTop: "1px", display: "block" }}>
+                  <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.25)", marginTop: "1px", display: "block" }}>
                     {rb.sessionKey.slice(0, 16)} · {new Date(rb.generatedAt).toLocaleDateString("en-GB")}
                   </span>
                 </div>
-                <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: rb.trajectory === "DETERIORATING" ? "rgba(252,165,165,0.55)" : rb.trajectory === "FRAGILE" ? "rgba(251,191,36,0.55)" : "rgba(110,231,183,0.55)", flexShrink: 0 }}>
+                <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: rb.trajectory === "DETERIORATING" ? "rgba(252,165,165,0.55)" : rb.trajectory === "FRAGILE" ? "rgba(251,191,36,0.55)" : "rgba(110,231,183,0.55)", flexShrink: 0 }}>
                   {rb.trajectory}
                 </span>
               </Link>
@@ -701,7 +701,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {c.outcomeStatus && (
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px" }}>
           <Clock style={{ width: "10px", height: "10px", color: "rgba(255,255,255,0.25)" }} />
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}>
             Outcome: {c.outcomeStatus}
           </span>
         </div>
@@ -709,7 +709,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
 
       {c.patternRecurrence && c.patternRecurrence.status !== "NO_PRIOR_PATTERN" && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.patternRecurrence.status === "VERIFIED_RECURRENCE" ? `${GOLD}AA` : "rgba(251,191,36,0.60)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.patternRecurrence.status === "VERIFIED_RECURRENCE" ? `${GOLD}AA` : "rgba(251,191,36,0.60)" }}>
             Pattern recurrence: {c.patternRecurrence.status === "VERIFIED_RECURRENCE" ? "verified" : "possible"}
           </span>
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
@@ -725,7 +725,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
         <div style={{ marginBottom: "16px", border: c.boardroom.qualified ? `1px solid rgba(201,169,110,0.20)` : "1px solid rgba(255,255,255,0.05)", backgroundColor: c.boardroom.qualified ? "rgba(201,169,110,0.03)" : "rgba(255,255,255,0.01)", padding: "10px 14px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.boardroom.qualified ? `${GOLD}AA` : "rgba(255,255,255,0.22)" }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.boardroom.qualified ? `${GOLD}AA` : "rgba(255,255,255,0.22)" }}>
                 {c.boardroom.qualified ? "Boardroom Dossier available" : "Boardroom Dossier not generated"}
               </span>
               {!c.boardroom.qualified && c.boardroom.reason && (
@@ -734,7 +734,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
                 </p>
               )}
               {(c.boardroom.historyCount ?? 0) > 0 && (
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.25)", marginTop: "6px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.25)", marginTop: "6px" }}>
                   {c.boardroom.historyCount} archived boardroom cycle{c.boardroom.historyCount === 1 ? "" : "s"}
                 </p>
               )}
@@ -742,7 +742,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
             {c.boardroom.qualified && c.boardroom.href && (
               <Link
                 href={c.boardroom.href}
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}30`, padding: "4px 10px" }}
+                style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none", border: `1px solid ${GOLD}30`, padding: "4px 10px" }}
               >
                 Open
               </Link>
@@ -754,19 +754,19 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Retainer readiness */}
       {c.retainerReadiness && (
         <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.retainerReadiness.level === "HIGH" ? `${GOLD}AA` : c.retainerReadiness.level === "MEDIUM" ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.22)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: c.retainerReadiness.level === "HIGH" ? `${GOLD}AA` : c.retainerReadiness.level === "MEDIUM" ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.22)" }}>
             Oversight potential: {c.retainerReadiness.level}
           </span>
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.34)", marginTop: "4px" }}>
             {c.retainerReadiness.reason}
           </p>
           {c.retainerReadiness.signals && c.retainerReadiness.signals.length > 0 && (
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
               {c.retainerReadiness.signals.join(" • ")}
             </p>
           )}
           {c.retainerReadiness.cadenceStatus && (
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "6px" }}>
               Cadence: {c.retainerReadiness.cadenceStatus}
             </p>
           )}
@@ -800,7 +800,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {/* Next required action */}
       {c.nextRequiredAction && (
         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "12px 16px", marginBottom: "16px" }}>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70`, display: "block", marginBottom: "4px" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}70`, display: "block", marginBottom: "4px" }}>
             Next required action
           </span>
           <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.60)" }}>
@@ -813,7 +813,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       {c.commercial.ownedProducts.length > 0 && (
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {c.commercial.ownedProducts.map((p) => (
-            <span key={p} style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(110,231,183,0.45)", border: "1px solid rgba(110,231,183,0.12)", padding: "2px 8px" }}>
+            <span key={p} style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(110,231,183,0.45)", border: "1px solid rgba(110,231,183,0.12)", padding: "2px 8px" }}>
               {p.replace(/_/g, " ").replace(/\./g, " ")}
             </span>
           ))}
@@ -824,7 +824,7 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
       <div style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
         <Link
           href={`/decision-centre/case/${encodeURIComponent(c.caseId)}`}
-          style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}66`, textDecoration: "none" }}
+          style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: `${GOLD}66`, textDecoration: "none" }}
         >
           View full case →
         </Link>
@@ -836,12 +836,12 @@ function CaseCard({ c, isMostUrgent }: { c: DecisionCentreCase; isMostUrgent: bo
 function StrategyRoomRecordRow({ record }: { record: StrategyRoomSessionRef }) {
   return (
     <div style={{ marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.015)", padding: "10px 14px" }}>
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", display: "block", marginBottom: "6px" }}>
         Strategy Room Record
       </span>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
         <div>
-          <span style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(110,231,183,0.60)" }}>
             Recorded
           </span>
           <p style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.28)", marginTop: "3px" }}>
@@ -853,14 +853,14 @@ function StrategyRoomRecordRow({ record }: { record: StrategyRoomSessionRef }) {
         <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
           <Link
             href={record.href}
-            style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px" }}
+            style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px" }}
           >
             View record
           </Link>
           {record.provenanceStatus === "available" && record.provenanceHref && (
             <Link
               href={record.provenanceHref}
-              style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px" }}
+              style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}BB`, textDecoration: "none", border: `1px solid ${GOLD}25`, padding: "4px 9px" }}
             >
               View provenance
             </Link>
@@ -895,7 +895,7 @@ function AdmissionRow({
           {surface}
         </span>
       </div>
-      <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.10em", textTransform: "uppercase", color: isAdmitted ? "rgba(110,231,183,0.50)" : "rgba(252,165,165,0.45)" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.10em", textTransform: "uppercase", color: isAdmitted ? "rgba(110,231,183,0.50)" : "rgba(252,165,165,0.45)" }}>
         {isAdmitted
           ? paymentRequired ? "Eligible — payment required" : "Admitted"
           : "Restricted — repair evidence"
@@ -918,14 +918,14 @@ function CreditPanel({ credit }: { credit: DecisionCreditSummary }) {
       <div style={{ display: "flex", gap: "24px" }}>
         <div>
           <span style={{ ...serif, fontSize: "1.8rem", color: "rgba(255,255,255,0.70)" }}>{credit.score}</span>
-          <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.25)", marginLeft: "6px" }}>
+          <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.25)", marginLeft: "6px" }}>
             {credit.trend}
           </span>
         </div>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <span style={{ ...mono, fontSize: "8px", color: "rgba(110,231,183,0.45)" }}>{credit.fulfilled} fulfilled</span>
-          {credit.breached > 0 && <span style={{ ...mono, fontSize: "8px", color: "rgba(252,165,165,0.45)" }}>{credit.breached} breached</span>}
-          {credit.disputed > 0 && <span style={{ ...mono, fontSize: "8px", color: "rgba(251,191,36,0.45)" }}>{credit.disputed} disputed</span>}
+          <span style={{ ...mono, fontSize: "11px", color: "rgba(110,231,183,0.45)" }}>{credit.fulfilled} fulfilled</span>
+          {credit.breached > 0 && <span style={{ ...mono, fontSize: "11px", color: "rgba(252,165,165,0.45)" }}>{credit.breached} breached</span>}
+          {credit.disputed > 0 && <span style={{ ...mono, fontSize: "11px", color: "rgba(251,191,36,0.45)" }}>{credit.disputed} disputed</span>}
         </div>
       </div>
     </div>
@@ -1001,7 +1001,7 @@ function CheckpointSection({
 }) {
   return (
     <div style={{ border: `1px solid rgba(201,169,110,0.20)`, backgroundColor: "rgba(201,169,110,0.03)", padding: "16px 20px", marginBottom: "16px" }}>
-      <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "12px" }}>
+      <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "12px" }}>
         {title}
       </p>
       {items.map((cp) => {
@@ -1014,11 +1014,11 @@ function CheckpointSection({
         return (
           <div key={cp.id} style={{ borderLeft: `2px solid ${cp.status === "OVERDUE" ? "rgba(252,165,165,0.40)" : responded ? "rgba(110,231,183,0.30)" : "rgba(201,169,110,0.30)"}`, paddingLeft: "12px", marginBottom: "10px" }}>
             <p style={{ ...serif, fontSize: "0.9rem", lineHeight: 1.5, color: "rgba(255,255,255,0.78)" }}>{cp.commandTitle}</p>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginTop: "4px" }}>
+            <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginTop: "4px" }}>
               Source: {cp.sourceLabel} · Surface: {cp.sourceSurface.replace(/_/g, " ").toLowerCase()} · Evidence posture: {cp.evidencePosture.replace(/_/g, " ").toLowerCase()}
             </p>
             <p style={{ fontSize: "12px", lineHeight: 1.5, color: "rgba(255,255,255,0.40)", marginTop: "4px" }}>{cp.verificationQuestion}</p>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: responded ? responseColor : cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "6px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: responded ? responseColor : cp.status === "OVERDUE" ? "rgba(252,165,165,0.45)" : "rgba(255,255,255,0.20)", marginTop: "6px" }}>
               {responded
                 ? `Response: ${(cp.responseStatus ?? "RESPONDED").replace(/_/g, " ")} · ${formatDisplayDate(cp.respondedAt) ?? "Date unavailable"}`
                 : `${cp.status} · Due ${formatDisplayDate(cp.dueAt) ?? "Date unavailable"}`}
@@ -1152,13 +1152,13 @@ export default function DecisionCentrePage() {
             <p style={{ fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.62)", marginTop: "10px", maxWidth: "58ch" }}>
               The operating console for governed cases. Each case has a case ID, evidence state, admissibility, intervention eligibility, and outcome memory — across every decision in the record.
             </p>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "8px", maxWidth: "58ch", lineHeight: 1.6 }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginTop: "8px", maxWidth: "58ch", lineHeight: 1.6 }}>
               This is not a report viewer. It is the live state of decisions under governance — from diagnostic through to intervention and oversight.
             </p>
 
             {/* Decision entry cluster — start with the decision in front of you */}
             <div style={{ marginTop: "28px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-              <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88`, display: "block", marginBottom: "12px" }}>
+              <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}88`, display: "block", marginBottom: "12px" }}>
                 Start with the decision in front of you
               </span>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "10px" }}>
@@ -1189,7 +1189,7 @@ export default function DecisionCentrePage() {
 
             {/* Product Authority Status Overview */}
             <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-              <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, display: "block", marginBottom: "12px" }}>
+              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, display: "block", marginBottom: "12px" }}>
                 Authority Status of Core Products
               </span>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
@@ -1215,12 +1215,12 @@ export default function DecisionCentrePage() {
                 <React.Fragment key={step.label}>
                   <Link
                     href={step.href}
-                    style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: i === 0 ? `${GOLD}BB` : "rgba(255,255,255,0.28)", textDecoration: "none" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: i === 0 ? `${GOLD}BB` : "rgba(255,255,255,0.28)", textDecoration: "none" }}
                   >
                     {step.label}
                   </Link>
                   {i < arr.length - 1 && (
-                    <span style={{ ...mono, fontSize: "8px", color: "rgba(255,255,255,0.14)", margin: "0 0.5rem" }}>→</span>
+                    <span style={{ ...mono, fontSize: "11px", color: "rgba(255,255,255,0.14)", margin: "0 0.5rem" }}>→</span>
                   )}
                 </React.Fragment>
               ))}
@@ -1232,7 +1232,7 @@ export default function DecisionCentrePage() {
 
           {continuityMessage && (
             <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "12px 16px", marginBottom: "16px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}AA` }}>
                 {continuityMessage}
               </p>
             </div>
@@ -1293,14 +1293,14 @@ export default function DecisionCentrePage() {
 
           {!loading && data && (data.cases.length > 0 || data.checkpoints.requiresResponse.length > 0) && (
             <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "16px 20px", marginBottom: "16px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
                 Selective engagement pathway
               </p>
               <p style={{ fontSize: "13px", lineHeight: 1.6, color: "rgba(255,255,255,0.48)" }}>
                 Your existing case record may support a selective engagement review. This is not a starting point and not a generic offer menu.
               </p>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "10px" }}>
-                <Link href="/engagements/selective-pilot" style={{ ...mono, fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
+                <Link href="/engagements/selective-pilot" style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: `${GOLD}CC`, textDecoration: "none" }}>
                   Review engagement path
                 </Link>
               </div>
@@ -1329,7 +1329,7 @@ export default function DecisionCentrePage() {
                       onClick={() => setActiveFilter(f.key)}
                       style={{
                         ...mono,
-                        fontSize: "7.5px",
+                        fontSize: "11px",
                         letterSpacing: "0.16em",
                         textTransform: "uppercase",
                         color: active ? `${GOLD}CC` : "rgba(255,255,255,0.25)",
@@ -1374,7 +1374,7 @@ export default function DecisionCentrePage() {
             <div style={{ display: "grid", gap: "16px" }}>
               {data.mostUrgentCase && (
                 <div style={{ border: `1px solid ${GOLD}24`, backgroundColor: `${GOLD}05`, padding: "16px 20px" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "10px" }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "10px" }}>
                     Most urgent case
                   </p>
                   {data.mostUrgentCase.reasons.map((reason) => (
@@ -1395,7 +1395,7 @@ export default function DecisionCentrePage() {
 
               {/* Strategy Room escalation corridor */}
               <div style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "16px 20px" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}88`, marginBottom: "8px" }}>
                   Intervention escalation
                 </p>
                 <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)" }}>
@@ -1404,14 +1404,14 @@ export default function DecisionCentrePage() {
                 <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "12px", alignItems: "center" }}>
                   <Link
                     href="/strategy-room"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "10px 20px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`, color: "#F5F5F5", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "10px 20px", border: `1px solid ${GOLD}40`, backgroundColor: `${GOLD}0E`, color: "#F5F5F5", ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
                   >
                     Strategy Room
                     <ArrowRight style={{ width: 11, height: 11 }} />
                   </Link>
                   <Link
                     href="/diagnostics/executive-reporting"
-                    style={{ ...mono, fontSize: "7.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
+                    style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", textDecoration: "none" }}
                   >
                     Executive Reporting required first →
                   </Link>
@@ -1422,7 +1422,7 @@ export default function DecisionCentrePage() {
               <div style={{ paddingTop: "24px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
                 <Link
                   href="/diagnostics"
-                  style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
+                  style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)", textDecoration: "none" }}
                 >
                   View diagnostic records archive
                 </Link>
@@ -1430,7 +1430,7 @@ export default function DecisionCentrePage() {
 
               {/* Persistence boundary */}
               <div style={{ marginTop: "32px", padding: "14px 18px", border: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)" }}>
-                <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}>
+                <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.18)", lineHeight: 1.6 }}>
                   Authenticated Decision Centre records are reconstructed from available account and diagnostic evidence. Session-only previews must be saved before they become account-bound governed cases.
                 </p>
               </div>
