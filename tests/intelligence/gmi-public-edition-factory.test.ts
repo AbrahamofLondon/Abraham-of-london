@@ -31,6 +31,11 @@ describe("GMI public edition landing-page factory", () => {
     expect(q2.commerce.productCode).toBe("gmi_q2_2026");
     expect(q2.commerce.priceLabel).toBe(CATALOG.gmi_q2_2026!.displayPrice);
     expect(q2.commerce.priceAuthorityRef).toBe("price_1TP1rRQFpelVFMXJWaFMOpJQ");
+    expect(q2.readerAccessState).toBe("ACQUISITION_VISITOR");
+    expect(q2.regimeFingerprint).toHaveLength(5);
+    expect(q2.consequenceMatrix.map((row) => row.decisionDomain)).toContain("CAPITAL ALLOCATION");
+    expect(q2.crossEditionDeltas.some((delta) => delta.movement === "STRENGTHENED")).toBe(true);
+    expect(q2.supportingBriefs[0]?.ref).toMatch(/^BRIEF-GMI-/);
     const state = await getDurableReleaseState("GMI-Q2-2026");
     expect(q2.releaseProof.receiptRef).toBeTruthy();
     expect(q2.releaseProof.candidateHash).toBe(state?.candidateHash);
@@ -44,6 +49,8 @@ describe("GMI public edition landing-page factory", () => {
     expect(q1.isPublic).toBe(true);
     expect(q1.isPurchasable).toBe(false);
     expect(q1.commerce.checkoutEligible).toBe(false);
+    expect(q1.readerAccessState).toBe("PUBLIC_SUMMARY");
+    expect(q1.consequenceMatrix[0]?.accessLevel).toBe("PUBLIC");
     expect(q1.archiveContext.currentEdition.editionId).toBe("GMI-Q2-2026");
     expect(q1.archiveContext.currentEdition.href).toBe("/intelligence/global-market-intelligence-q2-2026");
   });
