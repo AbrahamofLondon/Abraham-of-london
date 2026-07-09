@@ -102,7 +102,7 @@ import AssessmentResultSurface from "@/components/diagnostics/AssessmentResultSu
 import { mapTeamAssessmentToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
 import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const BASE = "rgb(6 6 9)";
 const VOID = "rgb(3 3 5)";
 const LIFT = "rgb(10 14 20)";
@@ -379,7 +379,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
         {children}
       </span>
     </div>
@@ -397,7 +397,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   display: "block", marginBottom: "0.45rem",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase",
+  fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase",
   color: "rgba(255,255,255,0.26)",
 };
 
@@ -415,7 +415,7 @@ function QuestionBlock({ domain, phase, scores, onScore }: {
           <Icon style={{ width: "14px", height: "14px", color: `${GOLD}90` }} />
           <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.05rem", color: "rgba(255,255,255,0.80)" }}>{domain.label}</span>
         </div>
-        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: answered === 3 ? "rgba(110,231,183,0.60)" : "rgba(255,255,255,0.18)" }}>{answered}/3</span>
+        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.26em", textTransform: "uppercase", color: answered === 3 ? "rgba(110,231,183,0.60)" : "rgba(255,255,255,0.18)" }}>{answered}/3</span>
       </div>
       <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
         {domain.prompts.map((prompt, idx) => {
@@ -477,7 +477,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
         <div className="flex items-end justify-between gap-4 mt-4 flex-wrap">
           <div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.5rem, 3vw, 2.5rem)", lineHeight: 1.0, letterSpacing: "-0.022em", color: "rgba(255,255,255,0.92)" }}>{reading.title}</h2>
-            <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: rc.text, opacity: 0.90 }}>{rc.label}</div>
+            <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: rc.text, opacity: 0.90 }}>{rc.label}</div>
             <BoundaryProximityLine
               text={boundaryProximityText({
                 label: "Overall gap",
@@ -491,7 +491,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
             <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "3.5rem", lineHeight: 1, color: gapAbs >= 25 ? "rgba(252,165,165,0.85)" : gapAbs >= 12 ? `${GOLD}CC` : "rgba(110,231,183,0.80)" }}>
               {overallGap > 0 ? "+" : ""}{overallGap}
             </div>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Overall gap</div>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Overall gap</div>
           </div>
         </div>
 
@@ -588,12 +588,12 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
           />
 
           <details style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
-            <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+            <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
               How this was determined
             </summary>
             <div className="mt-5 space-y-5">
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>You indicated</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>You indicated</div>
                 <ul className="mt-3 space-y-2">
                   {gaps.slice(0, 3).map((gap) => (
                     <li key={gap.domain} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
@@ -603,13 +603,13 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
                 </ul>
               </div>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Contradiction mapping</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Contradiction mapping</div>
                 <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
                   The reading compares how leadership experiences the team against how leadership believes the team would describe itself. The gap, not the raw score alone, drives the diagnosis.
                 </p>
               </div>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Pattern trigger explanation</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Pattern trigger explanation</div>
                 <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
                   This combination produces {reading.title.toLowerCase()} because the largest divergence sits in {reading.urgentDomain ?? "the dominant domain"}, while overall leader perception and operating reality remain {gapAbs} points apart.
                 </p>
@@ -628,7 +628,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
                 ? `The ${reading.urgentDomain ?? "dominant"} gap is too distributed for local correction. The Enterprise Diagnostic tests whether this strain is embedded in the wider institutional structure.`
                 : `The perception gap in ${reading.urgentDomain ?? "the most stressed domain"} may be contained to this team — or it may be a symptom of how the institution operates. The Enterprise Diagnostic reveals which.`}
             </p>
-            <Link href="/diagnostics/enterprise-assessment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "11px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
+            <Link href="/diagnostics/enterprise-assessment" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "11px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
               Run Enterprise Diagnostic <ChevronRight style={{ width: 11, height: 11 }} />
             </Link>
           </div>
@@ -659,13 +659,13 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
                     : "Before this can be governed, the system needs the evidence history."}
                 </p>
                 <button type="button" onClick={onSubmit} disabled={isSubmitting || !evidenceReady}
-                  style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.50)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: isSubmitting || !evidenceReady ? "not-allowed" : "pointer", flexShrink: 0, opacity: evidenceReady ? 1 : 0.6 }}>
+                  style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.50)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: isSubmitting || !evidenceReady ? "not-allowed" : "pointer", flexShrink: 0, opacity: evidenceReady ? 1 : 0.6 }}>
                   {isSubmitting ? "Saving…" : "Save record"}
                 </button>
               </div>
             ) : submitResult.ok ? (
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(110,231,183,0.65)", marginBottom: "0.4rem" }}>Record saved</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(110,231,183,0.65)", marginBottom: "0.4rem" }}>Record saved</div>
                 <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: "rgba(255,255,255,0.30)" }}>Ref: {submitResult.diagnosticRef}</p>
               </div>
             ) : (
@@ -678,7 +678,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
         <div className="space-y-4">
           <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
             <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Assessment metrics</span>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Assessment metrics</span>
             </div>
             <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
               <MRow label="Leader perception" value={`${overallLeader}%`} />
@@ -692,7 +692,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
           </div>
 
           <div style={{ border: `1px solid ${fragility.status === "FRACTURED" ? "rgba(252,165,165,0.22)" : fragility.status === "VOLATILE" ? `${GOLD}25` : "rgba(110,231,183,0.18)"}`, backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
-            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: fragility.status === "FRACTURED" ? "rgba(252,165,165,0.60)" : fragility.status === "VOLATILE" ? `${GOLD}90` : "rgba(110,231,183,0.60)", marginBottom: "0.65rem" }}>
+            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.36em", textTransform: "uppercase", color: fragility.status === "FRACTURED" ? "rgba(252,165,165,0.60)" : fragility.status === "VOLATILE" ? `${GOLD}90` : "rgba(110,231,183,0.60)", marginBottom: "0.65rem" }}>
               Internal fragility — {fragility.status.toLowerCase()}
             </div>
             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.50)" }}>{fragility.description}</p>
@@ -700,7 +700,7 @@ function ResultSurface({ gaps, reading, overallLeader, overallReality, fragility
 
           {purposePct !== null && (
             <div style={{ border: `1px solid ${GOLD}15`, backgroundColor: `${GOLD}05`, padding: "1.25rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.65rem" }}>Purpose alignment context</div>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.36em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.65rem" }}>Purpose alignment context</div>
               <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "2rem", lineHeight: 1, color: GOLD, marginBottom: "0.25rem" }}>{purposePct}%</div>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.38)" }}>
                 {purposePct >= 62 ? overallGap > 20 ? "Personal clarity is high. The team gap is a transmission problem, not a clarity problem." : "Personal alignment is strong. Team alignment is broadly consistent." : overallGap > 15 ? "Personal drift combined with team perception gap. The team cannot have more clarity than its leadership." : "Personal alignment gap exists. Address it before expecting team alignment to improve."}
@@ -1134,11 +1134,11 @@ export default function TeamAssessmentPage() {
             <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
               <div className="pt-32 md:pt-40 pb-12">
                 <div className="flex items-center gap-2 mb-10">
-                  <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     <span className="flex items-center gap-1.5"><ArrowLeft style={{ width: "10px", height: "10px" }} /> Diagnostics</span>
                   </Link>
                   <span style={{ color: "rgba(255,255,255,0.12)" }}>/</span>
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Team Assessment</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Team Assessment</span>
                 </div>
 
                 <div className="grid gap-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
@@ -1174,12 +1174,12 @@ export default function TeamAssessmentPage() {
                     </div>
                     {purposePct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
-                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Purpose alignment loaded — {purposePct}%</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Purpose alignment loaded — {purposePct}%</span>
                       </div>
                     )}
                     {constitutionalThread && (
                       <div style={{ marginTop: "1rem", padding: "0.95rem 1.25rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)" }}>
-                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>
                           Inherited constitutional route
                         </div>
                         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.6, color: "rgba(255,255,255,0.54)" }}>
@@ -1195,14 +1195,14 @@ export default function TeamAssessmentPage() {
                   </div>
 
                   <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, padding: "1.5rem" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1rem" }}>Position in ladder</div>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1rem" }}>Position in ladder</div>
                     {[
                       { label: "01 Purpose Alignment", done: true, active: false },
                       { label: "02 Team Assessment",   done: false, active: true },
                       { label: "03 Enterprise",        done: false, active: false },
                       { label: "04 Executive Reporting",done: false, active: false },
                     ].map(item => (
-                      <div key={item.label} style={{ padding: "0.55rem 0.85rem", marginBottom: "0.35rem", border: `1px solid ${item.active ? `${GOLD}22` : "transparent"}`, backgroundColor: item.active ? `${GOLD}08` : "transparent", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: item.active ? `${GOLD}CC` : item.done ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)", textDecoration: item.done ? "line-through" : "none" }}>
+                      <div key={item.label} style={{ padding: "0.55rem 0.85rem", marginBottom: "0.35rem", border: `1px solid ${item.active ? `${GOLD}22` : "transparent"}`, backgroundColor: item.active ? `${GOLD}08` : "transparent", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: item.active ? `${GOLD}CC` : item.done ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)", textDecoration: item.done ? "line-through" : "none" }}>
                         {item.label}
                       </div>
                     ))}
@@ -1282,7 +1282,7 @@ export default function TeamAssessmentPage() {
                       />
                     </div>
                     <div className="sm:col-span-2" style={{ border: `1px solid ${GOLD}18`, backgroundColor: `${GOLD}05`, padding: "1rem", marginTop: "0.25rem" }}>
-                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.85rem" }}>
                         Respondent decision record
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
@@ -1311,7 +1311,7 @@ export default function TeamAssessmentPage() {
                           <div key={field.key}>
                             <div className="flex items-center justify-between gap-3">
                               <label style={labelStyle}>{field.label}</label>
-                              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", color: `${GOLD}A8` }}>{identity[field.key as keyof IdentityForm]}%</span>
+                              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", color: `${GOLD}A8` }}>{identity[field.key as keyof IdentityForm]}%</span>
                             </div>
                             <input
                               type="range"
@@ -1335,7 +1335,7 @@ export default function TeamAssessmentPage() {
                       </div>
                     </div>
                     <details className="sm:col-span-2" style={{ marginTop: "0.5rem" }}>
-                      <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                      <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                         Optional context
                       </summary>
                       <div className="grid gap-4 mt-4 sm:grid-cols-2">
@@ -1360,7 +1360,7 @@ export default function TeamAssessmentPage() {
                   {/* ── What this reads / detects / record boundary ────────── */}
                   <div className="grid gap-3 sm:grid-cols-3" style={{ marginTop: "2rem" }}>
                     <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                         What this reads
                       </p>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -1368,7 +1368,7 @@ export default function TeamAssessmentPage() {
                       </p>
                     </div>
                     <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                         What this detects
                       </p>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -1376,7 +1376,7 @@ export default function TeamAssessmentPage() {
                       </p>
                     </div>
                     <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
                         Record boundary
                       </p>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
@@ -1387,23 +1387,23 @@ export default function TeamAssessmentPage() {
 
                   {/* Mode selection */}
                   <div style={{ marginTop: "1.5rem" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>Assessment mode</div>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>Assessment mode</div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div style={{ padding: "1.25rem", border: `1px solid ${GOLD}30`, backgroundColor: `${GOLD}08` }}>
-                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}CC`, marginBottom: "0.5rem" }}>Leader View</div>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}CC`, marginBottom: "0.5rem" }}>Leader View</div>
                         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.45)" }}>
                           Fast directional read. You rate the team, then estimate how the team would rate itself. Produces a leader-estimated perception gap. Suitable for early-stage signal detection.
                         </p>
-                        <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                        <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                           Claim level: leadership view of team reality
                         </div>
                       </div>
                       <Link href="/admin/campaigns" style={{ padding: "1.25rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", display: "block", textDecoration: "none" }}>
-                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(110,231,183,0.80)", marginBottom: "0.5rem" }}>Respondent-Based Team Reality</div>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(110,231,183,0.80)", marginBottom: "0.5rem" }}>Respondent-Based Team Reality</div>
                         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.60, color: "rgba(255,255,255,0.45)" }}>
                           Structured team-wide assessment. Invite team members to respond directly. Produces respondent-derived sentiment with measurable confidence. Stronger evidence for Executive Reporting.
                         </p>
-                        <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                        <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                           Claim level: respondent-derived team sentiment (when participation is sufficient)
                         </div>
                       </Link>
@@ -1418,17 +1418,17 @@ export default function TeamAssessmentPage() {
 
                   {showResume ? (
                     <div style={{ marginTop: "1.5rem", padding: "1.25rem", border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06` }}>
-                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90` }}>
                         Resume your assessment?
                       </div>
                       <p style={{ marginTop: "0.6rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.46)" }}>
                         A saved team reading is available on this device.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
-                        <button type="button" onClick={resumeDraft} style={{ padding: "10px 18px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                        <button type="button" onClick={resumeDraft} style={{ padding: "10px 18px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                           Resume
                         </button>
-                        <button type="button" onClick={discardDraft} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.42)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                        <button type="button" onClick={discardDraft} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.42)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                           Start fresh
                         </button>
                       </div>
@@ -1475,11 +1475,11 @@ export default function TeamAssessmentPage() {
                   )}
 
                   <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                    <button type="button" onClick={() => retreat("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <button type="button" onClick={() => retreat("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                       <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                     </button>
                     <div style={{ textAlign: "center" }}>
-                      {!leaderGroupComplete(leaderPage) && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
+                      {!leaderGroupComplete(leaderPage) && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
                       <button type="button" onClick={() => {
                         if (!leaderGroupComplete(leaderPage)) return;
                         if (leaderPage === 0) {
@@ -1530,7 +1530,7 @@ export default function TeamAssessmentPage() {
                       <div className="mt-4 space-y-4">
                         {adaptiveQuestions.map((q) => (
                           <div key={q.id}>
-                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: q.purpose === "challenge" ? "rgba(252,165,165,0.50)" : "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: q.purpose === "challenge" ? "rgba(252,165,165,0.50)" : "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                               {q.prompt}
                             </label>
                             <textarea
@@ -1558,11 +1558,11 @@ export default function TeamAssessmentPage() {
                   )}
 
                   <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                    <button type="button" onClick={() => retreat("leader")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <button type="button" onClick={() => retreat("leader")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                       <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                     </button>
                     <div style={{ textAlign: "center" }}>
-                      {!realityGroupComplete(realityPage) && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
+                      {!realityGroupComplete(realityPage) && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
                       <button type="button" onClick={() => {
                         if (!realityGroupComplete(realityPage)) return;
                         if (realityPage === 0) {
@@ -1595,7 +1595,7 @@ export default function TeamAssessmentPage() {
                     <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
                       <AssessmentResultSurface result={mappedTeamResult} />
                     </div>
-                    <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px", textAlign: "center" }}>
+                    <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px", textAlign: "center" }}>
                       Next earned action is determined by the assessment result. Save to Decision Centre to preserve this record.
                     </p>
                   </div>
@@ -1685,7 +1685,7 @@ export default function TeamAssessmentPage() {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}30, transparent)` }} />
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Layer 02 of 04</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Layer 02 of 04</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>

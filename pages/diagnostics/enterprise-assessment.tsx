@@ -112,7 +112,7 @@ import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contr
 // TOKENS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const BASE = "rgb(6 6 9)";
 const VOID = "rgb(3 3 5)";
 const LIFT = "rgb(10 14 20)";
@@ -424,7 +424,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>{children}</span>
+      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>{children}</span>
     </div>
   );
 }
@@ -438,7 +438,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   display: "block", marginBottom: "0.45rem",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)",
+  fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)",
 };
 
 function bandColor(band: string) {
@@ -625,7 +625,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.5rem, 3vw, 2.5rem)", lineHeight: 1.0, letterSpacing: "-0.022em", color: "rgba(255,255,255,0.92)" }}>
               {reading.patternTitle}
             </h2>
-            <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: bc.text, opacity: 0.90 }}>
+            <div style={{ marginTop: "0.6rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: bc.text, opacity: 0.90 }}>
               {reading.band} — {totalPct}% overall
             </div>
             <BoundaryProximityLine
@@ -693,19 +693,19 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
             </div>
             <div style={{ padding: "1.5rem" }} className="space-y-5">
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.5rem" }}>Enterprise stress summary</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.5rem" }}>Enterprise stress summary</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.65, color: "rgba(255,255,255,0.74)" }}>{enterpriseStressSummary}</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.5rem" }}>Dependency map summary</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.5rem" }}>Dependency map summary</div>
                   <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.62)" }}>
                     {summarizeEnterpriseInput(enterpriseStressInputs.dependencyMap)}
                   </p>
                 </div>
                 <div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.5rem" }}>Board challenge readiness</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.5rem" }}>Board challenge readiness</div>
                   <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.62)" }}>
                     {boardChallengeReadiness}. Evidence must survive independent challenge before judgement moves to Executive Reporting.
                   </p>
@@ -714,7 +714,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 
               {scenarioFindings.length > 0 && (
                 <div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>Scenario stress findings</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>Scenario stress findings</div>
                   <div className="space-y-3">
                     {scenarioFindings.map((finding) => (
                       <div key={finding.scenarioId} style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "rgba(255,255,255,0.018)", padding: "0.95rem 1rem" }}>
@@ -732,7 +732,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
               )}
 
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>Exposure map</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)", marginBottom: "0.75rem" }}>Exposure map</div>
                 <div className="grid gap-3 md:grid-cols-3">
                   {[
                     ["Financial", enterpriseStressInputs.financialExposure],
@@ -751,21 +751,21 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>First failure point</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>First failure point</div>
                   <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.62)" }}>{firstFailurePoint}</p>
                 </div>
                 <div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>Enterprise consequence state</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>Enterprise consequence state</div>
                   <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.62)" }}>{consequenceState}</p>
                 </div>
                 <div>
-                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>Recommended escalation path</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>Recommended escalation path</div>
                   <p style={{ fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif", fontSize: "0.84rem", lineHeight: 1.65, color: "rgba(255,255,255,0.62)" }}>{escalationPath}</p>
                 </div>
               </div>
 
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "1.1rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.55rem" }}>What Executive Reporting would add</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.55rem" }}>What Executive Reporting would add</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1rem", lineHeight: 1.7, color: "rgba(255,255,255,0.72)" }}>
                   This identifies where the decision breaks under organisational pressure. Executive Reporting converts this into board-grade judgement.
                 </p>
@@ -792,7 +792,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
           {/* Dominant failure mode */}
           {reading.dominantFailure && (
             <div style={{ border: "1px solid rgba(252,165,165,0.18)", backgroundColor: "rgba(252,165,165,0.04)", padding: "1.25rem 1.5rem" }}>
-              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)", marginBottom: "0.65rem" }}>
+              <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(252,165,165,0.60)", marginBottom: "0.65rem" }}>
                 Dominant failure mode
               </div>
               <div className="flex items-start gap-2.5">
@@ -843,12 +843,12 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
           />
 
           <details style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.02)", padding: "1.5rem" }}>
-            <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+            <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
               How this was determined
             </summary>
             <div className="mt-5 space-y-5">
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>You indicated</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>You indicated</div>
                 <ul className="mt-3 space-y-2">
                   {sections.slice(0, 4).map((section) => (
                     <li key={section.id} style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
@@ -858,13 +858,13 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
                 </ul>
               </div>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Contradiction mapping</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Contradiction mapping</div>
                 <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
                   The reading compares enterprise coherence, governance, execution, and risk against the decision signal from your recent high-stakes decision. The conflict between those layers drives the route.
                 </p>
               </div>
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Pattern trigger explanation</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Pattern trigger explanation</div>
                 <p style={{ marginTop: "0.75rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.96rem", lineHeight: 1.6, color: "rgba(255,255,255,0.72)" }}>
                   This combination produces {reading.patternTitle.toLowerCase()} because the weakest enterprise domain is {reading.dominantFailure ?? "the lowest-scoring structural block"}, while the recent decision signal resolves at {reading.decisionSignal.clarityScore}% clarity and {reading.decisionSignal.structuralRisk}% structural risk.
                 </p>
@@ -883,7 +883,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
                 ? `The institutional condition at ${totalPct}% has crossed from operational strain to structural risk. Executive Reporting translates this into priced consequence and governed intervention sequencing.`
                 : `The institutional reading at ${totalPct}% is under watch. Executive Reporting will determine whether the current condition has financial exposure that warrants intervention before pressure takes over sequencing.`}
             </p>
-            <Link href="/diagnostics/executive-reporting" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "11px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
+            <Link href="/diagnostics/executive-reporting" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", padding: "11px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
               Escalate to Executive Reporting <ChevronRight style={{ width: 11, height: 11 }} />
             </Link>
           </div>
@@ -914,13 +914,13 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
                     : "Before this can be governed, the system needs the evidence history."}
                 </p>
                 <button type="button" onClick={onSubmit} disabled={isSubmitting || !evidenceReady}
-                  style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.50)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: isSubmitting || !evidenceReady ? "not-allowed" : "pointer", flexShrink: 0, opacity: evidenceReady ? 1 : 0.6 }}>
+                  style={{ padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.50)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", cursor: isSubmitting || !evidenceReady ? "not-allowed" : "pointer", flexShrink: 0, opacity: evidenceReady ? 1 : 0.6 }}>
                   {isSubmitting ? "Saving…" : "Save record"}
                 </button>
               </div>
             ) : submitResult.ok ? (
               <div>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(110,231,183,0.65)", marginBottom: "0.4rem" }}>Record saved</div>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(110,231,183,0.65)", marginBottom: "0.4rem" }}>Record saved</div>
                 <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", color: "rgba(255,255,255,0.30)" }}>Ref: {submitResult.diagnosticRef}</p>
               </div>
             ) : (
@@ -932,7 +932,7 @@ function ResultSurface({ reading, sections, totalScore, maxScore, totalPct, team
         {/* Right */}
         <div className="space-y-4">
           <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT }}>
-            <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}><span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Enterprise metrics</span></div>
+            <div style={{ padding: "0.75rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}><span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.36em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Enterprise metrics</span></div>
             <div style={{ padding: "0.5rem 1.25rem 1rem" }}>
               <MRow label="Overall score"    value={`${totalScore}/${maxScore}`} />
               <MRow label="Overall pct"      value={`${totalPct}%`} />
@@ -1358,11 +1358,11 @@ export default function EnterpriseAssessmentPage() {
             <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
               <div className="pt-32 md:pt-40 pb-12">
                 <div className="flex items-center gap-2 mb-10">
-                  <Link href="/diagnostics" className="flex items-center gap-1.5 transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+                  <Link href="/diagnostics" className="flex items-center gap-1.5 transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
                     <ArrowLeft style={{ width: "10px", height: "10px" }} /> Diagnostics
                   </Link>
                   <span style={{ color: "rgba(255,255,255,0.12)" }}>/</span>
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Enterprise Assessment</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Enterprise Assessment</span>
                 </div>
 
                 <div className="grid gap-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
@@ -1401,12 +1401,12 @@ export default function EnterpriseAssessmentPage() {
                     </div>
                     {teamAlignmentPct !== null && (
                       <div style={{ marginTop: "1.25rem", padding: "0.85rem 1.25rem", border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}07`, display: "inline-flex", alignItems: "center", gap: "0.75rem" }}>
-                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Team assessment loaded — {teamAlignmentPct}%</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90` }}>Team assessment loaded — {teamAlignmentPct}%</span>
                       </div>
                     )}
                     {constitutionalThread && (
                       <div style={{ marginTop: "1rem", padding: "0.95rem 1.25rem", border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)" }}>
-                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.45rem" }}>
                           Constitutional inheritance
                         </div>
                         <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.95rem", lineHeight: 1.6, color: "rgba(255,255,255,0.54)" }}>
@@ -1422,14 +1422,14 @@ export default function EnterpriseAssessmentPage() {
                   </div>
 
                   <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: LIFT, padding: "1.5rem" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1rem" }}>Position in ladder</div>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "1rem" }}>Position in ladder</div>
                     {[
                       { label: "01 Constitutional",  done: true,  active: false },
                       { label: "02 Team Assessment", done: true,  active: false },
                       { label: "03 Enterprise",      done: false, active: true },
                       { label: "04 Executive Reporting",done: false, active: false },
                     ].map(item => (
-                      <div key={item.label} style={{ padding: "0.55rem 0.85rem", marginBottom: "0.30rem", border: `1px solid ${item.active ? `${GOLD}22` : "transparent"}`, backgroundColor: item.active ? `${GOLD}08` : "transparent", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: item.active ? `${GOLD}CC` : item.done ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)", textDecoration: item.done ? "line-through" : "none" }}>
+                      <div key={item.label} style={{ padding: "0.55rem 0.85rem", marginBottom: "0.30rem", border: `1px solid ${item.active ? `${GOLD}22` : "transparent"}`, backgroundColor: item.active ? `${GOLD}08` : "transparent", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: item.active ? `${GOLD}CC` : item.done ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)", textDecoration: item.done ? "line-through" : "none" }}>
                         {item.label}
                       </div>
                     ))}
@@ -1437,7 +1437,7 @@ export default function EnterpriseAssessmentPage() {
                       <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.35rem" }}>Dimensions mapped</div>
                       <div className="grid grid-cols-2 gap-1.5">
                         {["Leadership", "Governance", "Execution", "Risk posture"].map(d => (
-                          <span key={d} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{d}</span>
+                          <span key={d} style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{d}</span>
                         ))}
                       </div>
                     </div>
@@ -1493,7 +1493,7 @@ export default function EnterpriseAssessmentPage() {
                   {/* ── What this reads / detects / record boundary ────────── */}
                   <div className="grid gap-3 sm:grid-cols-3 mt-6">
                     <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                         What this reads
                       </p>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -1501,7 +1501,7 @@ export default function EnterpriseAssessmentPage() {
                       </p>
                     </div>
                     <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                         What this detects
                       </p>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -1509,7 +1509,7 @@ export default function EnterpriseAssessmentPage() {
                       </p>
                     </div>
                     <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
                         Record boundary
                       </p>
                       <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.85rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
@@ -1542,7 +1542,7 @@ export default function EnterpriseAssessmentPage() {
                       </p>
                     </div>
                     <details className="sm:col-span-2" style={{ marginTop: "0.5rem" }}>
-                      <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                      <summary style={{ cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                         Optional context
                       </summary>
                       <div className="grid gap-4 mt-4 sm:grid-cols-2">
@@ -1571,17 +1571,17 @@ export default function EnterpriseAssessmentPage() {
 
                   {showResume ? (
                     <div style={{ marginTop: "1.5rem", padding: "1.25rem", border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}06` }}>
-                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}90` }}>
                         Resume your assessment?
                       </div>
                       <p style={{ marginTop: "0.6rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.65, color: "rgba(255,255,255,0.46)" }}>
                         A saved enterprise reading is available on this device.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
-                        <button type="button" onClick={resumeDraft} style={{ padding: "10px 18px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                        <button type="button" onClick={resumeDraft} style={{ padding: "10px 18px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                           Resume
                         </button>
-                        <button type="button" onClick={discardDraft} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.42)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
+                        <button type="button" onClick={discardDraft} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.10)", backgroundColor: "transparent", color: "rgba(255,255,255,0.42)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", cursor: "pointer" }}>
                           Start fresh
                         </button>
                       </div>
@@ -1622,7 +1622,7 @@ export default function EnterpriseAssessmentPage() {
                     {/* Questions */}
                     <div>
                       <Eyebrow>Enterprise instrument</Eyebrow>
-                      <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                      <div style={{ marginTop: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                         Block {instrumentPage * 2 + 1}–{Math.min(instrumentPage * 2 + 2, BLOCKS.length)} of {BLOCKS.length}
                       </div>
                       <h2 style={{ marginTop: "1.25rem", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)", lineHeight: 1.0, letterSpacing: "-0.020em", color: "rgba(255,255,255,0.88)", marginBottom: "0.75rem" }}>Rate the institutional condition.</h2>
@@ -1638,9 +1638,9 @@ export default function EnterpriseAssessmentPage() {
                               <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                 <div>
                                   <span style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "1.10rem", color: "rgba(255,255,255,0.80)" }}>{block.title}</span>
-                                  <span style={{ marginLeft: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>{block.domain}</span>
+                                  <span style={{ marginLeft: "0.75rem", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>{block.domain}</span>
                                 </div>
-                                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.26em", textTransform: "uppercase", color: blockAnswered === 3 ? "rgba(110,231,183,0.60)" : "rgba(255,255,255,0.18)" }}>{blockAnswered}/3</span>
+                                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.26em", textTransform: "uppercase", color: blockAnswered === 3 ? "rgba(110,231,183,0.60)" : "rgba(255,255,255,0.18)" }}>{blockAnswered}/3</span>
                               </div>
                               <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
                                 {block.prompts.map((prompt, idx) => {
@@ -1676,7 +1676,7 @@ export default function EnterpriseAssessmentPage() {
                           <div className="mt-4 space-y-4">
                             {adaptiveQuestions.map((q) => (
                               <div key={q.id}>
-                                <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: q.purpose === "challenge" ? "rgba(252,165,165,0.50)" : "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                                <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: q.purpose === "challenge" ? "rgba(252,165,165,0.50)" : "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                                   {q.prompt}
                                 </label>
                                 <textarea
@@ -1706,7 +1706,7 @@ export default function EnterpriseAssessmentPage() {
 
                           <div className="grid gap-4 sm:grid-cols-2">
                             <div className="sm:col-span-2">
-                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                                 Which functions, people, systems, or external parties does this decision depend on?
                               </label>
                               <textarea value={enterpriseStressInputs.dependencyMap} onChange={e => setEnterpriseStressInputs(s => ({ ...s, dependencyMap: e.target.value }))}
@@ -1717,7 +1717,7 @@ export default function EnterpriseAssessmentPage() {
 
                           {/* Scenario 1: Delay */}
                           <div className="mt-4" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
                               Scenario 1 — If this decision is delayed 30 days, what fails first?
                             </label>
                             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic", marginBottom: "0.6rem" }}>
@@ -1749,7 +1749,7 @@ export default function EnterpriseAssessmentPage() {
 
                           {/* Scenario 2: Owner unavailable */}
                           <div className="mt-3" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
                               Scenario 2 — If the main owner becomes unavailable, who or what breaks?
                             </label>
                             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic", marginBottom: "0.6rem" }}>
@@ -1780,7 +1780,7 @@ export default function EnterpriseAssessmentPage() {
 
                           {/* Scenario 3: Challenge evidence */}
                           <div className="mt-3" style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(252,165,165,0.50)", marginBottom: "0.5rem" }}>
                               Scenario 3 — If the board, client, or regulator challenges the evidence, what proof survives?
                             </label>
                             <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.82rem", lineHeight: 1.5, color: "rgba(255,255,255,0.30)", fontStyle: "italic", marginBottom: "0.6rem" }}>
@@ -1811,7 +1811,7 @@ export default function EnterpriseAssessmentPage() {
 
                           <div className="grid gap-4 mt-4 sm:grid-cols-3">
                             <div>
-                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                                 What financial exposure is attached?
                               </label>
                               <textarea value={enterpriseStressInputs.financialExposure} onChange={e => setEnterpriseStressInputs(s => ({ ...s, financialExposure: e.target.value }))}
@@ -1819,7 +1819,7 @@ export default function EnterpriseAssessmentPage() {
                                 style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
                             </div>
                             <div>
-                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                                 What client or market exposure is attached?
                               </label>
                               <textarea value={enterpriseStressInputs.clientExposure} onChange={e => setEnterpriseStressInputs(s => ({ ...s, clientExposure: e.target.value }))}
@@ -1827,7 +1827,7 @@ export default function EnterpriseAssessmentPage() {
                                 style={{ width: "100%", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.09)", padding: "8px 10px", fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.92rem", lineHeight: 1.55, color: "rgba(255,255,255,0.70)", resize: "none", outline: "none" }} />
                             </div>
                             <div>
-                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                              <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                                 What legal, regulatory, or compliance exposure is attached?
                               </label>
                               <textarea value={enterpriseStressInputs.regulatoryExposure} onChange={e => setEnterpriseStressInputs(s => ({ ...s, regulatoryExposure: e.target.value }))}
@@ -1837,7 +1837,7 @@ export default function EnterpriseAssessmentPage() {
                           </div>
 
                           <div className="mt-4">
-                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
+                            <label style={{ display: "block", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", marginBottom: "0.4rem" }}>
                               If challenged by a board or senior reviewer, how strong is the evidence base?
                             </label>
                             <div className="flex gap-3 mt-2">
@@ -1845,7 +1845,7 @@ export default function EnterpriseAssessmentPage() {
                                 const isActive = enterpriseStressInputs.boardChallengeReadiness === level;
                                 return (
                                   <button key={level} type="button" onClick={() => setEnterpriseStressInputs(s => ({ ...s, boardChallengeReadiness: level }))}
-                                    style={{ flex: 1, padding: "10px 8px", textAlign: "center", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.14em", cursor: "pointer", transition: "all 200ms ease" }}>
+                                    style={{ flex: 1, padding: "10px 8px", textAlign: "center", border: `1px solid ${isActive ? `${GOLD}55` : "rgba(255,255,255,0.07)"}`, backgroundColor: isActive ? `${GOLD}12` : "rgba(255,255,255,0.01)", color: isActive ? GOLD : "rgba(255,255,255,0.30)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.14em", cursor: "pointer", transition: "all 200ms ease" }}>
                                     {level}
                                   </button>
                                 );
@@ -1878,11 +1878,11 @@ export default function EnterpriseAssessmentPage() {
                       )}
 
                       <div className="flex items-center justify-between mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                        <button type="button" onClick={() => advance("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <button type="button" onClick={() => advance("identity")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.26em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)", display: "flex", alignItems: "center", gap: "6px" }}>
                           <ArrowLeft style={{ width: "11px", height: "11px" }} /> Back
                         </button>
                         <div style={{ textAlign: "center" }}>
-                          {!instrumentGroupComplete && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
+                          {!instrumentGroupComplete && <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginBottom: "0.5rem" }}>Answer all 6 questions on this screen to continue</p>}
                           <button type="button" onClick={() => {
                             if (!instrumentGroupComplete) return;
                             if (instrumentPage === 0) {
@@ -1913,7 +1913,7 @@ export default function EnterpriseAssessmentPage() {
                           <div style={{ padding: "0.75rem 1.25rem", borderBottom: `1px solid ${GOLD}10` }}><Eyebrow>Live signal</Eyebrow></div>
                           <div style={{ padding: "1rem 1.25rem" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "2.5rem", lineHeight: 1, color: GOLD, marginBottom: "0.4rem" }}>{answeredCount > 0 ? `${totalPct}%` : "—"}</div>
-                            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "1rem" }}>{answeredCount > 0 ? bandFromPct(totalPct).toUpperCase() : "Awaiting answers"}</div>
+                            <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "1rem" }}>{answeredCount > 0 ? bandFromPct(totalPct).toUpperCase() : "Awaiting answers"}</div>
                             <div className="space-y-2.5">
                               {sections.map(s => {
                                 const c = s.pct >= 65 ? "rgba(110,231,183,0.65)" : s.pct >= 40 ? `${GOLD}80` : s.pct > 0 ? "rgba(252,165,165,0.65)" : "rgba(255,255,255,0.12)";
@@ -1921,7 +1921,7 @@ export default function EnterpriseAssessmentPage() {
                                   <div key={s.id}>
                                     <div className="flex justify-between mb-1">
                                       <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "6.5px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>{s.id}</span>
-                                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", color: c }}>{s.pct > 0 ? `${s.pct}%` : "—"}</span>
+                                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", color: c }}>{s.pct > 0 ? `${s.pct}%` : "—"}</span>
                                     </div>
                                     <div style={{ height: "2px", backgroundColor: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
                                       <motion.div style={{ height: "100%", backgroundColor: c }} animate={{ width: `${Math.max(0, s.pct)}%` }} transition={{ duration: 0.4 }} />
@@ -1953,7 +1953,7 @@ export default function EnterpriseAssessmentPage() {
                       <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "2rem" }}>
                         <AssessmentResultSurface result={mappedEnterpriseResult} />
                       </div>
-                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px", textAlign: "center" }}>
+                      <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", marginTop: "8px", textAlign: "center" }}>
                         Next earned action is determined by the assessment result. Save to Decision Centre to preserve this record.
                       </p>
                     </div>
@@ -2034,7 +2034,7 @@ export default function EnterpriseAssessmentPage() {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}30, transparent)` }} />
-                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Layer 03 of 04</span>
+                  <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>Layer 03 of 04</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <Link href="/diagnostics" className="transition-opacity hover:opacity-70" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>Diagnostic ladder</Link>

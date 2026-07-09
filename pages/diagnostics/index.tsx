@@ -10,7 +10,7 @@ import {
 } from "@/lib/diagnostics/session-thread";
 import { getProductDisplayPrice } from "@/lib/commercial/catalog";
 
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
 };
@@ -114,22 +114,22 @@ function SurfaceCard({
       <p className="mt-3 text-[13px] leading-[1.75] text-white/42">{why}</p>
       {paidMeta && (
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
             {paidMeta.price}
           </span>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
             {paidMeta.time}
           </span>
-          <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+          <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
             {paidMeta.deliveryNote}
           </span>
           {paidMeta.writesToMemory && (
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               Writes to memory
             </span>
           )}
           {paidMeta.dossierIncluded && (
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
+            <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>
               Dossier included
             </span>
           )}
@@ -228,7 +228,7 @@ export default function DiagnosticsIndexPage() {
         {/* P3 — Signal primer: what this system detects and names */}
         <section className="border-t px-6 py-8" style={{ borderColor: "rgba(255,255,255,0.05)", backgroundColor: "rgba(255,255,255,0.01)" }}>
           <div className="mx-auto max-w-[1100px]">
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}65`, marginBottom: "0.75rem" }}>
+            <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}65`, marginBottom: "0.75rem" }}>
               What the diagnostic system returns
             </p>
             <div className="grid gap-2 md:grid-cols-4">
@@ -239,7 +239,7 @@ export default function DiagnosticsIndexPage() {
                 { label: "Evidence basis", text: "Every finding labelled by source — user-reported, system-inferred, or estimated." },
               ] as { label: string; text: string }[]).map(({ label, text }) => (
                 <div key={label} style={{ borderLeft: "2px solid rgba(201,169,110,0.25)", paddingLeft: "0.85rem", paddingTop: "0.15rem", paddingBottom: "0.15rem" }}>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.25rem" }}>{label}</p>
+                  <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.25rem" }}>{label}</p>
                   <p style={{ fontSize: "12px", lineHeight: 1.55, color: "rgba(255,255,255,0.42)" }}>{text}</p>
                 </div>
               ))}

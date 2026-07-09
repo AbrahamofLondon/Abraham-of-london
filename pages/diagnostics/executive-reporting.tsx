@@ -15,7 +15,7 @@ import { trackLaunch } from "@/lib/analytics/client-launch-events";
 import type { AssessmentEvidenceCapture } from "@/lib/product/evidence-capture-contract";
 
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif" };
 
@@ -144,7 +144,7 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ─── Ladder orientation ─────────────────────────────────────────── */}
           <div style={{ marginBottom: "40px" }}>
-            <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
+            <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.20)" }}>
               Fast Diagnostic{" "}
               <span style={{ color: `${GOLD}40`, margin: "0 4px" }}>→</span>
               Constitutional Diagnostic{" "}
@@ -155,10 +155,10 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ═══ 1. OPENING VERDICT ═══ */}
           <section style={{ paddingBottom: "32px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
               Executive Reporting
             </p>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}65`, marginBottom: "18px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: `${GOLD}65`, marginBottom: "18px" }}>
               Paid report layer · Evidence-gated
             </p>
             <h1 style={{ ...serif, fontWeight: 400, fontSize: "clamp(34px, 5.5vw, 52px)", lineHeight: 1.08, letterSpacing: "-0.025em", color: "#F5F5F5" }}>
@@ -233,7 +233,7 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ═══ 3. CONSEQUENCE SNAPSHOT ═══ */}
           <section>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "32px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "32px" }}>
               If nothing changes
             </p>
             <div style={{ display: "grid", gap: "28px" }}>
@@ -271,7 +271,7 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ═══ 4. EVIDENCE ACCUMULATED ═══ */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: "rgba(255,255,255,0.015)", padding: "28px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "20px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "20px" }}>
               Evidence accumulated
             </p>
             <div style={{ display: "grid", gap: "12px" }}>
@@ -280,7 +280,7 @@ export default function ExecutiveReportingEntryPage() {
                   <span style={{ ...serif, fontSize: "15px", color: item.completed ? "#EAEAEA" : "rgba(255,255,255,0.30)" }}>
                     {item.completed ? "✓" : "○"} {item.label}
                   </span>
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: item.completed ? `${GOLD}90` : "rgba(255,255,255,0.20)" }}>
+                  <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: item.completed ? `${GOLD}90` : "rgba(255,255,255,0.20)" }}>
                     {item.completed ? "Completed" : "Not yet completed"}
                   </span>
                 </div>
@@ -290,7 +290,7 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ═══ 4b. GOVERNED CASE LINKAGE ═══ */}
           <section style={{ border: `1px solid ${GOLD}18`, backgroundColor: "rgba(255,255,255,0.015)", padding: "28px", marginBottom: "24px" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "20px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "20px" }}>
               Governed case linkage
             </p>
             <div style={{ display: "grid", gap: "10px" }}>
@@ -339,7 +339,7 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ═══ 5. EXECUTIVE REPORTING BOUNDARY ═══ */}
           <section style={{ padding: "64px 0" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "28px" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "28px" }}>
               Paid report layer · Evidence-gated
             </p>
             <div style={{ display: "grid", gap: "22px" }}>
@@ -358,7 +358,7 @@ export default function ExecutiveReportingEntryPage() {
                 },
               ].map((item) => (
                 <div key={item.label} style={{ borderLeft: `2px solid ${GOLD}28`, paddingLeft: "20px" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}80` }}>
                     {item.label}
                   </p>
                   <p style={{ ...serif, fontSize: "16px", lineHeight: 1.8, color: "rgba(255,255,255,0.58)", marginTop: "8px" }}>
@@ -372,12 +372,12 @@ export default function ExecutiveReportingEntryPage() {
           {/* ═══ 6. PERSONALISED REPORT PREVIEW ═══ */}
           {hasEvidence && (
             <section style={{ border: `1px solid ${GOLD}22`, backgroundColor: `${GOLD}04`, padding: "32px", marginBottom: "16px" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "28px" }}>
                 Preview — from your diagnostic evidence
               </p>
 
               <div style={{ marginBottom: "28px" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
                   1. Executive decision finding
                 </p>
                 <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "#EAEAEA" }}>
@@ -388,7 +388,7 @@ export default function ExecutiveReportingEntryPage() {
               <div style={{ height: "1px", background: `${GOLD}15`, margin: "0 0 28px 0" }} />
 
               <div style={{ marginBottom: "28px" }}>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
                   2. Structural contradiction
                 </p>
                 <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "#EAEAEA" }}>
@@ -403,7 +403,7 @@ export default function ExecutiveReportingEntryPage() {
               <div style={{ height: "1px", background: `${GOLD}15`, margin: "0 0 28px 0" }} />
 
               <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase", color: `${GOLD}60`, marginBottom: "8px" }}>
                   3. Cost of inaction
                 </p>
                 <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "#EAEAEA" }}>
@@ -419,14 +419,14 @@ export default function ExecutiveReportingEntryPage() {
 
           {/* ═══ 7. HOW THIS WAS DETERMINED ═══ */}
           <details style={{ border: `1px solid ${GOLD}15`, backgroundColor: "rgba(255,255,255,0.015)", padding: "24px 28px", marginBottom: "64px" }}>
-            <summary style={{ cursor: "pointer", ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
+            <summary style={{ cursor: "pointer", ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
               How this was determined
             </summary>
             <p style={{ marginTop: "20px", ...serif, fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.60)" }}>
               The system combined the decision you surfaced, the constraint that has preserved it, and the consequence attached to delay. Executive Reporting exists because that evidence now points to a structural issue rather than a local execution miss.
             </p>
             <div style={{ marginTop: "16px", padding: "12px 16px", border: "1px solid rgba(201,169,110,0.12)", backgroundColor: "rgba(255,255,255,0.015)" }}>
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "8px" }}>
+              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)", marginBottom: "8px" }}>
                 What the report uses and does not claim
               </p>
               <ul style={{ ...serif, fontSize: "13px", lineHeight: 1.75, color: "rgba(255,255,255,0.45)", paddingLeft: "16px", listStyleType: "disc" }}>
@@ -473,7 +473,7 @@ export default function ExecutiveReportingEntryPage() {
 
           {(checkoutCancelled || accessRequired) && (
             <div style={{ marginTop: "24px", padding: "24px", borderLeft: `2px solid ${GOLD}40`, background: "rgba(255,255,255,0.02)" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}80` }}>
                 {checkoutCancelled ? "Session cancelled" : "Access required"}
               </p>
               <p style={{ ...serif, fontSize: "15px", lineHeight: 1.7, color: "rgba(255,255,255,0.50)", marginTop: "10px" }}>
@@ -490,7 +490,7 @@ export default function ExecutiveReportingEntryPage() {
           <section style={{ paddingBottom: "48px" }}>
             {hasStrategy ? (
               <>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "16px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}70`, marginBottom: "16px" }}>
                   Qualified for intervention
                 </p>
                 <p style={{ ...serif, fontSize: "18px", lineHeight: 1.7, color: "rgba(255,255,255,0.65)" }}>
@@ -508,7 +508,7 @@ export default function ExecutiveReportingEntryPage() {
               </>
             ) : (
               <>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
+                <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "16px" }}>
                   Strategy Room
                 </p>
                 <p style={{ ...serif, fontSize: "16px", lineHeight: 1.7, color: "rgba(255,255,255,0.40)" }}>

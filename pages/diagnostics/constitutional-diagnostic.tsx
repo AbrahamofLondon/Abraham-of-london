@@ -32,7 +32,7 @@ import { advanceSpine, type IntelligenceSpine } from "@/lib/decision/intelligenc
 import { saveSpineToSession, persistSpineToDB } from "@/lib/decision/spine-persistence";
 import { getInheritedContext } from "@/lib/decision/spine-guard";
 
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const BASE = "rgb(6 6 9)";
 const VOID = "rgb(3 3 5)";
 const LIFT = "rgb(10 14 20)";
@@ -48,7 +48,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
       <span style={{
         fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-        fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB`,
+        fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB`,
       }}>
         {children}
       </span>
@@ -129,7 +129,7 @@ export default function ConstitutionalDiagnosticPage() {
           <div className="mx-auto max-w-3xl px-6 py-32">
             <div className="flex items-center gap-3 mb-6">
               <span className="h-5 w-px" style={{ backgroundColor: `${GOLD}55` }} />
-              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
+              <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}BB` }}>
                 Executive Reporting · Premium
               </span>
             </div>
@@ -144,25 +144,25 @@ export default function ConstitutionalDiagnosticPage() {
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}06`, padding: "1.25rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.32em", textTransform: "uppercase", color: `${GOLD}90`, marginBottom: "0.5rem" }}>
                   Complete the ladder
                 </div>
                 <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
                   Complete the Constitutional Diagnostic, Team Assessment, and Enterprise Assessment to build sufficient evidence for an executive brief.
                 </p>
-                <Link href="/diagnostics" style={{ display: "inline-block", marginTop: "0.85rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/diagnostics" style={{ display: "inline-block", marginTop: "0.85rem", padding: "10px 20px", border: `1px solid ${GOLD}42`, backgroundColor: `${GOLD}10`, color: `${GOLD}CC`, fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                   View diagnostics ladder
                 </Link>
               </div>
 
               <div style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+                <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
                   Sponsored or monitoring access
                 </div>
                 <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: "rgba(255,255,255,0.55)" }}>
                   If you have a sponsorship token, monitoring account ID, or direct access link, use the original link you were given.
                 </p>
-                <Link href="/diagnostics/executive-reporting" style={{ display: "inline-block", marginTop: "0.85rem", padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href="/diagnostics/executive-reporting" style={{ display: "inline-block", marginTop: "0.85rem", padding: "10px 20px", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.40)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}>
                   Try again
                 </Link>
               </div>
@@ -221,12 +221,12 @@ export default function ConstitutionalDiagnosticPage() {
                 className="flex items-center gap-2 mb-10"
               >
                 <Link href="/diagnostics" className="transition-opacity hover:opacity-70 flex items-center gap-1.5"
-                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}
+                  style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}
                 >
                   <ArrowLeft style={{ width: "10px", height: "10px" }} /> Diagnostics
                 </Link>
                 <span style={{ color: "rgba(255,255,255,0.12)" }}>/</span>
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
                   Constitutional Diagnostic
                 </span>
               </motion.div>
@@ -312,7 +312,7 @@ export default function ConstitutionalDiagnosticPage() {
                   {/* Instrument specification */}
                   <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: LIFT }}>
                     <div style={{ padding: "0.85rem 1.25rem", borderBottom: `1px solid ${GOLD}12`, background: `linear-gradient(to right, ${GOLD}08, transparent)` }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90` }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.40em", textTransform: "uppercase", color: `${GOLD}90` }}>
                         Instrument specification
                       </span>
                     </div>
@@ -341,7 +341,7 @@ export default function ConstitutionalDiagnosticPage() {
 
                   {/* Ladder position */}
                   <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.85rem" }}>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.85rem" }}>
                       Position in ladder
                     </div>
                     {[
@@ -364,7 +364,7 @@ export default function ConstitutionalDiagnosticPage() {
                   </div>
                   {/* Route explanation */}
                   <div style={{ border: "1px solid rgba(255,255,255,0.07)", backgroundColor: "rgba(255,255,255,0.01)", padding: "1.25rem" }}>
-                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.85rem" }}>
+                    <div style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.30em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: "0.85rem" }}>
                       What the routes mean
                     </div>
                     {[
@@ -407,7 +407,7 @@ export default function ConstitutionalDiagnosticPage() {
                   <Shield className="h-4 w-4" style={{ color: `${GOLD}BB` }} />
                   <span style={{
                     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                    fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}88`,
+                    fontSize: "11px", letterSpacing: "0.30em", textTransform: "uppercase", color: `${GOLD}88`,
                   }}>
                     Intelligence inherited from prior stage
                   </span>
@@ -430,7 +430,7 @@ export default function ConstitutionalDiagnosticPage() {
                 )}
                 <p style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px", color: "rgba(255,255,255,0.20)", marginTop: "0.75rem",
+                  fontSize: "10px", color: "rgba(255,255,255,0.20)", marginTop: "0.75rem",
                 }}>
                   This stage tests the structural conditions sustaining that state. {inheritedContext.stagesCompleted.length} stage{inheritedContext.stagesCompleted.length === 1 ? "" : "s"} completed.
                 </p>
@@ -444,7 +444,7 @@ export default function ConstitutionalDiagnosticPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-12 pb-6">
             <div className="grid gap-3 sm:grid-cols-3">
               <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                   What this reads
                 </p>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -452,7 +452,7 @@ export default function ConstitutionalDiagnosticPage() {
                 </p>
               </div>
               <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                   What this detects
                 </p>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -460,7 +460,7 @@ export default function ConstitutionalDiagnosticPage() {
                 </p>
               </div>
               <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+                <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
                   Record boundary
                 </p>
                 <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
@@ -497,7 +497,7 @@ export default function ConstitutionalDiagnosticPage() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="h-px w-6" style={{ background: `linear-gradient(to right, ${GOLD}30, transparent)` }} />
-                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
+                <span style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)" }}>
                   Layer 01 of 04
                 </span>
               </div>

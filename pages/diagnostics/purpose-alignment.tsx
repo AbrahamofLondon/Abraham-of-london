@@ -16,7 +16,7 @@ import { track } from "@/lib/analytics/track";
 import { mapPurposeAlignmentToAssessmentResult } from "@/lib/diagnostics/assessment-result-mappers";
 import type { AssessmentResult } from "@/lib/diagnostics/assessment-result-contract";
 
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const AMBER = "#F59E0B";
 const EMERALD = "#6EE7B7";
 const VOID = "rgb(3 3 5)";
@@ -114,7 +114,7 @@ export default function PurposeAlignmentPage() {
                 {stateIcon()}
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: "0.40em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.40em", textTransform: "uppercase",
                   color: currentLabel.color,
                 }}>
                   Personal Decision Infrastructure · {currentLabel.label}
@@ -215,7 +215,7 @@ export default function PurposeAlignmentPage() {
                   backgroundColor: `${GOLD}18`,
                   color: GOLD,
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase",
+                  fontSize: "11px", letterSpacing: "0.20em", textTransform: "uppercase",
                   textDecoration: "none", whiteSpace: "nowrap",
                   display: "inline-flex", alignItems: "center", gap: "6px",
                 }}
@@ -260,7 +260,7 @@ export default function PurposeAlignmentPage() {
         <section className="mx-auto max-w-6xl px-6 lg:px-12 pb-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                 What this reads
               </p>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -268,7 +268,7 @@ export default function PurposeAlignmentPage() {
               </p>
             </div>
             <div style={{ borderLeft: `2px solid ${GOLD}30`, padding: "0.75rem 1.25rem", backgroundColor: `${GOLD}04` }}>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}80`, marginBottom: "0.4rem" }}>
                 What this detects
               </p>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.55)" }}>
@@ -276,7 +276,7 @@ export default function PurposeAlignmentPage() {
               </p>
             </div>
             <div style={{ border: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.25rem", backgroundColor: "rgba(255,255,255,0.015)" }}>
-              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "7px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
+              <p style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: "0.4rem" }}>
                 Record boundary
               </p>
               <p style={{ fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300, fontSize: "0.88rem", lineHeight: 1.65, color: "rgba(255,255,255,0.40)" }}>
@@ -311,7 +311,7 @@ export default function PurposeAlignmentPage() {
                 <span className="h-4 w-px" style={{ backgroundColor: `${GOLD}55` }} />
                 <span style={{
                   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                  fontSize: "7px", letterSpacing: "0.34em", textTransform: "uppercase",
+                  fontSize: "10px", letterSpacing: "0.34em", textTransform: "uppercase",
                   color: `${GOLD}90`,
                 }}>
                   What comes next

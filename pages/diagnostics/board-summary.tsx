@@ -17,7 +17,7 @@ import { buildBoardSummaryCarryForwardPayload } from "@/lib/product/session-case
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
-const GOLD = "#C9A96E";
+import { brass as GOLD } from "@/components/institutional";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = {
   fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif",
@@ -58,7 +58,7 @@ function NoDataState() {
           color: `${GOLD}CC`,
           textDecoration: "none",
           ...mono,
-          fontSize: "8px",
+          fontSize: "11px",
           letterSpacing: "0.20em",
           textTransform: "uppercase",
           minHeight: "44px",
@@ -125,7 +125,7 @@ export default function BoardSummaryPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "7px",
+                fontSize: "10px",
                 letterSpacing: "0.30em",
                 textTransform: "uppercase",
                 color: `${GOLD}70`,
@@ -145,7 +145,7 @@ export default function BoardSummaryPage() {
               <span
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "10px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: `${GOLD}99`,
@@ -158,7 +158,7 @@ export default function BoardSummaryPage() {
               <span
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "10px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.30)",
@@ -171,7 +171,7 @@ export default function BoardSummaryPage() {
               <span
                 style={{
                   ...mono,
-                  fontSize: "7px",
+                  fontSize: "10px",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(255,255,255,0.30)",
@@ -207,7 +207,7 @@ export default function BoardSummaryPage() {
             <p
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.14em",
                 color: "rgba(255,255,255,0.28)",
               }}
@@ -240,7 +240,7 @@ export default function BoardSummaryPage() {
               }}
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.40)",
@@ -329,7 +329,7 @@ export default function BoardSummaryPage() {
               href="/diagnostics"
               style={{
                 ...mono,
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.25)",

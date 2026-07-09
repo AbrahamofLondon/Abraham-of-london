@@ -33,7 +33,7 @@ export default function DiagnosticWatchPage({ vm }: Props) {
             <span
               style={{
                 fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontSize: "8px",
+                fontSize: "11px",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: `${AMBER}CC`,
@@ -139,7 +139,7 @@ export default function DiagnosticWatchPage({ vm }: Props) {
             className="mt-8"
             style={{
               fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-              fontSize: "7px",
+              fontSize: "10px",
               letterSpacing: "0.24em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.24)",
