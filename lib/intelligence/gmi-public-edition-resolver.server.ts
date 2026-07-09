@@ -200,7 +200,8 @@ function buildFamilyChronology(
 
   const toEntry = (
     r: MarketIntelligenceLifecycleRecord | null,
-    relationship: GmiChronologyEntry["relationship"]
+    publicationRole: GmiChronologyEntry["publicationRole"],
+    isViewed: boolean
   ): GmiChronologyEntry | null => {
     if (!r) return null;
     const e = entryForEdition(r.id);
@@ -209,7 +210,8 @@ function buildFamilyChronology(
       title: r.title,
       shortTitle: `${r.quarter} ${r.year}`,
       lifecycleState: r.lifecycleState,
-      relationship,
+      publicationRole,
+      isViewed,
       publishedAt: r.publishedAt ?? null,
       publicationTarget: r.publicationTarget ?? null,
       href: e ? gmiPublicHrefForEditionSlug(e.slug) : null,
@@ -218,16 +220,16 @@ function buildFamilyChronology(
     };
   };
 
-  const viewedEntry = toEntry(record, viewedIdx === currentIdx ? "CURRENT" : "REFERENCE")!;
-  const currentEntry = toEntry(sorted[currentIdx] ?? null, currentIdx === viewedIdx ? "VIEWED" : "CURRENT")!;
+  const viewedEntry = toEntry(record, viewedIdx === currentIdx ? "CURRENT" : "REFERENCE", true)!;
+  const currentEntry = toEntry(sorted[currentIdx] ?? null, "CURRENT", currentIdx === viewedIdx)!;
   const previousPublished = sorted.find((r) => r.id !== editionId && r.id !== currentEdition.editionId && r.publicVisible) ?? null;
   const upcoming = sorted.find((r) => r.lifecycleState === "DRAFT" || r.lifecycleState === "SCHEDULED") ?? null;
 
   return {
     viewedEdition: viewedEntry,
     currentEdition: currentEntry,
-    previousPublishedEdition: toEntry(previousPublished, "REFERENCE"),
-    upcomingEdition: toEntry(upcoming, "UPCOMING"),
+    previousPublishedEdition: toEntry(previousPublished, "REFERENCE", false),
+    upcomingEdition: toEntry(upcoming, "UPCOMING", false),
   };
 }
 

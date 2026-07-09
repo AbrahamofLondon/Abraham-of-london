@@ -153,7 +153,8 @@ export type GmiChronologyEntry = {
   title: string;
   shortTitle: string;
   lifecycleState: MarketIntelligenceLifecycleState;
-  relationship: "VIEWED" | "REFERENCE" | "CURRENT" | "UPCOMING";
+  publicationRole: "CURRENT" | "REFERENCE" | "UPCOMING";
+  isViewed: boolean;
   publishedAt: string | null;
   publicationTarget: string | null;
   href: string | null;

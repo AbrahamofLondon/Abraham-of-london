@@ -1,6 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, FileText, LockKeyhole, ShieldCheck, TrendingUp, BarChart3, Globe } from "lucide-react";
+import { evidenceGrey } from "@/components/institutional";
 import type { GmiEditionPublicContract } from "@/lib/intelligence/gmi-public-edition-contract";
 
 type Props = { edition: GmiEditionPublicContract };
@@ -14,7 +15,7 @@ const semanticMonitoring = "#9A7B3C";
 const semanticContradicted = "#6B3A3A";
 const semanticUnresolved = "#4A4A50";
 
-function shortHash(value: string | null): string {
+function shortProofReference(value: string | null): string {
   return value ? `${value.slice(0, 12)}...${value.slice(-8)}` : "Not public";
 }
 
@@ -63,11 +64,15 @@ function RegimeFingerprint({ edition }: Props) {
               <div className="flex items-baseline justify-between gap-4">
                 <p className="text-sm font-medium text-white/82">{axis.axis}</p>
                 <p className="font-mono text-[12px] text-white/52">
-                  {axis.value}/100 {delta == null ? "baseline" : `${directionIndicator} ${delta >= 0 ? "+" : ""}${delta}`}
+                  {delta == null ? "baseline" : directionIndicator + " " + (delta >= 0 ? "+" : "") + delta}
                 </p>
               </div>
-              <div className="mt-2 h-2 bg-white/10" aria-hidden>
-                <div className="h-full bg-[#B59258]" style={{ width: `${Math.max(4, Math.min(100, axis.value))}%` }} />
+              <div className="mt-2 flex items-center gap-2" aria-hidden>
+                <span className="font-mono text-[9px] uppercase tracking-[0.10em]" style={{ color: evidenceGrey }}>Falling</span>
+                <div className="h-1 flex-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                  <div className="h-full w-1/2 rounded-full bg-[#B59258]" style={{ marginLeft: axis.direction === 'RISING' ? '50%' : axis.direction === 'FALLING' ? '0%' : '25%' }} />
+                </div>
+                <span className="font-mono text-[9px] uppercase tracking-[0.10em]" style={{ color: evidenceGrey }}>Rising</span>
               </div>
               <p className="mt-2 text-sm leading-6 text-white/55">{axis.definition} Confidence: {axis.confidence.toLowerCase()}.</p>
             </div>
@@ -168,10 +173,14 @@ function RegimeMap({ edition }: Props) {
               <div key={axis.axis} className="border border-white/10 bg-black/20 p-5">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-serif text-lg text-white">{axis.axis}</p>
-                  <span className="font-mono text-[11px] text-white/45">{axis.value}/100</span>
+                  <span className="font-mono text-[11px] text-white/45">{axis.direction}</span>
                 </div>
-                <div className="mt-3 h-1.5 bg-white/8" aria-hidden>
-                  <div className="h-full" style={{ width: `${Math.max(4, Math.min(100, axis.value))}%`, backgroundColor: barColor }} />
+                <div className="mt-3 flex items-center gap-2" aria-hidden>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color: evidenceGrey }}>Falling</span>
+                  <div className="h-1 flex-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                    <div className="h-full w-1/2 rounded-full" style={{ backgroundColor: barColor, marginLeft: axis.direction === 'RISING' ? '50%' : axis.direction === 'FALLING' ? '0%' : '25%' }} />
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.12em]" style={{ color: evidenceGrey }}>Rising</span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-white/45">
                   <span>Direction: {directionLabel}</span>
@@ -432,9 +441,9 @@ export default function GmiEditionLandingPage({ edition }: Props) {
                 <p className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D503A]">Verification</p>
                 <dl className="mt-4 space-y-3 text-sm">
                   <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Receipt</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.releaseProof.receiptRef ?? "Reference"}</dd></div>
-                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Candidate</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortHash(edition.releaseProof.candidateHash)}</dd></div>
-                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Report hash</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortHash(edition.releaseProof.reportContentHash)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-[#7A6A4C]">PDF hash</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortHash(edition.releaseProof.pdfHash)}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Candidate reference</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.candidateHash)}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Report content reference</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.reportContentHash)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-[#7A6A4C]">PDF SHA-256</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortProofReference(edition.releaseProof.pdfHash)}</dd></div>
                 </dl>
               </div>
               <div>
