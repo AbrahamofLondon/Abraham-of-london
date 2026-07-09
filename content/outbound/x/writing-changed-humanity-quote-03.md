@@ -8,7 +8,7 @@ sourceSlug: writing-changed-humanity
 sourcePath: content/source-material/the-minds-clay/Writing changed humanity.mdx
 campaign: writing-changed-humanity
 series: the-minds-clay
-status: ready
+status: published
 approvalStatus: approved
 scheduledFor: "2026-06-26T10:00:00Z"
 link: null

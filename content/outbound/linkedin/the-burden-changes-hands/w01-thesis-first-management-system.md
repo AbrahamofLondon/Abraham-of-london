@@ -7,7 +7,7 @@ campaign: the-burden-changes-hands
 sourceSeries: the-burden-changes-hands
 sourceMaterial: the-accountant-in-uruk
 sourcePath: content/blog/series/the-burden-changes-hands/the-accountant-in-uruk.mdx
-status: ready
+status: published
 approvalStatus: approved
 seriesWeek: 1
 sequence: 1

@@ -7,7 +7,7 @@ postType: quote-card
 campaign: the-truth-in-the-frame
 sourceSeries: the-truth-in-the-frame
 sourceSlug: before-the-word-what-the-cave-walls-remember
-status: scheduled
+status: published
 approvalStatus: approved
 scheduledFor: "2026-07-07T09:00:00Z"
 link: https://abrahamoflondon.com/blog/before-the-word-what-the-cave-walls-remember
