@@ -270,7 +270,7 @@ export default function ArtifactDetailPage({
 
         <main className="min-h-screen bg-[#050609] px-6 py-24 text-white">
           <div className="mx-auto max-w-4xl rounded-[28px] border border-white/10 bg-white/[0.03] p-10">
-            <div className="text-[10px] font-mono uppercase tracking-[0.26em] text-amber-300/70">
+            <div className="text-[11px] font-mono uppercase tracking-[0.26em] text-amber-300/70">
               Intelligence Archives
             </div>
             <h1 className="mt-4 font-serif text-3xl text-white/95">
@@ -333,7 +333,7 @@ export default function ArtifactDetailPage({
             <div className="mb-8">
               <Link
                 href="/artifacts"
-                className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[10px] font-mono uppercase tracking-[0.24em] text-white/62 transition hover:bg-white/[0.05]"
+                className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] font-mono uppercase tracking-[0.24em] text-white/62 transition hover:bg-white/[0.05]"
               >
                 <ArrowLeft className="mr-2 h-3.5 w-3.5" />
                 Back to Intelligence Archives
@@ -352,7 +352,7 @@ export default function ArtifactDetailPage({
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
 
                     <div className="absolute left-6 top-6 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.24em] text-amber-300/90">
+                      <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.24em] text-amber-300/90">
                         {isMarket ? (
                           <>
                             <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
@@ -365,13 +365,13 @@ export default function ArtifactDetailPage({
                           </>
                         )}
                       </span>
-                      <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.24em] text-white/65">
+                      <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.24em] text-white/65">
                         {classification}
                       </span>
                     </div>
 
                     <div className="absolute bottom-6 left-6 right-6">
-                      <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                      <div className="mb-2 text-[11px] font-mono uppercase tracking-[0.22em] text-white/45">
                         {item.metadata?.productLine || item.category}
                       </div>
 
@@ -389,7 +389,7 @@ export default function ArtifactDetailPage({
                 </div>
 
                 <div className="mt-8 rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-amber-300/75">
+                  <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-amber-300/75">
                     Asset Briefing
                   </div>
 
@@ -402,7 +402,7 @@ export default function ArtifactDetailPage({
                       {item.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-white/55"
+                          className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.2em] text-white/55"
                         >
                           {tag}
                         </span>
@@ -413,7 +413,7 @@ export default function ArtifactDetailPage({
 
                 {isMarket ? (
                   <div className="mt-8 rounded-[28px] border border-[#C9A96A]/20 bg-[linear-gradient(180deg,rgba(201,169,106,0.08),rgba(255,255,255,0.02))] p-8">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
+                    <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
                       Intelligence Line
                     </div>
 
@@ -425,9 +425,9 @@ export default function ArtifactDetailPage({
                       The Q1 2026 intelligence line is structured as a public
                       surface edition, an institutional PDF edition, and an
                       executive board deck. Each serves a different reading
-                      context without diluting the core signal. The institutional
-                      report remains active for Q2 decision use until the Q2
-                      2026 Market Intelligence Report supersedes it.
+                      context without diluting the core signal. This edition
+                      has been superseded by GMI Q2 2026 and is retained for
+                      historical reference and accountability review.
                     </p>
 
                     <div className="mt-7 flex flex-wrap gap-3">
@@ -463,7 +463,7 @@ export default function ArtifactDetailPage({
                 <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
                   <div className="grid grid-cols-2 gap-5">
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                         Document ID
                       </div>
                       <div className="mt-2 text-white/82">
@@ -472,7 +472,7 @@ export default function ArtifactDetailPage({
                     </div>
 
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                         Revision
                       </div>
                       <div className="mt-2 text-white/82">
@@ -481,21 +481,21 @@ export default function ArtifactDetailPage({
                     </div>
 
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                         Classification
                       </div>
                       <div className="mt-2 text-white/82">{classification}</div>
                     </div>
 
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                         Format
                       </div>
                       <div className="mt-2 text-white/82">{formatLabel}</div>
                     </div>
 
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                         File Size
                       </div>
                       <div className="mt-2 text-white/82">
@@ -504,7 +504,7 @@ export default function ArtifactDetailPage({
                     </div>
 
                     <div>
-                      <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                         Pages
                       </div>
                       <div className="mt-2 text-white/82">
@@ -515,13 +515,13 @@ export default function ArtifactDetailPage({
 
                   {freshnessMetadata.length > 0 ? (
                     <div className="mt-6 border-t border-white/10 pt-5">
-                      <div className="mb-4 text-[9px] font-mono uppercase tracking-[0.24em] text-amber-300/70">
+                      <div className="mb-4 text-[11px] font-mono uppercase tracking-[0.24em] text-amber-300/70">
                         Freshness
                       </div>
                       <div className="grid grid-cols-1 gap-4">
                         {freshnessMetadata.map(([label, value]) => (
                           <div key={label}>
-                            <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/35">
+                            <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/35">
                               {label}
                             </div>
                             <div className="mt-1 text-sm leading-6 text-white/78">
@@ -540,7 +540,7 @@ export default function ArtifactDetailPage({
                 </div>
 
                 <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
-                  <div className="mb-4 text-[10px] font-mono uppercase tracking-[0.24em] text-amber-300/75">
+                  <div className="mb-4 text-[11px] font-mono uppercase tracking-[0.24em] text-amber-300/75">
                     Access Layer
                   </div>
 
@@ -562,7 +562,7 @@ export default function ArtifactDetailPage({
                       <ArtifactCheckout item={item} />
                     )}
 
-                    <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                    <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-white/45">
                       {item.metadata?.watermarkRequired ? (
                         <>
                           <ShieldCheck className="h-3.5 w-3.5 text-amber-300/70" />
@@ -609,7 +609,7 @@ export default function ArtifactDetailPage({
 
                 {isMarket ? (
                   <div className="rounded-[28px] border border-[#C9A96A]/20 bg-white/[0.03] p-8">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
+                    <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#C9A96A]">
                       Product Position
                     </div>
                     <p className="mt-4 text-sm leading-8 text-white/68">
@@ -618,7 +618,7 @@ export default function ArtifactDetailPage({
                       happens through the PDF. Executive portability happens through
                       the board deck.
                     </p>
-                    <div className="mt-5 flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                    <div className="mt-5 flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-white/45">
                       <Lock className="h-3.5 w-3.5 text-[#C9A96A]" />
                       Quiet premium positioning
                     </div>
@@ -633,7 +633,7 @@ export default function ArtifactDetailPage({
 
         {related.length > 0 ? (
           <section className="mx-auto max-w-7xl px-6 pb-20 md:px-10">
-            <div className="mb-8 text-[10px] font-mono uppercase tracking-[0.26em] text-amber-300/70">
+            <div className="mb-8 text-[11px] font-mono uppercase tracking-[0.26em] text-amber-300/70">
               Related Editions
             </div>
 

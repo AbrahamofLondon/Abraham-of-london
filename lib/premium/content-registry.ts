@@ -168,7 +168,7 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       currentDecisionWindow: "Q2 2026",
       updatedAt: "2026-04-08",
       statusLabel: "Open reference surface",
-      nextScheduledReport: "Q2 2026 report in preparation",
+      nextScheduledReport: "Q2 2026 — current edition",
       surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
       directDownloadHref: "/.netlify/functions/gmi-boardroom-pdf",
       coverImage:
@@ -220,10 +220,10 @@ const PREMIUM_CONTENT: PremiumContentItem[] = [
       editionType: "institutional-pdf",
       coveragePeriod: "Q1 2026",
       currentDecisionWindow: "Q2 2026",
-      statusLabel: "Active until superseded by Q2 2026 report",
+      statusLabel: "Superseded — reference edition",
       nextScheduledReport: "Q2 2026 report in preparation",
       freshnessNote:
-        "This report reviews Q1 2026 conditions and remains active for Q2 decision use because it includes April 2026 tariff escalation, market repricing, and Q2 scenario implications. It will remain current until superseded by the Q2 2026 Market Intelligence Report.",
+        "This report reviews Q1 2026 conditions. It was superseded by GMI Q2 2026 on 8 July 2026 and is retained for historical access and the public call-scoring record; it is no longer the current edition.",
       surfaceHref: "/intelligence/global-market-intelligence-q1-2026",
       directDownloadHref: "/api/premium/content/download/global-market-intelligence-report-q1-2026",
       coverImage:
