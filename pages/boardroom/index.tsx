@@ -63,7 +63,7 @@ type Props = {
   institutionalCase: InstitutionalCaseBoardroomContext | null;
 };
 
-const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
+import { mono, evidenceGrey, brass, brassLight, StateBadge, EvidenceMeta, SectionLedger, RelationshipNavigator } from "@/components/institutional";
 
 const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institutionalCase }) => {
   return (
@@ -72,7 +72,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
       <main className="min-h-screen px-6 py-20" style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}>
         <div className="mx-auto max-w-5xl space-y-6">
           <header style={{ border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.02)", padding: "1.25rem" }}>
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.82)" }}>
+            <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: brassLight }}>
               Boardroom archive
             </p>
             <h1 className="mt-3 text-3xl text-white">Board-level strategic memory.</h1>
@@ -95,20 +95,20 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
 
           {authenticated && institutionalCase && (
             <section style={{ border: "1px solid rgba(201,169,110,0.18)", background: "rgba(201,169,110,0.03)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: brassLight }}>
                 Institutional case
               </p>
               <div className="mt-3 grid gap-3 md:grid-cols-3">
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Qualification</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey }}>Qualification</p>
                   <p className="mt-1 text-sm text-white/60">{institutionalCase.qualificationState.replace(/_/g, " ").toLowerCase()}</p>
                 </div>
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Boardroom status</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey }}>Boardroom status</p>
                   <p className="mt-1 text-sm text-white/60">{institutionalCase.boardroomEarned ? "Qualified" : "Not yet qualified"}</p>
                 </div>
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>Evidence</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey }}>Evidence</p>
                   <p className="mt-1 text-sm text-white/60">{institutionalCase.evidencePosture.replace(/_/g, " ").toLowerCase()}</p>
                 </div>
               </div>
@@ -117,7 +117,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
 
           {authenticated && institutionalCase?.stakeholderExposure && !institutionalCase.stakeholderExposure.thinState && (
             <section style={{ border: "1px solid rgba(201,169,110,0.12)", background: "rgba(201,169,110,0.02)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: brassLight }}>
                 Decision authority and stakeholder exposure
               </p>
               <div className="mt-3 space-y-2 text-sm text-white/60">
@@ -136,7 +136,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
 
           {authenticated && institutionalCase?.scenarioPressure && !institutionalCase.scenarioPressure.thinState && (
             <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: brassLight }}>
                 Scenario pressure
               </p>
               <div className="mt-3 space-y-2 text-sm text-white/60">
@@ -152,12 +152,12 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
           {/* P6 — BOARD SIGNAL AUTHORITY: board relevance, objections, signal recurrence */}
           {authenticated && institutionalCase && (
             <section style={{ border: "1px solid rgba(201,169,110,0.14)", background: "rgba(201,169,110,0.025)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.72)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: brassLight }}>
                 Board signal authority
               </p>
               <div className="mt-3 grid gap-3 md:grid-cols-2">
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Board relevance</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey, marginBottom: "0.3rem" }}>Board relevance</p>
                   <p className="text-sm text-white/60">
                     {institutionalCase.boardroomEarned
                       ? "Case has crossed the board-eligibility threshold. Evidence, consequence, and qualification conditions are satisfied."
@@ -165,7 +165,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                   </p>
                 </div>
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Decision record posture</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey, marginBottom: "0.3rem" }}>Decision record posture</p>
                   <p className="text-sm text-white/60">
                     {institutionalCase.decisionRecordPosture
                       ? institutionalCase.decisionRecordPosture.replace(/_/g, " ").toLowerCase()
@@ -175,17 +175,17 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
               </div>
               {institutionalCase.contradictionPressure && (
                 <div className="mt-3">
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Contradiction pressure</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey, marginBottom: "0.3rem" }}>Contradiction pressure</p>
                   <p className="text-sm text-white/50">{institutionalCase.contradictionPressure.replace(/_/g, " ").toLowerCase()} — unresolved contradictions are the primary board objection risk.</p>
                 </div>
               )}
               {institutionalCase.stakeholderExposure && institutionalCase.stakeholderExposure.potentialBlockers.length > 0 && (
                 <div className="mt-3">
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.3rem" }}>Likely board objections</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: evidenceGrey, marginBottom: "0.3rem" }}>Likely board objections</p>
                   <p className="text-sm text-white/50">Potential blockers identified: {institutionalCase.stakeholderExposure.potentialBlockers.join(", ")}. These represent the objection surface the board brief must address.</p>
                 </div>
               )}
-              <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem", lineHeight: 1.6 }}>
+              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", color: evidenceGrey, marginTop: "0.75rem", lineHeight: 1.6 }}>
                 Board signal authority is derived from the institutional case record. Not independently verified. Board outcomes are scenario estimates.
               </p>
             </section>
@@ -199,7 +199,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                   Signal exposure
                 </p>
                 {institutionalCase.signalExposure.highestSeverity && (
-                  <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(239,68,68,0.50)", border: "1px solid rgba(239,68,68,0.20)", padding: "2px 6px" }}>
+                  <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(239,68,68,0.50)", border: "1px solid rgba(239,68,68,0.20)", padding: "2px 6px" }}>
                     {institutionalCase.signalExposure.highestSeverity}
                   </span>
                 )}
@@ -217,13 +217,13 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                     <p className="text-xs text-white/45 italic mb-1">{signal.patternTag}</p>
                     <p className="text-xs text-white/55 leading-relaxed mb-2">{signal.narrativeSummary}</p>
                     <div style={{ borderLeft: "1px solid rgba(201,169,110,0.20)", paddingLeft: "0.65rem" }}>
-                      <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,0.45)", marginBottom: "0.2rem" }}>Board admission move</p>
+                      <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: brassLight, marginBottom: "0.2rem" }}>Board admission move</p>
                       <p className="text-xs text-white/50">{signal.admissibleNextMove}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <p style={{ ...mono, fontSize: "6.5px", letterSpacing: "0.10em", color: "rgba(255,255,255,0.16)", marginTop: "0.75rem" }}>
+              <p style={{ ...mono, fontSize: "10px", letterSpacing: "0.10em", color: evidenceGrey, marginTop: "0.75rem" }}>
                 {institutionalCase.signalExposure.signals[0]?.sampleCaveat ?? "Signal patterns represent observed tendencies, not determinate predictions."}
               </p>
             </section>
@@ -232,12 +232,12 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
           {/* P7 — VERIFICATION STATUS + MEMORY CONSEQUENCE */}
           {authenticated && institutionalCase?.verificationStatus && (
             <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.24em", textTransform: "uppercase", color: "rgba(201,169,110,0.60)" }}>
+              <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.24em", textTransform: "uppercase", color: brassLight }}>
                 Verification state
               </p>
               <div className="mt-3 space-y-3">
                 <div>
-                  <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginBottom: "0.25rem" }}>Status</p>
+                  <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: evidenceGrey, marginBottom: "0.25rem" }}>Status</p>
                   <p className="text-sm text-white/60">{institutionalCase.verificationStatus.replace(/_/g, " ")}</p>
                 </div>
                 {institutionalCase.memoryConsequence && (
@@ -269,7 +269,7 @@ const BoardroomArchivePage: NextPage<Props> = ({ authenticated, summary, institu
                   ["Latest dossier", summary.latestDossier ? new Date(summary.latestDossier.generatedAt).toLocaleDateString("en-GB") : "None"],
                 ].map(([label, value]) => (
                   <article key={label} style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)", padding: "1rem" }}>
-                    <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.40)" }}>{label}</p>
+                    <p style={{ ...mono, fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase", color: evidenceGrey }}>{label}</p>
                     <p className="mt-3 text-2xl text-white">{value}</p>
                   </article>
                 ))}

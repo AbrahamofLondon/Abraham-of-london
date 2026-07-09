@@ -4,6 +4,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { getRecommendationContext, isRecommendationContextStale, type RecommendationContextRecord } from "@/lib/intelligence/corridor/recommendation-context-store.composed";
 import { recordJourneyEvent } from "@/lib/demo/record-journey-event";
+import { evidenceGrey, brassLight, StateBadge, RelationshipNavigator } from "@/components/institutional";
 import { COLORS, FONTS, caption, display, bodyText, bodyTextSm, card, primaryButton, ghostButton, hexA } from "@/lib/demo/journey-design";
 
 interface CorridorProps {
@@ -77,7 +78,7 @@ export default function CorridorPage({ context, stale, missingRecommendation }: 
                     <p style={{ ...display, fontSize: "1.6rem", marginTop: 8 }}>Signal result: {context.pressureBand}</p>
                     <p style={{ ...bodyTextSm, marginTop: 8 }}>Recommendation {context.recommendationId} · Session v{context.sessionVersion} · State {context.stateHash.slice(0, 12)}</p>
                   </div>
-                  <div style={{ fontFamily: FONTS.mono, fontSize: 11, color: stale ? COLORS.amber : COLORS.emerald, textTransform: "uppercase", letterSpacing: "0.14em" }}>
+                  <div style={{ fontFamily: FONTS.mono, fontSize: 12, color: stale ? COLORS.amber : COLORS.emerald, textTransform: "uppercase", letterSpacing: "0.14em" }}>
                     {stale ? "Stale recommendation" : "Current recommendation"}
                   </div>
                 </div>
@@ -96,7 +97,7 @@ export default function CorridorPage({ context, stale, missingRecommendation }: 
                 <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
                   {Object.entries(context.unresolved).map(([key, value]) => value ? (
                     <div key={key} style={{ borderTop: `1px solid ${hexA(COLORS.amber, 0.18)}`, paddingTop: 10 }}>
-                      <p style={{ fontFamily: FONTS.mono, fontSize: 10.5, color: COLORS.amber, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>{key.replace(/([A-Z])/g, " $1")}</p>
+                      <p style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.amber, letterSpacing: "0.12em", textTransform: "uppercase", margin: 0 }}>{key.replace(/([A-Z])/g, " $1")}</p>
                       <p style={{ ...bodyTextSm, margin: "5px 0 0", color: COLORS.body }}>{value}</p>
                     </div>
                   ) : null)}
@@ -106,7 +107,7 @@ export default function CorridorPage({ context, stale, missingRecommendation }: 
               <section style={card(COLORS.emerald)}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                   <span style={caption(COLORS.emerald)}>Next admissible move</span>
-                  <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: COLORS.emerald, textTransform: "uppercase", letterSpacing: "0.12em" }}>{accessLabel(context.accessMode)}</span>
+                  <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.emerald, textTransform: "uppercase", letterSpacing: "0.12em" }}>{accessLabel(context.accessMode)}</span>
                 </div>
                 <p style={{ ...display, fontSize: "1.45rem", marginTop: 10 }}>{context.targetLabel}</p>
                 <p style={{ ...bodyTextSm, marginTop: 10 }}><strong style={{ color: COLORS.emerald }}>Why — </strong>{context.whyAdmissible}</p>
@@ -135,6 +136,12 @@ export default function CorridorPage({ context, stale, missingRecommendation }: 
           )}
 
           <Link href="/decision-instruments/signal" style={{ ...ghostButton(), textDecoration: "none", justifySelf: "start" }}>Run another Signal</Link>
+
+          <RelationshipNavigator
+            upstream={[{ label: "Signal", href: "/decision-instruments/signal" }]}
+            current="Product Corridor"
+            downstream={[{ label: "Boardroom", href: "/boardroom" }]}
+          />
         </div>
       </main>
     </Layout>
