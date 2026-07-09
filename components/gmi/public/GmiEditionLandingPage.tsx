@@ -159,7 +159,7 @@ function RegimeMap({ edition }: Props) {
         <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#D7BC84]">Regime map</p>
         <h2 className="mt-4 font-serif text-4xl text-white">How the conditions distribute</h2>
         <p className="mt-5 max-w-3xl text-base leading-8 text-white/64">The fingerprint axes track structural regime conditions. Regional layers show where GMI evidence supports geographic assessment. Regions marked DEVELOPING are under active evidence collection for future editions.</p>
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className={`mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3 ${globalAxes.length === 5 ? "max-w-4xl mx-auto" : ""}`}>
           {globalAxes.map((axis) => {
             const delta = axis.previousValue == null ? null : axis.value - axis.previousValue;
             const directionLabel = delta == null ? "Baseline" : delta > 0 ? "Rising" : delta < 0 ? "Falling" : "Stable";
@@ -189,21 +189,21 @@ function RegimeMap({ edition }: Props) {
               {regionalLayers.map((layer) => (
                 <div key={layer.region} className={`border p-5 ${
                       layer.evidenceState === "ACTIVE" ? "border-white/10 bg-black/20" :
-                      layer.evidenceState === "DEVELOPING" ? "border-dashed border-[#9A7B3C]/30 bg-black/10" :
+                      layer.evidenceState === "DEVELOPING" ? "border-dashed border-[#9A7B3C]/50 bg-black/30" :
                       "border border-white/5 bg-black/5"
                     }`}>
                   <div className="flex items-center justify-between gap-2">
                     <p className={`font-serif text-lg ${
                       layer.evidenceState === "ACTIVE" ? "text-white" :
-                      layer.evidenceState === "DEVELOPING" ? "text-white/70" : "text-white/40"
+                      layer.evidenceState === "DEVELOPING" ? "text-white/88" : "text-white/40"
                     }`}>{layer.label}</p>
                     <span className={`font-mono text-[11px] uppercase tracking-[0.12em] ${
                       layer.evidenceState === "ACTIVE" ? "text-[#2D5A4A]" :
-                      layer.evidenceState === "DEVELOPING" ? "text-[#9A7B3C]" : "text-white/25"
+                      layer.evidenceState === "DEVELOPING" ? "text-[#D7BC84]" : "text-white/25"
                     }`}>{layer.evidenceState.replace(/_/g, " ")}</span>
                   </div>
                   {layer.evidenceState === "DEVELOPING" ? (
-                    <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[#9A7B3C]/60">Research programme in progress</p>
+                    <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[#D7BC84]">Research programme in progress</p>
                   ) : layer.evidenceState === "UNAVAILABLE" ? (
                     <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/20">Not covered in this edition</p>
                   ) : null}
@@ -215,7 +215,7 @@ function RegimeMap({ edition }: Props) {
                   ) : null}
                   <p className={`mt-2 text-sm leading-6 ${
                     layer.evidenceState === "ACTIVE" ? "text-white/55" :
-                    layer.evidenceState === "DEVELOPING" ? "text-white/45" : "text-white/25"
+                    layer.evidenceState === "DEVELOPING" ? "text-white/65" : "text-white/25"
                   }`}>{layer.publicSummary}</p>
                   {layer.operatingImplication ? (
                     <p className="mt-3 text-sm leading-6 text-white/45"><span className="text-white/65">Implication:</span> {layer.operatingImplication}</p>
@@ -282,7 +282,7 @@ export default function GmiEditionLandingPage({ edition }: Props) {
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
             <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#7A6A4C]">The quarter in one sentence</p>
-            <h2 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">{edition.quarterInOneSentence}</h2>
+            <h2 className="mt-4 font-serif text-4xl leading-tight md:text-5xl" style={{ color: "#11161C" }}>{edition.quarterInOneSentence}</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
             {Object.entries({ "What changed": edition.quarterDelta.whatChanged, "What held": edition.quarterDelta.whatHeld, "What surprised us": edition.quarterDelta.whatSurprisedUs, "What now matters": edition.quarterDelta.whatNowMatters }).map(([label, value]) => (
@@ -301,17 +301,17 @@ export default function GmiEditionLandingPage({ edition }: Props) {
           <div className="mt-8 space-y-5">
             {edition.headlineSignals.map((signal, index) => (
               <article key={signal.signal} className="grid gap-5 border border-white/12 bg-black/20 p-5 lg:grid-cols-[0.18fr_0.82fr]">
-                <div className="font-mono text-[13px] text-[#D7BC84]">CALL {String(index + 1).padStart(2, "0")}</div>
+                <div className="font-mono text-[15px] font-bold tracking-[0.18em] text-[#D7BC84]">CALL {String(index + 1).padStart(2, "0")}</div>
                 <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
                   <div>
-                    <h3 className="font-serif text-2xl text-white">{signal.signal}</h3>
-                    <p className="mt-4 text-sm leading-7 text-white/65"><strong className="text-white/88">Observed:</strong> {signal.observedEvidence}</p>
-                    <p className="mt-3 text-sm leading-7 text-white/65"><strong className="text-white/88">Our reading:</strong> {signal.interpretation}</p>
+                    <h3 className="font-serif text-3xl leading-tight text-white">{signal.signal}</h3>
+                    <p className="mt-4 text-sm leading-7 text-white/65"><span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em] text-[#D7BC84]">Observed</span><br />{signal.observedEvidence}</p>
+                    <p className="mt-4 text-sm leading-7 text-white/65"><span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em] text-[#D7BC84]">Our reading</span><br />{signal.interpretation}</p>
                   </div>
                   <div className="border-l border-white/10 pl-5">
                     <p className="text-sm leading-7 text-white/65"><span className="font-sans text-[12px] font-medium uppercase tracking-[0.14em] text-[#D7BC84]">Decision consequence</span><br />{signal.businessConsequence}</p>
                     <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.16em] text-[#D7BC84]">Confidence {signal.confidence}</p>
-                    <p className="mt-3 text-sm leading-7 text-white/55">Changes our view if: {signal.falsificationTrigger}</p>
+                    <p className="mt-4 border-t border-white/8 pt-3 text-sm leading-7 text-white/55"><span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em] text-[#D7BC84]">Changes our view if</span><br />{signal.falsificationTrigger}</p>
                   </div>
                 </div>
               </article>
@@ -323,13 +323,13 @@ export default function GmiEditionLandingPage({ edition }: Props) {
       <section className="px-6 py-16 text-[#11161C]" style={{ backgroundColor: warm }}>
         <div className="mx-auto max-w-7xl">
           <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#7A6A4C]">What changed since the last edition</p>
-          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className={`mt-8 grid gap-5 ${edition.crossEditionDeltas.length === 1 ? "lg:grid-cols-1 max-w-3xl" : "lg:grid-cols-2"}`}>
             {edition.crossEditionDeltas.map((delta) => (
               <article key={delta.priorPosition} className="border border-[#11161C]/15 bg-white/45 p-5">
                 <span className="inline-flex items-center border px-3 py-1 font-sans text-[12px] font-medium uppercase tracking-[0.16em] border-[#B59258]/35 text-[#5D503A]" style={{ borderColor: evidenceStateColor(delta.movement) + "60", color: evidenceStateColor(delta.movement) }}>{delta.movement}</span>
-                <p className="mt-4 text-sm leading-7"><strong>Prior:</strong> {delta.priorPosition}</p>
-                <p className="mt-2 text-sm leading-7"><strong>What happened:</strong> {delta.whatHappened}</p>
-                <p className="mt-2 text-sm leading-7"><strong>Current:</strong> {delta.currentPosition}</p>
+                <p className="mt-4 text-sm leading-7" style={{ color: "#343A40" }}><strong style={{ color: "#11161C" }}>Prior:</strong> {delta.priorPosition}</p>
+                <p className="mt-2 text-sm leading-7" style={{ color: "#343A40" }}><strong style={{ color: "#11161C" }}>What happened:</strong> {delta.whatHappened}</p>
+                <p className="mt-2 text-sm leading-7" style={{ color: "#343A40" }}><strong style={{ color: "#11161C" }}>Current:</strong> {delta.currentPosition}</p>
                 <p className="mt-3 text-sm leading-7 text-[#343A40]">{delta.reason}</p>
               </article>
             ))}
@@ -346,10 +346,10 @@ export default function GmiEditionLandingPage({ edition }: Props) {
             {edition.consequenceMatrix.map((row) => (
               <article key={row.decisionDomain} className="grid gap-5 border border-white/12 bg-black/20 p-5 lg:grid-cols-[0.35fr_0.65fr]">
                 <div>
-                  <h3 className="font-serif text-2xl text-white">{row.decisionDomain}</h3>
-                  <p className="mt-3 text-sm leading-7 text-white/62">{row.publicDiagnostic}</p>
+                  <h3 className="font-serif text-2xl font-semibold text-white">{row.decisionDomain}</h3>
+                  <p className="mt-4 text-sm leading-7 text-white/62">{row.publicDiagnostic}</p>
                   <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.16em] text-white/45">{row.timeHorizon} / {row.confidence}</p>
-                  {row.monitoringSignal ? <p className="mt-2 font-mono text-[11px] text-white/40">Monitor: {row.monitoringSignal}</p> : null}
+                  {row.monitoringSignal ? <><p className="mt-3 font-sans text-[11px] font-medium uppercase tracking-[0.14em] text-[#D7BC84]">Monitor</p><p className="mt-1 text-sm leading-6 text-white/50">{row.monitoringSignal}</p></> : null}
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
@@ -368,20 +368,20 @@ export default function GmiEditionLandingPage({ edition }: Props) {
       </section>
 
       <section className="px-6 py-16 text-[#11161C]" style={{ backgroundColor: paper }}>
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className={`mx-auto grid max-w-7xl gap-8 ${edition.supportingBriefs.length === 0 ? "lg:grid-cols-1 max-w-4xl" : "lg:grid-cols-[0.8fr_1.2fr]"}`}>
           <div>
             <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#7A6A4C]">Underlying intelligence</p>
-            <h2 className="mt-4 font-serif text-4xl">The Vault citation loop</h2>
+            <h2 className="mt-4 font-serif text-4xl" style={{ color: "#11161C" }}>The Vault citation loop</h2>
             <p className="mt-5 text-base leading-8 text-[#343A40]">The quarterly edition is the synthesis layer. Specialist briefs remain governed by their own publication and access state.</p>
           </div>
           <div className="space-y-3">
             {edition.supportingBriefs.length ? edition.supportingBriefs.map((brief) => (
-              <div key={brief.ref} className="border border-[#11161C]/15 bg-white/40 p-4">
-                <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#7A6A4C]">{brief.ref} / {brief.publicationState}</p>
-                <h3 className="mt-2 text-lg font-semibold">{brief.title}</h3>
+              <div key={brief.ref} className="border border-[#11161C]/20 bg-white/60 p-5">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D503A]">{brief.ref}</p><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#7A6A4C]">{brief.publicationState}</p>
+                <h3 className="mt-2 text-xl font-semibold" style={{ color: "#11161C" }}>{brief.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-[#343A40]">{brief.relationship}</p>
               </div>
-            )) : <p className="text-base leading-8 text-[#343A40]">This historical edition is linked through the successor review rather than active brief citations.</p>}
+            )) : <div className="border border-dashed border-[#11161C]/15 bg-white/30 p-5"><p className="font-sans text-[11px] font-medium uppercase tracking-[0.16em] text-[#7A6A4C]">Citation loop</p><p className="mt-2 text-sm leading-7 text-[#5E6468]">This historical edition is linked through the successor review rather than active brief citations. Specialist briefs will appear here when the edition has active vault references.</p></div>}
           </div>
         </div>
       </section>
@@ -412,35 +412,39 @@ export default function GmiEditionLandingPage({ edition }: Props) {
       <section className="px-6 py-16 text-[#11161C]" style={{ backgroundColor: warm }}>
         <div className="mx-auto max-w-7xl">
           <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#7A6A4C]">Evidence receipt</p>
-          <div className="mt-8 grid gap-6 lg:grid-cols-3">
-            <div className="border border-[#11161C]/15 p-5">
+          <div className="mt-8 border border-[#11161C]/15 bg-white/40 p-6 lg:p-8">
+            <div className="flex items-center gap-3 border-b border-[#11161C]/10 pb-4">
               <FileText className="h-5 w-5 text-[#7A6A4C]" aria-hidden />
-              <h3 className="mt-4 text-xl font-semibold">GMI release receipt</h3>
-              <dl className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Edition</dt><dd className="font-mono text-[12px] text-right">{edition.editionId}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Published</dt><dd className="font-mono text-[12px] text-right">{formatDate(edition.publishedAt)}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Evidence locked</dt><dd className="font-mono text-[12px] text-right">{edition.evidenceSummary.sourceSnapshotHash ? formatDate(edition.publishedAt) : "Reference"}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Methodology</dt><dd className="font-mono text-[12px] text-right">{edition.methodologyVersion}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Source coverage</dt><dd className="font-mono text-[12px] text-right">{edition.evidenceSummary.coverageState}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Receipt</dt><dd className="font-mono text-[12px] text-right">{edition.releaseProof.receiptRef ?? "Reference"}</dd></div>
-              </dl>
+              <h2 className="font-serif text-2xl" style={{ color: "#11161C" }}>GMI release receipt</h2>
             </div>
-            <div className="border border-[#11161C]/15 p-5">
-              <LockKeyhole className="h-5 w-5 text-[#7A6A4C]" aria-hidden />
-              <h3 className="mt-4 text-xl font-semibold">Hashes & verification</h3>
-              <dl className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Candidate</dt><dd className="font-mono text-[12px] text-right">{shortHash(edition.releaseProof.candidateHash)}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Report hash</dt><dd className="font-mono text-[12px] text-right">{shortHash(edition.releaseProof.reportContentHash)}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">PDF hash</dt><dd className="font-mono text-[12px] text-right">{shortHash(edition.releaseProof.pdfHash)}</dd></div>
-                <div className="flex justify-between"><dt className="text-[#7A6A4C]">Sources</dt><dd className="font-mono text-[12px] text-right">{edition.evidenceSummary.sourceCount}</dd></div>
-              </dl>
-            </div>
-            <div className="border border-[#11161C]/15 p-5">
-              <CheckCircle2 className="h-5 w-5 text-[#7A6A4C]" aria-hidden />
-              <h3 className="mt-4 text-xl font-semibold">Methodology</h3>
-              <p className="mt-4 text-sm leading-7 text-[#343A40]">{edition.methodology.callReview}</p>
-              <p className="mt-3 text-sm leading-7 text-[#343A40]">{edition.methodology.falsification}</p>
-              <p className="mt-3 text-sm leading-7 text-[#343A40]">{edition.methodology.boundary}</p>
+            <div className="mt-6 grid gap-8 lg:grid-cols-3">
+              <div>
+                <p className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D503A]">Edition record</p>
+                <dl className="mt-4 space-y-3 text-sm">
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Edition</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.editionId}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Published</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{formatDate(edition.publishedAt)}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Evidence locked</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.evidenceSummary.sourceSnapshotHash ? formatDate(edition.publishedAt) : "Reference"}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Methodology</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.methodologyVersion}</dd></div>
+                  <div className="flex justify-between"><dt className="text-[#7A6A4C]">Source coverage</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.evidenceSummary.coverageState}</dd></div>
+                </dl>
+              </div>
+              <div>
+                <p className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D503A]">Verification</p>
+                <dl className="mt-4 space-y-3 text-sm">
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Receipt</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{edition.releaseProof.receiptRef ?? "Reference"}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Candidate</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortHash(edition.releaseProof.candidateHash)}</dd></div>
+                  <div className="flex justify-between border-b border-[#11161C]/6 pb-2"><dt className="text-[#7A6A4C]">Report hash</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortHash(edition.releaseProof.reportContentHash)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-[#7A6A4C]">PDF hash</dt><dd className="font-mono text-[12px] text-right" style={{ color: "#11161C" }}>{shortHash(edition.releaseProof.pdfHash)}</dd></div>
+                </dl>
+              </div>
+              <div>
+                <p className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D503A]">Method</p>
+                <div className="mt-4 space-y-3 text-sm">
+                  <p className="leading-7 text-[#5E6468]">{edition.methodology.callReview}</p>
+                  <p className="leading-7 text-[#5E6468]">{edition.methodology.falsification}</p>
+                  <p className="leading-7 text-[#5E6468]">{edition.methodology.boundary}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -457,21 +461,44 @@ export default function GmiEditionLandingPage({ edition }: Props) {
         </div>
       </section>
 
-      <section className="px-6 py-14 text-[#11161C]" style={{ backgroundColor: paper }}>
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#7A6A4C]">The record</p>
-            <p className="mt-3 text-base text-[#343A40]">Historical editions remain visible so judgement, revision and call review stay inspectable.</p>
-            <div className="mt-4 space-y-1 font-mono text-[11px] text-[#7A6A4C]">
-              {edition.archiveContext.previousEdition ? <p>Previous: {edition.archiveContext.previousEdition.title}</p> : null}
-              {edition.archiveContext.nextEdition ? <p>Next: {edition.archiveContext.nextEdition.title}</p> : null}
-              <p>Current: {edition.archiveContext.currentEdition.title}</p>
+      <section className="px-6 py-16 text-[#11161C]" style={{ backgroundColor: paper }}>
+        <div className="mx-auto max-w-7xl">
+          <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em] text-[#7A6A4C]">The record</p>
+          <div className="mt-8 border border-[#11161C]/12 bg-white/40 p-6 lg:p-8">
+            <p className="text-sm leading-7 text-[#5E6468]">Historical editions remain visible so judgement, revision and call review stay inspectable.</p>
+            <div className="mt-6 space-y-4">
+              <div className="border-l-2 border-[#B59258] pl-4">
+                <div className="flex items-center gap-3">
+                  <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#B59258]">Current</span>
+                  <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.archiveContext.currentEdition.editionId}</span>
+                </div>
+                <p className="mt-1 font-serif text-lg" style={{ color: "#11161C" }}>{edition.archiveContext.currentEdition.title}</p>
+                <p className="font-mono text-[11px] text-[#7A6A4C]">Published {formatDate(edition.publishedAt)}</p>
+              </div>
+              {edition.archiveContext.previousEdition ? (
+                <div className="border-l-2 border-[#11161C]/20 pl-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">Reference</span>
+                    <span className="font-mono text-[11px] text-[#7A6A4C]">{edition.archiveContext.previousEdition.editionId}</span>
+                  </div>
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#5E6468" }}>{edition.archiveContext.previousEdition.title}</p>
+                  <Link href={edition.archiveContext.previousEdition.href} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[#B59258] transition hover:text-[#D7BC84]">
+                    View reference edition <ArrowRight className="h-3 w-3" aria-hidden />
+                  </Link>
+                </div>
+              ) : null}
+              {edition.archiveContext.nextEdition ? (
+                <div className="border-l-2 border-dashed border-[#11161C]/15 pl-4">
+                  <span className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-[#7A6A4C]">Next</span>
+                  <p className="mt-1 font-serif text-lg" style={{ color: "#7A6A4C" }}>{edition.archiveContext.nextEdition.title}</p>
+                </div>
+              ) : null}
             </div>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {edition.archiveContext.previousEdition ? <Link href={edition.archiveContext.previousEdition.href} className="inline-flex min-h-11 items-center gap-2 border border-[#11161C]/18 px-4 py-3 text-sm font-medium">Previous edition <ArrowRight className="h-4 w-4" aria-hidden /></Link> : null}
-            {!edition.isCurrent ? <Link href={edition.archiveContext.currentEdition.href} className="inline-flex min-h-11 items-center gap-2 border border-[#B59258]/45 px-4 py-3 text-sm font-medium">Current edition <ArrowRight className="h-4 w-4" aria-hidden /></Link> : null}
-            {edition.pdf.available && edition.pdf.downloadPath ? <Link href={edition.pdf.downloadPath} className="inline-flex min-h-11 items-center gap-2 border border-[#11161C]/18 px-4 py-3 text-sm font-medium">PDF access</Link> : null}
+            <div className="mt-6 flex flex-wrap gap-3 pt-4 border-t border-[#11161C]/8">
+              {edition.archiveContext.previousEdition ? <Link href={edition.archiveContext.previousEdition.href} className="inline-flex min-h-10 items-center gap-2 border border-[#11161C]/18 px-4 py-2 text-sm font-medium" style={{ color: "#5E6468" }}>Previous edition <ArrowRight className="h-3 w-3" aria-hidden /></Link> : null}
+              {!edition.isCurrent ? <Link href={edition.archiveContext.currentEdition.href} className="inline-flex min-h-10 items-center gap-2 border border-[#B59258]/45 px-4 py-2 text-sm font-medium" style={{ color: "#B59258" }}>Current edition <ArrowRight className="h-3 w-3" aria-hidden /></Link> : null}
+              {edition.pdf.available && edition.pdf.downloadPath ? <Link href={edition.pdf.downloadPath} className="inline-flex min-h-10 items-center gap-2 border border-[#11161C]/18 px-4 py-2 text-sm font-medium" style={{ color: "#5E6468" }}>PDF access</Link> : null}
+            </div>
           </div>
         </div>
       </section>
