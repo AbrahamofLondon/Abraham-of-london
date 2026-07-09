@@ -1,1071 +1,407 @@
-/**
- * pages/intelligence/market.tsx — MARKET INTELLIGENCE LANDING v2
- *
- * Dedicated quarterly reports catalogue. Related public briefs are
- * secondary notes beneath the report line. Access boundaries are enforced
- * at card level; restricted materials are described, not exposed.
- */
-
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import type { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+import { ArrowRight, ShieldCheck, FileText, LockKeyhole, CheckCircle2, TrendingUp, BarChart3, Globe } from "lucide-react";
 
 import Layout from "@/components/Layout";
-import { getAllBriefs } from "@/lib/content/server";
-import { getPremiumContentList } from "@/lib/premium/content-registry";
 import {
-  normalizeRequiredTier,
-  requiredTierFromDoc,
-} from "@/lib/access/tier-policy";
-import {
-  getMarketIntelligenceFreshnessLabel,
-  getMarketIntelligenceLifecycleBadge,
+  getCurrentPublishedMarketIntelligenceReport,
+  getUpcomingMarketIntelligenceReport,
+  getPublishedArchiveMarketIntelligenceReports,
   getMarketIntelligenceRecord,
   MARKET_INTELLIGENCE_LIFECYCLE,
 } from "@/lib/intelligence/market-intelligence-lifecycle";
-import { getEditionsForReport } from "@/lib/intelligence/market-intelligence-editions";
-import { getCallsForReport, getCallsPendingReview } from "@/lib/intelligence/market-intelligence-call-ledger";
-import { calculateGmiSourceCoverageScore } from "@/lib/intelligence/gmi-source-coverage-score";
-import { MarketIntelligenceCatalogue } from "@/components/Intelligence/MarketIntelligenceCatalogue";
-import { MarketIntelligenceChronology } from "@/components/Intelligence/MarketIntelligenceChronology";
-import { GmiPriorCallScorecard, type GmiPriorCallScorecardData } from "@/components/Intelligence/GmiPriorCallScorecard";
-import { GmiEvidenceRoom } from "@/components/Intelligence/GmiEvidenceRoom";
+import { getCallsForReport } from "@/lib/intelligence/market-intelligence-call-ledger";
+import {
+  ink, ledger, paper, warm, graphite, evidenceGrey, brass, brassLight,
+  mono, serif, StateBadge, EvidenceMeta, SectionLedger, AuthorityStamp,
+  RelationshipNavigator,
+} from "@/components/institutional";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Design tokens
-// ─────────────────────────────────────────────────────────────────────────────
-
-const GOLD  = "#C9A96E";
-const BASE  = "rgb(3,3,5)";
-const mono: React.CSSProperties  = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
-const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
-
-type ArtifactAccess = "public" | "restricted" | "board";
-type ArtifactFormat = "briefing" | "pdf" | "deck" | "document";
-type ArtifactStatus = "available" | "restricted" | "archive";
-
-type ArtifactItem = {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  edition: string;
-  editionType: string;
-  access: ArtifactAccess;
-  format: ArtifactFormat;
-  status: ArtifactStatus;
-  classification: string;
-  primaryHref: string;
-  primaryLabel: string;
-  metaHref: string;
-  coveragePeriod?: string;
-  currentDecisionWindow?: string;
-  updatedAt?: string;
-  statusLabel?: string;
-  nextScheduledReport?: string;
-  freshnessLabel?: string;
-  freshnessNote?: string;
-};
-
-type BriefItem = {
-  title: string;
-  href: string;
-  description: string;
-  access: "public" | "member" | "restricted" | "other";
-  isPublicRoute: boolean;
-  routeStatus: "readable" | "metadata_only" | "request_access";
-  actionLabel: "Read public brief" | "View restricted metadata" | "Request access";
+type GatewayEdition = {
+  editionId: string;
+  shortTitle: string;
+  headline: string;
+  publishedAt: string | null;
+  lifecycleState: string;
+  isCurrent: boolean;
+  isPurchasable: boolean;
+  isPublic: boolean;
+  href: string | null;
+  checkoutHref: string | null;
 };
 
 type Props = {
-  briefs: BriefItem[];
-  artifacts: ArtifactItem[];
+  current: GatewayEdition | null;
+  reference: GatewayEdition[];
+  upcoming: GatewayEdition | null;
+  callsReviewed: number;
+  callsHeld: number;
+  callsRevised: number;
+  callsFalsified: number;
+  pendingReview: number;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function safeStr(v: unknown, fallback = ""): string {
-  return typeof v === "string" && v.trim() ? v.trim() : fallback;
+function formatDate(value: string | null): string {
+  if (!value) return "";
+  const d = new Date(value);
+  return Number.isFinite(d.getTime())
+    ? d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : value;
 }
 
-function formatDateLabel(value: string): string {
-  if (value === "2026-04-08") return "8 April 2026";
-  return value;
+function GatewayCover({ current, upcoming, reference }: { current: GatewayEdition | null; upcoming: GatewayEdition | null; reference: GatewayEdition[] }) {
+  return (
+    <section className="px-6 pb-20 pt-28" style={{ backgroundColor: ink }}>
+      <div className="mx-auto max-w-6xl">
+        <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>Global Market Intelligence</p>
+        <h1 className="mt-5 max-w-4xl font-serif text-5xl leading-[0.96] md:text-7xl" style={{ color: 'rgba(255,255,255,0.94)' }}>
+          Market judgement with a memory.
+        </h1>
+        <p className="mt-6 max-w-3xl text-lg leading-8" style={{ color: 'rgba(255,255,255,0.58)' }}>
+          Quarterly intelligence for boards, founders and operators making consequential decisions under fragmentation, capital selectivity, policy divergence and structural uncertainty.
+        </p>
+        <div className="mt-10 flex flex-wrap items-center gap-6">
+          {current ? (
+            <div className="flex items-center gap-3">
+              <span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: brassLight }}>Current</span>
+              <span className="font-mono text-[13px]" style={{ color: 'rgba(255,255,255,0.82)' }}>{current.shortTitle}</span>
+            </div>
+          ) : null}
+          {upcoming ? (
+            <div className="flex items-center gap-3">
+              <span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: evidenceGrey }}>Next</span>
+              <span className="font-mono text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>{upcoming.shortTitle} · In preparation</span>
+            </div>
+          ) : null}
+          {reference.length > 0 ? (
+            <div className="flex items-center gap-3">
+              <span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: evidenceGrey }}>Record</span>
+              <span className="font-mono text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>{reference[0]?.shortTitle ?? ""} · Reference edition</span>
+            </div>
+          ) : null}
+        </div>
+        <div className="mt-10 flex flex-wrap gap-4">
+          {current?.href ? (
+            <Link href={current.href} className="inline-flex min-h-12 items-center gap-3 bg-white px-6 py-3 font-sans text-[12px] font-semibold uppercase tracking-[0.18em] text-black transition hover:bg-white/90">
+              View current edition <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          ) : null}
+          <Link href="#record" className="inline-flex min-h-12 items-center gap-3 border px-6 py-3 font-sans text-[12px] font-semibold uppercase tracking-[0.18em] transition hover:opacity-80" style={{ borderColor: brass + '40', color: brassLight }}>
+            Inspect the record <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function normalizeSlug(value: unknown): string {
-  return safeStr(value)
-    .replace(/^\/+|\/+$/g, "")
-    .replace(/^briefs\//i, "");
+function CurrentEdition({ edition }: { edition: GatewayEdition }) {
+  return (
+    <section className="px-6 py-20" style={{ backgroundColor: paper }}>
+      <div className="mx-auto max-w-6xl">
+        <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: '#7A6A4C' }}>Current edition</p>
+        <div className="mt-6 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <p className="font-mono text-[13px] uppercase tracking-[0.20em]" style={{ color: graphite }}>{edition.shortTitle}</p>
+            <h2 className="mt-3 font-serif text-4xl leading-tight md:text-5xl" style={{ color: '#11161C' }}>{edition.headline}</h2>
+            <div className="mt-6 flex flex-wrap gap-6">
+              <EvidenceMeta label="Published" value={formatDate(edition.publishedAt)} />
+              <StateBadge state={edition.lifecycleState} />
+              {edition.isPurchasable ? <span className="font-sans text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: graphite }}>Purchasable</span> : null}
+            </div>
+            <div className="mt-8 flex flex-wrap gap-4">
+              {edition.href ? (
+                <Link href={edition.href} className="inline-flex min-h-11 items-center gap-2 border px-5 py-2.5 font-sans text-[12px] font-semibold uppercase tracking-[0.16em] transition hover:opacity-80" style={{ borderColor: brass + '45', color: graphite }}>
+                  Explore {edition.shortTitle} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                </Link>
+              ) : null}
+              {edition.checkoutHref ? (
+                <Link href={edition.checkoutHref} className="inline-flex min-h-11 items-center gap-2 px-5 py-2.5 font-sans text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90" style={{ backgroundColor: brass }}>
+                  Acquire {edition.shortTitle} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function isPublicBrief(doc: any): boolean {
-  if (!doc || doc.draft === true || doc.published === false) return false;
-  if (safeStr(doc?.status).toLowerCase() !== "canonical") return false;
-  const tier = normalizeRequiredTier(requiredTierFromDoc(doc));
-  return tier === "public";
+function PublicationLine({ current, reference, upcoming }: { current: GatewayEdition | null; reference: GatewayEdition[]; upcoming: GatewayEdition | null }) {
+  const allEditions = [
+    ...reference.map(e => ({ ...e, role: 'REFERENCE' as const })),
+    ...(current ? [{ ...current, role: 'CURRENT' as const }] : []),
+    ...(upcoming ? [{ ...upcoming, role: 'UPCOMING' as const }] : []),
+  ].sort((a, b) => {
+    const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return dateA - dateB;
+  });
+
+  return (
+    <section className="px-6 py-20" style={{ backgroundColor: '#11161C' }}>
+      <div className="mx-auto max-w-4xl">
+        <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>The publication line</p>
+        <div className="mt-10 space-y-0">
+          {allEditions.map((ed, i) => (
+            <div key={ed.editionId} className="flex gap-5">
+              <div className="flex flex-col items-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ backgroundColor: ed.role === 'CURRENT' ? brass : ed.role === 'REFERENCE' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)' }}>
+                  <span className="font-mono text-[11px] font-bold" style={{ color: ed.role === 'CURRENT' ? '#11161C' : evidenceGrey }}>{ed.shortTitle.replace('Q', '').replace(' ', '')}</span>
+                </div>
+                {i < allEditions.length - 1 ? <div className="w-px flex-1" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} /> : null}
+              </div>
+              <div className="pb-10 pt-1">
+                <div className="flex items-center gap-3">
+                  <p className="font-serif text-xl" style={{ color: ed.role === 'CURRENT' ? 'rgba(255,255,255,0.92)' : ed.role === 'REFERENCE' ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.4)' }}>{String(ed.shortTitle)}</p>
+                  <StateBadge state={ed.role} />
+                </div>
+                <p className="mt-1 text-sm leading-6" style={{ color: 'rgba(255,255,255,0.55)' }}>{ed.headline}</p>
+                <p className="font-mono text-[11px]" style={{ color: evidenceGrey }}>
+                  {ed.publishedAt ? `Published ${formatDate(ed.publishedAt)}` : 'In preparation'}
+                </p>
+                {ed.href && ed.role !== 'UPCOMING' ? (
+                  <Link href={ed.href} className="mt-2 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] transition hover:opacity-70" style={{ color: brassLight }}>
+                    {ed.role === 'CURRENT' ? 'View edition' : 'Inspect record'} <ArrowRight className="h-3 w-3" aria-hidden />
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function briefAccess(doc: any): BriefItem["access"] {
-  const tier = normalizeRequiredTier(requiredTierFromDoc(doc));
-  if (tier === "public")  return "public";
-  if (tier === "member")  return "member";
-  if (tier === "restricted") return "restricted";
-  return "other";
+function CompoundingPrinciples() {
+  return (
+    <section className="px-6 py-20" style={{ backgroundColor: warm }}>
+      <div className="mx-auto max-w-6xl">
+        <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: '#7A6A4C' }}>Why the intelligence compounds</p>
+        <h2 className="mt-4 max-w-3xl font-serif text-4xl leading-tight md:text-5xl" style={{ color: '#11161C' }}>This intelligence line compounds through verification, not just publication.</h2>
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          {[
+            { num: '01', title: 'Every edition has a state', text: 'Current, reference, draft and release conditions remain explicit. No edition is published without passing governed gates.' },
+            { num: '02', title: 'Every major call has a review path', text: 'Calls can hold, strengthen, weaken, revise or fail. Each outcome is recorded in the call ledger before the next edition is released.' },
+            { num: '03', title: 'Evidence and judgement are separated', text: 'Observed evidence is not confused with interpretation. Every claim carries a posture label — Confirmed, Directional, Monitoring, or Scenario assumption.' },
+            { num: '04', title: 'The record remains inspectable', text: 'Historical judgement is retained rather than quietly overwritten. Past editions remain visible so the current edition can be judged against a visible prior record.' },
+          ].map((p) => (
+            <div key={p.num} className="border-t pt-4" style={{ borderColor: brass + '45' }}>
+              <p className="font-mono text-[12px] font-bold" style={{ color: brass }}>{p.num}</p>
+              <h3 className="mt-2 font-serif text-xl" style={{ color: '#11161C' }}>{p.title}</h3>
+              <p className="mt-2 text-sm leading-7" style={{ color: graphite }}>{p.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function editionTypeToAccess(editionType: string, classification: string): ArtifactAccess {
-  if (editionType === "board-deck")      return "board";
-  if (classification === "PUBLIC")       return "public";
-  return "restricted";
+function AccountabilityEvidence({ current, reference, callsReviewed, callsHeld, callsRevised, callsFalsified, pendingReview }: Props) {
+  const priorEdition = reference[0];
+  return (
+    <section className="px-6 py-20" style={{ backgroundColor: ink }}>
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-10 lg:grid-cols-2">
+          <div>
+            <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>Accountability</p>
+            <h2 className="mt-4 font-serif text-3xl text-white">What happened to the previous edition's calls?</h2>
+            <div className="mt-6 space-y-4">
+              <EvidenceMeta label="Prior edition" value={priorEdition?.shortTitle ?? 'None'} />
+              <EvidenceMeta label="Successor review" value={current?.shortTitle ?? 'None'} />
+              <EvidenceMeta label="Calls reviewed" value={String(callsReviewed)} />
+              <EvidenceMeta label="Held / strengthened" value={String(callsHeld)} />
+              <EvidenceMeta label="Revised / weakened" value={String(callsRevised)} />
+              <EvidenceMeta label="Falsified" value={String(callsFalsified)} />
+              <EvidenceMeta label="Pending review" value={String(pendingReview)} />
+            </div>
+          </div>
+          <div>
+            <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>Evidence</p>
+            <h2 className="mt-4 font-serif text-3xl text-white">What supports the current edition?</h2>
+            <div className="mt-6 space-y-4">
+              <EvidenceMeta label="Current edition" value={current?.shortTitle ?? 'None'} />
+              <EvidenceMeta label="Published" value={formatDate(current?.publishedAt ?? null)} />
+              <EvidenceMeta label="State" value={current?.lifecycleState?.replace(/_/g, ' ') ?? 'Unknown'} />
+              <EvidenceMeta label="Access" value={current?.isPublic ? 'Public' : 'Restricted'} />
+              {current?.isPurchasable ? <EvidenceMeta label="Acquisition" value="Available" /> : null}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function editionTypeToFormat(editionType: string): ArtifactFormat {
-  if (editionType === "institutional-pdf") return "pdf";
-  if (editionType === "board-deck")        return "deck";
-  if (editionType === "public-surface")    return "briefing";
-  return "document";
+function MethodologyTrust() {
+  return (
+    <section className="px-6 py-20" style={{ backgroundColor: paper }}>
+      <div className="mx-auto max-w-6xl">
+        <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: '#7A6A4C' }}>How GMI is governed</p>
+        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'Cross-Edition Review', href: '/market-intelligence/cross-edition-review', desc: 'What changed between editions.' },
+            { label: 'Decision Integrity Index', href: '/market-intelligence/dii', desc: 'How disciplined judgement is measured.' },
+            { label: 'Learning Log', href: '/market-intelligence/learning-log', desc: 'What the system learned from outcomes.' },
+            { label: 'Trust Centre', href: '/trust-centre', desc: 'What can be claimed, sold, released or withheld.' },
+          ].map((item) => (
+            <Link key={item.href} href={item.href} className="border p-5 transition hover:opacity-80" style={{ borderColor: 'rgba(17,22,28,0.15)', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+              <p className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: brass }}>{item.label}</p>
+              <p className="mt-2 text-sm leading-6" style={{ color: graphite }}>{item.desc}</p>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em]" style={{ color: brassLight }}>Open →</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }
 
-function editionTypeToStatus(access: ArtifactAccess): ArtifactStatus {
-  if (access === "public") return "available";
-  return "restricted";
+function Record({ current, reference, upcoming }: { current: GatewayEdition | null; reference: GatewayEdition[]; upcoming: GatewayEdition | null }) {
+  return (
+    <section id="record" className="px-6 py-20" style={{ backgroundColor: ink }}>
+      <div className="mx-auto max-w-6xl">
+        <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>The record</p>
+        <div className="mt-8 space-y-4">
+          {current ? (
+            <div className="flex items-center justify-between gap-4 border-l-2 py-3 pl-5" style={{ borderColor: brass }}>
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: brassLight }}>Current</span>
+                  <span className="font-mono text-[12px]" style={{ color: evidenceGrey }}>{current.editionId}</span>
+                </div>
+                <p className="mt-1 font-serif text-xl text-white">{current.shortTitle}</p>
+                <p className="font-mono text-[11px]" style={{ color: evidenceGrey }}>{current.publishedAt ? `Published ${formatDate(current.publishedAt)}` : ''}</p>
+              </div>
+              {current.href ? (
+                <Link href={current.href} className="shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] transition hover:opacity-70" style={{ color: brassLight }}>
+                  Explore edition <ArrowRight className="inline h-3 w-3" aria-hidden />
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
+          {reference.map((ed) => (
+            <div key={ed.editionId} className="flex items-center justify-between gap-4 border-l-2 py-3 pl-5" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: evidenceGrey }}>Reference</span>
+                  <span className="font-mono text-[12px]" style={{ color: evidenceGrey }}>{ed.editionId}</span>
+                </div>
+                <p className="mt-1 font-serif text-xl" style={{ color: 'rgba(255,255,255,0.6)' }}>{ed.shortTitle}</p>
+                <p className="font-mono text-[11px]" style={{ color: evidenceGrey }}>{ed.publishedAt ? `Published ${formatDate(ed.publishedAt)}` : ''}</p>
+              </div>
+              {ed.href ? (
+                <Link href={ed.href} className="shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] transition hover:opacity-70" style={{ color: evidenceGrey }}>
+                  Inspect record <ArrowRight className="inline h-3 w-3" aria-hidden />
+                </Link>
+              ) : null}
+            </div>
+          ))}
+          {upcoming ? (
+            <div className="flex items-center justify-between gap-4 border-l-2 border-dashed py-3 pl-5" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="font-sans text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: evidenceGrey }}>Next</span>
+                  <span className="font-mono text-[12px]" style={{ color: evidenceGrey }}>{upcoming.editionId}</span>
+                </div>
+                <p className="mt-1 font-serif text-xl" style={{ color: 'rgba(255,255,255,0.4)' }}>{upcoming.shortTitle}</p>
+                <p className="font-mono text-[11px]" style={{ color: evidenceGrey }}>In preparation</p>
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <div className="mt-10">
+          <p className="font-sans text-[12px] font-medium uppercase tracking-[0.20em]" style={{ color: brassLight }}>Accountability pathways</p>
+          <div className="mt-4 flex flex-wrap gap-4">
+            {[
+              { label: 'Cross-Edition Review', href: '/market-intelligence/cross-edition-review' },
+              { label: 'Decision Integrity Index', href: '/market-intelligence/dii' },
+              { label: 'Learning Log', href: '/market-intelligence/learning-log' },
+              { label: 'Trust Centre', href: '/trust-centre' },
+            ].map((item) => (
+              <Link key={item.href} href={item.href} className="font-mono text-[11px] uppercase tracking-[0.14em] transition hover:opacity-70" style={{ color: brassLight }}>
+                {item.label} <ArrowRight className="inline h-3 w-3" aria-hidden />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
-
-function editionTypeToLabel(editionType: string): string {
-  if (editionType === "institutional-pdf") return "Institutional PDF";
-  if (editionType === "board-deck")        return "Board Briefing Deck";
-  if (editionType === "public-surface")    return "Public Surface Edition";
-  return "Intelligence Artifact";
-}
-
-function lifecycleIdForArtifact(id: string): string | null {
-  if (
-    id === "global-market-outlook-q1-2026-public" ||
-    id === "global-market-intelligence-report-q1-2026" ||
-    id === "global-market-intelligence-board-deck-q1-2026"
-  ) {
-    return "GMI-Q1-2026";
-  }
-
-  return null;
-}
-
-function primaryCta(access: ArtifactAccess, editionType: string): { label: string; href: string } | null {
-  if (access === "public")  return { label: "Read public briefing", href: "" }; // filled per item
-  if (access === "board")   return { label: "Request access", href: "/inner-circle" };
-  return { label: "View artifact metadata", href: "" }; // filled per item
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// getStaticProps
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  // ── Quarterly intelligence artifacts ────────────────────────────────────
-  const ARTIFACT_IDS = [
-    "global-market-outlook-q1-2026-public",
-    "global-market-intelligence-report-q1-2026",
-    "global-market-intelligence-board-deck-q1-2026",
-  ] as const;
+  const currentRecord = getCurrentPublishedMarketIntelligenceReport() as any;
+  const upcomingRecord = getUpcomingMarketIntelligenceReport();
+  const archiveRecords = getPublishedArchiveMarketIntelligenceReports();
 
-  const artifacts: ArtifactItem[] = getPremiumContentList()
-    .filter((item) => ARTIFACT_IDS.includes(item.id as typeof ARTIFACT_IDS[number]))
-    .map((item) => {
-      const lifecycleRecord = lifecycleIdForArtifact(item.id)
-        ? getMarketIntelligenceRecord(lifecycleIdForArtifact(item.id)!)
-        : null;
-      const lifecycleBadge = lifecycleRecord ? getMarketIntelligenceLifecycleBadge(lifecycleRecord) : null;
-      const editionType  = safeStr(item.metadata?.editionType, "document");
-      const classification = safeStr(item.metadata?.classification, "RESTRICTED");
-      const access       = editionTypeToAccess(editionType, classification);
-      const format       = editionTypeToFormat(editionType);
-      const status       = editionTypeToStatus(access);
-      const edition      = editionTypeToLabel(editionType);
-      const metaHref     = `/artifacts/${item.id}`;
-      const surfaceHref  = safeStr(item.metadata?.surfaceHref);
+  const toGateway = (r: typeof currentRecord): GatewayEdition | null => {
+    if (!r) return null;
+    return {
+      editionId: r.id,
+      shortTitle: `${r.quarter} ${r.year}`,
+      headline: r.title.replace('Global Market Intelligence ', ''),
+      publishedAt: r.publishedAt ?? null,
+      lifecycleState: r.lifecycleState,
+      isCurrent: r.id === currentRecord?.id,
+      isPurchasable: r.purchasable,
+      isPublic: r.publicVisible,
+      href: r.publicHref ?? null,
+      checkoutHref: r.purchasable ? `/api/billing/checkout?productCode=gmi_${r.id.toLowerCase().replace(/-/g, '_')}` : null,
+    };
+  };
 
-      let primaryLabel: string;
-      let primaryHref: string;
-      if (access === "public") {
-        primaryLabel = "Read public briefing";
-        primaryHref  = surfaceHref || metaHref;
-      } else if (access === "board") {
-        primaryLabel = "Request access";
-        primaryHref  = "/inner-circle";
-      } else if (item.id === "global-market-intelligence-report-q1-2026") {
-        primaryLabel = "Access institutional edition";
-        primaryHref = metaHref;
-      } else {
-        primaryLabel = "View artifact metadata";
-        primaryHref  = metaHref;
-      }
+  const current = toGateway(currentRecord);
+  const reference = archiveRecords.map(toGateway).filter((e): e is GatewayEdition => e !== null);
+  const upcoming = toGateway(upcomingRecord);
 
-      return {
-        id: item.id,
-        title: safeStr(item.title, "Untitled artifact"),
-        subtitle: safeStr(item.subtitle),
-        description: safeStr(item.description, "Quarterly intelligence artifact."),
-        edition,
-        editionType,
-        access,
-        format,
-        status,
-        classification,
-        primaryHref,
-        primaryLabel,
-        metaHref,
-        coveragePeriod: lifecycleRecord?.coveragePeriod ?? safeStr(item.metadata?.coveragePeriod),
-        currentDecisionWindow: lifecycleRecord?.decisionWindow ?? safeStr(item.metadata?.currentDecisionWindow),
-        updatedAt: lifecycleRecord?.updatedAt ?? safeStr(item.metadata?.updatedAt || item.metadata?.createdAt),
-        statusLabel: lifecycleBadge?.label ?? safeStr(item.metadata?.statusLabel),
-        nextScheduledReport: lifecycleRecord?.nextExpected === "GMI-Q2-2026"
-          ? "Q2 2026 report in preparation"
-          : safeStr(item.metadata?.nextScheduledReport),
-        freshnessLabel: lifecycleRecord
-          ? getMarketIntelligenceFreshnessLabel(lifecycleRecord)
-          : safeStr(item.metadata?.freshnessNote),
-        freshnessNote: lifecycleRecord?.freshnessNote ?? safeStr(item.metadata?.freshnessNote),
-      };
-    })
-    // Sort: public first, then restricted, then board
-    .sort((a, b) => {
-      const rank = (x: ArtifactItem) => x.access === "public" ? 0 : x.access === "restricted" ? 1 : 2;
-      return rank(a) - rank(b);
-    });
+  // Call review data from the current edition's predecessor
+  const priorId = currentRecord?.replaces;
+  const priorCalls = priorId ? (getCallsForReport(priorId) as any[]) : [];
+  const callsReviewed = priorCalls.filter((c: any) => c.score !== null && c.score !== undefined).length;
+  const callsHeld = priorCalls.filter((c: any) => c.score !== null && c.score !== undefined && c.score >= 3).length;
+  const callsRevised = priorCalls.filter((c: any) => c.score !== null && c.score !== undefined && c.score === 2).length;
+  const callsFalsified = priorCalls.filter((c: any) => c.outcomeStatus === 'DISCONFIRMED').length;
+  const pendingReview = priorCalls.filter((c: any) => c.score === null || c.score === undefined).length;
 
-  // ── Related public briefs ────────────────────────────────────────────────
-  const briefs: BriefItem[] = (getAllBriefs() as any[])
-    .filter((doc) => doc?.draft !== true && doc?.published !== false)
-    .slice(0, 8)
-    .map((doc) => {
-      const slug    = normalizeSlug(doc.slug || doc.urlSlug || doc._raw?.flattenedPath);
-      const pub     = isPublicBrief(doc);
-      const access  = briefAccess(doc);
-      const href    = pub && slug ? `/briefs/${slug}` : "#";
-
-      return {
-        title: safeStr(doc.title, "Untitled brief"),
-        href,
-        description: safeStr(doc.description || doc.summary || doc.excerpt, "Strategic brief."),
-        access,
-        isPublicRoute: pub && !!slug,
-        routeStatus: pub && !!slug ? "readable" : access === "restricted" ? "metadata_only" : "request_access",
-        actionLabel:
-          pub && !!slug
-            ? "Read public brief"
-            : access === "restricted"
-              ? "View restricted metadata"
-              : "Request access",
-      };
-    });
-
-  return { props: { briefs, artifacts }, revalidate: 1800 };
+  return {
+    props: {
+      current,
+      reference,
+      upcoming,
+      callsReviewed,
+      callsHeld,
+      callsRevised,
+      callsFalsified,
+      pendingReview,
+    },
+    revalidate: 1800,
+  };
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────────────────────────────────────
-
-const ACCESS_BADGE: Record<ArtifactAccess, { label: string; color: string; border: string; bg: string }> = {
-  public:     { label: "Public",     color: "rgba(34,197,94,0.85)",  border: "rgba(34,197,94,0.20)",  bg: "rgba(34,197,94,0.06)"  },
-  restricted: { label: "Restricted", color: "rgba(245,158,11,0.85)", border: "rgba(245,158,11,0.20)", bg: "rgba(245,158,11,0.06)" },
-  board:      { label: "Board",      color: `${GOLD}CC`,             border: `${GOLD}30`,             bg: `${GOLD}08`             },
-};
-
-const FORMAT_LABEL: Record<ArtifactFormat, string> = {
-  briefing: "Briefing", pdf: "PDF", deck: "Deck", document: "Document",
-};
-
-const STATUS_LABEL: Record<ArtifactStatus, { text: string; color: string }> = {
-  available:  { text: "Available",  color: "rgba(34,197,94,0.60)"  },
-  restricted: { text: "Restricted", color: "rgba(245,158,11,0.60)" },
-  archive:    { text: "Archive",    color: "rgba(255,255,255,0.30)" },
-};
-
-const EDITION_ACCENT: Record<string, string> = {
-  "public-surface":   "rgba(34,197,94,0.35)",
-  "institutional-pdf": "rgba(245,158,11,0.35)",
-  "board-deck":       `${GOLD}60`,
-};
-
-function Badge({ label, color, border, bg }: { label: string; color: string; border: string; bg: string }) {
-  return (
-    <span
-      style={{
-        ...mono,
-        fontSize: "7px",
-        letterSpacing: "0.20em",
-        textTransform: "uppercase",
-        color,
-        border: `1px solid ${border}`,
-        backgroundColor: bg,
-        padding: "2px 7px",
-        display: "inline-block",
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function ArtifactCard({ artifact }: { artifact: ArtifactItem }) {
-  const ab      = ACCESS_BADGE[artifact.access];
-  const accent  = EDITION_ACCENT[artifact.editionType] ?? "rgba(255,255,255,0.20)";
-  const status  = STATUS_LABEL[artifact.status];
-  const isRestricted = artifact.access !== "public";
-
-  return (
-    <article
-      style={{
-        borderLeft: `2px solid ${accent}`,
-        paddingLeft: "16px",
-        paddingTop: "4px",
-        paddingBottom: "4px",
-        opacity: isRestricted ? 0.88 : 1,
-      }}
-    >
-      {/* Edition + badges */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-          {artifact.edition}
-        </span>
-        <Badge label={ab.label} color={ab.color} border={ab.border} bg={ab.bg} />
-        <Badge
-          label={FORMAT_LABEL[artifact.format]}
-          color="rgba(255,255,255,0.40)"
-          border="rgba(255,255,255,0.10)"
-          bg="rgba(255,255,255,0.03)"
-        />
-        <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", color: status.color }}>
-          {status.text}
-        </span>
-      </div>
-
-      {/* Title */}
-      <p className="mt-2 text-base leading-snug" style={{ color: isRestricted ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.92)", fontWeight: 400 }}>
-        {artifact.title}
-      </p>
-      {artifact.subtitle ? (
-        <p className="mt-0.5 text-sm" style={{ ...mono, fontSize: "10px", color: "rgba(255,255,255,0.30)", letterSpacing: "0.06em" }}>
-          {artifact.subtitle}
-        </p>
-      ) : null}
-
-      {/* Description */}
-      <p className="mt-2 text-sm leading-6 text-white/50">{artifact.description}</p>
-
-      {artifact.currentDecisionWindow ? (
-        <p className="mt-2 text-xs" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: `${GOLD}AA`, textTransform: "uppercase" }}>
-          Current decision window: {artifact.currentDecisionWindow}
-        </p>
-      ) : null}
-
-      {/* Restricted notice */}
-      {isRestricted && (
-        <p className="mt-2 text-xs" style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(245,158,11,0.55)", textTransform: "uppercase" }}>
-          {artifact.access === "board" ? "Board-grade material. Institutional access required." : "Restricted record. Metadata available on request."}
-        </p>
-      )}
-
-      {/* Primary action */}
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        {artifact.access === "public" ? (
-          <Link
-            href={artifact.primaryHref}
-            className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
-            style={{ color: "rgba(34,197,94,0.85)" }}
-          >
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase" }}>
-              {artifact.primaryLabel}
-            </span>
-            <span aria-hidden="true" style={{ fontSize: "10px" }}>→</span>
-          </Link>
-        ) : artifact.access === "board" ? (
-          <Link
-            href="/inner-circle"
-            className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
-            style={{ color: `${GOLD}CC` }}
-          >
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase" }}>
-              Request access
-            </span>
-            <span aria-hidden="true" style={{ fontSize: "10px" }}>→</span>
-          </Link>
-        ) : (
-          <Link
-            href={artifact.primaryHref}
-            className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
-            style={{ color: "rgba(245,158,11,0.75)" }}
-          >
-            <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase" }}>
-              {artifact.primaryLabel}
-            </span>
-            <span aria-hidden="true" style={{ fontSize: "10px" }}>→</span>
-          </Link>
-        )}
-      </div>
-    </article>
-  );
-}
-
-const BRIEF_ACCESS_BADGE = {
-  public:     { label: "Public",     color: "rgba(34,197,94,0.80)",  border: "rgba(34,197,94,0.18)",  bg: "rgba(34,197,94,0.05)"  },
-  member:     { label: "Member",     color: "rgba(59,130,246,0.80)", border: "rgba(59,130,246,0.18)", bg: "rgba(59,130,246,0.05)" },
-  restricted: { label: "Restricted", color: "rgba(245,158,11,0.80)", border: "rgba(245,158,11,0.18)", bg: "rgba(245,158,11,0.05)" },
-  other:      { label: "Archive",    color: "rgba(255,255,255,0.30)", border: "rgba(255,255,255,0.10)", bg: "rgba(255,255,255,0.02)" },
-};
-
-const BRIEF_ROUTE_BADGE = {
-  readable: { label: "Readable", color: "rgba(34,197,94,0.70)", border: "rgba(34,197,94,0.16)", bg: "rgba(34,197,94,0.04)" },
-  metadata_only: { label: "Metadata only", color: "rgba(245,158,11,0.70)", border: "rgba(245,158,11,0.16)", bg: "rgba(245,158,11,0.04)" },
-  request_access: { label: "Access route", color: "rgba(255,255,255,0.32)", border: "rgba(255,255,255,0.08)", bg: "rgba(255,255,255,0.02)" },
-};
-
-function BriefCard({ brief }: { brief: BriefItem }) {
-  const ab = BRIEF_ACCESS_BADGE[brief.access];
-  const rb = BRIEF_ROUTE_BADGE[brief.routeStatus];
-  const isReadable = brief.isPublicRoute;
-
-  return (
-    <article style={{ borderLeft: "1px solid rgba(201,169,110,0.22)", paddingLeft: "14px" }}>
-      <div className="mb-1.5">
-        <Badge
-          label="Brief"
-          color="rgba(255,255,255,0.40)"
-          border="rgba(255,255,255,0.10)"
-          bg="rgba(255,255,255,0.03)"
-        />
-        <Badge label={ab.label} color={ab.color} border={ab.border} bg={ab.bg} />
-        <Badge label={rb.label} color={rb.color} border={rb.border} bg={rb.bg} />
-      </div>
-
-      {isReadable ? (
-        <Link
-          href={brief.href}
-          className="block text-sm leading-snug transition-colors hover:text-white"
-          style={{ color: "rgba(255,255,255,0.82)" }}
-        >
-          {brief.title}
-        </Link>
-      ) : (
-        <p className="text-sm leading-snug" style={{ color: "rgba(255,255,255,0.50)" }}>
-          {brief.title}
-        </p>
-      )}
-
-      <p className="mt-1.5 text-sm leading-6 text-white/45">{brief.description}</p>
-
-      <div className="mt-2">
-        {isReadable ? (
-          <Link
-            href={brief.href}
-            className="inline-flex items-center gap-1 transition-colors hover:opacity-80"
-            style={{ color: "rgba(255,255,255,0.50)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-          >
-            {brief.actionLabel}
-            <span aria-hidden="true" style={{ fontSize: "9px" }}>→</span>
-          </Link>
-        ) : brief.access === "restricted" ? (
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(245,158,11,0.45)" }}>
-            {brief.actionLabel}
-          </span>
-        ) : (
-          <span style={{ ...mono, fontSize: "7px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)" }}>
-            {brief.actionLabel}
-          </span>
-        )}
-      </div>
-    </article>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Page
-// ─────────────────────────────────────────────────────────────────────────────
-
-const GMI_Q1_RECORD = getMarketIntelligenceRecord("GMI-Q1-2026");
-const GMI_Q1_EDITIONS = getEditionsForReport("GMI-Q1-2026");
-const GMI_Q2_RECORD = getMarketIntelligenceRecord("GMI-Q2-2026");
-
-// Prior-call scorecard data — computed from ledger, passed to public component
-const GMI_Q1_CALLS = getCallsForReport("GMI-Q1-2026");
-const GMI_Q2_PENDING_CALLS = getCallsPendingReview("Q2 2026");
-const GMI_Q2_DUE_IN_Q2 = GMI_Q1_CALLS.filter((c) => c.expectedReviewWindow === "Q2 2026");
-const GMI_Q2_CARRIED = GMI_Q1_CALLS.filter((c) => c.expectedReviewWindow !== "Q2 2026");
-const GMI_SCORECARD_DATA: GmiPriorCallScorecardData = {
-  reportId: "GMI-Q2-2026",
-  priorReportId: "GMI-Q1-2026",
-  reviewWindow: "Q2 2026",
-  total: GMI_Q1_CALLS.length,
-  dueInCurrentQuarter: GMI_Q2_DUE_IN_Q2.length,
-  carriedForward: GMI_Q2_CARRIED.length,
-  reviewed: GMI_Q2_DUE_IN_Q2.length - GMI_Q2_PENDING_CALLS.length,
-  pending: GMI_Q2_PENDING_CALLS.length,
-};
-
-// Source coverage data for buyer-preview evidence room
-const GMI_Q2_COVERAGE = calculateGmiSourceCoverageScore("GMI-Q2-2026");
-
-const EVIDENCE_POSTURES = [
-  {
-    label: "Confirmed",
-    text: "Supported by source evidence or observed market data.",
-  },
-  {
-    label: "Directional",
-    text: "Supported by evidence, but not settled enough to treat as final.",
-  },
-  {
-    label: "Monitoring",
-    text: "Important but not yet strong enough for a firm conclusion.",
-  },
-  {
-    label: "Scenario assumption",
-    text: "Used for planning, not prediction.",
-  },
-] as const;
-
-const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({
-  briefs,
-  artifacts,
-}) => {
+const IntelligenceMarketPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
   return (
     <Layout
-      title="Market Intelligence Reports | Abraham of London"
-      description="Quarterly Global Market Intelligence reports catalogue: active report, access editions, report chronology, methodology, and secondary intelligence notes."
+      title="Global Market Intelligence | Abraham of London"
+      description="The GMI publication family — current edition, reference archive, forthcoming releases, and accountability record."
       canonicalUrl="/intelligence/market"
       fullWidth
       headerTransparent
     >
-      <Head>
-        <meta name="robots" content="index,follow" />
-      </Head>
-
-      <main
-        className="min-h-screen px-6 py-24"
-        style={{ backgroundColor: BASE, color: "white", paddingBottom: "6rem" }}
-      >
-        <div className="mx-auto max-w-6xl space-y-10">
-
-          {/* ── Page header ─────────────────────────────────────────────── */}
-          <header
-            style={{
-              border: "1px solid rgba(255,255,255,0.09)",
-              background: "rgba(255,255,255,0.02)",
-              padding: "1.5rem",
-            }}
-          >
-            <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.26em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-              Quarterly intelligence desk
-            </p>
-            <h1 className="mt-3" style={{ ...serif, fontSize: "clamp(1.9rem,4vw,3rem)", color: "rgba(255,255,255,0.93)" }}>
-              Global Market Intelligence
-            </h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">
-              A governed quarterly intelligence product line for operators planning under trade fragmentation, capital selectivity, and policy friction. The active report, preparation queue, evidence standards, and call ledger are shown together so buyers can see the discipline behind the line.
-            </p>
-
-            {/* Access posture summary */}
-            <div className="mt-5 flex flex-wrap gap-4">
-              {[
-                { label: "Current report remains active for Q2 decision use.", color: "rgba(34,197,94,0.65)" },
-                { label: "Institutional edition routes through restricted access.", color: "rgba(245,158,11,0.65)" },
-                { label: "Q2 2026 report is in preparation.", color: `${GOLD}AA` },
-              ].map(({ label, color }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.40)", textTransform: "uppercase" }}>
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </header>
-
-          {/* ── Current active report ───────────────────────────────────── */}
-          {GMI_Q1_RECORD ? (
-            <section>
-              <div className="mb-4">
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Current active report
-                </p>
-                <p className="mt-1 text-xs text-white/38">
-                  Q1 remains active for Q2 decision use until superseded by the Q2 report.
-                </p>
-              </div>
-              <MarketIntelligenceCatalogue
-                record={GMI_Q1_RECORD}
-                editions={GMI_Q1_EDITIONS}
-              />
-            </section>
-          ) : null}
-
-          {/* ── In preparation ──────────────────────────────────────────── */}
-          {GMI_Q2_RECORD ? (
-            <section
-              style={{
-                border: "1px solid rgba(255,255,255,0.09)",
-                background: "rgba(255,255,255,0.015)",
-                padding: "1.25rem",
-              }}
-            >
-              <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-start">
-                <div>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                    In preparation
-                  </p>
-                  <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.35rem,3vw,2.1rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.08 }}>
-                    Global Market Intelligence Q2 2026
-                  </h2>
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-white/52">
-                    The Q2 report is in preparation. It is not public, not purchasable, and not indexed as an active report. Release requires Q1 call review, source appendix completion, and quality-gate review.
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <Link
-                      href="#methodology"
-                      className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
-                      style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                    >
-                      View methodology →
-                    </Link>
-                    <Link
-                      href="#accountability"
-                      className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
-                      style={{ color: "rgba(255,255,255,0.46)", ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                    >
-                      Track the intelligence process →
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="grid gap-px bg-white/[0.06] sm:grid-cols-2 lg:grid-cols-1">
-                  {[
-                    { label: "Status", value: "In preparation" },
-                    { label: "Coverage", value: GMI_Q2_RECORD.coveragePeriod },
-                    { label: "Decision window", value: GMI_Q2_RECORD.decisionWindow },
-                    { label: "Purchase", value: "Not available" },
-                  ].map((item) => (
-                    <div key={item.label} style={{ backgroundColor: BASE, padding: "0.95rem" }}>
-                      <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.32)" }}>
-                        {item.label}
-                      </div>
-                      <div className="mt-2 text-sm leading-6 text-white/70">{item.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          ) : null}
-
-          {/* ── Three-column context row ──────────────────────────────────── */}
-          <div className="grid gap-5 xl:grid-cols-3">
-            <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Global Market Intelligence
-              </p>
-              <p className="mt-3 text-sm leading-7 text-white/55">
-                The flagship market intelligence line connects the quarterly public briefing, the institutional report, and the board briefing deck without collapsing them into one generic listing.
-              </p>
-              <div className="mt-4 space-y-2">
-                <Link
-                  href="/intelligence/global-market-intelligence-q1-2026"
-                  className="block text-sm transition-colors hover:text-white"
-                  style={{ color: "rgba(255,255,255,0.62)" }}
-                >
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase" }}>
-                    Open intelligence landing →
-                  </span>
-                </Link>
-                <Link
-                  href="/artifacts/global-market-outlook-q1-2026-public"
-                  className="block text-sm transition-colors hover:text-white"
-                  style={{ color: "rgba(34,197,94,0.65)" }}
-                >
-                  <span style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase" }}>
-                    Open public quarterly briefing →
-                  </span>
-                </Link>
-              </div>
-            </section>
-
-            <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Access structure
-              </p>
-              <ul className="mt-3 space-y-2.5 text-sm text-white/52">
-                {[
-                  { dot: "rgba(34,197,94,0.65)",  text: "Public briefings are freely available and clearly labelled." },
-                  { dot: "rgba(245,158,11,0.65)", text: "Restricted intelligence is tied to entitlement or governed access routes." },
-                  { dot: `${GOLD}AA`,             text: "Paid or premium reports route through artifact identity, not generic library framing." },
-                ].map(({ dot, text }) => (
-                  <li key={text} className="flex items-start gap-2.5">
-                    <div style={{ width: 4, height: 4, borderRadius: "50%", backgroundColor: dot, flexShrink: 0, marginTop: "6px" }} />
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.015)", padding: "1.25rem" }}>
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Strategic reports
-              </p>
-              <p className="mt-3 text-sm leading-7 text-white/52">
-                Quarterly intelligence artifacts remain connected to consequence framing, edition control, and governed access. They are not presented as a generic shelf of PDFs.
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="/artifacts"
-                  className="inline-flex items-center gap-1.5 text-sm transition-colors hover:opacity-80"
-                  style={{ color: "rgba(255,255,255,0.40)", ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase" }}
-                >
-                  Browse artifacts →
-                </Link>
-              </div>
-            </section>
-          </div>
-
-          {/* ── Why this report line is different ───────────────────────── */}
-          <section
-            style={{
-              border: `1px solid ${GOLD}24`,
-              background: `${GOLD}05`,
-              padding: "1.25rem",
-            }}
-          >
-            <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-              <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Why this intelligence line is different
-                </p>
-                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.2rem,2.5vw,1.8rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.1 }}>
-                  This intelligence line compounds through verification, not just publication.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-white/50" style={{ maxWidth: "52ch" }}>
-                  Global Market Intelligence is built as a report line with memory: lifecycle state, evidence posture, source discipline, call review, and deliberate separation between public and paid editions.
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  "Every report has a lifecycle state.",
-                  "Every major claim carries an evidence posture.",
-                  "Every quarter reviews material calls from the previous quarter.",
-                  "Scenario assumptions are labelled.",
-                  "Source-pending claims cannot become active-release claims.",
-                  "Public and paid editions are separated deliberately.",
-                ].map((item) => (
-                  <div key={item} style={{ borderLeft: `1px solid ${GOLD}35`, paddingLeft: "12px" }}>
-                    <p className="text-sm leading-6 text-white/58">{item}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ── Edition structure ────────────────────────────────────────── */}
-          <section
-            id="methodology"
-            style={{
-              border: "1px solid rgba(255,255,255,0.09)",
-              background: "rgba(255,255,255,0.015)",
-              padding: "1.25rem",
-            }}
-          >
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Edition structure
-                </p>
-                <p className="mt-1 text-xs text-white/35">
-                  Public Surface Edition, Institutional PDF Edition, Board Briefing Deck, and Boardroom PDF where applicable.
-                </p>
-              </div>
-              <Link
-                href="/artifacts"
-                className="shrink-0 text-sm transition-colors hover:text-white/60"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
-              >
-                All artifacts →
-              </Link>
-            </div>
-
-            {artifacts.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {artifacts.map((artifact) => (
-                  <ArtifactCard key={artifact.id} artifact={artifact} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-white/35">No quarterly intelligence artifacts are currently indexed.</p>
-            )}
-          </section>
-
-          {/* ── Report chronology ───────────────────────────────────────── */}
-          <section
-            style={{
-              border: "1px solid rgba(255,255,255,0.09)",
-              background: "rgba(255,255,255,0.015)",
-              padding: "1.25rem",
-            }}
-          >
-            <div className="mb-5">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Report chronology
-              </p>
-              <p className="mt-1 text-xs text-white/35">2026 quarterly report lifecycle.</p>
-            </div>
-            <MarketIntelligenceChronology records={MARKET_INTELLIGENCE_LIFECYCLE} />
-          </section>
-
-          {/* ── Methodology and cadence ─────────────────────────────────── */}
-          <section
-            style={{
-              border: "1px solid rgba(255,255,255,0.09)",
-              background: "rgba(255,255,255,0.015)",
-              padding: "1.25rem",
-            }}
-          >
-            <div className="mb-5">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Methodology and cadence
-              </p>
-              <p className="mt-1 text-xs text-white/35">
-                Quarter just ended supplies the evidence base. Current quarter supplies the decision window. Next quarter supplies the watchlist.
-              </p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-3">
-              {[
-                { label: "Evidence base", text: "The quarter just ended is reviewed for market structure, policy posture, capital flow, and consequence patterns." },
-                { label: "Decision window", text: "The current quarter frames live operating choices, scenario posture, and leadership timing." },
-                { label: "Watchlist", text: "The next quarter remains in preparation until the report is published and explicitly activated. The Q2 preparation process tracks tariff policy, Treasury-yield stress, institutional growth forecasts, and AI-productivity offsets as monitored inputs. These signals inform the next report only after evidence review." },
-              ].map((item) => (
-                <article key={item.label} style={{ borderLeft: `1px solid ${GOLD}33`, paddingLeft: "14px" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>{item.label}</p>
-                  <p className="mt-2 text-sm leading-7 text-white/50">{item.text}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          {/* ── Source and confidence standards ─────────────────────────── */}
-          <section
-            style={{
-              border: "1px solid rgba(255,255,255,0.09)",
-              background: "rgba(255,255,255,0.015)",
-              padding: "1.25rem",
-            }}
-          >
-            <div className="mb-5">
-              <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                Source and confidence standards
-              </p>
-              <p className="mt-1 text-xs text-white/38">
-                Evidence posture is a buyer-facing control, not a disclaimer. It shows where evidence ends and judgement begins.
-              </p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-4">
-              {EVIDENCE_POSTURES.map((item) => (
-                <article key={item.label} style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.012)", padding: "1rem" }}>
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-white/54">{item.text}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          {/* ── Buyer assurance ─────────────────────────────────────────── */}
-          <section
-            id="governance"
-            style={{
-              border: `1px solid ${GOLD}24`,
-              background: `${GOLD}04`,
-              padding: "1.25rem",
-            }}
-          >
-            <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-start">
-              <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Governance standard
-                </p>
-                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.1rem,2.2vw,1.6rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.12 }}>
-                  What governs this intelligence line
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-white/50" style={{ maxWidth: "52ch" }}>
-                  The Global Market Intelligence line is governed by a formal release standard — not a style guide. Each report must pass a quality gate before publication, satisfy a source coverage threshold, clear all release-blocking evidence rows, and review prior-quarter calls. No report is published until those conditions are met.
-                </p>
-                <div className="mt-4">
-                  <Link
-                    href="/docs/intelligence/market-intelligence-release-standard"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:opacity-80"
-                    style={{ color: `${GOLD}CC`, ...mono, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                  >
-                    View governance standard →
-                  </Link>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  {
-                    label: "Release gate",
-                    text: "Every report must pass scoreReport() returning releaseReady: true before promotion from DRAFT to ACTIVE.",
-                  },
-                  {
-                    label: "Source threshold",
-                    text: "Source coverage must reach ≥ 80% with all release-blocking rows verified. Source-pending rows are never allowed in active releases.",
-                  },
-                  {
-                    label: "Call accountability",
-                    text: "Every material call is recorded in the verification ledger. The following report reviews and scores those calls before issuing new ones.",
-                  },
-                  {
-                    label: "Evidence posture",
-                    text: "Every claim carries a posture label: Confirmed, Directional, Monitoring, or Scenario assumption. No claim implies more certainty than the evidence allows.",
-                  },
-                  {
-                    label: "Edition separation",
-                    text: "The public edition summarises. The paid institutional edition contains full regional analysis, case evidence, board actions, and source appendix.",
-                  },
-                  {
-                    label: "Compliance boundary",
-                    text: "This is decision-support intelligence. It is not investment advice, does not contain buy/sell recommendations, and does not carry price targets.",
-                  },
-                ].map((item) => (
-                  <article
-                    key={item.label}
-                    style={{
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      background: "rgba(255,255,255,0.012)",
-                      padding: "0.85rem",
-                    }}
-                  >
-                    <p style={{ ...mono, fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", color: `${GOLD}AA` }}>
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-xs leading-5 text-white/50">{item.text}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ── Intelligence Accountability ─────────────────────────────── */}
-          <section
-            id="accountability"
-            style={{
-              border: `1px solid ${GOLD}20`,
-              background: `${GOLD}04`,
-              padding: "1.25rem",
-            }}
-          >
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
-              <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Intelligence accountability
-                </p>
-                <h2 className="mt-3" style={{ ...serif, fontSize: "clamp(1.2rem,2.5vw,1.75rem)", color: "rgba(255,255,255,0.88)", lineHeight: 1.1 }}>
-                  Every report is accountable to the next one.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-white/52" style={{ maxWidth: "52ch" }}>
-                  Each quarterly report records its material calls, board instructions, scenario assumptions, and risk warnings in a governed ledger. The following report reviews those calls before issuing new ones — scoring what held, what failed, and what the model now weights differently.
-                </p>
-                <p className="mt-3 text-sm leading-7 text-white/52" style={{ maxWidth: "52ch" }}>
-                  Future quarterly reports are not released until material calls from the previous report have been reviewed, scored, or explicitly carried forward as too early to assess.
-                </p>
-                <p className="mt-3 text-sm leading-7 text-white/40" style={{ maxWidth: "52ch" }}>
-                  This is not automated market learning. It is governed institutional memory — the same discipline applied to decision records inside high-functioning boards.
-                </p>
-                <div className="mt-5">
-                  <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                    Call Verification Ledger
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-white/48" style={{ maxWidth: "56ch" }}>
-                    Each quarter, material calls are recorded and reviewed before the next report is released. Q1 2026 currently has 8 material calls recorded, with 7 scheduled for Q2 review and 1 carried toward Q3 review.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-px bg-white/[0.05]">
-                {[
-                  { label: "Q1 2026 material calls",        value: "8 calls recorded" },
-                  { label: "Reviewed",                      value: "0" },
-                  { label: "Pending review",                value: "7" },
-                  { label: "Carried forward",               value: "1" },
-                ].map((item) => (
-                  <div key={item.label} style={{ backgroundColor: "rgb(3,3,5)", padding: "0.90rem" }}>
-                    <div style={{ ...mono, fontSize: "7px", letterSpacing: "0.20em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)" }}>
-                      {item.label}
-                    </div>
-                    <div className="mt-1.5 text-sm leading-6" style={{ color: `${GOLD}CC` }}>{item.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ── Prior-call verification record (public) ─────────────────── */}
-          <GmiPriorCallScorecard
-            data={GMI_SCORECARD_DATA}
-            mode="public"
-          />
-
-          {/* ── Source evidence posture (buyer-preview) ──────────────────── */}
-          <GmiEvidenceRoom
-            reportId="GMI-Q2-2026"
-            coverage={GMI_Q2_COVERAGE}
-            mode="buyer-preview"
-          />
-
-          {/* ── Related public briefs ─────────────────────────────────────── */}
-          <section
-            style={{
-              border: "1px solid rgba(255,255,255,0.09)",
-              background: "rgba(255,255,255,0.015)",
-              padding: "1.25rem",
-            }}
-          >
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <p style={{ ...mono, fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: `${GOLD}BB` }}>
-                  Related intelligence notes
-                </p>
-                <p className="mt-1 text-xs text-white/35">
-                  Public briefs link directly to their route. Restricted briefs are noted as metadata only.
-                </p>
-              </div>
-              <Link
-                href="/library"
-                className="shrink-0 text-sm transition-colors hover:text-white/60"
-                style={{ ...mono, fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.30)" }}
-              >
-                Structured archive →
-              </Link>
-            </div>
-
-            {briefs.length > 0 ? (
-              <div className="grid gap-5 md:grid-cols-2">
-                {briefs.map((brief, i) => (
-                  <BriefCard key={`${brief.href}-${i}`} brief={brief} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-white/35">No briefs are currently indexed here.</p>
-            )}
-          </section>
-
-        </div>
+      <Head><meta name="robots" content="index,follow" /></Head>
+      <main className="min-h-screen" style={{ backgroundColor: ink, color: 'rgba(255,255,255,0.92)' }}>
+        <GatewayCover current={props.current} upcoming={props.upcoming} reference={props.reference} />
+        {props.current ? <CurrentEdition edition={props.current} /> : null}
+        <PublicationLine current={props.current} reference={props.reference} upcoming={props.upcoming} />
+        <CompoundingPrinciples />
+        <AccountabilityEvidence {...props} />
+        <MethodologyTrust />
+        <Record current={props.current} reference={props.reference} upcoming={props.upcoming} />
       </main>
     </Layout>
   );
