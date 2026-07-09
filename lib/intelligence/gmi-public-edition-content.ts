@@ -60,6 +60,7 @@ const q2RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "DEVELOPING",
     direction: null,
     confidence: null,
+    evidencePosture: null,
     publicSummary: "Africa-specific intelligence is under active development for this edition. Demographic tailwinds, resource-driven capital flows and intra-African trade corridor development are structurally significant but require dedicated evidence collection beyond the current release-lock scope. The GMI methodology will incorporate African central bank, supranational and corridor-specific sources from Q3 2026.",
     operatingImplication: null,
     triggerToMonitor: null,
@@ -72,6 +73,7 @@ const q2RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "DEVELOPING",
     direction: null,
     confidence: null,
+    evidencePosture: null,
     publicSummary: "Latin American coverage is under development. Regional differentiation between resource-driven economies (Brazil, Chile, Peru) and policy-constrained markets (Argentina) is observable but not yet at the evidence threshold required for GMI publication. Source coverage and corridor analysis will expand from Q3 2026.",
     operatingImplication: null,
     triggerToMonitor: null,
@@ -84,6 +86,7 @@ const q2RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "DEVELOPING",
     direction: null,
     confidence: null,
+    evidencePosture: null,
     publicSummary: "Middle East coverage is under development. Gulf sovereign wealth fund deployment, non-oil economic diversification and regional corridor dynamics are structurally relevant but not yet at the evidence threshold for GMI publication. Source coverage will expand from Q3 2026.",
     operatingImplication: null,
     triggerToMonitor: null,
@@ -99,6 +102,7 @@ const q1RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "DEVELOPING",
     direction: null,
     confidence: null,
+    evidencePosture: null,
     publicSummary: "Q1 registered an Africa strategic-infrastructure thesis, but the evidence base was insufficient for a publication-grade regional assessment. The call was carried forward for further evidence collection and successor review.",
     operatingImplication: null,
     triggerToMonitor: null,
@@ -111,6 +115,7 @@ const q1RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "UNAVAILABLE",
     direction: null,
     confidence: null,
+    evidencePosture: null,
     publicSummary: "No separate publication-grade regional assessment was issued in Q1. The research programme begins in the Q2–Q3 cycle.",
     operatingImplication: null,
     triggerToMonitor: null,
@@ -123,6 +128,7 @@ const q1RegionalLayers: GmiRegionalLayer[] = [
     evidenceState: "UNAVAILABLE",
     direction: null,
     confidence: null,
+    evidencePosture: null,
     publicSummary: "No separate publication-grade regional assessment was issued in Q1. The research programme begins in the Q2–Q3 cycle.",
     operatingImplication: null,
     triggerToMonitor: null,
@@ -138,9 +144,9 @@ const q2Briefs: GmiBriefCitation[] = [
 ];
 
 const q2Matrix: GmiConsequenceMatrixRow[] = [
-  { decisionDomain: "CAPITAL ALLOCATION", publicDiagnostic: "Capital conditions are becoming more selective across markets.", publicImplication: "Headline flow direction is less useful than dispersion and persistence.", operatorImplication: "Re-rank allocations by resilience exposure and policy-friction tolerance.", actionVector: "Move fragmentation from sensitivity case into the board base-case review.", timeHorizon: "3-12 months", monitoringSignal: "Forecast dispersion and capital-flow persistence", trigger: "Sustained convergence in forecasts plus tariff rollback", riskOfInaction: "Capital is committed against a regime assumption that has not been evidenced.", confidence: "HIGH", reviewHorizon: "Q3 2026", evidenceRefs: ["GMI-Q2-SRC-FORECAST", "GMI-Q2-SRC-CAPITAL"], briefRefs: ["BRIEF-GMI-057", "BRIEF-GMI-063"], accessLevel: "LICENSED" },
-  { decisionDomain: "SUPPLY CHAIN", publicDiagnostic: "Trade friction remains structural enough to affect operating design.", publicImplication: "Optionality has moved from resilience rhetoric to planning input.", operatorImplication: "Prioritise dual-node exposure where China dependency is material.", actionVector: "Set a board threshold for redundancy cost versus tariff and policy exposure.", timeHorizon: "By 30 September 2026", monitoringSignal: "Effective tariff rollback and trade-flow re-synchronisation", trigger: "Sustained rollback below structural thresholds", riskOfInaction: "Cost bases are optimised for a frictionless world that no longer has authority.", confidence: "HIGH", reviewHorizon: "Q3 2026", evidenceRefs: ["GMI-Q2-SRC-TARIFF"], briefRefs: ["BRIEF-GMI-042"], accessLevel: "LICENSED" },
-  { decisionDomain: "TREASURY AND RISK", publicDiagnostic: "USD stress is a monitored watch signal, not a concluded break.", publicImplication: "Treasury policy should avoid forcing a single-direction currency story.", operatorImplication: "Use composite stress triggers rather than narrative-led hedging.", actionVector: "Define trigger thresholds across DXY, treasury volatility and reserve commentary.", timeHorizon: "Ongoing", monitoringSignal: "DXY recovery, treasury volatility, reserve-diversification commentary", trigger: "Sustained safe-haven recovery or confirmed reserve credibility deterioration", riskOfInaction: "Hedges respond to commentary rather than governed evidence.", confidence: "MEDIUM", reviewHorizon: "Q3 2026", evidenceRefs: ["GMI-Q2-SRC-USD"], briefRefs: [], accessLevel: "LICENSED" },
+  { decisionDomain: "CAPITAL ALLOCATION", publicDiagnostic: "Capital conditions are becoming more selective across markets.", publicImplication: "Headline flow direction is less useful than dispersion and persistence.", operatorImplication: "Re-rank allocations by resilience exposure and policy-friction tolerance.", actionVector: "Move fragmentation from sensitivity case into the board base-case review.", timeHorizon: "3-12 months", monitoringSignal: "Forecast dispersion and capital-flow persistence", trigger: "Sustained convergence in forecasts plus tariff rollback", riskOfInaction: "Capital is committed against a regime assumption that has not been evidenced.", confidence: "HIGH", reviewHorizon: "Q3 2026", evidenceRefs: ["GMI-Q2-SRC-FORECAST", "GMI-Q2-SRC-CAPITAL"], briefRefs: ["BRIEF-GMI-057", "BRIEF-GMI-063"], accessLevel: "LICENSED", publicDecisionToReconsider: "Whether current capital allocation adequately prices fragmentation as a structural regime." },
+  { decisionDomain: "SUPPLY CHAIN", publicDiagnostic: "Trade friction remains structural enough to affect operating design.", publicImplication: "Optionality has moved from resilience rhetoric to planning input.", operatorImplication: "Prioritise dual-node exposure where China dependency is material.", actionVector: "Set a board threshold for redundancy cost versus tariff and policy exposure.", timeHorizon: "By 30 September 2026", monitoringSignal: "Effective tariff rollback and trade-flow re-synchronisation", trigger: "Sustained rollback below structural thresholds", riskOfInaction: "Cost bases are optimised for a frictionless world that no longer has authority.", confidence: "HIGH", reviewHorizon: "Q3 2026", evidenceRefs: ["GMI-Q2-SRC-TARIFF"], briefRefs: ["BRIEF-GMI-042"], accessLevel: "LICENSED", publicDecisionToReconsider: "Whether supply-chain strategy is still optimised for efficiency rather than optionality." },
+  { decisionDomain: "TREASURY AND RISK", publicDiagnostic: "USD stress is a monitored watch signal, not a concluded break.", publicImplication: "Treasury policy should avoid forcing a single-direction currency story.", operatorImplication: "Use composite stress triggers rather than narrative-led hedging.", actionVector: "Define trigger thresholds across DXY, treasury volatility and reserve commentary.", timeHorizon: "Ongoing", monitoringSignal: "DXY recovery, treasury volatility, reserve-diversification commentary", trigger: "Sustained safe-haven recovery or confirmed reserve credibility deterioration", riskOfInaction: "Hedges respond to commentary rather than governed evidence.", confidence: "MEDIUM", reviewHorizon: "Q3 2026", evidenceRefs: ["GMI-Q2-SRC-USD"], briefRefs: [], accessLevel: "LICENSED", publicDecisionToReconsider: "Whether treasury hedging strategy is evidence-governed or narrative-driven." },
 ];
 
 export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[] = [
@@ -167,17 +173,17 @@ export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[
     regionalLayers: q1RegionalLayers,
     marketRegime: { label: "Transition into structural pressure", summary: "Capital selectivity, policy credibility and resilience moved toward the centre of market judgement." },
     headlineSignals: [
-      { signal: "Resilience premium emerging", observedEvidence: "Q1 public brief identified repricing around resilience and policy credibility.", interpretation: "Markets were beginning to discriminate between durable positioning and narrative dependence.", businessConsequence: "Boards needed to test whether growth assumptions depended on a benign policy environment.", confidence: "MEDIUM", falsificationTrigger: "Broad re-synchronisation of policy, trade and capital flows without resilience premium." },
+      { signal: "Resilience premium emerging", observedEvidence: "Q1 public brief identified repricing around resilience and policy credibility.", interpretation: "Markets were beginning to discriminate between durable positioning and narrative dependence.", businessConsequence: "Boards needed to test whether growth assumptions depended on a benign policy environment.", confidence: "MEDIUM", evidencePosture: "DIRECTIONAL", reviewHorizon: "Q2 2026", falsificationTrigger: "Broad re-synchronisation of policy, trade and capital flows without resilience premium." },
     ],
     boardConsequences: [
       { area: "Capital allocation", consequence: "Review exposures dependent on cheap capital and policy continuity.", timing: "Q2 review window" },
       { area: "Risk governance", consequence: "Make resilience assumptions explicit in board papers.", timing: "Immediate" },
     ],
     consequenceMatrix: [
-      { decisionDomain: "CAPITAL ALLOCATION", publicDiagnostic: "Resilience became a board-level allocation criterion.", publicImplication: "Capital assumptions should be tested against policy and liquidity stress.", operatorImplication: "Reviewed in Q2 successor edition.", actionVector: "Refer to Q2 current edition for current action vector.", timeHorizon: "Historical", monitoringSignal: "Successor edition review", trigger: "Q2 supersession", riskOfInaction: "Historical reference used as current guidance.", confidence: "MEDIUM", reviewHorizon: "Q2 2026", evidenceRefs: ["GMI-Q1-PUBLIC"], briefRefs: [], accessLevel: "PUBLIC" },
+      { decisionDomain: "CAPITAL ALLOCATION", publicDiagnostic: "Resilience became a board-level allocation criterion.", publicImplication: "Capital assumptions should be tested against policy and liquidity stress.", operatorImplication: "Reviewed in Q2 successor edition.", actionVector: "Refer to Q2 current edition for current action vector.", timeHorizon: "Historical", monitoringSignal: "Successor edition review", trigger: "Q2 supersession", riskOfInaction: "Historical reference used as current guidance.", confidence: "MEDIUM", reviewHorizon: "Q2 2026", evidenceRefs: ["GMI-Q1-PUBLIC"], briefRefs: [], accessLevel: "PUBLIC", publicDecisionToReconsider: "Whether capital allocation assumptions have been updated to reflect the successor edition's findings." },
     ],
     crossEditionDeltas: [
-      { priorPosition: "Structural pressure is replacing cyclical volatility.", priorConfidence: "MEDIUM", priorTrigger: "Policy/trade re-synchronisation would weaken the thesis.", whatHappened: "Q2 strengthened the fragmentation interpretation rather than invalidating it.", currentPosition: "Managed fragmentation is now the current base case.", currentConfidence: "MEDIUM", movement: "STRENGTHENED", reason: "Q2 evidence showed persistence in forecast dispersion, tariff friction and capital selectivity." },
+      { priorPosition: "Structural pressure is replacing cyclical volatility.", priorConfidence: "MEDIUM", priorTrigger: "Policy/trade re-synchronisation would weaken the thesis.", whatHappened: "Q2 strengthened the fragmentation interpretation rather than invalidating it.", currentPosition: "Managed fragmentation is now the current base case.", currentConfidence: "MEDIUM", movement: "STRENGTHENED", reason: "Q2 evidence showed persistence in forecast dispersion, tariff friction and capital selectivity.", decisionImplication: "The Q1 structural-pressure thesis was a precursor to the managed-fragmentation base case." },
     ],
     supportingBriefs: [],
     thesisCards: [{ thesis: "Structural pressure is replacing cyclical volatility.", evidence: "Q1 public record and subsequent Q2 call review.", implication: "The archive remains part of the trust architecture, not a retired sales page.", reviewTrigger: "Q2 call review and successor edition supersession." }],
@@ -205,9 +211,9 @@ export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[
     regionalLayers: q2RegionalLayers,
     marketRegime: { label: "Managed fragmentation under cyclical shock", summary: "A durable structural regime is running alongside a cyclical inflation/growth shock. The edition separates where to position from how defensively to operate." },
     headlineSignals: [
-      { signal: "Forecast dispersion is the signal", observedEvidence: "World Bank 2.5%, OECD 2.8%, Goldman Sachs 2.8%, IMF July 3.0% at lock.", interpretation: "The outlook is sensitive to regime assumptions rather than converging around a single recovery path.", businessConsequence: "Board cases should test fragmentation persistence instead of assuming temporary disruption.", confidence: "MEDIUM", falsificationTrigger: "Durable convergence in institutional forecasts under tariff rollback and normalised capital flows." },
-      { signal: "Tariff persistence remains structural", observedEvidence: "No durable rollback below structural thresholds at the Q2 lock.", interpretation: "Supply-chain optionality remains a strategic requirement, not a temporary hedge.", businessConsequence: "COO and CFO decisions should price redundancy and bloc exposure explicitly.", confidence: "HIGH", falsificationTrigger: "Sustained bilateral effective-rate rollback below 50% with trade-flow re-synchronisation." },
-      { signal: "USD stress is monitored, not overcalled", observedEvidence: "Episodic weakness in risk-off windows, partial safe-haven recovery and June DXY recovery.", interpretation: "The reserve-credibility thesis remains a watch signal, not a concluded regime break.", businessConsequence: "Treasury policy should monitor composite stress rather than force a directional currency call.", confidence: "MEDIUM", falsificationTrigger: "Sustained safe-haven recovery across DXY, treasury volatility and reserve-diversification commentary." },
+      { signal: "Forecast dispersion is the signal", observedEvidence: "World Bank 2.5%, OECD 2.8%, Goldman Sachs 2.8%, IMF July 3.0% at lock.", interpretation: "The outlook is sensitive to regime assumptions rather than converging around a single recovery path.", businessConsequence: "Board cases should test fragmentation persistence instead of assuming temporary disruption.", confidence: "MEDIUM", evidencePosture: "DIRECTIONAL", reviewHorizon: "Q3 2026", falsificationTrigger: "Durable convergence in institutional forecasts under tariff rollback and normalised capital flows." },
+      { signal: "Tariff persistence remains structural", observedEvidence: "No durable rollback below structural thresholds at the Q2 lock.", interpretation: "Supply-chain optionality remains a strategic requirement, not a temporary hedge.", businessConsequence: "COO and CFO decisions should price redundancy and bloc exposure explicitly.", confidence: "HIGH", evidencePosture: "CONFIRMED", reviewHorizon: "Q3 2026", falsificationTrigger: "Sustained bilateral effective-rate rollback below 50% with trade-flow re-synchronisation." },
+      { signal: "USD stress is monitored, not overcalled", observedEvidence: "Episodic weakness in risk-off windows, partial safe-haven recovery and June DXY recovery.", interpretation: "The reserve-credibility thesis remains a watch signal, not a concluded regime break.", businessConsequence: "Treasury policy should monitor composite stress rather than force a directional currency call.", confidence: "MEDIUM", evidencePosture: "MONITORING", reviewHorizon: "Q3 2026", falsificationTrigger: "Sustained safe-haven recovery across DXY, treasury volatility and reserve-diversification commentary." },
     ],
     boardConsequences: [
       { area: "Capital allocation", consequence: "Move from scenario decoration to board-approved fragmentation base case.", timing: "31 July 2026" },
@@ -219,8 +225,8 @@ export const GMI_PUBLIC_EDITION_CONTENT: readonly GmiPublicEditionContentRecord[
     ],
     consequenceMatrix: q2Matrix,
     crossEditionDeltas: [
-      { priorPosition: "Structural pressure is replacing cyclical volatility.", priorConfidence: "MEDIUM", priorTrigger: "Policy/trade re-synchronisation would weaken the thesis.", whatHappened: "Forecast dispersion and tariff persistence strengthened rather than invalidated the line.", currentPosition: "Managed fragmentation is the current base case.", currentConfidence: "MEDIUM", movement: "STRENGTHENED", reason: "The Q2 evidence package increased confidence in fragmentation while keeping USD stress qualified." },
-      { priorPosition: "Resilience premium emerging.", priorConfidence: "MEDIUM", priorTrigger: "Broad capital re-synchronisation would weaken the call.", whatHappened: "Capital remained selective and liquidity defensiveness persisted.", currentPosition: "Capital selectivity is now an operational planning input.", currentConfidence: "HIGH", movement: "STRENGTHENED", reason: "The Q2 lock supported persistence, not reversion." },
+      { priorPosition: "Structural pressure is replacing cyclical volatility.", priorConfidence: "MEDIUM", priorTrigger: "Policy/trade re-synchronisation would weaken the thesis.", whatHappened: "Forecast dispersion and tariff persistence strengthened rather than invalidated the line.", currentPosition: "Managed fragmentation is the current base case.", currentConfidence: "MEDIUM", movement: "STRENGTHENED", reason: "The Q2 evidence package increased confidence in fragmentation while keeping USD stress qualified.", decisionImplication: "Boards should treat fragmentation as the base planning assumption, not a tail risk." },
+      { priorPosition: "Resilience premium emerging.", priorConfidence: "MEDIUM", priorTrigger: "Broad capital re-synchronisation would weaken the call.", whatHappened: "Capital remained selective and liquidity defensiveness persisted.", currentPosition: "Capital selectivity is now an operational planning input.", currentConfidence: "HIGH", movement: "STRENGTHENED", reason: "The Q2 lock supported persistence, not reversion.", decisionImplication: "Capital allocation assumptions should price selectivity as structural, not cyclical." },
     ],
     supportingBriefs: q2Briefs,
     thesisCards: [

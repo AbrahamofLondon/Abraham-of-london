@@ -1,5 +1,8 @@
 import type { MarketIntelligenceLifecycleState } from "@/lib/intelligence/market-intelligence-lifecycle";
 
+
+export type GmiEvidencePosture = "OBSERVED" | "DIRECTIONAL" | "CONFIRMED" | "MONITORING" | "SCENARIO_ASSUMPTION";
+
 export type GmiReaderAccessState = "PUBLIC_SUMMARY" | "ACQUISITION_VISITOR" | "ENTITLED_READER" | "INTERNAL_REVIEWER";
 
 export type GmiRegimeFingerprintAxis = {
@@ -41,6 +44,7 @@ export type GmiConsequenceMatrixRow = {
   evidenceRefs: string[];
   briefRefs: string[];
   accessLevel: "PUBLIC" | "LICENSED";
+  publicDecisionToReconsider: string | null;
 };
 
 export type GmiCrossEditionDelta = {
@@ -52,6 +56,7 @@ export type GmiCrossEditionDelta = {
   currentConfidence: "LOW" | "MEDIUM" | "HIGH";
   movement: "HELD" | "STRENGTHENED" | "WEAKENED" | "REVISED" | "CONTRADICTED" | "UNRESOLVED";
   reason: string;
+  decisionImplication: string | null;
 };
 export type GmiHeadlineSignal = {
   signal: string;
@@ -59,6 +64,8 @@ export type GmiHeadlineSignal = {
   interpretation: string;
   businessConsequence: string;
   confidence: "LOW" | "MEDIUM" | "HIGH";
+  evidencePosture: GmiEvidencePosture;
+  reviewHorizon: string | null;
   falsificationTrigger: string;
 };
 
@@ -113,6 +120,8 @@ export type GmiRegionalLayer = {
   direction: "RISING" | "FALLING" | "STABLE" | null;
   /** Confidence where evidence supports it */
   confidence: "LOW" | "MEDIUM" | "HIGH" | null;
+  /** Evidence posture for the regional assessment */
+  evidencePosture: GmiEvidencePosture | null;
   /** Public-facing summary of the regional assessment */
   publicSummary: string;
   /** Operating implication for boards and operators, where evidence supports it */
