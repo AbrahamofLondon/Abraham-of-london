@@ -1177,19 +1177,6 @@ export default function DecisionCentrePage() {
               </div>
             </div>
 
-            {/* Product Authority Status Overview */}
-            <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-              <span style={{ ...mono, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: `${GOLD}60`, display: "block", marginBottom: "12px" }}>
-                Authority Status of Core Products
-              </span>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
-                {productContracts.map(({ productCode, contract }) => (
-                  <div key={productCode}><div style={{ marginTop: "12px" }}></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Progression ladder — compact inline */}
             <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", flexWrap: "wrap", gap: "0" }}>
               {[

@@ -37,9 +37,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Resolve authority for personal_decision_audit
-  const configs = getDefaultProductConfigurations();
-  const auditConfig = configs.find(c => c.productCode === "personal_decision_audit");async function handlePurchase() {
+  async function handlePurchase() {
     setLoading(true);
     setError(null);
 
@@ -189,11 +187,6 @@ export default function PersonalDecisionAuditCheckoutPage() {
                 }}>
                   One-time purchase · Lifetime access · Full dossier
                 </p>
-
-                {contract && (
-                  <div style={{ marginTop: "20px", marginBottom: "20px" }}><div style={{ marginTop: "12px" }}></div>
-                  </div>
-                )}
 
                 <button
                   type="button"

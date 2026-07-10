@@ -15,7 +15,6 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, Zap, SlidersHorizontal, ScanSearch, Building2, Route } from "lucide-react";
 import Layout from "@/components/Layout";
-import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
 const GOLD = "#C9A96E";
 
 const mono: React.CSSProperties = {
@@ -207,17 +206,8 @@ export default function TestYourDecisionPage() {
                         <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" style={{ color: `${GOLD}AA` }} />
                       </div>
                     </Link>
-
-                    {/* Authority state for this route */}
-                    {contract && (
-                      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: `1px solid ${GOLD}22` }}><div style={{ marginTop: "0.75rem" }}>
-                          <ProductEvidenceStatus contract={contract} />
-                        </div>
-                      </div>
-                    )}
                   </div>
-                );
-              })}
+              ))}
             </div>
           </div>
         </section>

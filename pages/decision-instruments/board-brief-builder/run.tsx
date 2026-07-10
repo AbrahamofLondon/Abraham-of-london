@@ -5,7 +5,7 @@ import BoardBriefBuilderRunner from "@/components/instruments/BoardBriefBuilderR
 import { track } from "@/lib/analytics/track";
 import type { BoardBriefResult } from "@/lib/instruments/board-brief-template/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
-import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
+
 const BoardBriefRun: NextPage = () => {
   const [result, setResult] = React.useState<BoardBriefResult | null>(null);const [resultKey, setResultKey] = React.useState<string | null>(null);
 
@@ -42,13 +42,6 @@ const BoardBriefRun: NextPage = () => {
         { label: "Dossier", value: resultKey ? "PDF dossier available" : "Complete to unlock dossier" },
       ] : undefined}
     >
-      {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '0.75rem' }}></div>
-          <div style={{ marginTop: '0.75rem' }}>
-            <ProductEvidenceStatus contract={contract} />
-          </div>
-        </div>
-      )}
       {!result ? (
         <BoardBriefBuilderRunner onComplete={handleComplete} />
       ) : (

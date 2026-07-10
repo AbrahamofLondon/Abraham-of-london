@@ -28,10 +28,6 @@ import {
 
 import Layout from "@/components/Layout";
 import type { LiveReportApiResponse, LiveReportResult } from "@/pages/api/report/[reportId]";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
 
 const GOLD = "#C9A96E";
 const mono: React.CSSProperties = {
@@ -138,14 +134,11 @@ function ConfidenceBar({ confidence }: { confidence: number }) {
 
 const LiveReportPage: NextPage = () => {
   const router = useRouter();
-  const { reportId, product } = router.query;
+  const { reportId } = router.query;
 
   const [report, setReport] = React.useState<LiveReportResult | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-
-  // Determine productCode from query param or context
-  const productCode = typeof product === "string" ? product : null;
 
   React.useEffect(() => {
     if (!reportId || typeof reportId !== "string") return;
@@ -225,23 +218,6 @@ const LiveReportPage: NextPage = () => {
         style={{ backgroundColor: "rgb(3,3,5)", color: "white" }}
       >
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
-
-          {/* ── Product Authority ──────────────────────────────── */}
-          {productCode && (() => {
-            const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === productCode);
-            const contract = config ? resolveProductAuthority(config) : null;
-            return contract ? (
-              <div style={{ marginBottom: "2rem", backgroundColor: "rgba(255,255,255,0.04)", padding: "1.5rem", borderRadius: "0.5rem" }}>
-                <ProductAuthorityPanel contract={contract} expanded={true} />
-                <div style={{ marginTop: "1rem" }}>
-                  <ProductAuthorityNotice contract={contract} />
-                </div>
-                <div style={{ marginTop: "1rem" }}>
-                  <ProductEvidenceStatus contract={contract} />
-                </div>
-              </div>
-            ) : null;
-          })()}
 
           {/* ── Back ─────────────────────────────────────────────── */}
           <Link

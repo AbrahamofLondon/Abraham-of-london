@@ -5,7 +5,6 @@ import type { GetServerSideProps } from "next";
 import * as React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
 import BenchmarkNarrativeBlock from "@/components/product/BenchmarkNarrativeBlock";
 import { buildUnavailableBenchmarkNarrative } from "@/lib/benchmarks/benchmark-narrative";
 import CostOfDelaySection from "@/components/diagnostics/CostOfDelaySection";
@@ -1164,16 +1163,6 @@ function ResultSurface({
   return (
     <div style={{ backgroundColor: BASE, minHeight: "100vh", color: "white" }}>
       <div className="mx-auto max-w-6xl px-6 py-14 lg:px-12">
-
-        {/* ── Product Authority ──────────────────────────────── */}
-        {(() => {return contract ? (
-            <div style={{ marginBottom: "2rem", backgroundColor: "rgba(255,255,255,0.04)", padding: "1.5rem", borderRadius: "0.5rem" }}><div style={{ marginTop: "1rem" }}></div>
-              <div style={{ marginTop: "1rem" }}>
-                <ProductEvidenceStatus contract={contract} />
-              </div>
-            </div>
-          ) : null;
-        })()}
 
         <div style={{ border: `1px solid ${GOLD}20`, backgroundColor: `${GOLD}04`, padding: "20px 24px", marginBottom: "18px" }}>
           {/* ── Governed case linkage ── */}

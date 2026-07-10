@@ -127,6 +127,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
+  // ── Acquisition-mode guard ──
+  // Self-serve checkout is only valid for FREE / SELF_SERVE / EVIDENCE_GATED /
+  // ADMISSION_GATED products. CONTRACT and MANUAL_BILLING require enquiry; the
+  // whole GMI archive and any inactive/retired product is not purchasable here.
+  // (The commercial-governance gate below is the second, independent authority.)
+  const SELF_SERVE_MODES = new Set([
+    "FREE",
+    "SELF_SERVE_CHECKOUT",
+    "EVIDENCE_GATED_CHECKOUT",
+    "ADMISSION_GATED_CHECKOUT",
+  ]);
+  if (!SELF_SERVE_MODES.has(commercialPolicy.acquisitionMode)) {
+    const notSelfServeCode =
+      commercialPolicy.acquisitionMode === "ARCHIVE_ONLY"
+        ? "CHECKOUT_BLOCKED_BY_GOVERNANCE"
+        : "CHECKOUT_INELIGIBLE";
+    const failure = buildCheckoutFailureResponse(notSelfServeCode, code);
+    return res.status(409).json({
+      ok: false,
+      code: failure.code,
+      message: failure.publicMessage,
+      recoveryPath: failure.recoveryPath,
+      supportEmail: failure.helpEmail,
+      acquisitionMode: commercialPolicy.acquisitionMode,
+    });
+  }
+
   const prerequisiteResult = await evaluateCommercialPrerequisite(
     commercialPolicy.prerequisitePolicy,
     {

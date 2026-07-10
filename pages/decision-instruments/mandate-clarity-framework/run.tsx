@@ -31,10 +31,6 @@ const MandateClarityRun: NextPage = () => {
         { label: "Dossier", value: "PDF dossier available" },
       ] : undefined}
     >
-      {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '0.75rem' }}></div>
-        </div>
-      )}
       {!result ? <MandateClarityRunner onComplete={handleComplete} /> : (
         <div className="space-y-4">
           <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: result.authorityType === "DIRECT" ? "rgba(110,231,183,0.70)" : "#C9A96ECC" }}>

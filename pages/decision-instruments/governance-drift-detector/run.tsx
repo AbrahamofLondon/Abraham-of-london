@@ -40,10 +40,6 @@ const GovernanceDriftRun: NextPage = () => {
         { label: "Dossier", value: "PDF dossier available" },
       ] : undefined}
     >
-      {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '0.75rem' }}></div>
-        </div>
-      )}
       {!result ? (
         <GovernanceDriftDetectorRunner onComplete={handleComplete} />
       ) : (

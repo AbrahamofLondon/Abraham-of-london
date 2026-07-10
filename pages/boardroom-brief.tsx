@@ -34,7 +34,6 @@ import { trackLaunch } from '@/lib/analytics/client-launch-events'
 import { buildBoardroomIntelligenceSpine } from '@/lib/constitution/boardroom-spine-builder'
 import { generateBoardroomDossier } from '@/lib/constitution/boardroom-mode'
 import type { BoardroomDossier } from '@/lib/constitution/boardroom-mode'
-import { ProductEvidenceStatus } from '@/components/product/ProductEvidenceStatus'
 
 const GOLD = '#C9A96E'
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" }
@@ -518,14 +517,6 @@ export default function BoardroomBriefPage() {
                   style={{ ...mono, fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: `${GOLD}BB`, textDecoration: 'none', border: `1px solid ${GOLD}35`, padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                   Generate your own brief <ArrowRight style={{ width: '10px', height: '10px' }} />
                 </Link>
-              </div>
-            </div>
-          )}
-
-          {!isSampleResult && contract && (
-            <div className="mt-6" style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1.25rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '1rem' }}></div>
-              <div style={{ marginTop: '1rem' }}>
-                <ProductEvidenceStatus contract={contract} />
               </div>
             </div>
           )}
