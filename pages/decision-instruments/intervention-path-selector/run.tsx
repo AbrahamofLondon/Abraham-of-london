@@ -5,18 +5,9 @@ import InterventionPathRunner from "@/components/instruments/InterventionPathRun
 import { track } from "@/lib/analytics/track";
 import type { InterventionResult } from "@/lib/instruments/intervention-path/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
-
 const InterventionPathRun: NextPage = () => {
   const [result, setResult] = React.useState<InterventionResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);
-
-  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'intervention_path_selector');
-  const contract = config ? resolveProductAuthority(config) : null;
-
-  React.useEffect(() => { track("instrument_started", { instrumentSlug: "intervention-path-selector" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "intervention-path-selector" }); }, []);
 
   async function handleComplete(r: InterventionResult) {
     setResult(r);
@@ -42,11 +33,7 @@ const InterventionPathRun: NextPage = () => {
       ] : undefined}
     >
       {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
-          <ProductAuthorityPanel contract={contract} />
-          <div style={{ marginTop: '0.75rem' }}>
-            <ProductAuthorityNotice contract={contract} />
-          </div>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '0.75rem' }}></div>
         </div>
       )}
       {!result ? <InterventionPathRunner onComplete={handleComplete} /> : (

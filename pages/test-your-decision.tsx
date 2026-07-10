@@ -15,11 +15,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, Zap, SlidersHorizontal, ScanSearch, Building2, Route } from "lucide-react";
 import Layout from "@/components/Layout";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
 import { ProductEvidenceStatus } from "@/components/product/ProductEvidenceStatus";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
-
 const GOLD = "#C9A96E";
 
 const mono: React.CSSProperties = {
@@ -147,13 +143,7 @@ export default function TestYourDecisionPage() {
         <section className="border-t px-6 py-12" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
           <div className="mx-auto max-w-[900px]">
             <div className="grid gap-4 md:grid-cols-2">
-              {ROUTE_CARDS.map((card) => {
-                const config = card.productCode
-                  ? PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === card.productCode)
-                  : null;
-                const contract = config ? resolveProductAuthority(config) : null;
-
-                return (
+              {ROUTE_CARDS.map((card) => (
                   <div key={card.href} className="flex flex-col">
                     <Link
                       href={card.href}
@@ -220,9 +210,7 @@ export default function TestYourDecisionPage() {
 
                     {/* Authority state for this route */}
                     {contract && (
-                      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: `1px solid ${GOLD}22` }}>
-                        <ProductAuthorityNotice contract={contract} />
-                        <div style={{ marginTop: "0.75rem" }}>
+                      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: `1px solid ${GOLD}22` }}><div style={{ marginTop: "0.75rem" }}>
                           <ProductEvidenceStatus contract={contract} />
                         </div>
                       </div>

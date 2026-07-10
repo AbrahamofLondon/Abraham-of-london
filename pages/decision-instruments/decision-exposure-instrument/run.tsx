@@ -5,19 +5,11 @@ import DecisionExposureRunner from "@/components/instruments/DecisionExposureRun
 import { track } from "@/lib/analytics/track";
 import type { ExposureResult } from "@/lib/instruments/decision-exposure/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
-
 const DecisionExposureRun: NextPage = () => {
   const [result, setResult] = React.useState<ExposureResult | null>(null);
   const [resultKey, setResultKey] = React.useState<string | null>(null);
 
-  // Resolve authority for decision_exposure_instrument
-  const instrumentConfig = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'decision_exposure_instrument');
-  const contract = instrumentConfig ? resolveProductAuthority(instrumentConfig) : null;
-
-  React.useEffect(() => { track("instrument_started", { instrumentSlug: "decision-exposure-instrument" }); }, []);
+  // Resolve authority for decision_exposure_instrumentReact.useEffect(() => { track("instrument_started", { instrumentSlug: "decision-exposure-instrument" }); }, []);
 
   async function handleComplete(r: ExposureResult) {
     setResult(r);
@@ -55,11 +47,7 @@ const DecisionExposureRun: NextPage = () => {
       ] : undefined}
     >
       {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
-          <ProductAuthorityPanel contract={contract} />
-          <div style={{ marginTop: '0.75rem' }}>
-            <ProductAuthorityNotice contract={contract} />
-          </div>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '0.75rem' }}></div>
         </div>
       )}
       {!result ? (

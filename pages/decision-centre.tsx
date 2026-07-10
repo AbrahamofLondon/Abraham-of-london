@@ -54,10 +54,6 @@ import DecisionCentreChecklist from "@/components/onboarding/DecisionCentreCheck
 import TrialExpiredCaseSelection from "@/components/product/TrialExpiredCaseSelection";
 import DecisionCentreLivingLayerPanel from "@/components/decision-centre/DecisionCentreLivingLayerPanel";
 import { buildDecisionCentreLivingViewModel } from "@/lib/product/decision-centre-living-adapter";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
-
 import { brass as GOLD, evidenceGrey, RelationshipNavigator } from "@/components/institutional";
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', ui-monospace, monospace" };
 const serif: React.CSSProperties = { fontFamily: "'Cormorant Garamond', Georgia, ui-serif, serif", fontWeight: 300 };
@@ -1045,12 +1041,6 @@ export default function DecisionCentrePage() {
   const [loading, setLoading] = React.useState(true);
   const [activeFilter, setActiveFilter] = React.useState("all");
 
-  // Resolve authority for all products
-  const configs = getDefaultProductConfigurations();
-  const productContracts = configs.map(config => ({
-    productCode: config.productCode,
-    contract: resolveProductAuthority(config),
-  }));
 
   const filteredCases = React.useMemo(() => {
     if (!data) return [];
@@ -1194,11 +1184,7 @@ export default function DecisionCentrePage() {
               </span>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
                 {productContracts.map(({ productCode, contract }) => (
-                  <div key={productCode}>
-                    <ProductAuthorityPanel contract={contract} />
-                    <div style={{ marginTop: "12px" }}>
-                      <ProductAuthorityNotice contract={contract} />
-                    </div>
+                  <div key={productCode}><div style={{ marginTop: "12px" }}></div>
                   </div>
                 ))}
               </div>

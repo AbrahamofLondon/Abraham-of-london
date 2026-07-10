@@ -5,18 +5,9 @@ import MandateClarityRunner from "@/components/instruments/MandateClarityRunner"
 import { track } from "@/lib/analytics/track";
 import type { MandateResult } from "@/lib/instruments/mandate-clarity/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS } from "@/lib/product/resolve-product-authority";
-
 const MandateClarityRun: NextPage = () => {
   const [result, setResult] = React.useState<MandateResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);
-
-  const config = PUBLIC_NON_EXEMPT_PRODUCT_AUTHORITY_CONFIGS.find(c => c.productCode === 'mandate_clarity_framework');
-  const contract = config ? resolveProductAuthority(config) : null;
-
-  React.useEffect(() => { track("instrument_started", { instrumentSlug: "mandate-clarity-framework" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "mandate-clarity-framework" }); }, []);
 
   async function handleComplete(r: MandateResult) {
     setResult(r);
@@ -41,11 +32,7 @@ const MandateClarityRun: NextPage = () => {
       ] : undefined}
     >
       {!result && contract && (
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}>
-          <ProductAuthorityPanel contract={contract} />
-          <div style={{ marginTop: '0.75rem' }}>
-            <ProductAuthorityNotice contract={contract} />
-          </div>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.04)', padding: '1rem', marginBottom: '1.5rem', borderRadius: '0.5rem' }}><div style={{ marginTop: '0.75rem' }}></div>
         </div>
       )}
       {!result ? <MandateClarityRunner onComplete={handleComplete} /> : (

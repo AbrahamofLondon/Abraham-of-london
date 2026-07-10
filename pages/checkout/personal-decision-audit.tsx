@@ -15,10 +15,6 @@ import { ArrowRight, Shield, FileText, CheckCircle } from "lucide-react";
 
 import Layout from "@/components/Layout";
 import { track } from "@/lib/analytics/track";
-import { ProductAuthorityPanel } from "@/components/product/ProductAuthorityPanel";
-import { ProductAuthorityNotice } from "@/components/product/ProductAuthorityNotice";
-import { resolveProductAuthority, getDefaultProductConfigurations } from "@/lib/product/resolve-product-authority";
-
 const GOLD = "#C9A96E";
 const AMBER = "#F59E0B";
 const VOID = "rgb(3 3 5)";
@@ -43,10 +39,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
 
   // Resolve authority for personal_decision_audit
   const configs = getDefaultProductConfigurations();
-  const auditConfig = configs.find(c => c.productCode === "personal_decision_audit");
-  const contract = auditConfig ? resolveProductAuthority(auditConfig) : null;
-
-  async function handlePurchase() {
+  const auditConfig = configs.find(c => c.productCode === "personal_decision_audit");async function handlePurchase() {
     setLoading(true);
     setError(null);
 
@@ -198,11 +191,7 @@ export default function PersonalDecisionAuditCheckoutPage() {
                 </p>
 
                 {contract && (
-                  <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-                    <ProductAuthorityPanel contract={contract} />
-                    <div style={{ marginTop: "12px" }}>
-                      <ProductAuthorityNotice contract={contract} />
-                    </div>
+                  <div style={{ marginTop: "20px", marginBottom: "20px" }}><div style={{ marginTop: "12px" }}></div>
                   </div>
                 )}
 
