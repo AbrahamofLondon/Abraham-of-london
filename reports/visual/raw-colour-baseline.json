@@ -1,0 +1,3680 @@
+{
+  "generatedAt": "2026-07-10T15:17:04.336Z",
+  "dirsScanned": [
+    "pages",
+    "app",
+    "components"
+  ],
+  "filesScanned": 2143,
+  "totalRawHex": 3078,
+  "totalRawRgb": 9177,
+  "totalInlineStyle": 11859,
+  "filesWithRawColour": 733,
+  "byFile": [
+    {
+      "file": "pages/diagnostics/executive-reporting/run.tsx",
+      "hex": 12,
+      "rgb": 236
+    },
+    {
+      "file": "pages/diagnostics/enterprise-assessment.tsx",
+      "hex": 1,
+      "rgb": 246
+    },
+    {
+      "file": "pages/strategy-room/index.tsx",
+      "hex": 6,
+      "rgb": 220
+    },
+    {
+      "file": "pages/decision-centre.tsx",
+      "hex": 1,
+      "rgb": 193
+    },
+    {
+      "file": "pages/diagnostics/team-assessment.tsx",
+      "hex": 1,
+      "rgb": 174
+    },
+    {
+      "file": "pages/strategy-room/session/[id].tsx",
+      "hex": 2,
+      "rgb": 169
+    },
+    {
+      "file": "components/gmi/public/GmiEditionLandingPage.tsx",
+      "hex": 152,
+      "rgb": 3
+    },
+    {
+      "file": "pages/pricing.tsx",
+      "hex": 5,
+      "rgb": 106
+    },
+    {
+      "file": "pages/library/index.tsx",
+      "hex": 17,
+      "rgb": 88
+    },
+    {
+      "file": "pages/consulting/index.tsx",
+      "hex": 2,
+      "rgb": 102
+    },
+    {
+      "file": "pages/artifacts.tsx",
+      "hex": 6,
+      "rgb": 91
+    },
+    {
+      "file": "pages/oversight/brief/[cycleId].tsx",
+      "hex": 3,
+      "rgb": 93
+    },
+    {
+      "file": "pages/playbooks/[slug].tsx",
+      "hex": 1,
+      "rgb": 91
+    },
+    {
+      "file": "pages/consulting/interventions.tsx",
+      "hex": 2,
+      "rgb": 81
+    },
+    {
+      "file": "pages/boardroom-brief.tsx",
+      "hex": 1,
+      "rgb": 78
+    },
+    {
+      "file": "pages/products.tsx",
+      "hex": 15,
+      "rgb": 62
+    },
+    {
+      "file": "pages/oversight/index.tsx",
+      "hex": 1,
+      "rgb": 74
+    },
+    {
+      "file": "pages/editorials/[slug].tsx",
+      "hex": 2,
+      "rgb": 71
+    },
+    {
+      "file": "components/alignment/OGRHandoverDocument.tsx",
+      "hex": 73,
+      "rgb": 0
+    },
+    {
+      "file": "components/strategy-room/Form.tsx",
+      "hex": 1,
+      "rgb": 71
+    },
+    {
+      "file": "pages/evidence/[slug].tsx",
+      "hex": 2,
+      "rgb": 67
+    },
+    {
+      "file": "pages/provenance/sample-export.tsx",
+      "hex": 1,
+      "rgb": 67
+    },
+    {
+      "file": "components/homepage/ExecutiveReportingFlagship.tsx",
+      "hex": 3,
+      "rgb": 65
+    },
+    {
+      "file": "pages/decision-instruments/[slug].tsx",
+      "hex": 3,
+      "rgb": 64
+    },
+    {
+      "file": "app/portal/PortalClient.tsx",
+      "hex": 5,
+      "rgb": 62
+    },
+    {
+      "file": "pages/library/[slug].tsx",
+      "hex": 4,
+      "rgb": 62
+    },
+    {
+      "file": "pages/benchmark-context.tsx",
+      "hex": 1,
+      "rgb": 63
+    },
+    {
+      "file": "components/reports/SovereignReport.tsx",
+      "hex": 64,
+      "rgb": 0
+    },
+    {
+      "file": "pages/decision-centre/case/[caseId].tsx",
+      "hex": 1,
+      "rgb": 61
+    },
+    {
+      "file": "pages/counsel/index.tsx",
+      "hex": 1,
+      "rgb": 58
+    },
+    {
+      "file": "pages/admin/security-assurance-requests.tsx",
+      "hex": 1,
+      "rgb": 55
+    },
+    {
+      "file": "pages/diagnostics/constitutional-diagnostic.tsx",
+      "hex": 1,
+      "rgb": 54
+    },
+    {
+      "file": "pages/tools/decision-delay-exposure.tsx",
+      "hex": 10,
+      "rgb": 45
+    },
+    {
+      "file": "pages/admin/boardroom/orders/[id].tsx",
+      "hex": 30,
+      "rgb": 23
+    },
+    {
+      "file": "components/alignment/PatternBreakerContract.tsx",
+      "hex": 1,
+      "rgb": 52
+    },
+    {
+      "file": "components/shorts/ShortComments.tsx",
+      "hex": 34,
+      "rgb": 19
+    },
+    {
+      "file": "pages/institutional/index.tsx",
+      "hex": 2,
+      "rgb": 50
+    },
+    {
+      "file": "pages/security-review.tsx",
+      "hex": 1,
+      "rgb": 51
+    },
+    {
+      "file": "pages/counsel/intake.tsx",
+      "hex": 1,
+      "rgb": 50
+    },
+    {
+      "file": "pages/decision-paths/index.tsx",
+      "hex": 3,
+      "rgb": 48
+    },
+    {
+      "file": "pages/provenance/case/[subjectType]/[subjectId].tsx",
+      "hex": 1,
+      "rgb": 49
+    },
+    {
+      "file": "components/homepage/HeroBanner.tsx",
+      "hex": 3,
+      "rgb": 47
+    },
+    {
+      "file": "pages/vault/briefs/index.tsx",
+      "hex": 9,
+      "rgb": 40
+    },
+    {
+      "file": "components/sovereign/InstitutionalMemoryPanel.tsx",
+      "hex": 3,
+      "rgb": 46
+    },
+    {
+      "file": "pages/case-studies/index.tsx",
+      "hex": 0,
+      "rgb": 48
+    },
+    {
+      "file": "pages/provenance/anchor-log.tsx",
+      "hex": 1,
+      "rgb": 46
+    },
+    {
+      "file": "pages/account/organisation.tsx",
+      "hex": 4,
+      "rgb": 42
+    },
+    {
+      "file": "pages/admin/retainers.tsx",
+      "hex": 46,
+      "rgb": 0
+    },
+    {
+      "file": "pages/decision-pathway.tsx",
+      "hex": 7,
+      "rgb": 39
+    },
+    {
+      "file": "pages/developers.tsx",
+      "hex": 6,
+      "rgb": 40
+    },
+    {
+      "file": "components/alignment/DomainDeepDiveModule.tsx",
+      "hex": 45,
+      "rgb": 0
+    },
+    {
+      "file": "pages/decision-instruments/index.tsx",
+      "hex": 3,
+      "rgb": 41
+    },
+    {
+      "file": "pages/diagnostics/executive-reporting.tsx",
+      "hex": 10,
+      "rgb": 34
+    },
+    {
+      "file": "pages/enterprise-decision-scan.tsx",
+      "hex": 8,
+      "rgb": 35
+    },
+    {
+      "file": "pages/trust.tsx",
+      "hex": 1,
+      "rgb": 42
+    },
+    {
+      "file": "components/editorial/PublicationCard.tsx",
+      "hex": 43,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/boardroom/orders.tsx",
+      "hex": 26,
+      "rgb": 16
+    },
+    {
+      "file": "pages/admin/outcome-verification.tsx",
+      "hex": 1,
+      "rgb": 41
+    },
+    {
+      "file": "pages/briefing/return/[sessionKey].tsx",
+      "hex": 1,
+      "rgb": 41
+    },
+    {
+      "file": "pages/evidence/index.tsx",
+      "hex": 2,
+      "rgb": 40
+    },
+    {
+      "file": "pages/lab/living-case.tsx",
+      "hex": 6,
+      "rgb": 36
+    },
+    {
+      "file": "pages/method.tsx",
+      "hex": 2,
+      "rgb": 40
+    },
+    {
+      "file": "pages/provenance/demo.tsx",
+      "hex": 1,
+      "rgb": 41
+    },
+    {
+      "file": "pages/return-brief/[caseId].tsx",
+      "hex": 1,
+      "rgb": 41
+    },
+    {
+      "file": "pages/about/founder.tsx",
+      "hex": 1,
+      "rgb": 40
+    },
+    {
+      "file": "pages/admin/feedback.tsx",
+      "hex": 1,
+      "rgb": 40
+    },
+    {
+      "file": "pages/admin/suppression-ledger.tsx",
+      "hex": 1,
+      "rgb": 40
+    },
+    {
+      "file": "components/strategy-room/ExecutionFlow.tsx",
+      "hex": 4,
+      "rgb": 37
+    },
+    {
+      "file": "pages/outcome/check.tsx",
+      "hex": 1,
+      "rgb": 39
+    },
+    {
+      "file": "pages/report/[reportId].tsx",
+      "hex": 1,
+      "rgb": 39
+    },
+    {
+      "file": "components/Cards/utils.tsx",
+      "hex": 35,
+      "rgb": 5
+    },
+    {
+      "file": "components/pdf/TelemetryReport.tsx",
+      "hex": 40,
+      "rgb": 0
+    },
+    {
+      "file": "pages/retainer.tsx",
+      "hex": 1,
+      "rgb": 38
+    },
+    {
+      "file": "pages/retainers/status/[token].tsx",
+      "hex": 38,
+      "rgb": 0
+    },
+    {
+      "file": "components/enhanced/VenturesSection.tsx",
+      "hex": 1,
+      "rgb": 37
+    },
+    {
+      "file": "components/EnhancedFooter.tsx",
+      "hex": 36,
+      "rgb": 2
+    },
+    {
+      "file": "components/sovereign/BoardroomSignalExposure.tsx",
+      "hex": 2,
+      "rgb": 36
+    },
+    {
+      "file": "pages/counsel/status.tsx",
+      "hex": 0,
+      "rgb": 36
+    },
+    {
+      "file": "pages/intelligence/index.tsx",
+      "hex": 10,
+      "rgb": 26
+    },
+    {
+      "file": "components/dashboard/LiveDataDashboard.tsx",
+      "hex": 35,
+      "rgb": 1
+    },
+    {
+      "file": "components/strategy-room/SignalPressurePanel.tsx",
+      "hex": 2,
+      "rgb": 34
+    },
+    {
+      "file": "pages/education-research/index.tsx",
+      "hex": 4,
+      "rgb": 31
+    },
+    {
+      "file": "components/sovereign/IntelligenceSignalCard.tsx",
+      "hex": 4,
+      "rgb": 31
+    },
+    {
+      "file": "components/alignment/AsymmetricScaleForecast.tsx",
+      "hex": 34,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/ERUpgradePanel.tsx",
+      "hex": 2,
+      "rgb": 32
+    },
+    {
+      "file": "pages/admin/case-studies.tsx",
+      "hex": 0,
+      "rgb": 33
+    },
+    {
+      "file": "pages/admin/outcome-ledger.tsx",
+      "hex": 1,
+      "rgb": 32
+    },
+    {
+      "file": "pages/case/shared/[token].tsx",
+      "hex": 2,
+      "rgb": 31
+    },
+    {
+      "file": "pages/editorials/index.tsx",
+      "hex": 5,
+      "rgb": 28
+    },
+    {
+      "file": "pages/frameworks/index.tsx",
+      "hex": 1,
+      "rgb": 32
+    },
+    {
+      "file": "app/admin/commercial/PageClient.tsx",
+      "hex": 1,
+      "rgb": 32
+    },
+    {
+      "file": "components/diagnostics/CostOfDelaySection.tsx",
+      "hex": 1,
+      "rgb": 32
+    },
+    {
+      "file": "components/homepage/EditorialIntelligenceBand.tsx",
+      "hex": 19,
+      "rgb": 14
+    },
+    {
+      "file": "components/sovereign/CohortIntelligencePanel.tsx",
+      "hex": 2,
+      "rgb": 31
+    },
+    {
+      "file": "pages/admin/analytics.tsx",
+      "hex": 23,
+      "rgb": 9
+    },
+    {
+      "file": "pages/boardroom/index.tsx",
+      "hex": 0,
+      "rgb": 32
+    },
+    {
+      "file": "pages/case-studies/[slug].tsx",
+      "hex": 0,
+      "rgb": 32
+    },
+    {
+      "file": "pages/playbooks/index.tsx",
+      "hex": 2,
+      "rgb": 30
+    },
+    {
+      "file": "pages/retainers/index.tsx",
+      "hex": 32,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/EvidenceChainSurface.tsx",
+      "hex": 1,
+      "rgb": 31
+    },
+    {
+      "file": "components/diagnostics/results/OutcomeVerification.tsx",
+      "hex": 1,
+      "rgb": 31
+    },
+    {
+      "file": "components/institutional/index.tsx",
+      "hex": 13,
+      "rgb": 19
+    },
+    {
+      "file": "components/product/CaseSharePanel.tsx",
+      "hex": 3,
+      "rgb": 28
+    },
+    {
+      "file": "pages/admin/enterprise-pipeline.tsx",
+      "hex": 1,
+      "rgb": 29
+    },
+    {
+      "file": "components/alignment/OGRAuthorizationAccord.tsx",
+      "hex": 30,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/LongitudinalIntelligence.tsx",
+      "hex": 1,
+      "rgb": 29
+    },
+    {
+      "file": "components/homepage/ExecutiveIntelligenceStrip.tsx",
+      "hex": 1,
+      "rgb": 29
+    },
+    {
+      "file": "components/homepage/InstitutionalHero.tsx",
+      "hex": 1,
+      "rgb": 29
+    },
+    {
+      "file": "pages/account/proof-pack.tsx",
+      "hex": 10,
+      "rgb": 19
+    },
+    {
+      "file": "pages/admin/authority-center.tsx",
+      "hex": 1,
+      "rgb": 28
+    },
+    {
+      "file": "pages/admin/fulfilment/index.tsx",
+      "hex": 13,
+      "rgb": 16
+    },
+    {
+      "file": "pages/engagements/selective-pilot.tsx",
+      "hex": 21,
+      "rgb": 8
+    },
+    {
+      "file": "pages/founders/index.tsx",
+      "hex": 3,
+      "rgb": 26
+    },
+    {
+      "file": "pages/media/index.tsx",
+      "hex": 2,
+      "rgb": 27
+    },
+    {
+      "file": "components/alignment/InterventionBlueprint.tsx",
+      "hex": 29,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/BoardSummaryPreview.tsx",
+      "hex": 2,
+      "rgb": 27
+    },
+    {
+      "file": "components/homepage/DoctrineShowcase.tsx",
+      "hex": 1,
+      "rgb": 28
+    },
+    {
+      "file": "pages/admin/intelligence.tsx",
+      "hex": 28,
+      "rgb": 0
+    },
+    {
+      "file": "pages/enterprise/preview.tsx",
+      "hex": 6,
+      "rgb": 22
+    },
+    {
+      "file": "pages/private-clients/index.tsx",
+      "hex": 1,
+      "rgb": 27
+    },
+    {
+      "file": "pages/verification.tsx",
+      "hex": 1,
+      "rgb": 27
+    },
+    {
+      "file": "components/alignment/DissonanceInterpretationGuide.tsx",
+      "hex": 28,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/VenturesSection.tsx",
+      "hex": 1,
+      "rgb": 27
+    },
+    {
+      "file": "pages/enterprise.tsx",
+      "hex": 11,
+      "rgb": 16
+    },
+    {
+      "file": "pages/intelligence/market.tsx",
+      "hex": 8,
+      "rgb": 19
+    },
+    {
+      "file": "app/settings/integrations/IntegrationsClient.tsx",
+      "hex": 0,
+      "rgb": 27
+    },
+    {
+      "file": "components/commercial/EvidenceLimitedOfferPage.tsx",
+      "hex": 2,
+      "rgb": 25
+    },
+    {
+      "file": "components/diagnostics/results/AITerrainExposure.tsx",
+      "hex": 1,
+      "rgb": 26
+    },
+    {
+      "file": "components/executive/ExecutiveSnapshotBlock.tsx",
+      "hex": 1,
+      "rgb": 26
+    },
+    {
+      "file": "components/instruments/BoardBriefBuilderRunner.tsx",
+      "hex": 1,
+      "rgb": 26
+    },
+    {
+      "file": "components/product/ProvenanceBadge.tsx",
+      "hex": 4,
+      "rgb": 23
+    },
+    {
+      "file": "components/proof/ProofCapturePrompt.tsx",
+      "hex": 1,
+      "rgb": 26
+    },
+    {
+      "file": "pages/admin/launch-dashboard.tsx",
+      "hex": 25,
+      "rgb": 1
+    },
+    {
+      "file": "pages/boardroom/[sessionId].tsx",
+      "hex": 0,
+      "rgb": 26
+    },
+    {
+      "file": "pages/design-partners.tsx",
+      "hex": 2,
+      "rgb": 24
+    },
+    {
+      "file": "components/alignment/OGRCoherenceLock.tsx",
+      "hex": 26,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/PatternObservatory.tsx",
+      "hex": 3,
+      "rgb": 23
+    },
+    {
+      "file": "components/assessments/AssessmentSuiteLadder.tsx",
+      "hex": 2,
+      "rgb": 24
+    },
+    {
+      "file": "components/diagnostics/results/MultiStakeholderDivergence.tsx",
+      "hex": 1,
+      "rgb": 25
+    },
+    {
+      "file": "components/product/BenchmarkMovementSignal.tsx",
+      "hex": 1,
+      "rgb": 25
+    },
+    {
+      "file": "components/product/DecisionOutcomeCapture.tsx",
+      "hex": 4,
+      "rgb": 22
+    },
+    {
+      "file": "components/product/OutcomeContributionPanel.tsx",
+      "hex": 1,
+      "rgb": 25
+    },
+    {
+      "file": "components/sovereign/ForensicAccountPanel.tsx",
+      "hex": 5,
+      "rgb": 21
+    },
+    {
+      "file": "pages/editorials/intelligence-briefs.tsx",
+      "hex": 11,
+      "rgb": 14
+    },
+    {
+      "file": "app/admin/decision-intelligence/PageClient.tsx",
+      "hex": 1,
+      "rgb": 24
+    },
+    {
+      "file": "components/alignment/PastContractInterrupt.tsx",
+      "hex": 10,
+      "rgb": 15
+    },
+    {
+      "file": "components/homepage/EventsSection.tsx",
+      "hex": 1,
+      "rgb": 24
+    },
+    {
+      "file": "components/product/DataRightsPanel.tsx",
+      "hex": 1,
+      "rgb": 24
+    },
+    {
+      "file": "components/product/EfficacyCommandBlock.tsx",
+      "hex": 11,
+      "rgb": 14
+    },
+    {
+      "file": "components/product/ProductAuthorityPanel.tsx",
+      "hex": 25,
+      "rgb": 0
+    },
+    {
+      "file": "components/strategy-room/DecisionGuidancePanel.tsx",
+      "hex": 25,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/access-keys.tsx",
+      "hex": 8,
+      "rgb": 16
+    },
+    {
+      "file": "pages/boardroom-brief/confirmation.tsx",
+      "hex": 1,
+      "rgb": 23
+    },
+    {
+      "file": "pages/diagnostics/purpose-alignment.tsx",
+      "hex": 2,
+      "rgb": 22
+    },
+    {
+      "file": "pages/engagements/operator-pilot.tsx",
+      "hex": 4,
+      "rgb": 20
+    },
+    {
+      "file": "pages/retainers/readiness.tsx",
+      "hex": 24,
+      "rgb": 0
+    },
+    {
+      "file": "pages/return-brief/index.tsx",
+      "hex": 2,
+      "rgb": 22
+    },
+    {
+      "file": "app/assessment/[token]/PageClient.tsx",
+      "hex": 24,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/DemographicContextCapture.tsx",
+      "hex": 1,
+      "rgb": 23
+    },
+    {
+      "file": "components/alignment/OGRWelcomeMemo.tsx",
+      "hex": 24,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/HeroSection.tsx",
+      "hex": 1,
+      "rgb": 23
+    },
+    {
+      "file": "components/homepage/OperatorBriefing.tsx",
+      "hex": 1,
+      "rgb": 23
+    },
+    {
+      "file": "components/homepage/ServiceLines.tsx",
+      "hex": 1,
+      "rgb": 23
+    },
+    {
+      "file": "components/ogr/ContagionMap.tsx",
+      "hex": 16,
+      "rgb": 8
+    },
+    {
+      "file": "components/outcomes/OutcomeVerificationPanel.tsx",
+      "hex": 3,
+      "rgb": 21
+    },
+    {
+      "file": "components/sovereign/SovereignPositionSummary.tsx",
+      "hex": 2,
+      "rgb": 22
+    },
+    {
+      "file": "pages/about.tsx",
+      "hex": 3,
+      "rgb": 20
+    },
+    {
+      "file": "pages/artifacts/[id].tsx",
+      "hex": 19,
+      "rgb": 4
+    },
+    {
+      "file": "pages/enterprise-decision-authority.tsx",
+      "hex": 3,
+      "rgb": 20
+    },
+    {
+      "file": "pages/provenance/explained.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/diagnostics/AssessmentResultSurface.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/diagnostics/ERPreview.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/feedback/FeedbackWidget.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/homepage/ProtocolInitiation.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/homepage/StatsBar.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/instruments/StrategicPriorityStackRunner.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/instruments/TeamAlignmentGapMapRunner.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/Intelligence/MarketIntelligenceCatalogue.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "components/product/AdmissionNotice.tsx",
+      "hex": 1,
+      "rgb": 22
+    },
+    {
+      "file": "pages/changelog.tsx",
+      "hex": 1,
+      "rgb": 21
+    },
+    {
+      "file": "pages/professionals.tsx",
+      "hex": 4,
+      "rgb": 18
+    },
+    {
+      "file": "pages/vault/index.tsx",
+      "hex": 4,
+      "rgb": 18
+    },
+    {
+      "file": "components/alignment/OGRStrategicRoadmap.tsx",
+      "hex": 22,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/VelocityVectorSimulation.tsx",
+      "hex": 16,
+      "rgb": 6
+    },
+    {
+      "file": "components/blog/ClassicBlogReader.tsx",
+      "hex": 6,
+      "rgb": 16
+    },
+    {
+      "file": "components/Comments.tsx",
+      "hex": 16,
+      "rgb": 6
+    },
+    {
+      "file": "components/diagnostics/ExecutiveBuyerFitSection.tsx",
+      "hex": 1,
+      "rgb": 21
+    },
+    {
+      "file": "components/diagnostics/ResultEmailCapture.tsx",
+      "hex": 1,
+      "rgb": 21
+    },
+    {
+      "file": "components/homepage/EngagementLanes.tsx",
+      "hex": 1,
+      "rgb": 21
+    },
+    {
+      "file": "components/kernel/FreeSignalResult.tsx",
+      "hex": 7,
+      "rgb": 15
+    },
+    {
+      "file": "components/product/ChainOfCustodyTimeline.tsx",
+      "hex": 1,
+      "rgb": 21
+    },
+    {
+      "file": "pages/admin/intelligence/gmi/publication-readiness.tsx",
+      "hex": 4,
+      "rgb": 17
+    },
+    {
+      "file": "pages/checkout/personal-decision-audit.tsx",
+      "hex": 2,
+      "rgb": 19
+    },
+    {
+      "file": "pages/my-instruments/index.tsx",
+      "hex": 2,
+      "rgb": 19
+    },
+    {
+      "file": "pages/pressure.tsx",
+      "hex": 5,
+      "rgb": 16
+    },
+    {
+      "file": "components/BlogPostCard.tsx",
+      "hex": 21,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/VaultTeaserRail.tsx",
+      "hex": 1,
+      "rgb": 20
+    },
+    {
+      "file": "components/product/BenchmarkTeamAlignmentPanel.tsx",
+      "hex": 1,
+      "rgb": 20
+    },
+    {
+      "file": "pages/admin/operator-command-centre/index.tsx",
+      "hex": 8,
+      "rgb": 12
+    },
+    {
+      "file": "pages/foundry/index.tsx",
+      "hex": 2,
+      "rgb": 18
+    },
+    {
+      "file": "pages/inner-circle/dashboard.tsx",
+      "hex": 5,
+      "rgb": 15
+    },
+    {
+      "file": "components/commercial/ProductRecommendationCard.tsx",
+      "hex": 14,
+      "rgb": 6
+    },
+    {
+      "file": "components/ogr/live-terminal-client.tsx",
+      "hex": 14,
+      "rgb": 6
+    },
+    {
+      "file": "components/playbooks/PlaybookCard.tsx",
+      "hex": 1,
+      "rgb": 19
+    },
+    {
+      "file": "components/product/StaleCaseAlert.tsx",
+      "hex": 1,
+      "rgb": 19
+    },
+    {
+      "file": "components/ShortCard.backup.tsx",
+      "hex": 0,
+      "rgb": 20
+    },
+    {
+      "file": "components/ShortCard.tsx",
+      "hex": 0,
+      "rgb": 20
+    },
+    {
+      "file": "components/strategy-room/CounselStatusPanel.tsx",
+      "hex": 1,
+      "rgb": 19
+    },
+    {
+      "file": "pages/admin/case-studies/[id].tsx",
+      "hex": 14,
+      "rgb": 5
+    },
+    {
+      "file": "pages/admin/living-state/index.tsx",
+      "hex": 9,
+      "rgb": 10
+    },
+    {
+      "file": "pages/retainer/intake.tsx",
+      "hex": 6,
+      "rgb": 13
+    },
+    {
+      "file": "pages/toolkits/[slug].tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "components/alignment/SovereignPortfolioIndex.tsx",
+      "hex": 19,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/CommercialExposurePanel.tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "components/diagnostics/results/ExecutiveDecisionAuthorityBlock.tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "components/diagnostics/results/PredictiveConsequence.tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "components/product/BenchmarkNarrativeBlock.tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "components/product/FreeTierUpgradeModal.tsx",
+      "hex": 3,
+      "rgb": 16
+    },
+    {
+      "file": "components/product/ProvenanceSummaryPanel.tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "components/readers/VaultReader.tsx",
+      "hex": 2,
+      "rgb": 17
+    },
+    {
+      "file": "components/WhoIWorkWith.tsx",
+      "hex": 1,
+      "rgb": 18
+    },
+    {
+      "file": "pages/admin/calibration.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "pages/admin/enterprise-foundation.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "pages/boardroom-mode.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "pages/diagnostics/index.tsx",
+      "hex": 4,
+      "rgb": 14
+    },
+    {
+      "file": "pages/foundations.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "pages/intelligence/gmi/index.tsx",
+      "hex": 2,
+      "rgb": 16
+    },
+    {
+      "file": "pages/security/disclosure.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "components/alignment/PurposeAlignmentPaidResultSurface.tsx",
+      "hex": 18,
+      "rgb": 0
+    },
+    {
+      "file": "components/artifacts/GmiInstitutionalArtifactRecord.tsx",
+      "hex": 15,
+      "rgb": 3
+    },
+    {
+      "file": "components/instruments/InterventionPathRunner.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "components/Intelligence/operator/DiscoveryOverlay.tsx",
+      "hex": 18,
+      "rgb": 0
+    },
+    {
+      "file": "components/kernel/GovernedRefusalBlock.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "components/living/WhatTheSystemHeard.tsx",
+      "hex": 0,
+      "rgb": 18
+    },
+    {
+      "file": "components/product/ContinuityStatement.tsx",
+      "hex": 0,
+      "rgb": 18
+    },
+    {
+      "file": "components/product/ProductAuthorityBadge.tsx",
+      "hex": 18,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/ProductEvidenceStatus.tsx",
+      "hex": 18,
+      "rgb": 0
+    },
+    {
+      "file": "components/tools/SendToSelfForm.tsx",
+      "hex": 1,
+      "rgb": 17
+    },
+    {
+      "file": "pages/api/editorials/preview/[slug].ts",
+      "hex": 13,
+      "rgb": 4
+    },
+    {
+      "file": "pages/playbooks/[slug]/run.tsx",
+      "hex": 1,
+      "rgb": 16
+    },
+    {
+      "file": "components/homepage/CanonInstitutionalIntro.tsx",
+      "hex": 1,
+      "rgb": 16
+    },
+    {
+      "file": "components/homepage/ContentShowcase.tsx",
+      "hex": 1,
+      "rgb": 16
+    },
+    {
+      "file": "components/homepage/StrategicFunnelStrip.tsx",
+      "hex": 1,
+      "rgb": 16
+    },
+    {
+      "file": "components/Intelligence/public/DecisionVelocityCard.tsx",
+      "hex": 0,
+      "rgb": 17
+    },
+    {
+      "file": "components/product/ContextualUpgradePrompt.tsx",
+      "hex": 3,
+      "rgb": 14
+    },
+    {
+      "file": "components/report/arrival/ArrivalScreen.tsx",
+      "hex": 14,
+      "rgb": 3
+    },
+    {
+      "file": "components/strategy-room/AdvantagePathBlock.tsx",
+      "hex": 1,
+      "rgb": 16
+    },
+    {
+      "file": "pages/admin/product-authority.tsx",
+      "hex": 12,
+      "rgb": 4
+    },
+    {
+      "file": "pages/quick-check.tsx",
+      "hex": 4,
+      "rgb": 12
+    },
+    {
+      "file": "components/diagnostics/GovernanceEvidenceBridge.tsx",
+      "hex": 1,
+      "rgb": 15
+    },
+    {
+      "file": "components/instruments/ExecutionRiskIndexRunner.tsx",
+      "hex": 1,
+      "rgb": 15
+    },
+    {
+      "file": "components/instruments/GovernanceDriftDetectorRunner.tsx",
+      "hex": 1,
+      "rgb": 15
+    },
+    {
+      "file": "components/Intelligence/GmiEvidenceRoom.tsx",
+      "hex": 1,
+      "rgb": 15
+    },
+    {
+      "file": "components/kernel/WhatSystemNoticedBlock.tsx",
+      "hex": 4,
+      "rgb": 12
+    },
+    {
+      "file": "components/product/ConsequencePath.tsx",
+      "hex": 1,
+      "rgb": 15
+    },
+    {
+      "file": "components/strategy-room/AIInterventionSuggestions.tsx",
+      "hex": 1,
+      "rgb": 15
+    },
+    {
+      "file": "components/strategy-room/DecisionStateBanner.tsx",
+      "hex": 0,
+      "rgb": 16
+    },
+    {
+      "file": "pages/canon/glossary.tsx",
+      "hex": 1,
+      "rgb": 14
+    },
+    {
+      "file": "pages/constitution/command-centre.tsx",
+      "hex": 15,
+      "rgb": 0
+    },
+    {
+      "file": "pages/diagnostics/board-summary.tsx",
+      "hex": 3,
+      "rgb": 12
+    },
+    {
+      "file": "app/admin/organisations/[id]/campaigns/new/PageClient.tsx",
+      "hex": 15,
+      "rgb": 0
+    },
+    {
+      "file": "components/editorial/SeriesBand.tsx",
+      "hex": 15,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/MarketIntelligenceFeature.tsx",
+      "hex": 2,
+      "rgb": 13
+    },
+    {
+      "file": "components/instruments/EscalationReadinessRunner.tsx",
+      "hex": 1,
+      "rgb": 14
+    },
+    {
+      "file": "components/instruments/StructuralFailureCanvasRunner.tsx",
+      "hex": 1,
+      "rgb": 14
+    },
+    {
+      "file": "components/Intelligence/internal/DecisionTracePanel.tsx",
+      "hex": 0,
+      "rgb": 15
+    },
+    {
+      "file": "components/Intelligence/public/ContradictionMapPreview.tsx",
+      "hex": 0,
+      "rgb": 15
+    },
+    {
+      "file": "components/product/ValueReceipt.tsx",
+      "hex": 3,
+      "rgb": 12
+    },
+    {
+      "file": "pages/api/decision-instruments/send-purchase-email.ts",
+      "hex": 4,
+      "rgb": 10
+    },
+    {
+      "file": "pages/api/tools/send-to-self.ts",
+      "hex": 5,
+      "rgb": 9
+    },
+    {
+      "file": "pages/strategy/[...slug].tsx",
+      "hex": 14,
+      "rgb": 0
+    },
+    {
+      "file": "pages/test-your-decision.tsx",
+      "hex": 2,
+      "rgb": 12
+    },
+    {
+      "file": "pages/toolkits/index.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/admin/SecurityDashboard.tsx",
+      "hex": 14,
+      "rgb": 0
+    },
+    {
+      "file": "components/content/DirectorateOversight.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/decision-centre/RetainerMemoryPreview.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/diagnostics/results/LadderProgressionGate.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/homepage/InstitutionalTrailer.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/homepage/RefusalDemo.tsx",
+      "hex": 0,
+      "rgb": 14
+    },
+    {
+      "file": "components/Intelligence/public/WhatChangedPanel.tsx",
+      "hex": 0,
+      "rgb": 14
+    },
+    {
+      "file": "components/product/BenchmarkCaseBadge.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/product/BenchmarkContextPanel.tsx",
+      "hex": 1,
+      "rgb": 13
+    },
+    {
+      "file": "components/readers/CanonReader.tsx",
+      "hex": 11,
+      "rgb": 3
+    },
+    {
+      "file": "components/sovereign/BenchmarkStrip.tsx",
+      "hex": 2,
+      "rgb": 12
+    },
+    {
+      "file": "pages/briefs/index.tsx",
+      "hex": 7,
+      "rgb": 6
+    },
+    {
+      "file": "pages/scenario-stress-test.tsx",
+      "hex": 4,
+      "rgb": 9
+    },
+    {
+      "file": "pages/why-not-ai.tsx",
+      "hex": 1,
+      "rgb": 12
+    },
+    {
+      "file": "components/decision-centre/LadderPathwayPanel.tsx",
+      "hex": 3,
+      "rgb": 10
+    },
+    {
+      "file": "components/diagnostics/results/CompetitivePosition.tsx",
+      "hex": 0,
+      "rgb": 13
+    },
+    {
+      "file": "components/diagnostics/results/DecisionGradeBlocks.tsx",
+      "hex": 1,
+      "rgb": 12
+    },
+    {
+      "file": "components/diagnostics/results/SystemMemoryBlock.tsx",
+      "hex": 1,
+      "rgb": 12
+    },
+    {
+      "file": "components/foundry/InterestForm.tsx",
+      "hex": 1,
+      "rgb": 12
+    },
+    {
+      "file": "components/Header.tsx",
+      "hex": 12,
+      "rgb": 1
+    },
+    {
+      "file": "components/instruments/InstrumentShell.tsx",
+      "hex": 1,
+      "rgb": 12
+    },
+    {
+      "file": "components/PDFDashboard/PDFAnnotations.tsx",
+      "hex": 13,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/RetainerCycleMemoryPanel.tsx",
+      "hex": 0,
+      "rgb": 13
+    },
+    {
+      "file": "components/product/TrialExpiredCaseSelection.tsx",
+      "hex": 2,
+      "rgb": 11
+    },
+    {
+      "file": "components/shorts/ShortHero.tsx",
+      "hex": 0,
+      "rgb": 13
+    },
+    {
+      "file": "components/strategy-room/ConstitutionalResultSurface.tsx",
+      "hex": 7,
+      "rgb": 6
+    },
+    {
+      "file": "components/strategy-room/RetainerEntryGate.tsx",
+      "hex": 1,
+      "rgb": 12
+    },
+    {
+      "file": "pages/contact.tsx",
+      "hex": 2,
+      "rgb": 10
+    },
+    {
+      "file": "pages/market-intelligence/dii.tsx",
+      "hex": 0,
+      "rgb": 12
+    },
+    {
+      "file": "pages/trust-centre/index.tsx",
+      "hex": 0,
+      "rgb": 12
+    },
+    {
+      "file": "components/admin/reporting/intervention-copilot.tsx",
+      "hex": 12,
+      "rgb": 0
+    },
+    {
+      "file": "components/analytics/distribution-chart.tsx",
+      "hex": 12,
+      "rgb": 0
+    },
+    {
+      "file": "components/ContentPortal.tsx",
+      "hex": 6,
+      "rgb": 6
+    },
+    {
+      "file": "components/decision-centre/RetainerOversightPreview.tsx",
+      "hex": 3,
+      "rgb": 9
+    },
+    {
+      "file": "components/homepage/StartHereStrip.tsx",
+      "hex": 1,
+      "rgb": 11
+    },
+    {
+      "file": "components/Intelligence/internal/DeterminismProof.tsx",
+      "hex": 0,
+      "rgb": 12
+    },
+    {
+      "file": "components/print/BriefCoverPage.tsx",
+      "hex": 12,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/ProductAuthorityNotice.tsx",
+      "hex": 12,
+      "rgb": 0
+    },
+    {
+      "file": "pages/blog/series/[seriesSlug]/[partSlug].tsx",
+      "hex": 3,
+      "rgb": 8
+    },
+    {
+      "file": "pages/decision-instruments/operator-decision-pack/run.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "pages/inner-circle/council-request.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "pages/inner-circle/tools/rise-decay-scorecard.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "app/api/campaigns/[id]/nudge/route.ts",
+      "hex": 11,
+      "rgb": 0
+    },
+    {
+      "file": "app/api/client-portal/send-link/route.ts",
+      "hex": 3,
+      "rgb": 8
+    },
+    {
+      "file": "app/assessment/success/AssessmentSuccessClient.tsx",
+      "hex": 11,
+      "rgb": 0
+    },
+    {
+      "file": "app/render/pdf/[id]/page.tsx",
+      "hex": 11,
+      "rgb": 0
+    },
+    {
+      "file": "components/decision-centre/DecisionCentreOrientation.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/diagnostics/results/InheritedThreadContext.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/diagnostics/results/ResultDiagnostics.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/diagnostics/unified/FeedbackLoop.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/diagrams/LegacyDiagram.jsx",
+      "hex": 10,
+      "rgb": 1
+    },
+    {
+      "file": "components/instruments/DecisionExposureRunner.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/instruments/MandateClarityRunner.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/Intelligence/MarketIntelligenceChronology.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "components/Intelligence/public/CrossAssessmentInsight.tsx",
+      "hex": 0,
+      "rgb": 11
+    },
+    {
+      "file": "components/logos.tsx",
+      "hex": 11,
+      "rgb": 0
+    },
+    {
+      "file": "components/reporting/pdf/ExecutiveBriefingPdfDocument.tsx",
+      "hex": 11,
+      "rgb": 0
+    },
+    {
+      "file": "components/reporting/ReportEvidenceBoundaryNotice.tsx",
+      "hex": 11,
+      "rgb": 0
+    },
+    {
+      "file": "components/strategy-room/DecisionTimeline.tsx",
+      "hex": 1,
+      "rgb": 10
+    },
+    {
+      "file": "pages/admin/billing.tsx",
+      "hex": 10,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/intelligence/gmi/batch-score.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "pages/admin/intelligence/gmi-falsification.tsx",
+      "hex": 2,
+      "rgb": 8
+    },
+    {
+      "file": "pages/api/follow-up/process.ts",
+      "hex": 3,
+      "rgb": 7
+    },
+    {
+      "file": "pages/blog/index.tsx",
+      "hex": 2,
+      "rgb": 8
+    },
+    {
+      "file": "pages/decision-instruments/history.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "pages/invite.tsx",
+      "hex": 3,
+      "rgb": 7
+    },
+    {
+      "file": "pages/market-intelligence/cross-edition-review.tsx",
+      "hex": 0,
+      "rgb": 10
+    },
+    {
+      "file": "components/BookCard.tsx",
+      "hex": 10,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/ProvenanceThesisSection.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "components/homepage/WhatYouCanUseTodaySection.tsx",
+      "hex": 0,
+      "rgb": 10
+    },
+    {
+      "file": "components/Intelligence/GmiPriorCallScorecard.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "components/living/LivingLayerShell.tsx",
+      "hex": 0,
+      "rgb": 10
+    },
+    {
+      "file": "components/print/BriefHeaderBar.tsx",
+      "hex": 10,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/ResultPathwayPanel.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "components/product/SaveCaseConversionPanel.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "components/product/ValueProtectedSummary.tsx",
+      "hex": 1,
+      "rgb": 9
+    },
+    {
+      "file": "components/strategy-room/ArtifactGrid.tsx",
+      "hex": 10,
+      "rgb": 0
+    },
+    {
+      "file": "components/strategy-room/ConstitutionalFollowupPanel.tsx",
+      "hex": 10,
+      "rgb": 0
+    },
+    {
+      "file": "components/strategy-room/GovernanceEvidenceCarryForward.tsx",
+      "hex": 0,
+      "rgb": 10
+    },
+    {
+      "file": "pages/api/og/short.tsx",
+      "hex": 5,
+      "rgb": 4
+    },
+    {
+      "file": "pages/private/frameworks/[slug].tsx",
+      "hex": 1,
+      "rgb": 8
+    },
+    {
+      "file": "pages/system.tsx",
+      "hex": 3,
+      "rgb": 6
+    },
+    {
+      "file": "components/alignment/PurposeAlignmentFreeResultSurface.tsx",
+      "hex": 9,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/ResonanceFilter.tsx",
+      "hex": 9,
+      "rgb": 0
+    },
+    {
+      "file": "components/dashboard/ChartContent.tsx",
+      "hex": 9,
+      "rgb": 0
+    },
+    {
+      "file": "components/decision/ConstitutionalNarrativeBlock.tsx",
+      "hex": 6,
+      "rgb": 3
+    },
+    {
+      "file": "components/diagnostics/ExecutiveReportingPaywall.tsx",
+      "hex": 7,
+      "rgb": 2
+    },
+    {
+      "file": "components/diagnostics/results/FreeLayerBoundary.tsx",
+      "hex": 0,
+      "rgb": 9
+    },
+    {
+      "file": "components/Intelligence/operator/KnowledgeGraph.tsx",
+      "hex": 9,
+      "rgb": 0
+    },
+    {
+      "file": "components/mdx/Note.tsx",
+      "hex": 5,
+      "rgb": 4
+    },
+    {
+      "file": "components/navigation/SurfaceAwareNav.tsx",
+      "hex": 0,
+      "rgb": 9
+    },
+    {
+      "file": "components/Note.tsx",
+      "hex": 5,
+      "rgb": 4
+    },
+    {
+      "file": "components/onboarding/DecisionCentreChecklist.tsx",
+      "hex": 1,
+      "rgb": 8
+    },
+    {
+      "file": "components/oversight/GovernedAutomationPosture.tsx",
+      "hex": 0,
+      "rgb": 9
+    },
+    {
+      "file": "components/oversight/PortfolioMemorySummary.tsx",
+      "hex": 0,
+      "rgb": 9
+    },
+    {
+      "file": "components/playbooks/PlaybookContinuationPanel.tsx",
+      "hex": 1,
+      "rgb": 8
+    },
+    {
+      "file": "components/product/SaveSessionCasePanel.tsx",
+      "hex": 2,
+      "rgb": 7
+    },
+    {
+      "file": "components/product/SurfaceBoundaryPanel.tsx",
+      "hex": 2,
+      "rgb": 7
+    },
+    {
+      "file": "components/reporting/boardroom/BoardroomModeSurface.tsx",
+      "hex": 7,
+      "rgb": 2
+    },
+    {
+      "file": "components/trust/WorkedDecisionExample.tsx",
+      "hex": 1,
+      "rgb": 8
+    },
+    {
+      "file": "pages/admin/intelligence/gmi/source-workbench.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "pages/editorials/series/[seriesSlug]/[partSlug].tsx",
+      "hex": 2,
+      "rgb": 6
+    },
+    {
+      "file": "pages/engagements/index.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "pages/intelligence/gmi/board-pulse.tsx",
+      "hex": 7,
+      "rgb": 1
+    },
+    {
+      "file": "pages/intelligence/gmi/performance.tsx",
+      "hex": 3,
+      "rgb": 5
+    },
+    {
+      "file": "pages/intelligence/gmi/q2-2026.tsx",
+      "hex": 7,
+      "rgb": 1
+    },
+    {
+      "file": "pages/shorts/index.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "pages/ventures/index.tsx",
+      "hex": 0,
+      "rgb": 8
+    },
+    {
+      "file": "app/api/campaigns/[id]/invite/route.ts",
+      "hex": 8,
+      "rgb": 0
+    },
+    {
+      "file": "app/__pdf/[slug]/page.tsx",
+      "hex": 5,
+      "rgb": 3
+    },
+    {
+      "file": "components/alignment/PurposeAlignmentTrendChart.tsx",
+      "hex": 5,
+      "rgb": 3
+    },
+    {
+      "file": "components/debug/FormulaInspector.tsx",
+      "hex": 8,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/EngagementReadinessPanel.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "components/homepage/CinematicHero.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "components/homepage/FoundryEntrySection.tsx",
+      "hex": 0,
+      "rgb": 8
+    },
+    {
+      "file": "components/Intelligence/user/ClientIntelligenceStack.tsx",
+      "hex": 0,
+      "rgb": 8
+    },
+    {
+      "file": "components/living/EvidenceStrengthMeter.tsx",
+      "hex": 0,
+      "rgb": 8
+    },
+    {
+      "file": "components/print/ExecutiveSummaryPanel.tsx",
+      "hex": 8,
+      "rgb": 0
+    },
+    {
+      "file": "components/print/KeyJudgementsPanel.tsx",
+      "hex": 8,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/UpgradePrompt.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "components/product/VisibilityRetainedPanel.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "components/shorts/ShortMetadata.tsx",
+      "hex": 6,
+      "rgb": 2
+    },
+    {
+      "file": "components/sovereign/IntelligenceSignalPanel.tsx",
+      "hex": 2,
+      "rgb": 6
+    },
+    {
+      "file": "components/strategy-room/ReturnBriefInterruptionBar.tsx",
+      "hex": 1,
+      "rgb": 7
+    },
+    {
+      "file": "components/trust/ArbiterBadge.tsx",
+      "hex": 0,
+      "rgb": 8
+    },
+    {
+      "file": "pages/admin/validation.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "pages/briefs/institutional-alpha.tsx",
+      "hex": 2,
+      "rgb": 5
+    },
+    {
+      "file": "pages/briefs/sovereign-intelligence.tsx",
+      "hex": 2,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/board-brief-builder/run.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "pages/diagnostic.tsx",
+      "hex": 6,
+      "rgb": 1
+    },
+    {
+      "file": "pages/engagements/retained-oversight.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "pages/lexicon/[slug].tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "pages/oversight/portfolio.tsx",
+      "hex": 0,
+      "rgb": 7
+    },
+    {
+      "file": "pages/vault/briefs/[slug].tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "app/enterprise/alignment/campaigns/[campaignId]/page.tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "app/not-found.tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/StatisticalConfidenceOverlay.tsx",
+      "hex": 5,
+      "rgb": 2
+    },
+    {
+      "file": "components/analytics/predicted-impact-dashboard.tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "components/counsel/CounselCaseTimeline.tsx",
+      "hex": 0,
+      "rgb": 7
+    },
+    {
+      "file": "components/decision/UnifiedRecommendationCard.tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/ResultCost.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "components/downloads/LegacyCanvasInteractive.tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/CredibilityQuotes.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "components/homepage/HomepageHero.tsx",
+      "hex": 2,
+      "rgb": 5
+    },
+    {
+      "file": "components/homepage/OGRFlagshipSection.tsx",
+      "hex": 0,
+      "rgb": 7
+    },
+    {
+      "file": "components/homepage/OperatorPilotBlock.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "components/inner-circle/WorkspaceNav.tsx",
+      "hex": 1,
+      "rgb": 6
+    },
+    {
+      "file": "components/mdx/Callout.tsx",
+      "hex": 7,
+      "rgb": 0
+    },
+    {
+      "file": "components/proof/PublicProofBlocks.tsx",
+      "hex": 2,
+      "rgb": 5
+    },
+    {
+      "file": "pages/admin/advisory-queue.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/admin/conversion-dashboard.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/admin/delivery-queue.tsx",
+      "hex": 0,
+      "rgb": 6
+    },
+    {
+      "file": "pages/chatham-rooms/index.tsx",
+      "hex": 0,
+      "rgb": 6
+    },
+    {
+      "file": "pages/decision-instruments/decision-exposure-instrument/start.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/governance-drift-detector/run.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/intervention-path-selector/start.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/mandate-clarity-framework/start.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/operator-decision-pack/start.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/strategic-priority-stack-builder/run.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/decision-instruments/structural-failure-diagnostic-canvas/run.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/evidence/standards.tsx",
+      "hex": 2,
+      "rgb": 4
+    },
+    {
+      "file": "pages/intelligence/contradictions.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "pages/intelligence/gmi/red-team.tsx",
+      "hex": 5,
+      "rgb": 1
+    },
+    {
+      "file": "app/pdf-dashboard/PdfDashboardClient.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/reporting/dissonance-matrix.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/PurposeAlignmentRadarChart.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/content/DownloadCTA.no-scss.jsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/dashboard/archive/PdfAnalyticsWidget.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/ProductAdvantageBlocks.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/diagnostics/results/ResultContradiction.tsx",
+      "hex": 0,
+      "rgb": 6
+    },
+    {
+      "file": "components/diagnostics/results/ResultEscalation.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/diagnostics/unified/DirectiveCTA.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/homepage/HomepageFinalCTA.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/homepage/OutputArtifactPreview.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/mdx/SectionBreak.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/premium/PremiumAssetCard.tsx",
+      "hex": 4,
+      "rgb": 2
+    },
+    {
+      "file": "components/print/EmbossedBrandMark.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/print/InstitutionalBriefDocument.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/print/SignatureBlock.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/ShareButtons.tsx",
+      "hex": 6,
+      "rgb": 0
+    },
+    {
+      "file": "components/shorts/ShortsSignalRail.tsx",
+      "hex": 1,
+      "rgb": 5
+    },
+    {
+      "file": "components/strategy-room/EscalationTriggerPanel.tsx",
+      "hex": 0,
+      "rgb": 6
+    },
+    {
+      "file": "pages/books/index.tsx",
+      "hex": 0,
+      "rgb": 5
+    },
+    {
+      "file": "pages/briefs/[slug].tsx",
+      "hex": 3,
+      "rgb": 2
+    },
+    {
+      "file": "pages/decision-instruments/execution-risk-index/run.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/decision-instruments/intervention-path-selector/run.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/decision-instruments/team-alignment-gap-map/run.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/inner-circle/briefings.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/intelligence/gmi/methodology.tsx",
+      "hex": 4,
+      "rgb": 1
+    },
+    {
+      "file": "pages/intelligence/memory.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/intelligence/reports.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/intelligence/[slug].tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "pages/kernel/signal.tsx",
+      "hex": 4,
+      "rgb": 1
+    },
+    {
+      "file": "pages/private/admin/premium-downloads.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "pages/sovereign/authorize.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/organisations/[id]/dashboard/intervention-modal.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/decision/ContextualContextCard.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/ShortsAnalytics.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/analysis/StrategicStressWorkbench.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/content/FeatureGrid.jsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/counsel/CounselMemorySummary.tsx",
+      "hex": 0,
+      "rgb": 5
+    },
+    {
+      "file": "components/dashboard/admin/AdminJobsPanel.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/BoardSnapshot.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/diagnostics/results/DecisionTerrainStatus.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/diagnostics/results/ResultAction.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/diagnostics/unified/LimitationsBlock.tsx",
+      "hex": 0,
+      "rgb": 5
+    },
+    {
+      "file": "components/EmbossedBrandMark.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/enhanced/AnimatedStatsBar.tsx",
+      "hex": 0,
+      "rgb": 5
+    },
+    {
+      "file": "components/essays/EssayCard.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/homepage/ExecutiveReportingSection.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/homepage/SectionDivider.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/MandateStatement.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/navigation/SovereignHeader.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/print/BriefFooterBar.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/pulse/pulse-terminal.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "components/strategy-room/AvoidancePatternNotice.tsx",
+      "hex": 0,
+      "rgb": 5
+    },
+    {
+      "file": "components/strategy-room/DynamicConsequencePanel.tsx",
+      "hex": 1,
+      "rgb": 4
+    },
+    {
+      "file": "components/ui/SilentSurface.tsx",
+      "hex": 5,
+      "rgb": 0
+    },
+    {
+      "file": "pages/api/admin/auth/send-link.ts",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "pages/blog/series/[seriesSlug]/index.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "pages/controls.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "pages/decision-instruments/decision-exposure-instrument/run.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "pages/decision-instruments/escalation-readiness-scorecard/run.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "pages/decision-instruments/mandate-clarity-framework/run.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "pages/diagnostics/watch.tsx",
+      "hex": 2,
+      "rgb": 2
+    },
+    {
+      "file": "pages/evidence/seals.tsx",
+      "hex": 2,
+      "rgb": 2
+    },
+    {
+      "file": "pages/inner-circle/account.tsx",
+      "hex": 3,
+      "rgb": 1
+    },
+    {
+      "file": "app/(dashboard)/portfolio/page.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/campaigns/[id]/campaign-actions.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/simulation/strategy-room/PageClient.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "app/dashboard/pdf-analytics/PdfAnalyticsClient.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "app/strategy-room/success/StrategySuccessClient.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/governance/sovereign-key-auth.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/analytics/volatility-heatmap.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/commercial/CheckoutButton.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/commercial/EvidenceBoundaryNotice.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/dashboard/admin/SessionDebugger.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/RecommendedPlaybooks.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/downloads/SurrenderAssetsLanding.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/emails/TeaserEmail.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/Frameworks/PrivateFrameworkView.tsx",
+      "hex": 2,
+      "rgb": 2
+    },
+    {
+      "file": "components/homepage/DecisionDelayExposureCTASection.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/homepage/EarnedProgressionBlock.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/homepage/homepagePrimitives.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/homepage/InstitutionalClose.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/SectionCTAStrip.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/homepage/TrustSignals.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/Layout.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/living/LivingSpineProgress.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/LuxuryNavbar.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/mdx/Blockquote.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/oversight/CrossScopePatternSummary.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/PostHero.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/print/EmbossedSign.tsx",
+      "hex": 0,
+      "rgb": 4
+    },
+    {
+      "file": "components/print/ForensicMarkLayer.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/AccessPostureBadge.tsx",
+      "hex": 3,
+      "rgb": 1
+    },
+    {
+      "file": "components/trust/SecurityAssuranceStatusStrip.tsx",
+      "hex": 1,
+      "rgb": 3
+    },
+    {
+      "file": "components/ui/ogr-toast.tsx",
+      "hex": 4,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/artifacts.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/briefs.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/dev/session.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/operations.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/redis.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "pages/continuity.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "pages/foundry/brief/sample.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "pages/foundry/decision-test.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "pages/foundry/market-signal-test.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "pages/foundry/release-risk-test.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "pages/inner-circle/admin/artifacts.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "pages/inner-circle/reports/[ref].tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "pages/intelligence/gmi/calls.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "pages/intelligence/gmi/post-mortem.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "pages/intelligence/gmi/use-cases.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "pages/market-intelligence/learning-log.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "pages/verify.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "app/admin/campaigns/[id]/participant-drawer.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "app/api/cron/escalation/route.ts",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "app/dashboard/controls.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "app/foundry/case/success/page.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "app/restricted/RestrictedClient.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/decision/RankedAssetTable.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/SovereignDecisionEngine.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "components/blog/BlogHeader.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/briefing/FragilityRadar.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/canon/CanonHero.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/ContactForm.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/CtaArt.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/dashboard/admin/MyReportsPanel.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/dashboard/DashboardDrilldownPanel.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/decision/UnifiedRecommendationList.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/ConstitutionalDiagnostic.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/ResultCondition.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "components/diagnostics/unified/CaseActiveBanner.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "components/diagnostics/unified/ConsequenceTimeline.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/homepage/CredibilityStrip.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/inner-circle/IntelligenceBriefsClient.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/oversight/RetainedMemoryLossPanel.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/primitives/ContentMeta.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/NextAdmissibleMovePanel.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "components/providers/Toaster.tsx",
+      "hex": 2,
+      "rgb": 1
+    },
+    {
+      "file": "components/system/Frame.tsx",
+      "hex": 0,
+      "rgb": 3
+    },
+    {
+      "file": "components/trust/LegalIdentityBlock.tsx",
+      "hex": 3,
+      "rgb": 0
+    },
+    {
+      "file": "components/trust/PlainEnglishDecisionLayer.tsx",
+      "hex": 1,
+      "rgb": 2
+    },
+    {
+      "file": "pages/access/accept.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/access/redeem.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/api/newsletter.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/api/verify-newsletter.ts",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/books/the-architecture-of-human-purpose-landing.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "pages/canon-campaign/index.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/directorate/dossier/[id].tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/downloads/index.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "pages/editorials/series/[seriesSlug]/index.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "pages/foundry/demo.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/intelligence/gmi/falsification.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "pages/leadership/index.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "pages/lexicon/index.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/resources/index.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "pages/resources/strategic-frameworks/index.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "app/account/instruments/AccountInstrumentsClient.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/brief-orders/PageClient.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/performance/PageClient.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/qa-bench/PageClient.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "app/layout.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "app/registry/RegistryView.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/campaigns/participant-table.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/governance/decision-filter.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/ParticipantLiveView.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/reporting/DecisionAssetCard.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/reporting/institutional-library.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/AlignmentCTA.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/EnterpriseDashboardContainer.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/EnterpriseDashboardController.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/ArticleHero.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/auth/login-view.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/BriefAlert.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/content/CardDisplay.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/content/NextStepCTA.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/dashboard/PDFDataDashboard.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/debug/RouteChecker.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/ResultDecision.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/diagnostics/results/ResultInterruption.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/diagnostics/results/ResultTrajectory.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/diagnostics/results/TrajectoryLine.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/enhanced/ParticleBackground.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/essays/EssaysHero.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/GlobalFootprint.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/InstitutionalSections.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/homepage/MarketDefectBlock.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/homepage/MilestonesTimeline.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/ProfessionalContinuitySection.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/homepage/StrategyRoomSection.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/IntelligenceBrief.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/InteractiveElements.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/LegalStrip.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/living/DecisionAdvantageSummary.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/living/GovernedActionPanel.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/mdx/BriefAlert.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/mdx/PullQuote.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/ogr/TerminalConstitutionSurface.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/print/BrandFrame.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/product/DeliveryFormatPanel.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/product/FirstEncounterProof.tsx",
+      "hex": 1,
+      "rgb": 1
+    },
+    {
+      "file": "components/product/ProductAuthorityWrapper.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/PullLine.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/research/ResearchRunVault.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/search/CommandPalette.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/sections/TeaserHero.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/strategy/BriefViewer.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/system/Block.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/trust/TrustInfoRow.tsx",
+      "hex": 0,
+      "rgb": 2
+    },
+    {
+      "file": "components/ui/LoadingState.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/vault/BriefDetail.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "components/vault/BriefsGrid.tsx",
+      "hex": 2,
+      "rgb": 0
+    },
+    {
+      "file": "pages/access/index.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/admin/inner-circle/index.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/operator-pilot.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/product-surfaces.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/admin/proof.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/admin/report-state.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/api/admin/delivery-queue/send.ts",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/brands/index.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/canon/index.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/contact/success.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/diagnostics/fast.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/downloads/[...slug].tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/editorials/catalogue.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/editorials/discovery.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/foundry/brief/success.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/foundry/start.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/foundry/value.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/inner-circle/briefs/index.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/inner-circle/reports/index.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/inner-circle-portal.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/membership/success.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/offline.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/prints/index.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/refund-policy.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/shorts/[...slug].tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/test-readers.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "pages/ventures/[slug].tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "pages/_app.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/content/PageClient.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/executive-summary/page.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/living-case-fulfilment/FulfilmentClient.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/living-case-fulfilment/page.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "app/admin/intelligence-foundry/market/PageClient.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/intelligence-foundry/outbound/PageClient.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/admin/reporting/executive/page.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "app/api/audit/[id]/success/page.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/audit/[id]/page.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/audit/[id]/success/page.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/client-shell.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/downloads/vault/VaultBrowserClient.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/head.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "app/registry/[...slug]/page.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/NudgeButton.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/reporting/fragility-heatmap.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/admin/reporting/intervention-proposal.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/reporting/intervention-scheduler.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/admin/reporting/ReportRecommendationsPanel.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/EnterpriseIntelligenceDashboard.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/ExecutiveSynthesisDashboard.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/MarketCaptureDashboard.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/OGRFutureHorizon.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/alignment/OGRReadinessChecklist.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/analysis/ComparisonDelta.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/AppShell.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/authority/CanonicalEssayLayout.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/BookHero.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/canon/CanonCard.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/CanonCard.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/Cards/ArticleHero.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/content/ArticleCoverImage.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/ContentCard.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/dashboard/admin/BriefSearch.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/dashboard/GrowthChart.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/dashboard/PortfolioSummary.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/DualAxisInput.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/DualAxisPromptCard.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/ExecutiveReportSampleDownload.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/ProgressIndicator.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/report/ReportShell.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/results/ThresholdProximityLine.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/diagnostics/SeriousBuyerGate.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/DownloadCard.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/downloads/DownloadCard.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/FeatureGrid.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/homepage/MemoryContinuityPreview.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/homepage/RetainedOversightSection.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/layout/Layout.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/media/CoverFrame.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/NotFound.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/primitives/SmartCover.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/research/FoundryModuleGrid.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/shorts/ShortContent.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/SiteLayout.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/system/Divider.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/trust/DiagnosticStandardPanel.tsx",
+      "hex": 1,
+      "rgb": 0
+    },
+    {
+      "file": "components/VaultActivityFeed.tsx",
+      "hex": 0,
+      "rgb": 1
+    },
+    {
+      "file": "components/VaultSearchOverlay.tsx",
+      "hex": 1,
+      "rgb": 0
+    }
+  ]
+}

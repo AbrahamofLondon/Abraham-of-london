@@ -1,0 +1,1158 @@
+{
+  "generatedAt": "2026-07-10T15:15:38.013Z",
+  "sourcesScanned": [
+    "styles/globals.css",
+    "app/globals.css",
+    "styles/design-system.css",
+    "styles/brand-system.css"
+  ],
+  "totalCssVarDefinitions": 214,
+  "distinctVarNames": 156,
+  "crossFileConflictCount": 18,
+  "sameFileScopedVariantCount": 11,
+  "duplicateSameValueVarNames": 4,
+  "conflicts": [
+    {
+      "name": "--aol-bg",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 14,
+          "name": "--aol-bg",
+          "value": "6 6 9"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 24,
+          "name": "--aol-bg",
+          "value": "4 4 5"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-bg-2",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 15,
+          "name": "--aol-bg-2",
+          "value": "9 9 12"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 25,
+          "name": "--aol-bg-2",
+          "value": "8 8 10"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-bg-3",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 16,
+          "name": "--aol-bg-3",
+          "value": "14 14 18"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 26,
+          "name": "--aol-bg-3",
+          "value": "13 13 15"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-panel",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 19,
+          "name": "--aol-panel",
+          "value": "0 0 0"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 27,
+          "name": "--aol-panel",
+          "value": "18 18 20"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-panel-2",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 20,
+          "name": "--aol-panel-2",
+          "value": "10 10 14"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 28,
+          "name": "--aol-panel-2",
+          "value": "22 22 25"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-panel-3",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 21,
+          "name": "--aol-panel-3",
+          "value": "16 16 20"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 29,
+          "name": "--aol-panel-3",
+          "value": "28 28 32"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-ink",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 24,
+          "name": "--aol-ink",
+          "value": "242 241 238"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 31,
+          "name": "--aol-ink",
+          "value": "250 249 245"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-ink-dim",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 25,
+          "name": "--aol-ink-dim",
+          "value": "242 241 238"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 32,
+          "name": "--aol-ink-dim",
+          "value": "225 224 220"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-ink-muted",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 26,
+          "name": "--aol-ink-muted",
+          "value": "242 241 238"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 33,
+          "name": "--aol-ink-muted",
+          "value": "160 160 165"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-gold",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 29,
+          "name": "--aol-gold",
+          "value": "201 169 110"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 35,
+          "name": "--aol-gold",
+          "value": "201 169 106"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-gold-strong",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 30,
+          "name": "--aol-gold-strong",
+          "value": "245 158 11"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 36,
+          "name": "--aol-gold-strong",
+          "value": "222 190 126"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-gold-soft",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 31,
+          "name": "--aol-gold-soft",
+          "value": "184 155 110"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 37,
+          "name": "--aol-gold-soft",
+          "value": "170 144 94"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-danger",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 34,
+          "name": "--aol-danger",
+          "value": "239 68 68"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 43,
+          "name": "--aol-danger",
+          "value": "185 65 65"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-success",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 35,
+          "name": "--aol-success",
+          "value": "34 197 94"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 44,
+          "name": "--aol-success",
+          "value": "46 160 110"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--aol-warning",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 36,
+          "name": "--aol-warning",
+          "value": "234 179 8"
+        },
+        {
+          "file": "app/globals.css",
+          "line": 45,
+          "name": "--aol-warning",
+          "value": "214 135 34"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--font-serif",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 54,
+          "name": "--font-serif",
+          "value": "\"Cormorant Garamond\""
+        },
+        {
+          "file": "app/globals.css",
+          "line": 21,
+          "name": "--font-serif",
+          "value": "var(--font-cormorant), \"Cormorant Garamond\", Georgia, serif"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--font-mono",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 55,
+          "name": "--font-mono",
+          "value": "\"JetBrains Mono\""
+        },
+        {
+          "file": "app/globals.css",
+          "line": 20,
+          "name": "--font-mono",
+          "value": "var(--font-mono), \"JetBrains Mono\", ui-monospace, monospace"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    },
+    {
+      "name": "--font-sans",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 56,
+          "name": "--font-sans",
+          "value": "\"Inter\""
+        },
+        {
+          "file": "app/globals.css",
+          "line": 19,
+          "name": "--font-sans",
+          "value": "var(--font-inter), Inter, system-ui, sans-serif"
+        }
+      ],
+      "kind": "CROSS_FILE_CONFLICT"
+    }
+  ],
+  "scopedVariants": [
+    {
+      "name": "--ds-panel",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 120,
+          "name": "--ds-panel",
+          "value": "var(--surface-read)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 147,
+          "name": "--ds-panel",
+          "value": "rgba(247, 244, 239, 0.92)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 163,
+          "name": "--ds-panel",
+          "value": "rgba(13, 18, 22, 0.86)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-panel-alt",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 121,
+          "name": "--ds-panel-alt",
+          "value": "var(--surface-read-strong)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 148,
+          "name": "--ds-panel-alt",
+          "value": "rgba(247, 244, 239, 0.82)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 164,
+          "name": "--ds-panel-alt",
+          "value": "rgba(26, 35, 43, 0.86)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-border",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 122,
+          "name": "--ds-border",
+          "value": "var(--border-read)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 149,
+          "name": "--ds-border",
+          "value": "rgba(59, 51, 44, 0.12)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 165,
+          "name": "--ds-border",
+          "value": "rgba(188, 203, 218, 0.16)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-border-strong",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 123,
+          "name": "--ds-border-strong",
+          "value": "var(--border-read-strong)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 150,
+          "name": "--ds-border-strong",
+          "value": "rgba(59, 51, 44, 0.18)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 166,
+          "name": "--ds-border-strong",
+          "value": "rgba(188, 203, 218, 0.26)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-text",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 124,
+          "name": "--ds-text",
+          "value": "var(--text-primary)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 151,
+          "name": "--ds-text",
+          "value": "var(--ds-neutral-800)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 167,
+          "name": "--ds-text",
+          "value": "rgba(245, 247, 250, 0.94)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-text-muted",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 125,
+          "name": "--ds-text-muted",
+          "value": "var(--text-secondary)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 152,
+          "name": "--ds-text-muted",
+          "value": "rgba(59, 51, 44, 0.74)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 168,
+          "name": "--ds-text-muted",
+          "value": "rgba(219, 228, 238, 0.76)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-text-subtle",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 126,
+          "name": "--ds-text-subtle",
+          "value": "var(--text-muted)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 153,
+          "name": "--ds-text-subtle",
+          "value": "rgba(59, 51, 44, 0.56)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 169,
+          "name": "--ds-text-subtle",
+          "value": "rgba(219, 228, 238, 0.56)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-accent",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 128,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-400)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 154,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-500)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 170,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-300)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 178,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-400)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 186,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-400)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 193,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-400)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 200,
+          "name": "--ds-accent",
+          "value": "var(--ds-amber-500)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-accent-soft",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 129,
+          "name": "--ds-accent-soft",
+          "value": "rgba(240, 185, 79, 0.20)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 155,
+          "name": "--ds-accent-soft",
+          "value": "rgba(201, 123, 27, 0.14)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 171,
+          "name": "--ds-accent-soft",
+          "value": "rgba(240, 185, 79, 0.12)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 179,
+          "name": "--ds-accent-soft",
+          "value": "rgba(240, 185, 79, 0.16)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 201,
+          "name": "--ds-accent-soft",
+          "value": "rgba(201, 123, 27, 0.18)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-hero-wash",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 134,
+          "name": "--ds-hero-wash",
+          "value": "radial-gradient(circle at 15% 15%, rgba(240, 185, 79, 0.10), transparent 42%)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 156,
+          "name": "--ds-hero-wash",
+          "value": "radial-gradient(circle at 18% 18%, rgba(201, 123, 27, 0.10), transparent 42%)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 172,
+          "name": "--ds-hero-wash",
+          "value": "linear-gradient(135deg, rgba(81, 105, 126, 0.18), rgba(240, 185, 79, 0.06))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 180,
+          "name": "--ds-hero-wash",
+          "value": "radial-gradient(circle at 16% 14%, rgba(240, 185, 79, 0.08), transparent 40%)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 187,
+          "name": "--ds-hero-wash",
+          "value": "radial-gradient(circle at 50% 20%, rgba(240, 185, 79, 0.08), transparent 44%)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 194,
+          "name": "--ds-hero-wash",
+          "value": "radial-gradient(circle at 14% 16%, rgba(240, 185, 79, 0.06), transparent 38%)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 202,
+          "name": "--ds-hero-wash",
+          "value": "radial-gradient(circle at 20% 20%, rgba(201, 123, 27, 0.12), transparent 42%)"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    },
+    {
+      "name": "--ds-hero-scrim",
+      "definitions": [
+        {
+          "file": "styles/design-system.css",
+          "line": 135,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(7, 7, 7, 0.14), rgba(7, 7, 7, 0.54))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 157,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(247, 244, 239, 0.10), rgba(247, 244, 239, 0.70))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 173,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(13, 18, 22, 0.18), rgba(13, 18, 22, 0.68))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 181,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(7, 7, 7, 0.12), rgba(7, 7, 7, 0.48))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 188,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(7, 7, 7, 0.10), rgba(7, 7, 7, 0.42))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 195,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(7, 7, 7, 0.16), rgba(7, 7, 7, 0.56))"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 203,
+          "name": "--ds-hero-scrim",
+          "value": "linear-gradient(180deg, rgba(7, 7, 7, 0.20), rgba(7, 7, 7, 0.62))"
+        }
+      ],
+      "kind": "SAME_FILE_SCOPED_VARIANT"
+    }
+  ],
+  "duplicatesSameValue": [
+    {
+      "name": "--aol-watermark",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 44,
+          "name": "--aol-watermark",
+          "value": "\"\""
+        },
+        {
+          "file": "app/globals.css",
+          "line": 77,
+          "name": "--aol-watermark",
+          "value": "\"\""
+        }
+      ]
+    },
+    {
+      "name": "--text-primary",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 47,
+          "name": "--text-primary",
+          "value": "rgba(255, 255, 255, 0.92)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 113,
+          "name": "--text-primary",
+          "value": "rgba(255, 255, 255, 0.92)"
+        }
+      ]
+    },
+    {
+      "name": "--text-secondary",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 48,
+          "name": "--text-secondary",
+          "value": "rgba(255, 255, 255, 0.72)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 114,
+          "name": "--text-secondary",
+          "value": "rgba(255, 255, 255, 0.72)"
+        }
+      ]
+    },
+    {
+      "name": "--text-muted",
+      "definitions": [
+        {
+          "file": "styles/globals.css",
+          "line": 49,
+          "name": "--text-muted",
+          "value": "rgba(255, 255, 255, 0.58)"
+        },
+        {
+          "file": "styles/design-system.css",
+          "line": 115,
+          "name": "--text-muted",
+          "value": "rgba(255, 255, 255, 0.58)"
+        }
+      ]
+    }
+  ],
+  "tsLeafColorConstants": [
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 39,
+      "name": "void",
+      "value": "#030305"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 41,
+      "name": "base",
+      "value": "#060609"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 43,
+      "name": "lifted",
+      "value": "#09090C"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 45,
+      "name": "panel",
+      "value": "#0E0E12"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 47,
+      "name": "glass",
+      "value": "rgba(0, 0, 0, 0.28)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 49,
+      "name": "deep",
+      "value": "rgba(0, 0, 0, 0.42)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 51,
+      "name": "surface",
+      "value": "rgba(255, 255, 255, 0.02)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 57,
+      "name": "soft",
+      "value": "#C9A96E"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 59,
+      "name": "muted",
+      "value": "#B89B6E"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 61,
+      "name": "strong",
+      "value": "#F59E0B"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 63,
+      "name": "strongDark",
+      "value": "#B45309"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 69,
+      "name": "primary",
+      "value": "#FFFFFF"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 71,
+      "name": "body",
+      "value": "rgba(255, 255, 255, 0.85)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 73,
+      "name": "muted",
+      "value": "rgba(255, 255, 255, 0.66)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 75,
+      "name": "dim",
+      "value": "rgba(255, 255, 255, 0.48)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 77,
+      "name": "faint",
+      "value": "rgba(255, 255, 255, 0.34)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 83,
+      "name": "subtle",
+      "value": "rgba(255, 255, 255, 0.08)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 85,
+      "name": "default",
+      "value": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 87,
+      "name": "strong",
+      "value": "rgba(255, 255, 255, 0.18)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 89,
+      "name": "gold",
+      "value": "rgba(201, 169, 110, 0.24)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 91,
+      "name": "goldRule",
+      "value": "rgba(201, 169, 110, 0.34)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 93,
+      "name": "amber",
+      "value": "rgba(245, 158, 11, 0.24)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 95,
+      "name": "amberStrong",
+      "value": "rgba(245, 158, 11, 0.32)"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 100,
+      "name": "danger",
+      "value": "#EF4444"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 101,
+      "name": "success",
+      "value": "#22C55E"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 102,
+      "name": "warning",
+      "value": "#EAB308"
+    },
+    {
+      "file": "lib/design/tokens.ts",
+      "line": 103,
+      "name": "info",
+      "value": "#3B82F6"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 25,
+      "name": "50",
+      "value": "#f7f4ef"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 26,
+      "name": "100",
+      "value": "#ece7df"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 27,
+      "name": "200",
+      "value": "#d9d0c3"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 28,
+      "name": "300",
+      "value": "#bcae9d"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 29,
+      "name": "400",
+      "value": "#958674"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 30,
+      "name": "500",
+      "value": "#726452"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 31,
+      "name": "600",
+      "value": "#55493c"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 32,
+      "name": "700",
+      "value": "#3b332c"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 33,
+      "name": "800",
+      "value": "#221d19"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 34,
+      "name": "900",
+      "value": "#0b0a09"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 37,
+      "name": "50",
+      "value": "#fff7e6"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 38,
+      "name": "100",
+      "value": "#fdecc6"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 39,
+      "name": "200",
+      "value": "#f8d68b"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 40,
+      "name": "300",
+      "value": "#f0b94f"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 41,
+      "name": "400",
+      "value": "#df9830"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 42,
+      "name": "500",
+      "value": "#c97b1b"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 43,
+      "name": "600",
+      "value": "#9b5d13"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 44,
+      "name": "700",
+      "value": "#71430f"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 45,
+      "name": "800",
+      "value": "#492a0b"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 46,
+      "name": "900",
+      "value": "#241405"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 49,
+      "name": "50",
+      "value": "#edf2f7"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 50,
+      "name": "100",
+      "value": "#dbe4ee"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 51,
+      "name": "200",
+      "value": "#bccbda"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 52,
+      "name": "300",
+      "value": "#92a9bd"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 53,
+      "name": "400",
+      "value": "#6a869d"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 54,
+      "name": "500",
+      "value": "#51697e"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 55,
+      "name": "600",
+      "value": "#3f5364"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 56,
+      "name": "700",
+      "value": "#2c3946"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 57,
+      "name": "800",
+      "value": "#1a232b"
+    },
+    {
+      "file": "lib/design-system/tokens.ts",
+      "line": 58,
+      "name": "900",
+      "value": "#0d1216"
+    }
+  ],
+  "tailwindColorNamespaces": [
+    "background",
+    "foreground",
+    "border",
+    "input",
+    "ring",
+    "surface",
+    "ds",
+    "aol",
+    "card",
+    "brand",
+    "softGold",
+    "gold",
+    "amber",
+    "cream",
+    "warmWhite",
+    "charcoal",
+    "deepCharcoal",
+    "softBlack",
+    "obsidian",
+    "lightGrey",
+    "forest",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "8",
+    "10",
+    "12",
+    "16",
+    "20",
+    "24",
+    "32",
+    "40",
+    "48",
+    "56",
+    "64",
+    "ds",
+    "hero",
+    "60",
+    "70",
+    "80",
+    "90",
+    "100",
+    "110",
+    "xs",
+    "premium",
+    "card",
+    "cardHover",
+    "terminal"
+  ]
+}
