@@ -7,7 +7,8 @@ import type { BoardBriefResult } from "@/lib/instruments/board-brief-template/en
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
 
 const BoardBriefRun: NextPage = () => {
-  const [result, setResult] = React.useState<BoardBriefResult | null>(null);const [resultKey, setResultKey] = React.useState<string | null>(null);
+  const [result, setResult] = React.useState<BoardBriefResult | null>(null);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
 
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "board-brief-builder" }); }, []);
 

@@ -5,9 +5,13 @@ import EscalationReadinessRunner from "@/components/instruments/EscalationReadin
 import { track } from "@/lib/analytics/track";
 import type { EscalationResult } from "@/lib/instruments/escalation-readiness-scorecard/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const EscalationReadinessRun: NextPage = () => {
   const [result, setResult] = React.useState<EscalationResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "escalation-readiness-scorecard" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "escalation-readiness-scorecard" }); }, []);
 
   async function handleComplete(r: EscalationResult) {
     setResult(r);

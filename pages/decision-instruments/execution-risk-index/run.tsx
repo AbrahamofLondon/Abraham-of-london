@@ -10,6 +10,7 @@ const ExecutionRiskRun: NextPage = () => {
   const [result, setResult] = React.useState<ExecutionRiskResult | null>(null);
   const [resultKey, setResultKey] = React.useState<string | null>(null);
 
+
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "execution-risk-index" }); }, []);
 
   async function handleComplete(r: ExecutionRiskResult) {

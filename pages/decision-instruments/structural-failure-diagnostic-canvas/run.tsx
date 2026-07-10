@@ -5,9 +5,13 @@ import StructuralFailureCanvasRunner from "@/components/instruments/StructuralFa
 import { track } from "@/lib/analytics/track";
 import type { FailureResult } from "@/lib/instruments/structural-failure-diagnostic-canvas/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const StructuralFailureRun: NextPage = () => {
   const [result, setResult] = React.useState<FailureResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "structural-failure-diagnostic-canvas" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "structural-failure-diagnostic-canvas" }); }, []);
 
   async function handleComplete(r: FailureResult) {
     setResult(r);

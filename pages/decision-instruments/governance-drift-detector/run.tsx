@@ -5,9 +5,13 @@ import GovernanceDriftDetectorRunner from "@/components/instruments/GovernanceDr
 import { track } from "@/lib/analytics/track";
 import type { DriftResult } from "@/lib/instruments/governance-drift-detector/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const GovernanceDriftRun: NextPage = () => {
   const [result, setResult] = React.useState<DriftResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "governance-drift-detector" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "governance-drift-detector" }); }, []);
 
   async function handleComplete(r: DriftResult) {
     setResult(r);

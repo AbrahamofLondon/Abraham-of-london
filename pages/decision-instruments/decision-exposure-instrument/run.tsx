@@ -5,11 +5,13 @@ import DecisionExposureRunner from "@/components/instruments/DecisionExposureRun
 import { track } from "@/lib/analytics/track";
 import type { ExposureResult } from "@/lib/instruments/decision-exposure/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const DecisionExposureRun: NextPage = () => {
   const [result, setResult] = React.useState<ExposureResult | null>(null);
   const [resultKey, setResultKey] = React.useState<string | null>(null);
 
-  // Resolve authority for decision_exposure_instrumentReact.useEffect(() => { track("instrument_started", { instrumentSlug: "decision-exposure-instrument" }); }, []);
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "decision-exposure-instrument" }); }, []);
 
   async function handleComplete(r: ExposureResult) {
     setResult(r);

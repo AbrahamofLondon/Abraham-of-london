@@ -5,9 +5,13 @@ import MandateClarityRunner from "@/components/instruments/MandateClarityRunner"
 import { track } from "@/lib/analytics/track";
 import type { MandateResult } from "@/lib/instruments/mandate-clarity/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const MandateClarityRun: NextPage = () => {
   const [result, setResult] = React.useState<MandateResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "mandate-clarity-framework" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "mandate-clarity-framework" }); }, []);
 
   async function handleComplete(r: MandateResult) {
     setResult(r);

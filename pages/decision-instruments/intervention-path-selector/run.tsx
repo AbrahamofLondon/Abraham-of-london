@@ -5,9 +5,13 @@ import InterventionPathRunner from "@/components/instruments/InterventionPathRun
 import { track } from "@/lib/analytics/track";
 import type { InterventionResult } from "@/lib/instruments/intervention-path/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const InterventionPathRun: NextPage = () => {
   const [result, setResult] = React.useState<InterventionResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "intervention-path-selector" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "intervention-path-selector" }); }, []);
 
   async function handleComplete(r: InterventionResult) {
     setResult(r);

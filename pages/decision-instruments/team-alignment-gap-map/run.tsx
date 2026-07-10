@@ -5,9 +5,13 @@ import TeamAlignmentGapMapRunner from "@/components/instruments/TeamAlignmentGap
 import { track } from "@/lib/analytics/track";
 import type { AlignmentResult } from "@/lib/instruments/team-alignment-gap-map/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const TeamAlignmentRun: NextPage = () => {
   const [result, setResult] = React.useState<AlignmentResult | null>(null);
-  const [resultKey, setResultKey] = React.useState<string | null>(null);React.useEffect(() => { track("instrument_started", { instrumentSlug: "team-alignment-gap-map" }); }, []);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
+
+
+  React.useEffect(() => { track("instrument_started", { instrumentSlug: "team-alignment-gap-map" }); }, []);
 
   async function handleComplete(r: AlignmentResult) {
     setResult(r);

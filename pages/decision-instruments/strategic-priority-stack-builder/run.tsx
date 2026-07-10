@@ -5,8 +5,10 @@ import StrategicPriorityStackRunner from "@/components/instruments/StrategicPrio
 import { track } from "@/lib/analytics/track";
 import type { PriorityStackResult } from "@/lib/instruments/strategic-priority-stack-builder/engine";
 import { buildInstrumentSignalAuthority } from "@/lib/product/instrument-signal-authority";
+
 const PriorityStackRun: NextPage = () => {
-  const [result, setResult] = React.useState<PriorityStackResult | null>(null);const [resultKey, setResultKey] = React.useState<string | null>(null);
+  const [result, setResult] = React.useState<PriorityStackResult | null>(null);
+  const [resultKey, setResultKey] = React.useState<string | null>(null);
 
   React.useEffect(() => { track("instrument_started", { instrumentSlug: "strategic-priority-stack-builder" }); }, []);
 
