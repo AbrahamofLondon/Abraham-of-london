@@ -26,11 +26,11 @@ import type {
 } from "./product-authority-contract";
 
 export type PublicProductPosture =
-  | "AVAILABLE"
-  | "CONTROLLED_ACCESS"
+  | "PUBLIC_AUTHORITY_CLEARED"
+  | "CONTROLLED_AUTHORITY"
   | "EVIDENCE_LIMITED"
-  | "REFERENCE_ONLY"
-  | "UNAVAILABLE";
+  | "REFERENCE_AUTHORITY"
+  | "NO_PUBLIC_AUTHORITY";
 
 export interface PublicProductAuthorityProjection {
   productCode: string;
@@ -49,45 +49,45 @@ export interface PublicProductAuthorityProjection {
  * exposed; only the mapped posture is.
  */
 const POSTURE_BY_STATE: Record<ProductAuthorityState, PublicProductPosture> = {
-  externally_proven_gold_product: "AVAILABLE",
-  diagnostic_product: "AVAILABLE",
-  judgement_product: "AVAILABLE",
+  externally_proven_gold_product: "PUBLIC_AUTHORITY_CLEARED",
+  diagnostic_product: "PUBLIC_AUTHORITY_CLEARED",
+  judgement_product: "PUBLIC_AUTHORITY_CLEARED",
   legacy_validated_pending_v2_revalidation: "EVIDENCE_LIMITED",
   blocked_until_claim_evidenced: "EVIDENCE_LIMITED",
   blocked_until_v2_revalidation: "EVIDENCE_LIMITED",
   measurement_inconclusive: "EVIDENCE_LIMITED",
-  pending_reconciliation: "CONTROLLED_ACCESS",
-  static_reference: "REFERENCE_ONLY",
-  internal_only: "UNAVAILABLE",
-  authority_contract_missing: "UNAVAILABLE",
+  pending_reconciliation: "CONTROLLED_AUTHORITY",
+  static_reference: "REFERENCE_AUTHORITY",
+  internal_only: "NO_PUBLIC_AUTHORITY",
+  authority_contract_missing: "NO_PUBLIC_AUTHORITY",
 };
 
 /** Customer-facing meaning per posture — controlled vocabulary, no internals. */
 const CUSTOMER_MEANING: Record<PublicProductPosture, string> = {
-  AVAILABLE:
-    "This product is available to use now.",
-  CONTROLLED_ACCESS:
-    "Access to this product is arranged directly rather than by instant checkout.",
+  PUBLIC_AUTHORITY_CLEARED:
+    "Authority cleared. Release, commercial, and progression state are separate dimensions.",
+  CONTROLLED_AUTHORITY:
+    "Authority is controlled. Access is arranged directly rather than by instant checkout.",
   EVIDENCE_LIMITED:
-    "This product is available, with results presented as a considered signal rather than a certified outcome.",
-  REFERENCE_ONLY:
-    "This is a reference edition — available to read, not to purchase.",
-  UNAVAILABLE:
-    "This product is not currently available.",
+    "Evidence-limited authority. Results are presented as a considered signal rather than a certified outcome.",
+  REFERENCE_AUTHORITY:
+    "Reference authority. Provided for reading and citation, not for purchase.",
+  NO_PUBLIC_AUTHORITY:
+    "No public authority has been established for this product.",
 };
 
 /** Public claim language per posture — owner-controlled, safe to render. */
 const PUBLIC_CLAIM_LANGUAGE: Record<PublicProductPosture, string> = {
-  AVAILABLE:
-    "Available. Provides a structured, governed decision signal from the context you supply.",
-  CONTROLLED_ACCESS:
-    "Available by arrangement. Provided through a governed access route.",
+  PUBLIC_AUTHORITY_CLEARED:
+    "Authority cleared. Provides a structured, governed decision signal from the context you supply.",
+  CONTROLLED_AUTHORITY:
+    "Controlled authority. Provided through a governed access route.",
   EVIDENCE_LIMITED:
-    "Available as a considered signal. It does not certify outcomes or independently verify the underlying facts.",
-  REFERENCE_ONLY:
-    "Reference edition. Provided for reading and citation.",
-  UNAVAILABLE:
-    "Not currently available.",
+    "Evidence-limited authority. Does not certify outcomes or independently verify the underlying facts.",
+  REFERENCE_AUTHORITY:
+    "Reference authority. Provided for reading and citation.",
+  NO_PUBLIC_AUTHORITY:
+    "No public authority established.",
 };
 
 export interface ProjectionOptions {
@@ -104,7 +104,7 @@ export function projectPublicProductAuthority(
   contract: ProductAuthorityContract,
   options: ProjectionOptions = {},
 ): PublicProductAuthorityProjection {
-  const posture = POSTURE_BY_STATE[contract.currentAuthorityState] ?? "UNAVAILABLE";
+  const posture = POSTURE_BY_STATE[contract.currentAuthorityState] ?? "NO_PUBLIC_AUTHORITY";
   return {
     productCode: contract.productCode,
     posture,

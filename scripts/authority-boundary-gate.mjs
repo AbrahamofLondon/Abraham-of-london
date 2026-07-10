@@ -2,21 +2,30 @@
 /**
  * scripts/authority-boundary-gate.mjs
  *
- * Phase 6A — static import boundary gate.
+ * Phase 6A v2 — transitive import boundary gate.
  *
- * Rejects public / controlled-customer RENDERED routes that import internal
- * authority modules. Admin, internal-operator, and explicitly-classified
- * public-accountability routes are allowlisted (the exemption is a fixed set,
- * never a wildcard).
+ * Walks the FULL local import graph from every governed route entrypoint
+ * to detect forbidden internal authority modules at any depth.
+ *
+ * Route taxonomy (6 classes):
+ *   ADMIN               — /admin/* paths
+ *   INTERNAL_OPERATOR   — /inner-circle/admin/*, /api/admin/*, /api/internal/*
+ *   PUBLIC_ACCOUNTABILITY — fixed allowlist (never a wildcard)
+ *   PUBLIC_CUSTOMER     — no auth required, free access
+ *   CONTROLLED_CUSTOMER — auth + entitlement check
+ *   ENTITLED_CUSTOMER   — paid gating (currently none at route level)
+ *
+ * Enforcement: PUBLIC_CUSTOMER + CONTROLLED_CUSTOMER + ENTITLED_CUSTOMER
+ * are gated. ADMIN, INTERNAL_OPERATOR, PUBLIC_ACCOUNTABILITY are exempt.
  *
  * Exit 1 on any violation.
  */
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { join, relative, dirname, resolve } from "node:path";
 
 const ROOT = process.cwd();
 
-// ── Forbidden internal-module specifiers ─────────────────────────────────────
+// Forbidden internal-module specifiers (regex)
 const FORBIDDEN = [
   /components\/product\/ProductAuthority(Panel|Notice|Badge|Wrapper)/,
   /lib\/product\/resolve-product-authority/,
@@ -30,6 +39,8 @@ const FORBIDDEN = [
   /lib\/product\/derived-evidence-state/,
   /lib\/product\/frozen-validation-scenarios/,
   /lib\/product\/product-qualification-backbone/,
+  /lib\/product\/external-product-value-evidence/,
+  /lib\/product\/generic-ai-comparison-engine/,
   /lib\/intelligence\/gmi-red-team-store/,
   /lib\/intelligence\/product-evidence-ledger/,
   /lib\/intelligence\/run-evidence-ledger/,
@@ -38,23 +49,111 @@ const FORBIDDEN = [
   /lib\/intelligence\/gmi-release-durable-resolver\.server/,
 ];
 
-// ── Route classification ─────────────────────────────────────────────────────
-// ADMIN / INTERNAL_OPERATOR: any path segment "admin".
-// PUBLIC_ACCOUNTABILITY: fixed allowlist (never a wildcard).
+// Route classification
 const PUBLIC_ACCOUNTABILITY = new Set([
   "pages/intelligence/gmi/red-team.tsx",
 ]);
 
+const CONTROLLED_CUSTOMER_PREFIXES = [
+  "pages/strategy-room",
+  "pages/counsel",
+  "pages/oversight",
+  "pages/boardroom",
+  "pages/client",
+  "pages/portal",
+  "pages/decision-centre/case",
+  "pages/case/shared",
+  "pages/report",
+  "pages/retainer",
+  "pages/retainers",
+  "pages/return-brief",
+  "pages/decision-instruments",
+  "pages/diagnostics/executive-reporting/run",
+  "pages/diagnostics/constitutional-diagnostic",
+  "pages/diagnostics/enterprise-assessment",
+  "pages/diagnostics/team-assessment",
+  "pages/diagnostics/watch",
+  "pages/inner-circle",
+  "pages/private",
+  "pages/private-clients",
+  "pages/account",
+  "pages/access",
+  "pages/checkout",
+  "pages/offers",
+  "pages/premium",
+  "pages/market-intelligence",
+  "pages/provenance/case",
+  "pages/provenance/anchor-log",
+  "pages/enterprise/preview",
+  "pages/kernel/signal",
+  "pages/lab",
+  "pages/my-instruments",
+  "pages/outcome",
+  "app/client",
+  "app/portal",
+  "app/restricted",
+  "app/boardroom",
+  "app/assessment",
+  "app/audit",
+  "app/enterprise",
+  "app/strategy-room",
+  "app/purpose-alignment",
+  "app/settings",
+  "app/account",
+  "app/downloads",
+  "app/foundry/case",
+];
+
 function classify(rel) {
   const p = rel.replace(/\\/g, "/");
   if (/(^|\/)admin(\/|$)/.test(p)) return "ADMIN";
+  if (p.includes("inner-circle/admin")) return "INTERNAL_OPERATOR";
   if (PUBLIC_ACCOUNTABILITY.has(p)) return "PUBLIC_ACCOUNTABILITY";
+  for (const prefix of CONTROLLED_CUSTOMER_PREFIXES) {
+    if (p.startsWith(prefix)) return "CONTROLLED_CUSTOMER";
+  }
   return "PUBLIC_CUSTOMER";
 }
 
-// ── Enumerate rendered route files ───────────────────────────────────────────
-// pages/**/*.tsx  (excluding api, _app, _document) + app/**/page.tsx
-function walk(dir, acc = []) {
+// Module resolution
+function resolveSpec(spec, baseFile) {
+  const baseDir = dirname(baseFile);
+  let resolved;
+
+  if (spec.startsWith("@/")) {
+    resolved = join(ROOT, spec.slice(2));
+  } else if (spec.startsWith(".")) {
+    resolved = resolve(baseDir, spec);
+  } else {
+    return null;
+  }
+
+  for (const ext of ["", ".ts", ".tsx", ".js", ".mjs"]) {
+    const candidate = resolved + ext;
+    if (existsSync(candidate)) return relative(ROOT, candidate).replace(/\\/g, "/");
+  }
+
+  for (const ext of [".ts", ".tsx", ".js", ".mjs"]) {
+    const candidate = join(resolved, "index" + ext);
+    if (existsSync(candidate)) return relative(ROOT, candidate).replace(/\\/g, "/");
+  }
+
+  return null;
+}
+
+function extractSpecifiers(src) {
+  const specs = [];
+  const staticRe = /import\s+[\s\S]*?\bfrom\s+["']([^"']+)["']/g;
+  let m;
+  while ((m = staticRe.exec(src)) !== null) specs.push(m[1]);
+  const dynamicRe = /import\s*\(\s*["']([^"']+)["']\s*\)/g;
+  while ((m = dynamicRe.exec(src)) !== null) specs.push(m[1]);
+  const requireRe = /require\s*\(\s*["']([^"']+)["']\s*\)/g;
+  while ((m = requireRe.exec(src)) !== null) specs.push(m[1]);
+  return specs;
+}
+
+function walk(dir, acc) {
   let entries;
   try { entries = readdirSync(dir); } catch { return acc; }
   for (const e of entries) {
@@ -62,11 +161,9 @@ function walk(dir, acc = []) {
     let st;
     try { st = statSync(full); } catch { continue; }
     if (st.isDirectory()) {
-      if (e === "node_modules" || e === ".next" || e === ".git") continue;
+      if (["node_modules", ".next", ".git", ".contentlayer"].includes(e)) continue;
       walk(full, acc);
-    } else {
-      acc.push(full);
-    }
+    } else if (st.isFile()) acc.push(full);
   }
   return acc;
 }
@@ -74,7 +171,7 @@ function walk(dir, acc = []) {
 function isRenderedRoute(rel) {
   const p = rel.replace(/\\/g, "/");
   if (p.startsWith("pages/")) {
-    if (p.startsWith("pages/api/")) return false;         // API JSON covered by serialization tests
+    if (p.startsWith("pages/api/")) return false;
     if (/\/_app\.|\/_document\./.test(p)) return false;
     return p.endsWith(".tsx");
   }
@@ -85,50 +182,97 @@ function isRenderedRoute(rel) {
   return false;
 }
 
-function importSpecifiers(src) {
-  const specs = [];
-  const re = /(?:import[\s\S]*?from|import|require\()\s*["']([^"']+)["']/g;
-  let m;
-  while ((m = re.exec(src)) !== null) specs.push(m[1]);
-  return specs;
-}
-
-const files = [
-  ...walk(join(ROOT, "pages")),
-  ...walk(join(ROOT, "app")),
+// Main
+const routeFiles = [
+  ...walk(join(ROOT, "pages"), []),
+  ...walk(join(ROOT, "app"), []),
 ]
   .map((f) => relative(ROOT, f))
   .filter(isRenderedRoute);
 
+const byClass = {
+  ADMIN: 0, INTERNAL_OPERATOR: 0, PUBLIC_ACCOUNTABILITY: 0,
+  PUBLIC_CUSTOMER: 0, CONTROLLED_CUSTOMER: 0, ENTITLED_CUSTOMER: 0,
+};
+
+const GATED_CLASSES = new Set(["PUBLIC_CUSTOMER", "CONTROLLED_CUSTOMER", "ENTITLED_CUSTOMER"]);
+
 const violations = [];
 let audited = 0;
-const byClass = { ADMIN: 0, PUBLIC_ACCOUNTABILITY: 0, PUBLIC_CUSTOMER: 0 };
+let totalImportsResolved = 0;
 
-for (const rel of files) {
+for (const rel of routeFiles) {
   const cls = classify(rel);
   byClass[cls]++;
-  if (cls !== "PUBLIC_CUSTOMER") continue; // only public/customer routes are gated
+
+  if (!GATED_CLASSES.has(cls)) continue;
   audited++;
-  const src = readFileSync(join(ROOT, rel), "utf8");
-  for (const spec of importSpecifiers(src)) {
-    for (const bad of FORBIDDEN) {
-      if (bad.test(spec)) violations.push({ route: rel, importSpec: spec });
+
+  const queue = [rel];
+  const localVisited = new Set();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (localVisited.has(current)) continue;
+    localVisited.add(current);
+
+    const absPath = join(ROOT, current);
+    if (!existsSync(absPath)) continue; try { if (!statSync(absPath).isFile()) continue; } catch { continue; }
+
+    const src = readFileSync(absPath, "utf8");
+    const specs = extractSpecifiers(src);
+
+    for (const spec of specs) {
+      let isForbidden = false;
+      let matchedPattern = null;
+      for (const bad of FORBIDDEN) {
+        if (bad.test(spec)) {
+          isForbidden = true;
+          matchedPattern = bad;
+          break;
+        }
+      }
+
+      if (isForbidden) {
+        violations.push({
+          route: rel,
+          chain: [...localVisited].slice(1),
+          importSpec: spec,
+          matchedPattern: matchedPattern.source,
+        });
+        continue;
+      }
+
+      const resolved = resolveSpec(spec, current);
+      if (resolved && !localVisited.has(resolved)) {
+        queue.push(resolved);
+        totalImportsResolved++;
+      }
     }
   }
 }
 
-console.log("── Authority Boundary Gate (6A) ──");
-console.log(`Rendered routes discovered : ${files.length}`);
-console.log(`  ADMIN / operator         : ${byClass.ADMIN}`);
-console.log(`  PUBLIC_ACCOUNTABILITY    : ${byClass.PUBLIC_ACCOUNTABILITY}`);
-console.log(`  PUBLIC_CUSTOMER (gated)  : ${byClass.PUBLIC_CUSTOMER}`);
-console.log(`Public/customer routes audited for forbidden imports: ${audited}`);
+console.log("--- Authority Boundary Gate (6A v2 -- transitive) ---");
+console.log("Rendered routes discovered : " + routeFiles.length);
+console.log("  ADMIN                  : " + byClass.ADMIN);
+console.log("  INTERNAL_OPERATOR      : " + byClass.INTERNAL_OPERATOR);
+console.log("  PUBLIC_ACCOUNTABILITY  : " + byClass.PUBLIC_ACCOUNTABILITY);
+console.log("  PUBLIC_CUSTOMER        : " + byClass.PUBLIC_CUSTOMER);
+console.log("  CONTROLLED_CUSTOMER    : " + byClass.CONTROLLED_CUSTOMER);
+console.log("  ENTITLED_CUSTOMER      : " + byClass.ENTITLED_CUSTOMER);
+console.log("Gated routes audited (transitive): " + audited);
+console.log("Local imports resolved in graph  : " + totalImportsResolved);
 
 if (violations.length > 0) {
-  console.error(`\n❌ AUTHORITY BOUNDARY VIOLATIONS: ${violations.length}`);
-  for (const v of violations) console.error(`  ${v.route}  imports  ${v.importSpec}`);
+  console.error("\n*** AUTHORITY BOUNDARY VIOLATIONS: " + violations.length);
+  for (const v of violations) {
+    console.error("  Route: " + v.route);
+    if (v.chain.length > 0) console.error("    Chain: " + v.chain.join(" -> "));
+    console.error("    Imports: " + v.importSpec);
+    console.error("    Pattern: " + v.matchedPattern);
+  }
   process.exit(1);
 }
 
-console.log("\n✅ No public/customer route imports a forbidden internal authority module.");
+console.log("\n*** No gated route reaches a forbidden internal authority module at any depth.");
 process.exit(0);

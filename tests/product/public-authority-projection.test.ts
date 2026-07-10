@@ -67,17 +67,17 @@ function internalContract(state: ProductAuthorityState): ProductAuthorityContrac
 
 describe("state → posture mapping", () => {
   const cases: Array<[ProductAuthorityState, PublicProductPosture]> = [
-    ["externally_proven_gold_product", "AVAILABLE"],
-    ["diagnostic_product", "AVAILABLE"],
-    ["judgement_product", "AVAILABLE"],
+    ["externally_proven_gold_product", "PUBLIC_AUTHORITY_CLEARED"],
+    ["diagnostic_product", "PUBLIC_AUTHORITY_CLEARED"],
+    ["judgement_product", "PUBLIC_AUTHORITY_CLEARED"],
     ["legacy_validated_pending_v2_revalidation", "EVIDENCE_LIMITED"],
     ["blocked_until_claim_evidenced", "EVIDENCE_LIMITED"],
     ["blocked_until_v2_revalidation", "EVIDENCE_LIMITED"],
     ["measurement_inconclusive", "EVIDENCE_LIMITED"],
-    ["pending_reconciliation", "CONTROLLED_ACCESS"],
-    ["static_reference", "REFERENCE_ONLY"],
-    ["internal_only", "UNAVAILABLE"],
-    ["authority_contract_missing", "UNAVAILABLE"],
+    ["pending_reconciliation", "CONTROLLED_AUTHORITY"],
+    ["static_reference", "REFERENCE_AUTHORITY"],
+    ["internal_only", "NO_PUBLIC_AUTHORITY"],
+    ["authority_contract_missing", "NO_PUBLIC_AUTHORITY"],
   ];
 
   it.each(cases)("%s → %s", (state, expected) => {
