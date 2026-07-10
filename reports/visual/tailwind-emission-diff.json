@@ -1,0 +1,5 @@
+{
+  "status": "DEFERRED_TO_PHASE_3",
+  "reason": "Requires compiling both the current custom extractor and an experimental default-extraction configuration, then diffing emitted class sets across representative routes per brief §11 steps 3-6. Not attempted in Phase 0 (measurement-only, no build experiments).",
+  "prerequisite": "tailwind-extractor-trigger-inventory.json (done, Phase 0) identifies the 3 files that would be affected by any extractor change."
+}

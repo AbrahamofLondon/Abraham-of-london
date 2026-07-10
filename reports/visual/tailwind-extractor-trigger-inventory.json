@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-07-10T15:18:11.000Z",
+  "triggerPattern": ".replace(/[-:.]",
+  "contentGlobScanned": [
+    "pages/**",
+    "components/**",
+    "app/**",
+    "layouts/**",
+    "lib/**",
+    "src/**"
+  ],
+  "filesTriggering": [
+    "lib/diagnostics/store.ts",
+    "lib/reports/store.ts",
+    "lib/server/diagnostics/store.ts"
+  ],
+  "count": 3,
+  "note": "All 3 trigger files are lib/ store modules, not component/page files. No component or page currently triggers the extractor skip, so no known live class-truncation incident exists today — but the mechanism silently zeroes Tailwind class extraction for any future file containing this exact regex substring, with no build warning. Formal empirical investigation (extractor experiment, emission diff) is Phase 3 scope per section 11 of the brief, not Phase 0."
+}

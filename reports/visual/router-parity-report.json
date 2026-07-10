@@ -1,0 +1,13 @@
+{
+  "status": "PARTIAL — token-level conflicts known, fixture-mount comparison DEFERRED_TO_PHASE_2",
+  "knownTokenConflicts": {
+    "source": "token-conflict-register.json",
+    "crossFileConflictCount": 18,
+    "note": "18 --aol-*/--font-* variables resolve to different values between styles/globals.css (Pages Router) and app/globals.css (App Router). This is necessary-but-not-sufficient evidence of parity failure — it proves the token SOURCE diverges; it does not yet prove which rendered semantic roles (background/foreground/panel/border/gold accent/focus ring/success/warning/danger) actually differ in practice under both routers, which is what gate:visual-router-parity (brief §13.5) must formally measure by mounting equivalent fixtures under both routers and comparing resolved computed values."
+  },
+  "fixtureMountComparison": {
+    "status": "NOT_STARTED",
+    "plannedFor": "Phase 2 (test:visual-router-parity gate build-out)",
+    "method": "Mount equivalent semantic fixtures under pages/ and app/ route trees, compare computed background/foreground/text/panel/border/gold-accent/focus-ring/success/warning/danger values per brief §13.5. Success = same semantic token resolves to same value and interaction meaning, not pixel-identical whole-page rendering."
+  }
+}

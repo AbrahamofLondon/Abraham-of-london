@@ -1,0 +1,17 @@
+{
+  "status": "INITIALISED — populated as migration proceeds",
+  "order": [
+    { "seq": 1, "surface": "/enterprise-decision-scan", "family": "Organisational Decision Scan", "status": "BASELINED", "note": "reference surface, first to migrate after Foundation Exit Gate" },
+    { "seq": 2, "surface": "/decision-centre", "family": "Decision Centre", "status": "BASELINED" },
+    { "seq": 3, "surface": "/diagnostics", "family": "Diagnostics index and family", "status": "BASELINED", "note": "contains the invisible-heading opacity-multiplication defect, see visual-authority-baseline.md" },
+    { "seq": 4, "surface": "/intelligence", "family": "Intelligence landing", "status": "BASELINED" },
+    { "seq": 5, "surface": "/intelligence/gmi/q2-2026", "family": "GMI Q2", "status": "BASELINED" },
+    { "seq": 6, "surface": "/foundry/decision-test", "family": "Foundry Decision Test", "status": "BASELINED" },
+    { "seq": 7, "surface": "/boardroom-brief", "family": "Boardroom Brief", "status": "BASELINED" },
+    { "seq": 8, "surface": "/checkout/personal-decision-audit", "family": "Checkout surfaces", "status": "BASELINED" },
+    { "seq": 9, "family": "Remaining public customer surfaces", "status": "NOT_STARTED" },
+    { "seq": 10, "family": "Controlled customer surfaces", "status": "NOT_STARTED" },
+    { "seq": 11, "family": "Admin surfaces", "status": "NOT_STARTED" }
+  ],
+  "note": "BASELINED means screenshot/contrast baseline captured in Phase 0 (see screenshot-baseline-index.md, contrast-baseline.csv). No surface has begun actual migration yet — that starts only after the Foundation Exit Gate (brief §15) passes."
+}

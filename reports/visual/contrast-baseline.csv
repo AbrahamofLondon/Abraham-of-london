@@ -1,0 +1,19 @@
+route,viewport,tag,text,fontSizePx,foregroundRaw,compositedRgb,contrastRatio,thresholdRole,minRequired,result
+/enterprise-decision-scan,390x844,p,"For organisations",9,"rgba(201,169,110,0.533)","109,91,61",3.16,LABEL,4.5,FAIL
+/enterprise-decision-scan,390x844,h1,"Organisational Decision Scan",32,"rgb(245,245,245)","245,245,245",18.9,PRIMARY_DISPLAY,3,PASS
+/enterprise-decision-scan,390x844,p,"A 15-minute scan for leadership teams...",15,"rgba(255,255,255,0.5)","129,129,130",5.29,PRIMARY_BODY,4.5,PASS
+/enterprise-decision-scan,390x844,p,"This is not a consumer quiz...",13,"rgba(255,255,255,0.3)","79,79,80",2.5,SECONDARY_BODY,4.5,FAIL
+/enterprise-decision-scan,390x844,label,"What decision is currently unresolved?",11,"rgba(201,169,110,0.667)","135,114,75",4.44,LABEL,4.5,FAIL_MARGINAL
+/enterprise-decision-scan,390x844,label,"Who owns it?",11,"rgba(201,169,110,0.667)","135,114,75",4.44,LABEL,4.5,FAIL_MARGINAL
+/enterprise-decision-scan,390x844,textarea::placeholder,"Describe the decision that is stuck...",16,"rgba(255,255,255,0.2)","53,53,55",1.69,PLACEHOLDER,4.5,FAIL_SEVERE
+/enterprise-decision-scan,1440x900,h1,"Organisational Decision Scan",32,"rgb(245,245,245)","245,245,245",18.9,PRIMARY_DISPLAY,3,PASS
+/decision-centre,1440x900,span,"Test a Decision",9,"unresolved — see note",n/a,1.0,LABEL,4.5,FAIL_SEVERE
+/decision-centre,1440x900,span,"Decision Pressure",9,"unresolved — see note",n/a,1.0,LABEL,4.5,FAIL_SEVERE
+/decision-centre,1440x900,span,"Quick Check",9,"unresolved — see note",n/a,1.0,LABEL,4.5,FAIL_SEVERE
+/diagnostics,1440x900,p,"Do leadership intent and team reality diverge...",18,"unresolved — see note",n/a,1.0,PRIMARY_BODY,4.5,FAIL_CRITICAL_INVISIBLE
+/diagnostics,1440x900,p,"Where has organisational strain become systemic...",18,"unresolved — see note",n/a,1.0,PRIMARY_BODY,4.5,FAIL_CRITICAL_INVISIBLE
+/diagnostics,1440x900,p,"Leadership reading, team reality, gap map...",14,"unresolved — see note",n/a,1.0,SECONDARY_BODY,4.5,FAIL_CRITICAL_INVISIBLE
+/intelligence,1440x900,span,"Directory",7.5,"unresolved — see note",n/a,1.69,LABEL,4.5,FAIL_SEVERE
+/intelligence,1440x900,span,"Public",7,"unresolved — see note",n/a,2.08,LABEL,4.5,FAIL_SEVERE
+/intelligence,1440x900,span,"Member",7,"unresolved — see note",n/a,2.08,LABEL,4.5,FAIL_SEVERE
+/intelligence,1440x900,p,"Featured public intelligence",10,"unresolved — see note",n/a,1.58,LABEL,4.5,FAIL_SEVERE
