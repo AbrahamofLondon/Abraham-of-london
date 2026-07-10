@@ -1,8 +1,8 @@
 /**
- * tests/billing/commercial-prerequisite-and-messaging.test.ts
+ * tests/billing/checkout-policy-proof-matrix.test.ts
  *
- * Evaluator routing + customer-facing failure messaging, asserted against the
- * reconciled catalog-derived policy model.
+ * Positive/negative proof matrix per prerequisite-policy family + customer-safe
+ * failure messaging + acquisition-mode authority. Real catalog codes only.
  */
 import { describe, it, expect } from "vitest";
 import { resolveCommercialAccessPolicy } from "@/lib/commercial/commercial-access-policy";
@@ -13,8 +13,8 @@ import {
   CHECKOUT_FAILURE_MESSAGES,
 } from "@/lib/commercial/checkout-failure-code";
 
-describe("Prerequisite evaluator routing", () => {
-  it("NONE always allows (paid self-serve instrument)", async () => {
+describe("Proof matrix — prerequisite evaluators", () => {
+  it("[+] NONE allows self-serve instrument checkout (no diagnostic)", async () => {
     const r = await evaluateCommercialPrerequisite("NONE", {
       email: "buyer@example.com",
       productCode: "decision_exposure_instrument",
@@ -22,7 +22,7 @@ describe("Prerequisite evaluator routing", () => {
     expect(r.allowed).toBe(true);
   });
 
-  it("RELEASE_RECEIPT denies with recovery path when receipt absent", async () => {
+  it("[-] RELEASE_RECEIPT denies with bounded reason + recovery when receipt absent", async () => {
     const r = await evaluateCommercialPrerequisite("RELEASE_RECEIPT", {
       email: "buyer@example.com",
       productCode: "gmi_q2_2026",
@@ -33,7 +33,7 @@ describe("Prerequisite evaluator routing", () => {
     }
   });
 
-  it("BOARDROOM_HANDOFF currently allows (explicit, not universal)", async () => {
+  it("[+] BOARDROOM_HANDOFF allows (explicit governed policy, not universal gate)", async () => {
     const r = await evaluateCommercialPrerequisite("BOARDROOM_HANDOFF", {
       email: "b@example.com",
       productCode: "boardroom_brief",
@@ -41,7 +41,7 @@ describe("Prerequisite evaluator routing", () => {
     expect(r.allowed).toBe(true);
   });
 
-  it("EXECUTIVE_REPORTING_ADMISSION passes policy gate (detailed check in endpoint)", async () => {
+  it("[+] EXECUTIVE_REPORTING_ADMISSION passes policy gate (detailed admission runs in endpoint)", async () => {
     const r = await evaluateCommercialPrerequisite("EXECUTIVE_REPORTING_ADMISSION", {
       email: "e@example.com",
       productCode: "executive_reporting",
@@ -50,15 +50,15 @@ describe("Prerequisite evaluator routing", () => {
   });
 });
 
-describe("Customer-facing failure messaging", () => {
+describe("Proof matrix — customer-safe failure messaging", () => {
   it("every failure code has a non-empty public message", () => {
     for (const [code, msg] of Object.entries(CHECKOUT_FAILURE_MESSAGES)) {
-      expect(msg.publicMessage, `${code} message`).toBeTruthy();
+      expect(msg.publicMessage, `${code}`).toBeTruthy();
     }
   });
 
-  it("public messages never leak raw prerequisite tokens", () => {
-    const forbidden = ["RELEASE_RECEIPT", "INTELLIGENCE_SPINE", "PREREQUISITE", "BLOCKINGREASONS"];
+  it("public messages never leak raw prerequisite/authority tokens", () => {
+    const forbidden = ["RELEASE_RECEIPT", "INTELLIGENCE_SPINE", "PREREQUISITE", "BLOCKINGREASONS", "PRODUCTAUTHORITY"];
     for (const msg of Object.values(CHECKOUT_FAILURE_MESSAGES)) {
       for (const tok of forbidden) {
         expect(msg.publicMessage.toUpperCase()).not.toContain(tok);
@@ -66,7 +66,7 @@ describe("Customer-facing failure messaging", () => {
     }
   });
 
-  it("maps prerequisite failures to bounded public codes", () => {
+  it("prerequisite failures map to bounded public codes", () => {
     expect(mapPrerequisiteFailureToCheckoutCode("RELEASE_RECEIPT")).toBe("RELEASE_PROOF_MISSING");
     expect(mapPrerequisiteFailureToCheckoutCode("INTELLIGENCE_SPINE")).toBe("DIAGNOSTIC_JOURNEY_INCOMPLETE");
     expect(mapPrerequisiteFailureToCheckoutCode("EXECUTIVE_REPORTING_ADMISSION")).toBe("ADMISSION_RESTRICTED");
@@ -74,17 +74,23 @@ describe("Customer-facing failure messaging", () => {
     expect(mapPrerequisiteFailureToCheckoutCode("UNKNOWN")).toBe("CHECKOUT_INELIGIBLE");
   });
 
-  it("builds a bounded response for RELEASE_PROOF_MISSING", () => {
+  it("RELEASE_PROOF_MISSING → customer-facing GMI message + recovery path", () => {
     const resp = buildCheckoutFailureResponse("RELEASE_PROOF_MISSING");
     expect(resp.publicMessage).toContain("Global Market Intelligence");
     expect(resp.recoveryPath).toBe("/intelligence/gmi/q2-2026");
   });
 });
 
-describe("Acquisition mode is authoritative for self-serve eligibility", () => {
-  it("archive/contract/manual products are not self-serve", () => {
-    // GMI archived edition
-    const q1 = resolveCommercialAccessPolicy("gmi_q1_2026");
-    expect(["ARCHIVE_ONLY"]).toContain(q1!.acquisitionMode);
+describe("Proof matrix — acquisition mode authority (negative cases)", () => {
+  it("archived GMI edition is ARCHIVE_ONLY (not self-serve)", () => {
+    expect(resolveCommercialAccessPolicy("gmi_q1_2026")!.acquisitionMode).toBe("ARCHIVE_ONLY");
+  });
+
+  it("draft GMI edition is ARCHIVE_ONLY (not self-serve)", () => {
+    expect(resolveCommercialAccessPolicy("gmi_q3_2026")!.acquisitionMode).toBe("ARCHIVE_ONLY");
+  });
+
+  it("unknown product resolves no policy (checkout returns typed not-configured)", () => {
+    expect(resolveCommercialAccessPolicy("nonexistent_product_zzz")).toBeNull();
   });
 });
